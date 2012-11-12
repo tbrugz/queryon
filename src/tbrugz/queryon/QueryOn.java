@@ -38,16 +38,17 @@ public class QueryOn extends HttpServlet {
 		INSERT,
 		UPDATE,
 		DELETE,
-		EXECUTE
+		EXECUTE,
+		QUERY, //SQLQueries...
+		CONFIG //show model, user, vars...
 	}
 	
-	//TODO: order by?
+	//TODO: order by? 3a,1d,2d?
 	public static class RequestSpec {
 		int offset, length;
 		List<String> columns = new ArrayList<String>();
 		List<String> params = new ArrayList<String>();
-		//String outputFormat = "csv"; //XXX: change
-		DumpSyntax outputSyntax = new CSVDataDump();
+		DumpSyntax outputSyntax = null;
 		
 		public RequestSpec(HttpServletRequest req) {
 			String offsetStr = req.getParameter("offset");
@@ -70,10 +71,11 @@ public class QueryOn extends HttpServlet {
 		}
 	} 
 	
-	static Log log = LogFactory.getLog(SQLDump.class);
+	static Log log = LogFactory.getLog(QueryOn.class);
 
 	static final String PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String CONN_PROPS_PREFIX = "queryon";
+	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
 	Properties prop = new ParametrizedProperties();
 	SchemaModel model;
@@ -84,14 +86,18 @@ public class QueryOn extends HttpServlet {
 		try {
 			prop.load(QueryOn.class.getResourceAsStream(PROPERTIES_RESOURCE));
 			//Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop, false);
-			modelGrabber(model, prop);
+			model = modelGrabber(prop);
 			//XXX: add sqlqueries as views?
 		} catch (Exception e) {
-			throw new ServletException(e);
+			e.printStackTrace();
+			//throw new ServletException(e);
+		} catch (Error e) {
+			e.printStackTrace();
+			throw e;
 		}
 	}
 	
-	void modelGrabber(SchemaModel sm, Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException {
+	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException {
 		String grabClassName = prop.getProperty(SQLDump.PROP_SCHEMAGRAB_GRABCLASS);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
@@ -99,14 +105,17 @@ public class QueryOn extends HttpServlet {
 			throw new RuntimeException("schema grabber class '"+grabClassName+"' not found");
 		}
 		
+		DBMSResources.instance().setup(prop);
 		schemaGrabber.procProperties(prop);
+		
 		if(schemaGrabber.needsConnection()) {
 			Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
-		sm = schemaGrabber.grabSchema();
+		SchemaModel sm = schemaGrabber.grabSchema();
 		DBMSResources.updateDbId(sm.getSqlDialect());
+		return sm;
 		//TODO: close connection
 	}
 
@@ -115,13 +124,36 @@ public class QueryOn extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		String URI = req.getRequestURI();
-		String[] URIparts = URI.split("/");
-		if(URIparts.length<2) { throw new ServletException("URL must have at least 2 parts"); }
+		String contextPath = req.getContextPath();
+		String servletPath = req.getServletPath();
+		int numFixedPosUrl = contextPath.length() + servletPath.length();
 		
-		String object = URIparts[0];
-		String action = URIparts[1];
+		String varUrl = URI.substring(numFixedPosUrl);
+		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
+		int lastDotIndex = varUrl.lastIndexOf('.');
+		if(lastDotIndex>-1) {
+			outputTypeStr = varUrl.substring(lastDotIndex+1);
+			varUrl = varUrl.substring(0, lastDotIndex);
+		}
+		
+		String[] URIparts = varUrl.split("/");
+		if(URIparts.length<3) { throw new ServletException("URL must have at least 2 parts"); }
+		
+		String object = URIparts[1];
+		String action = URIparts[2];
+		
+		RequestSpec reqspec = new RequestSpec(req);
+		
+		//params
+		//output format
+		reqspec.outputSyntax = getDumpSyntax(outputTypeStr);
+		if(reqspec.outputSyntax == null) {
+			throw new ServletException("Unknown output syntax: "+outputTypeStr);
+		}
 		
 		String[] objectParts = object.split("\\.");
+		
+		log.debug("zzz: "+varUrl+" / "+contextPath+" / "+servletPath+" // "+object+" / "+action+" // "+objectParts.length + " / out="+outputTypeStr);
 		
 		Table table = null;
 		if(objectParts.length>1) {
@@ -141,8 +173,6 @@ public class QueryOn extends HttpServlet {
 		catch(IllegalArgumentException e) {
 			throw new ServletException("Unknown action: "+action);
 		}
-		
-		RequestSpec reqspec = new RequestSpec(req);
 		
 		try {
 			switch (atype) {
@@ -164,6 +194,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	//TODO: syntaxes must have mimetype!
 	void doSelect(Table table, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		String columns = "*";
@@ -172,6 +203,8 @@ public class QueryOn extends HttpServlet {
 		}
 		String sql = "select "+columns+
 			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.name;
+		log.debug("sql: "+sql);
+		
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
 		if(reqspec.offset>0) {
@@ -180,6 +213,11 @@ public class QueryOn extends HttpServlet {
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
 		
+		ds.procProperties(prop);
+		ds.initDump(table.name, 
+				table.getPKConstraint()!=null?table.getPKConstraint().uniqueColumns:null,
+				rs.getMetaData());
+		
 		ds.dumpHeader(resp.getWriter());
 		while(rs.next()) {
 			ds.dumpRow(rs, count, resp.getWriter());
@@ -187,5 +225,15 @@ public class QueryOn extends HttpServlet {
 			if(reqspec.length>0 && count>reqspec.length) break;
 		}
 		ds.dumpFooter(resp.getWriter());
+	}
+	
+	static DumpSyntax getDumpSyntax(String format) {
+		for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
+			DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
+			if(ds!=null && ds.getSyntaxId().equals(format)) {
+				return ds;
+			}
+		}
+		return null;
 	}
 }
