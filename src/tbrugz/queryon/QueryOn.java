@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.datadump.CSVDataDump;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -38,12 +37,12 @@ public class QueryOn extends HttpServlet {
 		INSERT,
 		UPDATE,
 		DELETE,
-		EXECUTE,
-		QUERY, //SQLQueries...
-		CONFIG //show model, user, vars...
+		EXECUTE, //TODO: execute action!
+		QUERY,   //TODO: SQLQueries action!
+		CONFIG   //show model, user, vars...
 	}
 	
-	//TODO: order by? 3a,1d,2d?
+	//XXX: order by? 3a,1d,2d?
 	public static class RequestSpec {
 		int offset, length;
 		List<String> columns = new ArrayList<String>();
@@ -108,15 +107,17 @@ public class QueryOn extends HttpServlet {
 		DBMSResources.instance().setup(prop);
 		schemaGrabber.procProperties(prop);
 		
+		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+			conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
 		DBMSResources.updateDbId(sm.getSqlDialect());
+		
+		if(conn!=null) { conn.close(); }
 		return sm;
-		//TODO: close connection
 	}
 
 	//TODO: prevent sql injection
@@ -164,6 +165,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		if(table == null) { throw new ServletException("Object "+object+" not found"); }
+		//XXX: validate column names
 		action = action.toUpperCase();
 		
 		ActionType atype = null;
@@ -194,7 +196,6 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	//TODO: syntaxes must have mimetype!
 	void doSelect(Table table, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		String columns = "*";
@@ -217,6 +218,10 @@ public class QueryOn extends HttpServlet {
 		ds.initDump(table.name, 
 				table.getPKConstraint()!=null?table.getPKConstraint().uniqueColumns:null,
 				rs.getMetaData());
+
+		resp.addHeader("Content-type", ds.getMimeType());
+		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
+		//resp.addHeader("Content-disposition", "attachment;filename="+table.name+"."+ds.getDefaultFileExtension());
 		
 		ds.dumpHeader(resp.getWriter());
 		while(rs.next()) {
@@ -225,6 +230,7 @@ public class QueryOn extends HttpServlet {
 			if(reqspec.length>0 && count>reqspec.length) break;
 		}
 		ds.dumpFooter(resp.getWriter());
+		conn.close();
 	}
 	
 	static DumpSyntax getDumpSyntax(String format) {
