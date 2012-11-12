@@ -39,7 +39,7 @@ public class QueryOn extends HttpServlet {
 		DELETE,
 		EXECUTE, //TODO: execute action!
 		QUERY,   //TODO: SQLQueries action!
-		CONFIG   //show model, user, vars...
+		CONFIG   //or status? show model, user, vars...
 	}
 	
 	//XXX: order by? 3a,1d,2d?
@@ -124,6 +124,7 @@ public class QueryOn extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		//XXX use getPathInfo() / getPathTranslated()
 		String URI = req.getRequestURI();
 		String contextPath = req.getContextPath();
 		String servletPath = req.getServletPath();
@@ -203,7 +204,7 @@ public class QueryOn extends HttpServlet {
 			columns = Utils.join(reqspec.columns, ", ");
 		}
 		String sql = "select "+columns+
-			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.name;
+			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
 		log.debug("sql: "+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql);
@@ -215,7 +216,7 @@ public class QueryOn extends HttpServlet {
 		DumpSyntax ds = reqspec.outputSyntax;
 		
 		ds.procProperties(prop);
-		ds.initDump(table.name, 
+		ds.initDump(table.getName(), 
 				table.getPKConstraint()!=null?table.getPKConstraint().uniqueColumns:null,
 				rs.getMetaData());
 
