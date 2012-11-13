@@ -57,7 +57,7 @@ public class QueryOn extends HttpServlet {
 		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
 		DumpSyntax outputSyntax = null;
 		
-		public RequestSpec(HttpServletRequest req, Properties prop) throws ServletException {
+		public RequestSpec(QueryOn qon, HttpServletRequest req, Properties prop) throws ServletException {
 			String varUrl = req.getPathInfo();
 			int lastDotIndex = varUrl.lastIndexOf('.');
 			if(lastDotIndex>-1) {
@@ -81,7 +81,7 @@ public class QueryOn extends HttpServlet {
 				params.add(URIpartz.get(i));
 			}
 			
-			outputSyntax = getDumpSyntax(outputTypeStr, prop);
+			outputSyntax = qon.getDumpSyntax(outputTypeStr, prop);
 			if(outputSyntax == null) {
 				throw new ServletException("Unknown output syntax: "+outputTypeStr);
 			}
@@ -107,7 +107,7 @@ public class QueryOn extends HttpServlet {
 		}
 	} 
 	
-	static Log log = LogFactory.getLog(QueryOn.class);
+	static final Log log = LogFactory.getLog(QueryOn.class);
 
 	static final String PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String CONN_PROPS_PREFIX = "queryon";
@@ -163,7 +163,7 @@ public class QueryOn extends HttpServlet {
 			throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo());
 		
-		RequestSpec reqspec = new RequestSpec(req, prop);
+		RequestSpec reqspec = new RequestSpec(this, req, prop);
 		
 		String[] objectParts = reqspec.object.split("\\.");
 		
@@ -259,9 +259,9 @@ public class QueryOn extends HttpServlet {
 		conn.close();
 	}
 	
-	static Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
+	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
 	
-	static DumpSyntax getDumpSyntax(String format, Properties prop) {
+	DumpSyntax getDumpSyntax(String format, Properties prop) {
 		DumpSyntax dsx = syntaxes.get(format);
 		if(dsx!=null) { return dsx; }
 		
