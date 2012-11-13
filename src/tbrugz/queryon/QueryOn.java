@@ -26,10 +26,13 @@ import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -43,7 +46,7 @@ public class QueryOn extends HttpServlet {
 		UPDATE,
 		DELETE,
 		EXECUTE, //TODO: execute action!
-		QUERY,   //TODO: SQLQueries action!
+		QUERY,   //TODOne?: SQLQueries action!
 		CONFIG   //or status? show model, user, vars...
 	}
 	
@@ -165,17 +168,6 @@ public class QueryOn extends HttpServlet {
 		
 		RequestSpec reqspec = new RequestSpec(this, req, prop);
 		
-		String[] objectParts = reqspec.object.split("\\.");
-		
-		Table table = null;
-		if(objectParts.length>1) {
-			table = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
-		}
-		else {
-			table = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
-		}
-		
-		if(table == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
 		//XXX: validate column names
 		
 		ActionType atype = null;
@@ -187,13 +179,18 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		try {
+			Relation rel = null;			
 			switch (atype) {
 			case SELECT:
-				doSelect(table, reqspec, req, resp);
+				rel = getTable(reqspec);
+				break;
+			case QUERY:
+				rel = getView(reqspec);
 				break;
 			default:
 				throw new ServletException("Unknown action: "+reqspec.action); 
 			}
+			doSelect(rel, reqspec, req, resp);
 		}
 		catch(SQLException e) {
 			throw new ServletException(e);
@@ -209,24 +206,55 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void doSelect(Table table, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException {
+	static final String PARAM_WHERE_CLAUSE = "[where-clause]";
+	
+	void doSelect(Relation relation, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
-		String columns = "*";
-		if(reqspec.columns.size()>0) {
-			columns = Utils.join(reqspec.columns, ", ");
+		
+		String sql = null;
+		if(relation instanceof Table) {
+			sql = createSQL((Table)relation, reqspec);
 		}
-		String sql = "select "+columns+
-			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
+		else if(relation instanceof View) {
+			View view = (View) relation;
+			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
+			if(view.query.contains(PARAM_WHERE_CLAUSE)) {
+				sql = ((View)relation).query;
+			}
+			else {
+				sql = "select * from ( "+((View)relation).query+" )";
+			}
+		}
+		else {
+			throw new ServletException("unknown relation type: "+relation.getClass().getName());
+		}
+		
+		Constraint pk = null;
+		List<Constraint> conss = relation.getConstraints();
+		if(conss!=null) {
+			for(Constraint c: conss) {
+				if(c.type==ConstraintType.PK) { pk = c; break; }
+			}
+		}
+		
 		int parametersToBind = 0;
-		if(reqspec.params.size()>0) {
-			Constraint pk = table.getPKConstraint();
-			sql += " where ";
+		String filter = "";
+		//TODO: what if parameters already defined in query?
+		if(reqspec.params.size()>0 && pk!=null) {
+			//Constraint pk = relation.getPKConstraint();
+			filter = " where ";
 			for(int i=0;i<pk.uniqueColumns.size();i++) {
 				if(reqspec.params.size()<=i) { break; }
 				//String s = reqspec.params.get(i);
-				sql += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
+				filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
 				parametersToBind++;
 			}
+		}
+		if(sql.contains(PARAM_WHERE_CLAUSE)) {
+			sql = sql.replace(PARAM_WHERE_CLAUSE, filter);
+		}
+		else {
+			sql += filter;
 		}
 		log.info("sql: "+sql);
 		
@@ -241,8 +269,8 @@ public class QueryOn extends HttpServlet {
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
 		
-		ds.initDump(table.getName(), 
-				table.getPKConstraint()!=null?table.getPKConstraint().uniqueColumns:null,
+		ds.initDump(relation.getName(), 
+				pk!=null?pk.uniqueColumns:null,
 				rs.getMetaData());
 
 		resp.addHeader("Content-type", ds.getMimeType());
@@ -260,6 +288,46 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
+	
+	Table getTable(RequestSpec reqspec) throws ServletException {
+		String[] objectParts = reqspec.object.split("\\.");
+		
+		Table table = null;
+		if(objectParts.length>1) {
+			table = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
+		}
+		else {
+			table = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
+		}
+		
+		if(table == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
+		return table;
+	}
+
+	View getView(RequestSpec reqspec) throws ServletException {
+		String[] objectParts = reqspec.object.split("\\.");
+		
+		View view = null;
+		if(objectParts.length>1) {
+			view = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getViews(), DBObjectType.VIEW, objectParts[0], objectParts[1]);
+		}
+		else {
+			view = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, objectParts[0]);
+		}
+		
+		if(view == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
+		return view;
+	}
+	
+	static String createSQL(Table table, RequestSpec reqspec) {
+		String columns = "*";
+		if(reqspec.columns.size()>0) {
+			columns = Utils.join(reqspec.columns, ", ");
+		}
+		String sql = "select "+columns+
+			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
+		return sql;
+	}
 	
 	DumpSyntax getDumpSyntax(String format, Properties prop) {
 		DumpSyntax dsx = syntaxes.get(format);
