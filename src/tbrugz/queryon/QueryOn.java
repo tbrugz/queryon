@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -123,14 +124,14 @@ public class QueryOn extends HttpServlet {
 			//XXX: add sqlqueries as views?
 		} catch (Exception e) {
 			e.printStackTrace();
-			//throw new ServletException(e);
+			throw new ServletException(e);
 		} catch (Error e) {
 			e.printStackTrace();
 			throw e;
 		}
 	}
 	
-	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException {
+	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException, NamingException {
 		String grabClassName = prop.getProperty(SQLDump.PROP_SCHEMAGRAB_GRABCLASS);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
@@ -158,36 +159,11 @@ public class QueryOn extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		//XXX use getPathInfo() / getPathTranslated()
 		log.info(">> pathInfo: "+req.getPathInfo());
-		/*String varUrl = req.getPathInfo();
-		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
-		int lastDotIndex = varUrl.lastIndexOf('.');
-		if(lastDotIndex>-1) {
-			outputTypeStr = varUrl.substring(lastDotIndex+1);
-			varUrl = varUrl.substring(0, lastDotIndex);
-		}
-		
-		String[] URIparts = varUrl.split("/");
-		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
-		log.info("urlparts: "+URIpartz);
-		if(URIpartz.size()<3) { throw new ServletException("URL must have at least 2 parts"); }
-
-		String object = URIpartz.remove(0);
-		if(object == null || object.equals("")) {
-			//first part may be empty
-			object = URIpartz.remove(0);
-		}
-		String action = URIpartz.remove(0);*/
 		
 		RequestSpec reqspec = new RequestSpec(req);
 		
-		//params
-		//output format
-		
 		String[] objectParts = reqspec.object.split("\\.");
-		
-		//log.debug("zzz: "+varUrl+" / "+contextPath+" / "+servletPath+" // "+object+" / "+action+" // "+objectParts.length + " / out="+outputTypeStr);
 		
 		Table table = null;
 		if(objectParts.length>1) {
@@ -226,9 +202,12 @@ public class QueryOn extends HttpServlet {
 		catch (ClassNotFoundException e) {
 			throw new ServletException(e);
 		}
+		catch (NamingException e) {
+			throw new ServletException(e);
+		}
 	}
 	
-	void doSelect(Table table, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException {
+	void doSelect(Table table, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
@@ -242,7 +221,7 @@ public class QueryOn extends HttpServlet {
 			sql += " where ";
 			for(int i=0;i<pk.uniqueColumns.size();i++) {
 				if(reqspec.params.size()<=i) { break; }
-				String s = reqspec.params.get(i);
+				//String s = reqspec.params.get(i);
 				sql += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
 				parametersToBind++;
 			}
