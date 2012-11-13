@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -55,7 +57,7 @@ public class QueryOn extends HttpServlet {
 		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
 		DumpSyntax outputSyntax = null;
 		
-		public RequestSpec(HttpServletRequest req) throws ServletException {
+		public RequestSpec(HttpServletRequest req, Properties prop) throws ServletException {
 			String varUrl = req.getPathInfo();
 			int lastDotIndex = varUrl.lastIndexOf('.');
 			if(lastDotIndex>-1) {
@@ -79,7 +81,7 @@ public class QueryOn extends HttpServlet {
 				params.add(URIpartz.get(i));
 			}
 			
-			outputSyntax = getDumpSyntax(outputTypeStr);
+			outputSyntax = getDumpSyntax(outputTypeStr, prop);
 			if(outputSyntax == null) {
 				throw new ServletException("Unknown output syntax: "+outputTypeStr);
 			}
@@ -161,7 +163,7 @@ public class QueryOn extends HttpServlet {
 			throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo());
 		
-		RequestSpec reqspec = new RequestSpec(req);
+		RequestSpec reqspec = new RequestSpec(req, prop);
 		
 		String[] objectParts = reqspec.object.split("\\.");
 		
@@ -239,7 +241,6 @@ public class QueryOn extends HttpServlet {
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
 		
-		ds.procProperties(prop);
 		ds.initDump(table.getName(), 
 				table.getPKConstraint()!=null?table.getPKConstraint().uniqueColumns:null,
 				rs.getMetaData());
@@ -258,10 +259,17 @@ public class QueryOn extends HttpServlet {
 		conn.close();
 	}
 	
-	static DumpSyntax getDumpSyntax(String format) {
+	static Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
+	
+	static DumpSyntax getDumpSyntax(String format, Properties prop) {
+		DumpSyntax dsx = syntaxes.get(format);
+		if(dsx!=null) { return dsx; }
+		
 		for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
 			DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 			if(ds!=null && ds.getSyntaxId().equals(format)) {
+				ds.procProperties(prop);
+				syntaxes.put(format, ds);
 				return ds;
 			}
 		}
