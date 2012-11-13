@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -21,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -44,12 +46,44 @@ public class QueryOn extends HttpServlet {
 	
 	//XXX: order by? 3a,1d,2d?
 	public static class RequestSpec {
+		String object = null;
+		String action = null;
 		int offset, length;
 		List<String> columns = new ArrayList<String>();
 		List<String> params = new ArrayList<String>();
+		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
 		DumpSyntax outputSyntax = null;
 		
-		public RequestSpec(HttpServletRequest req) {
+		public RequestSpec(HttpServletRequest req) throws ServletException {
+			String varUrl = req.getPathInfo();
+			int lastDotIndex = varUrl.lastIndexOf('.');
+			if(lastDotIndex>-1) {
+				outputTypeStr = varUrl.substring(lastDotIndex+1);
+				varUrl = varUrl.substring(0, lastDotIndex);
+			}
+			
+			String[] URIparts = varUrl.split("/");
+			List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
+			log.info("urlparts: "+URIpartz);
+			if(URIpartz.size()<3) { throw new ServletException("URL must have at least 2 parts"); }
+
+			object = URIpartz.remove(0);
+			if(object == null || object.equals("")) {
+				//first part may be empty
+				object = URIpartz.remove(0);
+			}
+			action = URIpartz.remove(0);
+			action = action.toUpperCase();
+			for(int i=0;i<URIpartz.size();i++) {
+				params.add(URIpartz.get(i));
+			}
+			
+			outputSyntax = getDumpSyntax(outputTypeStr);
+			if(outputSyntax == null) {
+				throw new ServletException("Unknown output syntax: "+outputTypeStr);
+			}
+			//---------------------
+			
 			String offsetStr = req.getParameter("offset");
 			if(offsetStr!=null) offset = Integer.parseInt(offsetStr);
 
@@ -125,12 +159,8 @@ public class QueryOn extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		//XXX use getPathInfo() / getPathTranslated()
-		String URI = req.getRequestURI();
-		String contextPath = req.getContextPath();
-		String servletPath = req.getServletPath();
-		int numFixedPosUrl = contextPath.length() + servletPath.length();
-		
-		String varUrl = URI.substring(numFixedPosUrl);
+		log.info(">> pathInfo: "+req.getPathInfo());
+		/*String varUrl = req.getPathInfo();
 		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
 		int lastDotIndex = varUrl.lastIndexOf('.');
 		if(lastDotIndex>-1) {
@@ -139,23 +169,25 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		String[] URIparts = varUrl.split("/");
-		if(URIparts.length<3) { throw new ServletException("URL must have at least 2 parts"); }
-		
-		String object = URIparts[1];
-		String action = URIparts[2];
+		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
+		log.info("urlparts: "+URIpartz);
+		if(URIpartz.size()<3) { throw new ServletException("URL must have at least 2 parts"); }
+
+		String object = URIpartz.remove(0);
+		if(object == null || object.equals("")) {
+			//first part may be empty
+			object = URIpartz.remove(0);
+		}
+		String action = URIpartz.remove(0);*/
 		
 		RequestSpec reqspec = new RequestSpec(req);
 		
 		//params
 		//output format
-		reqspec.outputSyntax = getDumpSyntax(outputTypeStr);
-		if(reqspec.outputSyntax == null) {
-			throw new ServletException("Unknown output syntax: "+outputTypeStr);
-		}
 		
-		String[] objectParts = object.split("\\.");
+		String[] objectParts = reqspec.object.split("\\.");
 		
-		log.debug("zzz: "+varUrl+" / "+contextPath+" / "+servletPath+" // "+object+" / "+action+" // "+objectParts.length + " / out="+outputTypeStr);
+		//log.debug("zzz: "+varUrl+" / "+contextPath+" / "+servletPath+" // "+object+" / "+action+" // "+objectParts.length + " / out="+outputTypeStr);
 		
 		Table table = null;
 		if(objectParts.length>1) {
@@ -165,16 +197,15 @@ public class QueryOn extends HttpServlet {
 			table = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
 		}
 		
-		if(table == null) { throw new ServletException("Object "+object+" not found"); }
+		if(table == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
 		//XXX: validate column names
-		action = action.toUpperCase();
 		
 		ActionType atype = null;
 		try {
-			atype = ActionType.valueOf(action);
+			atype = ActionType.valueOf(reqspec.action);
 		}
 		catch(IllegalArgumentException e) {
-			throw new ServletException("Unknown action: "+action);
+			throw new ServletException("Unknown action: "+reqspec.action);
 		}
 		
 		try {
@@ -183,7 +214,7 @@ public class QueryOn extends HttpServlet {
 				doSelect(table, reqspec, req, resp);
 				break;
 			default:
-				throw new ServletException("Unknown action: "+action); 
+				throw new ServletException("Unknown action: "+reqspec.action); 
 			}
 		}
 		catch(SQLException e) {
@@ -205,9 +236,23 @@ public class QueryOn extends HttpServlet {
 		}
 		String sql = "select "+columns+
 			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
-		log.debug("sql: "+sql);
+		int parametersToBind = 0;
+		if(reqspec.params.size()>0) {
+			Constraint pk = table.getPKConstraint();
+			sql += " where ";
+			for(int i=0;i<pk.uniqueColumns.size();i++) {
+				if(reqspec.params.size()<=i) { break; }
+				String s = reqspec.params.get(i);
+				sql += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
+				parametersToBind++;
+			}
+		}
+		log.info("sql: "+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<parametersToBind;i++) {
+			st.setString(i+1, reqspec.params.get(i));
+		}
 		ResultSet rs = st.executeQuery();
 		if(reqspec.offset>0) {
 			rs.absolute(reqspec.offset);
