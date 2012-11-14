@@ -5,8 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +25,6 @@ import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
-import tbrugz.sqldump.dbmodel.DBIdentifiable;
-import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -49,66 +45,6 @@ public class QueryOn extends HttpServlet {
 		QUERY,   //TODOne?: SQLQueries action!
 		CONFIG   //or status? show model, user, vars...
 	}
-	
-	//XXX: order by? 3a,1d,2d?
-	public static class RequestSpec {
-		String object = null;
-		String action = null;
-		int offset, length;
-		List<String> columns = new ArrayList<String>();
-		List<String> params = new ArrayList<String>();
-		String outputTypeStr = DEFAULT_OUTPUT_SYNTAX;
-		DumpSyntax outputSyntax = null;
-		
-		public RequestSpec(QueryOn qon, HttpServletRequest req, Properties prop) throws ServletException {
-			String varUrl = req.getPathInfo();
-			int lastDotIndex = varUrl.lastIndexOf('.');
-			if(lastDotIndex>-1) {
-				outputTypeStr = varUrl.substring(lastDotIndex+1);
-				varUrl = varUrl.substring(0, lastDotIndex);
-			}
-			
-			String[] URIparts = varUrl.split("/");
-			List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
-			log.info("urlparts: "+URIpartz);
-			if(URIpartz.size()<3) { throw new ServletException("URL must have at least 2 parts"); }
-
-			object = URIpartz.remove(0);
-			if(object == null || object.equals("")) {
-				//first part may be empty
-				object = URIpartz.remove(0);
-			}
-			action = URIpartz.remove(0);
-			action = action.toUpperCase();
-			for(int i=0;i<URIpartz.size();i++) {
-				params.add(URIpartz.get(i));
-			}
-			
-			outputSyntax = qon.getDumpSyntax(outputTypeStr, prop);
-			if(outputSyntax == null) {
-				throw new ServletException("Unknown output syntax: "+outputTypeStr);
-			}
-			//---------------------
-			
-			String offsetStr = req.getParameter("offset");
-			if(offsetStr!=null) offset = Integer.parseInt(offsetStr);
-
-			String lengthStr = req.getParameter("length");
-			if(lengthStr!=null) length = Integer.parseInt(lengthStr);
-			
-			for(int i=1;;i++) {
-				String value = req.getParameter("c"+i);
-				if(value==null) break;
-				columns.add(value);
-			}
-
-			for(int i=1;;i++) {
-				String value = req.getParameter("p"+i);
-				if(value==null) break;
-				params.add(value);
-			}
-		}
-	} 
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
 
@@ -182,10 +118,10 @@ public class QueryOn extends HttpServlet {
 			Relation rel = null;			
 			switch (atype) {
 			case SELECT:
-				rel = getTable(reqspec, true); //XXX: option to search views based on property?
+				rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
 				break;
 			case QUERY:
-				rel = getView(reqspec);
+				rel = SchemaModelUtils.getView(model, reqspec);
 				break;
 			default:
 				throw new ServletException("Unknown action: "+reqspec.action); 
@@ -293,43 +229,6 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
-	
-	Relation getTable(RequestSpec reqspec, boolean searchViews) throws ServletException {
-		String[] objectParts = reqspec.object.split("\\.");
-		
-		Relation table = null;
-		if(objectParts.length>1) {
-			table = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
-		}
-		else {
-			table = (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
-		}
-		
-		if(table == null) {
-			if(searchViews) {
-				table = getView(reqspec);
-			}
-			if(table == null) {
-				throw new ServletException("Object "+reqspec.object+" not found");
-			}
-		}
-		return table;
-	}
-
-	View getView(RequestSpec reqspec) throws ServletException {
-		String[] objectParts = reqspec.object.split("\\.");
-		
-		View view = null;
-		if(objectParts.length>1) {
-			view = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getViews(), DBObjectType.VIEW, objectParts[0], objectParts[1]);
-		}
-		else {
-			view = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, objectParts[0]);
-		}
-		
-		if(view == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
-		return view;
-	}
 	
 	static String createSQL(Table table, RequestSpec reqspec) {
 		String columns = "*";
