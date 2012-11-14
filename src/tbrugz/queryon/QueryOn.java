@@ -207,9 +207,13 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	static final String PARAM_WHERE_CLAUSE = "[where-clause]";
+	static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
+	// order-clause? limit/offset-clause?
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		
+		boolean isSQLWrapped = false;
 		
 		String sql = null;
 		if(relation instanceof Table) {
@@ -218,11 +222,12 @@ public class QueryOn extends HttpServlet {
 		else if(relation instanceof View) {
 			View view = (View) relation;
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
-			if(view.query.contains(PARAM_WHERE_CLAUSE)) {
+			if(view.query.contains(PARAM_WHERE_CLAUSE) || view.query.contains(PARAM_FILTER_CLAUSE)) {
 				sql = ((View)relation).query;
 			}
 			else {
 				sql = "select * from ( "+((View)relation).query+" )";
+				isSQLWrapped = true;
 			}
 		}
 		else {
@@ -242,7 +247,6 @@ public class QueryOn extends HttpServlet {
 		//TODO: what if parameters already defined in query?
 		if(reqspec.params.size()>0 && pk!=null) {
 			//Constraint pk = relation.getPKConstraint();
-			filter = " where ";
 			for(int i=0;i<pk.uniqueColumns.size();i++) {
 				if(reqspec.params.size()<=i) { break; }
 				//String s = reqspec.params.get(i);
@@ -251,10 +255,16 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		if(sql.contains(PARAM_WHERE_CLAUSE)) {
-			sql = sql.replace(PARAM_WHERE_CLAUSE, filter);
+			sql = sql.replace(PARAM_WHERE_CLAUSE, filter.length()>0?" where "+filter:"");
 		}
-		else {
-			sql += filter;
+		else if(sql.contains(PARAM_FILTER_CLAUSE)) {
+			sql = sql.replace(PARAM_FILTER_CLAUSE, filter.length()>0? " and "+filter:"");
+		}
+		else if(filter!=null && !filter.equals("")) {
+			sql += " where "+filter;
+			if(!isSQLWrapped) {
+				log.warn("sql may be malformed. sql: "+sql);
+			}
 		}
 		log.info("sql: "+sql);
 		
