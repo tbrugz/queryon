@@ -126,7 +126,7 @@ public class QueryOn extends HttpServlet {
 			default:
 				throw new ServletException("Unknown action: "+reqspec.action); 
 			}
-			doSelect(rel, reqspec, req, resp);
+			doSelect(rel, reqspec, resp);
 		}
 		catch(SQLException e) {
 			throw new ServletException(e);
@@ -146,7 +146,7 @@ public class QueryOn extends HttpServlet {
 	static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
 	// order-clause? limit/offset-clause?
 	
-	void doSelect(Relation relation, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		
 		boolean isSQLWrapped = false;
@@ -190,9 +190,11 @@ public class QueryOn extends HttpServlet {
 			sql = sql.replace(PARAM_FILTER_CLAUSE, filter.length()>0? " and "+filter:"");
 		}
 		else if(filter!=null && !filter.equals("")) {
-			sql = "select * from ( "+((View)relation).query+" )";
+			//FIXME: if selecting from Table object, do not need to wrap
+			sql = "select * from ( "+sql+" )";
 			isSQLWrapped = true;
 			sql += " where "+filter;
+			
 			/*if(!isSQLWrapped) {
 				log.warn("sql may be malformed. sql: "+sql);
 			}*/
