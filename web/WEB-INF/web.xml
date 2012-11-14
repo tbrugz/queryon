@@ -17,7 +17,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/q/*</url-pattern>
 	</servlet-mapping>
     
 </web-app>

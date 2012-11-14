@@ -1,0 +1,12 @@
+body {
+	margin: 0 auto;
+	font: normal 10pt Tahoma, Geneva, sans-serif; 
+	background-color: #ddd;
+}
+td {
+	border: 1px solid #bbb;
+}
+th {
+	border: 1px solid #bbb;
+	background-color: #fff;
+}
