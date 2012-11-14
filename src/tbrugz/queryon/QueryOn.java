@@ -182,7 +182,7 @@ public class QueryOn extends HttpServlet {
 			Relation rel = null;			
 			switch (atype) {
 			case SELECT:
-				rel = getTable(reqspec);
+				rel = getTable(reqspec, true); //XXX: option to search views based on property?
 				break;
 			case QUERY:
 				rel = getView(reqspec);
@@ -220,15 +220,8 @@ public class QueryOn extends HttpServlet {
 			sql = createSQL((Table)relation, reqspec);
 		}
 		else if(relation instanceof View) {
-			View view = (View) relation;
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
-			if(view.query.contains(PARAM_WHERE_CLAUSE) || view.query.contains(PARAM_FILTER_CLAUSE)) {
-				sql = ((View)relation).query;
-			}
-			else {
-				sql = "select * from ( "+((View)relation).query+" )";
-				isSQLWrapped = true;
-			}
+			sql = ((View)relation).query;
 		}
 		else {
 			throw new ServletException("unknown relation type: "+relation.getClass().getName());
@@ -261,10 +254,12 @@ public class QueryOn extends HttpServlet {
 			sql = sql.replace(PARAM_FILTER_CLAUSE, filter.length()>0? " and "+filter:"");
 		}
 		else if(filter!=null && !filter.equals("")) {
+			sql = "select * from ( "+((View)relation).query+" )";
+			isSQLWrapped = true;
 			sql += " where "+filter;
-			if(!isSQLWrapped) {
+			/*if(!isSQLWrapped) {
 				log.warn("sql may be malformed. sql: "+sql);
-			}
+			}*/
 		}
 		log.info("sql: "+sql);
 		
@@ -299,18 +294,25 @@ public class QueryOn extends HttpServlet {
 	
 	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
 	
-	Table getTable(RequestSpec reqspec) throws ServletException {
+	Relation getTable(RequestSpec reqspec, boolean searchViews) throws ServletException {
 		String[] objectParts = reqspec.object.split("\\.");
 		
-		Table table = null;
+		Relation table = null;
 		if(objectParts.length>1) {
-			table = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
+			table = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
 		}
 		else {
-			table = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
+			table = (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
 		}
 		
-		if(table == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
+		if(table == null) {
+			if(searchViews) {
+				table = getView(reqspec);
+			}
+			if(table == null) {
+				throw new ServletException("Object "+reqspec.object+" not found");
+			}
+		}
 		return table;
 	}
 
