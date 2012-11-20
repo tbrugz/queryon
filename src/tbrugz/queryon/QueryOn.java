@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.resultset.ResultSetCollectionAdapter;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
@@ -29,6 +31,7 @@ import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -47,7 +50,8 @@ public class QueryOn extends HttpServlet {
 		DELETE,
 		EXECUTE, //~TODO: execute action!
 		QUERY,   //TODOne: SQLQueries action!
-		CONFIG   //TODO: CONFIG. or status? show model, user, vars...
+		STATUS   //~TODO: or CONFIG? show model, user, vars...
+		//XXX: FINDBYKEY action? return only the first result
 	}
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
@@ -134,6 +138,9 @@ public class QueryOn extends HttpServlet {
 				ExecutableObject eo = SchemaModelUtils.getExecutable(model, reqspec);
 				doExecute(eo, reqspec, resp);
 				break;
+			case STATUS:
+				doStatus(reqspec, resp);
+				break;
 			default:
 				throw new ServletException("Unknown action: "+reqspec.action); 
 			}
@@ -148,6 +155,9 @@ public class QueryOn extends HttpServlet {
 			throw new ServletException(e);
 		}
 		catch (NamingException e) {
+			throw new ServletException(e);
+		}
+		catch (IntrospectionException e) {
 			throw new ServletException(e);
 		}
 	}
@@ -245,7 +255,7 @@ public class QueryOn extends HttpServlet {
 		if(eo.params!=null) {
 			sql.append("(");
 			for(int i=0;i<eo.params.size();i++) {
-				ExecutableParameter ep = eo.params.get(i);
+				//ExecutableParameter ep = eo.params.get(i);
 				sql.append((i>0?", ":"")+"?");
 			}
 			sql.append(")");
@@ -292,6 +302,26 @@ public class QueryOn extends HttpServlet {
 			resp.getWriter().write("execution successful - no return");
 		}
 		conn.close();
+	}
+
+	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
+		ResultSet rs = null;
+		if("table".equalsIgnoreCase(reqspec.object)) {
+			rs = new ResultSetCollectionAdapter<Table>("status", model.getTables());
+		}
+		else if("view".equalsIgnoreCase(reqspec.object)) {
+			rs = new ResultSetCollectionAdapter<View>("status", model.getViews());
+		}
+		else if("executable".equalsIgnoreCase(reqspec.object)) {
+			rs = new ResultSetCollectionAdapter<ExecutableObject>("status", model.getExecutables());
+		}
+		else if("fk".equalsIgnoreCase(reqspec.object)) {
+			rs = new ResultSetCollectionAdapter<FK>("status", model.getForeignKeys());
+		}
+		else {
+			throw new ServletException("unknown object: "+reqspec.object);
+		}
+		dumpResultSet(rs, reqspec, "status", null, resp);
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, HttpServletResponse resp) throws SQLException, IOException {
