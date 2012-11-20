@@ -17,8 +17,9 @@ import tbrugz.sqldump.datadump.DumpSyntax;
 public class RequestSpec {
 	static final Log log = LogFactory.getLog(QueryOn.class);
 
-	String object = null;
-	String action = null;
+	final String httpMethod;
+	final String object;
+	final String action;
 	int offset, length;
 	List<String> columns = new ArrayList<String>();
 	List<String> params = new ArrayList<String>();
@@ -26,25 +27,33 @@ public class RequestSpec {
 	DumpSyntax outputSyntax = null;
 	
 	public RequestSpec(QueryOn qon, HttpServletRequest req, Properties prop) throws ServletException {
+		httpMethod = req.getMethod();
+		
 		String varUrl = req.getPathInfo();
-		int lastDotIndex = varUrl.lastIndexOf('.');
-		if(lastDotIndex>-1) {
-			outputTypeStr = varUrl.substring(lastDotIndex+1);
-			varUrl = varUrl.substring(0, lastDotIndex);
-		}
 		
 		String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
 		log.info("urlparts: "+URIpartz);
 		if(URIpartz.size()<3) { throw new ServletException("URL must have at least 2 parts"); }
 
-		object = URIpartz.remove(0);
-		if(object == null || object.equals("")) {
-			//first part may be empty
-			object = URIpartz.remove(0);
+		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
+		int lastDotIndex = lastURIPart.lastIndexOf('.'); //FIXME: do it after '/' split - '.' may split SCHEMA and OBJNAME
+		if(lastDotIndex > -1) {
+			outputTypeStr = lastURIPart.substring(lastDotIndex+1);
+			lastURIPart = lastURIPart.substring(0, lastDotIndex);
 		}
-		action = URIpartz.remove(0);
-		action = action.toUpperCase();
+		URIpartz.add( lastURIPart );
+		log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
+		
+		String objectTmp = URIpartz.remove(0);
+		if(objectTmp == null || objectTmp.equals("")) {
+			//first part may be empty
+			objectTmp = URIpartz.remove(0);
+		}
+		object = objectTmp;
+		String actionTmp = URIpartz.remove(0);
+		action = actionTmp.toUpperCase();
+		
 		for(int i=0;i<URIpartz.size();i++) {
 			params.add(URIpartz.get(i));
 		}
