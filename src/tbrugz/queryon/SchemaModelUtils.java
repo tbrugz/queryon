@@ -4,6 +4,7 @@ import javax.servlet.ServletException;
 
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -48,4 +49,40 @@ public class SchemaModelUtils {
 		return view;
 	}
 
+	static ExecutableObject getExecutable(SchemaModel model, RequestSpec reqspec) throws ServletException {
+		String[] objectParts = reqspec.object.split("\\.");
+		
+		ExecutableObject exec = null;
+		if(objectParts.length==1) { //PROCEDURE
+			exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[0]);
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[0]);
+			}
+		}
+		else if(objectParts.length==3) { //SCHEMA.PACKAGE.PROCEDURE
+			exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[0], objectParts[2]);
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[0], objectParts[2]);
+			}
+			if(exec!=null && !objectParts[1].equals(exec.packageName)) { exec = null; }
+		}
+		else if(objectParts.length==2) { //SCHEMA.PROCEDURE or PACKAGE.PROCEDURE
+			exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[0], objectParts[1]);
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[0], objectParts[1]);
+			}
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[1]);
+				if(exec!=null && !objectParts[0].equals(exec.packageName)) { exec = null; }
+			}
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[1]);
+				if(exec!=null && !objectParts[0].equals(exec.packageName)) { exec = null; }
+			}
+		}
+		
+		if(exec == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
+		return exec;
+	}
+	
 }

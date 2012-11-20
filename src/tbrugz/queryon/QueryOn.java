@@ -1,6 +1,7 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +26,9 @@ import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -37,13 +41,13 @@ import tbrugz.sqldump.util.Utils;
 public class QueryOn extends HttpServlet {
 	
 	public enum ActionType {
-		SELECT,
+		SELECT,  //done
 		INSERT,
 		UPDATE,
 		DELETE,
-		EXECUTE, //TODO: execute action!
-		QUERY,   //TODOne?: SQLQueries action!
-		CONFIG   //or status? show model, user, vars...
+		EXECUTE, //~TODO: execute action!
+		QUERY,   //TODOne: SQLQueries action!
+		CONFIG   //TODO: CONFIG. or status? show model, user, vars...
 	}
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
@@ -115,18 +119,24 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		try {
-			Relation rel = null;			
 			switch (atype) {
-			case SELECT:
-				rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
+			case SELECT: {
+				Relation rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
+				doSelect(rel, reqspec, resp);
+				}
 				break;
-			case QUERY:
-				rel = SchemaModelUtils.getView(model, reqspec);
+			case QUERY: {
+				Relation rel = SchemaModelUtils.getView(model, reqspec);
+				doSelect(rel, reqspec, resp);
+				}
+				break;
+			case EXECUTE:
+				ExecutableObject eo = SchemaModelUtils.getExecutable(model, reqspec);
+				doExecute(eo, reqspec, resp);
 				break;
 			default:
 				throw new ServletException("Unknown action: "+reqspec.action); 
 			}
-			doSelect(rel, reqspec, resp);
 		}
 		catch(SQLException e) {
 			throw new ServletException(e);
@@ -206,15 +216,92 @@ public class QueryOn extends HttpServlet {
 			st.setString(i+1, reqspec.params.get(i));
 		}
 		ResultSet rs = st.executeQuery();
+		
+		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, resp);
+		conn.close();
+	}
+	
+	/*
+	 * http://docs.oracle.com/javase/6/docs/api/java/sql/CallableStatement.html
+	 *  
+	 * {?= call <procedure-name>[(<arg1>,<arg2>, ...)]}
+	 * {call <procedure-name>[(<arg1>,<arg2>, ...)]}
+	 * 
+	 * The type of all OUT parameters must be registered prior to executing the stored procedure; their values are retrieved after execution via the get methods provided here.
+	 */
+	void doExecute(ExecutableObject eo, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		log.info("eo: "+eo);
+		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		StringBuffer sql = new StringBuffer();
+		sql.append("{ "); //sql.append("begin ");
+		if(eo.type==DBObjectType.FUNCTION) {
+			sql.append("?= "); //sql.append("? := ");
+		}
+		sql.append("call ");
+		sql.append(
+			(eo.getSchemaName()!=null?eo.getSchemaName()+".":"")+
+			(eo.packageName!=null?eo.packageName+".":"")+
+			eo.getName());
+		if(eo.params!=null) {
+			sql.append("(");
+			for(int i=0;i<eo.params.size();i++) {
+				ExecutableParameter ep = eo.params.get(i);
+				sql.append((i>0?", ":"")+"?");
+			}
+			sql.append(")");
+		}
+		sql.append(" }"); //sql.append("; end;");
+		CallableStatement stmt = conn.prepareCall(sql.toString());
+		int paramOffset = 1 + (eo.type==DBObjectType.FUNCTION?1:0);
+		int outParamCount = 0;
+		for(int i=0;i<eo.params.size();i++) {
+			ExecutableParameter ep = eo.params.get(i);
+			if(ep.inout==ExecutableParameter.INOUT.IN || ep.inout==ExecutableParameter.INOUT.INOUT) {
+				stmt.setString(i+paramOffset, reqspec.params.get(i));
+			}
+			if(ep.inout==ExecutableParameter.INOUT.OUT || ep.inout==ExecutableParameter.INOUT.INOUT) {
+				stmt.registerOutParameter(i+paramOffset, DBUtil.getSQLTypeForColumnType(ep.dataType));
+				outParamCount++;
+			}
+		}
+		log.info("sql exec: "+sql);
+		stmt.execute();
+		Object retObject = null;
+		for(int i=0;i<eo.params.size();i++) {
+			ExecutableParameter ep = eo.params.get(i);
+			if(ep.inout==ExecutableParameter.INOUT.OUT || ep.inout==ExecutableParameter.INOUT.INOUT) {
+				retObject = stmt.getObject(i+paramOffset);
+			}
+			if(retObject!=null) {
+				if(outParamCount>1) {
+					log.info("there are "+outParamCount+" out parameter. Only the first will be returned");
+				}
+				break; //gets first result
+			}
+		}
+
+		if(retObject!=null) {
+			if(retObject instanceof ResultSet) {
+				dumpResultSet((ResultSet)retObject, reqspec, reqspec.object, null, resp);
+			}
+			else {
+				resp.getWriter().write(retObject.toString());
+			}
+		}
+		else {
+			resp.getWriter().write("execution successful - no return");
+		}
+		conn.close();
+	}
+	
+	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, HttpServletResponse resp) throws SQLException, IOException {
 		if(reqspec.offset>0) {
 			rs.absolute(reqspec.offset);
 		}
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
 		
-		ds.initDump(relation.getName(), 
-				pk!=null?pk.uniqueColumns:null,
-				rs.getMetaData());
+		ds.initDump(queryName, uniqueColumns, rs.getMetaData());
 
 		resp.addHeader("Content-type", ds.getMimeType());
 		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
@@ -227,7 +314,6 @@ public class QueryOn extends HttpServlet {
 			if(reqspec.length>0 && count>reqspec.length) break;
 		}
 		ds.dumpFooter(resp.getWriter());
-		conn.close();
 	}
 	
 	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
