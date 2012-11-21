@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -304,24 +305,26 @@ public class QueryOn extends HttpServlet {
 		conn.close();
 	}
 
+	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
+		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
 		if("table".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<Table>("status", model.getTables());
+			rs = new ResultSetCollectionAdapter<Table>("status", statusUniqueColumns, model.getTables());
 		}
 		else if("view".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<View>("status", model.getViews());
+			rs = new ResultSetCollectionAdapter<View>("status", statusUniqueColumns, model.getViews());
 		}
 		else if("executable".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<ExecutableObject>("status", model.getExecutables());
+			rs = new ResultSetCollectionAdapter<ExecutableObject>("status", statusUniqueColumns, model.getExecutables());
 		}
 		else if("fk".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<FK>("status", model.getForeignKeys());
+			rs = new ResultSetCollectionAdapter<FK>("status", statusUniqueColumns, model.getForeignKeys());
 		}
 		else {
 			throw new ServletException("unknown object: "+reqspec.object);
 		}
-		dumpResultSet(rs, reqspec, "status", null, resp);
+		dumpResultSet(rs, reqspec, "status", null /*statusUniqueColumns*/, resp);
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, HttpServletResponse resp) throws SQLException, IOException {

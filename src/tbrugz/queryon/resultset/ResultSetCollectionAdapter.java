@@ -47,7 +47,7 @@ public class ResultSetCollectionAdapter<E extends Object> extends AbstractResult
 	E currentElement;
 	//int position = 0;
 
-	public ResultSetCollectionAdapter(String name, Collection<E> list) throws IntrospectionException {
+	public ResultSetCollectionAdapter(String name, List<String> uniqueCols, Collection<E> list) throws IntrospectionException {
 		this.name = name;
 		
 		E e = list.iterator().next();
@@ -56,11 +56,23 @@ public class ResultSetCollectionAdapter<E extends Object> extends AbstractResult
 		
 		BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+		if(uniqueCols!=null) {
+			for(String col: uniqueCols) {
+				for (PropertyDescriptor prop : propertyDescriptors) {
+					if(col.equals(prop.getName())) {
+						columnNames.add(col);
+						methods.add(prop.getReadMethod());
+					}
+				}
+			}
+		}
 		for (PropertyDescriptor prop : propertyDescriptors) {
-			Method m = prop.getReadMethod();
 			String pname = prop.getName();
 			if("class".equals(pname)) { continue; }
+			if(columnNames.contains(pname)) { continue; }
 			//XXX: continue on transient, ... ??
+			
+			Method m = prop.getReadMethod();
 			columnNames.add(pname);
 			methods.add(m);
 		}
