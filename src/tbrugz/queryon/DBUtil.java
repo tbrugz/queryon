@@ -10,7 +10,7 @@ public class DBUtil {
 	
 	//XXX: getSQLTypeForColumnType(String colType): add dbid as parameter? 
 	public static int getSQLTypeForColumnType(String colType) {
-		if(colType==null) {	return Types.VARCHAR; }
+		if(colType==null) { return Types.VARCHAR; }
 		
 		if(colType.equalsIgnoreCase("BINARY_INTEGER")) {
 			return Types.INTEGER;

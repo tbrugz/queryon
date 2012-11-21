@@ -20,7 +20,7 @@ public class RequestSpec {
 	final String httpMethod;
 	final String object;
 	final String action;
-	int offset, length;
+	final int offset, limit;
 	List<String> columns = new ArrayList<String>();
 	List<String> params = new ArrayList<String>();
 	String outputTypeStr = QueryOn.DEFAULT_OUTPUT_SYNTAX;
@@ -65,10 +65,12 @@ public class RequestSpec {
 		//---------------------
 		
 		String offsetStr = req.getParameter("offset");
-		if(offsetStr!=null) offset = Integer.parseInt(offsetStr);
+		if(offsetStr!=null) { offset = Integer.parseInt(offsetStr); }
+		else { offset = 0; }
 
-		String lengthStr = req.getParameter("length");
-		if(lengthStr!=null) length = Integer.parseInt(lengthStr);
+		String lengthStr = req.getParameter("limit");
+		if(lengthStr!=null) { limit = Integer.parseInt(lengthStr); }
+		else { limit = -1; }
 		
 		for(int i=1;;i++) {
 			String value = req.getParameter("c"+i);

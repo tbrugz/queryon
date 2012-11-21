@@ -334,8 +334,14 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, HttpServletResponse resp) throws SQLException, IOException {
+		int resultSetType = rs.getType();
 		if(reqspec.offset>0) {
-			rs.absolute(reqspec.offset);
+			if(resultSetType!=ResultSet.TYPE_FORWARD_ONLY) {
+				rs.absolute(reqspec.offset);
+			}
+			else {
+				log.warn("cant offset: ResultSet type is FORWARD_ONLY");
+			}
 		}
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
@@ -350,7 +356,7 @@ public class QueryOn extends HttpServlet {
 		while(rs.next()) {
 			ds.dumpRow(rs, count, resp.getWriter());
 			count++;
-			if(reqspec.length>0 && count>reqspec.length) break;
+			if(reqspec.limit>0 && count>=reqspec.limit) break;
 		}
 		ds.dumpFooter(resp.getWriter());
 	}
