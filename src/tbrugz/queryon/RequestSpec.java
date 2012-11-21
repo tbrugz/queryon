@@ -21,10 +21,11 @@ public class RequestSpec {
 	final String object;
 	final String action;
 	final int offset, limit;
-	List<String> columns = new ArrayList<String>();
-	List<String> params = new ArrayList<String>();
-	String outputTypeStr = QueryOn.DEFAULT_OUTPUT_SYNTAX;
-	DumpSyntax outputSyntax = null;
+	
+	final List<String> columns = new ArrayList<String>();
+	final List<String> params = new ArrayList<String>();
+	final String outputTypeStr;
+	final DumpSyntax outputSyntax;
 	
 	public RequestSpec(QueryOn qon, HttpServletRequest req, Properties prop) throws ServletException {
 		httpMethod = req.getMethod();
@@ -41,6 +42,9 @@ public class RequestSpec {
 		if(lastDotIndex > -1) {
 			outputTypeStr = lastURIPart.substring(lastDotIndex+1);
 			lastURIPart = lastURIPart.substring(0, lastDotIndex);
+		}
+		else {
+			outputTypeStr = QueryOn.DEFAULT_OUTPUT_SYNTAX;
 		}
 		URIpartz.add( lastURIPart );
 		log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);

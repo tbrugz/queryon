@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.resultset.ResultSetCollectionAdapter;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
+import tbrugz.queryon.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
@@ -54,6 +56,13 @@ public class QueryOn extends HttpServlet {
 		QUERY,   //TODOne: SQLQueries action!
 		STATUS   //~TODO: or CONFIG? show model, user, vars...
 		//XXX: FINDBYKEY action? return only the first result
+	}
+
+	public enum LimitOffsetStrategy {
+		RESULTSET_CONTROL,
+		SQL_LIMIT_OFFSET,
+		SQL_ROWNUM,
+		SQL_FETCH_FIRST //ANSI:2008?
 	}
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
@@ -229,7 +238,9 @@ public class QueryOn extends HttpServlet {
 		}
 		ResultSet rs = st.executeQuery();
 		
-		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, resp);
+		boolean applyLimitOffset = true; //TODO: what's the best stratery?
+		
+		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, applyLimitOffset, resp);
 		conn.close();
 	}
 	
@@ -294,7 +305,7 @@ public class QueryOn extends HttpServlet {
 
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
-				dumpResultSet((ResultSet)retObject, reqspec, reqspec.object, null, resp);
+				dumpResultSet((ResultSet)retObject, reqspec, reqspec.object, null, true, resp);
 			}
 			else {
 				resp.getWriter().write(retObject.toString());
@@ -312,16 +323,20 @@ public class QueryOn extends HttpServlet {
 		ResultSet rs = null;
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
 		if("table".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<Table>("status", statusUniqueColumns, model.getTables());
+			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
+			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, list);
 		}
 		else if("view".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<View>("status", statusUniqueColumns, model.getViews());
+			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
+			rs = new ResultSetListAdapter<View>("status", statusUniqueColumns, list);
 		}
 		else if("executable".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<ExecutableObject>("status", statusUniqueColumns, model.getExecutables());
+			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
+			rs = new ResultSetListAdapter<ExecutableObject>("status", statusUniqueColumns, list);
 		}
 		else if("fk".equalsIgnoreCase(reqspec.object)) {
-			rs = new ResultSetCollectionAdapter<FK>("status", statusUniqueColumns, model.getForeignKeys());
+			List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
+			rs = new ResultSetListAdapter<FK>("status", statusUniqueColumns, list);
 		}
 		else {
 			throw new ServletException("unknown object: "+reqspec.object);
@@ -330,17 +345,18 @@ public class QueryOn extends HttpServlet {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
-		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, resp);
+		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, true, resp);
 	}
 	
-	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, HttpServletResponse resp) throws SQLException, IOException {
+	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, boolean mayApplyLimitOffset, HttpServletResponse resp) throws SQLException, IOException {
 		int resultSetType = rs.getType();
-		if(reqspec.offset>0) {
+		if(mayApplyLimitOffset && reqspec.offset>0) {
 			if(resultSetType!=ResultSet.TYPE_FORWARD_ONLY) {
 				rs.absolute(reqspec.offset);
 			}
 			else {
 				log.warn("cant offset: ResultSet type is FORWARD_ONLY");
+				// XXX: do rs.next() times 'reqspec.offset'? will fetch all: not really optimized
 			}
 		}
 		int count = 0;
@@ -356,6 +372,8 @@ public class QueryOn extends HttpServlet {
 		while(rs.next()) {
 			ds.dumpRow(rs, count, resp.getWriter());
 			count++;
+			
+			//XXX query mayApplyLimitOffset ? if false, (count>=reqspec.limit) should never be true
 			if(reqspec.limit>0 && count>=reqspec.limit) break;
 		}
 		ds.dumpFooter(resp.getWriter());
