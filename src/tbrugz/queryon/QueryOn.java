@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.resultset.ResultSetCollectionAdapter;
+import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
@@ -306,6 +307,7 @@ public class QueryOn extends HttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
+	
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
@@ -324,7 +326,11 @@ public class QueryOn extends HttpServlet {
 		else {
 			throw new ServletException("unknown object: "+reqspec.object);
 		}
-		dumpResultSet(rs, reqspec, "status", null /*statusUniqueColumns*/, resp);
+		
+		if(reqspec.params!=null && reqspec.params.size()>0) {
+			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
+		}
+		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, resp);
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, HttpServletResponse resp) throws SQLException, IOException {
