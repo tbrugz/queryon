@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.queryon.resultset.ResultSetCollectionAdapter;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.SQLDump;
@@ -62,7 +61,17 @@ public class QueryOn extends HttpServlet {
 		RESULTSET_CONTROL,
 		SQL_LIMIT_OFFSET,
 		SQL_ROWNUM,
-		SQL_FETCH_FIRST //ANSI:2008?
+		SQL_FETCH_FIRST //ANSI:2008? offset?
+		;
+		
+		/*public boolean mustChangeQuery() {
+			switch (this) {
+			case RESULTSET_CONTROL:
+				return false;
+			default:
+				return true;
+			}
+		}*/
 	}
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
@@ -220,17 +229,26 @@ public class QueryOn extends HttpServlet {
 		else if(sql.contains(PARAM_FILTER_CLAUSE)) {
 			sql = sql.replace(PARAM_FILTER_CLAUSE, filter.length()>0? " and "+filter:"");
 		}
-		else if(filter!=null && !filter.equals("")) {
+		else if(filter.length()>0) {
 			//FIXME: if selecting from Table object, do not need to wrap
-			sql = "select * from ( "+sql+" )";
-			isSQLWrapped = true;
+			if(relation instanceof View) {
+				sql = "select * from ( "+sql+" )";
+				isSQLWrapped = true;
+			}
 			sql += " where "+filter;
 			
 			/*if(!isSQLWrapped) {
 				log.warn("sql may be malformed. sql: "+sql);
 			}*/
 		}
-		log.info("sql: "+sql);
+		
+		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.RESULTSET_CONTROL; //XXX: how to decide strategy?
+		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
+		log.info("pre-sql:\n"+sql);
+		sql = addLimitOffset(sql, loStrategy, reqspec);
+		
+		//query finished!
+		log.info("sql:\n"+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql);
 		for(int i=0;i<parametersToBind;i++) {
@@ -388,6 +406,45 @@ public class QueryOn extends HttpServlet {
 		}
 		String sql = "select "+columns+
 			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
+		return sql;
+	}
+	
+	static String addLimitOffset(String sql, LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
+		if(reqspec.limit<=0 && reqspec.offset<=0) { return sql; }
+		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return sql; }
+		
+		if(strategy==LimitOffsetStrategy.SQL_LIMIT_OFFSET) {
+			if(reqspec.limit>0) {
+				sql += "\nlimit "+reqspec.limit;
+			}
+			if(reqspec.offset>0) {
+				sql += "\noffset "+reqspec.offset;
+			}
+		}
+		else if(strategy==LimitOffsetStrategy.SQL_ROWNUM) {
+			if(reqspec.limit>0 && reqspec.offset>0) {
+				sql = "select * from " 
+					+"( select a.*, ROWNUM rnum from (\n"
+					+ sql
+					+"\n) a " 
+					+"where ROWNUM <= "+(reqspec.limit+reqspec.offset-1)+" ) "
+					+"where rnum >= "+reqspec.offset;
+			}
+			else if(reqspec.limit>0) {
+				sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
+			}
+			else {
+				sql = "select * from " 
+					+"( select a.*, ROWNUM rnum from (\n"
+					+ sql
+					+"\n) a ) " 
+					+"where rnum >= "+reqspec.offset;
+			}
+		}
+		else {
+			throw new ServletException("Unknown Limit/Offset strategy: "+strategy);
+		}
+		
 		return sql;
 	}
 	
