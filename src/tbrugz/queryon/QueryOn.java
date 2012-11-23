@@ -35,6 +35,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -63,6 +64,24 @@ public class QueryOn extends HttpServlet {
 		SQL_ROWNUM,
 		SQL_FETCH_FIRST //ANSI:2008? offset?
 		;
+		
+		static final String PROPFILE_DBMS_SPECIFIC = "/dbms-specific-queryon.properties";
+		static final ParametrizedProperties prop = new ParametrizedProperties();
+		static {
+			try {
+				prop.load(LimitOffsetStrategy.class.getResourceAsStream(PROPFILE_DBMS_SPECIFIC));
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new ExceptionInInitializerError(e);
+			}
+		}
+		
+		static LimitOffsetStrategy getDefaultStrategy(String dbid) {
+			String strategyStr = prop.getProperty("dbid."+dbid+".limitoffsetstretegy", "DEFAULT");
+			log.info("getLOStrategy["+dbid+"]: "+strategyStr);
+			LimitOffsetStrategy strat = LimitOffsetStrategy.valueOf(strategyStr);
+			return strat;
+		}
 		
 		/*public boolean mustChangeQuery() {
 			switch (this) {
@@ -193,9 +212,12 @@ public class QueryOn extends HttpServlet {
 		
 		String sql = null;
 		if(relation instanceof Table) {
-			sql = createSQL((Table)relation, reqspec);
+			sql = createSQL(relation, reqspec);
 		}
 		else if(relation instanceof View) {
+			sql = createSQL(relation, reqspec);
+		}
+		else if(relation instanceof Query) {
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			sql = ((View)relation).query;
 		}
@@ -231,7 +253,7 @@ public class QueryOn extends HttpServlet {
 		}
 		else if(filter.length()>0) {
 			//FIXME: if selecting from Table object, do not need to wrap
-			if(relation instanceof View) {
+			if(relation instanceof Query) {
 				sql = "select * from ( "+sql+" )";
 				isSQLWrapped = true;
 			}
@@ -241,10 +263,14 @@ public class QueryOn extends HttpServlet {
 				log.warn("sql may be malformed. sql: "+sql);
 			}*/
 		}
-		
-		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.RESULTSET_CONTROL; //XXX: how to decide strategy?
+
+		//XXX: how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
-		log.info("pre-sql:\n"+sql);
+		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
+		
+		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
+			log.info("pre-sql:\n"+sql);
+		}
 		sql = addLimitOffset(sql, loStrategy, reqspec);
 		
 		//query finished!
@@ -256,9 +282,9 @@ public class QueryOn extends HttpServlet {
 		}
 		ResultSet rs = st.executeQuery();
 		
-		boolean applyLimitOffset = true; //TODO: what's the best stratery?
+		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
 		
-		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, applyLimitOffset, resp);
+		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, applyLimitOffsetInResultSet, resp);
 		conn.close();
 	}
 	
@@ -391,15 +417,20 @@ public class QueryOn extends HttpServlet {
 			ds.dumpRow(rs, count, resp.getWriter());
 			count++;
 			
-			//XXX query mayApplyLimitOffset ? if false, (count>=reqspec.limit) should never be true
-			if(reqspec.limit>0 && count>=reqspec.limit) break;
+			if(reqspec.limit>0 && count>=reqspec.limit) {
+				//XXX query mayApplyLimitOffset ? if false, (count>=reqspec.limit) should never be true
+				if(!mayApplyLimitOffset && rs.next()) {
+					log.warn("row count is "+count+" & has more rows: query should not have gone so far...");
+				}
+				break;
+			}
 		}
 		ds.dumpFooter(resp.getWriter());
 	}
 	
 	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
 	
-	static String createSQL(Table table, RequestSpec reqspec) {
+	static String createSQL(Relation table, RequestSpec reqspec) {
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
 			columns = Utils.join(reqspec.columns, ", ");
@@ -414,6 +445,7 @@ public class QueryOn extends HttpServlet {
 		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return sql; }
 		
 		if(strategy==LimitOffsetStrategy.SQL_LIMIT_OFFSET) {
+			//XXX assumes that the original query has no limit/offset clause
 			if(reqspec.limit>0) {
 				sql += "\nlimit "+reqspec.limit;
 			}
