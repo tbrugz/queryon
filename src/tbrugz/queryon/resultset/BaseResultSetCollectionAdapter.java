@@ -87,7 +87,9 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		try {
 			Method m = methods.get(columnIndex-1);
 			if(m==null) { log.warn("method is null: "+(columnIndex-1)); return null; }
-			ret = String.valueOf(m.invoke(currentElement, null));
+			Object oret = m.invoke(currentElement, null);
+			if(oret==null) { return null; }
+			ret = String.valueOf(oret);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
