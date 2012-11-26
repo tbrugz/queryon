@@ -362,13 +362,14 @@ public class QueryOn extends HttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
+	static final List<String> tableAllColumns = Arrays.asList(new String[]{"PKConstraint", "columnNames", "constraints", "remarks", "type"}); // XXX: add "columns"?
 	
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
 		if("table".equalsIgnoreCase(reqspec.object)) {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
-			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, list);
+			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, tableAllColumns, list);
 		}
 		else if("view".equalsIgnoreCase(reqspec.object)) {
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
