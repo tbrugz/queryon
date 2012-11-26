@@ -64,7 +64,7 @@ public class SchemaModelUtils {
 			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[0], objectParts[2]);
 			}
-			if(exec!=null && !objectParts[1].equals(exec.packageName)) { exec = null; }
+			if(exec!=null && !objectParts[1].equals(exec.getPackageName())) { exec = null; }
 		}
 		else if(objectParts.length==2) { //SCHEMA.PROCEDURE or PACKAGE.PROCEDURE
 			exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[0], objectParts[1]);
@@ -73,11 +73,11 @@ public class SchemaModelUtils {
 			}
 			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[1]);
-				if(exec!=null && !objectParts[0].equals(exec.packageName)) { exec = null; }
+				if(exec!=null && !objectParts[0].equals(exec.getPackageName())) { exec = null; }
 			}
 			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[1]);
-				if(exec!=null && !objectParts[0].equals(exec.packageName)) { exec = null; }
+				if(exec!=null && !objectParts[0].equals(exec.getPackageName())) { exec = null; }
 			}
 		}
 		

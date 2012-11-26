@@ -301,17 +301,17 @@ public class QueryOn extends HttpServlet {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		StringBuffer sql = new StringBuffer();
 		sql.append("{ "); //sql.append("begin ");
-		if(eo.type==DBObjectType.FUNCTION) {
+		if(eo.getType()==DBObjectType.FUNCTION) {
 			sql.append("?= "); //sql.append("? := ");
 		}
 		sql.append("call ");
 		sql.append(
 			(eo.getSchemaName()!=null?eo.getSchemaName()+".":"")+
-			(eo.packageName!=null?eo.packageName+".":"")+
+			(eo.getPackageName()!=null?eo.getPackageName()+".":"")+
 			eo.getName());
-		if(eo.params!=null) {
+		if(eo.getParams()!=null) {
 			sql.append("(");
-			for(int i=0;i<eo.params.size();i++) {
+			for(int i=0;i<eo.getParams().size();i++) {
 				//ExecutableParameter ep = eo.params.get(i);
 				sql.append((i>0?", ":"")+"?");
 			}
@@ -319,10 +319,10 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.append(" }"); //sql.append("; end;");
 		CallableStatement stmt = conn.prepareCall(sql.toString());
-		int paramOffset = 1 + (eo.type==DBObjectType.FUNCTION?1:0);
+		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
 		int outParamCount = 0;
-		for(int i=0;i<eo.params.size();i++) {
-			ExecutableParameter ep = eo.params.get(i);
+		for(int i=0;i<eo.getParams().size();i++) {
+			ExecutableParameter ep = eo.getParams().get(i);
 			if(ep.inout==ExecutableParameter.INOUT.IN || ep.inout==ExecutableParameter.INOUT.INOUT) {
 				stmt.setString(i+paramOffset, reqspec.params.get(i));
 			}
@@ -334,8 +334,8 @@ public class QueryOn extends HttpServlet {
 		log.info("sql exec: "+sql);
 		stmt.execute();
 		Object retObject = null;
-		for(int i=0;i<eo.params.size();i++) {
-			ExecutableParameter ep = eo.params.get(i);
+		for(int i=0;i<eo.getParams().size();i++) {
+			ExecutableParameter ep = eo.getParams().get(i);
 			if(ep.inout==ExecutableParameter.INOUT.OUT || ep.inout==ExecutableParameter.INOUT.INOUT) {
 				retObject = stmt.getObject(i+paramOffset);
 			}
