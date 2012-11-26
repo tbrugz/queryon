@@ -7,6 +7,7 @@
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="deploy.dir" value="dist/deploy"/>
+	<property name="web.dir" value="web"/>
 	<property name="war.file" value="${dist.dir}/${proj.name}.war"/>
 
 	<fileset id="fileset.base" dir="lib">
@@ -64,6 +65,16 @@
 		<copy file="${war.file}" todir="${deploy.dir}" />
 	</target>
 
+	<target name="web-deploy">
+		<copy todir="${deploy.dir}/${proj.name}">
+			<fileset dir="${web.dir}">
+				<include name="**/*.js"/>
+				<include name="**/*.css"/>
+				<include name="**/*.html" />
+			</fileset>
+		</copy>
+	</target>
+	
 	<target name="resolve-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false" transitive="false"/>
 	</target>
