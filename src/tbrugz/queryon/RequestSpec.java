@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.util.Utils;
 
 //XXX: order by? 3a,1d,2d?
 public class RequestSpec {
@@ -74,7 +75,9 @@ public class RequestSpec {
 
 		String lengthStr = req.getParameter("limit");
 		if(lengthStr!=null) { limit = Integer.parseInt(lengthStr); }
-		else { limit = -1; }
+		else {
+			limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
+		}
 		
 		for(int i=1;;i++) {
 			String value = req.getParameter("c"+i);
