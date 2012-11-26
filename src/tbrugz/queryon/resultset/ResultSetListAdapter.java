@@ -15,7 +15,11 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	int position;
 
 	public ResultSetListAdapter(String name, List<String> uniqueCols, List<E> list) throws IntrospectionException {
-		super(name, uniqueCols, list);
+		this(name, uniqueCols, null, list);
+	}
+	
+	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list) throws IntrospectionException {
+		super(name, uniqueCols, allCols, list);
 		this.list = list;
 		position = 0;
 	}
@@ -43,7 +47,7 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 
 	@Override
 	public boolean next() throws SQLException {
-		if(list.size() > position) {
+		if(list.size()-1 > position) {
 			position++;
 			currentElement = list.get(position);
 			return true;

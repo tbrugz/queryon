@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -25,55 +26,59 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 
 	E currentElement;
 
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, Collection<E> list) throws IntrospectionException {
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, Collection<E> valueList) throws IntrospectionException {
+		this(name, uniqueCols, null, false, valueList);
+	}
+	
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, Collection<E> valueList) throws IntrospectionException {
+		this(name, uniqueCols, allCols, false, valueList);
+	}
+
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, Collection<E> valueList) throws IntrospectionException {
 		this.name = name;
 		
-		E e = list.iterator().next();
-		Class<E> clazz = (Class<E>) e.getClass();
 		List<String> columnNames = new ArrayList<String>();
+		metadata = new RSMetaDataAdapter(null, name, columnNames);
+		
+		Iterator<E> iter = valueList.iterator();
+		if(!iter.hasNext()) { return; }
+		
+		E e = iter.next();
+		Class<E> clazz = (Class<E>) e.getClass();
 		
 		BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 		if(uniqueCols!=null) {
 			for(String col: uniqueCols) {
-				for (PropertyDescriptor prop : propertyDescriptors) {
-					if(col.equals(prop.getName())) {
-						columnNames.add(col);
-						methods.add(prop.getReadMethod());
-					}
+				addMatchProperties(propertyDescriptors, col, columnNames);
+			}
+		}
+		if(!onlyUniqueCols) {
+			if(allCols!=null) {
+				for(String col: allCols) {
+					addMatchProperties(propertyDescriptors, col, columnNames);
 				}
 			}
-		}
-		for (PropertyDescriptor prop : propertyDescriptors) {
-			String pname = prop.getName();
-			if("class".equals(pname)) { continue; }
-			if(columnNames.contains(pname)) { continue; }
-			//XXX: continue on transient, ... ??
-			
-			Method m = prop.getReadMethod();
-			columnNames.add(pname);
-			methods.add(m);
-		}
-		
-		/*Method[] ms = clazz.getMethods();
-		for(Method m: ms) {
-			String mname = m.toString();
-			boolean isGet = mname.startsWith("get");
-			boolean isIs = mname.startsWith("is");
-			if(!isGet && !isIs) { continue; }
-			if(m.getParameterTypes().length>0) { continue; }
-			String colName = null;
-			if(isGet) {
-				colName = mname.substring(3);
-			}
 			else {
-				colName = mname.substring(2);
+				addMatchProperties(propertyDescriptors, null, columnNames);
 			}
-			columnNames.add(colName);
-			methods.add(m);
-		}*/
+		}
 		log.info("resultset:cols: "+columnNames);
-		metadata = new RSMetaDataAdapter(null, name, columnNames);
+	}
+	
+	void addMatchProperties(PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
+		for (PropertyDescriptor prop : propertyDescriptors) {
+			if(matchCol==null || matchCol.equals(prop.getName())) {
+				String pname = prop.getName();
+				if("class".equals(pname)) { continue; }
+				if(columnNames.contains(pname)) { continue; }
+				//XXX: continue on transient, ... ??
+				
+				Method m = prop.getReadMethod();
+				columnNames.add(pname);
+				methods.add(m);
+			}
+		}
 	}
 
 	@Override
