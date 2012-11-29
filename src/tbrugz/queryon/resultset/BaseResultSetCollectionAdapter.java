@@ -9,8 +9,6 @@ import java.lang.reflect.Method;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -26,25 +24,21 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 
 	E currentElement;
 
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, Collection<E> valueList) throws IntrospectionException {
-		this(name, uniqueCols, null, false, valueList);
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, E value) throws IntrospectionException {
+		this(name, uniqueCols, null, false, value);
 	}
 	
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, Collection<E> valueList) throws IntrospectionException {
-		this(name, uniqueCols, allCols, false, valueList);
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, E value) throws IntrospectionException {
+		this(name, uniqueCols, allCols, false, value);
 	}
 
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, Collection<E> valueList) throws IntrospectionException {
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, E value) throws IntrospectionException {
 		this.name = name;
 		
 		List<String> columnNames = new ArrayList<String>();
 		metadata = new RSMetaDataAdapter(null, name, columnNames);
 		
-		Iterator<E> iter = valueList.iterator();
-		if(!iter.hasNext()) { return; }
-		
-		E e = iter.next();
-		Class<E> clazz = (Class<E>) e.getClass();
+		Class<E> clazz = (Class<E>) value.getClass();
 		
 		BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
@@ -87,7 +81,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		try {
 			Method m = methods.get(columnIndex-1);
 			if(m==null) { log.warn("method is null: "+(columnIndex-1)); return null; }
-			Object oret = m.invoke(currentElement, null);
+			Object oret = m.invoke(currentElement, (Object[]) null);
 			if(oret==null) { return null; }
 			ret = String.valueOf(oret);
 		} catch (IllegalAccessException e) {
@@ -96,7 +90,9 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
-		}
+		} /*catch (IndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}*/
 		return ret;
 	}
 

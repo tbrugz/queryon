@@ -19,9 +19,9 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	}
 	
 	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list) throws IntrospectionException {
-		super(name, uniqueCols, allCols, list);
+		super(name, uniqueCols, allCols, list.iterator().next());
 		this.list = list;
-		position = 0;
+		position = -1;
 	}
 	
 	@Override
@@ -32,7 +32,7 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	@Override
 	public boolean first() throws SQLException {
 		position = 0;
-		currentElement = list.get(position);
+		updateCurrentElement();
 		return true;
 	}
 	
@@ -40,7 +40,7 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	public boolean absolute(int row) throws SQLException {
 		if(list.size()>=row) {
 			position = row;
-			currentElement = list.get(position);
+			updateCurrentElement();
 		}
 		return super.absolute(row);
 	}
@@ -49,10 +49,14 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	public boolean next() throws SQLException {
 		if(list.size()-1 > position) {
 			position++;
-			currentElement = list.get(position);
+			updateCurrentElement();
 			return true;
 		}
 		return false;
+	}
+	
+	void updateCurrentElement() {
+		currentElement = list.get(position);
 	}
 
 }
