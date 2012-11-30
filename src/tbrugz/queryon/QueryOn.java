@@ -209,7 +209,7 @@ public class QueryOn extends HttpServlet {
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		
-		boolean isSQLWrapped = false;
+		//boolean isSQLWrapped = false;
 		
 		SQL sql = null;
 		if(relation instanceof Table) {
@@ -246,7 +246,7 @@ public class QueryOn extends HttpServlet {
 				parametersToBind++;
 			}
 		}
-		sql.addFilter(relation, filter);
+		sql.addFilter(filter, relation);
 
 		//XXX: how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type

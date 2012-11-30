@@ -11,9 +11,10 @@ public class SQL {
 	
 	public static final String PARAM_WHERE_CLAUSE = "[where-clause]";
 	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
-	// order-clause? limit/offset-clause?
+	//XXX add order-clause? limit/offset-clause?
 
 	String sql;
+	//XXX add Relation relation; to constructor?
 	
 	public SQL(String sql) {
 		this.sql = sql;
@@ -24,7 +25,7 @@ public class SQL {
 	}
 	
 	public String getFinalSql() {
-		return sql;
+		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "");
 	}
 	
 	static String createSQLstr(Relation table, RequestSpec reqspec) {
@@ -33,7 +34,8 @@ public class SQL {
 			columns = Utils.join(reqspec.columns, ", ");
 		}
 		String sql = "select "+columns+
-			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
+			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName()+
+			" " + PARAM_WHERE_CLAUSE;
 		return sql;
 	}
 
@@ -41,22 +43,22 @@ public class SQL {
 		return new SQL(createSQLstr(table, reqspec));
 	}
 	
-	public void addFilter(Relation relation, String filter) {
-		if(filter==null || filter.equals("")) { return; }
+	public void addFilter(String filter, Relation relation) {
+		if(filter==null || filter.length()==0) { return; }
 		
 		if(sql.contains(PARAM_WHERE_CLAUSE)) {
-			sql = sql.replace(PARAM_WHERE_CLAUSE, filter.length()>0?" where "+filter:"");
+			sql = sql.replace(PARAM_WHERE_CLAUSE, " where "+filter+" "+PARAM_FILTER_CLAUSE);
 		}
 		else if(sql.contains(PARAM_FILTER_CLAUSE)) {
-			sql = sql.replace(PARAM_FILTER_CLAUSE, filter.length()>0? " and "+filter:"");
+			sql = sql.replace(PARAM_FILTER_CLAUSE, " and "+filter+" "+PARAM_FILTER_CLAUSE);
 		}
 		else if(filter.length()>0) {
 			//FIXME: if selecting from Table object, do not need to wrap
-			if(relation instanceof Query) {
+			if(relation!=null && relation instanceof Query) {
 				sql = "select * from ( "+sql+" )";
 				//isSQLWrapped = true;
 			}
-			sql += " where "+filter;
+			sql += " where "+filter+" "+PARAM_FILTER_CLAUSE;
 			
 			/*if(!isSQLWrapped) {
 				log.warn("sql may be malformed. sql: "+sql);
@@ -87,7 +89,8 @@ public class SQL {
 					+"where rnum > "+reqspec.offset;
 			}
 			else if(reqspec.limit>0) {
-				sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
+				addFilter("rownum <= "+reqspec.limit, null);
+				//sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
 			}
 			else {
 				sql = "select * from " 
@@ -104,5 +107,9 @@ public class SQL {
 		return;
 	}
 	
+	@Override
+	public String toString() {
+		return "SQL[\n"+sql+"\n]";
+	}
 	
 }
