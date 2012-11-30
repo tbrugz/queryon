@@ -205,25 +205,22 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	static final String PARAM_WHERE_CLAUSE = "[where-clause]";
-	static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
-	// order-clause? limit/offset-clause?
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		
 		boolean isSQLWrapped = false;
 		
-		String sql = null;
+		SQL sql = null;
 		if(relation instanceof Table) {
-			sql = createSQL(relation, reqspec);
+			sql = SQL.createSQL(relation, reqspec);
 		}
 		else if(relation instanceof View) {
-			sql = createSQL(relation, reqspec);
+			sql = SQL.createSQL(relation, reqspec);
 		}
 		else if(relation instanceof Query) {
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
-			sql = ((View)relation).query;
+			sql = new SQL( ((View)relation).query );
 		}
 		else {
 			throw new ServletException("unknown relation type: "+relation.getClass().getName());
@@ -249,38 +246,21 @@ public class QueryOn extends HttpServlet {
 				parametersToBind++;
 			}
 		}
-		if(sql.contains(PARAM_WHERE_CLAUSE)) {
-			sql = sql.replace(PARAM_WHERE_CLAUSE, filter.length()>0?" where "+filter:"");
-		}
-		else if(sql.contains(PARAM_FILTER_CLAUSE)) {
-			sql = sql.replace(PARAM_FILTER_CLAUSE, filter.length()>0? " and "+filter:"");
-		}
-		else if(filter.length()>0) {
-			//FIXME: if selecting from Table object, do not need to wrap
-			if(relation instanceof Query) {
-				sql = "select * from ( "+sql+" )";
-				isSQLWrapped = true;
-			}
-			sql += " where "+filter;
-			
-			/*if(!isSQLWrapped) {
-				log.warn("sql may be malformed. sql: "+sql);
-			}*/
-		}
+		sql.addFilter(relation, filter);
 
 		//XXX: how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
-			log.info("pre-sql:\n"+sql);
+			log.info("pre-sql:\n"+sql.getSql());
 		}
-		sql = addLimitOffset(sql, loStrategy, reqspec);
+		sql.addLimitOffset(loStrategy, reqspec);
 		
 		//query finished!
-		log.info("sql:\n"+sql);
+		log.info("sql:\n"+sql.getFinalSql());
 		
-		PreparedStatement st = conn.prepareStatement(sql);
+		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		for(int i=0;i<parametersToBind;i++) {
 			st.setString(i+1, reqspec.params.get(i));
 		}
@@ -419,56 +399,6 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
-	
-	static String createSQL(Relation table, RequestSpec reqspec) {
-		String columns = "*";
-		if(reqspec.columns.size()>0) {
-			columns = Utils.join(reqspec.columns, ", ");
-		}
-		String sql = "select "+columns+
-			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName();
-		return sql;
-	}
-	
-	static String addLimitOffset(String sql, LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
-		if(reqspec.limit<=0 && reqspec.offset<=0) { return sql; }
-		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return sql; }
-		
-		if(strategy==LimitOffsetStrategy.SQL_LIMIT_OFFSET) {
-			//XXX assumes that the original query has no limit/offset clause
-			if(reqspec.limit>0) {
-				sql += "\nlimit "+reqspec.limit;
-			}
-			if(reqspec.offset>0) {
-				sql += "\noffset "+reqspec.offset;
-			}
-		}
-		else if(strategy==LimitOffsetStrategy.SQL_ROWNUM) {
-			if(reqspec.limit>0 && reqspec.offset>0) {
-				sql = "select * from " 
-					+"( select a.*, ROWNUM rnum from (\n"
-					+ sql
-					+"\n) a " 
-					+"where ROWNUM <= "+(reqspec.limit+reqspec.offset)+" ) "
-					+"where rnum > "+reqspec.offset;
-			}
-			else if(reqspec.limit>0) {
-				sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
-			}
-			else {
-				sql = "select * from " 
-					+"( select a.*, ROWNUM rnum from (\n"
-					+ sql
-					+"\n) a ) " 
-					+"where rnum > "+reqspec.offset;
-			}
-		}
-		else {
-			throw new ServletException("Unknown Limit/Offset strategy: "+strategy);
-		}
-		
-		return sql;
-	}
 	
 	//XXX: move to SchemaModelUtils/SQLDumpUtils?
 	DumpSyntax getDumpSyntax(String format, Properties prop) {
