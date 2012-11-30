@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
+import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
@@ -396,15 +397,8 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, boolean mayApplyLimitOffset, HttpServletResponse resp) throws SQLException, IOException {
-		int resultSetType = rs.getType();
-		if(mayApplyLimitOffset && reqspec.offset>0) {
-			if(resultSetType!=ResultSet.TYPE_FORWARD_ONLY) {
-				rs.absolute(reqspec.offset);
-			}
-			else {
-				log.warn("cant offset: ResultSet type is FORWARD_ONLY");
-				// XXX: do rs.next() times 'reqspec.offset'? will fetch all: not really optimized
-			}
+		if(mayApplyLimitOffset) {
+			rs = new ResultSetLimitOffsetDecorator(rs, reqspec.limit, reqspec.offset);
 		}
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
@@ -419,14 +413,6 @@ public class QueryOn extends HttpServlet {
 		while(rs.next()) {
 			ds.dumpRow(rs, count, resp.getWriter());
 			count++;
-			
-			if(reqspec.limit>0 && count>=reqspec.limit) {
-				//XXX query mayApplyLimitOffset ? if false, (count>=reqspec.limit) should never be true
-				if(!mayApplyLimitOffset && rs.next()) {
-					log.warn("row count is "+count+" & has more rows: query should not have gone so far...");
-				}
-				break;
-			}
 		}
 		ds.dumpFooter(resp.getWriter());
 	}
@@ -462,8 +448,8 @@ public class QueryOn extends HttpServlet {
 					+"( select a.*, ROWNUM rnum from (\n"
 					+ sql
 					+"\n) a " 
-					+"where ROWNUM <= "+(reqspec.limit+reqspec.offset-1)+" ) "
-					+"where rnum >= "+reqspec.offset;
+					+"where ROWNUM <= "+(reqspec.limit+reqspec.offset)+" ) "
+					+"where rnum > "+reqspec.offset;
 			}
 			else if(reqspec.limit>0) {
 				sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
@@ -473,7 +459,7 @@ public class QueryOn extends HttpServlet {
 					+"( select a.*, ROWNUM rnum from (\n"
 					+ sql
 					+"\n) a ) " 
-					+"where rnum >= "+reqspec.offset;
+					+"where rnum > "+reqspec.offset;
 			}
 		}
 		else {
