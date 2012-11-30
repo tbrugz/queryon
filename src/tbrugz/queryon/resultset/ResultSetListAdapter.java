@@ -21,7 +21,8 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list) throws IntrospectionException {
 		super(name, uniqueCols, allCols, list.iterator().next());
 		this.list = list;
-		position = -1;
+		//Initially the cursor is positioned before the first row
+		resetPosition();
 	}
 	
 	@Override
@@ -31,18 +32,25 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	
 	@Override
 	public boolean first() throws SQLException {
-		position = 0;
-		updateCurrentElement();
-		return true;
+		resetPosition();
+		return next();
 	}
 	
 	@Override
 	public boolean absolute(int row) throws SQLException {
 		if(list.size()>=row) {
-			position = row;
+			position = row-1;
 			updateCurrentElement();
+			return true;
 		}
-		return super.absolute(row);
+		return false;
+	}
+	
+	@Override
+	public boolean relative(int rows) throws SQLException {
+		int newpos = position + rows + 1;
+		if(newpos>0) { return absolute(newpos); }
+		return false;
 	}
 
 	@Override
@@ -57,6 +65,11 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	
 	void updateCurrentElement() {
 		currentElement = list.get(position);
+	}
+	
+	void resetPosition() {
+		//XXX: should reset to 0? position==1 should point to the first element?
+		position = -1;
 	}
 
 }

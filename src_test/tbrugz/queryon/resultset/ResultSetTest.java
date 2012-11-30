@@ -9,8 +9,11 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ResultSetTest {
 	
 	List<TestBean> l1;
@@ -53,6 +56,35 @@ public class ResultSetTest {
 		Assert.assertFalse("Must not have 4th element", rsla.next());
 	}
 
+	@Test
+	public void testRSAbsolute() throws IntrospectionException, SQLException {
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1);
+		rs.absolute(1);
+		Assert.assertEquals("1", rs.getString(1));
+		rs.next();
+		Assert.assertEquals("2", rs.getString(1));
+		rs.absolute(3);
+		Assert.assertEquals("3", rs.getString(1));
+		rs.absolute(1);
+		Assert.assertEquals("1", rs.getString(1));
+	}
+
+	@Test
+	public void testRSRelative() throws IntrospectionException, SQLException {
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1);
+		rs.relative(2);
+		Assert.assertEquals("2", rs.getString(1));
+		rs.relative(1);
+		Assert.assertEquals("3", rs.getString(1));
+		rs.relative(-2);
+		Assert.assertEquals("1", rs.getString(1));
+
+		rs.absolute(3);
+		Assert.assertEquals("3", rs.getString(1));
+		rs.absolute(1);
+		Assert.assertEquals("1", rs.getString(1));
+	}
+	
 	@Test
 	public void testListFilter() throws IntrospectionException, SQLException {
 		List<Integer> lPos = Arrays.asList(new Integer[]{3});
