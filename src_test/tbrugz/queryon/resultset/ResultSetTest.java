@@ -1,10 +1,8 @@
 package tbrugz.queryon.resultset;
 
 import java.beans.IntrospectionException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -83,22 +81,5 @@ public class ResultSetTest {
 		Assert.assertEquals("3", rs.getString(1));
 		rs.absolute(1);
 		Assert.assertEquals("1", rs.getString(1));
-	}
-	
-	@Test
-	public void testListFilter() throws IntrospectionException, SQLException {
-		List<Integer> lPos = Arrays.asList(new Integer[]{3});
-		List<String> lValue = Arrays.asList(new String[]{"c1"});
-		ResultSet rsfd = new ResultSetFilterDecorator(
-				new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1),
-				lPos, lValue);
-		
-		Assert.assertTrue("Must have 1st element", rsfd.next());
-		Assert.assertEquals("one", rsfd.getString(2));
-		
-		Assert.assertTrue("Must have 2nd element", rsfd.next());
-		Assert.assertEquals("2", rsfd.getString(1));
-
-		Assert.assertFalse("Must not have 3rd element", rsfd.next());
 	}
 }
