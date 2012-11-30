@@ -5,6 +5,8 @@ import javax.servlet.ServletException;
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.Utils;
 
 public class SQL {
@@ -14,10 +16,11 @@ public class SQL {
 	//XXX add order-clause? limit/offset-clause?
 
 	String sql;
-	//XXX add Relation relation; to constructor?
+	final Relation relation;
 	
-	public SQL(String sql) {
+	public SQL(String sql, Relation relation) {
 		this.sql = sql;
+		this.relation = relation;
 	}
 	
 	public String getSql() {
@@ -28,7 +31,7 @@ public class SQL {
 		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "");
 	}
 	
-	static String createSQLstr(Relation table, RequestSpec reqspec) {
+	private static String createSQLstr(Relation table, RequestSpec reqspec) {
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
 			columns = Utils.join(reqspec.columns, ", ");
@@ -39,11 +42,23 @@ public class SQL {
 		return sql;
 	}
 
-	public static SQL createSQL(Relation table, RequestSpec reqspec) {
-		return new SQL(createSQLstr(table, reqspec));
+	public static SQL createSQL(Relation relation, RequestSpec reqspec) {
+		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
+			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
+			return new SQL( ((View)relation).query , relation);
+		}
+		else if(relation instanceof Table) {
+			return new SQL(createSQLstr(relation, reqspec), relation);
+		}
+		else if(relation instanceof View) {
+			return new SQL(createSQLstr(relation, reqspec), relation);
+		}
+		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
+		
+		//return new SQL(createSQLstr(relation, reqspec), relation);
 	}
 	
-	public void addFilter(String filter, Relation relation) {
+	public void addFilter(String filter) {
 		if(filter==null || filter.length()==0) { return; }
 		
 		if(sql.contains(PARAM_WHERE_CLAUSE)) {
@@ -89,7 +104,7 @@ public class SQL {
 					+"where rnum > "+reqspec.offset;
 			}
 			else if(reqspec.limit>0) {
-				addFilter("rownum <= "+reqspec.limit, null);
+				addFilter("rownum <= "+reqspec.limit);
 				//sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
 			}
 			else {

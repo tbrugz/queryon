@@ -36,7 +36,6 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
-import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -211,20 +210,7 @@ public class QueryOn extends HttpServlet {
 		
 		//boolean isSQLWrapped = false;
 		
-		SQL sql = null;
-		if(relation instanceof Table) {
-			sql = SQL.createSQL(relation, reqspec);
-		}
-		else if(relation instanceof View) {
-			sql = SQL.createSQL(relation, reqspec);
-		}
-		else if(relation instanceof Query) {
-			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
-			sql = new SQL( ((View)relation).query );
-		}
-		else {
-			throw new ServletException("unknown relation type: "+relation.getClass().getName());
-		}
+		SQL sql = SQL.createSQL(relation, reqspec);
 		
 		Constraint pk = null;
 		List<Constraint> conss = relation.getConstraints();
@@ -257,12 +243,12 @@ public class QueryOn extends HttpServlet {
 				}
 			}
 		}
-		sql.addFilter(filter, relation);
+		sql.addFilter(filter);
 
+		//limit-offset
 		//XXX: how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
-		
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
 			log.info("pre-sql:\n"+sql.getSql());
 		}
