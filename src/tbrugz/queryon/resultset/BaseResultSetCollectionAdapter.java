@@ -57,7 +57,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				addMatchProperties(propertyDescriptors, null, columnNames);
 			}
 		}
-		log.info("resultset:cols: "+columnNames);
+		log.debug("resultset:cols: "+columnNames);
 	}
 	
 	void addMatchProperties(PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {

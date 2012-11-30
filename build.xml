@@ -61,11 +61,11 @@
 		</war>
 	</target>
 	
-	<target name="war-deploy" depends="war">
+	<target name="war-deploy" depends="war" description="deploy war file">
 		<copy file="${war.file}" todir="${deploy.dir}" />
 	</target>
 
-	<target name="web-deploy">
+	<target name="web-deploy" description="deploy static web artifacts">
 		<copy todir="${deploy.dir}/${proj.name}">
 			<fileset dir="${web.dir}">
 				<include name="**/*.js"/>

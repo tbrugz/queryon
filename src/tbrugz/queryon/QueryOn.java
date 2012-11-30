@@ -122,6 +122,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	//XXX: move to SchemaModelUtils?
 	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException, NamingException {
 		String grabClassName = prop.getProperty(SQLDump.PROP_SCHEMAGRAB_GRABCLASS);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
@@ -469,6 +470,7 @@ public class QueryOn extends HttpServlet {
 		return sql;
 	}
 	
+	//XXX: move to SchemaModelUtils/SQLDumpUtils?
 	DumpSyntax getDumpSyntax(String format, Properties prop) {
 		DumpSyntax dsx = syntaxes.get(format);
 		if(dsx!=null) { return dsx; }
