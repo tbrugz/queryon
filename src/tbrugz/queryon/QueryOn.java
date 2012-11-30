@@ -229,21 +229,32 @@ public class QueryOn extends HttpServlet {
 		Constraint pk = null;
 		List<Constraint> conss = relation.getConstraints();
 		if(conss!=null) {
+			Constraint uk = null;
 			for(Constraint c: conss) {
 				if(c.type==ConstraintType.PK) { pk = c; break; }
+				if(c.type==ConstraintType.UNIQUE && uk == null) { uk = c; }
+			}
+			//XXXdone: search for unique key?
+			if(pk == null && uk != null) {
+				pk = uk;
 			}
 		}
 		
 		int parametersToBind = 0;
 		String filter = "";
 		//TODO: what if parameters already defined in query?
-		if(reqspec.params.size()>0 && pk!=null) {
-			//Constraint pk = relation.getPKConstraint();
-			for(int i=0;i<pk.uniqueColumns.size();i++) {
-				if(reqspec.params.size()<=i) { break; }
-				//String s = reqspec.params.get(i);
-				filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
-				parametersToBind++;
+		if(reqspec.params.size()>0) {
+			if(pk==null) {
+				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
+			}
+			else {
+				//Constraint pk = relation.getPKConstraint();
+				for(int i=0;i<pk.uniqueColumns.size();i++) {
+					if(reqspec.params.size()<=i) { break; }
+					//String s = reqspec.params.get(i);
+					filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
+					parametersToBind++;
+				}
 			}
 		}
 		sql.addFilter(filter, relation);
