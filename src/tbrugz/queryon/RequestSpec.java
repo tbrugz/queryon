@@ -79,10 +79,9 @@ public class RequestSpec {
 			limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
 		}
 		
-		for(int i=1;;i++) {
-			String value = req.getParameter("c"+i);
-			if(value==null) break;
-			columns.add(value);
+		String fields = req.getParameter("fields");
+		if(fields!=null) {
+			columns.addAll(Arrays.asList(fields.split(",")));
 		}
 
 		for(int i=1;;i++) {
