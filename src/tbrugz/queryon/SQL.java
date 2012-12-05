@@ -1,7 +1,6 @@
 package tbrugz.queryon;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +23,7 @@ public class SQL {
 	
 	public static final String PARAM_WHERE_CLAUSE = "[where-clause]";
 	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
+	//XXX add sql projection clause ( [projection-clause] )?
 	//XXX add order-clause? limit/offset-clause?
 
 	String sql;
@@ -44,35 +44,21 @@ public class SQL {
 	}
 	
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
-		String columns = "*";
-		if(reqspec.columns.size()>0) {
-			Set<String> tabCols = new HashSet<String>(table.getColumnNames()); 
-			List<String> sqlCols = new ArrayList<String>(); 
-			for(String reqColumn: reqspec.columns) {
-				if(tabCols.contains(reqColumn)) {
-					sqlCols.add(reqColumn);
-				}
-				else {
-					log.warn("column not found: "+reqColumn+" [table:"+table.getName()+"]");
-				}
-			}
-			if(sqlCols.size()>0) {
-				columns = Utils.join(sqlCols, ", ");
-			}
-			else {
-				log.warn("no valid column specified. defaulting to 'all'");
-			}
-		}
+		String columns = createSQLColumns(reqspec, table);
 		String sql = "select "+columns+
 			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName()+
 			" " + PARAM_WHERE_CLAUSE;
 		return sql;
 	}
-
+	
 	public static SQL createSQL(Relation relation, RequestSpec reqspec) {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
-			return new SQL( ((View)relation).query , relation);
+			SQL sql = new SQL( ((View)relation).query , relation);
+			if(reqspec.columns.size()>0) {
+				sql.addProjection(createSQLColumns(reqspec, relation));
+			}
+			return sql;
 		}
 		else if(relation instanceof Table) {
 			return new SQL(createSQLstr(relation, reqspec), relation);
@@ -106,6 +92,10 @@ public class SQL {
 				log.warn("sql may be malformed. sql: "+sql);
 			}*/
 		}
+	}
+	
+	public void addProjection(String columns) {
+		sql = "select "+columns+" from ( "+sql+" )"; //XXX: add [where-clause] if it doesn't have already
 	}
 	
 	public void addLimitOffset(LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
@@ -147,6 +137,29 @@ public class SQL {
 		}
 		
 		return;
+	}
+	
+	public static String createSQLColumns(RequestSpec reqspec, Relation table) {
+		String columns = "*";
+		if(reqspec.columns.size()>0) {
+			Set<String> tabCols = new HashSet<String>(table.getColumnNames()); 
+			List<String> sqlCols = new ArrayList<String>(); 
+			for(String reqColumn: reqspec.columns) {
+				if(tabCols.contains(reqColumn)) {
+					sqlCols.add(reqColumn);
+				}
+				else {
+					log.warn("column not found: "+reqColumn+" [table:"+table.getName()+"]");
+				}
+			}
+			if(sqlCols.size()>0) {
+				columns = Utils.join(sqlCols, ", ");
+			}
+			else {
+				log.warn("no valid column specified. defaulting to 'all'");
+			}
+		}
+		return columns;
 	}
 	
 	@Override
