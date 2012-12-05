@@ -95,7 +95,11 @@ public class SQL {
 	}
 	
 	public void addProjection(String columns) {
-		sql = "select "+columns+" from ( "+sql+" )"; //XXX: add [where-clause] if it doesn't have already
+		String sqlFilter = "";
+		if(!sql.contains(PARAM_WHERE_CLAUSE) && !sql.contains(PARAM_FILTER_CLAUSE)) {
+			sqlFilter = " " + PARAM_WHERE_CLAUSE;
+		}
+		sql = "select "+columns+" from ( "+sql+" )"+sqlFilter;
 	}
 	
 	public void addLimitOffset(LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
