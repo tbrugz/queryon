@@ -20,7 +20,6 @@ public class RequestSpec {
 
 	final String httpMethod;
 	final String object;
-	final String action;
 	final int offset, limit;
 	
 	final List<String> columns = new ArrayList<String>();
@@ -36,7 +35,7 @@ public class RequestSpec {
 		String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
 		log.info("urlparts: "+URIpartz);
-		if(URIpartz.size()<3) { throw new ServletException("URL must have at least 2 parts"); }
+		if(URIpartz.size()<2) { throw new ServletException("URL must have at least 1 part"); }
 
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
 		int lastDotIndex = lastURIPart.lastIndexOf('.'); //FIXME: do it after '/' split - '.' may split SCHEMA and OBJNAME
@@ -56,8 +55,6 @@ public class RequestSpec {
 			objectTmp = URIpartz.remove(0);
 		}
 		object = objectTmp;
-		String actionTmp = URIpartz.remove(0);
-		action = actionTmp.toUpperCase();
 		
 		for(int i=0;i<URIpartz.size();i++) {
 			params.add(URIpartz.get(i));

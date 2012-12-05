@@ -85,4 +85,18 @@ public class SchemaModelUtils {
 		return exec;
 	}
 	
+	//XXX: should this be in tbrugz.sqldump.dbmodel.DBIdentifiable ?
+	@SuppressWarnings("unchecked")
+	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(SchemaModel model, RequestSpec reqspec) {
+		try {
+			return (T) getTable(model, reqspec, true);
+		} catch (ServletException e) {
+			try {
+				return (T) getExecutable(model, reqspec);
+			} catch (ServletException e1) {
+				return null;
+			}
+		}
+	}
+	
 }

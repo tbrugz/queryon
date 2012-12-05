@@ -32,6 +32,7 @@ import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
@@ -45,6 +46,9 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
+/**
+ * @see Web API Design - http://info.apigee.com/Portals/62317/docs/web%20api.pdf
+ */
 public class QueryOn extends HttpServlet {
 	
 	public enum ActionType {
@@ -53,10 +57,25 @@ public class QueryOn extends HttpServlet {
 		UPDATE,
 		DELETE,
 		EXECUTE, //~TODO: execute action!
-		QUERY,   //TODOne: SQLQueries action!
+		//QUERY,   //TODOne: SQLQueries action!
 		STATUS   //~TODO: or CONFIG? show model, user, vars...
 		//XXX: FINDBYKEY action? return only the first result
 	}
+	
+	public static final String SO_TABLE = "table", 
+			SO_VIEW = "view",
+			SO_EXECUTABLE = "executable",
+			SO_FK = "fk";
+	
+	public static final String[] STATUS_OBJECTS = { SO_TABLE, SO_VIEW, SO_EXECUTABLE, SO_FK,
+			SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
+			}; 
+	/*public enum StatusObject {
+		TABLE,
+		VIEW,
+		EXECUTABLE,
+		FK
+	}*/
 
 	public enum LimitOffsetStrategy {
 		RESULTSET_CONTROL,
@@ -157,22 +176,32 @@ public class QueryOn extends HttpServlet {
 		//XXX: validate column names
 		
 		ActionType atype = null;
-		try {
-			atype = ActionType.valueOf(reqspec.action);
+		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
+		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
+			atype = ActionType.STATUS;
 		}
-		catch(IllegalArgumentException e) {
-			throw new ServletException("Unknown action: "+reqspec.action);
+		else {
+			DBIdentifiable dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
+			if(dbobj==null) {
+				throw new ServletException("unknown object: "+reqspec.object);
+			}
+			
+			if(dbobj instanceof Relation) {
+				atype = ActionType.SELECT;
+			}
+			else if(dbobj instanceof ExecutableObject) {
+				atype = ActionType.EXECUTE;
+			}
+			else {
+				throw new ServletException("unknown object type: "+dbobj.getClass().getName()+" [obj="+reqspec.object+"]");
+			}
 		}
 		
 		try {
 			switch (atype) {
+			//TODO: use dbobj!
 			case SELECT: {
 				Relation rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
-				doSelect(rel, reqspec, resp);
-				}
-				break;
-			case QUERY: {
-				Relation rel = SchemaModelUtils.getView(model, reqspec);
 				doSelect(rel, reqspec, resp);
 				}
 				break;
@@ -184,7 +213,7 @@ public class QueryOn extends HttpServlet {
 				doStatus(reqspec, resp);
 				break;
 			default:
-				throw new ServletException("Unknown action: "+reqspec.action); 
+				throw new ServletException("Unknown action type: "+atype); 
 			}
 		}
 		catch(SQLException e) {
@@ -204,6 +233,23 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req, resp);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req, resp);
+	}
+
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req, resp);
+	}
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
@@ -348,19 +394,19 @@ public class QueryOn extends HttpServlet {
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
-		if("table".equalsIgnoreCase(reqspec.object)) {
+		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
 			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, tableAllColumns, list);
 		}
-		else if("view".equalsIgnoreCase(reqspec.object)) {
+		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
 			rs = new ResultSetListAdapter<View>("status", statusUniqueColumns, list);
 		}
-		else if("executable".equalsIgnoreCase(reqspec.object)) {
+		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
 			rs = new ResultSetListAdapter<ExecutableObject>("status", statusUniqueColumns, list);
 		}
-		else if("fk".equalsIgnoreCase(reqspec.object)) {
+		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
 			List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
 			rs = new ResultSetListAdapter<FK>("status", statusUniqueColumns, list);
 		}
