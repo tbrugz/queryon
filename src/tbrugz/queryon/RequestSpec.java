@@ -28,7 +28,14 @@ public class RequestSpec {
 	final DumpSyntax outputSyntax;
 	
 	public RequestSpec(QueryOn qon, HttpServletRequest req, Properties prop) throws ServletException {
-		httpMethod = req.getMethod();
+		String method = req.getParameter("method");
+		//XXX: may method be changed? property?
+		if(method!=null) {
+			httpMethod = method;
+		}
+		else {
+			httpMethod = req.getMethod();
+		}
 		
 		String varUrl = req.getPathInfo();
 		
