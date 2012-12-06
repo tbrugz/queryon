@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractResultSet {
 	
-	static final Log log = LogFactory.getLog(ResultSetCollectionAdapter.class);
+	static final Log log = LogFactory.getLog(BaseResultSetCollectionAdapter.class);
 
 	final String name;
 	final ResultSetMetaData metadata;
@@ -44,23 +44,23 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 		if(uniqueCols!=null) {
 			for(String col: uniqueCols) {
-				addMatchProperties(propertyDescriptors, col, columnNames);
+				addMatchProperties(clazz, propertyDescriptors, col, columnNames);
 			}
 		}
 		if(!onlyUniqueCols) {
 			if(allCols!=null) {
 				for(String col: allCols) {
-					addMatchProperties(propertyDescriptors, col, columnNames);
+					addMatchProperties(clazz, propertyDescriptors, col, columnNames);
 				}
 			}
 			else {
-				addMatchProperties(propertyDescriptors, null, columnNames);
+				addMatchProperties(clazz, propertyDescriptors, null, columnNames);
 			}
 		}
 		log.debug("resultset:cols: "+columnNames);
 	}
 	
-	void addMatchProperties(PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
+	void addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
 		for (PropertyDescriptor prop : propertyDescriptors) {
 			if(matchCol==null || matchCol.equals(prop.getName())) {
 				String pname = prop.getName();
@@ -69,6 +69,10 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				//XXX: continue on transient, ... ??
 				
 				Method m = prop.getReadMethod();
+				if(m==null) {
+					log.warn("null get method? prop: "+pname+" class: "+clazz.getSimpleName());
+					continue;
+				}
 				columnNames.add(pname);
 				methods.add(m);
 			}
@@ -80,7 +84,10 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		String ret = null;
 		try {
 			Method m = methods.get(columnIndex-1);
-			if(m==null) { log.warn("method is null: "+(columnIndex-1)); return null; }
+			if(m==null) {
+				log.warn("method is null ["+(columnIndex-1)+"/"+methods.size()+"]");
+				return null;
+			}
 			Object oret = m.invoke(currentElement, (Object[]) null);
 			if(oret==null) { return null; }
 			ret = String.valueOf(oret);
