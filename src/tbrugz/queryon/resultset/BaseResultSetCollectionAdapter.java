@@ -32,6 +32,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		this(name, uniqueCols, allCols, false, value);
 	}
 
+	//XXX: change 'E value' to 'Class<E> clazz'?
 	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, E value) throws IntrospectionException {
 		this.name = name;
 		

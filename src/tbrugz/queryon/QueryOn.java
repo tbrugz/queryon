@@ -176,12 +176,13 @@ public class QueryOn extends HttpServlet {
 		//XXX: validate column names
 		
 		ActionType atype = null;
+		DBIdentifiable dbobj = null;
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
 		}
 		else {
-			DBIdentifiable dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
+			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
 				throw new ServletException("unknown object: "+reqspec.object);
 			}
@@ -199,14 +200,21 @@ public class QueryOn extends HttpServlet {
 		
 		try {
 			switch (atype) {
-			//TODO: use dbobj!
 			case SELECT: {
-				Relation rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
+				Relation rel = (Relation) dbobj; 
+				if(rel==null) {
+					log.warn("strange... rel is null");
+					rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
+				}
 				doSelect(rel, reqspec, resp);
 				}
 				break;
 			case EXECUTE:
-				ExecutableObject eo = SchemaModelUtils.getExecutable(model, reqspec);
+				ExecutableObject eo = (ExecutableObject) dbobj;
+				if(eo==null) {
+					log.warn("strange... eo is null");
+					eo = SchemaModelUtils.getExecutable(model, reqspec);
+				}
 				doExecute(eo, reqspec, resp);
 				break;
 			case STATUS:
