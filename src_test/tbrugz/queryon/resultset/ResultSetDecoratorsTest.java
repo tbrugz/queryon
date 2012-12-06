@@ -28,7 +28,7 @@ public class ResultSetDecoratorsTest {
 		l1 = new ArrayList<TestBean>();
 		l1.add(b1); l1.add(b2); l1.add(b3);
 		
-		baseRS = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1);
+		baseRS = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
 	}
 	
 	@Test

@@ -24,22 +24,21 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 
 	E currentElement;
 
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, E value) throws IntrospectionException {
-		this(name, uniqueCols, null, false, value);
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, Class<E> clazz) throws IntrospectionException {
+		this(name, uniqueCols, null, false, clazz);
 	}
 	
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, E value) throws IntrospectionException {
-		this(name, uniqueCols, allCols, false, value);
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, Class<E> clazz) throws IntrospectionException {
+		this(name, uniqueCols, allCols, false, clazz);
 	}
 
-	//XXX: change 'E value' to 'Class<E> clazz'?
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, E value) throws IntrospectionException {
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, Class<E> clazz) throws IntrospectionException {
 		this.name = name;
 		
 		List<String> columnNames = new ArrayList<String>();
 		metadata = new RSMetaDataAdapter(null, name, columnNames);
 		
-		Class<E> clazz = (Class<E>) value.getClass();
+		//Class<E> clazz = (Class<E>) value.getClass();
 		
 		BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();

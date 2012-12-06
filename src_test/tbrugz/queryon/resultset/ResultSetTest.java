@@ -28,7 +28,7 @@ public class ResultSetTest {
 	
 	@Test
 	public void testListAdapter() throws IntrospectionException, SQLException {
-		ResultSetListAdapter<TestBean> rsla = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1);
+		ResultSetListAdapter<TestBean> rsla = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
 		Assert.assertTrue("Must have 1st element", rsla.next());
 
 		Assert.assertEquals("1", rsla.getString(1));
@@ -56,7 +56,7 @@ public class ResultSetTest {
 
 	@Test
 	public void testRSAbsolute() throws IntrospectionException, SQLException {
-		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1);
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
 		rs.absolute(1);
 		Assert.assertEquals("1", rs.getString(1));
 		rs.next();
@@ -69,7 +69,7 @@ public class ResultSetTest {
 
 	@Test
 	public void testRSRelative() throws IntrospectionException, SQLException {
-		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1);
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
 		rs.relative(2);
 		Assert.assertEquals("2", rs.getString(1));
 		rs.relative(1);
@@ -81,5 +81,12 @@ public class ResultSetTest {
 		Assert.assertEquals("3", rs.getString(1));
 		rs.absolute(1);
 		Assert.assertEquals("1", rs.getString(1));
+	}
+	
+	@Test
+	public void testRSSize0() throws IntrospectionException, SQLException {
+		l1 = new ArrayList<TestBean>();
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
+		Assert.assertFalse("Must not have any element", rs.next());
 	}
 }

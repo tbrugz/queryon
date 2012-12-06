@@ -405,19 +405,19 @@ public class QueryOn extends HttpServlet {
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
 		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
-			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, tableAllColumns, list);
+			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, tableAllColumns, list, Table.class);
 		}
 		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
-			rs = new ResultSetListAdapter<View>("status", statusUniqueColumns, list);
+			rs = new ResultSetListAdapter<View>("status", statusUniqueColumns, list, View.class);
 		}
 		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
-			rs = new ResultSetListAdapter<ExecutableObject>("status", statusUniqueColumns, list);
+			rs = new ResultSetListAdapter<ExecutableObject>("status", statusUniqueColumns, list, ExecutableObject.class);
 		}
 		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
 			List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
-			rs = new ResultSetListAdapter<FK>("status", statusUniqueColumns, list);
+			rs = new ResultSetListAdapter<FK>("status", statusUniqueColumns, list, FK.class);
 		}
 		else {
 			throw new ServletException("unknown object: "+reqspec.object);
