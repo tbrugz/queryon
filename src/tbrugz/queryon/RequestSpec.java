@@ -38,7 +38,7 @@ public class RequestSpec {
 		if(URIpartz.size()<2) { throw new ServletException("URL must have at least 1 part"); }
 
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
-		int lastDotIndex = lastURIPart.lastIndexOf('.'); //FIXME: do it after '/' split - '.' may split SCHEMA and OBJNAME
+		int lastDotIndex = lastURIPart.lastIndexOf('.');
 		if(lastDotIndex > -1) {
 			outputTypeStr = lastURIPart.substring(lastDotIndex+1);
 			lastURIPart = lastURIPart.substring(0, lastDotIndex);

@@ -81,16 +81,10 @@ public class SQL {
 			sql = sql.replace(PARAM_FILTER_CLAUSE, "and "+filter+" "+PARAM_FILTER_CLAUSE);
 		}
 		else if(filter.length()>0) {
-			//FIXME: if selecting from Table object, do not need to wrap
 			if(relation!=null && relation instanceof Query) {
 				sql = "select * from ( "+sql+" )";
-				//isSQLWrapped = true;
 			}
 			sql += " where "+filter+" "+PARAM_FILTER_CLAUSE;
-			
-			/*if(!isSQLWrapped) {
-				log.warn("sql may be malformed. sql: "+sql);
-			}*/
 		}
 	}
 	

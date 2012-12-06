@@ -56,9 +56,9 @@ public class QueryOn extends HttpServlet {
 		INSERT,
 		UPDATE,
 		DELETE,
-		EXECUTE, //~TODO: execute action!
+		EXECUTE, //~TODOne: execute action!
 		//QUERY,   //TODOne: SQLQueries action!
-		STATUS   //~TODO: or CONFIG? show model, user, vars...
+		STATUS   //~TODOne: or CONFIG? show model, user, vars...
 		//XXX: FINDBYKEY action? return only the first result
 	}
 	
@@ -131,7 +131,7 @@ public class QueryOn extends HttpServlet {
 			prop.load(QueryOn.class.getResourceAsStream(PROPERTIES_RESOURCE));
 			//Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop, false);
 			model = modelGrabber(prop);
-			//XXX: add sqlqueries as views?
+			//XXXxx: add sqlqueries as views? yes
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServletException(e);
