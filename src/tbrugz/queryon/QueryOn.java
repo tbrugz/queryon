@@ -116,7 +116,8 @@ public class QueryOn extends HttpServlet {
 
 	static final String PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String CONN_PROPS_PREFIX = "queryon";
-	static final String PROP_DEFAULT_LIMIT = "queryon.defaultlimit";
+	static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
+	static final String PROP_MAX_LIMIT = "queryon.limit.max";
 
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	

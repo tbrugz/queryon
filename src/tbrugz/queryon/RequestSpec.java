@@ -70,10 +70,29 @@ public class RequestSpec {
 		if(offsetStr!=null) { offset = Integer.parseInt(offsetStr); }
 		else { offset = 0; }
 
-		String lengthStr = req.getParameter("limit");
-		if(lengthStr!=null) { limit = Integer.parseInt(lengthStr); }
+		Long maxLimit = Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT);
+		String limitStr = req.getParameter("limit");
+		if(limitStr!=null) { 
+			int propLimit = Integer.parseInt(limitStr);
+			if(maxLimit!=null && propLimit>maxLimit) {
+				limit = (int)(long) maxLimit;
+			}
+			else {
+				limit = propLimit;
+			}
+		}
 		else {
-			limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
+			Long defaultLimit = Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT);
+			if(defaultLimit!=null) {
+				limit = (int)(long) defaultLimit;
+			}
+			else if(maxLimit!=null) {
+				limit = (int)(long) maxLimit;
+			}
+			else {
+				//limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
+				limit = 0;
+			}
 		}
 		
 		String fields = req.getParameter("fields");
