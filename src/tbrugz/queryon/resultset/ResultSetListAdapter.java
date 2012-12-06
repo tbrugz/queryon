@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollectionAdapter<E> {
-	static final Log log = LogFactory.getLog(ResultSetCollectionAdapter.class);
+	static final Log log = LogFactory.getLog(ResultSetListAdapter.class);
 
 	final List<E> list;
 	int position;
@@ -19,7 +19,7 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	}
 	
 	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list, Class<E> clazz) throws IntrospectionException {
-		super(name, uniqueCols, allCols, (Class<E>) list.iterator().next().getClass());
+		super(name, uniqueCols, allCols, clazz);
 		this.list = list;
 		//Initially the cursor is positioned before the first row
 		resetPosition();

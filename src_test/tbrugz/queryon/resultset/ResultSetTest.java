@@ -3,7 +3,9 @@ package tbrugz.queryon.resultset;
 import java.beans.IntrospectionException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -88,5 +90,26 @@ public class ResultSetTest {
 		l1 = new ArrayList<TestBean>();
 		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
 		Assert.assertFalse("Must not have any element", rs.next());
+	}
+	
+	@Test
+	public void testRSCollectionAdapterWithList() throws IntrospectionException, SQLException {
+		ResultSetCollectionAdapter<TestBean> rs = new ResultSetCollectionAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), l1, TestBean.class);
+		for(int i=1;i<=3;i++) {
+			Assert.assertTrue("Must have "+i+" element", rs.next());
+		}
+		Assert.assertFalse("Must not have 4th element", rs.next());
+	}
+
+	@Test
+	public void testRSCollectionAdapterWithSet() throws IntrospectionException, SQLException {
+		Set<TestBean> set = new HashSet<TestBean>();
+		set.addAll(l1);
+		
+		ResultSetCollectionAdapter<TestBean> rs = new ResultSetCollectionAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), set, TestBean.class);
+		for(int i=1;i<=3;i++) {
+			Assert.assertTrue("Must have "+i+" element", rs.next());
+		}
+		Assert.assertFalse("Must not have 4th element", rs.next());
 	}
 }

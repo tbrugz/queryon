@@ -16,8 +16,8 @@ public class ResultSetCollectionAdapter<E extends Object> extends BaseResultSetC
 
 	final Iterator<E> iterator;
 	
-	public ResultSetCollectionAdapter(String name, List<String> uniqueCols, Collection<E> list) throws IntrospectionException {
-		super(name, uniqueCols, (Class<E>) list.iterator().next().getClass());
+	public ResultSetCollectionAdapter(String name, List<String> uniqueCols, Collection<E> list, Class<E> clazz) throws IntrospectionException {
+		super(name, uniqueCols, clazz);
 		iterator = list.iterator();
 	}
 	
