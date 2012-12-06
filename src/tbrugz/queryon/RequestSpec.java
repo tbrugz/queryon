@@ -27,7 +27,7 @@ public class RequestSpec {
 	final String outputTypeStr;
 	final DumpSyntax outputSyntax;
 	
-	public RequestSpec(QueryOn qon, HttpServletRequest req, Properties prop) throws ServletException {
+	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
 		String method = req.getParameter("method");
 		//XXX: may method be changed? property?
 		if(method!=null) {
@@ -51,7 +51,7 @@ public class RequestSpec {
 			lastURIPart = lastURIPart.substring(0, lastDotIndex);
 		}
 		else {
-			outputTypeStr = QueryOn.DEFAULT_OUTPUT_SYNTAX;
+			outputTypeStr = null;
 		}
 		URIpartz.add( lastURIPart );
 		log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
@@ -67,10 +67,31 @@ public class RequestSpec {
 			params.add(URIpartz.get(i));
 		}
 		
-		outputSyntax = qon.getDumpSyntax(outputTypeStr, prop);
-		if(outputSyntax == null) {
-			throw new ServletException("Unknown output syntax: "+outputTypeStr);
+		DumpSyntax outputSyntaxTmp = null;
+		//accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+		String acceptHeader = req.getHeader("Accept");
+		log.info("accept: "+acceptHeader);
+		
+		if(outputTypeStr != null) {
+			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr, prop);
+			if(outputSyntaxTmp==null) {
+				throw new ServletException("Unknown output syntax: "+outputTypeStr);
+			}
 		}
+		else {
+			outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader, prop);
+			if(outputSyntaxTmp==null) {
+				outputSyntaxTmp = dsutils.getDumpSyntax(QueryOn.DEFAULT_OUTPUT_SYNTAX, prop);
+			}
+			else {
+				log.info("syntax defined by accept! syntax: "+outputSyntaxTmp.getSyntaxId()+" // "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
+			}
+		}
+		outputSyntax = outputSyntaxTmp;
+
+		
+
+		
 		//---------------------
 		
 		String offsetStr = req.getParameter("offset");

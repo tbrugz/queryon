@@ -9,9 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -44,7 +42,6 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
-import tbrugz.sqldump.util.Utils;
 
 /**
  * @see Web API Design - http://info.apigee.com/Portals/62317/docs/web%20api.pdf
@@ -121,7 +118,8 @@ public class QueryOn extends HttpServlet {
 
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
-	Properties prop = new ParametrizedProperties();
+	final Properties prop = new ParametrizedProperties();
+	DumpSyntaxUtils dsutils;
 	SchemaModel model;
 	
 	@Override
@@ -131,6 +129,7 @@ public class QueryOn extends HttpServlet {
 			prop.load(QueryOn.class.getResourceAsStream(PROPERTIES_RESOURCE));
 			//Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop, false);
 			model = modelGrabber(prop);
+			dsutils = new DumpSyntaxUtils(prop);
 			//XXXxx: add sqlqueries as views? yes
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -172,7 +171,7 @@ public class QueryOn extends HttpServlet {
 			throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo());
 		
-		RequestSpec reqspec = new RequestSpec(this, req, prop);
+		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
 		
 		//XXX: validate column names
 		
@@ -448,23 +447,5 @@ public class QueryOn extends HttpServlet {
 			count++;
 		}
 		ds.dumpFooter(resp.getWriter());
-	}
-	
-	Map<String, DumpSyntax> syntaxes = new HashMap<String, DumpSyntax>();
-	
-	//XXX: move to SchemaModelUtils/SQLDumpUtils?
-	DumpSyntax getDumpSyntax(String format, Properties prop) {
-		DumpSyntax dsx = syntaxes.get(format);
-		if(dsx!=null) { return dsx; }
-		
-		for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
-			DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
-			if(ds!=null && ds.getSyntaxId().equals(format)) {
-				ds.procProperties(prop);
-				syntaxes.put(format, ds);
-				return ds;
-			}
-		}
-		return null;
 	}
 }
