@@ -169,6 +169,17 @@ public class QueryOn extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		try {
+			doService(req, resp);
+		}
+		catch(BadRequestException e) {
+			resp.setStatus(400);
+			resp.getWriter().write(e.getMessage());
+			//throw e;
+		}
+	}
+	
+	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
 		log.info(">> pathInfo: "+req.getPathInfo());
 		
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
@@ -184,7 +195,7 @@ public class QueryOn extends HttpServlet {
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
-				throw new ServletException("unknown object: "+reqspec.object);
+				throw new BadRequestException("unknown object: "+reqspec.object);
 			}
 			
 			if(dbobj instanceof Relation) {
@@ -194,7 +205,7 @@ public class QueryOn extends HttpServlet {
 				atype = ActionType.EXECUTE;
 			}
 			else {
-				throw new ServletException("unknown object type: "+dbobj.getClass().getName()+" [obj="+reqspec.object+"]");
+				throw new BadRequestException("unknown object type: "+dbobj.getClass().getName()+" [obj="+reqspec.object+"]");
 			}
 		}
 		
@@ -221,7 +232,7 @@ public class QueryOn extends HttpServlet {
 				doStatus(reqspec, resp);
 				break;
 			default:
-				throw new ServletException("Unknown action type: "+atype); 
+				throw new BadRequestException("Unknown action type: "+atype); 
 			}
 		}
 		catch(SQLException e) {
@@ -419,7 +430,7 @@ public class QueryOn extends HttpServlet {
 			rs = new ResultSetListAdapter<FK>("status", statusUniqueColumns, list, FK.class);
 		}
 		else {
-			throw new ServletException("unknown object: "+reqspec.object);
+			throw new BadRequestException("unknown object: "+reqspec.object);
 		}
 		
 		if(reqspec.params!=null && reqspec.params.size()>0) {

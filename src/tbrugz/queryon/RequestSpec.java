@@ -42,7 +42,7 @@ public class RequestSpec {
 		String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
 		log.info("urlparts: "+URIpartz);
-		if(URIpartz.size()<2) { throw new ServletException("URL must have at least 1 part"); }
+		if(URIpartz.size()<2) { throw new BadRequestException("URL must have at least 1 part"); }
 
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
 		int lastDotIndex = lastURIPart.lastIndexOf('.');
@@ -68,14 +68,15 @@ public class RequestSpec {
 		}
 		
 		DumpSyntax outputSyntaxTmp = null;
-		//accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 		String acceptHeader = req.getHeader("Accept");
 		log.info("accept: "+acceptHeader);
 		
 		if(outputTypeStr != null) {
 			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr, prop);
 			if(outputSyntaxTmp==null) {
-				throw new ServletException("Unknown output syntax: "+outputTypeStr);
+				throw new BadRequestException("Unknown output syntax: "+outputTypeStr);
 			}
 		}
 		else {
