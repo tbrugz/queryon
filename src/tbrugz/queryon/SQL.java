@@ -24,10 +24,12 @@ public class SQL {
 	public static final String PARAM_WHERE_CLAUSE = "[where-clause]";
 	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
 	//XXX add sql projection clause ( [projection-clause] )?
-	//XXX add order-clause? limit/offset-clause?
+	public static final String PARAM_ORDER_CLAUSE = "[order-clause]";
+	//XXX add limit/offset-clause?
 
 	String sql;
 	final Relation relation;
+	boolean orderByApplyed = false;
 	//XXX add 'final String initialSql;'?
 	
 	public SQL(String sql, Relation relation) {
@@ -40,14 +42,15 @@ public class SQL {
 	}
 	
 	public String getFinalSql() {
-		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "");
+		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "");
 	}
 	
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
 		String columns = createSQLColumns(reqspec, table);
 		String sql = "select "+columns+
 			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName()+
-			" " + PARAM_WHERE_CLAUSE;
+			" " + PARAM_WHERE_CLAUSE+
+			" " + PARAM_ORDER_CLAUSE;
 		return sql;
 	}
 	
@@ -82,7 +85,7 @@ public class SQL {
 		}
 		else if(filter.length()>0) {
 			if(relation!=null && relation instanceof Query) {
-				sql = "select * from ( "+sql+" )";
+				sql = "select * from (\n"+sql+"\n)";
 			}
 			sql += " where "+filter+" "+PARAM_FILTER_CLAUSE;
 		}
@@ -93,7 +96,28 @@ public class SQL {
 		if(!sql.contains(PARAM_WHERE_CLAUSE) && !sql.contains(PARAM_FILTER_CLAUSE)) {
 			sqlFilter = " " + PARAM_WHERE_CLAUSE;
 		}
-		sql = "select "+columns+" from ( "+sql+" )"+sqlFilter;
+		sql = "select "+columns+" from (\n"+sql+"\n)"+sqlFilter;
+	}
+	
+	public void applyOrder(RequestSpec reqspec) {
+		//TODO: validate columns
+		if(reqspec.orderCols.size()==0) return;
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("order by ");
+		for(int i=0;i<reqspec.orderCols.size();i++) {
+			String col = reqspec.orderCols.get(i);
+			String ascDesc = reqspec.orderAscDesc.get(i);
+			sb.append((i==0?"":", ")+col+" "+ascDesc);
+		}
+		
+		if(sql.contains(PARAM_ORDER_CLAUSE)) {
+			sql = sql.replace(PARAM_ORDER_CLAUSE, sb.toString());
+		}
+		else {
+			sql = "select * from (\n"+sql+"\n) "+sb.toString();
+		}
+		orderByApplyed = true;
 	}
 	
 	public void addLimitOffset(LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
@@ -119,8 +143,12 @@ public class SQL {
 					+"where rnum > "+reqspec.offset;
 			}
 			else if(reqspec.limit>0) {
-				addFilter("rownum <= "+reqspec.limit);
-				//sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
+				if(orderByApplyed) {
+					sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
+				}
+				else {
+					addFilter("rownum <= "+reqspec.limit);
+				}
 			}
 			else {
 				sql = "select * from " 

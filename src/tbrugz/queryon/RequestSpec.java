@@ -31,6 +31,9 @@ public class RequestSpec {
 	
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
+
+	final List<String> orderCols = new ArrayList<String>();
+	final List<String> orderAscDesc = new ArrayList<String>();
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
 		String method = req.getParameter("method");
@@ -132,6 +135,30 @@ public class RequestSpec {
 		String fields = req.getParameter("fields");
 		if(fields!=null) {
 			columns.addAll(Arrays.asList(fields.split(",")));
+		}
+		
+		String order = req.getParameter("order");
+		if(order!=null) {
+			List<String> orderColz = Arrays.asList(order.split(","));
+			for(String ocol: orderColz) {
+				String[] cparts = ocol.split(":");
+				orderCols.add(cparts[0]);
+				if(cparts.length>1) {
+					String ascDesc = cparts[1];
+					if("A".equalsIgnoreCase(ascDesc)) {
+						orderAscDesc.add("ASC");
+					}
+					else if("D".equalsIgnoreCase(ascDesc)) {
+						orderAscDesc.add("DESC");
+					}
+					else {
+						orderAscDesc.add("");
+					}
+				}
+				else {
+					orderAscDesc.add("");
+				}
+			}
 		}
 
 		for(int i=1;;i++) {
