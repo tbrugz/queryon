@@ -58,7 +58,7 @@ public class QueryOn extends HttpServlet {
 		EXECUTE, //~TODOne: execute action!
 		//QUERY,   //TODOne: SQLQueries action!
 		STATUS   //~TODOne: or CONFIG? show model, user, vars...
-		//XXX: FINDBYKEY action? return only the first result
+		//XXXxx: FINDBYKEY action? return only the first result
 	}
 	
 	public static final String SO_TABLE = "table", 
@@ -185,12 +185,12 @@ public class QueryOn extends HttpServlet {
 		log.info(">> pathInfo: "+req.getPathInfo());
 		
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
-		
-		//XXX: validate column names
+		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 		
 		ActionType atype = null;
 		DBIdentifiable dbobj = null;
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
+		//XXX should status object names have special syntax? like meta:table, meta:fk
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
 		}
@@ -275,8 +275,6 @@ public class QueryOn extends HttpServlet {
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		
-		//boolean isSQLWrapped = false;
-		
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
 		Constraint pk = null;
@@ -287,7 +285,6 @@ public class QueryOn extends HttpServlet {
 				if(c.type==ConstraintType.PK) { pk = c; break; }
 				if(c.type==ConstraintType.UNIQUE && uk == null) { uk = c; }
 			}
-			//XXXdone: search for unique key?
 			if(pk == null && uk != null) {
 				pk = uk;
 			}
@@ -302,7 +299,6 @@ public class QueryOn extends HttpServlet {
 				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
 			}
 			else {
-				//Constraint pk = relation.getPKConstraint();
 				for(int i=0;i<pk.uniqueColumns.size();i++) {
 					if(reqspec.params.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
@@ -355,9 +351,12 @@ public class QueryOn extends HttpServlet {
 				log.warn("relation '"+relation.getName()+"' has no columns specified");
 			}
 		}
+		
+		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
+		//appXtraConstraints(relation, sql, reqspec, req);
 
 		//limit-offset
-		//XXX: how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
+		//how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
@@ -367,6 +366,7 @@ public class QueryOn extends HttpServlet {
 		
 		//query finished!
 		log.info("sql:\n"+sql.getFinalSql());
+		//XXX log sql parameter values?
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		for(int i=0;i<parametersToBind;i++) {
