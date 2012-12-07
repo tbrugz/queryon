@@ -2,7 +2,9 @@ package tbrugz.queryon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -26,6 +28,9 @@ public class RequestSpec {
 	final List<String> params = new ArrayList<String>();
 	final String outputTypeStr;
 	final DumpSyntax outputSyntax;
+	
+	final Map<String, String> filterEquals = new HashMap<String, String>();
+	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
 		String method = req.getParameter("method");
@@ -133,6 +138,21 @@ public class RequestSpec {
 			String value = req.getParameter("p"+i);
 			if(value==null) break;
 			params.add(value);
+		}
+		
+		Map<String,String[]> params = req.getParameterMap();
+		for(String param: params.keySet()) {
+			if(param.startsWith("fe:")) {
+				String col = param.substring(3);
+				String value = params.get(param)[0];
+				filterEquals.put(col, value);
+			}
+			else if(param.startsWith("fin:")) {
+				String col = param.substring(4);
+				String[] values = params.get(param);
+				filterIn.put(col, values);
+			}
+			//XXX: warn unknown parameters
 		}
 	}
 } 

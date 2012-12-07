@@ -9,8 +9,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
@@ -291,6 +293,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		
+		// pk/uk filter
 		int parametersToBind = 0;
 		String filter = "";
 		//TODO: what if parameters already defined in query?
@@ -309,6 +312,49 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		sql.addFilter(filter);
+
+		// xtra filters
+		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
+		List<String> colNames = relation.getColumnNames();
+		if(colNames!=null) {
+			Set<String> columns = new HashSet<String>();
+			columns.addAll(colNames);
+			for(String col: reqspec.filterEquals.keySet()) {
+				if(columns.contains(col)) {
+					//XXX column type?
+					reqspec.params.add(reqspec.filterEquals.get(col));
+					parametersToBind++;
+					sql.addFilter(col+" = ?");
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
+			for(String col: reqspec.filterIn.keySet()) {
+				if(columns.contains(col)) {
+					//XXX column type?
+					StringBuffer sb = new StringBuffer();
+					sb.append(col+" in (");
+					String[] values = reqspec.filterIn.get(col);
+					for(int i=0;i<values.length;i++) {
+						String value = values[i];
+						sb.append((i>0?", ":"")+"?");
+						reqspec.params.add(value);
+						parametersToBind++;
+					}
+					sb.append(")");
+					sql.addFilter(sb.toString());
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
+		}
+		else {
+			if(reqspec.filterEquals.size()>0) {
+				log.warn("relation '"+relation.getName()+"' has no columns specified");
+			}
+		}
 
 		//limit-offset
 		//XXX: how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
