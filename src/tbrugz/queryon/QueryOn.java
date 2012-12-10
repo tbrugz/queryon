@@ -176,7 +176,7 @@ public class QueryOn extends HttpServlet {
 			doService(req, resp);
 		}
 		catch(BadRequestException e) {
-			resp.setStatus(400);
+			resp.setStatus(e.getCode());
 			resp.getWriter().write(e.getMessage());
 			//throw e;
 		}
