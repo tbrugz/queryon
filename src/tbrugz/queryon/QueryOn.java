@@ -53,6 +53,7 @@ public class QueryOn extends HttpServlet {
 	public enum ActionType {
 		SELECT,  //done
 		INSERT,
+		//UPSERT? which http-method is suitable? POST?
 		UPDATE,
 		DELETE,
 		EXECUTE, //~TODOne: execute action!
@@ -201,7 +202,21 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			if(dbobj instanceof Relation) {
-				atype = ActionType.SELECT;
+				if(reqspec.httpMethod.equals("GET")) {
+					atype = ActionType.SELECT;
+				}
+				else if(reqspec.httpMethod.equals("POST")) {
+					atype = ActionType.INSERT; //upsert?
+				}
+				else if(reqspec.httpMethod.equals("PUT")) {
+					atype = ActionType.UPDATE;
+				}
+				else if(reqspec.httpMethod.equals("DELETE")) {
+					atype = ActionType.DELETE;
+				}
+				else {
+					throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [obj="+reqspec.object+"]");
+				}
 			}
 			else if(dbobj instanceof ExecutableObject) {
 				atype = ActionType.EXECUTE;
@@ -229,6 +244,10 @@ public class QueryOn extends HttpServlet {
 					eo = SchemaModelUtils.getExecutable(model, reqspec);
 				}
 				doExecute(eo, reqspec, resp);
+				break;
+			case DELETE: {
+				doDelete((Relation) dbobj, reqspec, resp);
+				}
 				break;
 			case STATUS:
 				doStatus(reqspec, resp);
@@ -277,80 +296,13 @@ public class QueryOn extends HttpServlet {
 		
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
-		Constraint pk = null;
-		List<Constraint> conss = relation.getConstraints();
-		if(conss!=null) {
-			Constraint uk = null;
-			for(Constraint c: conss) {
-				if(c.type==ConstraintType.PK) { pk = c; break; }
-				if(c.type==ConstraintType.UNIQUE && uk == null) { uk = c; }
-			}
-			if(pk == null && uk != null) {
-				pk = uk;
-			}
-		}
+		Constraint pk = getPK(relation);
 		
-		// pk/uk filter
-		int parametersToBind = 0;
-		String filter = "";
-		//TODO: what if parameters already defined in query?
-		if(reqspec.params.size()>0) {
-			if(pk==null) {
-				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
-			}
-			else {
-				for(int i=0;i<pk.uniqueColumns.size();i++) {
-					if(reqspec.params.size()<=i) { break; }
-					//String s = reqspec.params.get(i);
-					filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
-					parametersToBind++;
-				}
-			}
-		}
-		sql.addFilter(filter);
+		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
-		List<String> colNames = relation.getColumnNames();
-		if(colNames!=null) {
-			Set<String> columns = new HashSet<String>();
-			columns.addAll(colNames);
-			for(String col: reqspec.filterEquals.keySet()) {
-				if(columns.contains(col)) {
-					//XXX column type?
-					reqspec.params.add(reqspec.filterEquals.get(col));
-					parametersToBind++;
-					sql.addFilter(col+" = ?");
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
-				}
-			}
-			for(String col: reqspec.filterIn.keySet()) {
-				if(columns.contains(col)) {
-					//XXX column type?
-					StringBuffer sb = new StringBuffer();
-					sb.append(col+" in (");
-					String[] values = reqspec.filterIn.get(col);
-					for(int i=0;i<values.length;i++) {
-						String value = values[i];
-						sb.append((i>0?", ":"")+"?");
-						reqspec.params.add(value);
-						parametersToBind++;
-					}
-					sb.append(")");
-					sql.addFilter(sb.toString());
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
-				}
-			}
-		}
-		else {
-			if(reqspec.filterEquals.size()>0) {
-				log.warn("relation '"+relation.getName()+"' has no columns specified");
-			}
-		}
+		filterByXtraParams(relation, reqspec, sql);
 		
 		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
 		//appXtraConstraints(relation, sql, reqspec, req);
@@ -372,9 +324,8 @@ public class QueryOn extends HttpServlet {
 		//XXX log sql parameter values?
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
-		for(int i=0;i<parametersToBind;i++) {
-			st.setString(i+1, reqspec.params.get(i));
-		}
+		bindParameters(st, sql, reqspec);
+		
 		ResultSet rs = st.executeQuery();
 		
 		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
@@ -486,6 +437,115 @@ public class QueryOn extends HttpServlet {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
 		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, true, resp);
+	}
+	
+	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		SQL sql = SQL.createDeleteSQL(relation);
+
+		Constraint pk = getPK(relation);
+		filterByKey(relation, reqspec, pk, sql);
+
+		// xtra filters
+		filterByXtraParams(relation, reqspec, sql);
+		
+		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
+		bindParameters(st, sql, reqspec);
+		
+		int count = st.executeUpdate();
+		//XXX: boundaries for # of updated rows?
+		//XXX: (heterogeneous) array to ResultSet adapter?
+		conn.commit();
+		conn.close();
+		resp.getWriter().write(count+" rows deleted");
+	}
+	
+	Constraint getPK(Relation relation) {
+		Constraint pk = null;
+		List<Constraint> conss = relation.getConstraints();
+		if(conss!=null) {
+			Constraint uk = null;
+			for(Constraint c: conss) {
+				if(c.type==ConstraintType.PK) { pk = c; break; }
+				if(c.type==ConstraintType.UNIQUE && uk == null) { uk = c; }
+			}
+			if(pk == null && uk != null) {
+				pk = uk;
+			}
+		}
+		return pk;
+	}
+	
+	void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
+		int parametersToBind = 0;
+		String filter = "";
+		//TODO: what if parameters already defined in query?
+		if(reqspec.params.size()>0) {
+			if(pk==null) {
+				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
+			}
+			else {
+				for(int i=0;i<pk.uniqueColumns.size();i++) {
+					if(reqspec.params.size()<=i) { break; }
+					//String s = reqspec.params.get(i);
+					filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
+					parametersToBind++;
+				}
+			}
+		}
+		sql.addFilter(filter);
+		sql.parametersToBind = parametersToBind;
+	}
+	
+	void filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
+		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
+		
+		List<String> colNames = relation.getColumnNames();
+		if(colNames!=null) {
+			Set<String> columns = new HashSet<String>();
+			columns.addAll(colNames);
+			for(String col: reqspec.filterEquals.keySet()) {
+				if(columns.contains(col)) {
+					//XXX column type?
+					reqspec.params.add(reqspec.filterEquals.get(col));
+					sql.parametersToBind++;
+					sql.addFilter(col+" = ?");
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
+			for(String col: reqspec.filterIn.keySet()) {
+				if(columns.contains(col)) {
+					//XXX column type?
+					StringBuffer sb = new StringBuffer();
+					sb.append(col+" in (");
+					String[] values = reqspec.filterIn.get(col);
+					for(int i=0;i<values.length;i++) {
+						String value = values[i];
+						sb.append((i>0?", ":"")+"?");
+						reqspec.params.add(value);
+						sql.parametersToBind++;
+					}
+					sb.append(")");
+					sql.addFilter(sb.toString());
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
+		}
+		else {
+			if(reqspec.filterEquals.size()>0) {
+				log.warn("relation '"+relation.getName()+"' has no columns specified");
+			}
+		}
+	}
+	
+	void bindParameters(PreparedStatement st, SQL sql, RequestSpec reqspec) throws SQLException {
+		for(int i=0;i<sql.parametersToBind;i++) {
+			st.setString(i+1, reqspec.params.get(i));
+		}
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, List<String> uniqueColumns, boolean mayApplyLimitOffset, HttpServletResponse resp) throws SQLException, IOException {

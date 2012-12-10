@@ -30,6 +30,7 @@ public class SQL {
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
+	int parametersToBind = 0;
 	//XXX add 'final String initialSql;'?
 	
 	public SQL(String sql, Relation relation) {
@@ -72,6 +73,13 @@ public class SQL {
 		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
 		
 		//return new SQL(createSQLstr(relation, reqspec), relation);
+	}
+
+	public static SQL createDeleteSQL(Relation relation) {
+		String sql = "delete "+
+				"from " + (relation.getSchemaName()!=null?relation.getSchemaName()+".":"") + relation.getName()+
+				" " + PARAM_WHERE_CLAUSE;
+		return new SQL(sql, relation);
 	}
 	
 	public void addFilter(String filter) {
