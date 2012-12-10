@@ -24,6 +24,7 @@ public class SQL {
 	public static final String PARAM_WHERE_CLAUSE = "[where-clause]";
 	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
 	//XXX add sql projection clause ( [projection-clause] )?
+	public static final String PARAM_UPDATE_SET_CLAUSE = "[update-set-clause]";
 	public static final String PARAM_ORDER_CLAUSE = "[order-clause]";
 	//XXX add limit/offset-clause?
 
@@ -31,6 +32,7 @@ public class SQL {
 	final Relation relation;
 	boolean orderByApplyed = false;
 	int parametersToBind = 0;
+	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	
 	public SQL(String sql, Relation relation) {
@@ -73,6 +75,14 @@ public class SQL {
 		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
 		
 		//return new SQL(createSQLstr(relation, reqspec), relation);
+	}
+
+	public static SQL createUpdateSQL(Relation relation) {
+		String sql = "update "+
+				(relation.getSchemaName()!=null?relation.getSchemaName()+".":"") + relation.getName()+
+				" set " + PARAM_UPDATE_SET_CLAUSE +
+				" " + PARAM_WHERE_CLAUSE;
+		return new SQL(sql, relation);
 	}
 
 	public static SQL createDeleteSQL(Relation relation) {
@@ -126,6 +136,10 @@ public class SQL {
 			sql = "select * from (\n"+sql+"\n) "+sb.toString();
 		}
 		orderByApplyed = true;
+	}
+
+	public void applyUpdate(String set) {
+		sql = sql.replace(PARAM_UPDATE_SET_CLAUSE, set);
 	}
 	
 	public void addLimitOffset(LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
@@ -198,7 +212,7 @@ public class SQL {
 	
 	@Override
 	public String toString() {
-		return "SQL[\n"+sql+"\n]";
+		return "SQL[\n"+sql+"\n[bindpar="+bindParameterValues+"]]";
 	}
 	
 }

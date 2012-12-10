@@ -31,6 +31,7 @@ public class RequestSpec {
 	
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
+	final Map<String, String> updateValues = new HashMap<String, String>();
 
 	final List<String> orderCols = new ArrayList<String>();
 	final List<String> orderAscDesc = new ArrayList<String>();
@@ -179,6 +180,12 @@ public class RequestSpec {
 				String[] values = params.get(param);
 				filterIn.put(col, values);
 			}
+			else if(param.startsWith("v:")) {
+				String col = param.substring(2);
+				String value = params.get(param)[0];
+				updateValues.put(col, value);
+			}
+
 			//XXX: warn unknown parameters
 		}
 	}

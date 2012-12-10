@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -245,6 +246,10 @@ public class QueryOn extends HttpServlet {
 				}
 				doExecute(eo, reqspec, resp);
 				break;
+			case UPDATE: {
+				doUpdate((Relation) dbobj, reqspec, resp);
+				}
+				break;
 			case DELETE: {
 				doDelete((Relation) dbobj, reqspec, resp);
 				}
@@ -324,7 +329,7 @@ public class QueryOn extends HttpServlet {
 		//XXX log sql parameter values?
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
-		bindParameters(st, sql, reqspec);
+		bindParameters(st, sql);
 		
 		ResultSet rs = st.executeQuery();
 		
@@ -450,7 +455,9 @@ public class QueryOn extends HttpServlet {
 		filterByXtraParams(relation, reqspec, sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
-		bindParameters(st, sql, reqspec);
+		bindParameters(st, sql);
+
+		log.info("sql delete: "+sql);
 		
 		int count = st.executeUpdate();
 		//XXX: boundaries for # of updated rows?
@@ -458,6 +465,40 @@ public class QueryOn extends HttpServlet {
 		conn.commit();
 		conn.close();
 		resp.getWriter().write(count+" rows deleted");
+	}
+
+	void doUpdate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		SQL sql = SQL.createUpdateSQL(relation);
+
+		StringBuffer sb = new StringBuffer();
+		
+		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
+		for(int i=0; cols.hasNext(); i++) {
+			String col = cols.next();
+			sb.append((i!=0?", ":"")+col+" = ?");
+			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+			sql.parametersToBind++;
+		}
+		sql.applyUpdate(sb.toString());
+
+		Constraint pk = getPK(relation);
+		filterByKey(relation, reqspec, pk, sql);
+
+		// xtra filters
+		filterByXtraParams(relation, reqspec, sql);
+		
+		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
+		bindParameters(st, sql);
+
+		log.info("sql update: "+sql);
+		
+		int count = st.executeUpdate();
+		//XXX: boundaries for # of updated rows?
+		//XXX: (heterogeneous) array / map to ResultSet adapter?
+		conn.commit();
+		conn.close();
+		resp.getWriter().write(count+" rows updated");
 	}
 	
 	Constraint getPK(Relation relation) {
@@ -490,11 +531,12 @@ public class QueryOn extends HttpServlet {
 					//String s = reqspec.params.get(i);
 					filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
 					parametersToBind++;
+					sql.bindParameterValues.add(reqspec.params.get(i));
 				}
 			}
 		}
 		sql.addFilter(filter);
-		sql.parametersToBind = parametersToBind;
+		sql.parametersToBind += parametersToBind;
 	}
 	
 	void filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
@@ -507,7 +549,7 @@ public class QueryOn extends HttpServlet {
 			for(String col: reqspec.filterEquals.keySet()) {
 				if(columns.contains(col)) {
 					//XXX column type?
-					reqspec.params.add(reqspec.filterEquals.get(col));
+					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
 					sql.parametersToBind++;
 					sql.addFilter(col+" = ?");
 				}
@@ -524,7 +566,7 @@ public class QueryOn extends HttpServlet {
 					for(int i=0;i<values.length;i++) {
 						String value = values[i];
 						sb.append((i>0?", ":"")+"?");
-						reqspec.params.add(value);
+						sql.bindParameterValues.add(value);
 						sql.parametersToBind++;
 					}
 					sb.append(")");
@@ -542,9 +584,9 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void bindParameters(PreparedStatement st, SQL sql, RequestSpec reqspec) throws SQLException {
+	void bindParameters(PreparedStatement st, SQL sql) throws SQLException {
 		for(int i=0;i<sql.parametersToBind;i++) {
-			st.setString(i+1, reqspec.params.get(i));
+			st.setString(i+1, sql.bindParameterValues.get(i));
 		}
 	}
 	
