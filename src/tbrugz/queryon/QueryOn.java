@@ -199,7 +199,7 @@ public class QueryOn extends HttpServlet {
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
-				throw new BadRequestException("unknown object: "+reqspec.object);
+				throw new BadRequestException("object not found: "+reqspec.object, HttpServletResponse.SC_NOT_FOUND);
 			}
 			
 			if(dbobj instanceof Relation) {
@@ -302,6 +302,7 @@ public class QueryOn extends HttpServlet {
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		try {
 		
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
@@ -340,7 +341,15 @@ public class QueryOn extends HttpServlet {
 		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
 		
 		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, applyLimitOffsetInResultSet, resp);
-		conn.close();
+		
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
 	}
 	
 	/*
@@ -354,6 +363,8 @@ public class QueryOn extends HttpServlet {
 	void doExecute(ExecutableObject eo, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		log.info("eo: "+eo);
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		try {
+			
 		StringBuffer sql = new StringBuffer();
 		sql.append("{ "); //sql.append("begin ");
 		if(eo.getType()==DBObjectType.FUNCTION) {
@@ -413,7 +424,15 @@ public class QueryOn extends HttpServlet {
 		else {
 			resp.getWriter().write("execution successful - no return");
 		}
-		conn.close();
+
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
@@ -450,6 +469,7 @@ public class QueryOn extends HttpServlet {
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		try {
 		SQL sql = SQL.createDeleteSQL(relation);
 
 		Constraint pk = getPK(relation);
@@ -467,12 +487,22 @@ public class QueryOn extends HttpServlet {
 		//XXX: boundaries for # of updated rows?
 		//XXX: (heterogeneous) array to ResultSet adapter?
 		conn.commit();
-		conn.close();
 		resp.getWriter().write(count+" rows deleted");
+		
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
 	}
 
 	void doUpdate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		try {
+
 		SQL sql = SQL.createUpdateSQL(relation);
 
 		StringBuffer sb = new StringBuffer();
@@ -499,12 +529,22 @@ public class QueryOn extends HttpServlet {
 		//XXX: boundaries for # of updated rows?
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		conn.close();
 		resp.getWriter().write(count+" rows updated");
+
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
 	}
 
 	void doInsert(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		try {
+
 		SQL sql = SQL.createInsertSQL(relation);
 
 		//use url params to set PK cols values
@@ -539,8 +579,17 @@ public class QueryOn extends HttpServlet {
 		//XXX: boundaries for # of updated rows?
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		conn.close();
+		resp.setStatus(HttpServletResponse.SC_CREATED);
 		resp.getWriter().write(count+" rows inserted");
+		
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
 	}
 	
 	Constraint getPK(Relation relation) {
