@@ -507,7 +507,17 @@ public class QueryOn extends HttpServlet {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		SQL sql = SQL.createInsertSQL(relation);
 
-		//TODO use url params to set PK cols values
+		//use url params to set PK cols values
+		Constraint pk = getPK(relation);
+		if(pk!=null) {
+			for(int i=0;i<pk.uniqueColumns.size() && i<reqspec.params.size();i++) {
+				String pkcol = pk.uniqueColumns.get(i);
+				String pkval = reqspec.params.get(i);
+				if(pkcol!=null && pkval!=null) {
+					reqspec.updateValues.put(pkcol, pkval);
+				}
+			}
+		}
 		
 		StringBuffer sbCols = new StringBuffer();
 		StringBuffer sbVals = new StringBuffer();
