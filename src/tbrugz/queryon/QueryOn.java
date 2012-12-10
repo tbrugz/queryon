@@ -246,6 +246,10 @@ public class QueryOn extends HttpServlet {
 				}
 				doExecute(eo, reqspec, resp);
 				break;
+			case INSERT: {
+				doInsert((Relation) dbobj, reqspec, resp);
+				}
+				break;
 			case UPDATE: {
 				doUpdate((Relation) dbobj, reqspec, resp);
 				}
@@ -472,7 +476,6 @@ public class QueryOn extends HttpServlet {
 		SQL sql = SQL.createUpdateSQL(relation);
 
 		StringBuffer sb = new StringBuffer();
-		
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(int i=0; cols.hasNext(); i++) {
 			String col = cols.next();
@@ -498,6 +501,36 @@ public class QueryOn extends HttpServlet {
 		conn.commit();
 		conn.close();
 		resp.getWriter().write(count+" rows updated");
+	}
+
+	void doInsert(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		SQL sql = SQL.createInsertSQL(relation);
+
+		//TODO use url params to set PK cols values
+		
+		StringBuffer sbCols = new StringBuffer();
+		StringBuffer sbVals = new StringBuffer();
+		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
+		for(int i=0; cols.hasNext(); i++) {
+			String col = cols.next();
+			sbCols.append((i!=0?", ":"")+col);
+			sbVals.append((i!=0?", ":"")+"?");
+			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+		}
+		sql.applyInsert(sbCols.toString(), sbVals.toString());
+
+		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
+		bindParameters(st, sql);
+
+		log.info("sql insert: "+sql);
+		
+		int count = st.executeUpdate();
+		//XXX: boundaries for # of updated rows?
+		//XXX: (heterogeneous) array / map to ResultSet adapter?
+		conn.commit();
+		conn.close();
+		resp.getWriter().write(count+" rows inserted");
 	}
 	
 	Constraint getPK(Relation relation) {

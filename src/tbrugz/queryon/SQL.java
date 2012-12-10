@@ -25,6 +25,8 @@ public class SQL {
 	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
 	//XXX add sql projection clause ( [projection-clause] )?
 	public static final String PARAM_UPDATE_SET_CLAUSE = "[update-set-clause]";
+	public static final String PARAM_INSERT_COLUMNS_CLAUSE = "[insert-columns-clause]";
+	public static final String PARAM_INSERT_VALUES_CLAUSE = "[insert-values-clause]";
 	public static final String PARAM_ORDER_CLAUSE = "[order-clause]";
 	//XXX add limit/offset-clause?
 
@@ -74,6 +76,14 @@ public class SQL {
 		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
 		
 		//return new SQL(createSQLstr(relation, reqspec), relation);
+	}
+
+	public static SQL createInsertSQL(Relation relation) {
+		String sql = "insert into "+
+				(relation.getSchemaName()!=null?relation.getSchemaName()+".":"") + relation.getName()+
+				" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")" +
+				" values (" + PARAM_INSERT_VALUES_CLAUSE+")";
+		return new SQL(sql, relation);
 	}
 
 	public static SQL createUpdateSQL(Relation relation) {
@@ -139,6 +149,10 @@ public class SQL {
 
 	public void applyUpdate(String set) {
 		sql = sql.replace(PARAM_UPDATE_SET_CLAUSE, set);
+	}
+
+	public void applyInsert(String cols, String values) {
+		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
 	
 	public void addLimitOffset(LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
