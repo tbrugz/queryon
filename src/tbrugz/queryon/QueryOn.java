@@ -478,7 +478,6 @@ public class QueryOn extends HttpServlet {
 			String col = cols.next();
 			sb.append((i!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
-			sql.parametersToBind++;
 		}
 		sql.applyUpdate(sb.toString());
 
@@ -518,7 +517,6 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
-		int parametersToBind = 0;
 		String filter = "";
 		//TODO: what if parameters already defined in query?
 		if(reqspec.params.size()>0) {
@@ -530,13 +528,11 @@ public class QueryOn extends HttpServlet {
 					if(reqspec.params.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
 					filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
-					parametersToBind++;
 					sql.bindParameterValues.add(reqspec.params.get(i));
 				}
 			}
 		}
 		sql.addFilter(filter);
-		sql.parametersToBind += parametersToBind;
 	}
 	
 	void filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
@@ -550,7 +546,6 @@ public class QueryOn extends HttpServlet {
 				if(columns.contains(col)) {
 					//XXX column type?
 					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
-					sql.parametersToBind++;
 					sql.addFilter(col+" = ?");
 				}
 				else {
@@ -567,7 +562,6 @@ public class QueryOn extends HttpServlet {
 						String value = values[i];
 						sb.append((i>0?", ":"")+"?");
 						sql.bindParameterValues.add(value);
-						sql.parametersToBind++;
 					}
 					sb.append(")");
 					sql.addFilter(sb.toString());
@@ -585,7 +579,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void bindParameters(PreparedStatement st, SQL sql) throws SQLException {
-		for(int i=0;i<sql.parametersToBind;i++) {
+		for(int i=0;i<sql.bindParameterValues.size();i++) {
 			st.setString(i+1, sql.bindParameterValues.get(i));
 		}
 	}

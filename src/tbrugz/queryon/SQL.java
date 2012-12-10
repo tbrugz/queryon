@@ -31,7 +31,6 @@ public class SQL {
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
-	int parametersToBind = 0;
 	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	
