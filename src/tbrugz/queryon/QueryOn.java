@@ -507,13 +507,24 @@ public class QueryOn extends HttpServlet {
 		try {
 
 		SQL sql = SQL.createUpdateSQL(relation);
+		
+		Set<String> columns = new HashSet<String>();
+		columns.addAll(relation.getColumnNames());
 
 		StringBuffer sb = new StringBuffer();
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(int i=0; cols.hasNext(); i++) {
 			String col = cols.next();
+			if(! columns.contains(col)) {
+				log.warn("unknown column: "+col);
+				continue;
+			}
 			sb.append((i!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+		}
+
+		if("".equals(sb.toString())) {
+			throw new BadRequestException("No valid columns");
 		}
 		sql.applyUpdate(sb.toString());
 
@@ -522,6 +533,8 @@ public class QueryOn extends HttpServlet {
 
 		// xtra filters
 		filterByXtraParams(relation, reqspec, sql);
+
+		log.info("pre-sql update: "+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		bindParameters(st, sql);
@@ -550,11 +563,18 @@ public class QueryOn extends HttpServlet {
 
 		SQL sql = SQL.createInsertSQL(relation);
 
+		Set<String> columns = new HashSet<String>();
+		columns.addAll(relation.getColumnNames());
+
 		//use url params to set PK cols values
 		Constraint pk = getPK(relation);
 		if(pk!=null) {
 			for(int i=0;i<pk.uniqueColumns.size() && i<reqspec.params.size();i++) {
 				String pkcol = pk.uniqueColumns.get(i);
+				if(! columns.contains(pkcol)) {
+					log.warn("unknown PK column: "+pkcol);
+					continue;
+				}
 				String pkval = reqspec.params.get(i);
 				if(pkcol!=null && pkval!=null) {
 					reqspec.updateValues.put(pkcol, pkval);
@@ -567,9 +587,18 @@ public class QueryOn extends HttpServlet {
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(int i=0; cols.hasNext(); i++) {
 			String col = cols.next();
+			if(! columns.contains(col)) {
+				log.warn("unknown 'value' column: "+col);
+				continue;
+			}
 			sbCols.append((i!=0?", ":"")+col);
 			sbVals.append((i!=0?", ":"")+"?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+		}
+		
+		if("".equals(sbCols.toString())) {
+			//log.warn("no valid columns");
+			throw new BadRequestException("No valid columns");
 		}
 		sql.applyInsert(sbCols.toString(), sbVals.toString());
 
