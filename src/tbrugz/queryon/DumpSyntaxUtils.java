@@ -30,6 +30,7 @@ public class DumpSyntaxUtils {
 	}
 
 	DumpSyntax getDumpSyntaxByAccept(String mimetype, Properties prop) {
+		if(mimetype==null) { return null; }
 		String[] mimes = mimetype.split(",");
 		if(mimes.length<1) return null;
 		for(String mime: mimes) {

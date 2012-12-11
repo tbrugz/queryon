@@ -47,6 +47,7 @@ public class RequestSpec {
 		}
 		
 		String varUrl = req.getPathInfo();
+		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }
 		
 		String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
