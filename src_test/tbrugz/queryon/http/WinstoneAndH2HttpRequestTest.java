@@ -2,8 +2,11 @@ package tbrugz.queryon.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.naming.NamingException;
@@ -13,10 +16,15 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.h2.util.IOUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -26,6 +34,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.util.IOUtil;
 import winstone.Launcher;
 
 public class WinstoneAndH2HttpRequestTest {
@@ -151,10 +160,21 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
 		
-		Assert.assertEquals("Must be a Bad Request (NAME value not provided)", 400, response1.getStatusLine().getStatusCode());
+		Assert.assertEquals("Should be a Bad Request (NAME value not provided - is 'not null')", 400, response1.getStatusLine().getStatusCode());
 		httpPost.releaseConnection();
 	}
 
+	@Test
+	public void testPost_Emp_400b() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(baseUrl+"/EMP");
+		
+		HttpResponse response1 = httpclient.execute(httpPost);
+		
+		Assert.assertEquals("Must be a Bad Request (no columns provided)", 400, response1.getStatusLine().getStatusCode());
+		httpPost.releaseConnection();
+	}
+	
 	@Test
 	public void testPost_Emp_Created() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -177,19 +197,43 @@ public class WinstoneAndH2HttpRequestTest {
 		httpPost.releaseConnection();
 	}
 
+	//TODO: HttpPut isn't working with winstone
 	@Test
 	public void testPut_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PUT");
 		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&method=PUT");
+		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1?v:NAME=newname&method=PUT");
+		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1");
+		//HttpPost httpPut = new HttpPost(baseUrl+"/EMP/1");
 
-		/*List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-		nvps.add(new BasicNameValuePair("v:NAME", "newname"));
-		httpPut.setEntity(new UrlEncodedFormEntity(nvps));*/
+		//List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		//nvps.add(new BasicNameValuePair("method", "PUT"));
+		//nvps.add(new BasicNameValuePair("v:NAME", "newname"));
+		//httpPut.setEntity(new UrlEncodedFormEntity(nvps));
+		
+		System.out.println("PUT-uri: "+httpPut.getRequestLine());
+		//System.out.println(EntityUtils.toString(new UrlEncodedFormEntity(nvps)));		
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		String content = IOUtil.readFile(new InputStreamReader(instream));
+		System.out.println("content: "+content);
+
 		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
+		httpPut.releaseConnection();
+	}
+
+	@Test
+	public void testPut_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?method=PUT");
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+		
+		Assert.assertEquals("Must be Bad Request (no update columns informed)", 400, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
 	}
 }
