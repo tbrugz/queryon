@@ -115,7 +115,8 @@ public class QueryOn extends HttpServlet {
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
 
-	static final String PROPERTIES_RESOURCE = "/queryon.properties";
+	static final String PROPERTIES_PATH = "properties-resource";
+	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String CONN_PROPS_PREFIX = "queryon";
 	static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
 	static final String PROP_MAX_LIMIT = "queryon.limit.max";
@@ -130,11 +131,13 @@ public class QueryOn extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		try {
-			prop.load(QueryOn.class.getResourceAsStream(PROPERTIES_RESOURCE));
-			//Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop, false);
+			String propertiesResource = config.getInitParameter(PROPERTIES_PATH);
+			if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
+			
+			log.info("loading properties: "+propertiesResource);
+			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 			model = modelGrabber(prop);
 			dsutils = new DumpSyntaxUtils(prop);
-			//XXXxx: add sqlqueries as views? yes
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServletException(e);
