@@ -18,6 +18,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -28,6 +29,7 @@ import org.h2.util.IOUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -69,6 +71,12 @@ public class WinstoneAndH2HttpRequestTest {
 	@AfterClass
 	public static void shutdown() {
 		winstone.shutdown(); 
+	}
+	
+	public static String getContent(HttpResponse response) throws IllegalStateException, IOException {
+		HttpEntity entity = response.getEntity();
+		InputStream instream = entity.getContent();
+		return IOUtil.readFile(new InputStreamReader(instream));
 	}
 
 	/*
@@ -153,7 +161,7 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 	}
 
-	@Test
+	@Test @Ignore("maybe later")
 	public void testPost_Emp_400() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/EMP?v:ID=11");
@@ -197,7 +205,10 @@ public class WinstoneAndH2HttpRequestTest {
 		httpPost.releaseConnection();
 	}
 
-	//TODO: HttpPut isn't working with winstone
+	/*
+	 * TODO: HttpPut isn't working with winstone
+	 * http://code.google.com/p/winstone/source/browse/trunk/winstone/src/main/java/net/winstone/core/listener/HttpListener.java
+	 */
 	@Test
 	public void testPut_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -216,11 +227,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println(EntityUtils.toString(new UrlEncodedFormEntity(nvps)));		
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
-		
-		HttpEntity entity1 = response1.getEntity();
-		InputStream instream = entity1.getContent();
-		String content = IOUtil.readFile(new InputStreamReader(instream));
-		System.out.println("content: "+content);
+		System.out.println("content: "+getContent(response1));
 
 		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
@@ -236,4 +243,32 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertEquals("Must be Bad Request (no update columns informed)", 400, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
 	}
+
+	@Test
+	public void testDelete_Emp_Ok() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+
+		HttpGet httpGet = new HttpGet(baseUrl+"/EMP/5?method=DELETE");
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
+		System.out.println("content: "+getContent(response1));
+		httpGet.releaseConnection();
+
+		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/4");
+		HttpResponse response2 = httpclient.execute(httpDelete);
+		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
+		System.out.println("content: "+getContent(response2));
+		httpDelete.releaseConnection();
+	}
+
+	@Test
+	public void testDelete_Emp_404() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/7");
+		HttpResponse response2 = httpclient.execute(httpDelete);
+		Assert.assertEquals("Must be Not Found (no rows deleted)?", 404, response2.getStatusLine().getStatusCode());
+		System.out.println("content: "+getContent(response2));
+		httpDelete.releaseConnection();
+	}
+	
 }
