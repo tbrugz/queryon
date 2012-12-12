@@ -470,7 +470,7 @@ public class QueryOn extends HttpServlet {
 		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, true, resp);
 	}
 	
-	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
 		SQL sql = SQL.createDeleteSQL(relation);
@@ -487,7 +487,22 @@ public class QueryOn extends HttpServlet {
 		log.info("sql delete: "+sql);
 		
 		int count = st.executeUpdate();
-		//XXX: boundaries for # of updated rows?
+		
+		if(fullKeyDefined(reqspec, pk)) {
+			if(count==0) {
+				conn.rollback();
+				throw new BadRequestException("Element not found", 404);
+			}
+			if(count>1) {
+				//may never occur...
+				conn.rollback();
+				throw new ServletException("Full key defined but "+count+" elements deleted");
+			}
+		}
+		else {
+			//XXX: boundaries for # of updated (deleted) rows?
+		}
+		
 		//XXX: (heterogeneous) array to ResultSet adapter?
 		conn.commit();
 		resp.getWriter().write(count+" rows deleted");
@@ -638,6 +653,14 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		return pk;
+	}
+	
+	boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
+		if(pk==null) {
+			return false;
+		}
+		//log.info("#cols: pk="+pk.uniqueColumns.size()+", req="+reqspec.params.size());
+		return pk.uniqueColumns.size() <= reqspec.params.size();
 	}
 	
 	void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {

@@ -26,8 +26,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.h2.util.IOUtils;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -62,7 +64,6 @@ public class WinstoneAndH2HttpRequestTest {
 		dBuilder = dbFactory.newDocumentBuilder();
 	}
 	
-	@BeforeClass
 	public static void setupH2() throws ClassNotFoundException, IOException, SQLException, NamingException {
 		String[] params = {"-propfile=src_test/tbrugz/queryon/http/sqlrun.properties"};
 		SQLRun.main(params);
@@ -71,6 +72,15 @@ public class WinstoneAndH2HttpRequestTest {
 	@AfterClass
 	public static void shutdown() {
 		winstone.shutdown(); 
+	}
+
+	@Before
+	public void before() throws ClassNotFoundException, IOException, SQLException, NamingException {
+		setupH2();
+	}
+	
+	@After
+	public void after() {
 	}
 	
 	public static String getContent(HttpResponse response) throws IllegalStateException, IOException {
@@ -250,14 +260,14 @@ public class WinstoneAndH2HttpRequestTest {
 
 		HttpGet httpGet = new HttpGet(baseUrl+"/EMP/5?method=DELETE");
 		HttpResponse response1 = httpclient.execute(httpGet);
-		Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
 		System.out.println("content: "+getContent(response1));
+		Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
 		httpGet.releaseConnection();
 
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/4");
 		HttpResponse response2 = httpclient.execute(httpDelete);
-		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
 		System.out.println("content: "+getContent(response2));
+		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
 		httpDelete.releaseConnection();
 	}
 
@@ -266,9 +276,25 @@ public class WinstoneAndH2HttpRequestTest {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/7");
 		HttpResponse response2 = httpclient.execute(httpDelete);
-		Assert.assertEquals("Must be Not Found (no rows deleted)?", 404, response2.getStatusLine().getStatusCode());
 		System.out.println("content: "+getContent(response2));
+		Assert.assertEquals("Must be Not Found (no rows deleted)?", 404, response2.getStatusLine().getStatusCode());
 		httpDelete.releaseConnection();
 	}
+
+	@Test
+	public void testDelete_Emp_3rows() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		//XXX: delete doesn't get parameters from querystring?
+		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?fe:DEPARTMENT_ID=2&method=DELETE");
+		HttpResponse response2 = httpclient.execute(httpDelete);
+		String content = getContent(response2);
+		System.out.println("content: "+content);
+		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
+		//XXX: response may change...
+		int rows = Integer.parseInt(content.split(" ")[0]);
+		Assert.assertEquals("Must have 3 rows deleted", 3, rows);
+		httpDelete.releaseConnection();
+	}
+
 	
 }
