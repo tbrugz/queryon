@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.naming.NamingException;
@@ -25,7 +23,9 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.h2.util.IOUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -36,6 +36,9 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
@@ -296,5 +299,61 @@ public class WinstoneAndH2HttpRequestTest {
 		httpDelete.releaseConnection();
 	}
 
+	@Test
+	public void testGet_XML_Tables() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/table.xml");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		Document doc = dBuilder.parse(instream);
+		NodeList nl = doc.getElementsByTagName("row");
+		Assert.assertEquals("Should have 2 (data) rows", 2, nl.getLength());
+		
+		EntityUtils.consume(entity1);
+		httpGet.releaseConnection();
+	}
+
+	@Test
+	public void testGet_JSON_Tables() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/table.json");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String jsonStr = getContent(response1);
+
+		Object obj = JSONValue.parse(jsonStr);
+		//System.out.println("json: "+obj.getClass()+" // "+obj);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		obj = jobj.get("status");
+		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
+
+		JSONArray jarr = (JSONArray) obj;
+		Assert.assertEquals("Should have 2 (data) rows", 2, jarr.size());
+		
+		httpGet.releaseConnection();
+	}
+	
+	@Test
+	public void testGet_JGSON_Tables_PrettyPrint() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/table.json");
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String jsonStr = getContent(response1);
+		System.out.print("json-original:\n"+jsonStr+"\n");
+		
+		Gson gsonpretty = new GsonBuilder().setPrettyPrinting().create();
+		Object jsonObj = gsonpretty.fromJson(jsonStr, Object.class);
+		String jsonOutput = gsonpretty.toJson(jsonObj);
+		System.out.print("json-pretty:\n"+jsonOutput+"\n");
+
+		Gson gson = new Gson();
+		jsonObj = gson.fromJson(jsonStr, Object.class);
+		jsonOutput = gson.toJson(jsonObj);
+		System.out.print("json-compact:\n"+jsonOutput+"\n");
+	}
 	
 }

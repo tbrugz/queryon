@@ -11,6 +11,8 @@
 		<dependency org="net.sourceforge.winstone" name="winstone" rev="0.9.10"/>
 		<dependency org="org.apache.httpcomponents" name="httpclient" rev="4.2.1"/>
 		<dependency org="org.apache.httpcomponents" name="httpcore" rev="4.2.1"/>
+		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1.1"/>
+		<dependency org="com.google.code.gson" name="gson" rev="2.2.2"/>
 		<!--dependency org="httpunit" name="httpunit" rev="1.7"/-->
 	</dependencies>
 </ivy-module>
