@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
@@ -42,26 +40,16 @@ import com.google.gson.GsonBuilder;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
-import winstone.Launcher;
+import static tbrugz.queryon.http.TestSetup.baseUrl;
 
 public class WinstoneAndH2HttpRequestTest {
 	
-	final static int port = 8889;
-	final static String baseUrl = "http://localhost:"+port;
-
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;
 	
-	static Launcher winstone = null;
-	
 	@BeforeClass
-	public static void setupWinstone() throws IOException, ParserConfigurationException {
-		Map<String, String> args = new HashMap<String, String>();
-		args.put("webroot", "bin/tbrugz/queryon/http"); // or any other command line args, eg port
-		args.put("httpPort", ""+port);
-		args.put("ajp13Port", "-1");
-		Launcher.initLogger(args);
-		winstone = new Launcher(args); // spawns threads, so your application doesn't block
+	public static void setup() throws IOException, ParserConfigurationException {
+		TestSetup.setupWinstone();
 		
 		dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();
@@ -74,7 +62,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@AfterClass
 	public static void shutdown() {
-		winstone.shutdown(); 
+		TestSetup.shutdown();
 	}
 
 	@Before
