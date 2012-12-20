@@ -51,6 +51,9 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 /**
  * @see Web API Design - http://info.apigee.com/Portals/62317/docs/web%20api.pdf
  */
+/*
+ * TODO r2rml: option to understand URLs like: Department/name=accounting;city=Cambridge
+ */
 public class QueryOn extends HttpServlet {
 	
 	public enum ActionType {
