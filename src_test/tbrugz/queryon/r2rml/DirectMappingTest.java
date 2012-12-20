@@ -19,7 +19,10 @@ import tbrugz.sqldump.sqlrun.SQLRun;
 /**
  * see:
  * http://www.w3.org/TR/rdb-direct-mapping/
+ * http://www.w3.org/2001/sw/wiki/Direct_Mapping
+ * 
  * http://www.w3.org/TR/r2rml/
+ * http://www.w3.org/2001/sw/wiki/RDB2RDF
  */
 public class DirectMappingTest {
 

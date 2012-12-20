@@ -10,6 +10,7 @@ import tbrugz.sqldump.util.Utils;
 public class DumpSyntaxUtils {
 	
 	Map<String, DumpSyntax> syntaxesByFormat = new HashMap<String, DumpSyntax>();
+	Map<String, DumpSyntax> syntaxesByFileExtension = new HashMap<String, DumpSyntax>();
 	Map<String, DumpSyntax> syntaxesByMimeType = new HashMap<String, DumpSyntax>();
 
 	public DumpSyntaxUtils(Properties prop) {
@@ -18,15 +19,17 @@ public class DumpSyntaxUtils {
 			if(ds!=null) {
 				ds.procProperties(prop);
 				syntaxesByFormat.put(ds.getSyntaxId(), ds);
+				syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
 				syntaxesByMimeType.put(ds.getMimeType(), ds);
 			}
 		}
 	}
 	
 	DumpSyntax getDumpSyntax(String format, Properties prop) {
+		//XXX file format (id) preferred to file extension. which way is better?
 		DumpSyntax dsx = syntaxesByFormat.get(format);
 		if(dsx!=null) { return dsx; }
-		return null;
+		return syntaxesByFileExtension.get(format);
 	}
 
 	DumpSyntax getDumpSyntaxByAccept(String mimetype, Properties prop) {
