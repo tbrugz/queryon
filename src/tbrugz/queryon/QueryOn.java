@@ -356,7 +356,8 @@ public class QueryOn extends HttpServlet {
 		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
 
 		List<FK> fks = DBIdentifiable.getImportedKeys(relation, model.getForeignKeys());
-		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, fks, applyLimitOffsetInResultSet, resp);
+		List<Constraint> uks = DBIdentifiable.getUKs(relation);
+		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, fks, uks, applyLimitOffsetInResultSet, resp);
 		
 		}
 		catch(SQLException e) {
@@ -431,7 +432,7 @@ public class QueryOn extends HttpServlet {
 
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
-				dumpResultSet((ResultSet)retObject, reqspec, reqspec.object, null, null, true, resp);
+				dumpResultSet((ResultSet)retObject, reqspec, reqspec.object, null, null, null, true, resp);
 			}
 			else {
 				resp.getWriter().write(retObject.toString());
@@ -457,6 +458,7 @@ public class QueryOn extends HttpServlet {
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
+		List<Constraint> uks = null;
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
 		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
@@ -485,7 +487,7 @@ public class QueryOn extends HttpServlet {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
-		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, importedFKs, true, resp);
+		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, importedFKs, uks, true, resp);
 	}
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
@@ -750,7 +752,8 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, 
-			List<String> uniqueColumns, List<FK> importedFKs, boolean mayApplyLimitOffset, HttpServletResponse resp) 
+			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
+			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
 			rs = new ResultSetLimitOffsetDecorator(rs, reqspec.limit, reqspec.offset);
@@ -759,6 +762,9 @@ public class QueryOn extends HttpServlet {
 		DumpSyntax ds = reqspec.outputSyntax;
 		if(ds.usesImportedFKs()) {
 			ds.setImportedFKs(importedFKs);
+		}
+		if(ds.usesAllUKs()) {
+			ds.setAllUKs(UKs);
 		}
 		
 		ds.initDump(queryName, uniqueColumns, rs.getMetaData());
