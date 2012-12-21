@@ -11,10 +11,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class SQL {
@@ -30,6 +33,8 @@ public class SQL {
 	public static final String PARAM_ORDER_CLAUSE = "[order-clause]";
 	//XXX add limit/offset-clause?
 
+	static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
+	
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
@@ -52,7 +57,7 @@ public class SQL {
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
 		String columns = createSQLColumns(reqspec, table);
 		String sql = "select "+columns+
-			" from " + (table.getSchemaName()!=null?table.getSchemaName()+".":"") + table.getName()+
+			" from " + (table.getSchemaName()!=null?sqlIdDecorator.get(table.getSchemaName())+".":"") + sqlIdDecorator.get(table.getName())+
 			" " + PARAM_WHERE_CLAUSE+
 			" " + PARAM_ORDER_CLAUSE;
 		return sql;
@@ -80,7 +85,7 @@ public class SQL {
 
 	public static SQL createInsertSQL(Relation relation) {
 		String sql = "insert into "+
-				(relation.getSchemaName()!=null?relation.getSchemaName()+".":"") + relation.getName()+
+				(relation.getSchemaName()!=null?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")" +
 				" values (" + PARAM_INSERT_VALUES_CLAUSE+")";
 		return new SQL(sql, relation);
@@ -88,7 +93,7 @@ public class SQL {
 
 	public static SQL createUpdateSQL(Relation relation) {
 		String sql = "update "+
-				(relation.getSchemaName()!=null?relation.getSchemaName()+".":"") + relation.getName()+
+				(relation.getSchemaName()!=null?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" set " + PARAM_UPDATE_SET_CLAUSE +
 				" " + PARAM_WHERE_CLAUSE;
 		return new SQL(sql, relation);
@@ -135,7 +140,7 @@ public class SQL {
 		for(int i=0;i<reqspec.orderCols.size();i++) {
 			String col = reqspec.orderCols.get(i);
 			String ascDesc = reqspec.orderAscDesc.get(i);
-			sb.append((i==0?"":", ")+col+" "+ascDesc);
+			sb.append((i==0?"":", ")+sqlIdDecorator.get(col)+" "+ascDesc);
 		}
 		
 		if(sql.contains(PARAM_ORDER_CLAUSE)) {
@@ -214,7 +219,7 @@ public class SQL {
 				}
 			}
 			if(sqlCols.size()>0) {
-				columns = Utils.join(sqlCols, ", ");
+				columns = Utils.join(sqlCols, ", ", sqlIdDecorator);
 			}
 			else {
 				log.warn("no valid column specified. defaulting to 'all'");
@@ -226,6 +231,10 @@ public class SQL {
 	@Override
 	public String toString() {
 		return "SQL[\n"+sql+"\n[bindpar="+bindParameterValues+"]]";
+	}
+	
+	public static String quoteString() {
+		return DBMSResources.instance().getIdentifierQuoteString();
 	}
 	
 }
