@@ -19,6 +19,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	static final Log log = LogFactory.getLog(BaseResultSetCollectionAdapter.class);
 
 	final String name;
+	final List<String> columnNames;
 	final ResultSetMetaData metadata;
 	final List<Method> methods = new ArrayList<Method>();
 
@@ -35,7 +36,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, Class<E> clazz) throws IntrospectionException {
 		this.name = name;
 		
-		List<String> columnNames = new ArrayList<String>();
+		columnNames = new ArrayList<String>();
 		metadata = new RSMetaDataAdapter(null, name, columnNames);
 		
 		//Class<E> clazz = (Class<E>) value.getClass();
@@ -102,6 +103,14 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		}*/
 		return ret;
 	}
+	
+	@Override
+	public String getString(String columnLabel) throws SQLException {
+		int index = columnNames.indexOf(columnLabel) + 1;
+		//log.info("colnames: "+columnNames+" / label: "+columnLabel+" / index: "+index);
+		if(index==0) { return null; }
+		return getString(index);
+	}
 
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
@@ -113,4 +122,9 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		return getString(columnIndex);
 	}
 
+	@Override
+	public Object getObject(String columnLabel) throws SQLException {
+		return getString(columnLabel);
+	}
+	
 }

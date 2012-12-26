@@ -112,4 +112,22 @@ public class ResultSetTest {
 		}
 		Assert.assertFalse("Must not have 4th element", rs.next());
 	}
+	
+	@Test
+	public void testRSGetByColumnName() throws IntrospectionException, SQLException {
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
+		
+		Assert.assertTrue("Must have 1st element", rs.next());
+		Assert.assertEquals("1st column of 1st line must be equals to '1'", "1", rs.getString(1));
+		Assert.assertEquals("column 'id' of 1st line must be equals to '1'", "1", rs.getString("id"));
+		
+		Assert.assertTrue("Must have 2nd element", rs.next());
+		Assert.assertEquals("column 'description' of 2nd line must be equals to 'two'", "two", rs.getString("description"));
+		
+		Assert.assertTrue("Must have 3rd element", rs.next());
+		Assert.assertEquals("column 'category' of 3rd line must be equals to 'two'", "c2", rs.getString("category"));
+		Assert.assertNull("column 'xyz' of 3rd line must be null", rs.getString("xyz"));
+		
+		Assert.assertFalse("Must not have 4th element", rs.next());
+	}
 }
