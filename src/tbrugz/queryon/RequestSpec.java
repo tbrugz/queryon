@@ -18,7 +18,7 @@ import tbrugz.sqldump.util.Utils;
 
 //XXX: order by? 3a,1d,2d?
 public class RequestSpec {
-	static final Log log = LogFactory.getLog(QueryOn.class);
+	static final Log log = LogFactory.getLog(RequestSpec.class);
 
 	final String httpMethod;
 	final String object;

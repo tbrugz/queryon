@@ -316,7 +316,7 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
 		
 		JSONObject jobj = (JSONObject) obj;
-		obj = jobj.get("status");
+		obj = jobj.get("table");
 		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
 
 		JSONArray jarr = (JSONArray) obj;
