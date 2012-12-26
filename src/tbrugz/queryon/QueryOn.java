@@ -459,25 +459,30 @@ public class QueryOn extends HttpServlet {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
+		String objectName = null;
 		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
 		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
+			objectName = SO_TABLE;
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
-			rs = new ResultSetListAdapter<Table>("status", statusUniqueColumns, tableAllColumns, list, Table.class);
+			rs = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, tableAllColumns, list, Table.class);
 			//XXX importedFKs = ...
 		}
 		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
+			objectName = SO_VIEW;
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
-			rs = new ResultSetListAdapter<View>("status", statusUniqueColumns, list, View.class);
+			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, list, View.class);
 			//XXX importedFKs = ...
 		}
 		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
+			objectName = SO_EXECUTABLE;
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
-			rs = new ResultSetListAdapter<ExecutableObject>("status", statusUniqueColumns, list, ExecutableObject.class);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, list, ExecutableObject.class);
 			//XXX importedFKs = ...
 		}
 		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
+			objectName = SO_FK;
 			List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
-			rs = new ResultSetListAdapter<FK>("status", statusUniqueColumns, list, FK.class);
+			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
 			//XXX importedFKs = ...
 		}
 		else {
@@ -487,7 +492,7 @@ public class QueryOn extends HttpServlet {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
-		dumpResultSet(rs, reqspec, "status", statusUniqueColumns, importedFKs, uks, true, resp);
+		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
 	}
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
