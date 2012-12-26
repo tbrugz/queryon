@@ -76,7 +76,7 @@
 	</target>
 	
 	<target name="resolve-ivy" description="retrieve dependencies with ivy">
-		<ivy:retrieve haltonfailure="false" transitive="false"/>
+		<ivy:retrieve haltonfailure="false"/>
 	</target>
 
 </project>

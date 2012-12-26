@@ -13,6 +13,14 @@
 		<dependency org="org.apache.httpcomponents" name="httpcore" rev="4.2.1"/>
 		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1.1"/>
 		<dependency org="com.google.code.gson" name="gson" rev="2.2.2"/>
+		<dependency org="org.apache.any23" name="apache-any23-core" rev="0.7.0-incubating"/>
+		<dependency org="org.apache.commons" name="commons-csv" rev="1.0-SNAPSHOT"/>
+		<!--dependency org="org.slf4j" name="slf4j-api" rev="1.6.6"/>
+		<dependency org="org.apache.tika" name="tika" rev="0.3"/>
+		<dependency org="org.apache.tika" name="tika-parent" rev="1.2"/>
+		<dependency org="commons-codec" name="commons-codec" rev="1.7"/>
+		<dependency org="org.openrdf" name="openrdf-model" rev="2.0.1"/-->
+		
 		<!--dependency org="httpunit" name="httpunit" rev="1.7"/-->
 	</dependencies>
 </ivy-module>
