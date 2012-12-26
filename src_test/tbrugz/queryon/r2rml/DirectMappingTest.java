@@ -1,18 +1,33 @@
 package tbrugz.queryon.r2rml;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.any23.Any23;
+import org.apache.any23.extractor.ExtractionException;
+import org.apache.any23.source.DocumentSource;
+import org.apache.any23.source.StringDocumentSource;
+import org.apache.any23.writer.CountingTripleHandler;
+import org.apache.any23.writer.TripleHandler;
+import org.apache.any23.writer.TripleHandlerException;
+import org.apache.any23.writer.TurtleWriter;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import tbrugz.queryon.http.TestSetup;
+import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.sqlrun.SQLRun;
 
@@ -60,6 +75,42 @@ public class DirectMappingTest {
 				"-usesysprop=false"
 		};
 		SQLDump.main(params);
+	}
+	
+	@Test
+	public void testGet_Turtle_Tables_withAny23() throws IOException, ParserConfigurationException, SAXException, ExtractionException, TripleHandlerException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(TestSetup.baseUrl+"/table.ttl");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String turtleStr = WinstoneAndH2HttpRequestTest.getContent(response1);
+		DocumentSource source = new StringDocumentSource(turtleStr, TestSetup.baseUrl+"/table.ttl"); //"http://host.com/service");
+
+		Any23 runner = new Any23();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		TripleHandler handler = new TurtleWriter(out);
+		CountingTripleHandler countingHandler = new CountingTripleHandler(false);
+		//ReportingTripleHandler reportHandler = new ReportingTripleHandler(handler);
+		
+		try {
+			runner.extract(source, handler);
+			//runner.extract(source, reportHandler);
+			runner.extract(source, countingHandler);
+		} finally {
+			handler.close();
+			//reportHandler.close();
+			countingHandler.close();
+		}
+		
+		String n3 = out.toString("UTF-8");
+		System.out.println("before:\n"+turtleStr);
+		System.out.println("after:\n"+n3);
+		System.out.println("count: "+countingHandler.getCount());
+		//System.out.println("report:\n"+reportHandler.printReport());
+		
+		Assert.assertEquals("Should have 16 triples (2 rows x 8 properties)", 16, countingHandler.getCount());
+		
+		httpGet.releaseConnection();
 	}
 
 }

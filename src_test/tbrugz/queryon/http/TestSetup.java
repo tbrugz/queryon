@@ -8,8 +8,8 @@ import winstone.Launcher;
 
 public class TestSetup {
 	
-	final static int port = 8889;
-	final static String baseUrl = "http://localhost:"+port;
+	public final static int port = 8889;
+	public final static String baseUrl = "http://localhost:"+port;
 	
 	private static Launcher winstone = null;
 	
