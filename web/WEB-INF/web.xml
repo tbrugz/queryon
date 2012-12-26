@@ -15,9 +15,24 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>Cool303</servlet-name>
+		<servlet-class>tbrugz.queryon.Cool303RedirectionServlet</servlet-class>
+		<init-param>
+			<param-name>url-prepend</param-name>
+			<param-value>/queryon/q</param-value>
+		</init-param>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
 		<url-pattern>/q/*</url-pattern>
 	</servlet-mapping>
-    
+	
+	<servlet-mapping>
+		<servlet-name>Cool303</servlet-name>
+		<url-pattern>/id/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>
