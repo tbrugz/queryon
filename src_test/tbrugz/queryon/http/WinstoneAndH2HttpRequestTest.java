@@ -3,6 +3,7 @@ package tbrugz.queryon.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
@@ -10,6 +11,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -343,5 +346,31 @@ public class WinstoneAndH2HttpRequestTest {
 		jsonOutput = gson.toJson(jsonObj);
 		System.out.print("json-compact:\n"+jsonOutput+"\n");
 	}
-	
+
+	@Test
+	public void testGet_CSV_Tables() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/table.csv");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		HttpEntity entity1 = response1.getEntity();
+		Reader in = new InputStreamReader(entity1.getContent());
+		
+		int count = 0;
+		CSVFormat format = CSVFormat.newBuilder(CSVFormat.DEFAULT).withHeader().build();
+		for (CSVRecord record: format.parse(in)) {
+			/*for (String field : record) {
+				System.out.print("\"" + field + "\", ");
+			}
+			System.out.println();*/
+			System.out.println("record: "+record);
+			count++;
+		}
+		
+		Assert.assertEquals("Should have 2 (data) rows", 2, count);
+		
+		EntityUtils.consume(entity1);
+		httpGet.releaseConnection();
+	}
+
 }
