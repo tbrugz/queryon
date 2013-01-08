@@ -47,6 +47,7 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
 
 /**
  * @see Web API Design - http://info.apigee.com/Portals/62317/docs/web%20api.pdf
@@ -123,8 +124,13 @@ public class QueryOn extends HttpServlet {
 	static final String PROPERTIES_PATH = "properties-resource";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String CONN_PROPS_PREFIX = "queryon";
+	
 	static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
 	static final String PROP_MAX_LIMIT = "queryon.limit.max";
+	static final String PROP_BASE_URL = "queryon.baseurl";
+	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
+	
+	static final String REQ_ATTR_CONTENTLOCATION = "attr.contentlocation";
 
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
@@ -140,8 +146,9 @@ public class QueryOn extends HttpServlet {
 			if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
 			
 			log.info("loading properties: "+propertiesResource);
-			//XXX: path: add host port? servlet mapping url-pattern? 
+			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
 			String path = "http://"+InetAddress.getLocalHost().getHostName()+getServletContext().getContextPath()+"/";
+			prop.setProperty(PROP_BASE_URL, path);
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 			
@@ -357,6 +364,13 @@ public class QueryOn extends HttpServlet {
 
 		List<FK> fks = DBIdentifiable.getImportedKeys(relation, model.getForeignKeys());
 		List<Constraint> uks = DBIdentifiable.getUKs(relation);
+		
+		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
+			String contentLocation = reqspec.getCanonicalUrl(prop);
+			log.info("content-location header: "+contentLocation);
+			reqspec.request.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
+		}
+		
 		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, fks, uks, applyLimitOffsetInResultSet, resp);
 		
 		}
@@ -774,9 +788,13 @@ public class QueryOn extends HttpServlet {
 		
 		ds.initDump(queryName, uniqueColumns, rs.getMetaData());
 
-		resp.addHeader("Content-type", ds.getMimeType());
+		resp.addHeader("Content-Type", ds.getMimeType());
 		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
 		//resp.addHeader("Content-disposition", "attachment;filename="+table.name+"."+ds.getDefaultFileExtension());
+		String contentLocation = (String) reqspec.request.getAttribute(REQ_ATTR_CONTENTLOCATION);
+		if(contentLocation!=null) {
+			resp.addHeader("Content-Location", contentLocation);
+		}
 		
 		ds.dumpHeader(resp.getWriter());
 		while(rs.next()) {

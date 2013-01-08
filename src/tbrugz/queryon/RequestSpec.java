@@ -19,6 +19,8 @@ import tbrugz.sqldump.util.Utils;
 //XXX: order by? 3a,1d,2d?
 public class RequestSpec {
 	static final Log log = LogFactory.getLog(RequestSpec.class);
+	
+	final HttpServletRequest request;
 
 	final String httpMethod;
 	final String object;
@@ -37,6 +39,7 @@ public class RequestSpec {
 	final List<String> orderAscDesc = new ArrayList<String>();
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
+		this.request = req;
 		String method = req.getParameter("method");
 		//XXX: may method be changed? property?
 		if(method!=null) {
@@ -190,4 +193,19 @@ public class RequestSpec {
 			//XXX: warn unknown parameters
 		}
 	}
+	
+	
+	/*
+	 * reconstructs URL pased on RequestSpec
+	 * 
+	 * will not use: output syntax, method?, updateValues
+	 * XXX may use: columns, offset, limit, filters, order??
+	 */
+	public String getCanonicalUrl(Properties prop) {
+		String url = prop.getProperty(QueryOn.PROP_BASE_URL)+object+"/";
+		//url = url.replaceAll("\\/+", "\\/");
+		String params = Utils.join(this.params, "/");
+		return url+params;
+	}
+	
 } 
