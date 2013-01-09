@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.SQLException;
+import java.util.Iterator;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
@@ -12,6 +13,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -356,18 +358,33 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpEntity entity1 = response1.getEntity();
 		Reader in = new InputStreamReader(entity1.getContent());
 		
-		int count = 0;
+		//int count = 0;
 		CSVFormat format = CSVFormat.newBuilder(CSVFormat.DEFAULT).withHeader().build();
-		for (CSVRecord record: format.parse(in)) {
+		CSVParser parser = new CSVParser(in, format);
+		System.out.println("headers: "+parser.getHeaderMap());
+		Iterator<CSVRecord> it = parser.iterator();
+		
+		Assert.assertTrue("Must have 1st element", it.hasNext());
+		CSVRecord record = it.next();
+		System.out.println("1st record (name = '"+record.get("name")+"'): "+record);
+		Assert.assertEquals("1st record name must be DEPT", "DEPT", record.get("name"));
+		
+		Assert.assertTrue("Must have 2nd element", it.hasNext());
+		record = it.next();
+		System.out.println("2nd record (name = '"+record.get("name")+"'): "+record);
+		Assert.assertEquals("1st record name must be DEPT", "EMP", record.get("name"));
+		
+		Assert.assertFalse("Must not have have 3rd element", it.hasNext());
+		/*for (CSVRecord record: format.parse(in)) {
 			/*for (String field : record) {
 				System.out.print("\"" + field + "\", ");
 			}
-			System.out.println();*/
+			System.out.println();* /
 			System.out.println("record: "+record);
 			count++;
 		}
 		
-		Assert.assertEquals("Should have 2 (data) rows", 2, count);
+		Assert.assertEquals("Should have 2 (data) rows", 2, count);*/
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
