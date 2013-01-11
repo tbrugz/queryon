@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="src_test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/javax.servlet-api-3.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-servlet_3.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/sqldump.jar"/>
 	<classpathentry kind="lib" path="lib/kmlutils.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
@@ -16,8 +16,8 @@
 	<classpathentry kind="lib" path="lib/gson-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-any23-core-0.7.0-incubating.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/tika-core-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/sesame-rio-api-2.6.1.jar"/>
