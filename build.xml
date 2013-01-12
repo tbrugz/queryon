@@ -26,8 +26,14 @@
 	</fileset>
 	
 	<path id="classpath.compile">
-		<path refid="fileset.base" />
-		<path refid="fileset.compile" />
+		<fileset refid="fileset.base" />
+		<fileset refid="fileset.compile" />
+	</path>
+
+	<path id="classpath.sqldump">
+		<fileset refid="fileset.base" />
+		<fileset refid="fileset.compile" />
+		<fileset refid="fileset.war" />
 	</path>
 	
 	<target name="prepare">
@@ -74,6 +80,31 @@
 				<include name="**/*.html" />
 			</fileset>
 		</copy>
+	</target>
+
+	<target name="start-db" description="init H2 database">
+		<java classpath="${lib.dir}/${h2.jar}" classname="org.h2.tools.Server" fork="true">
+			<arg value="-tcp"/>
+			<arg value="-web"/>
+			<arg value="-baseDir"/>
+			<arg value="${h2.basedir}"/>
+			<!--arg value="-trace"/-->
+		</java>
+	</target>
+	
+	<target name="load-r2rml-db">
+		<java classpathref="classpath.sqldump" classname="tbrugz.sqldump.sqlrun.SQLRun" fork="true">
+			<jvmarg value="-Dsqlrun.dburl=jdbc:h2:tcp://localhost/r2rml"/>
+			<arg value="-propfile=src_test/tbrugz/queryon/r2rml/sqlrun.properties"/>
+		</java>
+	</target>
+	
+	<target name="stop-db" description="stop H2 database">
+		<java classpath="${lib.dir}/${h2.jar}" classname="org.h2.tools.Server" fork="true">
+			<arg value="-tcpShutdown"/>
+			<arg value="tcp://localhost:9092"/>
+			<arg value="-tcpShutdownForce"/>
+		</java>
 	</target>
 	
 	<target name="resolve-ivy" description="retrieve dependencies with ivy">
