@@ -838,12 +838,12 @@ public abstract class AbstractResultSetDecorator implements ResultSet {
 	}
 
 	public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-		return rs.getObject(columnIndex, type);
+		return null;//rs.getObject(columnIndex, type);
 	}
 
 	public <T> T getObject(String columnLabel, Class<T> type)
 			throws SQLException {
-		return rs.getObject(columnLabel, type);
+		return null;//rs.getObject(columnLabel, type);
 	}
 	
 	

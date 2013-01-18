@@ -1019,12 +1019,12 @@ public abstract class AbstractResultSet implements ResultSet {
 
 	}
 
-	@Override
+	//@Override
 	public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
 		return null;
 	}
 
-	@Override
+	//@Override
 	public <T> T getObject(String columnLabel, Class<T> type)
 			throws SQLException {
 		return null;
