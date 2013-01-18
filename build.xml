@@ -58,6 +58,13 @@
 		</copy>
 	</target>
 	
+	<target name="jar" depends="compile" description="builds jar">
+		<jar destfile="${dist.dir}/queryon.jar"
+			basedir="${bin.dir}"
+			includes="**/*.class, dbms-specific-queryon.properties">
+		</jar>
+	</target>
+	
 	<target name="war" depends="compile">
 		<war destfile="${war.file}" needxmlfile="false">
 			<webinf dir="web/WEB-INF"></webinf>
