@@ -47,6 +47,7 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 /**
@@ -154,6 +155,9 @@ public class QueryOn extends HttpServlet {
 			
 			model = modelGrabber(prop);
 			dsutils = new DumpSyntaxUtils(prop);
+			
+			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
+			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ServletException(e);
