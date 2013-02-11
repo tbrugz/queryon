@@ -148,7 +148,8 @@ public class QueryOn extends HttpServlet {
 			
 			log.info("loading properties: "+propertiesResource);
 			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
-			String path = "http://"+InetAddress.getLocalHost().getHostName()+getServletContext().getContextPath()+"/";
+			String path = "http://"+InetAddress.getLocalHost().getHostName()+"/";
+			//+getServletContext().getContextPath();
 			prop.setProperty(PROP_BASE_URL, path);
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
@@ -159,9 +160,11 @@ public class QueryOn extends HttpServlet {
 			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 		} catch (Exception e) {
+			log.error(e.toString());
 			e.printStackTrace();
 			throw new ServletException(e);
 		} catch (Error e) {
+			log.error(e.toString());
 			e.printStackTrace();
 			throw e;
 		}
@@ -186,7 +189,7 @@ public class QueryOn extends HttpServlet {
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
-		DBMSResources.updateDbId(sm.getSqlDialect());
+		DBMSResources.instance().updateDbId(sm.getSqlDialect());
 		
 		if(conn!=null) { conn.close(); }
 		return sm;

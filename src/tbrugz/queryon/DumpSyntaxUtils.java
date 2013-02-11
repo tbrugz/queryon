@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.util.Utils;
 
 public class DumpSyntaxUtils {
@@ -14,7 +15,7 @@ public class DumpSyntaxUtils {
 	Map<String, DumpSyntax> syntaxesByMimeType = new HashMap<String, DumpSyntax>();
 
 	public DumpSyntaxUtils(Properties prop) {
-		for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
+		for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
 			DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 			if(ds!=null) {
 				ds.procProperties(prop);
