@@ -1,7 +1,10 @@
 <project name="queryon" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property name="proj.name" value="queryon"/>
+	
 	<property file="build.properties"/>
+	<property file="version.properties"/>
+	<property file="ivysettings.properties"/>
 	
 	<property name="src.dir" value="src"/>
 	<property name="src.test.dir" value="src_test"/>
@@ -146,20 +149,34 @@
 	</target>
 	
 	<target name="test" depends="compile">
-		<junit printsummary="yes">
+		<junit printsummary="yes" showoutput="true">
 			<classpath refid="classpath.test"/>
 			<formatter type="xml"/>
 			<test name="tbrugz.queryon.QueryOnTestSuite" todir="${test.dir}"/>
 		</junit>
 	</target>
-	
-	<target name="resolve-ivy" description="retrieve dependencies with ivy">
+
+	<target name="config-ivy" if="ivy.settings.dir">
+		<ivy:settings file="${ivy.settings.dir}/ivysettings.xml"/>
+	</target>
+
+	<target name="resolve-ivy" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false"/>
 	</target>
 
-	<target name="resolve-get">
+	<target name="publish" depends="jar,war,config-ivy" description="publish this project in the ivy repository">
+		<property name="revision" value="${version}"/>
+		<property name="resolver" value="local"/>
+		<ivy:info file="ivy.xml"/>
+		<ivy:publish resolver="${resolver}" pubrevision="${revision}" status="release" update="true" overwrite="true">
+			<artifacts pattern="${dist.dir}/[module].[ext]" />
+		</ivy:publish>
+		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver}"/>
+	</target>
+
+	<!--target name="resolve-get">
 		<get dest="${lib.dir}/kmlutils.jar" src="http://cdn.bitbucket.org/tbrugz/kmlutils/downloads/svg2kml.jar" verbose="true"/>
 		<get dest="${lib.dir}" src="http://cdn.bitbucket.org/tbrugz/sqldump/downloads/sqldump.jar" verbose="true"/>
-	</target>
+	</target-->
 	
 </project>
