@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivysettings>
 	<settings defaultResolver="default" />
+	<property name="mvn.repository.dir" value="${user.home}/.m2/repository/" override="false"/>
+	
 	<include url="${ivy.default.settings.dir}/ivysettings-public.xml" />
 	<resolvers>
 		<ibiblio name="aduana" root="http://repo.aduna-software.org/maven2/releases/" m2compatible="true" />
 		<ibiblio name="apache-snapshots" root="https://repository.apache.org/content/groups/snapshots/" m2compatible="true" />
+		<filesystem name="local-mvn-publish" m2compatible="true">
+			<artifact pattern="${mvn.repository.dir}/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" />
+		</filesystem>
 		<chain name="shared">
+			<resolver ref="local-mvn-publish"/>
 			<ibiblio name="ibiblio" m2compatible="true" />
 			<resolver ref="aduana"/>
 			<resolver ref="apache-snapshots"/>

@@ -177,6 +177,7 @@
 		
 		<!-- default publish options -->
 		<property name="resolver.publish" value="local"/>
+		<!--property name="mvn.repository.dir" value="${user.home}/.m2/repository/"/-->
 		
 		<ivy:info/>
 		<property name="ivy.pom.version" value="${revision}"/>
