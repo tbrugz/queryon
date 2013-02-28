@@ -14,7 +14,7 @@
 	<property name="deploy.dir" value="dist/deploy"/>
 	<property name="test.dir" value="dist/test"/>
 	<property name="web.dir" value="web"/>
-	<property name="war.file" value="${dist.dir}/${proj.name}.war"/>
+	<property name="war.file" value="dist/${proj.name}.war"/>
 
 	<fileset id="fileset.base" dir="lib">
 		<include name="sqldump.jar" />
@@ -75,12 +75,13 @@
 	</target>
 	
 	<target name="clean">
+		<delete dir="${bin.dir}"/>
 		<delete dir="${dist.dir}"/>
-		<mkdir dir="${dist.dir}"/>
+		<delete dir="${test.dir}"/>
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on" source="1.6" target="1.6">
+		<javac destdir="${bin.dir}" classpathref="classpath.test" debug="on" source="1.6" target="1.6">
 			<src path="${src.dir}"/>
 			<src path="${src.test.dir}"/>
 		</javac>
@@ -172,7 +173,7 @@
 		<ivy:retrieve haltonfailure="false"/>
 	</target>
 
-	<target name="publish" depends="jar,war,config-ivy" description="publish this project in the ivy repository">
+	<target name="publish" depends="jar,config-ivy" description="publish this project in the ivy repository">
 		<property name="revision" value="${version}"/>
 		
 		<!-- default publish options -->
@@ -182,7 +183,7 @@
 		<ivy:info/>
 		<property name="ivy.pom.version" value="${revision}"/>
 		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/${ivy.module}.pom"/>
-		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true">
+		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" conf="main">
 			<artifacts pattern="${dist.dir}/[module].[ext]" />
 			<artifact name="${ivy.module}" ext="pom" type="pom" />
 		</ivy:publish>
