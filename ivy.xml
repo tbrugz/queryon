@@ -9,7 +9,7 @@
 		<!-- artifact name="queryon" type="war"/ -->
 	</publications>
 	<dependencies>
-		<dependency name="sqldump" rev="0.9.0"/>
+		<dependency name="sqldump" rev="0.9.1"/>
 		
 		<dependency org="commons-logging" name="commons-logging" rev="1.1.1"/>
 		<dependency org="log4j" name="log4j" rev="1.2.16"/>

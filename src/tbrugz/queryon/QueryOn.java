@@ -57,7 +57,8 @@ import tbrugz.sqldump.util.Utils;
  * TODO r2rml: option to understand URLs like: Department/name=accounting;city=Cambridge
  */
 public class QueryOn extends HttpServlet {
-	
+	private static final long serialVersionUID = 1L;
+
 	public enum ActionType {
 		SELECT,  //done
 		INSERT,
@@ -173,7 +174,7 @@ public class QueryOn extends HttpServlet {
 	//XXX: move to SchemaModelUtils?
 	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException, NamingException {
 		String grabClassName = prop.getProperty(SQLDump.PROP_SCHEMAGRAB_GRABCLASS);
-		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
+		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
 			log.warn("schema grabber class '"+grabClassName+"' not found");
 			throw new RuntimeException("schema grabber class '"+grabClassName+"' not found");
