@@ -3,7 +3,7 @@ package tbrugz.queryon.resultset;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-public class AbstractResultSetMetaData implements ResultSetMetaData {
+public abstract class AbstractResultSetMetaData implements ResultSetMetaData {
 	
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
