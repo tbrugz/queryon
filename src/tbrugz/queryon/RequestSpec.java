@@ -172,7 +172,9 @@ public class RequestSpec {
 			params.add(value);
 		}
 		
+		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
+		
 		for(String param: params.keySet()) {
 			if(param.startsWith("fe:")) {
 				String col = param.substring(3);

@@ -20,7 +20,8 @@ import org.apache.commons.logging.LogFactory;
  * TODO: init params: add current-server, current-port and/or current-context to path
  */
 public class Cool303RedirectionServlet extends HttpServlet {
-	
+	private static final long serialVersionUID = 1L;
+
 	static final Log log = LogFactory.getLog(Cool303RedirectionServlet.class);
 	
 	public static String PARAM_URL_PREPEND = "url-prepend"; 
