@@ -17,7 +17,7 @@
 	<property name="war.file" value="dist/${proj.name}.war"/>
 
 	<fileset id="fileset.base" dir="lib">
-		<include name="sqldump-0.9.1.jar" />
+		<include name="sqldump-0.9.2.jar" />
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 	</fileset>
@@ -188,8 +188,11 @@
 		
 		<ivy:info/>
 		<property name="ivy.pom.version" value="${revision}"/>
-		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/${ivy.module}.pom"/>
-		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" conf="main">
+		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/${ivy.module}.pom">
+			<mapping conf="default" scope="compile"/>
+			<mapping conf="test" scope="test"/>
+		</ivy:makepom>
+		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" conf="default" forcedeliver="true">
 			<artifacts pattern="${dist.dir}/[module].[ext]" />
 			<artifact name="${ivy.module}" ext="pom" type="pom" />
 		</ivy:publish>
