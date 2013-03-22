@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
-import tbrugz.queryon.resultset.ResultSetListAdapter;
+import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;

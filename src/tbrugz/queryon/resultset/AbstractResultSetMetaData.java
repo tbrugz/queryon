@@ -3,6 +3,7 @@ package tbrugz.queryon.resultset;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+@Deprecated
 public abstract class AbstractResultSetMetaData implements ResultSetMetaData {
 	
 	@Override

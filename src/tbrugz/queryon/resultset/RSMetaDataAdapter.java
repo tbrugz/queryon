@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+@Deprecated
 public class RSMetaDataAdapter extends AbstractResultSetMetaData {
 	
 	String schema;

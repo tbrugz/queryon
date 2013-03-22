@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+@Deprecated
 public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollectionAdapter<E> {
 	static final Log log = LogFactory.getLog(ResultSetListAdapter.class);
 
