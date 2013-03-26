@@ -98,6 +98,10 @@
 		<jar destfile="${dist.dir}/queryon.jar"
 			basedir="${bin.dir}"
 			includes="**/*.class, dbms-specific-queryon.properties">
+			<manifest>
+				<attribute name="Implementation-Title" value="${ant.project.name}"/>
+				<attribute name="Implementation-Version" value="${version}"/>
+			</manifest>
 		</jar>
 	</target>
 	
@@ -170,7 +174,7 @@
 
 	<target name="config-ivy" depends="config-ivy-file,config-ivy-dir"/>
 
-	<target name="resolve-ivy" depends="config-ivy" description="retrieve dependencies with ivy">
+	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false"/>
 	</target>
 
