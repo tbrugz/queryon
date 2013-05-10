@@ -28,5 +28,6 @@
 	<classpathentry kind="lib" path="lib/sesame-util-2.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/tika-parsers-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-csv-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/kmlutils-0.5.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
