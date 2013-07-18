@@ -26,8 +26,11 @@
 		<dependency org="org.apache.httpcomponents" name="httpcore" rev="4.2.1" conf="test->default"/>
 		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1.1" conf="test->default"/>
 		<dependency org="com.google.code.gson" name="gson" rev="2.2.2" conf="test->default"/>
-		<dependency org="org.apache.any23" name="apache-any23-core" rev="0.7.0-incubating" conf="test->default"/>
+		<dependency org="org.apache.any23" name="apache-any23-core" rev="0.8.0" conf="test->default">
+			<exclude module="commons-csv"/>
+		</dependency>
 		<dependency org="org.apache.commons" name="commons-csv" rev="1.0-SNAPSHOT" conf="test->default"/>
+		<!-- dependency org="org.apache.solr" name="solr-commons-csv" rev="3.5.0"/ -->
 		<dependency org="org.slf4j" name="slf4j-api" rev="1.6.1" conf="test->default"/>
 		
 		<!--dependency org="org.apache.tika" name="tika" rev="0.3"/>
