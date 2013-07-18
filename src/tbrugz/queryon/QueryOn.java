@@ -30,7 +30,6 @@ import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -45,7 +44,9 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -174,18 +175,18 @@ public class QueryOn extends HttpServlet {
 	//XXX: move to SchemaModelUtils?
 	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException, NamingException {
 		String grabClassName = prop.getProperty(SQLDump.PROP_SCHEMAGRAB_GRABCLASS);
-		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
+		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
 			log.warn("schema grabber class '"+grabClassName+"' not found");
 			throw new RuntimeException("schema grabber class '"+grabClassName+"' not found");
 		}
 		
 		DBMSResources.instance().setup(prop);
-		schemaGrabber.procProperties(prop);
+		schemaGrabber.setProperties(prop);
 		
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
@@ -331,7 +332,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
 		
 		SQL sql = SQL.createSQL(relation, reqspec);
@@ -401,7 +402,7 @@ public class QueryOn extends HttpServlet {
 	 */
 	void doExecute(ExecutableObject eo, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		log.info("eo: "+eo);
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
 			
 		StringBuffer sql = new StringBuffer();
@@ -518,7 +519,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
 		SQL sql = SQL.createDeleteSQL(relation);
 
@@ -565,7 +566,7 @@ public class QueryOn extends HttpServlet {
 	}
 
 	void doUpdate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
 
 		SQL sql = SQL.createUpdateSQL(relation);
@@ -620,7 +621,7 @@ public class QueryOn extends HttpServlet {
 	}
 
 	void doInsert(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
 
 		SQL sql = SQL.createInsertSQL(relation);
@@ -809,6 +810,6 @@ public class QueryOn extends HttpServlet {
 			ds.dumpRow(rs, count, resp.getWriter());
 			count++;
 		}
-		ds.dumpFooter(resp.getWriter());
+		ds.dumpFooter(count, resp.getWriter());
 	}
 }
