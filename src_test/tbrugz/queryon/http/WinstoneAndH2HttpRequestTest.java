@@ -86,6 +86,7 @@ public class WinstoneAndH2HttpRequestTest {
 	 */
 	@Test
 	public void testGet01_OK() throws IOException {
+		System.out.println("user.dir = "+System.getProperty("user.dir"));
 		//URL url = new URL("http://localhost:8889/table");
 		//String s = (String) url.getContent();
 		//url.openConnection().

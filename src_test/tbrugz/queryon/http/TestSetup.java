@@ -17,7 +17,7 @@ public class TestSetup {
 		if(winstone!=null) { return; }
 			
 		Map<String, String> args = new HashMap<String, String>();
-		args.put("webroot", "bin/tbrugz/queryon/http"); // or any other command line args, eg port
+		args.put("webroot", "src_test/tbrugz/queryon/http"); // or any other command line args, eg port
 		args.put("httpPort", ""+port);
 		args.put("ajp13Port", "-1");
 		Launcher.initLogger(args);
