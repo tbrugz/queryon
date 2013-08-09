@@ -31,7 +31,48 @@
         <directory>src_test</directory>
       </testResource>
     </testResources>
-  </build>  
+    
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.5.2</version>
+          <configuration>
+            <formats>
+              <format>html</format>
+              <format>xml</format>
+            </formats>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>cobertura</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <!-- plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+      </plugin>
+    </plugins -->
+    
+  </build>
+  
+  <!-- reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting-->
+    
   <dependencies>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
@@ -126,6 +167,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
   <repositories>
     <repository>
       <id>central</id>
@@ -147,9 +189,5 @@
       <id>apache-snapshots</id>
       <url>https://repository.apache.org/content/groups/snapshots/</url>
     </repository>
-		<!-- ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/tip/" m2compatible="true" />
-		<ibiblio name="eclipselink" root="http://download.eclipse.org/rt/eclipselink/maven.repo/" m2compatible="true" />
-		<ibiblio name="apache-snapshots" root="https://repository.apache.org/content/groups/snapshots/" m2compatible="true" />
-		<ibiblio name="pentaho-rep" root="http://repo.pentaho.org/artifactory/repo/" m2compatible="true" /-->
   </repositories>
 </project>
