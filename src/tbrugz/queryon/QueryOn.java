@@ -516,6 +516,7 @@ public class QueryOn extends HttpServlet {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
 		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
+		if(rs!=null) { rs.close(); }
 	}
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {

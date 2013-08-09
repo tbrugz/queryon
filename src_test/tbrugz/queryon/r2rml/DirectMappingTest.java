@@ -68,6 +68,7 @@ public class DirectMappingTest {
 	//@Test
 	//public void nullTest() {}
 	
+	//XXX: failonerror!
 	@Test
 	public void dumpTest() throws Exception {
 		String[] params = {
