@@ -17,7 +17,7 @@
 	<property name="war.file" value="dist/${proj.name}.war"/>
 
 	<fileset id="fileset.base" dir="lib">
-		<include name="sqldump-0.9.2.jar" />
+		<include name="sqldump-0.9.7.jar" />
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 	</fileset>
