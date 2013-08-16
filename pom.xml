@@ -14,7 +14,10 @@
   <version>0.5.0</version>
   
   <properties>
-  	<checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
+    <findbugs.version>2.5.2</findbugs.version>
+    <checkstyle.version>2.10</checkstyle.version>
+    <cobertura.version>2.5.2</cobertura.version>
+    <checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
   </properties>
   
   <build>
@@ -73,19 +76,27 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.5.2</version>
+        <version>${cobertura.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.10</version>
+        <version>${checkstyle.version}</version>
         <!-- configuration>
           <configLocation>s checkstyle_checks.xml</configLocation>
         </configuration-->
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>${findbugs.version}</version>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+      </plugin>
     </plugins>
   </reporting>
-      
+  
   <dependencies>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
