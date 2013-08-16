@@ -17,6 +17,8 @@
     <findbugs.version>2.5.2</findbugs.version>
     <checkstyle.version>2.10</checkstyle.version>
     <cobertura.version>2.5.2</cobertura.version>
+    <pmd.version>3.0.1</pmd.version>
+    
     <checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
   </properties>
   
@@ -92,7 +94,14 @@
         <version>${findbugs.version}</version>
         <configuration>
           <xmlOutput>true</xmlOutput>
+          <!-- excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+          <includeFilterFile>findbugs-include.xml</includeFilterFile-->
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd.version}</version>
       </plugin>
     </plugins>
   </reporting>
