@@ -105,6 +105,10 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${pmd.version}</version>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jdepend-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </reporting>
   
@@ -112,7 +116,7 @@
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
-      <version>0.9.8</version>
+      <version>0.9.9</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
