@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -133,6 +132,9 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	
+	static final String PROP_GRABCLASS = "queryon.grabclass";
+	static final String PROP_SQLDUMP_GRABCLASS = "sqldump.grabclass";
+	
 	static final String REQ_ATTR_CONTENTLOCATION = "attr.contentlocation";
 
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
@@ -174,11 +176,12 @@ public class QueryOn extends HttpServlet {
 	
 	//XXX: move to SchemaModelUtils?
 	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException, NamingException {
-		String grabClassName = prop.getProperty(SQLDump.PROP_SCHEMAGRAB_GRABCLASS);
+		String grabClassName = Utils.getPropWithDeprecated(prop, PROP_GRABCLASS, PROP_SQLDUMP_GRABCLASS, null);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
-			log.warn("schema grabber class '"+grabClassName+"' not found");
-			throw new RuntimeException("schema grabber class '"+grabClassName+"' not found");
+			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+PROP_GRABCLASS+"']";
+			log.warn(message);
+			throw new RuntimeException(message);
 		}
 		
 		DBMSResources.instance().setup(prop);
