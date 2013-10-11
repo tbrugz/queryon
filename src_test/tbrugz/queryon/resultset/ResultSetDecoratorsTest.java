@@ -13,6 +13,8 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import tbrugz.sqldump.resultset.ResultSetListAdapter;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ResultSetDecoratorsTest {
 	
@@ -44,6 +46,7 @@ public class ResultSetDecoratorsTest {
 		Assert.assertEquals("2", rsfd.getString(1));
 
 		Assert.assertFalse("Must not have 3rd element", rsfd.next());
+		rsfd.close();
 	}
 	
 	@Test
@@ -54,6 +57,7 @@ public class ResultSetDecoratorsTest {
 		Assert.assertEquals("two", rs.getString(2));
 		
 		Assert.assertFalse("Must not have 2nd element", rs.next());
+		rs.close();
 	}
 
 	@Test
@@ -67,6 +71,7 @@ public class ResultSetDecoratorsTest {
 		Assert.assertEquals("c2", rs.getString(3));
 
 		Assert.assertFalse("Must not have 3rd element", rs.next());
+		rs.close();
 	}
 
 	@Test
@@ -80,6 +85,7 @@ public class ResultSetDecoratorsTest {
 		Assert.assertEquals("c1", rs.getString(3));
 
 		Assert.assertFalse("Must not have 3rd element", rs.next());
+		rs.close();
 	}
 	
 }

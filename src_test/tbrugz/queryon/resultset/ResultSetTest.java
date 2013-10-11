@@ -13,6 +13,9 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import tbrugz.sqldump.resultset.ResultSetCollectionAdapter;
+import tbrugz.sqldump.resultset.ResultSetListAdapter;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ResultSetTest {
 	
