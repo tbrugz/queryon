@@ -133,7 +133,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	
 	static final String PROP_GRABCLASS = "queryon.grabclass";
-	static final String PROP_SQLDUMP_GRABCLASS = "sqldump.grabclass";
+	@Deprecated static final String PROP_SQLDUMP_GRABCLASS = "sqldump.schemagrab.grabclass";
 	
 	static final String REQ_ATTR_CONTENTLOCATION = "attr.contentlocation";
 
