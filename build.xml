@@ -17,7 +17,7 @@
 	<property name="war.file" value="dist/${proj.name}.war"/>
 
 	<fileset id="fileset.base" dir="lib">
-		<include name="sqldump-0.9.8.jar" />
+		<include name="sqldump-0.9.10.jar" />
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 	</fileset>
@@ -29,6 +29,10 @@
 	<fileset id="fileset.war" dir="lib">
 		<include name="${jdbc.jar}" />
 	</fileset>
+	
+	<path id="classpath.base">
+		<fileset refid="fileset.base" />
+	</path>
 	
 	<path id="classpath.compile">
 		<fileset refid="fileset.base" />
@@ -67,6 +71,13 @@
 		<pathelement location="lib/tika-core-0.6.jar"/>
 		<pathelement location="lib/tika-parsers-0.6.jar"/>
 		<pathelement location="lib/winstone-0.9.10.jar"/>
+	</path>
+	
+	<path id="classpath.h2">
+		<pathelement location="${lib.dir}/${h2.jar}"/>
+		<pathelement location="${sqldump.project.dir}/bin/main"/>
+		<pathelement location="${sqldump.project.dir}/bin/test"/>
+		<fileset refid="fileset.base" />
 	</path>
 	
 	<target name="prepare">
@@ -130,7 +141,7 @@
 	</target>
 
 	<target name="start-db" description="init H2 database">
-		<java classpath="${lib.dir}/${h2.jar}" classname="org.h2.tools.Server" fork="true">
+		<java classpathref="classpath.h2" classname="org.h2.tools.Server" fork="true">
 			<arg value="-tcp"/>
 			<arg value="-web"/>
 			<arg value="-baseDir"/>
