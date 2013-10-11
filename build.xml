@@ -97,8 +97,12 @@
 			<src path="${src.dir}"/>
 			<src path="${src.test.dir}"/>
 		</javac>
-		<copy todir="${bin.dir}" >
+		<copy todir="${bin.dir}">
 			<fileset dir="${src.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</fileset>
+			<fileset dir="${src.test.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/*.xml"/>
 			</fileset>

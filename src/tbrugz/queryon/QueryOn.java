@@ -146,8 +146,9 @@ public class QueryOn extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		String propertiesResource = null;
 		try {
-			String propertiesResource = config.getInitParameter(PROPERTIES_PATH);
+			propertiesResource = config.getInitParameter(PROPERTIES_PATH);
 			if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
 			
 			log.info("loading properties: "+propertiesResource);
@@ -164,9 +165,10 @@ public class QueryOn extends HttpServlet {
 			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 		} catch (Exception e) {
-			log.error(e.toString());
+			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
+			log.error(message);
 			e.printStackTrace();
-			throw new ServletException(e);
+			throw new ServletException(message, e);
 		} catch (Error e) {
 			log.error(e.toString());
 			e.printStackTrace();
