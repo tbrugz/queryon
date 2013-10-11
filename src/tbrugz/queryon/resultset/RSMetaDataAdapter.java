@@ -5,7 +5,8 @@ import java.sql.Types;
 import java.util.List;
 
 @Deprecated
-public class RSMetaDataAdapter extends AbstractResultSetMetaData {
+public abstract class RSMetaDataAdapter extends AbstractResultSetMetaData {
+	/*
 	
 	String schema;
 	String table;
@@ -57,4 +58,5 @@ public class RSMetaDataAdapter extends AbstractResultSetMetaData {
 		return String.class.getName();
 	}
 
+	*/
 }

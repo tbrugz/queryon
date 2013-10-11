@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.resultset.AbstractResultSet;
+import tbrugz.sqldump.resultset.RSMetaDataAdapter;
 
 @Deprecated
 public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractResultSet {

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 @Deprecated
 public abstract class AbstractResultSetMetaData implements ResultSetMetaData {
+	/*
 	
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -121,4 +122,5 @@ public abstract class AbstractResultSetMetaData implements ResultSetMetaData {
 		return null;
 	}
 
+	*/
 }
