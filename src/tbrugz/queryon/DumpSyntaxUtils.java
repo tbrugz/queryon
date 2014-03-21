@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.util.Utils;
 
 public class DumpSyntaxUtils {
+	static Log log = LogFactory.getLog(DumpSyntaxUtils.class);
 	
 	Map<String, DumpSyntax> syntaxesByFormat = new HashMap<String, DumpSyntax>();
 	Map<String, DumpSyntax> syntaxesByFileExtension = new HashMap<String, DumpSyntax>();
@@ -22,6 +26,7 @@ public class DumpSyntaxUtils {
 				syntaxesByFormat.put(ds.getSyntaxId(), ds);
 				syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
 				syntaxesByMimeType.put(ds.getMimeType(), ds);
+				log.debug("syntax: "+ds.getClass()+" :: id="+ds.getSyntaxId()+" ext="+ds.getDefaultFileExtension()+" ?mime="+ds.getMimeType());
 			}
 		}
 	}

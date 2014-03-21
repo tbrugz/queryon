@@ -30,6 +30,7 @@ import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -131,6 +132,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_MAX_LIMIT = "queryon.limit.max";
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
+	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
 	
 	static final String PROP_GRABCLASS = "queryon.grabclass";
 	@Deprecated static final String PROP_SQLDUMP_GRABCLASS = "sqldump.schemagrab.grabclass";
@@ -158,6 +160,8 @@ public class QueryOn extends HttpServlet {
 			prop.setProperty(PROP_BASE_URL, path);
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
+
+			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES));
 			
 			model = modelGrabber(prop);
 			dsutils = new DumpSyntaxUtils(prop);
