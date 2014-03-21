@@ -1,10 +1,11 @@
 
 var tables;
+var views;
 var fks;
 var execs;
 var baseUrl;
 
-var tablesHash = {};
+var tablesHash = {}; // XXX rename to relationsHash?
 var fksHash = {};
 var fksPkHash = {};
 var fksFkHash = {};
@@ -12,32 +13,43 @@ var execsHash = {};
 
 function init(url) {
 	baseUrl = url;
+	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
-		url: baseUrl+'/table/status.json',
+		url: baseUrl+'/table.json',
 		success: function(data) {
-			tables = data.status;
-			//alert('Load was performed. '+tables.length+' tables loaded');
+			tables = data.table;
+			if(tables) { console.log('Load was performed. '+tables.length+' tables loaded'); }
 			writeTables();
 		}
 	});
 	$.ajax({
-		url: baseUrl+'/fk/status.json',
+		url: baseUrl+'/view.json',
 		success: function(data) {
-			fks = data.status;
-			//alert('Load was performed. '+fks.length+' FKs loaded');
+			views = data.view;
+			if(views) { console.log('Load was performed. '+views.length+' views loaded'); }
+			writeViews();
+		}
+	});
+	$.ajax({
+		url: baseUrl+'/fk.json',
+		success: function(data) {
+			fks = data.fk;
+			if(fks) { console.log('Load was performed. '+fks.length+' FKs loaded'); }
 			writeFKs();
 		}
 	});
 	$.ajax({
-		url: baseUrl+'/executable/status.json',
+		url: baseUrl+'/executable.json',
 		success: function(data) {
-			execs = data.status;
+			execs = data.executable;
+			if(execs) { console.log('Load was performed. '+execs.length+' execs loaded'); }
 			writeExecutables();
 		}
 	});
 }
 
 function writeTables() {
+	if(!tables) { return; }
 	for(var i=0;i<tables.length;i++) {
 		var id = tables[i].schemaName+'.'+tables[i].name;
 		//$('<li><a href="'+baseUrl+'/'+id+'/select">'+id+'</li>').appendTo($('#tables'));
@@ -46,7 +58,18 @@ function writeTables() {
 	}
 }
 
+function writeViews() {
+	if(!views) { return; }
+	for(var i=0;i<views.length;i++) {
+		var id = views[i].schemaName+'.'+views[i].name;
+		//$('<li><a href="'+baseUrl+'/'+id+'/select">'+id+'</li>').appendTo($('#tables'));
+		$('<li><a href="javascript:loadTable(\''+id+'\',\'\');">'+id+'</a></li>').appendTo($('#tables-content'));
+		tablesHash[id] = views[i];
+	}
+}
+
 function writeFKs() {
+	if(!fks) { return; }
 	for(var i=0;i<fks.length;i++) {
 		var id = fks[i].schemaName+'.'+fks[i].name;
 		var fkdesc = id+': '+fks[i].fkTable+' -> '+fks[i].pkTable;
@@ -64,6 +87,7 @@ function writeFKs() {
 }
 
 function writeExecutables() {
+	if(!execs) { return; }
 	for(var i=0;i<execs.length;i++) {
 		var id = execs[i].schemaName+'.'+execs[i].name;
 		var execdesc = id+': '+execs[i].type+(execs[i].packageName!=null?' [pkg: '+execs[i].packageName+']':'');
@@ -72,6 +96,7 @@ function writeExecutables() {
 	}
 }
 
+// XXX rename to loadRelations? ...
 function loadTable(tableid, filter) {
 	return loadTableJson(tableid, filter);
 }
