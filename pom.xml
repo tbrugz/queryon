@@ -116,7 +116,7 @@
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
-      <version>0.9.10</version>
+      <version>0.9.11</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

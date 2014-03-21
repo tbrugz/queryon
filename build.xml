@@ -17,7 +17,8 @@
 	<property name="war.file" value="dist/${proj.name}.war"/>
 
 	<fileset id="fileset.base" dir="lib">
-		<include name="sqldump-0.9.10.jar" />
+		<include name="sqldump.jar" />
+		<!--include name="sqldump-0.9.11.jar" /-->
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 	</fileset>
@@ -55,7 +56,7 @@
 		<pathelement location="lib/commons-csv-1.0-SNAPSHOT.jar"/>
 		<pathelement location="lib/commons-httpclient-3.1.jar"/>
 		<pathelement location="lib/gson-2.2.2.jar"/>
-		<pathelement location="lib/h2-1.3.170.jar"/>
+		<pathelement location="lib/h2-1.3.174.jar"/>
 		<pathelement location="lib/json-simple-1.1.1.jar"/>
 		<pathelement location="lib/httpcore-4.2.1.jar"/>
 		<pathelement location="lib/httpclient-4.2.1.jar"/>
@@ -67,7 +68,7 @@
 		<pathelement location="lib/sesame-rio-turtle-2.6.1.jar"/>
 		<pathelement location="lib/sesame-rio-trix-2.6.1.jar"/>
 		<pathelement location="lib/sesame-util-2.6.1.jar"/>
-		<pathelement location="lib/slf4j-api-1.6.1.jar"/>
+		<!--pathelement location="lib/slf4j-api-1.6.1.jar"/-->
 		<pathelement location="lib/tika-core-0.6.jar"/>
 		<pathelement location="lib/tika-parsers-0.6.jar"/>
 		<pathelement location="lib/winstone-0.9.10.jar"/>
@@ -120,12 +121,18 @@
 		</jar>
 	</target>
 	
-	<target name="war" depends="compile">
+	<target name="war" depends="jar">
 		<war destfile="${war.file}" needxmlfile="false">
 			<webinf dir="web/WEB-INF"></webinf>
 			<lib refid="fileset.base" />
 			<lib refid="fileset.war" />
-			<classes dir="bin"></classes>
+			<lib dir="${dist.dir}">
+				<include name="queryon.jar" />
+			</lib>
+			<classes dir="bin">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+			</classes>
 			<fileset dir="web"></fileset>
 		</war>
 	</target>
