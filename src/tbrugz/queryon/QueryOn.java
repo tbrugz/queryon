@@ -143,6 +143,9 @@ public class QueryOn extends HttpServlet {
 
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
+	public static final String ATTR_PROP = "prop";
+	public static final String ATTR_MODEL = "model";
+	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	SchemaModel model;
@@ -170,6 +173,9 @@ public class QueryOn extends HttpServlet {
 			
 			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
+			
+			config.getServletContext().setAttribute(ATTR_PROP, prop);
+			config.getServletContext().setAttribute(ATTR_MODEL, model);
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);

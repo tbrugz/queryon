@@ -25,6 +25,11 @@
 		</init-param>
 	</servlet>
 	
+	<servlet>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
 		<url-pattern>/q/*</url-pattern>
@@ -33,6 +38,11 @@
 	<servlet-mapping>
 		<servlet-name>Cool303</servlet-name>
 		<url-pattern>/id/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<url-pattern>/processor/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>
