@@ -77,9 +77,11 @@ public class QueryOn extends HttpServlet {
 			SO_EXECUTABLE = "executable",
 			SO_FK = "fk";
 	
-	public static final String[] STATUS_OBJECTS = { SO_TABLE, SO_VIEW, SO_EXECUTABLE, SO_FK,
-			SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
-			}; 
+	public static final String[] STATUS_OBJECTS = {
+		SO_TABLE, SO_VIEW, SO_EXECUTABLE, SO_FK,
+		SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
+	};
+	
 	/*public enum StatusObject {
 		TABLE,
 		VIEW,
@@ -106,7 +108,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		static LimitOffsetStrategy getDefaultStrategy(String dbid) {
-			String strategyStr = prop.getProperty("dbid."+dbid+".limitoffsetstretegy", "DEFAULT");
+			String strategyStr = prop.getProperty("dbid."+dbid+".limitoffsetstretegy", RESULTSET_CONTROL.toString());
 			log.info("getLOStrategy["+dbid+"]: "+strategyStr);
 			LimitOffsetStrategy strat = LimitOffsetStrategy.valueOf(strategyStr);
 			return strat;
