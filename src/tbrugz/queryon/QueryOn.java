@@ -179,8 +179,10 @@ public class QueryOn extends HttpServlet {
 			config.getServletContext().setAttribute(ATTR_MODEL, model);
 			
 			List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
-			for(String p: procsOnStartup) {
-				ProcessorServlet.doProcess(p, config);
+			if(procsOnStartup!=null) {
+				for(String p: procsOnStartup) {
+					ProcessorServlet.doProcess(p, config);
+				}
 			}
 			
 		} catch (Exception e) {
