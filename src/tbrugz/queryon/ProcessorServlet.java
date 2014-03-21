@@ -58,9 +58,15 @@ public class ProcessorServlet extends HttpServlet {
 		String[] parts = s.split("/");
 		String procClass = parts[1];
 		
+		doProcess(procClass, config);
+		resp.getWriter().write("processor '"+procClass+"' processed");
+	}
+	
+	static void doProcess(String procClass, ServletConfig config) throws ClassNotFoundException, ServletException, SQLException, NamingException {
 		Processor pc = (Processor) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(pc==null) {
-			throw new ClassNotFoundException(procClass+" [pathInfo: "+s+"]");
+			throw new ClassNotFoundException(procClass);
+			//throw new ClassNotFoundException(procClass+" [pathInfo: "+s+"]");
 		}
 		
 		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
@@ -73,13 +79,15 @@ public class ProcessorServlet extends HttpServlet {
 		}
 		
 		pc.setProperties(prop);
+		Connection conn = null;
 		if(pc.needsConnection()) {
-			Connection conn = ConnectionUtil.initDBConnection(QueryOn.CONN_PROPS_PREFIX, prop);
+			conn = ConnectionUtil.initDBConnection(QueryOn.CONN_PROPS_PREFIX, prop);
 			pc.setConnection(conn);
 		}
 		pc.setSchemaModel(sm);
 		pc.process();
-		resp.getWriter().write("processor '"+procClass+"' processed");
+		
+		if(conn!=null) { conn.close(); }
 	}
 	
 }

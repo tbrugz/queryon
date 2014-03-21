@@ -135,6 +135,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
+	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
 	
 	static final String PROP_GRABCLASS = "queryon.grabclass";
 	@Deprecated static final String PROP_SQLDUMP_GRABCLASS = "sqldump.schemagrab.grabclass";
@@ -176,6 +177,12 @@ public class QueryOn extends HttpServlet {
 			
 			config.getServletContext().setAttribute(ATTR_PROP, prop);
 			config.getServletContext().setAttribute(ATTR_MODEL, model);
+			
+			List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
+			for(String p: procsOnStartup) {
+				ProcessorServlet.doProcess(p, config);
+			}
+			
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);
