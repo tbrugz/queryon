@@ -181,7 +181,13 @@ public class QueryOn extends HttpServlet {
 			List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
 			if(procsOnStartup!=null) {
 				for(String p: procsOnStartup) {
-					ProcessorServlet.doProcess(p, config);
+					try {
+						ProcessorServlet.doProcess(p, config, null);
+					}
+					catch(Exception e) {
+						log.warn("Exception executing processor on startup: "+e);
+						//XXX: fail on error?
+					}
 				}
 			}
 			

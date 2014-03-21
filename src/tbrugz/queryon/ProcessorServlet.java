@@ -1,6 +1,8 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -17,7 +19,9 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.Processor;
+import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
@@ -50,7 +54,7 @@ public class ProcessorServlet extends HttpServlet {
 
 	/*
 	 * XXX add all request parameters as properties?
-	 * XXX option to write processor's output?
+	 * XXXdone option to write processor's output?
 	 */
 	void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		String s = req.getPathInfo();
@@ -58,36 +62,87 @@ public class ProcessorServlet extends HttpServlet {
 		String[] parts = s.split("/");
 		String procClass = parts[1];
 		
-		doProcess(procClass, config);
-		resp.getWriter().write("processor '"+procClass+"' processed");
+		doProcess(procClass, config, resp);
 	}
 	
-	static void doProcess(String procClass, ServletConfig config) throws ClassNotFoundException, ServletException, SQLException, NamingException {
-		Processor pc = (Processor) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
-		if(pc==null) {
+	public static void doProcess(String procClass, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
+		if(procComponent==null) {
 			throw new ClassNotFoundException(procClass);
-			//throw new ClassNotFoundException(procClass+" [pathInfo: "+s+"]");
 		}
 		
 		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
-		SchemaModel sm = (SchemaModel) config.getServletContext().getAttribute(QueryOn.ATTR_MODEL);
 		if(prop==null) {
 			throw new ServletException("properties attribute is null!");
 		}
-		if(sm==null) {
-			throw new ServletException("schema model attribute is null!");
+		procComponent.setProperties(prop);
+		
+		if(procComponent instanceof Processor) {
+			Processor proc = (Processor) procComponent;
+			doProcessProcessor(proc, prop, config, resp);
+			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
+				resp.getWriter().write("processor '"+procClass+"' processed");
+			}
+		}
+		else if(procComponent instanceof SchemaModelDumper) {
+			SchemaModelDumper dumper = (SchemaModelDumper) procComponent;
+			doProcessDumper(dumper, config, resp);
+			if(!dumper.acceptsOutputStream() && !dumper.acceptsOutputWriter() && resp!=null) {
+				resp.getWriter().write("dumper '"+procClass+"' processed");
+			}
+		}
+		else {
+			throw new IllegalArgumentException("'"+procComponent.getClass()+"': unknown processor type");
+		}
+	}
+	
+	static void doProcessProcessor(Processor pc, Properties prop, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException {
+		if(pc.needsSchemaModel()) {
+			SchemaModel sm = (SchemaModel) config.getServletContext().getAttribute(QueryOn.ATTR_MODEL);
+			if(sm==null) {
+				throw new ServletException("schema model attribute is null!");
+			}
+			pc.setSchemaModel(sm);
 		}
 		
-		pc.setProperties(prop);
 		Connection conn = null;
 		if(pc.needsConnection()) {
 			conn = ConnectionUtil.initDBConnection(QueryOn.CONN_PROPS_PREFIX, prop);
 			pc.setConnection(conn);
 		}
-		pc.setSchemaModel(sm);
 		pc.process();
 		
 		if(conn!=null) { conn.close(); }
 	}
 	
+	static void doProcessDumper(SchemaModelDumper dumper, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+		SchemaModel sm = (SchemaModel) config.getServletContext().getAttribute(QueryOn.ATTR_MODEL);
+		if(sm==null) {
+			throw new ServletException("schema model attribute is null!");
+		}
+		
+		Writer w = null;
+		OutputStream os = null;
+		if(resp!=null) {
+			if(dumper.acceptsOutputWriter()) {
+				w = resp.getWriter();
+				dumper.setOutputWriter(w);
+			}
+			else if(dumper.acceptsOutputStream()) {
+				os = resp.getOutputStream();
+				dumper.setOutputStream(os);
+			}
+		}
+		//XXX else: System.out?
+		
+		dumper.dumpSchema(sm);
+		
+		if(w!=null) {
+			w.flush();
+		}
+		if(os!=null) {
+			os.flush();
+		}
+	}
+
 }
