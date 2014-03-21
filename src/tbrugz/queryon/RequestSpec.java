@@ -146,23 +146,14 @@ public class RequestSpec {
 		if(order!=null) {
 			List<String> orderColz = Arrays.asList(order.split(","));
 			for(String ocol: orderColz) {
-				String[] cparts = ocol.split(":");
-				orderCols.add(cparts[0]);
-				if(cparts.length>1) {
-					String ascDesc = cparts[1];
-					if("A".equalsIgnoreCase(ascDesc)) {
-						orderAscDesc.add("ASC");
-					}
-					else if("D".equalsIgnoreCase(ascDesc)) {
-						orderAscDesc.add("DESC");
-					}
-					else {
-						orderAscDesc.add("");
-					}
+				if(ocol.startsWith("-")) {
+					ocol = ocol.substring(1);
+					orderAscDesc.add("DESC");
 				}
 				else {
-					orderAscDesc.add("");
+					orderAscDesc.add("ASC");
 				}
+				orderCols.add(ocol);
 			}
 		}
 
