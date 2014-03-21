@@ -755,7 +755,7 @@ public class QueryOn extends HttpServlet {
 				for(int i=0;i<pk.uniqueColumns.size();i++) {
 					if(reqspec.params.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
-					filter += (i!=0?" and ":"")+pk.uniqueColumns.get(i)+" = ?"; //+reqspec.params.get(i)
+					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.uniqueColumns.get(i))+" = ?"; //+reqspec.params.get(i)
 					sql.bindParameterValues.add(reqspec.params.get(i));
 				}
 			}
@@ -774,7 +774,7 @@ public class QueryOn extends HttpServlet {
 				if(columns.contains(col)) {
 					//XXX column type?
 					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
-					sql.addFilter(col+" = ?");
+					sql.addFilter(SQL.sqlIdDecorator.get(col)+" = ?");
 				}
 				else {
 					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
@@ -784,7 +784,7 @@ public class QueryOn extends HttpServlet {
 				if(columns.contains(col)) {
 					//XXX column type?
 					StringBuffer sb = new StringBuffer();
-					sb.append(col+" in (");
+					sb.append(SQL.sqlIdDecorator.get(col)+" in (");
 					String[] values = reqspec.filterIn.get(col);
 					for(int i=0;i<values.length;i++) {
 						String value = values[i];
