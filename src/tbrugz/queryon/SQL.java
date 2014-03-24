@@ -37,10 +37,11 @@ public class SQL {
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
+	int originalBindParameterCount;
 	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	
-	public SQL(String sql, Relation relation) {
+	protected SQL(String sql, Relation relation) {
 		this.sql = sql;
 		this.relation = relation;
 	}
@@ -65,7 +66,9 @@ public class SQL {
 	public static SQL createSQL(Relation relation, RequestSpec reqspec) {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
-			SQL sql = new SQL( ((View)relation).query , relation);
+			Query q = (Query) relation;
+			SQL sql = new SQL( q.query , relation);
+			sql.originalBindParameterCount = q.parameterCount; 
 			if(reqspec.columns.size()>0) {
 				sql.addProjection(createSQLColumns(reqspec, relation));
 			}

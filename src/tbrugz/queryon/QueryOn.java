@@ -369,6 +369,9 @@ public class QueryOn extends HttpServlet {
 		
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
+		// bind parameters for Query
+		addOriginalParameters(reqspec, sql);
+		
 		Constraint pk = getPK(relation);
 		
 		filterByKey(relation, reqspec, pk, sql);
@@ -803,6 +806,18 @@ public class QueryOn extends HttpServlet {
 			if(reqspec.filterEquals.size()>0) {
 				log.warn("relation '"+relation.getName()+"' has no columns specified");
 			}
+		}
+	}
+	
+	void addOriginalParameters(RequestSpec reqspec, SQL sql) throws SQLException {
+		int informedParams = reqspec.params.size();
+		if(sql.originalBindParameterCount > informedParams) {
+			throw new BadRequestException("Query '"+reqspec.object+"' needs "+sql.originalBindParameterCount+" parameters but "
+				+((informedParams>0)?"only "+informedParams:"none")
+				+" were informed");
+		}
+		for(int i=0;i<sql.originalBindParameterCount;i++) {
+			sql.bindParameterValues.add(reqspec.params.get(i));
 		}
 	}
 	

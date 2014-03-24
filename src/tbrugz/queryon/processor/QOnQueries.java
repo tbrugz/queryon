@@ -1,5 +1,6 @@
 package tbrugz.queryon.processor;
 
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -71,6 +72,23 @@ public class QOnQueries extends SQLQueries {
 		try {
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			query.setColumns(DataDumpUtils.getColumns(rsmd));
+			ParameterMetaData pmd = stmt.getParameterMetaData();
+			int params = pmd.getParameterCount();
+			int inParams = 0;
+			for(int i=1;i<=params;i++) {
+				int pmode = ParameterMetaData.parameterModeIn; // assuming IN parameter
+				try {
+					pmode = pmd.getParameterMode(i);
+				}
+				catch(SQLException e) {
+					log.warn("Exception getting parameter mode ["+queryName+"/"+i+"]: "+e);
+				} 
+				if(pmode==ParameterMetaData.parameterModeIn) { inParams++; }
+				else {
+					log.warn("Parameter of mode '"+pmode+"' not understood for queries ["+queryName+"/"+i+"]");
+				}
+			}
+			query.parameterCount = inParams;
 		} catch (SQLException e) {
 			query.setColumns(new ArrayList<Column>());
 			log.warn("sqlexception: "+e.toString().trim(), e);
