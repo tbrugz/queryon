@@ -37,7 +37,7 @@ public class SQL {
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
-	int originalBindParameterCount;
+	Integer originalBindParameterCount;
 	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	

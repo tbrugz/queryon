@@ -817,12 +817,18 @@ public class QueryOn extends HttpServlet {
 	
 	void addOriginalParameters(RequestSpec reqspec, SQL sql) throws SQLException {
 		int informedParams = reqspec.params.size();
-		if(sql.originalBindParameterCount > informedParams) {
-			throw new BadRequestException("Query '"+reqspec.object+"' needs "+sql.originalBindParameterCount+" parameters but "
-				+((informedParams>0)?"only "+informedParams:"none")
-				+" were informed");
+		//XXX bind all or bind none?
+		//int bindParamsLoop = informedParams; //bind all
+		int bindParamsLoop = -1; // bind none
+		if(sql.originalBindParameterCount!=null) {
+			if(sql.originalBindParameterCount > informedParams) {
+				throw new BadRequestException("Query '"+reqspec.object+"' needs "+sql.originalBindParameterCount+" parameters but "
+					+((informedParams>0)?"only "+informedParams:"none")
+					+" were informed");
+			}
+			bindParamsLoop = sql.originalBindParameterCount;
 		}
-		for(int i=0;i<sql.originalBindParameterCount;i++) {
+		for(int i=0;i<bindParamsLoop;i++) {
 			sql.bindParameterValues.add(reqspec.params.get(i));
 		}
 	}
