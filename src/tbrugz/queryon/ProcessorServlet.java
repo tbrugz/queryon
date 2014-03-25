@@ -96,7 +96,7 @@ public class ProcessorServlet extends HttpServlet {
 		}
 	}
 	
-	static void doProcessProcessor(Processor pc, Properties prop, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException {
+	static void doProcessProcessor(Processor pc, Properties prop, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		if(pc.needsSchemaModel()) {
 			SchemaModel sm = (SchemaModel) config.getServletContext().getAttribute(QueryOn.ATTR_MODEL);
 			if(sm==null) {
@@ -110,8 +110,29 @@ public class ProcessorServlet extends HttpServlet {
 			conn = ConnectionUtil.initDBConnection(QueryOn.CONN_PROPS_PREFIX, prop);
 			pc.setConnection(conn);
 		}
+		
+		Writer w = null;
+		OutputStream os = null;
+		if(resp!=null) {
+			if(pc.acceptsOutputWriter()) {
+				w = resp.getWriter();
+				pc.setOutputWriter(w);
+			}
+			else if(pc.acceptsOutputStream()) {
+				os = resp.getOutputStream();
+				pc.setOutputStream(os);
+			}
+		}
+		
 		pc.process();
 		
+		if(w!=null) {
+			w.flush();
+		}
+		if(os!=null) {
+			os.flush();
+		}
+
 		if(conn!=null) { conn.close(); }
 	}
 	
