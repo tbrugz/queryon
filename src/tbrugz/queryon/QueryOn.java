@@ -136,6 +136,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
+	static final String PROP_SQLDIALECT = "queryon.sqldialect";
 	
 	static final String PROP_GRABCLASS = "queryon.grabclass";
 	@Deprecated static final String PROP_SQLDUMP_GRABCLASS = "sqldump.schemagrab.grabclass";
@@ -223,6 +224,11 @@ public class QueryOn extends HttpServlet {
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
+		String dialect = prop.getProperty(PROP_SQLDIALECT);
+		if(dialect!=null) {
+			log.info("setting sql-dialect: "+dialect);
+			sm.setSqlDialect(dialect);
+		}
 		DBMSResources.instance().updateDbId(sm.getSqlDialect());
 		
 		if(conn!=null) { conn.close(); }
