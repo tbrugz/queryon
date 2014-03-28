@@ -153,6 +153,11 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_PROP = "prop";
 	public static final String ATTR_MODEL = "model";
 	
+	public static final String METHOD_GET = "GET";
+	public static final String METHOD_POST = "POST";
+	public static final String METHOD_PUT = "PUT";
+	public static final String METHOD_DELETE = "DELETE";
+	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	SchemaModel model;
@@ -270,7 +275,7 @@ public class QueryOn extends HttpServlet {
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
 		}
-		else if(ACTION_QUERY_ANY.equals(reqspec.object) && "POST".equals(reqspec.httpMethod)) {
+		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.SELECT_ANY;
 		}
 		else {
@@ -280,16 +285,16 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			if(dbobj instanceof Relation) {
-				if(reqspec.httpMethod.equals("GET")) {
+				if(reqspec.httpMethod.equals(METHOD_GET)) {
 					atype = ActionType.SELECT;
 				}
-				else if(reqspec.httpMethod.equals("POST")) {
+				else if(reqspec.httpMethod.equals(METHOD_POST)) {
 					atype = ActionType.INSERT; //upsert?
 				}
-				else if(reqspec.httpMethod.equals("PUT")) {
+				else if(reqspec.httpMethod.equals(METHOD_PUT)) {
 					atype = ActionType.UPDATE;
 				}
-				else if(reqspec.httpMethod.equals("DELETE")) {
+				else if(reqspec.httpMethod.equals(METHOD_DELETE)) {
 					atype = ActionType.DELETE;
 				}
 				else {
