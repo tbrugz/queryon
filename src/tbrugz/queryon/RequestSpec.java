@@ -167,7 +167,7 @@ public class RequestSpec {
 		Map<String,String[]> params = req.getParameterMap();
 		
 		for(String param: params.keySet()) {
-			if(param.startsWith("fe:")) {
+			if(param.startsWith("fe:")) { //XXX "feq"?
 				String col = param.substring(3);
 				String value = params.get(param)[0];
 				filterEquals.put(col, value);

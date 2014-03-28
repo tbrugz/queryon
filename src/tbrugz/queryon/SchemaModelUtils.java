@@ -85,7 +85,7 @@ public class SchemaModelUtils {
 		return exec;
 	}
 	
-	//XXX: should this be in tbrugz.sqldump.dbmodel.DBIdentifiable ?
+	//XXXXX: should this be in tbrugz.sqldump.dbmodel.DBIdentifiable ? no, it uses RequestSpec as parameter
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(SchemaModel model, RequestSpec reqspec) {
 		try {
