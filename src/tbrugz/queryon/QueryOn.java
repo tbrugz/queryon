@@ -39,6 +39,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -68,10 +69,12 @@ public class QueryOn extends HttpServlet {
 		DELETE,
 		EXECUTE, //~TODOne: execute action!
 		//QUERY,   //TODOne: SQLQueries action!
-		STATUS   //~TODOne: or CONFIG? show model, user, vars...
+		STATUS,   //~TODOne: or CONFIG? show model, user, vars...
 		//XXXxx: FINDBYKEY action? return only the first result
+		SELECT_ANY
 	}
 	
+	// 'status objects' (SO)
 	public static final String SO_TABLE = "table", 
 			SO_VIEW = "view",
 			SO_EXECUTABLE = "executable",
@@ -81,6 +84,8 @@ public class QueryOn extends HttpServlet {
 		SO_TABLE, SO_VIEW, SO_EXECUTABLE, SO_FK,
 		SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
 	};
+	
+	public static final String ACTION_QUERY_ANY = "QueryAny";
 	
 	/*public enum StatusObject {
 		TABLE,
@@ -265,6 +270,9 @@ public class QueryOn extends HttpServlet {
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
 		}
+		else if(ACTION_QUERY_ANY.equals(reqspec.object) && "POST".equals(reqspec.httpMethod)) {
+			atype = ActionType.SELECT_ANY;
+		}
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
@@ -289,6 +297,7 @@ public class QueryOn extends HttpServlet {
 				}
 			}
 			else if(dbobj instanceof ExecutableObject) {
+				//XXX only if POST method?
 				atype = ActionType.EXECUTE;
 			}
 			else {
@@ -306,6 +315,20 @@ public class QueryOn extends HttpServlet {
 				}
 				doSelect(rel, reqspec, resp);
 				}
+				break;
+			case SELECT_ANY:
+				Query relation = new Query();
+				String name = req.getParameter("name");
+				if(name==null || name.equals("")) {
+					throw new BadRequestException("parameter 'name' undefined");
+				}
+				String sql = req.getParameter("sql");
+				if(sql==null || sql.equals("")) {
+					throw new BadRequestException("parameter 'sql' undefined");
+				}
+				relation.setName(name);
+				relation.query = sql;
+				doSelect(relation, reqspec, resp);
 				break;
 			case EXECUTE:
 				ExecutableObject eo = (ExecutableObject) dbobj;
