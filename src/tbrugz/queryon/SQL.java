@@ -134,14 +134,24 @@ public class SQL {
 	}
 	
 	public void applyOrder(RequestSpec reqspec) {
-		//TODO: validate columns
+		//TODOne: validate columns
 		if(reqspec.orderCols.size()==0) return;
+		
+		List<String> relationCols = null;
+		if(relation!=null) {
+			relationCols = relation.getColumnNames();
+		}
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("order by ");
 		for(int i=0;i<reqspec.orderCols.size();i++) {
 			String col = reqspec.orderCols.get(i);
 			String ascDesc = reqspec.orderAscDesc.get(i);
+			//XXX option to ignore unknown columns? or to not validate?
+			if(relationCols!=null && !relationCols.contains(col)) {
+				throw new BadRequestException("can't order by '"+col+"' (unknown column)");
+			}
+			
 			sb.append((i==0?"":", ")+sqlIdDecorator.get(col)+" "+ascDesc);
 		}
 		
