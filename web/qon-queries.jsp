@@ -26,9 +26,9 @@
 	        height: 20em;
 	        border: 1px solid black;
 	    }
-	    #objectid-container {
-	    	/*background-color: #ddd;*/
-	    }
+	    /*#objectid-container {
+	    	background-color: #ddd;
+	    }*/
 	    label {
 	    	background-color: #ddd;
 	    	font-weight: bold;
@@ -38,6 +38,10 @@
 	    	margin-top: 2px;
 	    	margin-bottom: 2px;
 	    }
+	    /*#queryResult {
+			overflow-y: scroll;
+			bottom: 0px;
+		}*/
 	</style>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
 <script type="text/javascript">

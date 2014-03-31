@@ -4,3 +4,4 @@ lib/*
 dist/*
 target/*
 work/output/*
+tmp/*
