@@ -48,14 +48,28 @@
 	var responseType = "htmlx";
 
 	function doRun() {
+		var reqData = {
+			schema : document.getElementById('schema').value,
+			name : document.getElementById('name').value,
+			sql: editor.getValue(),
+		};
+		
+		var params = document.querySelectorAll('.parameter');
+		//var paramsStr = '';
+		console.log(params);
+		
+		for (var i = 0; i < params.length; ++i) {
+			var item = params[i];
+			//console.log(item);
+			reqData[item.name] = item.value;
+			//paramsStr += '/'+item.value;
+		}
+		
 		var request = $.ajax({
 			url : "q/QueryAny."+responseType,
+			//url : "q/QueryAny"+paramsStr+"."+responseType,
 			type : "POST",
-			data : {
-				schema : document.getElementById('schema').value,
-				name : document.getElementById('name').value,
-				sql: editor.getValue(),
-			},
+			data: reqData,
 			dataType : "html"
 		});
 		
@@ -72,6 +86,51 @@
 		});
 	}
 	//type: 'POST' - https://api.jquery.com/jQuery.ajax/
+
+	function doValidate() {
+		var request = $.ajax({
+			url : "q/ValidateAny",
+			type : "POST",
+			data : {
+				schema : document.getElementById('schema').value,
+				name : document.getElementById('name').value,
+				sql: editor.getValue(),
+			},
+			dataType : "html"
+		});
+		
+		request.done(function(data) {
+			console.log('#params = '+data);
+			//var container = document.getElementById('sqlparams');
+			setParameters(data);
+		});
+
+		request.fail(function(jqXHR, textStatus, errorThrown) {
+			console.log(jqXHR);
+			alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+		});
+	}
+	
+	function setParameters(numparams) {
+		var params = document.querySelectorAll('.parameter');
+		//$("#sqlparams").html('');
+		console.log('numparams: '+numparams+' ; params.length: '+params.length);
+		if(numparams > params.length) {
+			for(var i=params.length+1;i<=numparams;i++) {
+				$("#sqlparams").append("<label>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");
+			}
+		}
+		else if(numparams < params.length) {
+			for (var i = params.length; i > numparams; --i) {
+				var item = params[i-1];
+				console.log(item);
+				item = item.parentNode;
+				item.parentNode.removeChild(item);
+			}
+		}
+	
+	}
+	
 </script>
 </head>
 <body>
@@ -80,6 +139,7 @@ SchemaModel model = null;
 String schemaName = null;
 String queryName = null;
 String query = "";
+int numOfParameters = 0;
 %>
 
 <%
@@ -95,6 +155,7 @@ if(queryName!=null) {
 		if(v instanceof Query) {
 			Query q = (Query) v;
 			query = q.query;
+			numOfParameters = q.parameterCount;
 		}
 		else {
 			query = "select * from "+v.getFinalName(true);
@@ -124,8 +185,11 @@ if(queryName==null) { queryName = ""; }
 
 <div id="editor"><%= query %></div>
 
+<div class="container" id="sqlparams">
+</div>
+
 <div class="container">
-	<input type="button" value="validate">
+	<input type="button" value="validate" onclick="javascript:doValidate();">
 	<input type="button" value="run" onclick="javascript:doRun();">
 	<input type="button" value="save">
 </div>
@@ -141,6 +205,8 @@ if(queryName==null) { queryName = ""; }
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/eclipse"); //monokai,ambiance,twilight,,eclipse,github ?
     editor.getSession().setMode("ace/mode/sql");
+    
+    setParameters(<%= numOfParameters %>);
 </script>
 
 

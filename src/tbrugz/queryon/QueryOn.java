@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
@@ -71,7 +74,8 @@ public class QueryOn extends HttpServlet {
 		//QUERY,   //TODOne: SQLQueries action!
 		STATUS,   //~TODOne: or CONFIG? show model, user, vars...
 		//XXXxx: FINDBYKEY action? return only the first result
-		SELECT_ANY
+		SELECT_ANY,
+		VALIDATE_ANY
 	}
 	
 	// 'status objects' (SO)
@@ -86,6 +90,7 @@ public class QueryOn extends HttpServlet {
 	};
 	
 	public static final String ACTION_QUERY_ANY = "QueryAny";
+	public static final String ACTION_VALIDATE_ANY = "ValidateAny";
 	
 	/*public enum StatusObject {
 		TABLE,
@@ -278,6 +283,9 @@ public class QueryOn extends HttpServlet {
 		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.SELECT_ANY;
 		}
+		else if(ACTION_VALIDATE_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
+			atype = ActionType.VALIDATE_ANY;
+		}
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
@@ -321,7 +329,7 @@ public class QueryOn extends HttpServlet {
 				doSelect(rel, reqspec, resp);
 				}
 				break;
-			case SELECT_ANY:
+			case SELECT_ANY: {
 				Query relation = new Query();
 				String name = req.getParameter("name");
 				if(name==null || name.equals("")) {
@@ -335,11 +343,33 @@ public class QueryOn extends HttpServlet {
 				relation.query = sql;
 				try {
 					//XXX: validate first & return number of parameters?
+					relation.parameterCount = reqspec.params.size(); //maybe not good... anyway
 					doSelect(relation, reqspec, resp);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage());
 				}
+			}
+				break;
+			case VALIDATE_ANY: {
+				Query relation = new Query();
+				String name = req.getParameter("name");
+				if(name==null || name.equals("")) {
+					throw new BadRequestException("parameter 'name' undefined");
+				}
+				String sql = req.getParameter("sql");
+				if(sql==null || sql.equals("")) {
+					throw new BadRequestException("parameter 'sql' undefined");
+				}
+				relation.setName(name);
+				relation.query = sql;
+				try {
+					doValidate(relation, reqspec, resp);
+				}
+				catch(SQLException e) {
+					throw new BadRequestException(e.getMessage());
+				}
+			}
 				break;
 			case EXECUTE:
 				ExecutableObject eo = (ExecutableObject) dbobj;
@@ -457,6 +487,27 @@ public class QueryOn extends HttpServlet {
 		
 		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, fks, uks, applyLimitOffsetInResultSet, resp);
 		
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
+	}
+	
+	void doValidate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		try {
+			SQL sql = SQL.createSQL(relation, reqspec);
+			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
+
+			//ResultSetMetaData rsmd = stmt.getMetaData();
+			ParameterMetaData pmd = stmt.getParameterMetaData();
+			int params = pmd.getParameterCount();
+			log.info("doValidate: "+params);
+			resp.getWriter().write(String.valueOf(params));
 		}
 		catch(SQLException e) {
 			conn.rollback();
