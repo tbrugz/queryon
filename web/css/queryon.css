@@ -1,6 +1,13 @@
 
-body,h1,h2,h3 {
-	padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+body {
+	margin: 0 auto;
+	font: normal 10pt Tahoma, Geneva, sans-serif; 
+	background-color: #ddd;
+}
+h1,h2,h3 {
+	/*padding-top: 60px; / * 60px to make the container go all the way to the bottom of the topbar
+	font-family: Helvetica, sans-serif;
+	background-color: #fff;*/
 }
 
 td {

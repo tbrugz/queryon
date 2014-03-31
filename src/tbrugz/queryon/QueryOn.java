@@ -333,7 +333,13 @@ public class QueryOn extends HttpServlet {
 				}
 				relation.setName(name);
 				relation.query = sql;
-				doSelect(relation, reqspec, resp);
+				try {
+					//XXX: validate first & return number of parameters?
+					doSelect(relation, reqspec, resp);
+				}
+				catch(SQLException e) {
+					throw new BadRequestException(e.getMessage());
+				}
 				break;
 			case EXECUTE:
 				ExecutableObject eo = (ExecutableObject) dbobj;
