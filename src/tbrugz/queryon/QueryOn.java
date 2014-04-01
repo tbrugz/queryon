@@ -595,7 +595,7 @@ public class QueryOn extends HttpServlet {
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"?
 	static final List<String> tableAllColumns = Arrays.asList(new String[]{"PKConstraint", "columnNames", "constraints", "remarks", "relationType"});
-	static final List<String> viewAllColumns = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
+	static final List<String> viewAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;

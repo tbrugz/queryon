@@ -108,14 +108,14 @@ public class ProcessorServlet extends HttpServlet {
 			Processor proc = (Processor) procComponent;
 			doProcessProcessor(proc, prop, config, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
-				resp.getWriter().write("processor '"+procClass+"' processed");
+				resp.getWriter().write("processor '"+procClass+"' processed\n");
 			}
 		}
 		else if(procComponent instanceof SchemaModelDumper) {
 			SchemaModelDumper dumper = (SchemaModelDumper) procComponent;
 			doProcessDumper(dumper, config, resp);
 			if(!dumper.acceptsOutputStream() && !dumper.acceptsOutputWriter() && resp!=null) {
-				resp.getWriter().write("dumper '"+procClass+"' processed");
+				resp.getWriter().write("dumper '"+procClass+"' processed\n");
 			}
 		}
 		else {
