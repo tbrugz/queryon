@@ -27,6 +27,9 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * XXX: allow only POST method? (not idempotent)
+ */
 public class ProcessorServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -42,6 +45,12 @@ public class ProcessorServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doPost(req, resp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
 			doProcess(req, resp);

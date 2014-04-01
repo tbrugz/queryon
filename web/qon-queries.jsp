@@ -46,6 +46,8 @@
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
+	var queryOnUrl = 'q';
+	var processorUrl = 'processor';
 
 	function doRun() {
 		var reqData = {
@@ -66,7 +68,7 @@
 		}
 		
 		var request = $.ajax({
-			url : "q/QueryAny."+responseType,
+			url : queryOnUrl+"/QueryAny."+responseType,
 			//url : "q/QueryAny"+paramsStr+"."+responseType,
 			type : "POST",
 			data: reqData,
@@ -89,7 +91,7 @@
 
 	function doValidate() {
 		var request = $.ajax({
-			url : "q/ValidateAny",
+			url : queryOnUrl+"/ValidateAny",
 			type : "POST",
 			data : {
 				schema : document.getElementById('schema').value,
@@ -103,6 +105,34 @@
 			console.log('#params = '+data);
 			//var container = document.getElementById('sqlparams');
 			setParameters(data);
+		});
+
+		request.fail(function(jqXHR, textStatus, errorThrown) {
+			console.log(jqXHR);
+			alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+		});
+	}
+	
+	function doSave() {
+		var request = $.ajax({
+			url : processorUrl+"/SQLQueries",
+			// url : processorUrl+"/SQLQueries,queryon.processor.QOnQueries",
+			type : "POST",
+			data : {
+				"sqldump.queries.addtomodel": "true",
+				"sqldump.queries.runqueries": "false",
+				"sqldump.queries.grabcolsinfofrommetadata": "true",
+				"sqldump.queries": "q1",
+				"sqldump.query.q1.schemaname": document.getElementById('schema').value,
+				"sqldump.query.q1.name": document.getElementById('name').value,
+				"sqldump.query.q1.sql": editor.getValue(),
+				//"sqldump.query.q1.remarks"
+			},
+			dataType : "html"
+		});
+
+		request.done(function(data) {
+			console.log(data);
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -195,7 +225,7 @@ if(queryName==null) { queryName = ""; }
 <div class="container">
 	<input type="button" value="validate" onclick="javascript:doValidate();">
 	<input type="button" value="run" onclick="javascript:doRun();">
-	<input type="button" value="save">
+	<input type="button" value="save" onclick="javascript:doSave();">
 </div>
 
 <div class="container">
@@ -212,6 +242,5 @@ if(queryName==null) { queryName = ""; }
     
     setParameters(<%= numOfParameters %>);
 </script>
-
 
 </body>
