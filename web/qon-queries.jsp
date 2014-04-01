@@ -115,8 +115,8 @@
 	
 	function doSave() {
 		var request = $.ajax({
-			url : processorUrl+"/SQLQueries",
-			// url : processorUrl+"/SQLQueries,queryon.processor.QOnQueries",
+			//url : processorUrl+"/SQLQueries",
+			url : processorUrl+"/SQLQueries,queryon.processor.QOnQueries",
 			type : "POST",
 			data : {
 				"sqldump.queries.addtomodel": "true",
@@ -127,6 +127,8 @@
 				"sqldump.query.q1.name": document.getElementById('name').value,
 				"sqldump.query.q1.sql": editor.getValue(),
 				//"sqldump.query.q1.remarks"
+				"queryon.qon-queries.action": "write",
+				"queryon.qon-queries.querynames": document.getElementById('name').value,
 			},
 			dataType : "html"
 		});
