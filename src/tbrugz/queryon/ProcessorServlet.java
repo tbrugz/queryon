@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -23,6 +24,7 @@ import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
 public class ProcessorServlet extends HttpServlet {
@@ -60,9 +62,12 @@ public class ProcessorServlet extends HttpServlet {
 		String s = req.getPathInfo();
 		//log.info("pathInfo: "+s);
 		String[] parts = s.split("/");
-		String procClass = parts[1];
-		
-		doProcess(procClass, config, req, resp);
+		String procClasses = parts[1];
+
+		String[] classParts = procClasses.split(",");
+		for(String procClass: classParts) {
+			doProcess(procClass, config, req, resp);
+		}
 	}
 
 	public static void doProcess(String procClass, ServletConfig config) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
@@ -75,9 +80,18 @@ public class ProcessorServlet extends HttpServlet {
 			throw new ClassNotFoundException(procClass);
 		}
 		
-		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
-		if(prop==null) {
+		Properties appprop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		if(appprop==null) {
 			throw new ServletException("properties attribute is null!");
+		}
+		Properties prop = new ParametrizedProperties();
+		prop.putAll(appprop);
+		if(req!=null) {
+			Enumeration<String> en = req.getParameterNames();
+			while(en.hasMoreElements()) {
+				String s = en.nextElement();
+				prop.setProperty(s, req.getParameter(s));
+			}
 		}
 		procComponent.setProperties(prop);
 		
