@@ -494,13 +494,15 @@ public class QueryOn extends HttpServlet {
 			SQL sql = SQL.createSQL(relation, reqspec);
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
 
-			//ResultSetMetaData rsmd = stmt.getMetaData();
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
-			log.info("doValidate: "+params);
+			log.info("doValidate: #params="+params);
+			stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
+			
 			resp.getWriter().write(String.valueOf(params));
 		}
 		catch(SQLException e) {
+			log.info("doValidate: error validating: "+e);
 			conn.rollback();
 			throw e;
 		}
