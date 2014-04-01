@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
-import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
@@ -329,47 +327,25 @@ public class QueryOn extends HttpServlet {
 				doSelect(rel, reqspec, resp);
 				}
 				break;
-			case SELECT_ANY: {
-				Query relation = new Query();
-				String name = req.getParameter("name");
-				if(name==null || name.equals("")) {
-					throw new BadRequestException("parameter 'name' undefined");
-				}
-				String sql = req.getParameter("sql");
-				if(sql==null || sql.equals("")) {
-					throw new BadRequestException("parameter 'sql' undefined");
-				}
-				relation.setName(name);
-				relation.query = sql;
+			case SELECT_ANY:
 				try {
-					//XXX: validate first & return number of parameters?
+					Query relation = getQuery(req);
+					//XXXxx: validate first & return number of parameters?
 					relation.parameterCount = reqspec.params.size(); //maybe not good... anyway
 					doSelect(relation, reqspec, resp);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage());
 				}
-			}
 				break;
-			case VALIDATE_ANY: {
-				Query relation = new Query();
-				String name = req.getParameter("name");
-				if(name==null || name.equals("")) {
-					throw new BadRequestException("parameter 'name' undefined");
-				}
-				String sql = req.getParameter("sql");
-				if(sql==null || sql.equals("")) {
-					throw new BadRequestException("parameter 'sql' undefined");
-				}
-				relation.setName(name);
-				relation.query = sql;
+			case VALIDATE_ANY:
 				try {
+					Query relation = getQuery(req);
 					doValidate(relation, reqspec, resp);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage());
 				}
-			}
 				break;
 			case EXECUTE:
 				ExecutableObject eo = (ExecutableObject) dbobj;
@@ -431,6 +407,21 @@ public class QueryOn extends HttpServlet {
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		doGet(req, resp);
+	}
+	
+	Query getQuery(HttpServletRequest req) {
+		Query relation = new Query();
+		String name = req.getParameter("name");
+		if(name==null || name.equals("")) {
+			throw new BadRequestException("parameter 'name' undefined");
+		}
+		String sql = req.getParameter("sql");
+		if(sql==null || sql.equals("")) {
+			throw new BadRequestException("parameter 'sql' undefined");
+		}
+		relation.setName(name);
+		relation.query = sql;
+		return relation;
 	}
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
