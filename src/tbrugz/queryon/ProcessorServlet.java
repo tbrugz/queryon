@@ -62,10 +62,14 @@ public class ProcessorServlet extends HttpServlet {
 		String[] parts = s.split("/");
 		String procClass = parts[1];
 		
-		doProcess(procClass, config, resp);
+		doProcess(procClass, config, req, resp);
 	}
-	
-	public static void doProcess(String procClass, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+
+	public static void doProcess(String procClass, ServletConfig config) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+		doProcess(procClass, config, null, null);
+	}
+
+	public static void doProcess(String procClass, ServletConfig config, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(procComponent==null) {
 			throw new ClassNotFoundException(procClass);

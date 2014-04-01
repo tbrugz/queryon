@@ -196,7 +196,7 @@ public class QueryOn extends HttpServlet {
 			if(procsOnStartup!=null) {
 				for(String p: procsOnStartup) {
 					try {
-						ProcessorServlet.doProcess(p, config, null);
+						ProcessorServlet.doProcess(p, config);
 					}
 					catch(Exception e) {
 						log.warn("Exception executing processor on startup: "+e);
