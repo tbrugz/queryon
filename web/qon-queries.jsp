@@ -10,39 +10,10 @@
 <head>
     <title>QueryOn - query editor</title>
     <link href="css/queryon.css" rel="stylesheet">
+    <link href="css/qon-queries.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-	<style type="text/css" media="screen">
-	    #editor { 
-	        /*position: absolute;
-	        top: 0;
-	        bottom: 0;
-	        width: 100%;
-	        right: 1ex;
-	        left: 1ex;
-	        margin: 2em;
-	        */
-	        height: 20em;
-	        border: 1px solid black;
-	    }
-	    /*#objectid-container {
-	    	background-color: #ddd;
-	    }*/
-	    label {
-	    	background-color: #ddd;
-	    	font-weight: bold;
-	    }
-	    .container {
-	    	border: 1px solid #999;
-	    	margin-top: 2px;
-	    	margin-bottom: 2px;
-	    }
-	    /*#queryResult {
-			overflow-y: scroll;
-			bottom: 0px;
-		}*/
-	</style>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
@@ -80,13 +51,16 @@
 		request.done(function(data) {
 			//XXX option to handle different response types (html, json, csv, xml)?
 			//'close' style:: position: relative, float: right?
-			$("#queryResult").html("<input type='button' style='background-color: #444; position: absolute; right: 0px; font-weight: bold;' onclick='document.getElementById(\"queryResult\").innerHTML = \"\"' value='X'/>");
+			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X'/>");
 			$("#queryResult").append(data);
+			closeMessages();
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			console.log(jqXHR);
-			alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			errorMessage(jqXHR.responseText);
+			closeResults();
+			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
 	//type: 'POST' - https://api.jquery.com/jQuery.ajax/
@@ -107,11 +81,14 @@
 			console.log('#params = '+data);
 			//var container = document.getElementById('sqlparams');
 			setParameters(data);
+			infoMessage('query '+document.getElementById('name').value+' sucessfully validated');
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			console.log(jqXHR);
-			alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			errorMessage(jqXHR.responseText);
+			closeResults();
+			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
 	
@@ -137,6 +114,8 @@
 
 		request.done(function(data) {
 			console.log(data);
+			closeMessages();
+			infoMessage('query '+document.getElementById('name').value+' sucessfully saved');
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -165,6 +144,23 @@
 	
 	}
 	
+	function errorMessage(message) {
+		// XXX encode 'message'?
+		$('#messages').html("<div class='error'>"+message+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages()\" value='x' float='right'/></div>");
+	}
+
+	function infoMessage(message) {
+		// XXX encode 'message'?
+		$('#messages').html("<div class='info'>"+message+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages()\" value='x' float='right'/></div>");
+	}
+	
+	function closeMessages() {
+		document.getElementById('messages').innerHTML = '';		
+	}
+	
+	function closeResults() {
+		document.getElementById("queryResult").innerHTML = "";
+	}
 </script>
 <script type="text/javascript">
 	$(document).jkey('f9',function(){
@@ -242,6 +238,9 @@ if(remarks==null) { remarks = ""; }
 	<input type="button" value="validate" onclick="javascript:doValidate();">
 	<input type="button" value="run" onclick="javascript:doRun();">
 	<input type="button" value="save" onclick="javascript:doSave();">
+</div>
+
+<div id="messages">
 </div>
 
 <div class="container">

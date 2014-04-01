@@ -1,0 +1,57 @@
+#editor {
+	/*position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	right: 1ex;
+	left: 1ex;
+	margin: 2em;
+	*/
+	height: 20em;
+	border: 1px solid black;
+}
+/*#objectid-container {
+	background-color: #ddd;
+}*/
+label {
+	background-color: #ddd;
+	font-weight: bold;
+}
+
+.container {
+	border: 1px solid #999;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+.error {
+	background-color: #faa;
+}
+
+.errorbutton {
+	background-color: #f66;
+	font-weight: bold;
+	border: 0;
+}
+
+.info {
+	background-color: #aaf;
+}
+
+.infobutton {
+	background-color: #66f;
+	font-weight: bold;
+	border: 0;
+}
+
+.closebutton {
+	background-color: #666;
+	position: absolute;
+	right: 0px;
+	font-weight: bold;
+	border: 0;
+}
+/*#queryResult {
+	overflow-y: scroll;
+	bottom: 0px;
+}*/
