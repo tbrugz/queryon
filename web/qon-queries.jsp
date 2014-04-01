@@ -159,7 +159,11 @@ if(queryName!=null) {
 		else {
 			query = "select * from "+v.getFinalName(true);
 		}
-		numOfParameters = v.getParameterCount();
+		
+		schemaName = v.getSchemaName();
+		if(v.getParameterCount()!=null) {
+			numOfParameters = v.getParameterCount();
+		}
 	}
 	else {
 		Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, queryName);
