@@ -199,7 +199,7 @@ public class QueryOn extends HttpServlet {
 						ProcessorServlet.doProcess(p, config);
 					}
 					catch(Exception e) {
-						log.warn("Exception executing processor on startup: "+e);
+						log.warn("Exception executing processor on startup: "+e, e);
 						//XXX: fail on error?
 					}
 				}
@@ -593,7 +593,9 @@ public class QueryOn extends HttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
-	static final List<String> tableAllColumns = Arrays.asList(new String[]{"PKConstraint", "columnNames", "constraints", "remarks", "type"}); // XXX: add "columns"?
+	// XXX: add "columns"?
+	static final List<String> tableAllColumns = Arrays.asList(new String[]{"PKConstraint", "columnNames", "constraints", "remarks", "relationType"});
+	static final List<String> viewAllColumns = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
@@ -610,7 +612,7 @@ public class QueryOn extends HttpServlet {
 		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
 			objectName = SO_VIEW;
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
-			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, list, View.class);
+			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, list, View.class);
 			//XXX importedFKs = ...
 		}
 		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
