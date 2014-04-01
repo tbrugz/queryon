@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -56,7 +55,7 @@ public class QOnQueries extends SQLQueries {
 	
 	void readFromDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String sql = "select schema, name, query from "+qonQueriesTable;
+		String sql = "select schema, name, query, remarks from "+qonQueriesTable;
 		
 		ResultSet rs = null;
 		try {
@@ -72,6 +71,7 @@ public class QOnQueries extends SQLQueries {
 			String schema = rs.getString(1);
 			String queryName = rs.getString(2);
 			String query = rs.getString(3);
+			String remarks = rs.getString(4);
 			
 			PreparedStatement stinn = conn.prepareStatement(query);
 			//count += addQueryToModel(queryName, queryName, schema,
@@ -80,17 +80,18 @@ public class QOnQueries extends SQLQueries {
 			//		/*List<String> params*/ null,
 			//		/*String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend*/ null, null, null);
 			
-			count += addQ2M(schema, queryName, stinn, query); 
+			count += addQ2M(schema, queryName, stinn, query, remarks); 
 		}
 		
 		log.info("QOn processed [added/replaced "+count+" queries]");
 	}
 	
-	int addQ2M(String schemaName, String queryName, PreparedStatement stmt, String sql) {
+	int addQ2M(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks) {
 		Query query = new Query();
 		query.setSchemaName(schemaName);
 		query.setName(queryName);
 		query.setQuery(sql);
+		query.setRemarks(remarks);
 
 		try {
 			ResultSetMetaData rsmd = stmt.getMetaData();
@@ -129,8 +130,8 @@ public class QOnQueries extends SQLQueries {
 
 	void writeToDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String updateSql = "update "+qonQueriesTable+" set schema = ?, query = ? where name = ?";
-		String insertSql = "insert into "+qonQueriesTable+" (schema, query, name) values (?, ?, ?)";
+		String updateSql = "update "+qonQueriesTable+" set schema = ?, query = ?, remarks = ? where name = ?";
+		String insertSql = "insert into "+qonQueriesTable+" (schema, query, remarks, name) values (?, ?, ?, ?)";
 		PreparedStatement updateSt = conn.prepareStatement(updateSql);
 		PreparedStatement insertSt = conn.prepareStatement(insertSql);
 
@@ -147,13 +148,15 @@ public class QOnQueries extends SQLQueries {
 					//schema, query, name
 					updateSt.setString(1, v.getSchemaName());
 					updateSt.setString(2, v.getQuery());
-					updateSt.setString(3, v.getName());
+					updateSt.setString(3, v.getRemarks());
+					updateSt.setString(4, v.getName());
 					int countU = updateSt.executeUpdate();
 					countUpdates += countU;
 					if(countU==0) {
 						insertSt.setString(1, v.getSchemaName());
 						insertSt.setString(2, v.getQuery());
-						insertSt.setString(3, v.getName());
+						insertSt.setString(3, v.getRemarks());
+						insertSt.setString(4, v.getName());
 						int countI = insertSt.executeUpdate();
 						countInserts += countI;
 						if(countI==0) {

@@ -128,7 +128,7 @@
 				"sqldump.query.q1.schemaname": document.getElementById('schema').value,
 				"sqldump.query.q1.name": document.getElementById('name').value,
 				"sqldump.query.q1.sql": editor.getValue(),
-				//"sqldump.query.q1.remarks"
+				"sqldump.query.q1.remarks": document.getElementById('remarks').value,
 				"queryon.qon-queries.action": "write",
 				"queryon.qon-queries.querynames": document.getElementById('name').value,
 			},
@@ -179,6 +179,7 @@ SchemaModel model = null;
 String schemaName = null;
 String queryName = null;
 String query = "";
+String remarks = "";
 int numOfParameters = 0;
 %>
 
@@ -201,6 +202,7 @@ if(queryName!=null) {
 		}
 		
 		schemaName = v.getSchemaName();
+		remarks = v.getRemarks();
 		if(v.getParameterCount()!=null) {
 			numOfParameters = v.getParameterCount();
 		}
@@ -209,6 +211,8 @@ if(queryName!=null) {
 		Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, queryName);
 		if(t != null) {
 			query = "select * from "+t.getFinalName(true);
+			schemaName = t.getSchemaName();
+			remarks = t.getRemarks();
 		}
 		/*else {
 			query = "select * from xxx";
@@ -220,11 +224,13 @@ if(query==null || query.equals("")) {
 }
 if(schemaName==null) { schemaName = ""; }
 if(queryName==null) { queryName = ""; }
+if(remarks==null) { remarks = ""; }
 %>
 
 <div class="container" id="objectid-container">
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>"/></label>
+	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="40"/></label>
 </div>
 
 <div id="editor"><%= query %></div>
