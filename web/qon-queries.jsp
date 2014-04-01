@@ -154,12 +154,12 @@ if(queryName!=null) {
 	if(v != null) {
 		if(v instanceof Query) {
 			Query q = (Query) v;
-			query = q.query;
-			numOfParameters = q.parameterCount;
+			query = q.getQuery();
 		}
 		else {
 			query = "select * from "+v.getFinalName(true);
 		}
+		numOfParameters = v.getParameterCount();
 	}
 	else {
 		Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, queryName);
