@@ -44,6 +44,8 @@
 		}*/
 	</style>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
+	<!-- see: https://github.com/oscargodson/jkey -->
+	<script type="text/javascript" src="js/jquery.jkey.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
@@ -163,6 +165,12 @@
 	
 	}
 	
+</script>
+<script type="text/javascript">
+	$(document).jkey('f9',function(){
+		console.log('f9 pressed: doRun()');
+		doRun();
+	});
 </script>
 </head>
 <body>
