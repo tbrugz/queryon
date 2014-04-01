@@ -67,8 +67,8 @@ public class SQL {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.query , relation);
-			sql.originalBindParameterCount = q.parameterCount; 
+			SQL sql = new SQL( q.getQuery() , relation);
+			sql.originalBindParameterCount = q.getParameterCount(); 
 			if(reqspec.columns.size()>0) {
 				sql.addProjection(createSQLColumns(reqspec, relation));
 			}

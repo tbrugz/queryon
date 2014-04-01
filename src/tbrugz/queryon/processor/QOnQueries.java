@@ -67,7 +67,7 @@ public class QOnQueries extends SQLQueries {
 		Query query = new Query();
 		query.setSchemaName(schemaName);
 		query.setName(queryName);
-		query.query = sql;
+		query.setQuery(sql);
 
 		try {
 			ResultSetMetaData rsmd = stmt.getMetaData();
@@ -88,7 +88,7 @@ public class QOnQueries extends SQLQueries {
 					log.warn("Parameter of mode '"+pmode+"' not understood for queries ["+queryName+"/"+i+"]");
 				}
 			}
-			query.parameterCount = inParams;
+			query.setParameterCount(inParams);
 		} catch (SQLException e) {
 			query.setColumns(new ArrayList<Column>());
 			log.warn("sqlexception: "+e.toString().trim(), e);

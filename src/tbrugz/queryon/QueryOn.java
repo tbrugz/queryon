@@ -331,7 +331,7 @@ public class QueryOn extends HttpServlet {
 				try {
 					Query relation = getQuery(req);
 					//XXXxx: validate first & return number of parameters?
-					relation.parameterCount = reqspec.params.size(); //maybe not good... anyway
+					relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway
 					doSelect(relation, reqspec, resp);
 				}
 				catch(SQLException e) {
@@ -420,7 +420,7 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("parameter 'sql' undefined");
 		}
 		relation.setName(name);
-		relation.query = sql;
+		relation.setQuery(sql);
 		return relation;
 	}
 	
