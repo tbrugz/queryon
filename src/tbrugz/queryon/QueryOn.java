@@ -476,7 +476,7 @@ public class QueryOn extends HttpServlet {
 			reqspec.request.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
 		}
 		
-		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.uniqueColumns:null, fks, uks, applyLimitOffsetInResultSet, resp);
+		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp);
 		
 		}
 		catch(SQLException e) {
@@ -548,11 +548,11 @@ public class QueryOn extends HttpServlet {
 		int outParamCount = 0;
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
-			if(ep.inout==ExecutableParameter.INOUT.IN || ep.inout==ExecutableParameter.INOUT.INOUT) {
+			if(ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
 				stmt.setString(i+paramOffset, reqspec.params.get(i));
 			}
-			if(ep.inout==ExecutableParameter.INOUT.OUT || ep.inout==ExecutableParameter.INOUT.INOUT) {
-				stmt.registerOutParameter(i+paramOffset, DBUtil.getSQLTypeForColumnType(ep.dataType));
+			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
+				stmt.registerOutParameter(i+paramOffset, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
 				outParamCount++;
 			}
 		}
@@ -561,7 +561,7 @@ public class QueryOn extends HttpServlet {
 		Object retObject = null;
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
-			if(ep.inout==ExecutableParameter.INOUT.OUT || ep.inout==ExecutableParameter.INOUT.INOUT) {
+			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
 				retObject = stmt.getObject(i+paramOffset);
 			}
 			if(retObject!=null) {
@@ -754,8 +754,8 @@ public class QueryOn extends HttpServlet {
 		//use url params to set PK cols values
 		Constraint pk = getPK(relation);
 		if(pk!=null) {
-			for(int i=0;i<pk.uniqueColumns.size() && i<reqspec.params.size();i++) {
-				String pkcol = pk.uniqueColumns.get(i);
+			for(int i=0;i<pk.getUniqueColumns().size() && i<reqspec.params.size();i++) {
+				String pkcol = pk.getUniqueColumns().get(i);
 				if(! columns.contains(pkcol)) {
 					log.warn("unknown PK column: "+pkcol);
 					continue;
@@ -815,8 +815,8 @@ public class QueryOn extends HttpServlet {
 		if(conss!=null) {
 			Constraint uk = null;
 			for(Constraint c: conss) {
-				if(c.type==ConstraintType.PK) { pk = c; break; }
-				if(c.type==ConstraintType.UNIQUE && uk == null) { uk = c; }
+				if(c.getType()==ConstraintType.PK) { pk = c; break; }
+				if(c.getType()==ConstraintType.UNIQUE && uk == null) { uk = c; }
 			}
 			if(pk == null && uk != null) {
 				pk = uk;
@@ -830,7 +830,7 @@ public class QueryOn extends HttpServlet {
 			return false;
 		}
 		//log.info("#cols: pk="+pk.uniqueColumns.size()+", req="+reqspec.params.size());
-		return pk.uniqueColumns.size() <= reqspec.params.size();
+		return pk.getUniqueColumns().size() <= reqspec.params.size();
 	}
 	
 	void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
@@ -841,10 +841,10 @@ public class QueryOn extends HttpServlet {
 				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
 			}
 			else {
-				for(int i=0;i<pk.uniqueColumns.size();i++) {
+				for(int i=0;i<pk.getUniqueColumns().size();i++) {
 					if(reqspec.params.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
-					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.uniqueColumns.get(i))+" = ?"; //+reqspec.params.get(i)
+					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.getUniqueColumns().get(i))+" = ?"; //+reqspec.params.get(i)
 					sql.bindParameterValues.add(reqspec.params.get(i));
 				}
 			}
