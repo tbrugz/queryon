@@ -130,7 +130,7 @@
 		console.log('numparams: '+numparams+' ; params.length: '+params.length);
 		if(numparams > params.length) {
 			for(var i=params.length+1;i<=numparams;i++) {
-				$("#sqlparams").append("<label>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");
+				$("#sqlparams").append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");
 			}
 		}
 		else if(numparams < params.length) {
@@ -163,9 +163,17 @@
 	}
 </script>
 <script type="text/javascript">
+	$(document).jkey('f8',function(){
+		console.log('f8 pressed: doValidate()');
+		doValidate();
+	});
 	$(document).jkey('f9',function(){
 		console.log('f9 pressed: doRun()');
 		doRun();
+	});
+	$(document).jkey('f10',function(){
+		console.log('f10 pressed: doSave()');
+		doSave();
 	});
 </script>
 </head>
@@ -231,13 +239,15 @@ if(remarks==null) { remarks = ""; }
 
 <div id="editor"><%= query %></div>
 
-<div class="container" id="sqlparams">
-</div>
-
 <div class="container">
-	<input type="button" value="validate" onclick="javascript:doValidate();">
-	<input type="button" value="run" onclick="javascript:doRun();">
-	<input type="button" value="save" onclick="javascript:doSave();">
+	<div id="sqlparams">
+	</div>
+	
+	<div id="button-cotntainer">
+		<input type="button" value="validate" onclick="javascript:doValidate();">
+		<input type="button" value="run" onclick="javascript:doRun();">
+		<input type="button" value="save" onclick="javascript:doSave();">
+	</div>
 </div>
 
 <div id="messages">

@@ -17,11 +17,16 @@ label {
 	background-color: #ddd;
 	font-weight: bold;
 }
-
+.parameter-label {
+	display: inline-block;
+}
 .container {
 	border: 1px solid #999;
 	margin-top: 2px;
 	margin-bottom: 2px;
+}
+#button-container {
+	display: inline-block;
 }
 
 .error {
