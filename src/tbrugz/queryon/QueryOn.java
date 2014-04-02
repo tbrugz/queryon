@@ -902,9 +902,11 @@ public class QueryOn extends HttpServlet {
 		int bindParamsLoop = -1; // bind none
 		if(sql.originalBindParameterCount!=null) {
 			if(sql.originalBindParameterCount > informedParams) {
+				//XXX option to bind params with null?
 				throw new BadRequestException("Query '"+reqspec.object+"' needs "+sql.originalBindParameterCount+" parameters but "
 					+((informedParams>0)?"only "+informedParams:"none")
-					+" were informed");
+					+((informedParams>1)?" were":" was")
+					+" informed");
 			}
 			bindParamsLoop = sql.originalBindParameterCount;
 		}
