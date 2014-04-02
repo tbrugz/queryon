@@ -12,10 +12,17 @@ import tbrugz.sqldump.dbmodel.View;
 
 public class SchemaModelUtils {
 	
-	static Relation getTable(SchemaModel model, RequestSpec reqspec, boolean searchViews) throws ServletException {
+	static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) throws ServletException {
+		Relation table = null;
+		
+		// search for view first
+		if(searchViews) {
+			table = getView(model, reqspec);
+			if(table!=null) { return table; }
+		}
+		
 		String[] objectParts = reqspec.object.split("\\.");
 		
-		Relation table = null;
 		if(objectParts.length>1) {
 			table = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
 		}
@@ -24,12 +31,7 @@ public class SchemaModelUtils {
 		}
 		
 		if(table == null) {
-			if(searchViews) {
-				table = getView(model, reqspec);
-			}
-			if(table == null) {
-				throw new ServletException("Object "+reqspec.object+" not found");
-			}
+			throw new ServletException("Object "+reqspec.object+" not found");
 		}
 		return table;
 	}
@@ -89,7 +91,7 @@ public class SchemaModelUtils {
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(SchemaModel model, RequestSpec reqspec) {
 		try {
-			return (T) getTable(model, reqspec, true);
+			return (T) getRelation(model, reqspec, true);
 		} catch (ServletException e) {
 			try {
 				return (T) getExecutable(model, reqspec);

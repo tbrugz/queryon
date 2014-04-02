@@ -319,10 +319,10 @@ public class QueryOn extends HttpServlet {
 		try {
 			switch (atype) {
 			case SELECT: {
-				Relation rel = (Relation) dbobj; 
+				Relation rel = (Relation) dbobj;
 				if(rel==null) {
 					log.warn("strange... rel is null");
-					rel = SchemaModelUtils.getTable(model, reqspec, true); //XXX: option to search views based on property?
+					rel = SchemaModelUtils.getRelation(model, reqspec, true); //XXX: option to search views based on property?
 				}
 				doSelect(rel, reqspec, resp);
 				}
