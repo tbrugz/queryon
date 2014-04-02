@@ -98,12 +98,13 @@ function writeExecutables() {
 
 // XXX rename to loadRelations? ...
 function loadTable(tableid, filter) {
-	return loadTableJson(tableid, filter);
+	return loadTableHtml(tableid, filter);
+	//return loadTableJson(tableid, filter);
 }
 
 function loadTableHtml(tableid, filter) {
 	$.ajax({
-		url: baseUrl+'/'+tableid+'/select'+filter+'.html',
+		url: baseUrl+'/'+tableid+filter+'.html',
 		success: function(data) {
 			$('#main-content').html(data);
 			window.location.replace('#main-content');
@@ -118,7 +119,7 @@ function loadTableJson(tableid, filter) {
 	var tablename = tablearr[1];
 	//console.log(tablename);
 	$.ajax({
-		url: baseUrl+'/'+tableid+'/select'+filter+'.json',
+		url: baseUrl+'/'+tableid+filter+'.json',
 		success: function(data) {
 			//console.log('success: '+tablename);
 			$('#xtraTitle').html(': '+tableid);
