@@ -81,6 +81,7 @@
 			console.log('#params = '+data);
 			//var container = document.getElementById('sqlparams');
 			setParameters(data);
+			makeHrefs();
 			infoMessage('query '+document.getElementById('name').value+' sucessfully validated');
 		});
 
@@ -161,6 +162,19 @@
 	function closeResults() {
 		document.getElementById("queryResult").innerHTML = "";
 	}
+	
+	function makeHrefs() {
+		var urlr = document.getElementById("url-reload");
+		urlr.href = "?name="+document.getElementById("name").value;
+		
+		var numparameters = document.getElementById("sqlparams").children.length;
+		var urlpl = document.getElementById("url-permalink");
+		urlpl.href = queryOnUrl+"/"+document.getElementById("name").value;
+		for(var i=0;i<numparameters;i++) {
+			urlpl.href += "/-";
+		}
+		//urlr.href = "?name="+document.getElementById("name").value;
+	}
 </script>
 <script type="text/javascript">
 	$(document).jkey('f8',function(){
@@ -191,6 +205,9 @@ int numOfParameters = 0;
 model = (SchemaModel) application.getAttribute(QueryOn.ATTR_MODEL);
 schemaName = request.getParameter("schema");
 queryName = request.getParameter("name");
+query = "";
+remarks = "";
+numOfParameters = 0;
 if(queryName!=null) {
 	View v = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getViews(), schemaName, queryName);
 	if(v == null) {
@@ -224,17 +241,19 @@ if(queryName!=null) {
 	}
 }
 if(query==null || query.equals("")) {
-	query = "select * from xxx";
+	query = "select * from &lt;table&gt;";
 }
 if(schemaName==null) { schemaName = ""; }
 if(queryName==null) { queryName = ""; }
 if(remarks==null) { remarks = ""; }
+//System.out.println("qon-queries.jsp: name: "+queryName+" ; query: "+query);
 %>
 
 <div class="container" id="objectid-container">
-	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>"/></label>
-	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>"/></label>
+	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
+	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="40"/></label>
+	<a id="url-reload" href="">reload</a> <a id="url-permalink" href="" target="_new">permalink</a>
 </div>
 
 <div id="editor"><%= query %></div>
@@ -266,6 +285,9 @@ if(remarks==null) { remarks = ""; }
     editor.getSession().setMode("ace/mode/sql");
     
     setParameters(<%= numOfParameters %>);
+</script>
+<script type="text/javascript">
+	makeHrefs();
 </script>
 
 </body>
