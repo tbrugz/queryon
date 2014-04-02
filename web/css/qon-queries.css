@@ -29,26 +29,6 @@ label {
 	display: inline-block;
 }
 
-.error {
-	background-color: #faa;
-}
-
-.errorbutton {
-	background-color: #f66;
-	font-weight: bold;
-	border: 0;
-}
-
-.info {
-	background-color: #aaf;
-}
-
-.infobutton {
-	background-color: #66f;
-	font-weight: bold;
-	border: 0;
-}
-
 .closebutton {
 	background-color: #666;
 	position: absolute;

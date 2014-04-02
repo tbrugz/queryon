@@ -23,3 +23,25 @@ th {
 .detail {
 	background-color: #fd8;
 }
+
+.error {
+	background-color: #faa;
+	color: #000;
+}
+
+.errorbutton {
+	background-color: #f66;
+	font-weight: bold;
+	border: 0;
+	color: #000;
+}
+
+.info {
+	background-color: #aaf;
+}
+
+.infobutton {
+	background-color: #66f;
+	font-weight: bold;
+	border: 0;
+}

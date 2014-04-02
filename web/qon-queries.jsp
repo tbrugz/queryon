@@ -156,7 +156,7 @@
 	}
 	
 	function closeMessages() {
-		document.getElementById('messages').innerHTML = '';		
+		document.getElementById('messages').innerHTML = '';
 	}
 	
 	function closeResults() {
