@@ -13,30 +13,27 @@ import tbrugz.sqldump.dbmodel.View;
 public class SchemaModelUtils {
 	
 	static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) throws ServletException {
-		Relation table = null;
+		Relation relation = null;
 		
 		// search for view first
 		if(searchViews) {
-			table = getView(model, reqspec);
-			if(table!=null) { return table; }
+			relation = getView(model, reqspec);
+			if(relation!=null) { return relation; }
 		}
 		
 		String[] objectParts = reqspec.object.split("\\.");
 		
 		if(objectParts.length>1) {
-			table = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
+			relation = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
 		}
 		else {
-			table = (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
+			relation = (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
 		}
 		
-		if(table == null) {
-			throw new ServletException("Object "+reqspec.object+" not found");
-		}
-		return table;
+		return relation;
 	}
 
-	static View getView(SchemaModel model, RequestSpec reqspec) throws ServletException {
+	private static View getView(SchemaModel model, RequestSpec reqspec) throws ServletException {
 		String[] objectParts = reqspec.object.split("\\.");
 		
 		View view = null;
@@ -47,7 +44,6 @@ public class SchemaModelUtils {
 			view = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, objectParts[0]);
 		}
 		
-		if(view == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
 		return view;
 	}
 

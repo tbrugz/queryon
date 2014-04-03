@@ -105,7 +105,7 @@ public class QOnQueries extends SQLQueries {
 					pmode = pmd.getParameterMode(i);
 				}
 				catch(SQLException e) {
-					log.warn("Exception getting parameter mode ["+queryName+"/"+i+"]: "+e);
+					log.debug("Exception getting parameter mode ["+queryName+"/"+i+"]: "+e);
 				} 
 				if(pmode==ParameterMetaData.parameterModeIn) { inParams++; }
 				else {
