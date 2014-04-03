@@ -1,6 +1,4 @@
 
-var tables;
-var views;
 var baseUrl;
 
 var relationsHash = {};
@@ -14,7 +12,7 @@ function init(url, containerId) {
 		success: function(data) {
 			tables = data.table;
 			if(tables) { console.log('Load was performed. '+tables.length+' tables loaded'); }
-			writeTables(containerId);
+			writeRelations(containerId, tables);
 		}
 	});
 	$.ajax({
@@ -22,7 +20,7 @@ function init(url, containerId) {
 		success: function(data) {
 			views = data.view;
 			if(views) { console.log('Load was performed. '+views.length+' views loaded'); }
-			writeViews(containerId);
+			writeRelations(containerId, views);
 		}
 	});
 }
@@ -36,23 +34,13 @@ function getDescription(obj) {
 		+ ((obj.remarks!=null && obj.remarks!="" && obj.remarks!="null")?" - "+obj.remarks:"");
 }
 
-function writeTables(containerId) {
-	if(!tables) { return; }
-	for(var i=0;i<tables.length;i++) {
-		var id = getId(tables[i]);
-		//var id = tables[i].schemaName+'.'+tables[i].name;
-		$(containerId).append("<option name='"+id+"'>"+getDescription(tables[i])+"</option>");
-		relationsHash[id] = tables[i];
-	}
-}
-
-function writeViews(containerId) {
-	console.log('write views [#'+views.length+'] to '+containerId);
-	if(!views) { return; }
-	for(var i=0;i<views.length;i++) {
-		var id = getId(views[i]);
-		$('#'+containerId).append("<option value='"+id+"'>"+getDescription(views[i])+"</option>");
-		relationsHash[id] = views[i];
+function writeRelations(containerId, relations) {
+	if(!relations) { return; }
+	console.log('write relations [#'+relations.length+'] to '+containerId);
+	for(var i=0;i<relations.length;i++) {
+		var id = getId(relations[i]);
+		$('#'+containerId).append("<option value='"+id+"'>"+getDescription(relations[i])+"</option>");
+		relationsHash[id] = relations[i];
 	}
 }
 
