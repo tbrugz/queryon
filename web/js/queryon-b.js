@@ -8,19 +8,11 @@ function init(url, containerId) {
 	$('#'+containerId).append('<option value="" selected disabled>select object</option>');
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
-		url: baseUrl+'/table.json',
+		url: baseUrl+'/relation.json',
 		success: function(data) {
-			tables = data.table;
-			if(tables) { console.log('Load was performed. '+tables.length+' tables loaded'); }
-			writeRelations(containerId, tables);
-		}
-	});
-	$.ajax({
-		url: baseUrl+'/view.json',
-		success: function(data) {
-			views = data.view;
-			if(views) { console.log('Load was performed. '+views.length+' views loaded'); }
-			writeRelations(containerId, views);
+			var rels = data.relation;
+			if(rels) { console.log('Load was performed. '+rels.length+' relations loaded'); }
+			writeRelations(containerId, rels);
 		}
 	});
 }

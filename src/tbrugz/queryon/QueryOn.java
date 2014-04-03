@@ -79,12 +79,13 @@ public class QueryOn extends HttpServlet {
 	// 'status objects' (SO)
 	public static final String SO_TABLE = "table", 
 			SO_VIEW = "view",
+			SO_RELATION = "relation", //tables + views 
 			SO_EXECUTABLE = "executable",
 			SO_FK = "fk";
 	
 	public static final String[] STATUS_OBJECTS = {
-		SO_TABLE, SO_VIEW, SO_EXECUTABLE, SO_FK,
-		SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
+		SO_TABLE, SO_VIEW, SO_RELATION, SO_EXECUTABLE, SO_FK,
+		SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_RELATION.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
 	};
 	
 	public static final String ACTION_QUERY_ANY = "QueryAny";
@@ -598,6 +599,7 @@ public class QueryOn extends HttpServlet {
 	// XXX: add "columns"?
 	static final List<String> tableAllColumns = Arrays.asList(new String[]{"PKConstraint", "columnNames", "constraints", "remarks", "relationType"});
 	static final List<String> viewAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
+	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
@@ -616,6 +618,12 @@ public class QueryOn extends HttpServlet {
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
 			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, list, View.class);
 			//XXX importedFKs = ...
+		}
+		else if(SO_RELATION.equalsIgnoreCase(reqspec.object)) {
+			objectName = SO_RELATION;
+			List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables());
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, list, Relation.class);
+			// importedFKs = ... ?
 		}
 		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
 			objectName = SO_EXECUTABLE;
