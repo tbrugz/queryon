@@ -75,7 +75,7 @@ function setParameters(parametersId, numparams) {
 	console.log('numparams: '+numparams+' ; params.length: '+params.length);
 	if(numparams > params.length) {
 		for(var i=params.length+1;i<=numparams;i++) {
-			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");
+			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='makeHrefs();'/></label>");
 		}
 	}
 	else if(numparams < params.length) {
@@ -86,6 +86,19 @@ function setParameters(parametersId, numparams) {
 			item.parentNode.removeChild(item);
 		}
 	}
+}
+
+function getParameters() {
+	var params = document.querySelectorAll('.parameter');
+	var paramsStr = '';
+	for (var i = 0; i < params.length; ++i) {
+		var item = params[i];
+		//console.log(item);
+		var value = item.value;
+		if(value=='') { value = '-'; }
+		paramsStr += '/'+value;
+	}
+	return paramsStr;
 }
 
 function closeMessages(messagesId) {

@@ -6,8 +6,45 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
-	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script type="text/javascript">
+	var queryOnUrl = '/queryon/q';
+	
+	function makeHrefs() {
+		var urled = document.getElementById("url-editor");
+		var urlpl = document.getElementById("url-permalink");
+
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		if(id=="") {
+			urled.style.display = 'none';
+			urlpl.style.display = 'none';
+			return;
+		}
+		urled.style.display = 'initial';
+		urlpl.style.display = 'initial';
+		
+		var name = id;
+		urled.href = "qon-queries.jsp?";
+		var parts = id.split('.');
+		if(parts.length>1) {
+			urled.href += "schema="+parts[0]+"&name="+parts[1];
+		}
+		else {
+			urled.href += "name="+parts[0];
+		}
+		
+		var numparameters = document.getElementById("parameters").children.length;
+		urlpl.href = queryOnUrl+"/"+id;
+		urlpl.href += getParameters();
+		/*for(var i=0;i<numparameters;i++) {
+			numparameters
+			urlpl.href += "/-";
+		}*/
+		urlpl.href += ".htmlx";
+	}
+	</script>
 	<style type="text/css">
 	#nav {
 		background-color: #222;
@@ -45,22 +82,26 @@
 		position: sticky;
 		top: 0px;
 	}
+	a, a:visited {
+		color: #ccc;
+	}
 	</style>
 </head>
-<body onload="javascript:init('/queryon/q','objects')">
+<body onload="javascript:init('/queryon/q','objects');makeHrefs();">
 
 <div id="nav" class="navbar">
 	<span id="logo">QueryOn</span>
 
 	<label>
-		<select id="objects" onchange="loadRelation('objects', 'parameters', 'content')">
+		<select id="objects" onchange="loadRelation('objects', 'parameters', 'content');makeHrefs();">
 		</select>
 		<!-- add descriptions (& parameters? nah) -->
 	</label>
 	
 	<span id="parameters"></span>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
-	<!-- order, filter, link to query editor, permalink -->
+	<!-- order, filter -->
+	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a>
 	
 	<div id="messages"></div>
 </div>
