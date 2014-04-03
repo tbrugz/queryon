@@ -19,28 +19,48 @@
 		top: 0px;
 		right: 0px;
 		left: 0px;
-		height: 30px;
+		/*height: 30px;*/
 		z-index: 10;
 	}
 	#content-container {
 		position: relative;
 		top: 30px;
 	}
+	#logo {
+		padding: 2px;
+		font-size: 11pt;	
+		padding-left: 10px;
+		padding-right: 10px;
+		font-weight: bolder;
+		background-color: #555;
+	}
+	#parameter {
+		z-index: 10;
+	}
+	#content > table > tbody > tr:nth-child(1) {
+		position: -webkit-sticky;
+		position: -moz-sticky;
+		position: -ms-sticky;
+		position: -o-sticky;
+		position: sticky;
+		top: 0px;
+	}
 	</style>
 </head>
 <body onload="javascript:init('/queryon/q','objects')">
 
 <div id="nav" class="navbar">
-	<span>QueryOn</span>
-	
-	<label> object:
+	<span id="logo">QueryOn</span>
+
+	<label>
 		<select id="objects" onchange="loadRelation('objects', 'parameters', 'content')">
 		</select>
+		<!-- add descriptions (& parameters? nah) -->
 	</label>
 	
 	<span id="parameters"></span>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
-	<!-- link to query editor, permalink -->
+	<!-- order, filter, link to query editor, permalink -->
 	
 	<div id="messages"></div>
 </div>

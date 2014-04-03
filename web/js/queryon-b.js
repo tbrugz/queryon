@@ -7,7 +7,7 @@ var relationsHash = {};
 
 function init(url, containerId) {
 	baseUrl = url;
-	$('#'+containerId).append('<option value="" selected>select object</option>');
+	$('#'+containerId).append('<option value="" selected disabled>select object</option>');
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
 		url: baseUrl+'/table.json',
@@ -31,12 +31,17 @@ function getId(obj) {
 	return (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null")?obj.schemaName+"."+obj.name:obj.name;
 }
 
+function getDescription(obj) {
+	return ((obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null")?obj.schemaName+"."+obj.name:obj.name)
+		+ ((obj.remarks!=null && obj.remarks!="" && obj.remarks!="null")?" - "+obj.remarks:"");
+}
+
 function writeTables(containerId) {
 	if(!tables) { return; }
 	for(var i=0;i<tables.length;i++) {
 		var id = getId(tables[i]);
 		//var id = tables[i].schemaName+'.'+tables[i].name;
-		$(containerId).append("<option name='"+id+"'>"+id+" [T]</option>");
+		$(containerId).append("<option name='"+id+"'>"+getDescription(tables[i])+"</option>");
 		relationsHash[id] = tables[i];
 	}
 }
@@ -46,7 +51,7 @@ function writeViews(containerId) {
 	if(!views) { return; }
 	for(var i=0;i<views.length;i++) {
 		var id = getId(views[i]);
-		$('#'+containerId).append("<option value='"+id+"'>"+id+" [V]</option>");
+		$('#'+containerId).append("<option value='"+id+"'>"+getDescription(views[i])+"</option>");
 		relationsHash[id] = views[i];
 	}
 }
@@ -56,10 +61,10 @@ function loadRelation(selectId, parametersId, containerId) {
 	var id = select.options[select.selectedIndex].value;
 	var params = relationsHash[id].parameterCount;
 	console.log('selected: '+id+' ; params: '+params);
-	if(params>0) {
-		setParameters(parametersId, params);
+	if(params==null || params=="") {
+		params = 0;
 	}
-	//doRun()
+	setParameters(parametersId, params);
 }
 
 function doRun(selectId, containerId, messagesId) {
@@ -96,7 +101,7 @@ function setParameters(parametersId, numparams) {
 	else if(numparams < params.length) {
 		for (var i = params.length; i > numparams; --i) {
 			var item = params[i-1];
-			console.log(item);
+			//console.log(item);
 			item = item.parentNode;
 			item.parentNode.removeChild(item);
 		}

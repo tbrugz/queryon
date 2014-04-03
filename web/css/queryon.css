@@ -45,3 +45,8 @@ th {
 	font-weight: bold;
 	border: 0;
 }
+
+.parameter-label {
+	display: inline-block;
+}
+
