@@ -10,6 +10,7 @@
 	<script src="js/queryon-b.js"></script>
 	<script type="text/javascript">
 	var queryOnUrl = '/queryon/q';
+	var isAdmin = getQueryVariable('admin');
 	
 	function makeHrefs() {
 		var urled = document.getElementById("url-editor");
@@ -22,9 +23,9 @@
 			urlpl.style.display = 'none';
 			return;
 		}
-		urled.style.display = 'initial';
-		urlpl.style.display = 'initial';
 		
+		if(isAdmin) {
+		urled.style.display = 'initial';
 		var name = id;
 		urled.href = "qon-queries.jsp?";
 		var parts = id.split('.');
@@ -34,7 +35,9 @@
 		else {
 			urled.href += "name="+parts[0];
 		}
+		}
 		
+		urlpl.style.display = 'initial';
 		var numparameters = document.getElementById("parameters").children.length;
 		urlpl.href = queryOnUrl+"/"+id;
 		urlpl.href += getParameters();
@@ -69,7 +72,7 @@
 		padding-left: 10px;
 		padding-right: 10px;
 		font-weight: bolder;
-		background-color: #555;
+		background-color: #666;
 	}
 	#parameter {
 		z-index: 10;
@@ -100,7 +103,7 @@
 	
 	<span id="parameters"></span>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
-	<!-- order, filter -->
+	<!-- order, filter, limit/offset or page/pagesize -->
 	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a>
 	
 	<div id="messages"></div>
