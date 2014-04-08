@@ -57,13 +57,25 @@ function doRun(selectId, containerId, messagesId) {
 		//console.log(item);
 		paramsStr += '/'+item.value;
 	}
+	
 	var queryString = '';
+	
+	var filters = document.querySelectorAll('.filter');
+	for (var i = 0; i < filters.length; ++i) {
+		var item = filters[i];
+		//console.log(item);
+		queryString += '&'+item.name+"="+item.value;
+	}
+	
 	var order = document.getElementById('order').value;
 	if(order!=null && order!='') {
-		queryString += '?order='+order;
+		queryString += '&order='+order;
 	}
+	
+	console.log('query-string: '+queryString);
+	
 	$.ajax({
-		url: baseUrl+'/'+id+paramsStr+'.htmlx'+queryString,
+		url: baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString,
 		success: function(data) {
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
@@ -121,4 +133,14 @@ function getQueryVariable(variable) {
 		}
 	}
 	//console.log('Query Variable ' + variable + ' not found');
+}
+
+function getColumns(id) {
+	var colsStr = relationsHash[id].columnNames;
+	var cols = colsStr.split(",");
+
+	for(var i=0;i<cols.length;i++) {
+		cols[i] = cols[i].replace("[","").replace("]","").trim();
+	}
+	return cols;
 }

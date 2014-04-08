@@ -44,12 +44,62 @@
 
 		var queryString = '';
 		
-		var order = document.getElementById('order').value;
-		if(order!=null && order!='') {
-			queryString += '?order='+order;
+		var filters = document.querySelectorAll('.filter');
+		for (var i = 0; i < filters.length; ++i) {
+			var item = filters[i];
+			queryString += '&'+item.name+"="+item.value;
 		}
 		
-		urlpl.href += ".htmlx"+queryString;
+		var order = document.getElementById('order').value;
+		if(order!=null && order!='') {
+			queryString += '&order='+order;
+		}
+		
+		urlpl.href += ".htmlx?"+queryString;
+	}
+	
+	function addFilter() {
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		if(!id) {
+			alert('no object selected!');
+			return;
+		}
+		var dialogCont = document.getElementById('dialog-container');
+		dialogCont.style.display = 'block';
+		var dialog = document.getElementById('dialog');
+		//console.log(dialog);
+		//console.log(relationsHash[id]);
+		//var colsStr = relationsHash[id].columnNames;
+		//console.log(colsStr);
+		//var cols = colsStr.split(",");
+		var cols = getColumns(id);
+
+		var selectHTML = "<select name='fin-column' id='fin-column'>";
+		for(var i=0;i<cols.length;i++) {
+			//cols[i] = cols[i].replace(/[^\|[\$] ]*/g,"");
+			//var colz = cols[i].replace("[","").replace("]","").trim();
+			var colz = cols[i];
+			selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
+		}
+		selectHTML += '</select>';
+		//dialog.innerHTML += selectHTML;
+		dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
+			+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
+			+ "<input type='button' value='add' onclick='addFilterIn();'/></div>"
+			+ "<input type='button' value='X' onclick='document.getElementById(\"dialog-container\").style.display = \"none\"'/>";
+		//dialog.style.display = 'none';
+	}
+	
+	function addFilterIn() {
+		var col = document.getElementById('fin-column').value;
+		var value = document.getElementById('fin-value').value;
+		var filters = document.getElementById('filters');
+		filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='makeHrefs();'/>"
+			+ "<input type='button' value='X' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
+		//console.log(col);
+		//console.log(value);
+		makeHrefs();
 	}
 	</script>
 	<style type="text/css">
@@ -65,6 +115,32 @@
 		left: 0px;
 		/*height: 30px;*/
 		z-index: 10;
+	}
+	#dialog-container {
+		position: fixed;
+		top: 0; bottom: 0; left: 0; right: 0;
+		background-color: #666;
+		background-color: rgba(100,100,100,0.7);
+		z-index: 20;
+		display: none;
+	}
+	#dialog {
+		position: fixed;
+		/*width: 50%;
+		height: 50%;*/
+		/*width: 400px;
+		margin-left: auto;
+		margin-right: auto;*/
+		top: 20%;
+		left: 20%;
+		background-color: #ccc;
+		z-index: 20;
+		padding: 10px;
+		border: 4px solid #fff;
+	}
+	#dialog label {
+		background-color: #ddd;
+		padding: 5px;
 	}
 	#content-container {
 		position: relative;
@@ -92,13 +168,15 @@
 	a, a:visited {
 		color: #ccc;
 	}
-	label {
+	#nav label {
 		background-color: #666;
+		padding: 2px;
 		margin: 2px;
+		border: dashed 1px #ccc;
 	}
 	</style>
 </head>
-<body onload="javascript:init('/queryon/q','objects');makeHrefs();">
+<body onload="javascript:init('q','objects');makeHrefs();">
 
 <div id="nav" class="navbar">
 	<span id="logo">QueryOn</span>
@@ -110,7 +188,9 @@
 	</label>
 	
 	<span id="parameters"></span>
+	<span id="filters"></span>
 	<label>order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
+	<input type="button" value="+ filter" onclick="addFilter();"/>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 	<!-- order, filter, limit/offset or page/pagesize -->
 	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a>
@@ -120,6 +200,11 @@
 
 <div id="content-container">
 	<div id="content">
+	</div>
+</div>
+
+<div id="dialog-container">
+	<div id="dialog">
 	</div>
 </div>
 
