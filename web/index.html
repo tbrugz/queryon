@@ -69,26 +69,18 @@
 		var dialogCont = document.getElementById('dialog-container');
 		dialogCont.style.display = 'block';
 		var dialog = document.getElementById('dialog');
-		//console.log(dialog);
-		//console.log(relationsHash[id]);
-		//var colsStr = relationsHash[id].columnNames;
-		//console.log(colsStr);
-		//var cols = colsStr.split(",");
 		var cols = getColumns(id);
 
 		var selectHTML = "<select name='fin-column' id='fin-column'>";
 		for(var i=0;i<cols.length;i++) {
-			//cols[i] = cols[i].replace(/[^\|[\$] ]*/g,"");
-			//var colz = cols[i].replace("[","").replace("]","").trim();
 			var colz = cols[i];
 			selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
 		}
 		selectHTML += '</select>';
-		//dialog.innerHTML += selectHTML;
 		dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
 			+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
-			+ "<input type='button' value='add' onclick='addFilterIn();'/></div>"
-			+ "<input type='button' value='X' onclick='document.getElementById(\"dialog-container\").style.display = \"none\"'/>";
+			+ "<input type='button' value='add' onclick='addFilterIn();document.getElementById(\"dialog-container\").style.display = \"none\";'/></div>";
+			//+ "<input type='button' value='X' onclick='document.getElementById(\"dialog-container\").style.display = \"none\"'/>";
 		//dialog.style.display = 'none';
 	}
 	
@@ -98,8 +90,6 @@
 		var filters = document.getElementById('filters');
 		filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='makeHrefs();'/>"
 			+ "<input type='button' value='X' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
-		//console.log(col);
-		//console.log(value);
 		makeHrefs();
 	}
 	</script>
@@ -127,11 +117,6 @@
 	}
 	#dialog {
 		position: fixed;
-		/*width: 50%;
-		height: 50%;*/
-		/*width: 400px;
-		margin-left: auto;
-		margin-right: auto;*/
 		top: 20%;
 		left: 20%;
 		background-color: #ccc;
@@ -145,7 +130,7 @@
 	}
 	#content-container {
 		position: relative;
-		top: 30px;
+		top: 40px;
 	}
 	#logo {
 		padding: 2px;
@@ -172,8 +157,9 @@
 	#nav label {
 		background-color: #666;
 		padding: 2px;
-		margin: 2px;
+		/*margin: 2px;*/
 		border: dashed 1px #ccc;
+		display: inline-block;
 	}
 	</style>
 </head>
