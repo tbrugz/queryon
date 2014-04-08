@@ -29,23 +29,27 @@
 		var name = id;
 		urled.href = "qon-queries.jsp?";
 		var parts = id.split('.');
-		if(parts.length>1) {
-			urled.href += "schema="+parts[0]+"&name="+parts[1];
-		}
-		else {
-			urled.href += "name="+parts[0];
-		}
+			if(parts.length>1) {
+				urled.href += "schema="+parts[0]+"&name="+parts[1];
+			}
+			else {
+				urled.href += "name="+parts[0];
+			}
 		}
 		
 		urlpl.style.display = 'initial';
 		var numparameters = document.getElementById("parameters").children.length;
 		urlpl.href = queryOnUrl+"/"+id;
 		urlpl.href += getParameters();
-		/*for(var i=0;i<numparameters;i++) {
-			numparameters
-			urlpl.href += "/-";
-		}*/
-		urlpl.href += ".htmlx";
+
+		var queryString = '';
+		
+		var order = document.getElementById('order').value;
+		if(order!=null && order!='') {
+			queryString += '?order='+order;
+		}
+		
+		urlpl.href += ".htmlx"+queryString;
 	}
 	</script>
 	<style type="text/css">
@@ -68,7 +72,7 @@
 	}
 	#logo {
 		padding: 2px;
-		font-size: 11pt;	
+		font-size: 11pt;
 		padding-left: 10px;
 		padding-right: 10px;
 		font-weight: bolder;
@@ -88,6 +92,10 @@
 	a, a:visited {
 		color: #ccc;
 	}
+	label {
+		background-color: #666;
+		margin: 2px;
+	}
 	</style>
 </head>
 <body onload="javascript:init('/queryon/q','objects');makeHrefs();">
@@ -102,6 +110,7 @@
 	</label>
 	
 	<span id="parameters"></span>
+	<label>order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 	<!-- order, filter, limit/offset or page/pagesize -->
 	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a>

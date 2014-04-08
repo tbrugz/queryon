@@ -57,8 +57,13 @@ function doRun(selectId, containerId, messagesId) {
 		//console.log(item);
 		paramsStr += '/'+item.value;
 	}
+	var queryString = '';
+	var order = document.getElementById('order').value;
+	if(order!=null && order!='') {
+		queryString += '?order='+order;
+	}
 	$.ajax({
-		url: baseUrl+'/'+id+paramsStr+'.htmlx',
+		url: baseUrl+'/'+id+paramsStr+'.htmlx'+queryString,
 		success: function(data) {
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
