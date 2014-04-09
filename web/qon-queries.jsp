@@ -14,6 +14,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+	<style type="text/css">
+	#objectid-container {
+	}
+	#editor {
+	}
+	#spec {
+		/*position: fixed;
+		top: 0px;
+		left: 0px;
+		right: 0px;*/
+	}
+	</style>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
@@ -249,6 +261,7 @@ if(remarks==null) { remarks = ""; }
 //System.out.println("qon-queries.jsp: name: "+queryName+" ; query: "+query);
 %>
 
+<div id="spec">
 <div class="container" id="objectid-container">
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
@@ -271,6 +284,7 @@ if(remarks==null) { remarks = ""; }
 </div>
 
 <div id="messages">
+</div>
 </div>
 
 <div class="container">

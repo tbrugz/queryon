@@ -26,15 +26,20 @@
 		}
 		
 		if(isAdmin) {
-		urled.style.display = 'initial';
-		var name = id;
-		urled.href = "qon-queries.jsp?";
-		var parts = id.split('.');
-			if(parts.length>1) {
-				urled.href += "schema="+parts[0]+"&name="+parts[1];
+			if(relationsHash[id].relationType=="query") {
+				urled.style.display = 'initial';
+				var name = id;
+				urled.href = "qon-queries.jsp?";
+				var parts = id.split('.');
+				if(parts.length>1) {
+					urled.href += "schema="+parts[0]+"&name="+parts[1];
+				}
+				else {
+					urled.href += "name="+parts[0];
+				}
 			}
 			else {
-				urled.href += "name="+parts[0];
+				urled.style.display = 'none';
 			}
 		}
 		
@@ -77,10 +82,10 @@
 			selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
 		}
 		selectHTML += '</select>';
-		dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
+		dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> <em>in</em> "
 			+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
-			+ "<input type='button' value='add' onclick='addFilterIn();document.getElementById(\"dialog-container\").style.display = \"none\";'/></div>";
-			//+ "<input type='button' value='X' onclick='document.getElementById(\"dialog-container\").style.display = \"none\"'/>";
+			+ "<input type='button' value='add' onclick='addFilterIn();document.getElementById(\"dialog-container\").style.display = \"none\";'/>"
+			+ "<input type='button' value='X' class='simplebutton' onclick='document.getElementById(\"dialog-container\").style.display = \"none\";'/></div>";
 		//dialog.style.display = 'none';
 	}
 	
@@ -89,7 +94,7 @@
 		var value = document.getElementById('fin-value').value;
 		var filters = document.getElementById('filters');
 		filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='makeHrefs();'/>"
-			+ "<input type='button' value='X' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
+			+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
 		makeHrefs();
 	}
 	</script>
@@ -129,9 +134,14 @@
 		padding: 5px;
 	}
 	#content-container {
+		/*position: fixed;*/
 		position: relative;
-		top: 40px;
+		top: 37px;
 	}
+	/*#content {
+		top: 50px;
+		overflow: scroll;
+	}*/
 	#logo {
 		padding: 2px;
 		font-size: 11pt;
@@ -161,6 +171,9 @@
 		border: dashed 1px #ccc;
 		display: inline-block;
 	}
+	#navbar-prop {
+		display: none;
+	}
 	</style>
 </head>
 <body onload="javascript:init('q','objects');makeHrefs();">
@@ -169,11 +182,12 @@
 	<span id="logo">QueryOn</span>
 
 	<label>
-		<select id="objects" onchange="loadRelation('objects', 'parameters', 'content');makeHrefs();">
+		<select id="objects" onchange="loadRelation('objects', 'parameters', 'content');document.getElementById('navbar-prop').style.display = 'initial';makeHrefs();">
 		</select>
 		<!-- add descriptions (& parameters? nah) -->
 	</label>
 	
+	<span id="navbar-prop">
 	<span id="parameters"></span>
 	<span id="filters"></span>
 	<label>order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
@@ -181,6 +195,7 @@
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 	<!-- order, filter, limit/offset or page/pagesize -->
 	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a>
+	</span>
 	
 	<div id="messages"></div>
 </div>
