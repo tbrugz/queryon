@@ -69,9 +69,6 @@ public class SQL {
 			Query q = (Query) relation;
 			SQL sql = new SQL( q.getQuery() , relation);
 			sql.originalBindParameterCount = q.getParameterCount(); 
-			if(reqspec.columns.size()>0) {
-				sql.addProjection(createSQLColumns(reqspec, relation));
-			}
 			return sql;
 		}
 		else if(relation instanceof Table) {
@@ -215,6 +212,12 @@ public class SQL {
 		}
 		
 		return;
+	}
+	
+	public void applyProjection(RequestSpec reqspec) {
+		if(relation instanceof Query && reqspec.columns.size()>0) {
+			addProjection(createSQLColumns(reqspec, relation));
+		}
 	}
 	
 	public static String createSQLColumns(RequestSpec reqspec, Relation table) {
