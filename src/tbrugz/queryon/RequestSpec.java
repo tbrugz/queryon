@@ -166,6 +166,7 @@ public class RequestSpec {
 		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
 		
+		//XXX: filters: add filter 'not in', 'like'
 		for(String param: params.keySet()) {
 			if(param.startsWith("fe:")) { //XXX "feq"?
 				String col = param.substring(3);

@@ -214,21 +214,6 @@ public class SQL {
 		return;
 	}
 	
-	/*public void applyProjection(RequestSpec reqspec, Relation table) {
-		if(relation instanceof Query && reqspec.columns.size()>0) {
-			addProjection(createSQLColumns(reqspec, relation));
-		}
-		else {
-			String columns = createSQLColumns(reqspec, table);
-			if(sql.contains(PARAM_ORDER_CLAUSE)) {
-				sql = sql.replace(PARAM_PROJECTION_CLAUSE, columns);
-			}
-			else {
-				
-			}
-		}
-	}*/
-
 	public void applyProjection(RequestSpec reqspec, Relation table) {
 		String columns = createSQLColumns(reqspec, table);
 		if(sql.contains(PARAM_PROJECTION_CLAUSE)) {

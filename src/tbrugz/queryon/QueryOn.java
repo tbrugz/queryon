@@ -458,7 +458,7 @@ public class QueryOn extends HttpServlet {
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
-			log.info("pre-sql:\n"+sql.getSql());
+			log.debug("pre-sql:\n"+sql.getSql());
 		}
 		sql.addLimitOffset(loStrategy, reqspec);
 		
