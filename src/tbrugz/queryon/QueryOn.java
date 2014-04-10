@@ -449,7 +449,7 @@ public class QueryOn extends HttpServlet {
 		sql.applyOrder(reqspec);
 
 		// projection (select columns)
-		sql.applyProjection(reqspec);
+		sql.applyProjection(reqspec, relation);
 		
 		//XXX: option to add distinct?
 

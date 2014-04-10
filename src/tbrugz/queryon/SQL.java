@@ -25,7 +25,7 @@ public class SQL {
 	
 	public static final String PARAM_WHERE_CLAUSE = "[where-clause]";
 	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
-	//XXX add sql projection clause ( [projection-clause] )?
+	public static final String PARAM_PROJECTION_CLAUSE = "[projection-clause]";
 	public static final String PARAM_UPDATE_SET_CLAUSE = "[update-set-clause]";
 	public static final String PARAM_INSERT_COLUMNS_CLAUSE = "[insert-columns-clause]";
 	public static final String PARAM_INSERT_VALUES_CLAUSE = "[insert-values-clause]";
@@ -55,8 +55,7 @@ public class SQL {
 	}
 	
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
-		String columns = createSQLColumns(reqspec, table);
-		String sql = "select "+columns+
+		String sql = "select "+PARAM_PROJECTION_CLAUSE+
 			" from " + (table.getSchemaName()!=null?sqlIdDecorator.get(table.getSchemaName())+".":"") + sqlIdDecorator.get(table.getName())+
 			" " + PARAM_WHERE_CLAUSE+
 			" " + PARAM_ORDER_CLAUSE;
@@ -122,7 +121,7 @@ public class SQL {
 		}
 	}
 	
-	public void addProjection(String columns) {
+	private void addProjection(String columns) {
 		String sqlFilter = "";
 		if(!sql.contains(PARAM_WHERE_CLAUSE) && !sql.contains(PARAM_FILTER_CLAUSE)) {
 			sqlFilter = " " + PARAM_WHERE_CLAUSE;
@@ -144,6 +143,7 @@ public class SQL {
 		for(int i=0;i<reqspec.orderCols.size();i++) {
 			String col = reqspec.orderCols.get(i);
 			String ascDesc = reqspec.orderAscDesc.get(i);
+			if(col==null || col.equals("")) { continue; }
 			//XXX option to ignore unknown columns? or to not validate?
 			if(relationCols!=null && !relationCols.contains(col)) {
 				throw new BadRequestException("can't order by '"+col+"' (unknown column)");
@@ -214,13 +214,40 @@ public class SQL {
 		return;
 	}
 	
-	public void applyProjection(RequestSpec reqspec) {
+	/*public void applyProjection(RequestSpec reqspec, Relation table) {
 		if(relation instanceof Query && reqspec.columns.size()>0) {
 			addProjection(createSQLColumns(reqspec, relation));
 		}
+		else {
+			String columns = createSQLColumns(reqspec, table);
+			if(sql.contains(PARAM_ORDER_CLAUSE)) {
+				sql = sql.replace(PARAM_PROJECTION_CLAUSE, columns);
+			}
+			else {
+				
+			}
+		}
+	}*/
+
+	public void applyProjection(RequestSpec reqspec, Relation table) {
+		String columns = createSQLColumns(reqspec, table);
+		if(sql.contains(PARAM_PROJECTION_CLAUSE)) {
+			sql = sql.replace(PARAM_PROJECTION_CLAUSE, columns);
+		}
+		else {
+			if(relation instanceof Query) {
+				if(reqspec.columns.size()>0) {
+					addProjection(columns);
+				}
+			}
+			else {
+				log.warn("relation of type "+relation.getRelationType()+" (not Query) with no "+PARAM_PROJECTION_CLAUSE+" ?");
+				addProjection(columns);
+			}
+		}
 	}
 	
-	public static String createSQLColumns(RequestSpec reqspec, Relation table) {
+	private static String createSQLColumns(RequestSpec reqspec, Relation table) {
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
 			Set<String> tabCols = new HashSet<String>(table.getColumnNames()); 
