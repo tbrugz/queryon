@@ -35,10 +35,13 @@
 	var processorUrl = 'processor';
 
 	function doRun() {
+		var sqlString = editor.getSelectedText();
+		if(!sqlString) { sqlString = editor.getValue(); }
+		
 		var reqData = {
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
-			sql: editor.getValue(),
+			sql: sqlString,
 		};
 		
 		var params = document.querySelectorAll('.parameter');
@@ -78,13 +81,20 @@
 	//type: 'POST' - https://api.jquery.com/jQuery.ajax/
 
 	function doValidate() {
+		var sqlString = editor.getSelectedText();
+		var usingSelected = true;
+		if(!sqlString) {
+			sqlString = editor.getValue();
+			usingSelected = false;
+		}
+		
 		var request = $.ajax({
 			url : queryOnUrl+"/ValidateAny",
 			type : "POST",
 			data : {
 				schema : document.getElementById('schema').value,
 				name : document.getElementById('name').value,
-				sql: editor.getValue(),
+				sql: sqlString,
 			},
 			dataType : "html"
 		});
@@ -94,7 +104,12 @@
 			//var container = document.getElementById('sqlparams');
 			setParameters(data);
 			makeHrefs();
-			infoMessage('query '+document.getElementById('name').value+' sucessfully validated');
+			if(usingSelected) {
+				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully validated');
+			}
+			else {
+				infoMessage('query '+document.getElementById('name').value+' sucessfully validated');
+			}
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -298,6 +313,10 @@ if(remarks==null) { remarks = ""; }
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
     editor.getSession().setMode("ace/mode/sql");
+    editor.getSelectedText = function() {
+    	//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
+        return this.getSession().getTextRange(this.getSelectionRange());
+    };
     
     setParameters(<%= numOfParameters %>);
 </script>
