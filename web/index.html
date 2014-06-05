@@ -67,6 +67,9 @@
 		urldown.href = queryOnUrl+"/"+id;
 		urldown.href += getParameters();
 		urldown.href += ".csv?"+queryString;
+		
+		//cleaning 'order'
+		document.getElementById('order').value = '';
 	}
 	
 	function addFilter() {
@@ -169,7 +172,7 @@
 	#nav a, #nav a:visited {
 		color: #ccc;
 	}
-	#nav label {
+	.navbar label {
 		background-color: #666;
 		padding: 2px;
 		/*margin: 2px;*/
@@ -198,8 +201,8 @@
 	<label>order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 	<input type="button" value="+ filter" onclick="addFilter();"/>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
-	<!-- order, filter, limit/offset or page/pagesize -->
-	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a> <a id="url-down" href="" target="_new">download</a>
+	<!-- TODO limit/offset or page/pagesize -->
+	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a> <a id="url-down" href="">download</a>
 	</span>
 	
 	<div id="messages"></div>
