@@ -16,12 +16,14 @@
 	function makeHrefs() {
 		var urled = document.getElementById("url-editor");
 		var urlpl = document.getElementById("url-permalink");
+		var urldown = document.getElementById("url-down");
 
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
 		if(id=="") {
 			urled.style.display = 'none';
 			urlpl.style.display = 'none';
+			urldown.style.display = 'none';
 			return;
 		}
 		
@@ -43,11 +45,6 @@
 			}
 		}
 		
-		urlpl.style.display = 'initial';
-		var numparameters = document.getElementById("parameters").children.length;
-		urlpl.href = queryOnUrl+"/"+id;
-		urlpl.href += getParameters();
-
 		var queryString = '';
 		
 		var filters = document.querySelectorAll('.filter');
@@ -60,8 +57,16 @@
 		if(order!=null && order!='') {
 			queryString += '&order='+order;
 		}
-		
+
+		urlpl.style.display = 'initial';
+		urlpl.href = queryOnUrl+"/"+id;
+		urlpl.href += getParameters();
 		urlpl.href += ".htmlx?"+queryString;
+
+		urldown.style.display = 'initial';
+		urldown.href = queryOnUrl+"/"+id;
+		urldown.href += getParameters();
+		urldown.href += ".csv?"+queryString;
 	}
 	
 	function addFilter() {
@@ -194,7 +199,7 @@
 	<input type="button" value="+ filter" onclick="addFilter();"/>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 	<!-- order, filter, limit/offset or page/pagesize -->
-	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a>
+	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a> <a id="url-down" href="" target="_new">download</a>
 	</span>
 	
 	<div id="messages"></div>
