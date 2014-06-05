@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,9 +18,26 @@ import tbrugz.sqldump.util.SQLUtils;
 
 public class HTMLAttrSyntax extends HTMLDataDump {
 	
-	static final String[] SUFFIXES = {"_STYLE", "_CLASS"}; //all suffixes must have same size
+	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_HREF"}; //XXX: change to enum!
+	//static final List<String> ATTRIB = Arrays.asList(new String[]{SUFFIXES[0].substring(1).toLowerCase(), SUFFIXES[1].substring(1).toLowerCase()});
+	static final List<String> ATTRIBS = Arrays.asList("style", "class");
+	
+	/*static final Map<String, StringDecorator> decorators = new HashMap<String, StringDecorator>();
+	
+	static class HRefDecorator extends StringDecorator {
+		@Override
+		public String get(String str) {
+			return "<a href=\"\">"+str+"</a>";
+		}
+	}
+	
+	static {
+		decorators.put(SUFFIXES[2], )
+	}*/
+
+	//XXX: add HREF/LINK suffix
 	//static String[] ATTRS = {"style", "class"};
-	static final int SUFFIX_NAME_SIZE =  SUFFIXES[0].length();
+	//static final int SUFFIX_NAME_SIZE =  SUFFIXES[0].length();
 	
 	Set<String> finalColNames = new HashSet<String>();
 
@@ -81,26 +99,33 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			if(!finalColNames.contains(colName)) {
-				String fullCol = colName.substring(0, colName.length()-SUFFIX_NAME_SIZE);
-				String attr = colName.substring(colName.length()-SUFFIX_NAME_SIZE+1).toLowerCase();
-				Map<String,String> attrs = attrsVals.get(fullCol);
-				if(attrs==null) {
-					attrs = new HashMap<String, String>();
-					attrsVals.put(fullCol, attrs);
+				for(String suffix: SUFFIXES) {
+					if(colName.endsWith(suffix)) {
+						String fullCol = colName.substring(0, colName.length()-suffix.length());
+						String attr = colName.substring(colName.length()-suffix.length()+1).toLowerCase();
+						Map<String,String> attrs = attrsVals.get(fullCol);
+						if(attrs==null) {
+							attrs = new HashMap<String, String>();
+							attrsVals.put(fullCol, attrs);
+						}
+						attrs.put(attr, DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, null, escape));
+						//System.out.println("fullCol="+fullCol+" ; attrs="+attrs);
+					}
 				}
-				attrs.put(attr, DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr));
-				//System.out.println("fullCol="+fullCol+" ; attrs="+attrs);
 			}
 		}
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			if(finalColNames.contains(colName)) {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr);
+				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, escape);
 				Map<String,String> attrs = attrsVals.get(colName);
 				String attrsStr = "";
 				if(attrs!=null) {
-					for(String k: attrs.keySet()) {
-						attrsStr += " "+k+"=\""+attrs.get(k)+"\"";
+					for(String key: attrs.keySet()) {
+						if(ATTRIBS.contains(key)) {
+							attrsStr += " "+key+"=\""+attrs.get(key)+"\"";
+						}
+						value = decorateValue(attrs, key, String.valueOf(value));
 					}
 				}
 				sb.append( "<td"+attrsStr+">"+ value +"</td>");
@@ -108,6 +133,16 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		}
 		sb.append("</tr>");
 		out(sb.toString()+"\n", fos);
+	}
+	
+	String decorateValue(Map<String,String> attrs, String key, String value) {
+		if("href".equals(key)) {
+			String href = attrs.get(key);
+			if(href!=null) {
+				return "<a href=\""+attrs.get(key)+"\">"+value+"</a>";
+			}
+		}
+		return value;
 	}
 	
 	@Override
