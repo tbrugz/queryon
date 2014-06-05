@@ -109,7 +109,7 @@
 	function addSortHrefs() {
 		var content = document.getElementById('content');
 		var headers = content.getElementsByTagName('th');
-		console.log('headers.length: '+headers.length);
+		//console.log('headers.length: '+headers.length);
 		for(var i=0;i<headers.length;i++) {
 			var elem = headers[i];
 			var colname = elem.innerHTML;
@@ -117,11 +117,11 @@
 			if(idx>0) {
 				colname = colname.substring(0, idx);
 			}
-			console.log('colname['+i+']: '+colname);
+			//console.log('colname['+i+']: '+colname);
 			
-			elem.innerHTML = colname;
-			elem.innerHTML += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>';
-			elem.innerHTML += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/>';
+			elem.innerHTML = colname
+				+ '<div class="orderbutton-container"><input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>'
+				+ '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/></div>';
 		}
 	}
 	
@@ -216,6 +216,10 @@
 		padding: 0;
 		font-size: smaller;
 	}
+	.orderbutton-container {
+		display: inline-block;
+	}			
+	
 	</style>
 </head>
 <body onload="javascript:init('q','objects');makeHrefs();">
