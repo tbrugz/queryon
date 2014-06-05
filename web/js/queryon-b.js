@@ -55,7 +55,9 @@ function doRun(selectId, containerId, messagesId) {
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
 		//console.log(item);
-		paramsStr += '/'+item.value;
+		var str = item.value;
+		if(str=='') { str = '-'; } 
+		paramsStr += '/'+str;
 	}
 	
 	var queryString = '';
