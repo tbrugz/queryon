@@ -105,6 +105,33 @@
 			+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
 		makeHrefs();
 	}
+	
+	function addSortHrefs() {
+		var content = document.getElementById('content');
+		var headers = content.getElementsByTagName('th');
+		console.log('headers.length: '+headers.length);
+		for(var i=0;i<headers.length;i++) {
+			var elem = headers[i];
+			var colname = elem.innerHTML;
+			var idx = colname.indexOf('<');
+			if(idx>0) {
+				colname = colname.substring(0, idx);
+			}
+			console.log('colname['+i+']: '+colname);
+			
+			elem.innerHTML = colname;
+			elem.innerHTML += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>';
+			elem.innerHTML += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/>';
+		}
+	}
+	
+	function sortBy(colName, direction) {
+		var str = direction==2?'-':'';
+		str += colName;
+		console.log()
+		document.getElementById('order').value = str;
+		doRun('objects', 'content', 'messages');
+	}
 	</script>
 	<style type="text/css">
 	#nav {
@@ -182,6 +209,13 @@
 	#navbar-prop {
 		display: none;
 	}
+	#order-label {
+		display: none;
+	}
+	.orderbutton {
+		padding: 0;
+		font-size: smaller;
+	}
 	</style>
 </head>
 <body onload="javascript:init('q','objects');makeHrefs();">
@@ -198,7 +232,7 @@
 	<span id="navbar-prop">
 	<span id="parameters"></span>
 	<span id="filters"></span>
-	<label>order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
+	<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 	<input type="button" value="+ filter" onclick="addFilter();"/>
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 	<!-- TODO limit/offset or page/pagesize -->

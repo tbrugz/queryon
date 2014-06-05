@@ -81,6 +81,7 @@ function doRun(selectId, containerId, messagesId) {
 		success: function(data) {
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
+			addSortHrefs();
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
