@@ -31,7 +31,7 @@
 			if(relationsHash[id].relationType=="query") {
 				urled.style.display = 'initial';
 				var name = id;
-				urled.href = "qon-queries.jsp?";
+				urled.href = "qon-editor.jsp?";
 				var parts = id.split('.');
 				if(parts.length>1) {
 					urled.href += "schema="+parts[0]+"&name="+parts[1];
