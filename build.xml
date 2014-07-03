@@ -15,6 +15,7 @@
 	<property name="test.dir" value="dist/test"/>
 	<property name="web.dir" value="web"/>
 	<property name="war.file" value="dist/${proj.name}.war"/>
+	<property name="winstone.webroot" value="${war.file}"/>
 
 	<fileset id="fileset.base" dir="lib">
 		<include name="sqldump.jar" />
@@ -72,6 +73,10 @@
 		<pathelement location="lib/tika-core-0.6.jar"/>
 		<pathelement location="lib/tika-parsers-0.6.jar"/>
 		<pathelement location="lib/winstone-0.9.10.jar"/>
+		<fileset dir="lib">
+			<include name="jetty-*.jar" />
+			<include name="slf4j-*-1.6.6.jar"/>
+		</fileset>
 	</path>
 	
 	<path id="classpath.h2">
@@ -173,6 +178,46 @@
 			<arg value="-tcpShutdown"/>
 			<arg value="tcp://localhost:9092"/>
 			<arg value="-tcpShutdownForce"/>
+		</java>
+	</target>
+
+	<target name="start-winstone" description="init winstone">
+		<java classpathref="classpath.test" classname="winstone.Launcher" fork="true">
+			<arg value="--webroot=${winstone.webroot}"/>
+			<arg value="--httpPort=8888"/>
+			<arg value="--ajp13Port=-1"/>
+		</java>
+	</target>
+	
+	<!--target name="start-jetty" description="init jetty">
+		<!- - http://www.eclipse.org/jetty/documentation/current/jetty-ant.html - ->
+		<taskdef classpathref="classpath.test" resource="tasks.properties" loaderref="jetty.loader" />
+		<typedef name="connector" classname="org.eclipse.jetty.ant.types.Connector" classpathref="classpath.test" loaderref="jetty.loader" />
+		<typedef name="contextHandlers" classname="org.eclipse.jetty.ant.types.ContextHandlers" classpathref="classpath.test" loaderref="jetty.loader" />
+		<typedef name="contextHandler" classname="org.eclipse.jetty.server.handler.ContextHandler" classpathref="classpath.test" loaderref="jetty.loader" />
+		<typedef name="resourceHandler" classname="org.eclipse.jetty.server.handler.ResourceHandler" classpathref="classpath.test" loaderref="jetty.loader" />
+		
+		<jetty.run requestlog="org.eclipse.jetty.server.NCSARequestLog" scanIntervalSeconds="5">
+			<connectors>
+				<connector port="8888"/>
+			</connectors>
+			<contextHandlers>
+				<!- -resourceHandler resourceBase="${winstone.webroot}" available="true" allownullpathinfo="true"/- ->
+				<contextHandler resourceBase="${winstone.webroot}" available="true" allownullpathinfo="true">
+				</contextHandler>
+			</contextHandlers>
+		</jetty.run>
+	</target-->
+
+	<target name="start-jetty-java" description="init jetty">
+		<java classpathref="classpath.test" classname="org.eclipse.jetty.start.Main" fork="true">
+			<sysproperty key="jetty.port" value="8888"/>
+			<sysproperty key="rootResourceBase" value="${winstone.webroot}"/>
+			<arg value="OPTIONS=All"/>
+			<!--arg value="- -help"/-->
+			<arg value="src_test/jetty.xml"/>
+			<arg value="src_test/jetty-http.xml"/>
+			<arg value="src_test/jetty-staticcontext.xml"/>
 		</java>
 	</target>
 	
