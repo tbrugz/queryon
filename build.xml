@@ -135,8 +135,8 @@
 				<include name="queryon.jar" />
 			</lib>
 			<classes dir="bin">
-				<include name="**/*.properties"/>
-				<include name="**/*.xml"/>
+				<include name="*.properties"/>
+				<include name="*.xml"/>
 			</classes>
 			<fileset dir="web"></fileset>
 		</war>
@@ -245,6 +245,10 @@
 		<ivy:retrieve haltonfailure="false"/>
 	</target>
 
+	<target name="resolve-conf-default" depends="config-ivy" description="retrieve 'default' dependencies with ivy">
+		<ivy:retrieve haltonfailure="false" conf="default"/>
+	</target>
+	
 	<target name="report-ivy" depends="config-ivy">
 		<ivy:info/>
 		<ivy:report todir="bin/report-ivy" conf="main"/>
