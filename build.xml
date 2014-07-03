@@ -18,8 +18,8 @@
 	<property name="winstone.webroot" value="${war.file}"/>
 
 	<fileset id="fileset.base" dir="lib">
-		<include name="sqldump.jar" />
-		<!--include name="sqldump-0.9.11.jar" /-->
+		<!--include name="sqldump.jar" /-->
+		<include name="sqldump-0.9.12.jar" />
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 	</fileset>
