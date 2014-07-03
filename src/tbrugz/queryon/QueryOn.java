@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.NamingException;
+import javax.naming.NoPermissionException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
@@ -272,18 +275,22 @@ public class QueryOn extends HttpServlet {
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 		
+		String otype = null;
 		ActionType atype = null;
 		DBIdentifiable dbobj = null;
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
+			otype = reqspec.object;
 		}
 		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.SELECT_ANY;
+			otype = ActionType.SELECT_ANY.name();
 		}
 		else if(ACTION_VALIDATE_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.VALIDATE_ANY;
+			otype = ActionType.VALIDATE_ANY.name();
 		}
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
@@ -307,10 +314,12 @@ public class QueryOn extends HttpServlet {
 				else {
 					throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [obj="+reqspec.object+"]");
 				}
+				otype = DBObjectType.TABLE.name(); //XXX: view? query?
 			}
 			else if(dbobj instanceof ExecutableObject) {
 				//XXX only if POST method?
 				atype = ActionType.EXECUTE;
+				otype = DBObjectType.EXECUTABLE.name();
 			}
 			else {
 				throw new BadRequestException("unknown object type: "+dbobj.getClass().getName()+" [obj="+reqspec.object+"]");
@@ -318,6 +327,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		try {
+			Subject currentUser = SecurityUtils.getSubject();
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;
@@ -329,6 +339,11 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case SELECT_ANY:
+				checkPermission(currentUser, otype+":"+atype);
+				//checkPermission(currentUser, ACTION_QUERY_ANY+":"+ActionType.SELECT);
+				/*if(!currentUser.isPermitted("selectAny:select")) {
+					throw new NoPermissionException("SELECT_ANY: authorization required");
+				}*/
 				try {
 					Query relation = getQuery(req);
 					//XXXxx: validate first & return number of parameters?
@@ -374,6 +389,10 @@ public class QueryOn extends HttpServlet {
 			default:
 				throw new BadRequestException("Unknown action type: "+atype); 
 			}
+		}
+		catch(NoPermissionException e) {
+			//XXX: do not log exception!
+			throw new ServletException(e);
 		}
 		catch(SQLException e) {
 			throw new ServletException(e);
@@ -423,6 +442,13 @@ public class QueryOn extends HttpServlet {
 		relation.setName(name);
 		relation.setQuery(sql);
 		return relation;
+	}
+	
+	void checkPermission(Subject user, String permission) throws NoPermissionException {
+		log.info("checking permission '"+permission+"', subject = "+user);
+		/*if(!user.isPermitted(permission)) {
+			throw new NoPermissionException(permission+": authorization required");
+		}*/
 	}
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
