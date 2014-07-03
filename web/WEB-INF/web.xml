@@ -6,6 +6,11 @@
 	version="2.5">
 	<display-name>queryon</display-name>
 	
+	<!-- apache shiro: see http://shiro.apache.org/web.html -->
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	</listener>
+	
 	<servlet>
 		<servlet-name>QueryOn</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOn</servlet-class>
@@ -44,5 +49,20 @@
 		<servlet-name>ProcessorServlet</servlet-name>
 		<url-pattern>/processor/*</url-pattern>
 	</servlet-mapping>
+
+	<filter>
+		<filter-name>ShiroFilter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+		<!-- filter-class>org.apache.shiro.web.servlet.IniShiroFilter</filter-class-->
+	</filter>
+
+	<filter-mapping>
+		<filter-name>ShiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher> 
+		<dispatcher>FORWARD</dispatcher> 
+		<dispatcher>INCLUDE</dispatcher> 
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
 
 </web-app>
