@@ -116,7 +116,7 @@
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
-      <version>0.9.11</version>
+      <version>0.9.12</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -216,10 +216,10 @@
       <id>aduana</id>
       <url>http://repo.aduna-software.org/maven2/releases/</url>
     </repository>
-    <!-- repository>
+    <repository>
       <id>bitbucket-tbrugz</id>
       <url>https://bitbucket.org/tbrugz/mvn-repo/raw/tip/</url>
-    </repository-->
+    </repository>
     <!-- repository>
       <id>pentaho-rep</id>
       <url>http://repo.pentaho.org/artifactory/repo/</url>
