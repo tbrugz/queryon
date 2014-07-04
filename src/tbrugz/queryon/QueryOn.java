@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
@@ -93,6 +95,9 @@ public class QueryOn extends HttpServlet {
 	
 	public static final String ACTION_QUERY_ANY = "QueryAny";
 	public static final String ACTION_VALIDATE_ANY = "ValidateAny";
+	
+	public static final String CONST_QUERY = "QUERY";
+	public static final String CONST_RELATION = "RELATION";
 	
 	/*public enum StatusObject {
 		TABLE,
@@ -282,7 +287,7 @@ public class QueryOn extends HttpServlet {
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
-			otype = reqspec.object;
+			otype = reqspec.object.toUpperCase();
 		}
 		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.SELECT_ANY;
@@ -314,7 +319,19 @@ public class QueryOn extends HttpServlet {
 				else {
 					throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [obj="+reqspec.object+"]");
 				}
-				otype = DBObjectType.TABLE.name(); //XXX: view? query?
+				
+				if(dbobj instanceof Table) {
+					otype = DBObjectType.TABLE.name();
+				}
+				else if(dbobj instanceof Query) {
+					otype = CONST_QUERY;
+				}
+				else if(dbobj instanceof View) {
+					otype = DBObjectType.VIEW.name();
+				}
+				else {
+					otype = CONST_RELATION;
+				}
 			}
 			else if(dbobj instanceof ExecutableObject) {
 				//XXX only if POST method?
@@ -327,7 +344,9 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		try {
-			Subject currentUser = SecurityUtils.getSubject();
+			Subject currentUser = getSubject();
+			
+			checkPermission(currentUser, otype+":"+atype+":"+reqspec.object);
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;
@@ -339,11 +358,6 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case SELECT_ANY:
-				checkPermission(currentUser, otype+":"+atype);
-				//checkPermission(currentUser, ACTION_QUERY_ANY+":"+ActionType.SELECT);
-				/*if(!currentUser.isPermitted("selectAny:select")) {
-					throw new NoPermissionException("SELECT_ANY: authorization required");
-				}*/
 				try {
 					Query relation = getQuery(req);
 					//XXXxx: validate first & return number of parameters?
@@ -392,6 +406,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(NoPermissionException e) {
 			//XXX: do not log exception!
+			log.warn("NoPermissionException: "+e.getMessage());
 			throw new ServletException(e);
 		}
 		catch(SQLException e) {
@@ -444,12 +459,32 @@ public class QueryOn extends HttpServlet {
 		return relation;
 	}
 	
-	void checkPermission(Subject user, String permission) throws NoPermissionException {
-		log.info("checking permission '"+permission+"', subject = "+user);
-		/*if(!user.isPermitted(permission)) {
-			throw new NoPermissionException(permission+": authorization required");
+	// --- security-related methods <start>
+	
+	Subject getSubject() {
+		Subject currentUser = SecurityUtils.getSubject();
+		if(currentUser.getPrincipal()==null) {
+			//TODO: get static info from properties...
+			Object userIdentity = "anonymous";
+			String realmName = "myRealm";
+			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
+			currentUser = new Subject.Builder().principals(principals).buildSubject();
+		}
+		return currentUser;
+	}
+	
+	void checkPermission(Subject subject, String permission) throws NoPermissionException {
+		//log.info("checking permission '"+permission+"', subject = "+subject);
+		if(! subject.isPermitted(permission)) {
+			log.warn("no permission '"+permission+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
+			throw new NoPermissionException(permission+": authorization required"); //TODO: throw exception, or something like that
+		}
+		/*else {
+			log.info("checked permission '"+permission+"' OK, subject = "+subject+" ; "+subject.getPrincipal());
 		}*/
 	}
+	
+	// --- security-related methods <end>
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
@@ -513,6 +548,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			conn.rollback();
+			//XXX: create new SQLException including the query string?
 			throw e;
 		}
 		finally {

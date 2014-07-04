@@ -83,6 +83,7 @@ public class ProcessorServlet extends HttpServlet {
 		doProcess(procClass, config, null, null);
 	}
 
+	//TODO: shiro: add permission check
 	public static void doProcess(String procClass, ServletConfig config, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(procComponent==null) {
