@@ -242,6 +242,7 @@ if(queryName!=null) {
 	}
 	if(v != null) {
 		if(v instanceof Query) {
+			//XXX: check permission for q.getQuery()? add new action on QueryOn servlet? 
 			Query q = (Query) v;
 			query = q.getQuery();
 		}

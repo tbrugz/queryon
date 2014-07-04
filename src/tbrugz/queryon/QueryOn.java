@@ -155,6 +155,9 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
 	static final String PROP_SQLDIALECT = "queryon.sqldialect";
 	
+	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
+	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
+	
 	static final String PROP_GRABCLASS = "queryon.grabclass";
 	@Deprecated static final String PROP_SQLDUMP_GRABCLASS = "sqldump.schemagrab.grabclass";
 	
@@ -464,9 +467,9 @@ public class QueryOn extends HttpServlet {
 	Subject getSubject() {
 		Subject currentUser = SecurityUtils.getSubject();
 		if(currentUser.getPrincipal()==null) {
-			//TODO: get static info from properties...
-			Object userIdentity = "anonymous";
-			String realmName = "myRealm";
+			//TODOne: get static info from properties...
+			Object userIdentity = prop.getProperty(PROP_AUTH_ANONUSER);
+			String realmName = prop.getProperty(PROP_AUTH_ANONREALM);
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
 			currentUser = new Subject.Builder().principals(principals).buildSubject();
 		}
