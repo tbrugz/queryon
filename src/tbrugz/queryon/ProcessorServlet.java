@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.subject.Subject;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.Defs;
@@ -34,6 +35,8 @@ public class ProcessorServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(ProcessorServlet.class);
+	
+	static final String PROCESSOR_PERMISSION_PREFIX = "PROCESSOR:"; 
 	
 	ServletConfig config = null;
 	
@@ -54,6 +57,10 @@ public class ProcessorServlet extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			doProcess(req, resp);
+		} catch(BadRequestException e) {
+			log.warn("BadRequestException: "+e.getMessage());
+			resp.setStatus(e.getCode());
+			resp.getWriter().write(e.getMessage());
 		} catch (ServletException e) {
 			e.printStackTrace();
 			throw e;
@@ -94,6 +101,16 @@ public class ProcessorServlet extends HttpServlet {
 		if(appprop==null) {
 			throw new ServletException("properties attribute is null!");
 		}
+
+		// check authorization
+		if(req!=null) {
+			Subject currentUser = ShiroUtils.getSubject(appprop);
+			ShiroUtils.checkPermissionAny(currentUser, new String[]{
+					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getCanonicalName(),
+					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getSimpleName(),
+					});
+		}
+		
 		Properties prop = new ParametrizedProperties();
 		prop.putAll(appprop);
 		if(req!=null) {
