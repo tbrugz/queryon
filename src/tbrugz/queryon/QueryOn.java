@@ -18,7 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.NamingException;
-import javax.naming.NoPermissionException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -407,10 +406,10 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("Unknown action type: "+atype); 
 			}
 		}
-		catch(NoPermissionException e) {
+		catch(BadRequestException e) {
 			//XXX: do not log exception!
-			log.warn("NoPermissionException: "+e.getMessage());
-			throw new ServletException(e);
+			log.warn("BadRequestException: "+e.getMessage());
+			throw e;
 		}
 		catch(SQLException e) {
 			throw new ServletException(e);
@@ -476,11 +475,11 @@ public class QueryOn extends HttpServlet {
 		return currentUser;
 	}
 	
-	void checkPermission(Subject subject, String permission) throws NoPermissionException {
+	void checkPermission(Subject subject, String permission) {
 		//log.info("checking permission '"+permission+"', subject = "+subject);
 		if(! subject.isPermitted(permission)) {
 			log.warn("no permission '"+permission+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
-			throw new NoPermissionException(permission+": authorization required"); //TODO: throw exception, or something like that
+			throw new BadRequestException(permission+": authorization required", HttpServletResponse.SC_FORBIDDEN);
 		}
 		/*else {
 			log.info("checked permission '"+permission+"' OK, subject = "+subject+" ; "+subject.getPrincipal());
