@@ -29,7 +29,7 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * XXX: allow only POST method? (not idempotent)
+ * XXXdone: allow only POST method? (not idempotent)
  */
 public class ProcessorServlet extends HttpServlet {
 
@@ -49,7 +49,7 @@ public class ProcessorServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doPost(req, resp);
+		throw new BadRequestException("Only GET allowed", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 	}
 
 	@Override
