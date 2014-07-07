@@ -22,6 +22,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.config.IniSecurityManagerFactory;
+import org.apache.shiro.util.Factory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -54,11 +57,18 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();
+		
+		setupShiro();
 	}
 	
 	public static void setupH2() throws ClassNotFoundException, IOException, SQLException, NamingException {
 		String[] params = {"-propfile=src_test/tbrugz/queryon/http/sqlrun.properties"};
 		SQLRun.main(params);
+	}
+	
+	public static void setupShiro() {
+		Factory<org.apache.shiro.mgt.SecurityManager> factory = new IniSecurityManagerFactory("classpath:test.shiro.all-permission.ini");
+		SecurityUtils.setSecurityManager(factory.getInstance());
 	}
 	
 	@AfterClass
