@@ -148,7 +148,8 @@
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			console.log(jqXHR);
-			alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			errorMessage('error saving query: '+jqXHR.responseText);
+			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
 	
