@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.config.IniSecurityManagerFactory;
+import org.apache.shiro.util.Factory;
+
 import winstone.Launcher;
 
 public class TestSetup {
@@ -30,10 +34,18 @@ public class TestSetup {
 				System.err.println("winstone shutted down");
 			}
 		});
+		
+		setupShiro();
+	}
+	
+	public static void setupShiro() {
+		Factory<org.apache.shiro.mgt.SecurityManager> factory = new IniSecurityManagerFactory("classpath:test.shiro.all-permission.ini");
+		SecurityUtils.setSecurityManager(factory.getInstance());
 	}
 
 	public static void shutdown() {
-		//winstone.shutdown(); 
+		//shutdownShiro(); //??
+		//winstone.shutdown();
 	}
 	
 }
