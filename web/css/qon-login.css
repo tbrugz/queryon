@@ -1,0 +1,9 @@
+
+body {
+	margin: 10px;
+}
+
+.warning {
+	background-color: #f99;
+	font-style: normal;
+}
