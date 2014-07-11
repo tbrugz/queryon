@@ -7,3 +7,7 @@ body {
 	background-color: #f99;
 	font-style: normal;
 }
+
+pre {
+	background-color: #eee;
+}

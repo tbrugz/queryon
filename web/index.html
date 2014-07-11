@@ -11,7 +11,14 @@
 	<script src="js/queryon-b.js"></script>
 	<script type="text/javascript">
 	var queryOnUrl = '/queryon/q';
-	var isAdmin = getQueryVariable('admin');
+	//var isAdmin = getQueryVariable('admin');
+	var isAdmin = false;
+	$.ajax({
+		url: 'auth/hasRole.jsp?role=admin',
+		success: function(data) {
+			isAdmin = data.trim()=="1"?true:false;
+		}
+	});
 	
 	function makeHrefs() {
 		var urled = document.getElementById("url-editor");
