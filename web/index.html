@@ -13,10 +13,16 @@
 	var queryOnUrl = '/queryon/q';
 	//var isAdmin = getQueryVariable('admin');
 	var isAdmin = false;
+	var username = null;
 	$.ajax({
-		url: 'auth/hasRole.jsp?role=admin',
+		url: 'auth/info.jsp',
 		success: function(data) {
-			isAdmin = data.trim()=="1"?true:false;
+			var info = JSON.parse(data);
+			console.log(info);
+			if(info.authenticated) {
+				username = info.username;
+				isAdmin = info.roles.indexOf("admin")>=0;
+			}
 		}
 	});
 	
