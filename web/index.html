@@ -11,9 +11,10 @@
 	<script src="js/queryon-b.js"></script>
 	<script type="text/javascript">
 	var queryOnUrl = '/queryon/q';
+	var username = '';
 	//var isAdmin = getQueryVariable('admin');
 	var isAdmin = false;
-	var username = null;
+	
 	$.ajax({
 		url: 'auth/info.jsp',
 		success: function(data) {
@@ -23,6 +24,11 @@
 				username = info.username;
 				isAdmin = info.roles.indexOf("admin")>=0;
 			}
+			else {
+				username = '';
+				isAdmin = false;
+			}
+			refreshAuthInfo();
 		}
 	});
 	
@@ -145,6 +151,21 @@
 		document.getElementById('order').value = str;
 		doRun('objects', 'content', 'messages');
 	}
+	
+	function refreshAuthInfo() {
+		var user = document.getElementById('username');
+		user.innerHTML = username;
+		var auth = document.getElementById('authaction');
+		if(username=='') {
+			auth.innerHTML = '<a href="auth/login.jsp">login</a>';
+			user.style.display = 'none';
+		}
+		else {
+			auth.innerHTML = '<a href="auth/logout.jsp">logout</a>';
+			user.style.display = 'inline';
+		}
+	}
+	
 	</script>
 	<style type="text/css">
 	#nav {
@@ -231,7 +252,18 @@
 	}
 	.orderbutton-container {
 		display: inline-block;
-	}			
+	}
+	
+	#authinfo {
+		float: right;
+		margin: 6px;
+	}
+	
+	#username {
+		background-color: #555;
+		padding: 2px;
+		display: none;
+	}
 	
 	</style>
 </head>
@@ -254,6 +286,11 @@
 	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 	<!-- TODO limit/offset or page/pagesize -->
 	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a> <a id="url-down" href="">download</a>
+	</span>
+	
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
 	</span>
 	
 	<div id="messages"></div>

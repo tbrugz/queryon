@@ -5,8 +5,8 @@
 <html>
 <head>
 	<title>QueryOn</title>
-	<link href="css/queryon.css" rel="stylesheet">
-	<link href="css/qon-login.css" rel="stylesheet">
+	<link href="../css/queryon.css" rel="stylesheet">
+	<link href="../css/qon-login.css" rel="stylesheet">
 </head>
 <body>
 <%
@@ -16,5 +16,6 @@ SecurityUtils.getSubject().logout();
 %>
 You have succesfully logged out.
 
-<a href="login.jsp">login</a>
+<br><a href="../">home</a>
+<br><a href="login.jsp">login</a>
 </body>

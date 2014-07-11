@@ -10,8 +10,8 @@
 <html>
 <head>
 	<title>QueryOn</title>
-	<link href="css/queryon.css" rel="stylesheet">
-	<link href="css/qon-login.css" rel="stylesheet">
+	<link href="../css/queryon.css" rel="stylesheet">
+	<link href="../css/qon-login.css" rel="stylesheet">
 </head>
 <body>
 <%
@@ -56,5 +56,6 @@ else {
     <shiro:hasRole name="user"><li>user<br/></shiro:hasRole>
 </p>
 
-<a href="logout.jsp">logout</a>
+<br><a href="../">home</a>
+<br><a href="logout.jsp">logout</a>
 </body>
