@@ -13,6 +13,6 @@ for more info.
 license
 -------
 
-[AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html)
+[AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) - except where otherwise noted
 
 -- [Telmo Brugnara](mailto:tbrugz@gmail.com)
