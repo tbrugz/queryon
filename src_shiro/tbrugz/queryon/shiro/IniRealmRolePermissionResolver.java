@@ -14,6 +14,7 @@ public class IniRealmRolePermissionResolver extends IniRealm implements RolePerm
 
 	public Collection<Permission> resolvePermissionsInRole(String roleString) {
 		SimpleRole sr = getRole(roleString);
+		if(sr==null) { return null; }
 		return sr.getPermissions();
 	}
 	
