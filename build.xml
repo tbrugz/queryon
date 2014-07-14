@@ -8,7 +8,7 @@
 	
 	<property name="src.dir" value="src"/>
 	<property name="src.test.dir" value="src_test"/>
-	<property name="bin.dir"  value="bin"/>
+	<property name="bin.dir"  value="target/classes"/>
 	<property name="lib.dir"  value="lib"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="deploy.dir" value="dist/deploy"/>
@@ -23,7 +23,8 @@
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 		
-		<include name="shiro-*-1.2.3.jar" />
+		<include name="shiro-core-1.2.3.jar" />
+		<include name="shiro-web-1.2.3.jar" />
 		<include name="slf4j-api-1.6.6.jar" />
 		<include name="slf4j-simple-1.6.6.jar" />
 		<include name="commons-beanutils-1.8.3.jar" />
@@ -139,7 +140,8 @@
 			<lib dir="${dist.dir}">
 				<include name="queryon.jar" />
 			</lib>
-			<classes dir="bin">
+			<classes dir="target/classes">
+				<include name="*.ini"/>
 				<include name="*.properties"/>
 				<include name="*.xml"/>
 			</classes>
