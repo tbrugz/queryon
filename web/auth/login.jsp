@@ -1,3 +1,6 @@
+<%@page import="java.io.PrintWriter"%>
+<%@page import="java.io.StringWriter"%>
+<%@page import="org.apache.shiro.ShiroException"%>
 <%@page import="org.apache.shiro.authc.IncorrectCredentialsException"%>
 <%@page import="org.apache.shiro.authc.UnknownAccountException"%>
 <%@page import="org.apache.shiro.authc.UsernamePasswordToken"%>
@@ -30,6 +33,14 @@ if(username!=null) {
 	}
 	catch(IncorrectCredentialsException e) {
 		out.write("<em class='warning'>Incorrect password</em><br/>");
+	}
+	catch(ShiroException e) {
+		out.write("<em class='warning'>Shiro Exception: "+e.getMessage()+"</em><br/><pre>");
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		out.write(sw.toString());
+		out.write("</pre>");
 	}
 }
 else {

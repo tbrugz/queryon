@@ -5,3 +5,4 @@ dist/*
 target/*
 work/output/*
 tmp/*
+z_etc/*
