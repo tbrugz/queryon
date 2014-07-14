@@ -345,7 +345,7 @@ public class QueryOn extends HttpServlet {
 		try {
 			Subject currentUser = ShiroUtils.getSubject(prop);
 			
-			ShiroUtils.checkPermission(currentUser, otype+":"+atype+":"+reqspec.object);
+			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;

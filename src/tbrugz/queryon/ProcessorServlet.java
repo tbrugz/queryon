@@ -114,6 +114,7 @@ public class ProcessorServlet extends HttpServlet {
 		Properties prop = new ParametrizedProperties();
 		prop.putAll(appprop);
 		if(req!=null) {
+			@SuppressWarnings("unchecked")
 			Enumeration<String> en = req.getParameterNames();
 			while(en.hasMoreElements()) {
 				String s = en.nextElement();

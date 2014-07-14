@@ -28,7 +28,11 @@ public class ShiroUtils {
 		return currentUser;
 	}
 	
-	public static void checkPermission(Subject subject, String permission) {
+	public static void checkPermission(Subject subject, String permission, String object) {
+		if(object!=null) {
+			object = object.replaceAll("\\.", ":");
+			permission += ":"+object;
+		}
 		//log.info("checking permission '"+permission+"', subject = "+subject);
 		if(! subject.isPermitted(permission)) {
 			log.warn("no permission '"+permission+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
