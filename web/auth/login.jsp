@@ -21,9 +21,9 @@
 
 String username = request.getParameter("username");
 String password = request.getParameter("password");
+Subject currentUser = SecurityUtils.getSubject();
 if(username!=null) {
 	AuthenticationToken token = new UsernamePasswordToken(username, password);
-	Subject currentUser = SecurityUtils.getSubject();
 	try {
 		currentUser.login(token);
 		System.out.println("login.jsp: auth: "+username);
@@ -44,7 +44,7 @@ if(username!=null) {
 	}
 }
 else {
-	System.out.println("login.jsp: auth: username is null");
+	//System.out.println("login.jsp: auth: username is null");
 }
 
 %>
