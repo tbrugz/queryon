@@ -74,7 +74,8 @@ function doRun(selectId, containerId, messagesId) {
 		queryString += '&order='+order;
 	}
 	
-	console.log('query-string: '+queryString);
+	//console.log('query-string: '+queryString);
+	console.log('url: '+baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString);
 	
 	$.ajax({
 		url: baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString,
