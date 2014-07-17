@@ -286,7 +286,7 @@ public class QueryOn extends HttpServlet {
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
 			atype = ActionType.STATUS;
-			otype = reqspec.object.toUpperCase();
+			otype = reqspec.object.toLowerCase();
 		}
 		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.SELECT_ANY;
@@ -636,8 +636,8 @@ public class QueryOn extends HttpServlet {
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"?
-	static final List<String> tableAllColumns = Arrays.asList(new String[]{"PKConstraint", "columnNames", "constraints", "remarks", "relationType"});
-	static final List<String> viewAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
+	static final List<String> tableAllColumns =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "PKConstraint"});
+	static final List<String> viewAllColumns  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
 	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {

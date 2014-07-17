@@ -56,6 +56,7 @@ public class QOnQueries extends SQLQueries {
 	void readFromDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
 		String sql = "select schema, name, query, remarks from "+qonQueriesTable;
+				//+" order by schema, name";
 		
 		ResultSet rs = null;
 		try {
