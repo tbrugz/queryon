@@ -30,6 +30,7 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
+import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
@@ -172,6 +173,8 @@ public class QueryOn extends HttpServlet {
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	SchemaModel model;
+	
+	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -397,7 +400,7 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case STATUS:
-				doStatus(reqspec, resp);
+				doStatus(reqspec, currentUser, resp);
 				break;
 			default:
 				throw new BadRequestException("Unknown action type: "+atype); 
@@ -640,12 +643,12 @@ public class QueryOn extends HttpServlet {
 	static final List<String> viewAllColumns  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
-	void doStatus(RequestSpec reqspec, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
+	void doStatus(RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
 		String objectName = null;
-		//XXX: filter by schemaName, name? ResultSetFilterAdapter(rs, colnames, colvalues)?
+		//XXX: filter by schemaName, name? ResultSetFilterDecorator(rs, colpositions, colvalues)?
 		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
 			objectName = SO_TABLE;
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
@@ -660,7 +663,7 @@ public class QueryOn extends HttpServlet {
 		}
 		else if(SO_RELATION.equalsIgnoreCase(reqspec.object)) {
 			objectName = SO_RELATION;
-			List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables());
+			List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables()); //XXX: sort relations?
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, list, Relation.class);
 			// importedFKs = ... ?
 		}
@@ -682,6 +685,10 @@ public class QueryOn extends HttpServlet {
 		
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
+		}
+		if(doFilterStatusByPermission) {
+			// filter by [object-type]:SELECT:[schema]:[name]
+			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[6]:SELECT:[1]:[2]");
 		}
 		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
 		if(rs!=null) { rs.close(); }
