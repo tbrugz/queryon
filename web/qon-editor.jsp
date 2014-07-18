@@ -282,7 +282,7 @@ if(remarks==null) { remarks = ""; }
 <div class="container" id="objectid-container">
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
-	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="40"/></label>
+	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
 	<!-- TODO show relation type -->
 	<a id="url-reload" href="">reload</a> <a id="url-permalink" href="" target="_new">permalink</a>
 </div>

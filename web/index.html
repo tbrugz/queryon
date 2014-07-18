@@ -11,6 +11,7 @@
 	<script src="js/queryon-b.js"></script>
 	<script type="text/javascript">
 	var queryOnUrl = '/queryon/q';
+	var qonEditorUrl = 'qon-editor.jsp';
 	var username = '';
 	//var isAdmin = getQueryVariable('admin');
 	var isAdmin = false;
@@ -50,7 +51,7 @@
 			if(relationsHash[id].relationType=="query") {
 				urled.style.display = 'initial';
 				var name = id;
-				urled.href = "qon-editor.jsp?";
+				urled.href = qonEditorUrl+"?";
 				var parts = id.split('.');
 				if(parts.length>1) {
 					urled.href += "schema="+parts[0]+"&name="+parts[1];
@@ -164,6 +165,15 @@
 			auth.innerHTML = '<a href="auth/logout.jsp">logout</a>';
 			user.style.display = 'inline';
 		}
+
+		var urlednew = document.getElementById("url-editor-new");
+		if(isAdmin) {
+			urlednew.style.display = 'inline';
+			urlednew.href = qonEditorUrl;
+		}
+		else {
+			urlednew.style.display = 'none';
+		}
 	}
 	
 	</script>
@@ -253,6 +263,17 @@
 	.orderbutton-container {
 		display: inline-block;
 	}
+	/*#url-editor-new-cont {
+		display: none;
+	}*/
+	#url-editor-new {
+		display: none;
+		/*margin: 0 1em 0 1em;*/
+		padding: 2px;
+		/*color: #A72020;
+		color: #D11919;*/
+		background-color: #5A5A5A;
+	}
 	
 	#authinfo {
 		float: right;
@@ -279,13 +300,18 @@
 	</label>
 	
 	<span id="navbar-prop">
-	<span id="parameters"></span>
-	<span id="filters"></span>
-	<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
-	<input type="button" value="+ filter" onclick="addFilter();"/>
-	<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
-	<!-- TODO limit/offset or page/pagesize -->
-	<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a> <a id="url-down" href="">download</a>
+		<span id="parameters"></span>
+		<span id="filters"></span>
+		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
+		<input type="button" value="+ filter" onclick="addFilter();"/>
+		<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
+		<!-- TODO limit/offset or page/pagesize -->
+		<a id="url-editor" href="" target="_new">edit</a> <a id="url-permalink" href="" target="_new">permalink</a> <a id="url-down" href="">download</a>
+	</span>
+
+	<span id="navbar-actions">
+		<!-- span id="url-editor-new-cont"></span -->
+		<a id="url-editor-new" href="" target="_new">new</a>
 	</span>
 	
 	<span id="authinfo">
