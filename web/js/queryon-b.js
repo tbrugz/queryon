@@ -77,18 +77,52 @@ function doRun(selectId, containerId, messagesId) {
 	//console.log('query-string: '+queryString);
 	console.log('url: '+baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString);
 	
+	var startTimeMilis = Date.now();
 	$.ajax({
 		url: baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString,
 		success: function(data) {
+			var completedTimeMilis = Date.now();
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
-			addSortHrefs();
+			addSortHrefs(containerId);
+			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 			$('#'+messagesId).attr('class','error');
 		}
 	});
+}
+
+function addSortHrefs(containerId) {
+	var content = document.getElementById(containerId);
+	var headers = content.getElementsByTagName('th');
+	//console.log('headers.length: '+headers.length);
+	for(var i=0;i<headers.length;i++) {
+		var elem = headers[i];
+		var colname = elem.innerHTML;
+		var idx = colname.indexOf('<');
+		if(idx>0) {
+			colname = colname.substring(0, idx);
+		}
+		//console.log('colname['+i+']: '+colname);
+		
+		elem.innerHTML = colname
+			+ '<div class="orderbutton-container"><input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>'
+			+ '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/></div>';
+	}
+}
+
+function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTimeMilis) {
+	//var renderedTimeMilis = Date.now();
+	
+	var content = document.getElementById(containerId);
+	var messages = document.getElementById(messagesId);
+	
+	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
+	//messages.innerHTML = 'rows = '+numOfRows+' ; time in millis: server = '+(completedTimeMilis-startTimeMilis)+' ; render = '+(renderedTimeMilis-completedTimeMilis)
+	messages.innerHTML = 'rows = '+numOfRows+' ; time: = '+(completedTimeMilis-startTimeMilis)+'ms '
+		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 }
 
 function setParameters(parametersId, numparams) {

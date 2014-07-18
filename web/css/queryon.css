@@ -46,6 +46,17 @@ th {
 	border: 0;
 }
 
+.status {
+	background-color: #222;
+	color: #ddd;
+}
+
+.statusbutton {
+	background-color: #666;
+	font-weight: bold;
+	border: 0;
+}
+
 .parameter-label {
 	display: inline-block;
 }

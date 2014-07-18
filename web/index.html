@@ -143,25 +143,6 @@
 		makeHrefs();
 	}
 	
-	function addSortHrefs() {
-		var content = document.getElementById('content');
-		var headers = content.getElementsByTagName('th');
-		//console.log('headers.length: '+headers.length);
-		for(var i=0;i<headers.length;i++) {
-			var elem = headers[i];
-			var colname = elem.innerHTML;
-			var idx = colname.indexOf('<');
-			if(idx>0) {
-				colname = colname.substring(0, idx);
-			}
-			//console.log('colname['+i+']: '+colname);
-			
-			elem.innerHTML = colname
-				+ '<div class="orderbutton-container"><input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>'
-				+ '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/></div>';
-		}
-	}
-	
 	function sortBy(colName, direction) {
 		var str = direction==2?'-':'';
 		str += colName;
@@ -319,6 +300,13 @@
 		display: none;
 	}
 	
+	#status-container {
+		position: fixed;
+		bottom: 0;
+		padding: 2px;
+		right: 0;
+	}
+	
 	</style>
 </head>
 <body onload="javascript:init('q','objects');makeHrefs();">
@@ -363,6 +351,9 @@
 <div id="dialog-container">
 	<div id="dialog">
 	</div>
+</div>
+
+<div id="status-container" class="status">
 </div>
 
 </body>
