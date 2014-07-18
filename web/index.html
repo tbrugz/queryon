@@ -33,6 +33,16 @@
 		}
 	});
 	
+	function onQueryChanged() {
+		loadRelation('objects', 'parameters', 'content');
+		document.getElementById('navbar-prop').style.display = 'initial';
+		
+		//cleaning 'order'
+		document.getElementById('order').value = '';
+		
+		makeHrefs();
+	}
+	
 	function makeHrefs() {
 		var urled = document.getElementById("url-editor");
 		var urlpl = document.getElementById("url-permalink");
@@ -64,32 +74,39 @@
 				urled.style.display = 'none';
 			}
 		}
+
+		urlpl.style.display = 'initial';
+		urlpl.href = queryOnUrl+"/"+id;
+		urlpl.href += getParameters()+".htmlx";
+
+		urldown.style.display = 'initial';
+		urldown.href = queryOnUrl+"/"+id;
+		urldown.href += getParameters()+".csv";
 		
-		var queryString = '';
+		//var queryString = '';
 		
 		var filters = document.querySelectorAll('.filter');
 		for (var i = 0; i < filters.length; ++i) {
 			var item = filters[i];
-			queryString += '&'+item.name+"="+item.value;
+			//queryString += '&'+item.name+"="+item.value;
+			//queryString = append2url(queryString, item.name+"="+item.value);
+			urlpl.href = append2url(urlpl.href, item.name+"="+item.value);
+			urldown.href = append2url(urldown.href, item.name+"="+item.value);
 		}
 		
 		var order = document.getElementById('order').value;
 		if(order!=null && order!='') {
-			queryString += '&order='+order;
+			//queryString += '&order='+order;
+			//queryString = append2url(queryString, 'order='+order);
+			urlpl.href = append2url(urlpl.href, 'order='+order);
+			urldown.href = append2url(urldown.href, 'order='+order);
 		}
+		//console.log('queryString: '+queryString);
 
-		urlpl.style.display = 'initial';
-		urlpl.href = queryOnUrl+"/"+id;
-		urlpl.href += getParameters();
-		urlpl.href += ".htmlx?"+queryString;
+		//console.log('urlpl.href: '+urlpl.href);
 
-		urldown.style.display = 'initial';
-		urldown.href = queryOnUrl+"/"+id;
-		urldown.href += getParameters();
-		urldown.href += ".csv?"+queryString;
+		//console.log('urldown.href: '+urldown.href);
 		
-		//cleaning 'order'
-		document.getElementById('order').value = '';
 	}
 	
 	function addFilter() {
@@ -148,8 +165,8 @@
 	function sortBy(colName, direction) {
 		var str = direction==2?'-':'';
 		str += colName;
-		console.log()
 		document.getElementById('order').value = str;
+		makeHrefs();
 		doRun('objects', 'content', 'messages');
 	}
 	
@@ -173,6 +190,22 @@
 		}
 		else {
 			urlednew.style.display = 'none';
+		}
+	}
+	
+	function append2url(url, append) {
+		if(append==null || append=='') {
+			return url;
+		}
+		
+		if(url!=null && url.indexOf("?") > -1) {
+			return url+"&"+append;
+		}
+		/*else if(append!=null && append.indexOf("?")==0) {
+			return url+append;
+		}*/
+		else {
+			return url+"?"+append;
 		}
 	}
 	
@@ -294,7 +327,7 @@
 	<span id="logo">QueryOn</span>
 
 	<label>
-		<select id="objects" onchange="loadRelation('objects', 'parameters', 'content');document.getElementById('navbar-prop').style.display = 'initial';makeHrefs();">
+		<select id="objects" onchange="onQueryChanged();">
 		</select>
 		<!-- add descriptions (& parameters? nah) -->
 	</label>
