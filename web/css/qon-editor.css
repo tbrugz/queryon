@@ -49,8 +49,18 @@ a, a:visited {
 	font-weight: bold;
 	font-size: 10pt;
 	color: #000;
+	padding: 2px;
 }
 
 #url-permalink {
 	display: none;
+}
+
+#removebutton {
+	/*font-weight: bold;
+	font-size: 10pt;
+	color: #000;
+	padding: 2px;
+	*/
+	background-color: #f55;
 }

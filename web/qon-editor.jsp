@@ -157,6 +157,29 @@
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
+
+	function doRemove() {
+		var request = $.ajax({
+			url : processorUrl+"/queryon.processor.QOnQueries",
+			type : "POST",
+			data : {
+				"queryon.qon-queries.action": "remove",
+				"queryon.qon-queries.querynames": document.getElementById('name').value,
+			},
+			dataType : "html"
+		});
+
+		request.done(function(data) {
+			console.log(data);
+			closeMessages('messages');
+			infoMessage('query '+document.getElementById('name').value+' sucessfully removed');
+		});
+
+		request.fail(function(jqXHR, textStatus, errorThrown) {
+			console.log(jqXHR);
+			errorMessage('error removing query: '+jqXHR.responseText);
+		});
+	}
 	
 	function setParameters(numparams) {
 		var params = document.querySelectorAll('.parameter');
@@ -300,8 +323,9 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
-	<!-- TODO show relation type -->
-	<a id="url-reload" href="">reload</a> <a id="url-permalink" href="" target="_new">permalink</a>
+	<a id="url-reload" href="" title="Reload query (F5)">reload</a>
+	<a id="url-permalink" href="" target="_new">permalink</a>
+	<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
 </div>
 
 <div id="editor"><%= query %></div>
