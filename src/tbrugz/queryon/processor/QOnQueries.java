@@ -34,6 +34,7 @@ public class QOnQueries extends SQLQueries {
 	
 	static final String ACTION_READ = "read";
 	static final String ACTION_WRITE = "write";
+	static final String ACTION_REMOVE = "remove";
 	
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";
 	
@@ -45,6 +46,9 @@ public class QOnQueries extends SQLQueries {
 			}
 			else if(ACTION_WRITE.equals(action)) {
 				writeToDatabase();
+			}
+			else if(ACTION_REMOVE.equals(action)) {
+				removeFromDatabase();
 			}
 			else {
 				throw new ProcessingException("unknown action: "+action);
@@ -175,6 +179,44 @@ public class QOnQueries extends SQLQueries {
 		}
 		
 		log.info("QOn processed [updated/inserted "+countUpdates+"/"+countInserts+" queries in table "+qonQueriesTable+"]");
+	}
+	
+	void removeFromDatabase() throws SQLException {
+		List<String> queriesToRemove = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_QUERY_NAMES, ",");
+		if(queriesToRemove==null) {
+			throw new ProcessingException("prop '"+PROP_PREFIX+SUFFIX_QUERY_NAMES+"' must be set");
+		}
+		
+		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
+		String deleteSql = "delete from "+qonQueriesTable+" where name = ?";
+		PreparedStatement deleteSt = conn.prepareStatement(deleteSql);
+		
+		int countAllDeletes = 0;
+		for(String qname: queriesToRemove) {
+			qname = qname.trim();
+			deleteSt.setString(1, qname);
+			int countDeletes = deleteSt.executeUpdate();
+			if(countDeletes!=1) {
+				conn.rollback();
+				throw new ProcessingException("error deleting query '"+qname+"' [#deletes = "+countDeletes+"]");
+			}
+			
+			View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), qname);
+			if(v!=null) {
+				boolean removed = model.getViews().remove(v);
+				if(!removed) {
+					log.warn("query '"+qname+"' not removed from model");
+				}
+			}
+			
+			countAllDeletes += countDeletes;
+		}
+
+		if(countAllDeletes>0) {
+			conn.commit();
+		}
+		
+		log.info("QOn processed ["+countAllDeletes+" deleted queries in table "+qonQueriesTable+"]");
 	}
 	
 }
