@@ -15,6 +15,7 @@
 	<title>QueryOn</title>
 	<link href="../css/queryon.css" rel="stylesheet">
 	<link href="../css/qon-login.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="../favicon.png" />
 </head>
 <body>
 <%
