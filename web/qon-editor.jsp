@@ -55,6 +55,8 @@
 			//paramsStr += '/'+item.value;
 		}
 		
+		var startTimeMilis = Date.now();
+		
 		var request = $.ajax({
 			url : queryOnUrl+"/QueryAny."+responseType,
 			//url : "q/QueryAny"+paramsStr+"."+responseType,
@@ -64,11 +66,13 @@
 		});
 		
 		request.done(function(data) {
+			var completedTimeMilis = Date.now();
 			//XXX option to handle different response types (html, json, csv, xml)?
 			//'close' style:: position: relative, float: right?
 			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X'/>");
 			$("#queryResult").append(data);
-			closeMessages();
+			showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
+			closeMessages('messages');
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -142,7 +146,7 @@
 
 		request.done(function(data) {
 			console.log(data);
-			closeMessages();
+			closeMessages('messages');
 			infoMessage('query '+document.getElementById('name').value+' sucessfully saved');
 		});
 
@@ -175,16 +179,16 @@
 	
 	function errorMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='error'>"+message+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages()\" value='x' float='right'/></div>");
+		$('#messages').html("<div class='error'>"+message+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 
 	function infoMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='info'>"+message+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages()\" value='x' float='right'/></div>");
+		$('#messages').html("<div class='info'>"+message+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 	
-	function closeMessages() {
-		document.getElementById('messages').innerHTML = '';
+	function closeMessages(elemId) {
+		document.getElementById(elemId).innerHTML = '';
 	}
 	
 	function closeResults() {
@@ -202,6 +206,18 @@
 			urlpl.href += "/-";
 		}
 		//urlr.href = "?name="+document.getElementById("name").value;
+	}
+	
+	function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTimeMilis) {
+		//var renderedTimeMilis = Date.now();
+		
+		var content = document.getElementById(containerId);
+		var messages = document.getElementById(messagesId);
+		
+		var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
+		//messages.innerHTML = 'rows = '+numOfRows+' ; time in millis: server = '+(completedTimeMilis-startTimeMilis)+' ; render = '+(renderedTimeMilis-completedTimeMilis)
+		messages.innerHTML = 'rows = '+numOfRows+' ; time: = '+(completedTimeMilis-startTimeMilis)+'ms '
+			+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	}
 </script>
 <script type="text/javascript">
@@ -294,9 +310,9 @@ if(remarks==null) { remarks = ""; }
 	</div>
 	
 	<div id="button-cotntainer">
-		<input type="button" value="validate" onclick="javascript:doValidate();">
-		<input type="button" value="run" onclick="javascript:doRun();">
-		<input type="button" value="save" onclick="javascript:doSave();">
+		<input type="button" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
+		<input type="button" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
+		<input type="button" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
 	</div>
 </div>
 
@@ -306,6 +322,9 @@ if(remarks==null) { remarks = ""; }
 
 <div class="container">
 	<div id="queryResult"></div>
+</div>
+
+<div id="status-container" class="status">
 </div>
 
 <!-- see http://ace.c9.io/ -->

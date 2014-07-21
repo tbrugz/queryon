@@ -37,3 +37,10 @@ label {
 	overflow-y: scroll;
 	bottom: 0px;
 }*/
+
+#status-container {
+	position: fixed;
+	bottom: 0;
+	padding: 2px;
+	right: 0;
+}
