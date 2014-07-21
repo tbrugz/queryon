@@ -157,29 +157,32 @@ public class ProcessorServlet extends HttpServlet {
 			pc.setConnection(conn);
 		}
 		
-		Writer w = null;
-		OutputStream os = null;
-		if(resp!=null) {
-			if(pc.acceptsOutputWriter()) {
-				w = resp.getWriter();
-				pc.setOutputWriter(w);
+		try {
+			Writer w = null;
+			OutputStream os = null;
+			if(resp!=null) {
+				if(pc.acceptsOutputWriter()) {
+					w = resp.getWriter();
+					pc.setOutputWriter(w);
+				}
+				else if(pc.acceptsOutputStream()) {
+					os = resp.getOutputStream();
+					pc.setOutputStream(os);
+				}
 			}
-			else if(pc.acceptsOutputStream()) {
-				os = resp.getOutputStream();
-				pc.setOutputStream(os);
+			
+			pc.process();
+			
+			if(w!=null) {
+				w.flush();
+			}
+			if(os!=null) {
+				os.flush();
 			}
 		}
-		
-		pc.process();
-		
-		if(w!=null) {
-			w.flush();
+		finally {
+			if(conn!=null) { conn.close(); }
 		}
-		if(os!=null) {
-			os.flush();
-		}
-
-		if(conn!=null) { conn.close(); }
 	}
 	
 	static void doProcessDumper(SchemaModelDumper dumper, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
