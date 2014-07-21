@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.BadRequestException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.Column;
@@ -198,7 +199,8 @@ public class QOnQueries extends SQLQueries {
 			int countDeletes = deleteSt.executeUpdate();
 			if(countDeletes!=1) {
 				conn.rollback();
-				throw new ProcessingException("error deleting query '"+qname+"' [#deletes = "+countDeletes+"]");
+				//XXX "client/user error" - throw BadRequest or Processing Exception?
+				throw new BadRequestException("error deleting query '"+qname+"' [#deletes = "+countDeletes+"]");
 			}
 			
 			View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), qname);
