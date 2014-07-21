@@ -149,6 +149,9 @@
 			console.log(data);
 			closeMessages('messages');
 			infoMessage('query '+document.getElementById('name').value+' sucessfully saved');
+			//XXX: reload query after save?
+			document.getElementById('schema').disabled = true;
+			document.getElementById('name').disabled = true;
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -320,8 +323,8 @@ if(remarks==null) { remarks = ""; }
 
 <div id="spec">
 <div class="container" id="objectid-container">
-	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
-	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
+	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()" <%= queryName.equals("")?"":"disabled" %>/></label>
+	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()" <%= queryName.equals("")?"":"disabled" %>/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
 	<a id="url-reload" href="" title="Reload query (F5)">reload</a>
 	<a id="url-permalink" href="" target="_new">permalink</a>
