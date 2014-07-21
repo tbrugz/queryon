@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.ProcessingException;
@@ -120,9 +121,10 @@ public class QOnQueries extends SQLQueries {
 			log.debug("sqlexception: "+e.getMessage(), e);
 		}
 		
-		if(model.getViews().contains(query)) {
-			log.info("removing query: "+query);
-			model.getViews().remove(query);
+		View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), query.getName());
+		if(v!=null) {
+			boolean removed = model.getViews().remove(v);
+			log.info("removed query '"+v+"'? "+removed);
 		}
 
 		boolean added = model.getViews().add(query);
@@ -172,7 +174,7 @@ public class QOnQueries extends SQLQueries {
 			conn.commit();
 		}
 		
-		log.info("QOn processed [update/inserted "+countUpdates+"/"+countInserts+" queries in table "+qonQueriesTable+"]");
+		log.info("QOn processed [updated/inserted "+countUpdates+"/"+countInserts+" queries in table "+qonQueriesTable+"]");
 	}
 	
 }
