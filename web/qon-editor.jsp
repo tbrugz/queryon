@@ -150,8 +150,7 @@
 			closeMessages('messages');
 			infoMessage('query '+document.getElementById('name').value+' sucessfully saved');
 			//XXX: reload query after save?
-			document.getElementById('schema').disabled = true;
-			document.getElementById('name').disabled = true;
+			validateEditComponents();
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -202,6 +201,19 @@
 			}
 		}
 	
+	}
+	
+	function validateEditComponents() {
+		var qname = document.getElementById('name').value;
+		var removebutton = document.getElementById('removebutton');
+		if((qname != null) && (qname != '')) {
+			document.getElementById('schema').disabled = true;
+			document.getElementById('name').disabled = true;
+			removebutton.style.display = 'inline';
+		}
+		else {
+			removebutton.style.display = 'none';
+		}
 	}
 	
 	function errorMessage(message) {
@@ -323,10 +335,10 @@ if(remarks==null) { remarks = ""; }
 
 <div id="spec">
 <div class="container" id="objectid-container">
-	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()" <%= queryName.equals("")?"":"disabled" %>/></label>
-	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()" <%= queryName.equals("")?"":"disabled" %>/></label>
+	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
+	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
-	<a id="url-reload" href="" title="Reload query (F5)">reload</a>
+	<a id="url-reload" href="" title="Reload query">reload</a>
 	<a id="url-permalink" href="" target="_new">permalink</a>
 	<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
 </div>
@@ -371,6 +383,7 @@ if(remarks==null) { remarks = ""; }
 </script>
 <script type="text/javascript">
 	makeHrefs();
+	validateEditComponents();
 </script>
 
 </body>
