@@ -22,7 +22,10 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.Utils;
 
-//XXX add remarks
+/*
+ * XXX add 'enabled' column?
+ * XXX add audit table (inserts, updates & deletes on table qon_queries)?
+ */
 public class QOnQueries extends SQLQueries {
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
@@ -46,6 +49,7 @@ public class QOnQueries extends SQLQueries {
 				readFromDatabase();
 			}
 			else if(ACTION_WRITE.equals(action)) {
+				//XXX: call SQLQueries processor before writeToDatabase() ?
 				writeToDatabase();
 			}
 			else if(ACTION_REMOVE.equals(action)) {

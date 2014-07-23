@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -44,6 +45,22 @@ public class ResultSetDecoratorsTest {
 		
 		Assert.assertTrue("Must have 2nd element", rsfd.next());
 		Assert.assertEquals("2", rsfd.getString(1));
+
+		Assert.assertFalse("Must not have 3rd element", rsfd.next());
+		rsfd.close();
+	}
+
+	@Test @Ignore
+	public void testListFilterOR() throws IntrospectionException, SQLException {
+		List<Integer> lPos = Arrays.asList(new Integer[]{2,2});
+		List<String> lValue = Arrays.asList(new String[]{"one", "three"});
+		ResultSet rsfd = new ResultSetFilterDecorator(baseRS, lPos, lValue);
+		
+		Assert.assertTrue("Must have 1st element", rsfd.next());
+		Assert.assertEquals("one", rsfd.getString(2));
+		
+		Assert.assertTrue("Must have 2nd (3rd original) element", rsfd.next());
+		Assert.assertEquals("3", rsfd.getString(1));
 
 		Assert.assertFalse("Must not have 3rd element", rsfd.next());
 		rsfd.close();
