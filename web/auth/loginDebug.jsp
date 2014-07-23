@@ -32,7 +32,7 @@
 
 String username = request.getParameter("username");
 String password = request.getParameter("password");
-//org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
+org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
 Subject currentUser = SecurityUtils.getSubject();
 if(username!=null) {
 	AuthenticationToken token = new UsernamePasswordToken(username, password);
