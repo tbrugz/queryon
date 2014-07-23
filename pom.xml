@@ -35,7 +35,7 @@
     <outputDirectory>target/classes</outputDirectory>
     <finalName>${artifactId}-${version}</finalName>
     <testOutputDirectory>target/test-classes</testOutputDirectory-->
-    <sourceDirectory>src, src_shiro</sourceDirectory>
+    <sourceDirectory>.</sourceDirectory>
     <!-- scriptSourceDirectory>src/main/scripts</scriptSourceDirectory-->
     <testSourceDirectory>src_test</testSourceDirectory>
     <resources>
@@ -85,6 +85,17 @@
         <version>2.4</version>
         <configuration>
           <webappDirectory>web</webappDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+        <includes>
+          <include>src/**/*.java</include>
+          <include>src_shiro/**/*.java</include>
+        </includes>
         </configuration>
       </plugin>
     </plugins>
@@ -161,6 +172,18 @@
       <version>1.2.3</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.6</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.6.6</version>
+      <optional>true</optional>
+    </dependency>
     
     <dependency>
       <groupId>log4j</groupId>
@@ -173,11 +196,6 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.6.6</version>
     </dependency-->
-    <dependency>
-	  <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.6.6</version>
-    </dependency>
     
     <dependency>
       <groupId>com.h2database</groupId>
@@ -237,12 +255,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
       <version>1.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
