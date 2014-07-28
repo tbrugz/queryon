@@ -6,3 +6,4 @@ target/*
 work/output/*
 tmp/*
 z_etc/*
+web/WEB-INF/classes/*

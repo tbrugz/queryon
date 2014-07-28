@@ -6,6 +6,10 @@
 	version="2.5">
 	<display-name>queryon</display-name>
 	
+	<session-config>
+		<session-timeout>480</session-timeout> <!-- in minutes (300 = 5hs; 480 = 8hs) -->
+	</session-config>
+
 	<!-- apache shiro: see http://shiro.apache.org/web.html -->
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
