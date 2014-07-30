@@ -346,7 +346,7 @@ public class WinstoneAndH2HttpRequestTest {
 		System.out.print("json-compact:\n"+jsonOutput+"\n");
 	}
 
-	@Test @Ignore("maybe later")
+	@Test
 	public void testGet_CSV_Tables() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.csv");
@@ -358,18 +358,26 @@ public class WinstoneAndH2HttpRequestTest {
 		//int count = 0;
 		CSVFormat format = CSVFormat.DEFAULT; // CSVFormat.newBuilder(CSVFormat.DEFAULT).withHeader().build();
 		CSVParser parser = new CSVParser(in, format);
-		System.out.println("headers: "+parser.getHeaderMap());
+		System.out.println("headers: "+parser.getHeaderMap()); //is null
 		Iterator<CSVRecord> it = parser.iterator();
 		
-		Assert.assertTrue("Must have 1st element", it.hasNext());
+		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
 		CSVRecord record = it.next();
-		System.out.println("1st record (name = '"+record.get("name")+"'): "+record);
-		Assert.assertEquals("1st record name must be DEPT", "DEPT", record.get("name"));
+		String value = record.get(1);
+		System.out.println("0ed record (name = '"+value+"'): "+record);
+		Assert.assertEquals("0ed record' 1st col must be 'name'", "name", value);
+
+		Assert.assertTrue("Must have 1st element", it.hasNext());
+		record = it.next();
+		value = record.get(1);
+		System.out.println("1st record (1st col = '"+value+"'): "+record);
+		Assert.assertEquals("1st record' 1st col name must be DEPT", "DEPT", value);
 		
 		Assert.assertTrue("Must have 2nd element", it.hasNext());
 		record = it.next();
-		System.out.println("2nd record (name = '"+record.get("name")+"'): "+record);
-		Assert.assertEquals("1st record name must be DEPT", "EMP", record.get("name"));
+		value = record.get(1);
+		System.out.println("2nd record (1st col = '"+value+"'): "+record);
+		Assert.assertEquals("2st record' 1st col must be DEPT", "EMP", value);
 		
 		Assert.assertFalse("Must not have have 3rd element", it.hasNext());
 		
