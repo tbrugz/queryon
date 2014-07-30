@@ -35,7 +35,7 @@
     <outputDirectory>target/classes</outputDirectory>
     <finalName>${artifactId}-${version}</finalName>
     <testOutputDirectory>target/test-classes</testOutputDirectory-->
-    <sourceDirectory>.</sourceDirectory>
+    <sourceDirectory>src</sourceDirectory>
     <!-- scriptSourceDirectory>src/main/scripts</scriptSourceDirectory-->
     <testSourceDirectory>src_test</testSourceDirectory>
     <resources>
@@ -87,7 +87,7 @@
           <webappDirectory>web</webappDirectory>
         </configuration>
       </plugin>
-      <plugin>
+      <!-- plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
@@ -97,7 +97,7 @@
           <include>src_shiro/**/*.java</include>
         </includes>
         </configuration>
-      </plugin>
+      </plugin-->
     </plugins>
     
   </build>
