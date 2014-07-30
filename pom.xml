@@ -40,7 +40,7 @@
     <testSourceDirectory>src_test</testSourceDirectory>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src_resources</directory>
       </resource>
     </resources>
     <testResources>
