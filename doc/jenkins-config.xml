@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<maven2-moduleset plugin="maven-plugin@1.508">
+<maven2-moduleset plugin="maven-plugin@2.1">
   <actions/>
   <description></description>
   <logRotator class="hudson.tasks.LogRotator">
@@ -10,10 +10,10 @@
   </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties/>
-  <scm class="hudson.plugins.mercurial.MercurialSCM" plugin="mercurial@1.46">
+  <scm class="hudson.plugins.mercurial.MercurialSCM" plugin="mercurial@1.49">
     <source>https://bitbucket.org/tbrugz/queryon</source>
     <modules/>
-    <clean>false</clean>
+    <clean>true</clean>
     <browser class="hudson.plugins.mercurial.browser.BitBucket">
       <url>https://bitbucket.org/tbrugz/queryon/</url>
     </browser>
@@ -22,10 +22,9 @@
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers class="vector">
+  <triggers>
     <hudson.triggers.SCMTrigger>
-      <spec># every hour
-0 * * * *</spec>
+      <spec>H * * * *</spec>
       <ignorePostCommitHooks>false</ignorePostCommitHooks>
     </hudson.triggers.SCMTrigger>
   </triggers>
@@ -219,6 +218,11 @@
       </failingTarget>
       <sourceEncoding>ASCII</sourceEncoding>
     </hudson.plugins.cobertura.CoberturaPublisher>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>**/target/*.war</artifacts>
+      <latestOnly>false</latestOnly>
+      <allowEmptyArchive>false</allowEmptyArchive>
+    </hudson.tasks.ArtifactArchiver>
   </publishers>
   <buildWrappers/>
   <prebuilders/>
