@@ -31,7 +31,7 @@
 		<dependency org="org.apache.httpcomponents" name="httpcore" rev="4.2.1" conf="test->default"/>
 		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1.1" conf="test->default"/>
 		<dependency org="com.google.code.gson" name="gson" rev="2.2.2" conf="test->default"/>
-		<dependency org="org.apache.any23" name="apache-any23-core" rev="0.8.0" conf="test->default">
+		<dependency org="org.apache.any23" name="apache-any23-core" rev="1.0" conf="test->default">
 			<exclude module="commons-csv"/>
 		</dependency>
 		<dependency org="org.apache.commons" name="commons-csv" rev="1.0-SNAPSHOT" conf="test->default"/>
