@@ -85,6 +85,7 @@
         <version>2.4</version>
         <configuration>
           <webappDirectory>web</webappDirectory>
+          <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> <!-- skinny war -->
         </configuration>
       </plugin>
       <!-- plugin>
@@ -98,6 +99,21 @@
         </includes>
         </configuration>
       </plugin-->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
+        <!-- see: http://stackoverflow.com/questions/12497081/maven-war-inplace-clean-classes-and-lib-folder -->
+        <configuration>
+            <filesets>
+                <fileset>
+                    <directory>web/WEB-INF/classes</directory>
+                </fileset>
+                <fileset>
+                    <directory>web/WEB-INF/lib</directory>
+                </fileset>
+            </filesets>
+        </configuration>
+      </plugin>
     </plugins>
     
   </build>
