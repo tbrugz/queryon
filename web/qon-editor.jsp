@@ -205,14 +205,17 @@
 	
 	function validateEditComponents() {
 		var qname = document.getElementById('name').value;
-		var removebutton = document.getElementById('removebutton');
+		//var removebutton = document.getElementById('removebutton');
+		//var reloadbutton = document.getElementById('url-reload');
+		var container = document.getElementById('actions-container');
+		
 		if((qname != null) && (qname != '')) {
 			document.getElementById('schema').disabled = true;
 			document.getElementById('name').disabled = true;
-			removebutton.style.display = 'inline';
+			container.style.display = 'inline';
 		}
 		else {
-			removebutton.style.display = 'none';
+			container.style.display = 'none';
 		}
 	}
 	
@@ -338,9 +341,11 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
-	<a id="url-reload" href="" title="Reload query">reload</a>
-	<a id="url-permalink" href="" target="_new">permalink</a>
-	<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
+	<div id="actions-container">
+		<a id="url-reload" href="" title="Reload query">reload</a>
+		<a id="url-permalink" href="" target="_new">permalink</a>
+		<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
+	</div>
 </div>
 
 <div id="editor"><%= query %></div>
@@ -349,7 +354,7 @@ if(remarks==null) { remarks = ""; }
 	<div id="sqlparams">
 	</div>
 	
-	<div id="button-cotntainer">
+	<div id="button-container">
 		<input type="button" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
 		<input type="button" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
 		<input type="button" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
