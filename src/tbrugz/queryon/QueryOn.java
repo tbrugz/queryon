@@ -152,6 +152,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
 	static final String PROP_SQLDIALECT = "queryon.sqldialect";
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
+	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
 	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
@@ -200,6 +201,7 @@ public class QueryOn extends HttpServlet {
 			
 			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
+			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
 			
 			config.getServletContext().setAttribute(ATTR_PROP, prop);
 			config.getServletContext().setAttribute(ATTR_MODEL, model);

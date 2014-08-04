@@ -34,6 +34,8 @@ public class SQL {
 
 	static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
 	
+	static boolean validateOrderColumnNames = true;
+	
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
@@ -144,8 +146,8 @@ public class SQL {
 			String col = reqspec.orderCols.get(i);
 			String ascDesc = reqspec.orderAscDesc.get(i);
 			if(col==null || col.equals("")) { continue; }
-			//XXX option to ignore unknown columns? or to not validate?
-			if(relationCols!=null && !relationCols.contains(col)) {
+			//XXXdone option to ignore unknown columns? or to not validate?
+			if(validateOrderColumnNames && relationCols!=null && !relationCols.contains(col)) {
 				throw new BadRequestException("can't order by '"+col+"' (unknown column)");
 			}
 			
