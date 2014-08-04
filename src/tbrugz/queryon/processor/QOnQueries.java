@@ -105,8 +105,18 @@ public class QOnQueries extends SQLQueries {
 		query.setRemarks(remarks);
 
 		try {
+			// resultset metadata
+			// XXX: test for 'queryon.validate.x-getmetadata'?
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			query.setColumns(DataDumpUtils.getColumns(rsmd));
+		} catch (SQLException e) {
+			query.setColumns(new ArrayList<Column>());
+			log.warn("resultset metadata's sqlexception: "+e.toString().trim(), e);
+			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
+		}
+		
+		try {
+			// parameter metadata
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
 			int inParams = 0;
@@ -125,9 +135,9 @@ public class QOnQueries extends SQLQueries {
 			}
 			query.setParameterCount(inParams);
 		} catch (SQLException e) {
-			query.setColumns(new ArrayList<Column>());
-			log.warn("sqlexception: "+e.toString().trim(), e);
-			log.debug("sqlexception: "+e.getMessage(), e);
+			query.setParameterCount(0);
+			log.warn("parameter metadata's sqlexception: "+e.toString().trim(), e);
+			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
 		}
 		
 		View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), query.getName());

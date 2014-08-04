@@ -552,11 +552,12 @@ public class QueryOn extends HttpServlet {
 				stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
 			}
 
-			//XXX: return number of bind parameters?
+			//XXX: return number of bind parameters? return as ResultSet?
 			resp.getWriter().write(String.valueOf(params));
 		}
 		catch(SQLException e) {
 			log.info("doValidate: error validating: "+e);
+			//log.debug("doValidate: error validating: "+e.getMessage(), e);
 			conn.rollback();
 			throw e;
 		}
