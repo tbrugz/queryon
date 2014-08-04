@@ -151,6 +151,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
 	static final String PROP_SQLDIALECT = "queryon.sqldialect";
+	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
 	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
@@ -531,6 +532,12 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	/*
+	 * XXX: option to select different validate strategies (drivers may validate queries differently)
+	 * - current impl
+	 * - no stmt.getMetaData()
+	 * - run query with limit of 0 or 1? set parameters with what? null? random?
+	 */
 	void doValidate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		try {
@@ -540,8 +547,12 @@ public class QueryOn extends HttpServlet {
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
 			log.info("doValidate: #params="+params);
-			stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
-			
+			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
+			if(doGetMetadata) {
+				stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
+			}
+
+			//XXX: return number of bind parameters?
 			resp.getWriter().write(String.valueOf(params));
 		}
 		catch(SQLException e) {
