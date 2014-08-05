@@ -452,9 +452,9 @@ public class QueryOn extends HttpServlet {
 	Query getQuery(HttpServletRequest req) {
 		Query relation = new Query();
 		String name = req.getParameter("name");
-		if(name==null || name.equals("")) {
+		/*if(name==null || name.equals("")) {
 			throw new BadRequestException("parameter 'name' undefined");
-		}
+		}*/
 		String sql = req.getParameter("sql");
 		if(sql==null || sql.equals("")) {
 			throw new BadRequestException("parameter 'sql' undefined");
