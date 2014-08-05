@@ -130,12 +130,12 @@ public class QOnQueries extends SQLQueries {
 				} 
 				if(pmode==ParameterMetaData.parameterModeIn) { inParams++; }
 				else {
-					log.warn("Parameter of mode '"+pmode+"' not understood for queries ["+queryName+"/"+i+"]");
+					log.warn("Parameter of mode '"+pmode+"' not understood for query '"+queryName+"/"+i+"'");
 				}
 			}
 			query.setParameterCount(inParams);
 		} catch (SQLException e) {
-			query.setParameterCount(0);
+			query.setParameterCount(null);
 			log.warn("parameter metadata's sqlexception: "+e.toString().trim(), e);
 			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
 		}
