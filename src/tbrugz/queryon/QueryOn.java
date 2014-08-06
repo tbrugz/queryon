@@ -153,6 +153,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_SQLDIALECT = "queryon.sqldialect";
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
 	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
+	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
 	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
@@ -177,6 +178,7 @@ public class QueryOn extends HttpServlet {
 	SchemaModel model;
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
+	boolean validateFilterColumnNames = true;
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -200,6 +202,8 @@ public class QueryOn extends HttpServlet {
 			dsutils = new DumpSyntaxUtils(prop);
 			
 			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
+			validateFilterColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_FILTERCOLNAME, validateFilterColumnNames);
+			
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
 			
@@ -928,7 +932,7 @@ public class QueryOn extends HttpServlet {
 			Set<String> columns = new HashSet<String>();
 			columns.addAll(colNames);
 			for(String col: reqspec.filterEquals.keySet()) {
-				if(columns.contains(col)) {
+				if(!validateFilterColumnNames || columns.contains(col)) {
 					//XXX column type?
 					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
 					sql.addFilter(SQL.sqlIdDecorator.get(col)+" = ?");
@@ -938,7 +942,7 @@ public class QueryOn extends HttpServlet {
 				}
 			}
 			for(String col: reqspec.filterIn.keySet()) {
-				if(columns.contains(col)) {
+				if(!validateFilterColumnNames || columns.contains(col)) {
 					//XXX column type?
 					StringBuffer sb = new StringBuffer();
 					sb.append(SQL.sqlIdDecorator.get(col)+" in (");
