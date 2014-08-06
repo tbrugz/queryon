@@ -123,7 +123,7 @@ public class QueryOn extends HttpServlet {
 		
 		static LimitOffsetStrategy getDefaultStrategy(String dbid) {
 			String strategyStr = prop.getProperty("dbid."+dbid+".limitoffsetstretegy", RESULTSET_CONTROL.toString());
-			log.info("getLOStrategy["+dbid+"]: "+strategyStr);
+			log.debug("getLOStrategy["+dbid+"]: "+strategyStr);
 			LimitOffsetStrategy strat = LimitOffsetStrategy.valueOf(strategyStr);
 			return strat;
 		}
@@ -521,7 +521,7 @@ public class QueryOn extends HttpServlet {
 		
 		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
 			String contentLocation = reqspec.getCanonicalUrl(prop);
-			log.info("content-location header: "+contentLocation);
+			//log.info("content-location header: "+contentLocation);
 			reqspec.request.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
 		}
 		

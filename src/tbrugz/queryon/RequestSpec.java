@@ -54,7 +54,7 @@ public class RequestSpec {
 		
 		String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
-		log.info("urlparts: "+URIpartz);
+		log.debug("urlparts: "+URIpartz);
 		if(URIpartz.size()<2) { throw new BadRequestException("URL must have at least 1 part"); }
 
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
@@ -67,7 +67,7 @@ public class RequestSpec {
 			outputTypeStr = null;
 		}
 		URIpartz.add( lastURIPart );
-		log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
+		//log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
 		
 		String objectTmp = URIpartz.remove(0);
 		if(objectTmp == null || objectTmp.equals("")) {
@@ -75,6 +75,7 @@ public class RequestSpec {
 			objectTmp = URIpartz.remove(0);
 		}
 		object = objectTmp;
+		log.info("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
 		
 		for(int i=0;i<URIpartz.size();i++) {
 			params.add(URIpartz.get(i));
@@ -84,7 +85,7 @@ public class RequestSpec {
 		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 		String acceptHeader = req.getHeader("Accept");
-		log.info("accept: "+acceptHeader);
+		log.debug("accept: "+acceptHeader);
 		
 		if(outputTypeStr != null) {
 			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr, prop);

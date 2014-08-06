@@ -111,7 +111,7 @@ public class QOnQueries extends SQLQueries {
 			query.setColumns(DataDumpUtils.getColumns(rsmd));
 		} catch (SQLException e) {
 			query.setColumns(new ArrayList<Column>());
-			log.warn("resultset metadata's sqlexception: "+e.toString().trim(), e);
+			log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");
 			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
 		}
 		
@@ -136,7 +136,7 @@ public class QOnQueries extends SQLQueries {
 			query.setParameterCount(inParams);
 		} catch (SQLException e) {
 			query.setParameterCount(null);
-			log.warn("parameter metadata's sqlexception: "+e.toString().trim(), e);
+			log.warn("parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");
 			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
 		}
 		
