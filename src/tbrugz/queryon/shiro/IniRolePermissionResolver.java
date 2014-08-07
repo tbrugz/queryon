@@ -22,7 +22,7 @@ public class IniRolePermissionResolver implements RolePermissionResolver {
 	}
 
 	public void setIniRealm(IniRealm iniRealm) {
-		System.out.println("IniRolePermissionResolver: set: "+iniRealm);
+		//System.out.println("IniRolePermissionResolver: set: "+iniRealm);
 		this.iniRealm = iniRealm;
 	}
 

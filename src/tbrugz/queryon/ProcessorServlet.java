@@ -172,6 +172,7 @@ public class ProcessorServlet extends HttpServlet {
 		try {
 			Writer w = null;
 			OutputStream os = null;
+			String mimeType = pc.getMimeType();
 			if(resp!=null) {
 				if(pc.acceptsOutputWriter()) {
 					w = resp.getWriter();
@@ -181,12 +182,12 @@ public class ProcessorServlet extends HttpServlet {
 					os = resp.getOutputStream();
 					pc.setOutputStream(os);
 				}
+				
+				if(mimeType!=null) {
+					resp.setContentType(mimeType);
+				}
 			}
 			
-			String mimeType = pc.getMimeType();
-			if(mimeType!=null) {
-				resp.setContentType(mimeType);
-			}
 			pc.process();
 			
 			if(w!=null) {
@@ -209,6 +210,7 @@ public class ProcessorServlet extends HttpServlet {
 		
 		Writer w = null;
 		OutputStream os = null;
+		String mimeType = dumper.getMimeType();
 		if(resp!=null) {
 			if(dumper.acceptsOutputWriter()) {
 				w = resp.getWriter();
@@ -218,10 +220,10 @@ public class ProcessorServlet extends HttpServlet {
 				os = resp.getOutputStream();
 				dumper.setOutputStream(os);
 			}
-		}
-		String mimeType = dumper.getMimeType();
-		if(mimeType!=null) {
-			resp.setContentType(mimeType);
+			
+			if(mimeType!=null) {
+				resp.setContentType(mimeType);
+			}
 		}
 		
 		//XXX else: System.out?

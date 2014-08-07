@@ -474,7 +474,7 @@ public class QueryOn extends HttpServlet {
 		
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
-		// bind parameters for Query
+		// add parameters for Query
 		addOriginalParameters(reqspec, sql);
 		
 		Constraint pk = getPK(relation);
@@ -506,10 +506,12 @@ public class QueryOn extends HttpServlet {
 		sql.addLimitOffset(loStrategy, reqspec);
 		
 		//query finished!
-		log.info("sql:\n"+sql.getFinalSql());
+		
+		String finalSql = sql.getFinalSql();
+		log.debug("sql:\n"+finalSql);
 		//XXX log sql parameter values?
 		
-		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
+		PreparedStatement st = conn.prepareStatement(finalSql);
 		bindParameters(st, sql);
 		
 		ResultSet rs = st.executeQuery();
@@ -907,9 +909,18 @@ public class QueryOn extends HttpServlet {
 	
 	void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
 		String filter = "";
-		//TODO: what if parameters already defined in query?
+		// TODOxxx: what if parameters already defined in query?
 		if(reqspec.params.size()>0) {
-			if(pk==null) {
+			if(relation.getParameterCount()!=null && relation.getParameterCount()>0) {
+				// query parameters already added in 'addOriginalParameters()'
+				if(relation.getParameterCount() > reqspec.params.size()) {
+					log.warn("parameters defined "+reqspec.params+" but query '"+relation.getName()+"' expects more ["+relation.getParameterCount()+"] parameters");
+				}
+				else if(relation.getParameterCount() < reqspec.params.size()) {
+					log.warn("parameters defined "+reqspec.params+" but query '"+relation.getName()+"' expects less ["+relation.getParameterCount()+"] parameters");
+				}
+			}
+			else if(pk==null) {
 				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
 			}
 			else {
