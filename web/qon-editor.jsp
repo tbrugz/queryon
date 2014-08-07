@@ -1,11 +1,33 @@
 <!DOCTYPE html>
+<%@page import="tbrugz.sqldump.datadump.DataDumpUtils"%>
 <%@page import="tbrugz.sqldump.dbmodel.Table"%>
 <%@page import="tbrugz.sqldump.dbmodel.Query"%>
 <%@page import="tbrugz.sqldump.dbmodel.View"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
 <%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%>
-<%@page import="tbrugz.queryon.SchemaModelUtils"%>
+<%@page import="tbrugz.queryon.SchemaModelUtils"%><%!
+static String xmlEscapeText(String t) {
+	StringBuilder sb = new StringBuilder();
+	for (int i = 0; i < t.length(); i++) {
+		char c = t.charAt(i);
+		switch (c) {
+		case '<':
+			sb.append("&lt;");
+			break;
+		case '>':
+			sb.append("&gt;");
+			break;
+		case '&':
+			sb.append("&amp;");
+			break;
+		default:
+			sb.append(c);
+		}
+	}
+	return sb.toString();
+}
+%>
 <html>
 <head>
     <title>QueryOn - query editor</title>
@@ -328,12 +350,12 @@ if(queryName!=null) {
 	}
 }
 if(query==null || query.equals("")) {
-	query = "select * from &lt;table&gt;";
+	query = "select * from <table>";
 }
 if(schemaName==null) { schemaName = ""; }
 if(queryName==null) { queryName = ""; }
 if(remarks==null) { remarks = ""; }
-//System.out.println("qon-queries.jsp: name: "+queryName+" ; query: "+query);
+//System.out.println("qon-editor.jsp: name: "+queryName+" ; query: "+query);
 %>
 
 <div id="spec">
@@ -348,7 +370,8 @@ if(remarks==null) { remarks = ""; }
 	</div>
 </div>
 
-<div id="editor"><%= query %></div>
+<!-- div id="editor"><%//= DataDumpUtils.xmlEscapeText( query ) %></div-->
+<div id="editor"><%= xmlEscapeText(query) %></div>
 
 <div class="container">
 	<div id="sqlparams">
