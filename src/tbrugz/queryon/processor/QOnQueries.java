@@ -35,6 +35,8 @@ public class QOnQueries extends SQLQueries {
 	static final String SUFFIX_ACTION = ".action";
 	static final String SUFFIX_TABLE = ".table";
 	static final String SUFFIX_QUERY_NAMES = ".querynames";
+	static final String SUFFIX_LIMIT_INSERT_EXACT = ".limit.insert.exact";
+	static final String SUFFIX_LIMIT_UPDATE_EXACT = ".limit.update.exact";
 	
 	static final String ACTION_READ = "read";
 	static final String ACTION_WRITE = "write";
@@ -150,6 +152,11 @@ public class QOnQueries extends SQLQueries {
 		return added?1:0;
 	}
 
+	/*
+	 * XXX validate?
+	 * - name cannot be null
+	 * - add '.limit.[insert|update].[min|max]' (..exact already done)
+	 */
 	void writeToDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
 		String updateSql = "update "+qonQueriesTable+" set schema = ?, query = ?, remarks = ? where name = ?";
@@ -157,6 +164,10 @@ public class QOnQueries extends SQLQueries {
 		PreparedStatement updateSt = conn.prepareStatement(updateSql);
 		PreparedStatement insertSt = conn.prepareStatement(insertSql);
 
+		Integer limitUpdateCountExact = Utils.getPropInt(prop, PROP_PREFIX+SUFFIX_LIMIT_UPDATE_EXACT);
+		Integer limitInsertCountExact = Utils.getPropInt(prop, PROP_PREFIX+SUFFIX_LIMIT_INSERT_EXACT);
+		log.info("limitUpdateCountExact="+limitUpdateCountExact+" ; limitInsertCountExact="+limitInsertCountExact); 
+		
 		List<String> queriesToUpdate = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_QUERY_NAMES, ",");
 		if(queriesToUpdate==null) {
 			throw new ProcessingException("prop '"+PROP_PREFIX+SUFFIX_QUERY_NAMES+"' must be set");
@@ -182,8 +193,15 @@ public class QOnQueries extends SQLQueries {
 						int countI = insertSt.executeUpdate();
 						countInserts += countI;
 						if(countI==0) {
-							throw new ProcessingException("error updating/inserting query '"+v.getName()+"'");
+							throw new ProcessingException("error updating/inserting query '"+v.getName()+"': no insert or update executed");
 						}
+					}
+					//test limits
+					if(limitInsertCountExact!=null && limitInsertCountExact!=countInserts) {
+						throw new ProcessingException("error updating/inserting query '"+v.getName()+"': insert count ["+countInserts+"] does not match exact limit ["+limitInsertCountExact+"]");
+					}
+					if(limitUpdateCountExact!=null && limitUpdateCountExact!=countUpdates) {
+						throw new ProcessingException("error updating/inserting query '"+v.getName()+"': update count ["+countUpdates+"] does not match exact limit ["+limitUpdateCountExact+"]");
 					}
 				}
 			}

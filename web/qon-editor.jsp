@@ -56,6 +56,7 @@ static String xmlEscapeText(String t) {
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
 	var processorUrl = 'processor';
+	var isQuerySaved = false;
 
 	function doRun() {
 		var sqlString = editor.getSelectedText();
@@ -163,6 +164,8 @@ static String xmlEscapeText(String t) {
 				"sqldump.query.q1.remarks": document.getElementById('remarks').value,
 				"queryon.qon-queries.action": "write",
 				"queryon.qon-queries.querynames": document.getElementById('name').value,
+				"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
+				"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
 			},
 			dataType : "html"
 		});
@@ -235,9 +238,11 @@ static String xmlEscapeText(String t) {
 			document.getElementById('schema').disabled = true;
 			document.getElementById('name').disabled = true;
 			container.style.display = 'inline';
+			isQuerySaved = true;
 		}
 		else {
 			container.style.display = 'none';
+			isQuerySaved = false;
 		}
 	}
 	
