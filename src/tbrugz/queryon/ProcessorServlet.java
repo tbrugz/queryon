@@ -49,7 +49,8 @@ public class ProcessorServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		throw new BadRequestException("Only GET allowed", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		//throw new BadRequestException("Only POST allowed", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		doPost(req, resp);
 	}
 
 	@Override
@@ -76,8 +77,14 @@ public class ProcessorServlet extends HttpServlet {
 	 */
 	void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		String s = req.getPathInfo();
-		//log.info("pathInfo: "+s);
+		if(s==null) {
+			throw new BadRequestException("null pathinfo");
+		}
+		//log.debug("pathInfo: "+s);
 		String[] parts = s.split("/");
+		if(parts.length<2) {
+			throw new BadRequestException("null processor");
+		}
 		String procClasses = parts[1];
 
 		String[] classParts = procClasses.split(",");
@@ -94,7 +101,7 @@ public class ProcessorServlet extends HttpServlet {
 	public static void doProcess(String procClass, ServletConfig config, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(procComponent==null) {
-			throw new ClassNotFoundException(procClass);
+			throw new BadRequestException("processor class not found: "+procClass);
 		}
 		
 		Properties appprop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
@@ -125,12 +132,17 @@ public class ProcessorServlet extends HttpServlet {
 		
 		if(procComponent instanceof Processor) {
 			Processor proc = (Processor) procComponent;
+			// if not idempotent, only POST method allowed
+			if(!proc.isIdempotent() && !req.getMethod().equals("POST")) {
+				throw new BadRequestException("processor '"+procClass+"' only allowed with POST method");
+			}
 			doProcessProcessor(proc, prop, config, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
 				resp.getWriter().write("processor '"+procClass+"' processed\n");
 			}
 		}
 		else if(procComponent instanceof SchemaModelDumper) {
+			// dumpers are always idempotent?
 			SchemaModelDumper dumper = (SchemaModelDumper) procComponent;
 			doProcessDumper(dumper, config, resp);
 			if(!dumper.acceptsOutputStream() && !dumper.acceptsOutputWriter() && resp!=null) {
@@ -171,6 +183,10 @@ public class ProcessorServlet extends HttpServlet {
 				}
 			}
 			
+			String mimeType = pc.getMimeType();
+			if(mimeType!=null) {
+				resp.setContentType(mimeType);
+			}
 			pc.process();
 			
 			if(w!=null) {
@@ -203,8 +219,12 @@ public class ProcessorServlet extends HttpServlet {
 				dumper.setOutputStream(os);
 			}
 		}
-		//XXX else: System.out?
+		String mimeType = dumper.getMimeType();
+		if(mimeType!=null) {
+			resp.setContentType(mimeType);
+		}
 		
+		//XXX else: System.out?
 		dumper.dumpSchema(sm);
 		
 		if(w!=null) {

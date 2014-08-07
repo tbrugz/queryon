@@ -160,7 +160,7 @@
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
-      <version>0.9.12</version>
+      <version>0.9.13-SNAPSHOT</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
