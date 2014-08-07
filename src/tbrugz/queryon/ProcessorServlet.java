@@ -133,7 +133,7 @@ public class ProcessorServlet extends HttpServlet {
 		if(procComponent instanceof Processor) {
 			Processor proc = (Processor) procComponent;
 			// if not idempotent, only POST method allowed
-			if(!proc.isIdempotent() && !req.getMethod().equals("POST")) {
+			if(!proc.isIdempotent() && req!=null && req.getMethod()!=null && !req.getMethod().equals("POST")) {
 				throw new BadRequestException("processor '"+procClass+"' only allowed with POST method");
 			}
 			doProcessProcessor(proc, prop, config, resp);
