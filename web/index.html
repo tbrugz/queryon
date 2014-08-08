@@ -280,6 +280,10 @@
 	#navbar-prop {
 		display: none;
 	}
+	#navbar-links {
+		display: inline-block;
+		padding-top: 5px;
+	}
 	#order-label {
 		display: none;
 	}
@@ -358,13 +362,15 @@
 		<input type="button" value="+ filter" onclick="addFilter();"/>
 		<input type="button" id="go-button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 		<!-- TODO limit/offset or page/pagesize -->
-		<a id="url-permalink" href="" target="_blank">permalink</a> <a id="url-down" href="">download</a>
 	</span>
 
-	<span id="navbar-actions">
-		<!-- span id="url-editor-new-cont"></span -->
-		<a id="url-editor" class="edit-link" href="" target="_blank">edit</a>
-		<a id="url-editor-new" class="edit-link" href="" target="_blank">new</a>
+	<span id="navbar-links">
+		<a id="url-permalink" href="" target="_blank">permalink</a> <a id="url-down" href="">download</a>
+		<span id="navbar-actions">
+			<!-- span id="url-editor-new-cont"></span -->
+			<a id="url-editor" class="edit-link" href="" target="_blank">edit</a>
+			<a id="url-editor-new" class="edit-link" href="" target="_blank">new</a>
+		</span>
 	</span>
 	
 	<span id="authinfo">
