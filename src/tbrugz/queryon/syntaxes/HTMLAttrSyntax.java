@@ -41,6 +41,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	
 	Set<String> finalColNames = new HashSet<String>();
 
+	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
+	
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
@@ -139,7 +141,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		if("href".equals(key)) {
 			String href = attrs.get(key);
 			if(href!=null) {
-				return "<a href=\""+attrs.get(key)+"\">"+value+"</a>";
+				return "<a href=\""+attrs.get(key)+"\""+(hrefDumpTargetBlank?" target=\"_blank\"":"")+">"+value+"</a>";
 			}
 		}
 		return value;
