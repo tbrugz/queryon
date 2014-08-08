@@ -63,10 +63,10 @@ public class ProcessorServlet extends HttpServlet {
 			resp.setStatus(e.getCode());
 			resp.getWriter().write(e.getMessage());
 		} catch (ServletException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw e;
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw new ServletException(e);
 		}
 	}

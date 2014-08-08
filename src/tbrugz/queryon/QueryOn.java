@@ -210,6 +210,7 @@ public class QueryOn extends HttpServlet {
 			config.getServletContext().setAttribute(ATTR_PROP, prop);
 			config.getServletContext().setAttribute(ATTR_MODEL, model);
 			
+			//XXX option to reload properties & re-execute processors?
 			List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
 			if(procsOnStartup!=null) {
 				for(String p: procsOnStartup) {
@@ -278,7 +279,7 @@ public class QueryOn extends HttpServlet {
 			resp.getWriter().write(e.getMessage());
 		}
 		catch(ServletException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw e;
 		}
 	}

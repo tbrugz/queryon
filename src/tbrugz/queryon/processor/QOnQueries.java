@@ -166,7 +166,7 @@ public class QOnQueries extends SQLQueries {
 
 		Integer limitUpdateCountExact = Utils.getPropInt(prop, PROP_PREFIX+SUFFIX_LIMIT_UPDATE_EXACT);
 		Integer limitInsertCountExact = Utils.getPropInt(prop, PROP_PREFIX+SUFFIX_LIMIT_INSERT_EXACT);
-		log.info("limitUpdateCountExact="+limitUpdateCountExact+" ; limitInsertCountExact="+limitInsertCountExact); 
+		log.debug("limitUpdateCountExact="+limitUpdateCountExact+" ; limitInsertCountExact="+limitInsertCountExact); 
 		
 		List<String> queriesToUpdate = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_QUERY_NAMES, ",");
 		if(queriesToUpdate==null) {
@@ -198,10 +198,10 @@ public class QOnQueries extends SQLQueries {
 					}
 					//test limits
 					if(limitInsertCountExact!=null && limitInsertCountExact!=countInserts) {
-						throw new ProcessingException("error updating/inserting query '"+v.getName()+"': insert count ["+countInserts+"] does not match exact limit ["+limitInsertCountExact+"]");
+						throw new BadRequestException("error updating/inserting query '"+v.getName()+"': insert count ["+countInserts+"] does not match exact limit ["+limitInsertCountExact+"]");
 					}
 					if(limitUpdateCountExact!=null && limitUpdateCountExact!=countUpdates) {
-						throw new ProcessingException("error updating/inserting query '"+v.getName()+"': update count ["+countUpdates+"] does not match exact limit ["+limitUpdateCountExact+"]");
+						throw new BadRequestException("error updating/inserting query '"+v.getName()+"': update count ["+countUpdates+"] does not match exact limit ["+limitUpdateCountExact+"]");
 					}
 				}
 			}
