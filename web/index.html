@@ -41,6 +41,8 @@
 		document.getElementById('order').value = '';
 		
 		makeHrefs();
+		
+		updateUI();
 	}
 	
 	function makeHrefs() {
@@ -106,7 +108,15 @@
 		//console.log('urlpl.href: '+urlpl.href);
 
 		//console.log('urldown.href: '+urldown.href);
+	}
+	
+	function updateUI() {
+		// style changes
 		
+		// http://stackoverflow.com/questions/526347/css-javascript-how-do-you-get-the-rendered-height-of-an-element
+		//document.getElementById('content-container').style.top = ($('#nav').height()+6)+'px';
+		// http://stackoverflow.com/questions/15615552/get-div-height-with-plain-javascript
+		document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
 	}
 	
 	function addFilter() {
@@ -132,6 +142,8 @@
 			+ "<input type='button' value='add' onclick='addFilterIn();document.getElementById(\"dialog-container\").style.display = \"none\";'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='document.getElementById(\"dialog-container\").style.display = \"none\";'/></div>";
 		//dialog.style.display = 'none';
+		
+		updateUI();
 	}
 	
 	function addFilterIn() {
@@ -141,6 +153,7 @@
 		filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='makeHrefs();'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
 		makeHrefs();
+		updateUI();
 	}
 	
 	function sortBy(colName, direction) {
@@ -277,16 +290,15 @@
 	.orderbutton-container {
 		display: inline-block;
 	}
-	/*#url-editor-new-cont {
-		display: none;
-	}*/
-	#url-editor-new {
+	.edit-link {
 		display: none;
 		/*margin: 0 1em 0 1em;*/
 		padding: 2px;
 		/*color: #A72020;
 		color: #D11919;*/
 		background-color: #5A5A5A;
+		/* #238F28; #9C7909; #5A5A5A; */
+		text-decoration: initial;
 	}
 	
 	#authinfo {
@@ -307,6 +319,25 @@
 		right: 0;
 	}
 	
+	input[type=button] {
+		border: 0;
+		padding: 3px 9px 3px 9px;
+		font-weight: bold;
+		margin: 0px 1px 0px 1px;
+	}
+	
+	#go-button {
+		background-color: rgb(146, 218, 136); /* rgb(136, 162, 218); */
+	}
+	
+	#content input[type=button] {
+		padding: 2px;
+	}
+	
+	.button-selected {
+		background-color: rgb(146, 218, 136);
+	}
+	
 	</style>
 </head>
 <body onload="javascript:init('q','objects');makeHrefs();">
@@ -325,14 +356,15 @@
 		<span id="filters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilter();"/>
-		<input type="button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
+		<input type="button" id="go-button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 		<!-- TODO limit/offset or page/pagesize -->
-		<a id="url-editor" href="" target="_blank">edit</a> <a id="url-permalink" href="" target="_blank">permalink</a> <a id="url-down" href="">download</a>
+		<a id="url-permalink" href="" target="_blank">permalink</a> <a id="url-down" href="">download</a>
 	</span>
 
 	<span id="navbar-actions">
 		<!-- span id="url-editor-new-cont"></span -->
-		<a id="url-editor-new" href="" target="_blank">new</a>
+		<a id="url-editor" class="edit-link" href="" target="_blank">edit</a>
+		<a id="url-editor-new" class="edit-link" href="" target="_blank">new</a>
 	</span>
 	
 	<span id="authinfo">

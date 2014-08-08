@@ -84,7 +84,7 @@ function doRun(selectId, containerId, messagesId) {
 			var completedTimeMilis = Date.now();
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
-			addSortHrefs(containerId);
+			addSortHrefs(containerId, order);
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
@@ -94,7 +94,7 @@ function doRun(selectId, containerId, messagesId) {
 	});
 }
 
-function addSortHrefs(containerId) {
+function addSortHrefs(containerId, order) {
 	var content = document.getElementById(containerId);
 	var headers = content.getElementsByTagName('th');
 	//console.log('headers.length: '+headers.length);
@@ -107,9 +107,24 @@ function addSortHrefs(containerId) {
 		}
 		//console.log('colname['+i+']: '+colname);
 		
-		elem.innerHTML = colname
-			+ '<div class="orderbutton-container"><input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>'
-			+ '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/></div>';
+		var elemValue = colname
+			+ '<div class="orderbutton-container">';
+		if(order==colname) {
+			elemValue += '<input type=button class="orderbutton button-selected" value="A"/>'
+		}
+		else {
+			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>'
+		}
+		
+		if(order=="-"+colname) {
+			elemValue += '<input type=button class="orderbutton button-selected" value="D"/>'
+		}
+		else {
+			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/>'
+		}
+		elemValue += '</div>';
+		
+		elem.innerHTML = elemValue;
 	}
 }
 
