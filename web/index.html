@@ -13,7 +13,6 @@
 	var queryOnUrl = '/queryon/q';
 	var qonEditorUrl = 'qon-editor.jsp';
 	var username = '';
-	//var isAdmin = getQueryVariable('admin');
 	var isAdmin = false;
 	
 	$.ajax({
@@ -217,6 +216,8 @@
 		left: 0px;
 		/*height: 30px;*/
 		z-index: 10;
+		overflow-y: auto;
+		max-height: 100%;
 	}
 	#dialog-container {
 		position: fixed;

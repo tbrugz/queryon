@@ -88,8 +88,9 @@ function doRun(selectId, containerId, messagesId) {
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
-			$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
-			$('#'+messagesId).attr('class','error');
+			showErrorMessages(messagesId, jqXHR.responseText);
+			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+			//$('#'+messagesId).attr('class','error');
 		}
 	});
 }
@@ -171,8 +172,15 @@ function getParameters() {
 	return paramsStr;
 }
 
+function showErrorMessages(messagesId, text) {
+	$('#'+messagesId).html(text+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+	$('#'+messagesId).attr('class','error');
+	updateUI();
+}
+
 function closeMessages(messagesId) {
 	document.getElementById(messagesId).innerHTML = '';
+	updateUI();
 }
 
 // see: http://stackoverflow.com/questions/827368/using-the-get-parameter-of-a-url-in-javascript
