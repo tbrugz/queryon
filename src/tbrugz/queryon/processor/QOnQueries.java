@@ -14,19 +14,20 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX add 'enabled' column?
  * XXX add audit table (inserts, updates & deletes on table qon_queries)?
+ * TODO: saving with 'SQLQueries+QOnQueries' may create inconsistencies when exception occurs in 2nd (QOnQueries) processor (can't rollback 1st processor actions)
  */
-public class QOnQueries extends SQLQueries {
+public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
 	
@@ -60,6 +61,13 @@ public class QOnQueries extends SQLQueries {
 			else {
 				throw new ProcessingException("unknown action: "+action);
 			}
+		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
+			try {
+				conn.rollback();
+			} catch (SQLException sqle) {
+				log.warn(sqle);
+			}
+			throw e;
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -230,7 +238,6 @@ public class QOnQueries extends SQLQueries {
 			deleteSt.setString(1, qname);
 			int countDeletes = deleteSt.executeUpdate();
 			if(countDeletes!=1) {
-				conn.rollback();
 				//XXX "client/user error" - throw BadRequest or Processing Exception?
 				throw new BadRequestException("error deleting query '"+qname+"' [#deletes = "+countDeletes+"]");
 			}
