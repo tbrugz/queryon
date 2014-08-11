@@ -22,12 +22,17 @@
 
 String username = request.getParameter("username");
 String password = request.getParameter("password");
+String returnUrl = request.getParameter("return");
+
 Subject currentUser = SecurityUtils.getSubject();
 if(username!=null) {
 	AuthenticationToken token = new UsernamePasswordToken(username, password);
 	try {
 		currentUser.login(token);
 		System.out.println("login.jsp: auth: "+username);
+		if(returnUrl!=null) {
+			out.write("<script>window.location.href = '"+returnUrl+"';</script>");
+		}
 	}
 	catch(UnknownAccountException e) {
 		out.write("<em class='warning'>Unknown account</em><br/>");

@@ -11,9 +11,13 @@
 </head>
 <body>
 <%
+String returnUrl = request.getParameter("return");
 
 SecurityUtils.getSubject().logout();
 
+if(returnUrl!=null) {
+	out.write("<script>window.location.href = '"+returnUrl+"';</script>");
+}
 %>
 You have succesfully logged out.
 
