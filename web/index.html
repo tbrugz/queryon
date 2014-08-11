@@ -130,6 +130,9 @@
 		dialogCont.style.display = 'block';
 		var dialog = document.getElementById('dialog');
 		var cols = getColumns(id);
+		if(cols==null || cols.length==0) {
+			cols = getColumnsFromContainer('content');
+		}
 
 		var selectHTML = "<select name='fin-column' id='fin-column'>";
 		for(var i=0;i<cols.length;i++) {

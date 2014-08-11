@@ -200,8 +200,26 @@ function getColumns(id) {
 	var colsStr = relationsHash[id].columnNames;
 	var cols = colsStr.split(",");
 
-	for(var i=0;i<cols.length;i++) {
+	for(var i=cols.length-1;i>=0;i--) {
 		cols[i] = cols[i].replace("[","").replace("]","").trim();
+		if(cols[i]=="") { cols.pop(i); }
+	}
+	return cols;
+}
+
+function getColumnsFromContainer(containerId) {
+	var content = document.getElementById(containerId);
+	var headers = content.getElementsByTagName('th');
+	var cols = [];
+	//console.log('headers.length: '+headers.length);
+	for(var i=0;i<headers.length;i++) {
+		var elem = headers[i];
+		var colname = elem.innerHTML;
+		var idx = colname.indexOf('<');
+		if(idx>0) {
+			colname = colname.substring(0, idx);
+		}
+		cols.push(colname);
 	}
 	return cols;
 }
