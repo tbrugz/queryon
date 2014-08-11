@@ -109,21 +109,21 @@ function addSortHrefs(containerId, order) {
 		//console.log('colname['+i+']: '+colname);
 		
 		var elemValue = colname
-			+ '<div class="orderbutton-container">';
+			+ '<span class="orderbutton-container">';
 		if(order==colname) {
-			elemValue += '<input type=button class="orderbutton button-selected" value="A"/>'
+			elemValue += '<input type=button class="orderbutton button-selected" value="&#9650;"/>'
 		}
 		else {
-			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="A"/>'
+			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="&#9650;"/>'
 		}
 		
 		if(order=="-"+colname) {
-			elemValue += '<input type=button class="orderbutton button-selected" value="D"/>'
+			elemValue += '<input type=button class="orderbutton button-selected" value="&#9660;"/>'
 		}
 		else {
-			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="D"/>'
+			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="&#9660;"/>'
 		}
-		elemValue += '</div>';
+		elemValue += '</span>';
 		
 		elem.innerHTML = elemValue;
 	}

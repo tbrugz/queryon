@@ -41,7 +41,7 @@
 		
 		makeHrefs();
 		
-		updateUI();
+		//updateUI();
 	}
 	
 	function makeHrefs() {
@@ -107,6 +107,7 @@
 		//console.log('urlpl.href: '+urlpl.href);
 
 		//console.log('urldown.href: '+urldown.href);
+		updateUI();
 	}
 	
 	function updateUI() {
@@ -152,7 +153,7 @@
 		filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='makeHrefs();'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);makeHrefs();'></label>";
 		makeHrefs();
-		updateUI();
+		//updateUI();
 	}
 	
 	function sortBy(colName, direction) {
@@ -294,6 +295,7 @@
 	}
 	.orderbutton-container {
 		display: inline-block;
+		margin: 0 5px 0 5px;
 	}
 	.edit-link {
 		display: none;
@@ -336,7 +338,7 @@
 	}
 	
 	#content input[type=button] {
-		padding: 2px;
+		padding: 0px;
 	}
 	
 	.button-selected {
