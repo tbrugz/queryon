@@ -25,6 +25,7 @@ public class RequestSpec {
 	final String httpMethod;
 	final String object;
 	final int offset, limit;
+	final String loStrategy;
 	
 	final List<String> columns = new ArrayList<String>();
 	final List<String> params = new ArrayList<String>();
@@ -157,6 +158,8 @@ public class RequestSpec {
 				orderCols.add(ocol);
 			}
 		}
+		
+		loStrategy = req.getParameter("lostrategy");
 
 		for(int i=1;;i++) {
 			String value = req.getParameter("p"+i);

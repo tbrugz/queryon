@@ -515,6 +515,10 @@ public class QueryOn extends HttpServlet {
 		//how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
+		if(reqspec.loStrategy!=null) {
+			//TODO: add permission check
+			loStrategy = LimitOffsetStrategy.valueOf(reqspec.loStrategy);
+		}
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
 			log.debug("pre-sql:\n"+sql.getSql());
 		}
