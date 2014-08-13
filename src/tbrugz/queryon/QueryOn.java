@@ -485,6 +485,7 @@ public class QueryOn extends HttpServlet {
 	
 	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		String finalSql = null;
 		try {
 		
 		SQL sql = SQL.createSQL(relation, reqspec);
@@ -526,7 +527,7 @@ public class QueryOn extends HttpServlet {
 		
 		//query finished!
 		
-		String finalSql = sql.getFinalSql();
+		finalSql = sql.getFinalSql();
 		log.debug("sql:\n"+finalSql);
 		//XXX log sql parameter values?
 		
@@ -551,6 +552,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			conn.rollback();
+			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
 			//XXX: create new SQLException including the query string?
 			throw e;
 		}

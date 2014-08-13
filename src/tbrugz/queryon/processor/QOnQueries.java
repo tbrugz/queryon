@@ -94,6 +94,7 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 			String query = rs.getString(3);
 			String remarks = rs.getString(4);
 			
+			try {
 			PreparedStatement stinn = conn.prepareStatement(query);
 			//count += addQueryToModel(queryName, queryName, schema,
 			//		/*String colNames*/ null, /*boolean grabInfoFromMetadata*/ true, /*addAlsoAsTable*/ false,
@@ -101,7 +102,11 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 			//		/*List<String> params*/ null,
 			//		/*String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend*/ null, null, null);
 			
-			count += addQ2M(schema, queryName, stinn, query, remarks); 
+			count += addQ2M(schema, queryName, stinn, query, remarks);
+			}
+			catch(SQLException e) {
+				log.warn("error reading query '"+queryName+"': "+e);
+			}
 		}
 		
 		log.info("QOn processed [added/replaced "+count+" queries]");
