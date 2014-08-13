@@ -19,6 +19,7 @@ import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -176,6 +177,7 @@ public class QueryOn extends HttpServlet {
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	SchemaModel model;
+	String propertiesResource = null;
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
 	boolean validateFilterColumnNames = true;
@@ -183,10 +185,14 @@ public class QueryOn extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		String propertiesResource = null;
+		propertiesResource = config.getInitParameter(PROPERTIES_PATH);
+		if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
+		
+		doInit(config.getServletContext());
+	}
+	
+	void doInit(ServletContext context) throws ServletException {
 		try {
-			propertiesResource = config.getInitParameter(PROPERTIES_PATH);
-			if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
 			
 			log.info("loading properties: "+propertiesResource);
 			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
@@ -207,15 +213,15 @@ public class QueryOn extends HttpServlet {
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
 			
-			config.getServletContext().setAttribute(ATTR_PROP, prop);
-			config.getServletContext().setAttribute(ATTR_MODEL, model);
+			context.setAttribute(ATTR_PROP, prop);
+			context.setAttribute(ATTR_MODEL, model);
 			
 			//XXX option to reload properties & re-execute processors?
 			List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
 			if(procsOnStartup!=null) {
 				for(String p: procsOnStartup) {
 					try {
-						ProcessorServlet.doProcess(p, config);
+						ProcessorServlet.doProcess(p, context);
 					}
 					catch(Exception e) {
 						log.warn("Exception executing processor on startup: "+e, e);

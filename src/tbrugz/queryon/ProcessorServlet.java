@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +39,7 @@ public class ProcessorServlet extends HttpServlet {
 	
 	static final String PROCESSOR_PERMISSION_PREFIX = "PROCESSOR:"; 
 	
-	ServletConfig config = null;
+	ServletConfig config = null; //XXX: remove ServletConfig config
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -89,22 +90,22 @@ public class ProcessorServlet extends HttpServlet {
 
 		String[] classParts = procClasses.split(",");
 		for(String procClass: classParts) {
-			doProcess(procClass, config, req, resp);
+			doProcess(procClass, config.getServletContext(), req, resp);
 		}
 	}
 
-	public static void doProcess(String procClass, ServletConfig config) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
-		doProcess(procClass, config, null, null);
+	public static void doProcess(String procClass, ServletContext context) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+		doProcess(procClass, context, null, null);
 	}
 
 	//TODO: shiro: add permission check
-	public static void doProcess(String procClass, ServletConfig config, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+	public static void doProcess(String procClass, ServletContext context, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(procComponent==null) {
 			throw new BadRequestException("processor class not found: "+procClass);
 		}
 		
-		Properties appprop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties appprop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
 		if(appprop==null) {
 			throw new ServletException("properties attribute is null!");
 		}
@@ -136,7 +137,7 @@ public class ProcessorServlet extends HttpServlet {
 			if(!proc.isIdempotent() && req!=null && req.getMethod()!=null && !req.getMethod().equals("POST")) {
 				throw new BadRequestException("processor '"+procClass+"' only allowed with POST method");
 			}
-			doProcessProcessor(proc, prop, config, resp);
+			doProcessProcessor(proc, prop, context, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
 				resp.getWriter().write("processor '"+procClass+"' processed\n");
 			}
@@ -144,7 +145,7 @@ public class ProcessorServlet extends HttpServlet {
 		else if(procComponent instanceof SchemaModelDumper) {
 			// dumpers are always idempotent?
 			SchemaModelDumper dumper = (SchemaModelDumper) procComponent;
-			doProcessDumper(dumper, config, resp);
+			doProcessDumper(dumper, context, resp);
 			if(!dumper.acceptsOutputStream() && !dumper.acceptsOutputWriter() && resp!=null) {
 				resp.getWriter().write("dumper '"+procClass+"' processed\n");
 			}
@@ -154,9 +155,9 @@ public class ProcessorServlet extends HttpServlet {
 		}
 	}
 	
-	static void doProcessProcessor(Processor pc, Properties prop, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+	static void doProcessProcessor(Processor pc, Properties prop, ServletContext context, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		if(pc.needsSchemaModel()) {
-			SchemaModel sm = (SchemaModel) config.getServletContext().getAttribute(QueryOn.ATTR_MODEL);
+			SchemaModel sm = (SchemaModel) context.getAttribute(QueryOn.ATTR_MODEL);
 			if(sm==null) {
 				throw new ServletException("schema model attribute is null!");
 			}
@@ -202,8 +203,8 @@ public class ProcessorServlet extends HttpServlet {
 		}
 	}
 	
-	static void doProcessDumper(SchemaModelDumper dumper, ServletConfig config, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
-		SchemaModel sm = (SchemaModel) config.getServletContext().getAttribute(QueryOn.ATTR_MODEL);
+	static void doProcessDumper(SchemaModelDumper dumper, ServletContext context, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+		SchemaModel sm = (SchemaModel) context.getAttribute(QueryOn.ATTR_MODEL);
 		if(sm==null) {
 			throw new ServletException("schema model attribute is null!");
 		}
