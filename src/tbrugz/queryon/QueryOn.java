@@ -76,7 +76,8 @@ public class QueryOn extends HttpServlet {
 		STATUS,   //~TODOne: or CONFIG? show model, user, vars...
 		//XXXxx: FINDBYKEY action? return only the first result
 		SELECT_ANY,
-		VALIDATE_ANY
+		VALIDATE_ANY,
+		MANAGE
 	}
 	
 	// 'status objects' (SO)
@@ -313,6 +314,10 @@ public class QueryOn extends HttpServlet {
 			atype = ActionType.VALIDATE_ANY;
 			otype = ActionType.VALIDATE_ANY.name();
 		}
+		else if(ActionType.MANAGE.name().equals(reqspec.object)) {
+			atype = ActionType.MANAGE;
+			otype = ActionType.MANAGE.name();
+		}
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
@@ -415,6 +420,9 @@ public class QueryOn extends HttpServlet {
 				break;
 			case STATUS:
 				doStatus(reqspec, currentUser, resp);
+				break;
+			case MANAGE:
+				doManage(reqspec, req, resp);
 				break;
 			default:
 				throw new BadRequestException("Unknown action type: "+atype); 
@@ -888,6 +896,12 @@ public class QueryOn extends HttpServlet {
 		finally {
 			conn.close();
 		}
+	}
+	
+	void doManage(RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//TODO: only reloads model for now...
+		doInit(req.getSession().getServletContext());
+		resp.getWriter().write("queryon config reloaded");
 	}
 	
 	Constraint getPK(Relation relation) {
