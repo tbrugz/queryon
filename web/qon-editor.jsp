@@ -1,33 +1,20 @@
-<!DOCTYPE html>
+<%@page import="org.apache.shiro.SecurityUtils"%>
+<%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="tbrugz.sqldump.datadump.DataDumpUtils"%>
 <%@page import="tbrugz.sqldump.dbmodel.Table"%>
 <%@page import="tbrugz.sqldump.dbmodel.Query"%>
 <%@page import="tbrugz.sqldump.dbmodel.View"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
-<%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%>
-<%@page import="tbrugz.queryon.SchemaModelUtils"%><%!
-static String xmlEscapeText(String t) {
-	StringBuilder sb = new StringBuilder();
-	for (int i = 0; i < t.length(); i++) {
-		char c = t.charAt(i);
-		switch (c) {
-		case '<':
-			sb.append("&lt;");
-			break;
-		case '>':
-			sb.append("&gt;");
-			break;
-		case '&':
-			sb.append("&amp;");
-			break;
-		default:
-			sb.append(c);
-		}
-	}
-	return sb.toString();
+<%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%><%
+Subject currentUser = SecurityUtils.getSubject();
+if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
+	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+	out.write("permission denied");
+	return;
 }
 %>
+<!DOCTYPE html>
 <html>
 <head>
     <title>QueryOn - query editor</title>
@@ -375,8 +362,7 @@ if(remarks==null) { remarks = ""; }
 	</div>
 </div>
 
-<!-- div id="editor"><%//= DataDumpUtils.xmlEscapeText( query ) %></div-->
-<div id="editor"><%= xmlEscapeText(query) %></div>
+<div id="editor"><%= DataDumpUtils.xmlEscapeText( query ) %></div>
 
 <div class="container">
 	<div id="sqlparams">

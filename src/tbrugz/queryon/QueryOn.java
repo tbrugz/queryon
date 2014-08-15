@@ -194,7 +194,7 @@ public class QueryOn extends HttpServlet {
 	
 	void doInit(ServletContext context) throws ServletException {
 		try {
-			
+			prop.clear();
 			log.info("loading properties: "+propertiesResource);
 			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
 			String path = "http://"+InetAddress.getLocalHost().getHostName()+"/";
@@ -906,6 +906,7 @@ public class QueryOn extends HttpServlet {
 	
 	void doManage(RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//TODO: only reloads model for now...
+		// - reload-config, reload-movel, rerun-processors
 		doInit(req.getSession().getServletContext());
 		resp.getWriter().write("queryon config reloaded");
 	}
