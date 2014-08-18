@@ -33,11 +33,16 @@ body {
 		<select id="objects">
 		</select>
 		<input type="button" value="go!" onclick="loadGraph();"/>
-		<input type="button" value="start layout" onclick="s.startForceAtlas2();"/>
-		<input type="button" value="stop layout" onclick="s.stopForceAtlas2();"/>
+		<input type="button" id="forcebutton" value="start force layout" onclick="toggleForce(s);"/>
+		<!-- input type="button" value="stop layout" onclick="s.stopForceAtlas2();"/-->
 	</div>
 	<div id="container"></div>
 	<script>
+		// Let's first initialize sigma:
+		sigma.renderers.def = sigma.renderers.canvas; //dragnodes needs this, i think
+		var s = new sigma('container');
+		var forceAtlasRunning = false;
+
 		function contains(graph, id) {
 			var nodes = graph.nodes();
 			for(var i=0;i<nodes.length;i++) {
@@ -48,6 +53,20 @@ body {
 			return false;
 		}
 		
+		function toggleForce(s) {
+			var btn = document.getElementById('forcebutton');
+			if(forceAtlasRunning) { //s.isForceAtlas2Running()) {
+				s.stopForceAtlas2();
+				btn.value = 'start force layout';
+				forceAtlasRunning = false;
+			}
+			else {
+				s.startForceAtlas2();
+				btn.value = 'stop force layout';
+				forceAtlasRunning = true;
+			}
+		}
+		
 		function getXorY() {
 			return Math.random();
 		}
@@ -55,6 +74,7 @@ body {
 		function addNode(graph, prefix, elem) {
 			var id = elem[prefix];
 			var label = elem[prefix+"_LABEL"]?elem[prefix+"_LABEL"]:elem[prefix];
+			var color = elem[prefix+"_COLOR"]?elem[prefix+"_COLOR"]:'#fff';
 			var ret = graph.addNode({
 				id: id,
 				label : label,
@@ -62,7 +82,7 @@ body {
 				x: getXorY(),
 				y: getXorY(),
 				size : 1,
-				color : '#f00'
+				color : color,
 			});
 			console.log("added node "+elem[prefix]);
 		}
@@ -72,6 +92,7 @@ body {
 			//console.log(qid);
 			$.getJSON('q/'+qid+'.json', function(data) {
 				data = data[Object.keys(data)[0]];
+				s.graph.clear();
 				//console.log(data);
 				//XXX: test if valid query (valid columns)
 				for(var i=0;i<data.length;i++) {
@@ -91,7 +112,8 @@ body {
 							// Reference extremities:
 							source : data[i].SOURCE,
 							target : data[i].TARGET,
-							type: "arrow",
+							type: 'arrow',
+							//type : 'curve',
 						});
 						//console.log("added edge "+eid);
 					}
@@ -104,16 +126,12 @@ body {
 			});
 		}
 		
-		// Let's first initialize sigma:
-		sigma.renderers.def = sigma.renderers.canvas; //dragnodes needs this, i think
-		var s = new sigma('container');
-
 		// see https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
 		s.settings({
 			edgeColor: 'default',
 			defaultEdgeColor: 'grey',
-			minNodeSize: 8,
-			maxNodeSize: 16,
+			minNodeSize: 1,
+			maxNodeSize: 4,
 		});
 		
 		sigma.plugins.dragNodes(s, s.renderers[0]);
