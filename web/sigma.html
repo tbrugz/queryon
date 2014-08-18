@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QOn with sigma.js</title>
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script src="js/queryon-b.js"></script>
+	<script src="js/sigma/sigma.min.js"></script>
+	<script src="js/sigma/plugins/sigma.layout.forceAtlas2.min.js"></script>
+	<script src="js/sigma/plugins/sigma.plugins.dragNodes.min.js"></script>
+<style type="text/css">
+body {
+	margin: 0;
+}
+
+#container {
+	position: absolute;
+	top: 10px;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+	border: 1px solid #bbb;
+	background-color: #ddd;
+}
+
+#buttons {
+	position: absolute;
+	z-index: 100;
+}
+</style>
+</head>
+<body onload="javascript:init('q','objects');">
+	<div id="buttons">
+		<select id="objects">
+		</select>
+		<input type="button" value="go!" onclick="loadGraph();"/>
+		<input type="button" value="start layout" onclick="s.startForceAtlas2();"/>
+		<input type="button" value="stop layout" onclick="s.stopForceAtlas2();"/>
+	</div>
+	<div id="container"></div>
+	<script>
+		function contains(graph, id) {
+			var nodes = graph.nodes();
+			for(var i=0;i<nodes.length;i++) {
+				if(nodes[i].id==id) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		function getXorY() {
+			return Math.random();
+		}
+		
+		function addNode(graph, prefix, elem) {
+			var id = elem[prefix];
+			var label = elem[prefix+"_LABEL"]?elem[prefix+"_LABEL"]:elem[prefix];
+			var ret = graph.addNode({
+				id: id,
+				label : label,
+				// Display attributes:
+				x: getXorY(),
+				y: getXorY(),
+				size : 1,
+				color : '#f00'
+			});
+			console.log("added node "+elem[prefix]);
+		}
+	
+		function loadGraph() {
+			var qid = document.getElementById('objects').options[document.getElementById('objects').selectedIndex].value;
+			//console.log(qid);
+			$.getJSON('q/'+qid+'.json', function(data) {
+				data = data[Object.keys(data)[0]];
+				//console.log(data);
+				//XXX: test if valid query (valid columns)
+				for(var i=0;i<data.length;i++) {
+					// maybe add source node
+					if(!contains(s.graph,data[i].SOURCE)) {
+						addNode(s.graph, "SOURCE", data[i]);
+					}
+					// maybe add target node
+					if(!contains(s.graph,data[i].TARGET)) {
+						addNode(s.graph, "TARGET", data[i]);
+					}
+					// add edge
+					try {
+						var eid = data[i].SOURCE+"$"+data[i].TARGET;
+						s.graph.addEdge({
+							id : eid,
+							// Reference extremities:
+							source : data[i].SOURCE,
+							target : data[i].TARGET,
+							type: "arrow",
+						});
+						//console.log("added edge "+eid);
+					}
+					catch (e) {
+						console.log(e+" / target: "+data[i].TARGET);
+					}
+				}
+				// Finally, let's ask our sigma instance to refresh:
+				s.refresh();
+			});
+		}
+		
+		// Let's first initialize sigma:
+		sigma.renderers.def = sigma.renderers.canvas; //dragnodes needs this, i think
+		var s = new sigma('container');
+
+		// see https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
+		s.settings({
+			edgeColor: 'default',
+			defaultEdgeColor: 'grey',
+			minNodeSize: 8,
+			maxNodeSize: 16,
+		});
+		
+		sigma.plugins.dragNodes(s, s.renderers[0]);
+	</script>
+</body>
+</html>
+
