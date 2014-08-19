@@ -67,3 +67,14 @@ th {
 	border: 0;
 	padding: 0;
 }
+
+input[type=button] {
+	border: 0;
+	padding: 3px 9px 3px 9px;
+	font-weight: bold;
+	margin: 0px 1px 0px 1px;
+}
+
+input.mainaction {
+	background-color: rgb(146, 218, 136);
+}

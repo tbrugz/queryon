@@ -24,7 +24,7 @@ body {
 	top: 0px;
 	right: 0px;
 	left: 0px;
-	height: 26px;
+	/*height: 26px;*/
 	z-index: 10;
 	overflow-y: auto;
 	max-height: 100%;
@@ -38,7 +38,6 @@ body {
 	font-weight: bolder;
 	background-color: #666;
 }
-
 
 #container {
 	position: absolute;
@@ -54,22 +53,57 @@ body {
 	display: inline-block;
 }
 
+#dialog-container {
+	position: fixed;
+	top: 0; bottom: 0; left: 0; right: 0;
+	background-color: #666;
+	background-color: rgba(100,100,100,0.7);
+	z-index: 20;
+	display: none;
+}
+#dialog {
+	position: fixed;
+	top: 20%;
+	left: 20%;
+	background-color: #ccc;
+	z-index: 20;
+	padding: 10px;
+	border: 4px solid #fff;
+}
+#dialog label {
+	background-color: #ddd;
+	padding: 5px;
+}
+
 </style>
 </head>
 <body onload="javascript:init('q','objects', writeOptions);">
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + sigma<span style="color: #ec5148">js</span></span>
 
-	<select id="objects"></select>
+	<select id="objects" onchange="onQueryChanged();"></select>
+	
+	<span id="navbar-prop">
+		<span id="parameters"></span>
+		<span id="filters"></span>
+	</span>
 	
 	<div id="buttons">
-		<input type="button" value="go!" onclick="loadGraph();"/>
+		<input type="button" value="+ filter" onclick="addFilter();"/>
+		<input type="button" class="mainaction" value="go!" onclick="loadGraph();"/>
 		<input type="button" id="forcebutton" value="start force layout" onclick="toggleForce(s);"/>
 		<!-- input type="button" value="stop layout" onclick="s.stopForceAtlas2();"/-->
 	</div>
+	
+	<div id="messages"></div>
 </div>
 
 <div id="container"></div>
+
+<div id="dialog-container">
+	<div id="dialog">
+	</div>
+</div>
 
 <script>
 		function writeOptions(containerId, relations) {
@@ -84,6 +118,8 @@ body {
 			}
 		}
 		
+		function onParameterChange(i) {}
+		
 		function validGraphRelation(relation) {
 			var cols = getColumnsFromRelation(relation);
 			if(cols.indexOf("SOURCE")>=0 && cols.indexOf("TARGET")>=0) {
@@ -91,7 +127,55 @@ body {
 			}
 			return false;
 		}
-	
+		
+		function onQueryChanged() {
+			loadRelation('objects', 'parameters', 'content');
+			//document.getElementById('navbar-prop').style.display = 'initial';
+		}
+		
+		function updateUI() {
+			document.getElementById('container').style.top = (document.getElementById('nav').offsetHeight+10) + 'px';
+		}
+		
+		function addFilter() {
+			var select = document.getElementById('objects');
+			var id = select.options[select.selectedIndex].value;
+			if(!id) {
+				alert('no object selected!');
+				return;
+			}
+			var dialogCont = document.getElementById('dialog-container');
+			dialogCont.style.display = 'block';
+			var dialog = document.getElementById('dialog');
+			var cols = getColumnsFromRelation(relationsHash[id]);
+
+			var selectHTML = "<select name='fin-column' id='fin-column'>";
+			for(var i=0;i<cols.length;i++) {
+				var colz = cols[i];
+				selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
+			}
+			selectHTML += '</select>';
+			dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> <em>in</em> "
+				+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
+				+ "<input type='button' value='add' onclick='addFilterIn();document.getElementById(\"dialog-container\").style.display = \"none\";'/>"
+				+ "<input type='button' value='X' class='simplebutton' onclick='document.getElementById(\"dialog-container\").style.display = \"none\";'/></div>";
+			//dialog.style.display = 'none';
+			
+			updateUI();
+		}
+		
+		function addFilterIn() {
+			var col = document.getElementById('fin-column').value;
+			var value = document.getElementById('fin-value').value;
+			var filters = document.getElementById('filters');
+			filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"'/>"
+				+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);'></label>";
+			updateUI();
+		}
+		
+
+		// ======================== sigma-related functions ========================
+		
 		// Let's first initialize sigma:
 		sigma.renderers.def = sigma.renderers.canvas; //dragnodes needs this, i think
 		var s = new sigma('container');
@@ -143,8 +227,30 @@ body {
 	
 		function loadGraph() {
 			var qid = document.getElementById('objects').options[document.getElementById('objects').selectedIndex].value;
-			//console.log(qid);
-			$.getJSON('q/'+qid+'.json', function(data) {
+
+			//parameters
+			var params = document.querySelectorAll('.parameter');
+			var paramsStr = '';
+			for (var i = 0; i < params.length; ++i) {
+				var item = params[i];
+				var str = item.value;
+				if(str=='') { str = '-'; } 
+				paramsStr += '/'+str;
+			}
+
+			//filters
+			var queryString = '';
+			var filters = document.querySelectorAll('.filter');
+			for (var i = 0; i < filters.length; ++i) {
+				var item = filters[i];
+				//console.log(item);
+				queryString += '&'+item.name+"="+item.value;
+			}
+
+			// ajax
+			var url = 'q/'+qid+paramsStr+'.json?'+queryString;
+			console.log('url['+qid+']: '+url);
+			var jqxhr = $.getJSON(url, function(data) {
 				data = data[Object.keys(data)[0]];
 				s.graph.clear();
 				//console.log(data);
@@ -177,6 +283,9 @@ body {
 				}
 				// Finally, let's ask our sigma instance to refresh:
 				s.refresh();
+			})
+			.fail(function() {
+				showErrorMessages('messages', jqxhr.responseText);
 			});
 		}
 		

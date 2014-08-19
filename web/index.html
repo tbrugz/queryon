@@ -44,6 +44,10 @@
 		//updateUI();
 	}
 	
+	function onParameterChange(i) {
+		makeHrefs();
+	}
+	
 	function makeHrefs() {
 		var urled = document.getElementById("url-editor");
 		var urlpl = document.getElementById("url-permalink");
@@ -336,9 +340,9 @@
 		margin: 0px 1px 0px 1px;
 	}
 	
-	#go-button {
-		background-color: rgb(146, 218, 136); /* rgb(136, 162, 218); */
-	}
+	/*#go-button {
+		background-color: rgb(146, 218, 136); /* rgb(136, 162, 218); * /
+	}*/
 	
 	#content input[type=button] {
 		padding: 0px;
@@ -366,7 +370,7 @@
 		<span id="filters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilter();"/>
-		<input type="button" id="go-button" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
 		<!-- TODO limit/offset or page/pagesize -->
 	</span>
 

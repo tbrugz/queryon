@@ -147,7 +147,7 @@ function setParameters(parametersId, numparams) {
 	console.log('numparams: '+numparams+' ; params.length: '+params.length);
 	if(numparams > params.length) {
 		for(var i=params.length+1;i<=numparams;i++) {
-			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='makeHrefs();'/></label>");
+			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'/></label>");
 		}
 	}
 	else if(numparams < params.length) {
