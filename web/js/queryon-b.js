@@ -3,8 +3,9 @@ var baseUrl;
 
 var relationsHash = {};
 
-function init(url, containerId) {
+function init(url, containerId, callback) {
 	baseUrl = url;
+	callback = typeof callback !== 'undefined' ? callback : writeRelations;
 	$('#'+containerId).append('<option value="" selected disabled>select object</option>');
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
@@ -12,7 +13,7 @@ function init(url, containerId) {
 		success: function(data) {
 			var rels = data.relation;
 			if(rels) { console.log('Load was performed. '+rels.length+' relations loaded'); }
-			writeRelations(containerId, rels);
+			callback(containerId, rels);
 		}
 	});
 }
@@ -196,8 +197,8 @@ function getQueryVariable(variable) {
 	//console.log('Query Variable ' + variable + ' not found');
 }
 
-function getColumns(id) {
-	var colsStr = relationsHash[id].columnNames;
+function getColumnsFromRelation(relation) {
+	var colsStr = relation.columnNames;
 	var cols = colsStr.split(",");
 
 	for(var i=cols.length-1;i>=0;i--) {

@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>QOn with sigma.js</title>
+	<link rel="icon" type="image/png" href="favicon.png" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
 	<script src="js/sigma/sigma.min.js"></script>
@@ -28,7 +29,7 @@ body {
 }
 </style>
 </head>
-<body onload="javascript:init('q','objects');">
+<body onload="javascript:init('q','objects', writeOptions);">
 	<div id="buttons">
 		<select id="objects">
 		</select>
@@ -38,6 +39,26 @@ body {
 	</div>
 	<div id="container"></div>
 	<script>
+		function writeOptions(containerId, relations) {
+			if(!relations) { return; }
+			//console.log('write relations [#'+relations.length+'] to '+containerId);
+			for(var i=0;i<relations.length;i++) {
+				if(validGraphRelation(relations[i])) {
+					var id = getId(relations[i]);
+					$('#'+containerId).append("<option value='"+id+"'>"+getDescription(relations[i])+"</option>");
+					relationsHash[id] = relations[i];
+				}
+			}
+		}
+		
+		function validGraphRelation(relation) {
+			var cols = getColumnsFromRelation(relation);
+			if(cols.indexOf("SOURCE")>=0 && cols.indexOf("TARGET")>=0) {
+				return true;
+			}
+			return false;
+		}
+	
 		// Let's first initialize sigma:
 		sigma.renderers.def = sigma.renderers.canvas; //dragnodes needs this, i think
 		var s = new sigma('container');

@@ -129,7 +129,7 @@
 		var dialogCont = document.getElementById('dialog-container');
 		dialogCont.style.display = 'block';
 		var dialog = document.getElementById('dialog');
-		var cols = getColumns(id);
+		var cols = getColumnsFromRelation(relationsHash[id]);
 		if(cols==null || cols.length==0) {
 			cols = getColumnsFromContainer('content');
 		}
