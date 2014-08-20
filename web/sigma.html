@@ -221,12 +221,12 @@ body {
 				id: id,
 				label : label,
 				// Display attributes:
-				x: getXorY(),
-				y: getXorY(),
+				x: elem[prefix+"_X"] || getXorY(),
+				y: elem[prefix+"_Y"] || getXorY(),
 				size : 1,
 				color : color,
 			});
-			console.log("added node "+elem[prefix]);
+			//console.log("added node "+elem[prefix]);
 		}
 	
 		function loadGraph() {
@@ -270,7 +270,8 @@ body {
 					}
 					// add edge
 					try {
-						var eid = data[i].SOURCE+"$"+data[i].TARGET;
+						//var eid = data[i].SOURCE+"$"+data[i].TARGET;
+						var eid = "edge"+i;
 						s.graph.addEdge({
 							id : eid,
 							// Reference extremities:
@@ -278,13 +279,15 @@ body {
 							target : data[i].TARGET,
 							type: 'arrow',
 							//type : 'curve',
+							size: 2, //increases thickness & arrow size
 						});
 						//console.log("added edge "+eid);
 					}
 					catch (e) {
-						console.log(e+" / target: "+data[i].TARGET);
+						console.log(e+" / i: "+i+" ; source: "+data[i].SOURCE+" ; target: "+data[i].TARGET);
 					}
 				}
+				console.log("#nodes = "+s.graph.nodes().length+" ; #edges = "+s.graph.edges().length);
 				// Finally, let's ask our sigma instance to refresh:
 				s.refresh();
 			})

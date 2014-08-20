@@ -17,12 +17,12 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QueryOn - query editor</title>
-    <link href="css/queryon.css" rel="stylesheet">
-    <link href="css/qon-editor.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+	<title>QueryOn - query editor</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-editor.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<style type="text/css">
 	#objectid-container {
@@ -34,6 +34,10 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		top: 0px;
 		left: 0px;
 		right: 0px;*/
+	}
+	#button-container input[type=button] {
+		border: 1px solid #999;
+		margin: 2px;
 	}
 	</style>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
@@ -390,15 +394,15 @@ if(remarks==null) { remarks = ""; }
 <!-- style? see http://ace.c9.io/build/kitchen-sink.html -->
 <script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
-    editor.getSession().setMode("ace/mode/sql");
-    editor.getSelectedText = function() {
-    	//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
-        return this.getSession().getTextRange(this.getSelectionRange());
-    };
-    
-    setParameters(<%= numOfParameters %>);
+	var editor = ace.edit("editor");
+	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
+	editor.getSession().setMode("ace/mode/sql");
+	editor.getSelectedText = function() {
+		//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
+		return this.getSession().getTextRange(this.getSelectionRange());
+	};
+	
+	setParameters(<%= numOfParameters %>);
 </script>
 <script type="text/javascript">
 	makeHrefs();
