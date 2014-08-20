@@ -49,7 +49,7 @@ body {
 	background-color: #bbb; /* #bbb, #eee */
 }
 
-#buttons {
+.btn-container {
 	display: inline-block;
 }
 
@@ -88,12 +88,16 @@ body {
 		<span id="filters"></span>
 	</span>
 	
-	<div id="buttons">
+	<span id="buttons" class="btn-container">
 		<input type="button" value="+ filter" onclick="addFilter();"/>
 		<input type="button" class="mainaction" value="go!" onclick="loadGraph();"/>
+	</span>
+
+	<span id="graphbuttons" class="btn-container">
 		<input type="button" id="forcebutton" value="start force layout" onclick="toggleForce(s);"/>
-		<!-- input type="button" value="stop layout" onclick="s.stopForceAtlas2();"/-->
-	</div>
+		<input type="button" value="+" onclick="graphIncreaseSize();"/>
+		<input type="button" value="-" onclick="graphDecreaseSize();"/>
+	</span>
 	
 	<div id="messages"></div>
 </div>
@@ -287,6 +291,24 @@ body {
 			.fail(function() {
 				showErrorMessages('messages', jqxhr.responseText);
 			});
+		}
+		
+		var graphIncreaseFactor = 1.25;
+		
+		function graphIncreaseSize() {
+			s.settings({
+				minNodeSize: s.settings('minNodeSize')*graphIncreaseFactor,
+				maxNodeSize: s.settings('maxNodeSize')*graphIncreaseFactor,
+			});
+			s.refresh();
+		}
+
+		function graphDecreaseSize() {
+			s.settings({
+				minNodeSize: s.settings('minNodeSize')/graphIncreaseFactor,
+				maxNodeSize: s.settings('maxNodeSize')/graphIncreaseFactor,
+			});
+			s.refresh();
 		}
 		
 		// see https://github.com/jacomyal/sigma.js/wiki/Settings#renderers-settings
