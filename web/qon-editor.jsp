@@ -25,20 +25,6 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<style type="text/css">
-	#objectid-container {
-	}
-	#editor {
-	}
-	#spec {
-		/*position: fixed;
-		top: 0px;
-		left: 0px;
-		right: 0px;*/
-	}
-	#button-container input[type=button] {
-		border: 1px solid #999;
-		margin: 2px;
-	}
 	</style>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
@@ -260,12 +246,15 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	}
 	
 	function makeHrefs() {
+		var schema = document.getElementById('schema').value;
+		var name = document.getElementById('name').value;
+
 		var urlr = document.getElementById("url-reload");
-		urlr.href = "?name="+document.getElementById("name").value;
+		urlr.href = "?name="+name+(schema!=''?"&schema="+schema:"");
 		
 		var numparameters = document.getElementById("sqlparams").children.length;
 		var urlpl = document.getElementById("url-permalink");
-		urlpl.href = queryOnUrl+"/"+document.getElementById("name").value;
+		urlpl.href = queryOnUrl+"/"+name;
 		for(var i=0;i<numparameters;i++) {
 			urlpl.href += "/-";
 		}
@@ -344,9 +333,9 @@ if(queryName!=null) {
 			schemaName = t.getSchemaName();
 			remarks = t.getRemarks();
 		}
-		/*else {
-			query = "select * from xxx";
-		}*/
+		else {
+			query = "-- query not found";
+		}
 	}
 }
 if(query==null || query.equals("")) {

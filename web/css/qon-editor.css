@@ -64,3 +64,27 @@ a, a:visited {
 	*/
 	background-color: #f55;
 }
+
+#objectid-container {
+}
+
+#editor {
+}
+
+#spec {
+	/*position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;*/
+}
+
+#button-container input[type=button] {
+	border: 1px solid #999;
+	margin: 2px;
+}
+
+#actions-container a {
+	text-decoration: none;
+	border: 1px solid #999;
+	padding: 1px 9px 1px 9px;
+}
