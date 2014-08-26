@@ -140,6 +140,9 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	}
 	
 	function doSave() {
+		var schema = document.getElementById('schema').value;
+		var name = document.getElementById('name').value;
+		
 		var request = $.ajax({
 			//url : processorUrl+"/SQLQueries",
 			url : processorUrl+"/SQLQueries,queryon.processor.QOnQueries",
@@ -149,12 +152,12 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 				"sqldump.queries.runqueries": "false",
 				"sqldump.queries.grabcolsinfofrommetadata": "true",
 				"sqldump.queries": "q1",
-				"sqldump.query.q1.schemaname": document.getElementById('schema').value,
-				"sqldump.query.q1.name": document.getElementById('name').value,
+				"sqldump.query.q1.schemaname": schema,
+				"sqldump.query.q1.name": name,
 				"sqldump.query.q1.sql": editor.getValue(),
 				"sqldump.query.q1.remarks": document.getElementById('remarks').value,
 				"queryon.qon-queries.action": "write",
-				"queryon.qon-queries.querynames": document.getElementById('name').value,
+				"queryon.qon-queries.querynames": name,
 				"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
 				"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
 			},
@@ -164,9 +167,10 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		request.done(function(data) {
 			console.log(data);
 			closeMessages('messages');
-			infoMessage('query '+document.getElementById('name').value+' sucessfully saved');
+			infoMessage('query '+name+' sucessfully saved');
 			//XXX: reload query after save?
 			validateEditComponents();
+			history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
