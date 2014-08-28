@@ -75,6 +75,10 @@ body {
 	padding: 5px;
 }
 
+#navbar-prop, #buttons, #graphbuttons {
+	display: none;
+}
+
 </style>
 </head>
 <body onload="javascript:init('q','objects', writeOptions);updateUI();">
@@ -134,7 +138,8 @@ body {
 		
 		function onQueryChanged() {
 			loadRelation('objects', 'parameters', 'content');
-			//document.getElementById('navbar-prop').style.display = 'initial';
+			document.getElementById('navbar-prop').style.display = 'initial';
+			document.getElementById('buttons').style.display = 'initial';
 		}
 		
 		function updateUI() {
@@ -290,6 +295,7 @@ body {
 				console.log("#nodes = "+s.graph.nodes().length+" ; #edges = "+s.graph.edges().length);
 				// Finally, let's ask our sigma instance to refresh:
 				s.refresh();
+				document.getElementById('graphbuttons').style.display = 'initial';
 			})
 			.fail(function() {
 				showErrorMessages('messages', jqxhr.responseText);
