@@ -130,13 +130,12 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		var name = document.getElementById('name').value;
 		
 		var request = $.ajax({
-			//url : processorUrl+"/SQLQueries",
-			url : processorUrl+"/SQLQueries,queryon.processor.QOnQueries",
+			url : processorUrl+"/queryon.processor.QOnQueries",
 			type : "POST",
 			data : {
-				"sqldump.queries.addtomodel": "true",
+				/*"sqldump.queries.addtomodel": "true",
 				"sqldump.queries.runqueries": "false",
-				"sqldump.queries.grabcolsinfofrommetadata": "true",
+				"sqldump.queries.grabcolsinfofrommetadata": "true",*/
 				"sqldump.queries": "q1",
 				"sqldump.query.q1.schemaname": schema,
 				"sqldump.query.q1.name": name,

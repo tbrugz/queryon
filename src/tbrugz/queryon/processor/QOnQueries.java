@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,11 +15,11 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.Utils;
 
@@ -27,7 +28,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX add audit table (inserts, updates & deletes on table qon_queries)?
  * TODO: saving with 'SQLQueries+QOnQueries' may create inconsistencies when exception occurs in 2nd (QOnQueries) processor (can't rollback 1st processor actions)
  */
-public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
+public class QOnQueries extends SQLQueries {
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
 	
@@ -46,13 +47,17 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";
 	
 	public void process() {
+		Set<View> origViews = new HashSet<View>();
+		origViews.addAll(model.getViews());
+		
 		try {
 			String action = prop.getProperty(PROP_PREFIX+SUFFIX_ACTION, ACTION_READ);
 			if(ACTION_READ.equals(action)) {
 				readFromDatabase();
 			}
 			else if(ACTION_WRITE.equals(action)) {
-				//XXX: call SQLQueries processor before writeToDatabase() ?
+				//XXXdone: call SQLQueries processor before writeToDatabase() ?
+				addQueriesFromProperties();
 				writeToDatabase();
 			}
 			else if(ACTION_REMOVE.equals(action)) {
@@ -62,6 +67,8 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 				throw new ProcessingException("unknown action: "+action);
 			}
 		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
+			model.getViews().clear();
+			model.getViews().addAll(origViews);
 			try {
 				conn.rollback();
 			} catch (SQLException sqle) {
@@ -102,7 +109,7 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 			//		/*List<String> params*/ null,
 			//		/*String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend*/ null, null, null);
 			
-			count += addQ2M(schema, queryName, stinn, query, remarks);
+			count += addQueryFromDB(schema, queryName, stinn, query, remarks);
 			}
 			catch(SQLException e) {
 				log.warn("error reading query '"+queryName+"': "+e);
@@ -112,7 +119,7 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 		log.info("QOn processed [added/replaced "+count+" queries]");
 	}
 	
-	int addQ2M(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks) {
+	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks) {
 		Query query = new Query();
 		query.setSchemaName(schemaName);
 		query.setName(queryName);
@@ -163,6 +170,15 @@ public class QOnQueries extends AbstractSQLProc { //extends SQLQueries?
 
 		boolean added = model.getViews().add(query);
 		return added?1:0;
+	}
+	
+	void addQueriesFromProperties() {
+		//-- running SQLQueries...
+		prop.setProperty(SQLQueries.PROP_QUERIES_ADD_TO_MODEL, "true");
+		prop.setProperty(SQLQueries.PROP_QUERIES_RUN, "false");
+		prop.setProperty(SQLQueries.PROP_QUERIES_GRABCOLSINFOFROMMETADATA, "true");
+		super.process();
+		//------ end SQLQueries...
 	}
 
 	/*
