@@ -138,7 +138,7 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	
 	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
 	//messages.innerHTML = 'rows = '+numOfRows+' ; time in millis: server = '+(completedTimeMilis-startTimeMilis)+' ; render = '+(renderedTimeMilis-completedTimeMilis)
-	messages.innerHTML = 'rows = '+numOfRows+' ; time: = '+(completedTimeMilis-startTimeMilis)+'ms '
+	messages.innerHTML = 'rows = '+numOfRows+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
 		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 }
 
