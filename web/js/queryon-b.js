@@ -6,7 +6,7 @@ var relationsHash = {};
 function init(url, containerId, callback) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
-	$('#'+containerId).append('<option value="" selected disabled>select object</option>');
+	$('#'+containerId).append('<option value="" selected>select object</option>');
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
 		url: baseUrl+'/relation.json',
@@ -40,7 +40,7 @@ function writeRelations(containerId, relations) {
 function loadRelation(selectId, parametersId, containerId) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
-	var params = relationsHash[id].parameterCount;
+	var params = relationsHash[id] ? relationsHash[id].parameterCount : null;
 	console.log('selected: '+id+' ; params: '+params);
 	if(params==null || params=="") {
 		params = 0;

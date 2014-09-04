@@ -32,9 +32,33 @@
 		}
 	});
 	
+	function onLoad() {
+		//init('q','objects');
+		init(queryOnUrl,'objects', function(containerId, rels) {
+			writeRelations(containerId, rels); updateSelectedQueryState(); makeHrefs();
+		});
+	}
+	
+	function updateSelectedQueryState() {
+		var hash = window.location.hash;
+		if(hash.indexOf('#')==0) {
+			hash = hash.substring(1);
+			var parts = hash.split('/');
+			var select = document.getElementById('objects');
+			for(var i = 0;i<select.length;i++) {
+				if(select.options[i].value==parts[0]) {
+					select.options[i].selected = true;
+					onQueryChanged();
+					//updateNavBar();
+					break;
+				}
+			}
+		}
+	}
+	
 	function onQueryChanged() {
 		loadRelation('objects', 'parameters', 'content');
-		document.getElementById('navbar-prop').style.display = 'initial';
+		updateNavBar();
 		
 		//cleaning 'order'
 		document.getElementById('order').value = '';
@@ -42,10 +66,33 @@
 		makeHrefs();
 		
 		//updateUI();
+		updateState();
 	}
 	
 	function onParameterChange(i) {
 		makeHrefs();
+		updateState();
+	}
+	
+	function updateState() {
+		//replace href
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		history.replaceState(null, null, "#"+id);
+		////var hash = id!="" ? "#"+id : "";
+		////history.replaceState(null, null, hash);
+		//var state = id+getParameters();
+		//history.replaceState(null, null, "#"+state);
+	}
+
+	function updateNavBar() {
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		var display = 'initial';
+		if(id=="") {
+			display = 'none';
+		}
+		document.getElementById('navbar-prop').style.display = display;
 	}
 	
 	function makeHrefs() {
@@ -354,7 +401,7 @@
 	
 	</style>
 </head>
-<body onload="javascript:init('q','objects');makeHrefs();">
+<body onload="onLoad();">
 
 <div id="nav" class="navbar">
 	<span id="logo">QueryOn</span>
