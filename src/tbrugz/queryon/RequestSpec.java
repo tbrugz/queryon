@@ -31,6 +31,7 @@ public class RequestSpec {
 	final List<String> params = new ArrayList<String>();
 	final String outputTypeStr;
 	final DumpSyntax outputSyntax;
+	final boolean distinct;
 	
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
@@ -143,6 +144,8 @@ public class RequestSpec {
 		if(fields!=null) {
 			columns.addAll(Arrays.asList(fields.split(",")));
 		}
+		
+		distinct = req.getParameter("distinct")!=null;
 		
 		String order = req.getParameter("order");
 		if(order!=null) {

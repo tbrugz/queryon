@@ -254,6 +254,9 @@ public class SQL {
 				log.warn("no valid column specified. defaulting to 'all'");
 			}
 		}
+		if(reqspec.distinct) {
+			columns = "distinct "+columns;
+		}
 		return columns;
 	}
 	
