@@ -9,6 +9,7 @@
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script src="js/filter.js"></script>
 	<script type="text/javascript">
 	var queryOnUrl = '/queryon/q';
 	var qonEditorUrl = 'qon-editor.jsp';
@@ -170,6 +171,11 @@
 		document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
 	}
 	
+	function updateFromFilters() {
+		makeHrefs();
+	}
+
+	/*
 	function addFilter() {
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
@@ -209,6 +215,7 @@
 		makeHrefs();
 		//updateUI();
 	}
+	*/
 	
 	function sortBy(colName, direction) {
 		var str = direction==2?'-':'';

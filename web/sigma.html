@@ -6,6 +6,7 @@
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script src="js/filter.js"></script>
 	<script src="js/sigma/sigma.min.js"></script>
 	<script src="js/sigma/plugins/sigma.layout.forceAtlas2.min.js"></script>
 	<script src="js/sigma/plugins/sigma.plugins.dragNodes.min.js"></script>
@@ -146,7 +147,11 @@ body {
 			document.getElementById('container').style.top = (document.getElementById('nav').offsetHeight+10) + 'px';
 		}
 		
-		function addFilter() {
+		function updateFromFilters() {
+			updateUI();
+		}
+		
+		/*function addFilter() {
 			var select = document.getElementById('objects');
 			var id = select.options[select.selectedIndex].value;
 			if(!id) {
@@ -180,7 +185,7 @@ body {
 			filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"'/>"
 				+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);'></label>";
 			updateUI();
-		}
+		}*/
 		
 
 		// ======================== sigma-related functions ========================
