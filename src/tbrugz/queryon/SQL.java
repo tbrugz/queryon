@@ -23,13 +23,13 @@ public class SQL {
 
 	static final Log log = LogFactory.getLog(SQL.class);
 	
-	public static final String PARAM_WHERE_CLAUSE = "[where-clause]";
-	public static final String PARAM_FILTER_CLAUSE = "[filter-clause]";
-	public static final String PARAM_PROJECTION_CLAUSE = "[projection-clause]";
+	public static final String PARAM_WHERE_CLAUSE = "$where_clause";
+	public static final String PARAM_FILTER_CLAUSE = "$filter_clause";
+	public static final String PARAM_PROJECTION_CLAUSE = "$projection_clause";
 	public static final String PARAM_UPDATE_SET_CLAUSE = "[update-set-clause]";
 	public static final String PARAM_INSERT_COLUMNS_CLAUSE = "[insert-columns-clause]";
 	public static final String PARAM_INSERT_VALUES_CLAUSE = "[insert-values-clause]";
-	public static final String PARAM_ORDER_CLAUSE = "[order-clause]";
+	public static final String PARAM_ORDER_CLAUSE = "$order_clause";
 	//XXX add limit/offset-clause?
 
 	static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
