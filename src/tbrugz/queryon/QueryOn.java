@@ -504,13 +504,13 @@ public class QueryOn extends HttpServlet {
 		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
 		//appXtraConstraints(relation, sql, reqspec, req);
 		
+		//XXX: apply order or projection first? order last seems more natural...
+		
+		// projection (select columns) - also adds 'distinct' if requested
+		sql.applyProjection(reqspec, relation);
+
 		// order by
 		sql.applyOrder(reqspec);
-
-		// projection (select columns)
-		sql.applyProjection(reqspec, relation);
-		
-		//XXX: option to add distinct?
 
 		//limit-offset
 		//how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL

@@ -128,7 +128,11 @@ public class SQL {
 		if(!sql.contains(PARAM_WHERE_CLAUSE) && !sql.contains(PARAM_FILTER_CLAUSE)) {
 			sqlFilter = " " + PARAM_WHERE_CLAUSE;
 		}
-		sql = "select "+columns+" from (\n"+sql+"\n)"+sqlFilter;
+		String sqlOrder = "";
+		if(!sql.contains(PARAM_ORDER_CLAUSE)) {
+			sqlOrder = " " + PARAM_ORDER_CLAUSE;
+		}
+		sql = "select "+columns+" from (\n"+sql+"\n)"+sqlFilter+sqlOrder;
 	}
 	
 	public void applyOrder(RequestSpec reqspec) {
@@ -222,14 +226,14 @@ public class SQL {
 			sql = sql.replace(PARAM_PROJECTION_CLAUSE, columns);
 		}
 		else {
-			if(relation instanceof Query) {
-				if(reqspec.columns.size()>0) {
-					addProjection(columns);
+			if(reqspec.columns.size()>0 || reqspec.distinct) {
+				addProjection(columns);
+				if(!(relation instanceof Query)) {
+					log.warn("relation of type "+relation.getRelationType()+" (not Query) with no "+PARAM_PROJECTION_CLAUSE+" ?");
 				}
 			}
 			else {
-				log.warn("relation of type "+relation.getRelationType()+" (not Query) with no "+PARAM_PROJECTION_CLAUSE+" ?");
-				addProjection(columns);
+				// no columns selected...
 			}
 		}
 	}
