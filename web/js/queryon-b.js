@@ -224,3 +224,37 @@ function getColumnsFromContainer(containerId) {
 	}
 	return cols;
 }
+
+function getValuesFromColumn(containerId, columnName) {
+	var cols = getColumnsFromContainer(containerId)
+	var colPos = cols.indexOf(columnName);
+	if(colPos==-1) {
+		console.log("column "+columnName+" not found");
+		return [];
+	}
+	
+	var content = document.getElementById(containerId);
+	var rows = content.getElementsByTagName('tr');
+	
+	//console.log(colPos);
+	//var colValues = new Set();
+	var colValues = [];
+	
+	for(var i=0;i<rows.length;i++) {
+		var elem = rows[i];
+		/*if(!elem.children[colPos]) {
+			console.log("column "+columnName)
+			continue;
+		}*/
+		if(elem.children[colPos].tagName!="TD") continue;
+		
+		var value = elem.children[colPos].innerHTML;
+		//colValues.add(value);
+		if(colValues.indexOf(value)==-1) {
+			colValues.push(value);
+		}
+	}
+	
+	//console.log(colValues);
+	return colValues;
+}

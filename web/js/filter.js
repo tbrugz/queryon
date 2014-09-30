@@ -1,4 +1,20 @@
 
+var bhvalues = null;
+
+if(typeof Bloodhound != 'undefined') {
+	bhvalues = new Bloodhound({
+		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
+		queryTokenizer : Bloodhound.tokenizers.whitespace,
+		local: $.map([], function(str) {
+			return {
+				value : str
+			};
+		})
+	});
+	// kicks off the loading/processing of `local` and `prefetch`
+	bhvalues.initialize();
+}
+
 function addFilter() {
 	var select = document.getElementById('objects');
 	var id = select.options[select.selectedIndex].value;
@@ -25,11 +41,58 @@ function addFilter() {
 		+ "<input type='button' value='add' onclick='addFilterIn();closeFilterDialog();'/>"
 		+ "<input type='button' value='X' class='simplebutton' onclick='closeFilterDialog();'/></div>";
 	//dialog.style.display = 'none';
+	refreshAutocomplete();
 	
 	updateUI();
 }
 
 function refreshAutocomplete() {
+	if(bhvalues==null) { return; }
+	var sel = document.getElementById('fin-column');
+	var columnName = sel.options[sel.selectedIndex].value;
+	console.log('autocomplete: col='+columnName);
+	
+	// constructs the suggestion engine
+	/*var bhvalues = new Bloodhound({
+		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
+		queryTokenizer : Bloodhound.tokenizers.whitespace,
+		// `states` is an array of state names defined in "The Basics"
+		local : $.map(getValuesFromColumn('content', columnName), function(str) {
+			return {
+				value : str
+			};
+		})
+	});*/
+	
+	bhvalues.local = $.map(getValuesFromColumn('content', columnName), function(str) {
+		return {
+			value : str
+		};
+	});
+
+	// kicks off the loading/processing of `local` and `prefetch`
+	bhvalues.clear();
+	bhvalues.initialize(true);
+
+	if($('#fin-value').typeahead) {
+		$('#fin-value').typeahead('destroy');
+	}
+
+	$('#fin-value').typeahead({
+		hint : true,
+		highlight : true,
+		minLength : 1
+	}, {
+		name : columnName.replace(/([^a-zA-Z0-9])/g,""),
+		displayKey : 'value',
+		// `ttAdapter` wraps the suggestion engine in an adapter that
+		// is compatible with the typeahead jQuery plugin
+		source : bhvalues.ttAdapter()
+	});
+
+	// removing styles added by typeahead
+	$('#fin-value').css('vertical-align','');
+	$('#fin-value').css('background-color','');
 }
 
 function addFilterIn() {
@@ -44,6 +107,9 @@ function addFilterIn() {
 }
 
 function closeFilterDialog() {
+	if(bhvalues!=null) {
+		$('#fin-value').typeahead('destroy');
+	}
 	document.getElementById('dialog').innerHTML = '';
 	document.getElementById('dialog-container').style.display = 'none';
 }
