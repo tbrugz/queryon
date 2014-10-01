@@ -1,7 +1,16 @@
+
 body {
 	margin: 0 auto;
 	font: normal 10pt Tahoma, Geneva, sans-serif; 
 	background-color: #ddd;
+}
+table {
+	border-spacing: 0;
+	/* border-collapse: collapse; */
+}
+table tr:hover td {
+	background-color: #efefef; /* !important */
+	/*opacity: 0.4; /* CSS3 */
 }
 td {
 	border: 1px solid #bbb;

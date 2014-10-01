@@ -10,6 +10,15 @@ h1,h2,h3 {
 	background-color: #fff;*/
 }
 
+/* table, td, th styles already on table.css - table.css takes precedence */
+table {
+	border-spacing: 0;
+	/* border-collapse: collapse; */
+}
+table tr:hover td {
+	background-color: #efefef; /* !important */
+	/*opacity: 0.4; /* CSS3 */
+}
 td {
 	border: 1px solid #bbb;
 }
@@ -17,6 +26,7 @@ th {
 	border: 1px solid #bbb;
 	background-color: #fff;
 }
+
 .tdnull {
 	background-color: #ddd;
 }
@@ -98,7 +108,8 @@ input.mainaction {
 
 .tt-suggestion.tt-cursor {
 	color: #fff;
-	background-color: #0097cf;
+	/* background-color: #0097cf; */
+	background-color: rgb(126, 198, 116);
 }
 
 .tt-suggestion p {
