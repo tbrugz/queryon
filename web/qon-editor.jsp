@@ -66,7 +66,9 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			dataType : "html"
 		});
 		
+		btnActionStart('btnRun');
 		request.done(function(data) {
+			btnActionStop('btnRun');
 			var completedTimeMilis = Date.now();
 			//XXX option to handle different response types (html, json, csv, xml)?
 			//'close' style:: position: relative, float: right?
@@ -78,6 +80,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('btnRun');
 			console.log(jqXHR);
 			errorMessage(jqXHR.responseText);
 			closeResults();
@@ -105,7 +108,9 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			dataType : "html"
 		});
 		
+		btnActionStart('btnValidate');
 		request.done(function(data) {
+			btnActionStop('btnValidate');
 			console.log('#params = '+data);
 			//var container = document.getElementById('sqlparams');
 			setParameters(data);
@@ -119,6 +124,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('btnValidate');
 			console.log(jqXHR);
 			errorMessage(jqXHR.responseText);
 			closeResults();
@@ -150,7 +156,9 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			dataType : "html"
 		});
 
+		btnActionStart('btnSave');
 		request.done(function(data) {
+			btnActionStop('btnSave');
 			console.log(data);
 			closeMessages('messages');
 			infoMessage('query '+name+' sucessfully saved');
@@ -160,6 +168,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('btnSave');
 			console.log(jqXHR);
 			errorMessage('error saving query: '+jqXHR.responseText);
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
@@ -276,6 +285,15 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	function updateUI() {
 		document.getElementById('queryResult').style.top = document.getElementById('spec').offsetHeight + 'px';
 	}
+	
+	function btnActionStart(btnId) {
+		$('#'+btnId).addClass('onaction');
+		//XXX add hourglass-like icon?
+	}
+
+	function btnActionStop(btnId) {
+		$('#'+btnId).removeClass('onaction');
+	}
 </script>
 <script type="text/javascript">
 	$(document).jkey('f8',function(){
@@ -370,9 +388,9 @@ if(remarks==null) { remarks = ""; }
 	</div>
 	
 	<div id="button-container">
-		<input type="button" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
-		<input type="button" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
-		<input type="button" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
+		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
+		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
+		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
 	</div>
 </div>
 
