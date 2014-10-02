@@ -30,6 +30,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	<!-- see: https://github.com/oscargodson/jkey -->
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
 	<script type="text/javascript" src="js/http-post.js"></script>
+	<script type="text/javascript" src="js/qon-util.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
@@ -315,15 +316,6 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	
 	function updateUI() {
 		document.getElementById('queryResult').style.top = document.getElementById('spec').offsetHeight + 'px';
-	}
-	
-	function btnActionStart(btnId) {
-		$('#'+btnId).addClass('onaction');
-		//XXX add hourglass-like icon?
-	}
-
-	function btnActionStop(btnId) {
-		$('#'+btnId).removeClass('onaction');
 	}
 </script>
 <script type="text/javascript">

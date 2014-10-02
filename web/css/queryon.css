@@ -89,6 +89,10 @@ input.mainaction {
 	background-color: rgb(146, 218, 136);
 }
 
+input.onaction {
+	background-color: #f90;
+}
+
 /* typeahead */
 
 .tt-dropdown-menu {

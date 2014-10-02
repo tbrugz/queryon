@@ -78,10 +78,12 @@ function doRun(selectId, containerId, messagesId) {
 	//console.log('query-string: '+queryString);
 	console.log('url: '+baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString);
 	
+	btnActionStart('go-button');
 	var startTimeMilis = Date.now();
 	$.ajax({
 		url: baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString,
 		success: function(data) {
+			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
@@ -89,6 +91,7 @@ function doRun(selectId, containerId, messagesId) {
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('go-button');
 			showErrorMessages(messagesId, jqXHR.responseText);
 			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 			//$('#'+messagesId).attr('class','error');
