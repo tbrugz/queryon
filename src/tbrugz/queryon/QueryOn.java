@@ -292,7 +292,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
-		log.info(">> pathInfo: "+req.getPathInfo());
+		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 		
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
@@ -383,6 +383,7 @@ public class QueryOn extends HttpServlet {
 					Query relation = getQuery(req);
 					//XXXxx: validate first & return number of parameters?
 					relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway
+					resp.addHeader("Content-Disposition", "attachment; filename=queryon_"+relation.getFinalName(true)+"."+reqspec.outputSyntax.getDefaultFileExtension());
 					doSelect(relation, reqspec, resp);
 				}
 				catch(SQLException e) {

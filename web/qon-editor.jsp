@@ -29,6 +29,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
+	<script type="text/javascript" src="js/http-post.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
@@ -198,6 +199,37 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		});
 	}
 	
+	function doDownload() {
+		var sqlString = editor.getSelectedText();
+		if(!sqlString) { sqlString = editor.getValue(); }
+		
+		var reqData = {
+			schema : document.getElementById('schema').value,
+			name : document.getElementById('name').value,
+			sql: sqlString,
+		};
+		
+		var params = document.querySelectorAll('.parameter');
+		console.log(params);
+		
+		for (var i = 0; i < params.length; ++i) {
+			var item = params[i];
+			reqData[item.name] = item.value;
+		}
+		
+		//var startTimeMilis = Date.now();
+		
+		btnActionStart('btnDownload');
+		post(queryOnUrl+"/QueryAny.csv", reqData, function () {
+			//console.log('downloading...'); 
+			btnActionStop('btnDownload');
+		});
+		
+		//var completedTimeMilis = Date.now();
+		//showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
+		
+	}
+
 	function setParameters(numparams) {
 		var params = document.querySelectorAll('.parameter');
 		//$("#sqlparams").html('');
@@ -215,7 +247,6 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 				item.parentNode.removeChild(item);
 			}
 		}
-	
 	}
 	
 	function validateEditComponents() {
@@ -391,11 +422,12 @@ if(remarks==null) { remarks = ""; }
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
 		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
+		<input type="button" id="btnDownload" value="download" onclick="doDownload();" title="Download CSV" style="float: right;"/>
 	</div>
+	
 </div>
 
-<div id="messages">
-</div>
+<div id="messages"></div>
 </div>
 
 <div class="container">

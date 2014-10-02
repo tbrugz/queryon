@@ -24,6 +24,7 @@ label {
 }
 #button-container {
 	display: inline-block;
+	width: 100%;
 }
 
 .closebutton {
