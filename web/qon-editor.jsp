@@ -74,6 +74,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			$("#queryResult").append(data);
 			showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
 			closeMessages('messages');
+			updateUI();
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -228,12 +229,12 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	
 	function errorMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='error'>"+message+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+		$('#messages').html("<div class='error message'>"+message+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 
 	function infoMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='info'>"+message+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+		$('#messages').html("<div class='info message'>"+message+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 	
 	function closeMessages(elemId) {
@@ -271,6 +272,10 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		messages.innerHTML = 'rows = '+numOfRows+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
 			+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	}
+	
+	function updateUI() {
+		document.getElementById('queryResult').style.top = document.getElementById('spec').offsetHeight + 'px';
+	}
 </script>
 <script type="text/javascript">
 	$(document).jkey('f8',function(){
@@ -287,7 +292,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	});
 </script>
 </head>
-<body>
+<body onload="updateUI();">
 <%!
 SchemaModel model = null;
 String schemaName = null;
@@ -338,7 +343,7 @@ if(queryName!=null) {
 	}
 }
 if(query==null || query.equals("")) {
-	query = "select * from <table>";
+	query = "select * from table";
 }
 if(schemaName==null) { schemaName = ""; }
 if(queryName==null) { queryName = ""; }

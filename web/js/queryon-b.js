@@ -176,6 +176,7 @@ function getParameters() {
 function showErrorMessages(messagesId, text) {
 	$('#'+messagesId).html(text+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','error');
+	//$('#'+messagesId).addClass('error'); //when to remove?
 	updateUI();
 }
 

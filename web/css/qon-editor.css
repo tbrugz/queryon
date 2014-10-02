@@ -72,10 +72,11 @@ a, a:visited {
 }
 
 #spec {
-	/*position: fixed;
+	position: fixed;
 	top: 0px;
 	left: 0px;
-	right: 0px;*/
+	right: 0px;
+	background-color: #ddd;
 }
 
 #button-container input[type=button] {
@@ -87,4 +88,15 @@ a, a:visited {
 	text-decoration: none;
 	border: 1px solid #999;
 	padding: 1px 9px 1px 9px;
+}
+
+#queryResult {
+	position: absolute;
+	z-index: -1;
+}
+
+.message {
+	border: 1px solid #999;
+	margin: 2px;
+	padding: 2px;
 }
