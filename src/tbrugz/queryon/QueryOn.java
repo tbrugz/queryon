@@ -383,7 +383,9 @@ public class QueryOn extends HttpServlet {
 					Query relation = getQuery(req);
 					//XXXxx: validate first & return number of parameters?
 					relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway
-					resp.addHeader("Content-Disposition", "attachment; filename=queryon_"+relation.getFinalName(true)+"."+reqspec.outputSyntax.getDefaultFileExtension());
+					resp.addHeader("Content-Disposition", "attachment; filename=queryon_"
+						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
+						+"."+reqspec.outputSyntax.getDefaultFileExtension());
 					doSelect(relation, reqspec, resp);
 				}
 				catch(SQLException e) {

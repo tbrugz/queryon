@@ -74,7 +74,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			var completedTimeMilis = Date.now();
 			//XXX option to handle different response types (html, json, csv, xml)?
 			//'close' style:: position: relative, float: right?
-			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X'/>");
+			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
 			$("#queryResult").append(data);
 			showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
 			closeMessages('messages');
