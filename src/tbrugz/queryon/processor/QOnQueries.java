@@ -67,17 +67,25 @@ public class QOnQueries extends SQLQueries {
 				throw new ProcessingException("unknown action: "+action);
 			}
 		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
-			model.getViews().clear();
-			model.getViews().addAll(origViews);
+			modelRollback(origViews);
 			try {
 				conn.rollback();
 			} catch (SQLException sqle) {
 				log.warn(sqle);
 			}
 			throw e;
+		} catch (ProcessingException pe) {
+			modelRollback(origViews);
+			throw pe;
 		} catch (SQLException e) {
+			modelRollback(origViews);
 			throw new RuntimeException(e);
 		}
+	}
+	
+	void modelRollback(Set<View> origViews) {
+		model.getViews().clear();
+		model.getViews().addAll(origViews);
 	}
 	
 	void readFromDatabase() throws SQLException {

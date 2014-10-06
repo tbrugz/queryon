@@ -165,7 +165,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			closeMessages('messages');
 			infoMessage('query '+name+' sucessfully saved');
 			//XXX: reload query after save?
-			validateEditComponents();
+			validateEditComponents(true);
 			history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
 		});
 
@@ -192,6 +192,8 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			console.log(data);
 			closeMessages('messages');
 			infoMessage('query '+document.getElementById('name').value+' sucessfully removed');
+			validateEditComponents(false);
+			history.replaceState(null, null, "qon-editor.jsp");
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -250,19 +252,21 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		}
 	}
 	
-	function validateEditComponents() {
+	function validateEditComponents(saved) {
 		var qname = document.getElementById('name').value;
 		//var removebutton = document.getElementById('removebutton');
 		//var reloadbutton = document.getElementById('url-reload');
 		var container = document.getElementById('actions-container');
 		
-		if((qname != null) && (qname != '')) {
+		if(saved) { // }(qname != null) && (qname != '')) {
 			document.getElementById('schema').disabled = true;
 			document.getElementById('name').disabled = true;
 			container.style.display = 'inline';
 			isQuerySaved = true;
 		}
 		else {
+			document.getElementById('schema').disabled = false;
+			document.getElementById('name').disabled = false;
 			container.style.display = 'none';
 			isQuerySaved = false;
 		}
@@ -341,6 +345,7 @@ String queryName = null;
 String query = "";
 String remarks = "";
 int numOfParameters = 0;
+boolean queryLoaded = false;
 %>
 
 <%
@@ -350,6 +355,8 @@ queryName = request.getParameter("name");
 query = "";
 remarks = "";
 numOfParameters = 0;
+queryLoaded = false;
+
 if(queryName!=null) {
 	View v = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getViews(), schemaName, queryName);
 	if(v == null) {
@@ -367,6 +374,7 @@ if(queryName!=null) {
 		
 		schemaName = v.getSchemaName();
 		remarks = v.getRemarks();
+		queryLoaded = true;
 		if(v.getParameterCount()!=null) {
 			numOfParameters = v.getParameterCount();
 		}
@@ -445,7 +453,7 @@ if(remarks==null) { remarks = ""; }
 </script>
 <script type="text/javascript">
 	makeHrefs();
-	validateEditComponents();
+	validateEditComponents(<%= queryLoaded %>);
 </script>
 
 </body>
