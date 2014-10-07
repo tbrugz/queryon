@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
@@ -386,7 +388,11 @@ public class QueryOn extends HttpServlet {
 					resp.addHeader("Content-Disposition", "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
-					doSelect(relation, reqspec, resp);
+					
+					boolean specialQueryExecuted = trySpecialQuery(relation, reqspec, resp);
+					if(!specialQueryExecuted) {
+						doSelect(relation, reqspec, resp);
+					}
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage());
@@ -1067,5 +1073,59 @@ public class QueryOn extends HttpServlet {
 			count++;
 		}
 		ds.dumpFooter(count, resp.getWriter());
+	}
+	
+	/*
+	 * possible syntaxes for commands/special queries
+	 * - desc ; desc <table> //oracle-like
+	 * - show catalogs; schemas; tables; columns; //mysql-like, h2-like - http://www.h2database.com/html/grammar.html#show
+	 * - metadata.gettables(<schema>); metadata.getcolumns(<table>); //"jdbc"
+	 * - \d+ <table> //postgresql
+	 * - !dbinfo ; !describe ; !tables ; !columns <table> ; !exportedkeys ; !importedkeys ; !indexes ; !meta ; !primarykeys ; // sqlline - http://sqlline.sourceforge.net/
+	 */
+	static final Pattern CMD_DESCRIBE_COLUMNS = Pattern.compile("\\s*desc\\s+([\\w\\.]+)\\s*", Pattern.CASE_INSENSITIVE);
+	static final Pattern CMD_DESCRIBE_TABLES  = Pattern.compile("\\s*desc\\s*", Pattern.CASE_INSENSITIVE);
+	
+	boolean trySpecialQuery(Query relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		Connection conn = null;
+		ResultSet rs = null;
+		String sql = relation.getQuery();
+		Pattern matchedPattern = null;
+		Matcher m = null;
+
+		//TODO: getCatalogs() ; getSchemas() ; 
+		//desc (list) tables
+		m = CMD_DESCRIBE_TABLES.matcher(sql);
+		if(m.matches()) {
+			//TODO: filter by schema...
+			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+			rs = conn.getMetaData().getTables(null, null, null, null);
+			matchedPattern = CMD_DESCRIBE_TABLES;
+		}
+		//desc columns
+		m = CMD_DESCRIBE_COLUMNS.matcher(sql);
+		if(m.matches()) {
+			String name = m.group(1);
+			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+			rs = conn.getMetaData().getColumns(null, null, name.toUpperCase(), null);
+			matchedPattern = CMD_DESCRIBE_COLUMNS;
+		}
+
+		if(rs!=null) {
+			try {
+				dumpResultSet(rs, reqspec, relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ false, resp);
+			}
+			catch(SQLException e) {
+				conn.rollback();
+				log.warn("exception in 'trySpecialQuery'/"+matchedPattern+": "+e+" ; sql:\n"+sql);
+				throw e;
+			}
+			finally {
+				conn.close();
+			}
+			return true;
+		}
+		
+		return false;
 	}
 }

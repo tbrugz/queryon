@@ -170,9 +170,9 @@ public class ProcessorServlet extends HttpServlet {
 			pc.setConnection(conn);
 		}
 		
+		Writer w = null;
+		OutputStream os = null;
 		try {
-			Writer w = null;
-			OutputStream os = null;
 			String mimeType = pc.getMimeType();
 			if(resp!=null) {
 				if(pc.acceptsOutputWriter()) {
@@ -190,15 +190,14 @@ public class ProcessorServlet extends HttpServlet {
 			}
 			
 			pc.process();
-			
+		}
+		finally {
 			if(w!=null) {
 				w.flush();
 			}
 			if(os!=null) {
 				os.flush();
 			}
-		}
-		finally {
 			if(conn!=null) { conn.close(); }
 		}
 	}
