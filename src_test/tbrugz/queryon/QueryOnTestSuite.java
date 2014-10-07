@@ -8,12 +8,14 @@ import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.queryon.r2rml.DirectMappingTest;
 import tbrugz.queryon.resultset.ResultSetDecoratorsTest;
 import tbrugz.queryon.resultset.ResultSetTest;
+import tbrugz.queryon.sqlcmd.SqlCommandTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
 	DirectMappingTest.class,
 	ResultSetDecoratorsTest.class,
 	ResultSetTest.class,
+	SqlCommandTest.class,
 	WinstoneAndH2HttpRequestTest.class,
 })
 public class QueryOnTestSuite {

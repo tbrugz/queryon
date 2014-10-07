@@ -8,23 +8,17 @@ import java.util.regex.Pattern;
 
 import tbrugz.queryon.SqlCommand;
 
-public class ShowColumns implements SqlCommand {
+public class ShowSchemas implements SqlCommand {
 
-	static final Pattern CMD = Pattern.compile("\\s*\\$columns(\\s+([\\w\\.]+))?\\s*", Pattern.CASE_INSENSITIVE);
-	
-	String name;
+	static final Pattern CMD  = Pattern.compile("\\s*\\$schemas\\s*", Pattern.CASE_INSENSITIVE);
 	
 	public boolean matches(String sql) {
 		Matcher m = CMD.matcher(sql);
-		if(m.matches()) {
-			name = m.group(2);
-			return true;
-		}
-		return false;
+		return m.matches();
 	}
 
 	public ResultSet run(Connection conn) throws SQLException {
-		return conn.getMetaData().getColumns(null, null, name!=null?name.toUpperCase():null, null);
+		return conn.getMetaData().getSchemas();
 	}
 
 }

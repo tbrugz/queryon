@@ -33,6 +33,7 @@ import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
 import tbrugz.queryon.sqlcmd.ShowColumns;
+import tbrugz.queryon.sqlcmd.ShowSchemas;
 import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DumpSyntax;
@@ -1078,27 +1079,31 @@ public class QueryOn extends HttpServlet {
 	/*
 	 * possible syntaxes for commands/special queries
 	 * - desc ; desc <table> //oracle-like
-	 * - show catalogs; schemas; tables; columns; //mysql-like, h2-like - http://www.h2database.com/html/grammar.html#show
+	 * - show catalogs; schemas; tables; columns; //mysql-like - http://dev.mysql.com/doc/refman/5.0/en/show.html;
+	 *   h2-like - http://www.h2database.com/html/grammar.html#show
 	 * - metadata.gettables(<schema>); metadata.getcolumns(<table>); //"jdbc"
 	 * - \d+ <table> //postgresql
-	 * - !dbinfo ; !describe ; !tables ; !columns <table> ; !exportedkeys ; !importedkeys ; !indexes ; !meta ; !primarykeys ; // sqlline - http://sqlline.sourceforge.net/
+	 * - !dbinfo ; !describe ; !tables ; !columns <table> ; !exportedkeys ; !importedkeys ; !indexes ; !metadata ; !primarykeys, !procedures ; // sqlline - http://sqlline.sourceforge.net/
+	 * - $showtables [<xxx>] ; $showcolumns <xxx> ; $tables [<xxx>] ; $columns <xxx> ; $schemas
+	 * 
+	 * XXX: getCatalogs()? exportedkeys, importedkeys, indexes, primarykeys
 	 */
-	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowTables(), new ShowColumns() };
+	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowSchemas(), new ShowTables(), new ShowColumns() };
 	
 	boolean trySqlCommand(Query relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		String sql = relation.getQuery();
 
-		//TODO: getCatalogs() ; getSchemas() ;
 		for(SqlCommand cmd: cmds) {
 			if(cmd.matches(sql)) {
 				Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 				ResultSet rs = cmd.run(conn);
 				try {
-					dumpResultSet(rs, reqspec, relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ false, resp);
+					//XXX: mayApplyLimitOffset should be true or false?
+					dumpResultSet(rs, reqspec, relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ true, resp);
 				}
 				catch(SQLException e) {
 					conn.rollback();
-					log.warn("exception in 'trySpecialQuery'/"+cmd+": "+e+" ; sql:\n"+sql);
+					log.warn("exception in 'trySqlCommand'/"+cmd.getClass().getSimpleName()+": "+e+" ; sql:\n"+sql);
 					throw e;
 				}
 				finally {

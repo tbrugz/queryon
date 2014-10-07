@@ -10,15 +10,21 @@ import tbrugz.queryon.SqlCommand;
 
 public class ShowTables implements SqlCommand {
 
-	static final Pattern CMD_DESCRIBE_TABLES  = Pattern.compile("\\s*desc\\s*", Pattern.CASE_INSENSITIVE);
+	static final Pattern CMD  = Pattern.compile("\\s*\\$tables(\\s+([\\w\\.]+))?\\s*", Pattern.CASE_INSENSITIVE);
+	
+	String schema = null;
 	
 	public boolean matches(String sql) {
-		Matcher m = CMD_DESCRIBE_TABLES.matcher(sql);
-		return m.matches();
+		Matcher m = CMD.matcher(sql);
+		if(m.matches()) {
+			schema = m.group(2);
+			return true;
+		}
+		return false;
 	}
 
 	public ResultSet run(Connection conn) throws SQLException {
-		return conn.getMetaData().getTables(null, null, null, null);
+		return conn.getMetaData().getTables(null, schema!=null?schema.toUpperCase():null, null, null);
 	}
 
 }

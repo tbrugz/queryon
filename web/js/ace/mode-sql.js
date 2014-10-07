@@ -16,6 +16,7 @@ var SqlHighlightRules = function() {
     var builtinConstants = (
         "true|false|null"
         + "|$where_clause|$filter_clause|$projection_clause|$order_clause" //see: tbrugz.queryon.SQL class
+        + "|$schemas|$tables|$columns" //see: package tbrugz.queryon.sqlcmd
     );
 
     var builtinFunctions = (
