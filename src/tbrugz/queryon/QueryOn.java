@@ -16,8 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
@@ -34,6 +32,8 @@ import org.apache.shiro.subject.Subject;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
+import tbrugz.queryon.sqlcmd.ShowColumns;
+import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
@@ -389,8 +389,8 @@ public class QueryOn extends HttpServlet {
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
 					
-					boolean specialQueryExecuted = trySpecialQuery(relation, reqspec, resp);
-					if(!specialQueryExecuted) {
+					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
+					if(!sqlCommandExecuted) {
 						doSelect(relation, reqspec, resp);
 					}
 				}
@@ -1083,47 +1083,29 @@ public class QueryOn extends HttpServlet {
 	 * - \d+ <table> //postgresql
 	 * - !dbinfo ; !describe ; !tables ; !columns <table> ; !exportedkeys ; !importedkeys ; !indexes ; !meta ; !primarykeys ; // sqlline - http://sqlline.sourceforge.net/
 	 */
-	static final Pattern CMD_DESCRIBE_COLUMNS = Pattern.compile("\\s*desc\\s+([\\w\\.]+)\\s*", Pattern.CASE_INSENSITIVE);
-	static final Pattern CMD_DESCRIBE_TABLES  = Pattern.compile("\\s*desc\\s*", Pattern.CASE_INSENSITIVE);
+	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowTables(), new ShowColumns() };
 	
-	boolean trySpecialQuery(Query relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		Connection conn = null;
-		ResultSet rs = null;
+	boolean trySqlCommand(Query relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		String sql = relation.getQuery();
-		Pattern matchedPattern = null;
-		Matcher m = null;
 
-		//TODO: getCatalogs() ; getSchemas() ; 
-		//desc (list) tables
-		m = CMD_DESCRIBE_TABLES.matcher(sql);
-		if(m.matches()) {
-			//TODO: filter by schema...
-			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
-			rs = conn.getMetaData().getTables(null, null, null, null);
-			matchedPattern = CMD_DESCRIBE_TABLES;
-		}
-		//desc columns
-		m = CMD_DESCRIBE_COLUMNS.matcher(sql);
-		if(m.matches()) {
-			String name = m.group(1);
-			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
-			rs = conn.getMetaData().getColumns(null, null, name.toUpperCase(), null);
-			matchedPattern = CMD_DESCRIBE_COLUMNS;
-		}
-
-		if(rs!=null) {
-			try {
-				dumpResultSet(rs, reqspec, relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ false, resp);
+		//TODO: getCatalogs() ; getSchemas() ;
+		for(SqlCommand cmd: cmds) {
+			if(cmd.matches(sql)) {
+				Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+				ResultSet rs = cmd.run(conn);
+				try {
+					dumpResultSet(rs, reqspec, relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ false, resp);
+				}
+				catch(SQLException e) {
+					conn.rollback();
+					log.warn("exception in 'trySpecialQuery'/"+cmd+": "+e+" ; sql:\n"+sql);
+					throw e;
+				}
+				finally {
+					conn.close();
+				}
+				return true;
 			}
-			catch(SQLException e) {
-				conn.rollback();
-				log.warn("exception in 'trySpecialQuery'/"+matchedPattern+": "+e+" ; sql:\n"+sql);
-				throw e;
-			}
-			finally {
-				conn.close();
-			}
-			return true;
 		}
 		
 		return false;
