@@ -16,6 +16,7 @@
   <!-- 
   http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
   http://blog.miloszikic.com/2010/04/maven-war-plugin-and-non-default-webapp.html
+  http://stackoverflow.com/questions/849389/how-to-read-an-external-properties-file-in-maven
   -->
   
   <properties>

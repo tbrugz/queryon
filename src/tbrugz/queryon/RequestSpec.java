@@ -33,6 +33,7 @@ public class RequestSpec {
 	final DumpSyntax outputSyntax;
 	final boolean distinct;
 	
+	// eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 	final Map<String, String> filterLike = new HashMap<String, String>();

@@ -51,7 +51,7 @@ public class ShiroUtils {
 		}
 		String permissionsStr = Arrays.asList(permissionList).toString();
 		log.warn("no permission '"+permissionsStr+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
-		throw new BadRequestException(permissionsStr+": authorization required", HttpServletResponse.SC_FORBIDDEN);
+		throw new BadRequestException("no authorization for any of "+permissionsStr, HttpServletResponse.SC_FORBIDDEN);
 	}
 	
 }
