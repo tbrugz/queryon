@@ -405,11 +405,12 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
-	<div id="actions-container">
+	<span id="actions-container">
 		<a id="url-reload" href="" title="Reload query">reload</a>
 		<a id="url-permalink" href="" target="_blank">permalink</a>
 		<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
-	</div>
+	</span>
+	<span id="username"><%= currentUser.getPrincipal() %></span>
 </div>
 
 <div id="editor"><%= DataDumpUtils.xmlEscapeText( query ) %></div>

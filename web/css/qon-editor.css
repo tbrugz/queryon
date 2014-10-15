@@ -101,3 +101,11 @@ a, a:visited {
 	margin: 2px;
 	padding: 2px;
 }
+
+#username {
+	float: right;
+	padding: 3px 5px 3px 5px;
+	background-color: #B8B5B5;
+	font-weight: bold;
+	/*margin: 2px 4px 2px 4px;*/
+}
