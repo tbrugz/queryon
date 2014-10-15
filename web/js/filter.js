@@ -99,11 +99,30 @@ function addFilterIn() {
 	var col = document.getElementById('fin-column').value;
 	var value = document.getElementById('fin-value').value;
 	var filters = document.getElementById('filters');
-	filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
-		+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);updateFromFilters();'></label>";
+	var finContainerId = "fin_"+col;
+	var finContainer = document.getElementById(finContainerId);
+	if(finContainer==null) {
+		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>in</em> (<span>"
+			+ "<span><input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
+			+ "</span>)</label>";
+	}
+	else {
+		finContainer.getElementsByTagName('span')[0].innerHTML += "<span><input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
+	}
 	updateFromFilters();
 	//makeHrefs();
 	//updateUI();
+}
+
+function removeFilter(element) {
+	var filter = element.parentNode.parentNode.parentNode;
+	element.parentNode.parentNode.removeChild(element.parentNode);
+	console.log(filter);
+	if(filter.getElementsByTagName('input').length==0) {
+		filter.parentNode.removeChild(filter);
+	}
 }
 
 function closeFilterDialog() {

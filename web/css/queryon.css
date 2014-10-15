@@ -93,6 +93,14 @@ input.onaction {
 	background-color: #f90;
 }
 
+input.parameter {
+	width: 8em;
+}
+
+input.filter {
+	width: 8em;
+}
+
 /* typeahead */
 
 .tt-dropdown-menu {
