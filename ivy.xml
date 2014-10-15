@@ -13,7 +13,7 @@
 		<dependency name="sqldump" rev="0.9.12" conf="default->default"/>
 		<dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="default->default"/>
 		<!-- dependency org="org.apache.geronimo.specs" name="geronimo-servlet_3.0_spec" rev="1.0"/ -->
-		<dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="default->default"/>
+		<!--dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="default->default"/-->
 		
 		<!-- "optional" -->
 		<dependency org="log4j" name="log4j" rev="1.2.16"/>
