@@ -101,6 +101,11 @@ input.filter {
 	width: 8em;
 }
 
+#dialog input[type=button] {
+	margin: 3px;	
+}
+
+
 /* typeahead */
 
 .tt-dropdown-menu {

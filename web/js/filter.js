@@ -15,7 +15,7 @@ if(typeof Bloodhound != 'undefined') {
 	bhvalues.initialize();
 }
 
-function addFilter() {
+function addFilterDialog() {
 	var select = document.getElementById('objects');
 	var id = select.options[select.selectedIndex].value;
 	if(!id) {
@@ -36,9 +36,12 @@ function addFilter() {
 		selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
 	}
 	selectHTML += '</select>';
-	dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> <em>in</em> "
+	dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
+		+ "<em>in </em>"
+		//+ "<select><option value='in'>in</option></select> "
 		+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
-		+ "<input type='button' value='add' onclick='addFilterIn();closeFilterDialog();'/>"
+		+ "<input type='button' value='add & close' onclick='addFilterIn();closeFilterDialog();'/>"
+		+ "<input type='button' value='add' onclick='addFilterIn();'/>"
 		+ "<input type='button' value='X' class='simplebutton' onclick='closeFilterDialog();'/></div>";
 	//dialog.style.display = 'none';
 	refreshAutocomplete();

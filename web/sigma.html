@@ -94,7 +94,7 @@ body {
 	</span>
 	
 	<span id="buttons" class="btn-container">
-		<input type="button" value="+ filter" onclick="addFilter();"/>
+		<input type="button" value="+ filter" onclick="addFilterDialog();"/>
 		<input type="button" class="mainaction" value="go!" onclick="loadGraph();"/>
 	</span>
 
@@ -151,43 +151,6 @@ body {
 			updateUI();
 		}
 		
-		/*function addFilter() {
-			var select = document.getElementById('objects');
-			var id = select.options[select.selectedIndex].value;
-			if(!id) {
-				alert('no object selected!');
-				return;
-			}
-			var dialogCont = document.getElementById('dialog-container');
-			dialogCont.style.display = 'block';
-			var dialog = document.getElementById('dialog');
-			var cols = getColumnsFromRelation(relationsHash[id]);
-
-			var selectHTML = "<select name='fin-column' id='fin-column'>";
-			for(var i=0;i<cols.length;i++) {
-				var colz = cols[i];
-				selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
-			}
-			selectHTML += '</select>';
-			dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> <em>in</em> "
-				+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
-				+ "<input type='button' value='add' onclick='addFilterIn();document.getElementById(\"dialog-container\").style.display = \"none\";'/>"
-				+ "<input type='button' value='X' class='simplebutton' onclick='document.getElementById(\"dialog-container\").style.display = \"none\";'/></div>";
-			//dialog.style.display = 'none';
-			
-			updateUI();
-		}
-		
-		function addFilterIn() {
-			var col = document.getElementById('fin-column').value;
-			var value = document.getElementById('fin-value').value;
-			var filters = document.getElementById('filters');
-			filters.innerHTML += "<label class='filter-label'>"+col+" = <input type='text' class='filter' name='fin:"+col+"' value='"+value+"'/>"
-				+ "<input type='button' value='X' class='simplebutton' onclick='this.parentNode.parentNode.removeChild(this.parentNode);'></label>";
-			updateUI();
-		}*/
-		
-
 		// ======================== sigma-related functions ========================
 		
 		// Let's first initialize sigma:
