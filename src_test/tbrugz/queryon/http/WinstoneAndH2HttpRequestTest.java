@@ -395,4 +395,37 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	Assert.assertEquals("Should have 2 (data) rows", 2, count);*/
+
+	void baseReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+url);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		//String resp = getContent(response1); System.out.println(resp);
+		
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		Document doc = dBuilder.parse(instream);
+		NodeList nl = doc.getElementsByTagName("row");
+		Assert.assertEquals(expectedReturnRows, nl.getLength());
+		
+		EntityUtils.consume(entity1);
+		httpGet.releaseConnection();
+	}
+	
+	@Test
+	public void testGetXmlEmp() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml", 5);
+	}
+
+	@Test
+	public void testGetXmlEmpFilterIn() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fin:SUPERVISOR_ID=1", 2);
+	}
+
+	@Test
+	public void testGetXmlEmpFilterIn2() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fin:SALARY=1200&fin:SALARY=1000", 3);
+	}
+	
 }
