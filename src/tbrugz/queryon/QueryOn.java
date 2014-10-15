@@ -980,9 +980,9 @@ public class QueryOn extends HttpServlet {
 		if(colNames!=null) {
 			Set<String> columns = new HashSet<String>();
 			columns.addAll(colNames);
+			//XXX bind parameters: column type?
 			for(String col: reqspec.filterEquals.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
-					//XXX column type?
 					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
 					sql.addFilter(SQL.sqlIdDecorator.get(col)+" = ?");
 				}
@@ -990,9 +990,17 @@ public class QueryOn extends HttpServlet {
 					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
 				}
 			}
+			for(String col: reqspec.filterLike.keySet()) {
+				if(!validateFilterColumnNames || columns.contains(col)) {
+					sql.bindParameterValues.add(reqspec.filterLike.get(col));
+					sql.addFilter(SQL.sqlIdDecorator.get(col)+" like ?");
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
 			for(String col: reqspec.filterIn.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
-					//XXX column type?
 					StringBuffer sb = new StringBuffer();
 					sb.append(SQL.sqlIdDecorator.get(col)+" in (");
 					String[] values = reqspec.filterIn.get(col);

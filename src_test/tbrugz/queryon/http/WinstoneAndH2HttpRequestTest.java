@@ -278,7 +278,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testDelete_Emp_3rows() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//XXX: delete doesn't get parameters from querystring?
-		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?fe:DEPARTMENT_ID=2&method=DELETE");
+		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&method=DELETE");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		String content = getContent(response2);
 		System.out.println("content: "+content);
@@ -426,6 +426,12 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testGetXmlEmpFilterIn2() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml?fin:SALARY=1200&fin:SALARY=1000", 3);
+	}
+
+	@Test
+	public void testGetXmlEmpFilterLike() throws IOException, ParserConfigurationException, SAXException {
+		// '%25' == '%' in urls
+		baseReturnCountTest("/EMP.xml?flk:NAME=j%25", 2);
 	}
 	
 }

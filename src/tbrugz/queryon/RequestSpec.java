@@ -35,6 +35,8 @@ public class RequestSpec {
 	
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
+	final Map<String, String> filterLike = new HashMap<String, String>();
+	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), not in (fni?)
 	final Map<String, String> updateValues = new HashMap<String, String>();
 
 	final List<String> orderCols = new ArrayList<String>();
@@ -173,10 +175,9 @@ public class RequestSpec {
 		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
 		
-		//XXX: filters: add filter 'not in', 'like'
 		for(String param: params.keySet()) {
-			if(param.startsWith("fe:")) { //XXX "feq"?
-				String col = param.substring(3);
+			if(param.startsWith("feq:")) {
+				String col = param.substring(4);
 				String value = params.get(param)[0];
 				filterEquals.put(col, value);
 			}
@@ -184,6 +185,11 @@ public class RequestSpec {
 				String col = param.substring(4);
 				String[] values = params.get(param);
 				filterIn.put(col, values);
+			}
+			else if(param.startsWith("flk:")) {
+				String col = param.substring(4);
+				String value = params.get(param)[0];
+				filterLike.put(col, value);
 			}
 			else if(param.startsWith("v:")) {
 				String col = param.substring(2);
