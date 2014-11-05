@@ -37,7 +37,7 @@ public class RequestSpec {
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 	final Map<String, String> filterLike = new HashMap<String, String>();
-	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), not in (fni?)
+	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), not in (fni?), is null (fnull), is not null (fnn/finn)
 	final Map<String, String> updateValues = new HashMap<String, String>();
 
 	final List<String> orderCols = new ArrayList<String>();

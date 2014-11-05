@@ -154,7 +154,7 @@
 	</target>
 
 	<target name="web-deploy" description="deploy static web artifacts">
-		<copy todir="${deploy.dir}/${proj.name}">
+		<copy todir="${deploy.dir}/${proj.name}" verbose="true">
 			<fileset dir="${web.dir}">
 				<include name="**/*.js"/>
 				<include name="**/*.css"/>
