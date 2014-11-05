@@ -9,6 +9,12 @@ h1,h2,h3 {
 	font-family: Helvetica, sans-serif;
 	background-color: #fff;*/
 }
+ 
+#logo {
+	padding: 2px 9px 3px 9px;
+	display: inline-block;
+	margin-top: 2px;
+}
 
 /* table, td, th styles already on table.css - table.css takes precedence */
 table {
@@ -78,6 +84,14 @@ th {
 	padding: 0;
 }
 
+.navbar label {
+	background-color: #666;
+	padding: 0 1px 0 2px;
+	margin: 0px 1px 0px 2px;
+	border: solid 1px #999;
+	display: inline-block;
+}
+
 input[type=button] {
 	border: 0;
 	padding: 3px 9px 3px 9px;
@@ -105,6 +119,9 @@ input.filter {
 	margin: 3px;	
 }
 
+#filters input[type=button] {
+	padding: 3px 3px 3px 3px;
+}
 
 /* typeahead */
 
