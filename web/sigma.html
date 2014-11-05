@@ -7,6 +7,7 @@
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
 	<script src="js/filter.js"></script>
+	<script src="js/qon-util.js"></script>
 	<script src="js/sigma/sigma.min.js"></script>
 	<script src="js/sigma/plugins/sigma.layout.forceAtlas2.min.js"></script>
 	<script src="js/sigma/plugins/sigma.plugins.dragNodes.min.js"></script>
@@ -96,7 +97,7 @@ body {
 	
 	<span id="buttons" class="btn-container">
 		<input type="button" value="+ filter" onclick="addFilterDialog();"/>
-		<input type="button" class="mainaction" value="go!" onclick="loadGraph();"/>
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="loadGraph();"/>
 	</span>
 
 	<span id="graphbuttons" class="btn-container">
@@ -173,12 +174,14 @@ body {
 			var btn = document.getElementById('forcebutton');
 			if(forceAtlasRunning) { //s.isForceAtlas2Running()) {
 				s.stopForceAtlas2();
+				btnActionStop('forcebutton');
 				btn.value = 'start force layout';
 				forceAtlasRunning = false;
 			}
 			else {
 				s.startForceAtlas2();
 				btn.value = 'stop force layout';
+				btnActionStart('forcebutton');
 				forceAtlasRunning = true;
 			}
 		}
@@ -226,9 +229,11 @@ body {
 			}
 
 			// ajax
+			btnActionStart('go-button');
 			var url = 'q/'+qid+paramsStr+'.json?'+queryString;
 			console.log('url['+qid+']: '+url);
 			var jqxhr = $.getJSON(url, function(data) {
+				btnActionStop('go-button');
 				data = data[Object.keys(data)[0]];
 				s.graph.clear();
 				//console.log(data);
@@ -267,6 +272,7 @@ body {
 				document.getElementById('graphbuttons').style.display = 'initial';
 			})
 			.fail(function() {
+				btnActionStop('go-button');
 				showErrorMessages('messages', jqxhr.responseText);
 			});
 		}
