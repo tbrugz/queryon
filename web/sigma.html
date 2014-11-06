@@ -194,13 +194,14 @@ body {
 			var id = elem[prefix];
 			var label = elem[prefix+"_LABEL"]?elem[prefix+"_LABEL"]:elem[prefix];
 			var color = elem[prefix+"_COLOR"]?elem[prefix+"_COLOR"]:'#fff';
+			var size = elem[prefix+"_SIZE"]?elem[prefix+"_SIZE"]:1;
 			var ret = graph.addNode({
 				id: id,
 				label : label,
 				// Display attributes:
 				x: elem[prefix+"_X"] || getXorY(),
 				y: elem[prefix+"_Y"] || getXorY(),
-				size : 1,
+				size : size,
 				color : color,
 			});
 			//console.log("added node "+elem[prefix]);
