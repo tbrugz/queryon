@@ -19,7 +19,6 @@
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.authc.AuthenticationToken"%>
 <%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
