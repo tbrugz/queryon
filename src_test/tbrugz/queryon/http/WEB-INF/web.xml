@@ -15,9 +15,20 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+	<servlet>
+		<servlet-name>QueryOnSchema</servlet-name>
+		<servlet-class>tbrugz.queryon.QueryOnSchema</servlet-class>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/q/*</url-pattern>
 	</servlet-mapping>
-    
+
+	<servlet-mapping>
+		<servlet-name>QueryOnSchema</servlet-name>
+		<url-pattern>/qos/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>

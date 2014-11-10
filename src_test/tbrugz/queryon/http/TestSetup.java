@@ -13,7 +13,8 @@ import winstone.Launcher;
 public class TestSetup {
 	
 	public final static int port = 8889;
-	public final static String baseUrl = "http://localhost:"+port;
+	public final static String baseUrl = "http://localhost:"+port+"/q";
+	public final static String qonSchemaBaseUrl = "http://localhost:"+port+"/qos";
 	
 	private static Launcher winstone = null;
 	

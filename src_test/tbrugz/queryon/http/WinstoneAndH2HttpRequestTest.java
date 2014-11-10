@@ -17,6 +17,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -41,7 +42,7 @@ import com.google.gson.GsonBuilder;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
-import static tbrugz.queryon.http.TestSetup.baseUrl;
+import static tbrugz.queryon.http.TestSetup.*;
 
 public class WinstoneAndH2HttpRequestTest {
 	
@@ -383,6 +384,7 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
+		parser.close();
 	}
 
 	/*for (CSVRecord record: format.parse(in)) {
@@ -433,5 +435,35 @@ public class WinstoneAndH2HttpRequestTest {
 		// '%25' == '%' in urls
 		baseReturnCountTest("/EMP.xml?flk:NAME=j%25", 2);
 	}
+
+	//--------------------------- QueryOnSchema Tests -------------------------------
 	
+	int getReturnCodeQOS(String query) throws ClientProtocolException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(qonSchemaBaseUrl+query);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		//String resp = getContent(response1);
+		return response1.getStatusLine().getStatusCode();
+	}
+	
+	@Test
+	public void testQosGetTableDept() throws IOException, ParserConfigurationException, SAXException {
+		Assert.assertEquals(200, getReturnCodeQOS("/table/PUBLIC.DEPT"));
+	}
+
+	@Test
+	public void testQosGetTableXxxError() throws IOException, ParserConfigurationException, SAXException {
+		Assert.assertEquals(404, getReturnCodeQOS("/TABLE/PUBLIC.XXX"));
+	}
+	
+	@Test
+	public void testQosGetFkEmpdept() throws IOException, ParserConfigurationException, SAXException {
+		Assert.assertEquals(200, getReturnCodeQOS("/FK/PUBLIC.EMP_DEPT_FK"));
+	}
+	
+	@Test
+	public void testQosGetFkEmpdeptError() throws IOException, ParserConfigurationException, SAXException {
+		Assert.assertEquals(404, getReturnCodeQOS("/FK/PUBLIC.EMP_XXX_FK"));
+	}
 }

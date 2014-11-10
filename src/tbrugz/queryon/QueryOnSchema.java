@@ -102,7 +102,7 @@ public class QueryOnSchema extends HttpServlet {
 		log.info("partz: "+partz);
 		
 		DBObjectType type = null;
-		String objType = partz.get(0);
+		String objType = partz.get(0).toUpperCase();
 		String fullObjectName = partz.get(1);
 		String schemaName = null;
 		String objectName = fullObjectName;
@@ -128,9 +128,11 @@ public class QueryOnSchema extends HttpServlet {
 		ShiroUtils.checkPermission(currentUser, objType+":SHOW", fullObjectName);
 		
 		SchemaModel model = (SchemaModel) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_MODEL);
-		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableBySchemaAndName(getCollectionFromModel(model, type), schemaName, objectName);
+		Collection<? extends DBIdentifiable> dbids = getCollectionFromModel(model, type);
+		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
+		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, DBIdentifiable.getType4Diff(type), schemaName, objectName);
 		if(dbid==null) {
-			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" not found", 404);
+			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type+" not found", 404);
 		}
 		
 		resp.getWriter().write(dbid.getDefinition(true));
