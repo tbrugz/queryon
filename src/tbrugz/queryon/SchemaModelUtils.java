@@ -1,5 +1,8 @@
 package tbrugz.queryon;
 
+import java.util.Map;
+
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -97,4 +100,18 @@ public class SchemaModelUtils {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static SchemaModel getModel(ServletContext context, String modelId) {
+		Map<String, SchemaModel> models = (Map<String, SchemaModel>) context.getAttribute(QueryOn.ATTR_MODEL_MAP);
+		if(models==null || models.size()==0) { return null; }
+		if(modelId==null) {
+			modelId = (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+		}
+		return models.get(modelId);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String, SchemaModel> getModels(ServletContext context) {
+		return (Map<String, SchemaModel>) context.getAttribute(QueryOn.ATTR_MODEL_MAP);
+	}
 }

@@ -76,6 +76,7 @@ public class QueryOnSchema extends HttpServlet {
 		String fullObjectName = partz.get(1);
 		String schemaName = null;
 		String objectName = fullObjectName;
+		String modelId = req.getParameter("model");
 		
 		if(objectName.contains(".")) {
 			String[] onPartz = objectName.split("\\.");
@@ -97,7 +98,8 @@ public class QueryOnSchema extends HttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, objType+":SHOW", fullObjectName);
 		
-		SchemaModel model = (SchemaModel) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_MODEL);
+		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelId);
+
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
 		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type, schemaName, objectName);

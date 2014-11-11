@@ -1,12 +1,13 @@
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="tbrugz.sqldump.datadump.DataDumpUtils"%>
+<%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%>
 <%@page import="tbrugz.sqldump.dbmodel.Table"%>
 <%@page import="tbrugz.sqldump.dbmodel.Query"%>
 <%@page import="tbrugz.sqldump.dbmodel.View"%>
-<%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
-<%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%><%
+<%@page import="tbrugz.queryon.QueryOn"%>
+<%@page import="tbrugz.queryon.SchemaModelUtils"%><%
 Subject currentUser = SecurityUtils.getSubject();
 if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -349,7 +350,7 @@ boolean queryLoaded = false;
 %>
 
 <%
-model = (SchemaModel) application.getAttribute(QueryOn.ATTR_MODEL);
+model = SchemaModelUtils.getModel(application, request.getParameter("model"));
 schemaName = request.getParameter("schema");
 queryName = request.getParameter("name");
 query = "";

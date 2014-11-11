@@ -11,9 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -146,9 +148,13 @@ public class QueryOn extends HttpServlet {
 	
 	static final Log log = LogFactory.getLog(QueryOn.class);
 
-	static final String PROPERTIES_PATH = "properties-resource";
+	static final String INITP_PROPERTIES_PATH = "properties-resource";
+	//static final String INITP_MODEL_ID = "model-id";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String CONN_PROPS_PREFIX = "queryon";
+	
+	static final String PROP_MODELS = "queryon.models";
+	static final String PROP_MODELS_DEFAULT = "queryon.models.default";
 	
 	static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
 	static final String PROP_MAX_LIMIT = "queryon.limit.max";
@@ -164,15 +170,16 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
 	
+	static final String SUFFIX_GRABCLASS = ".grabclass";
 	static final String PROP_GRABCLASS = "queryon.grabclass";
-	@Deprecated static final String PROP_SQLDUMP_GRABCLASS = "sqldump.schemagrab.grabclass";
 	
 	static final String REQ_ATTR_CONTENTLOCATION = "attr.contentlocation";
 
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
 	public static final String ATTR_PROP = "prop";
-	public static final String ATTR_MODEL = "model";
+	public static final String ATTR_MODEL_MAP = "modelmap";
+	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
 	
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_POST = "POST";
@@ -181,8 +188,11 @@ public class QueryOn extends HttpServlet {
 	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
-	SchemaModel model;
+	//SchemaModel model;
+	//final Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
+	
 	String propertiesResource = null;
+	//String modelId;
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
 	boolean validateFilterColumnNames = true;
@@ -190,8 +200,10 @@ public class QueryOn extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		propertiesResource = config.getInitParameter(PROPERTIES_PATH);
+		propertiesResource = config.getInitParameter(INITP_PROPERTIES_PATH);
 		if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
+
+		//modelId = config.getInitParameter(INITP_MODEL_ID);
 		
 		doInit(config.getServletContext());
 	}
@@ -209,7 +221,23 @@ public class QueryOn extends HttpServlet {
 
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES));
 			
-			model = modelGrabber(prop);
+			Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
+			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
+			if(modelIds!=null) {
+				for(String id: modelIds) {
+					models.put(id, modelGrabber(prop, CONN_PROPS_PREFIX+"."+id));
+				}
+				String defaultModel = prop.getProperty(PROP_MODELS_DEFAULT);
+				if(defaultModel==null && models.size()>0) {
+					defaultModel = modelIds.get(0);
+				}
+				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
+			}
+			else {
+				models.put(null, modelGrabber(prop, CONN_PROPS_PREFIX));
+			}
+			context.setAttribute(ATTR_MODEL_MAP, models);
+			//model = SchemaModelUtils.getDefaultModel(context);
 			dsutils = new DumpSyntaxUtils(prop);
 			
 			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
@@ -219,22 +247,8 @@ public class QueryOn extends HttpServlet {
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
 			
 			context.setAttribute(ATTR_PROP, prop);
-			context.setAttribute(ATTR_MODEL, model);
 			
-			//XXX option to reload properties & re-execute processors?
-			List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
-			if(procsOnStartup!=null) {
-				for(String p: procsOnStartup) {
-					try {
-						ProcessorServlet.doProcess(p, context);
-					}
-					catch(Exception e) {
-						log.warn("Exception executing processor on startup: "+e, e);
-						//XXX: fail on error?
-					}
-				}
-			}
-			
+			runOnStartupProcessors(context);
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);
@@ -247,9 +261,41 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	void runOnStartupProcessors(ServletContext context) {
+		//XXX option to reload properties & re-execute processors?
+		//XXX run for every model?
+		boolean run4EveryModel = true;
+		List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
+		if(procsOnStartup!=null) {
+			for(String p: procsOnStartup) {
+				if(run4EveryModel) {
+					Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
+					for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
+						try {
+							ProcessorServlet.doProcess(p, context, entry.getValue());
+						}
+						catch(Exception e) {
+							log.warn("Exception executing processor on startup [model="+entry.getKey()+"]: "+e, e);
+							//XXX: fail on error?
+						}
+					}
+				}
+				else {
+					try {
+						ProcessorServlet.doProcess(p, context, null);
+					}
+					catch(Exception e) {
+						log.warn("Exception executing processor on startup: "+e, e);
+						//XXX: fail on error?
+					}
+				}
+			}
+		}
+	}
+	
 	//XXX: move to SchemaModelUtils?
-	SchemaModel modelGrabber(Properties prop/*, Connection conn*/) throws ClassNotFoundException, SQLException, NamingException {
-		String grabClassName = Utils.getPropWithDeprecated(prop, PROP_GRABCLASS, PROP_SQLDUMP_GRABCLASS, null);
+	static SchemaModel modelGrabber(Properties prop, String prefix) throws ClassNotFoundException, SQLException, NamingException {
+		String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
 			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+PROP_GRABCLASS+"']";
@@ -262,7 +308,7 @@ public class QueryOn extends HttpServlet {
 		
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+			conn = ConnectionUtil.initDBConnection(prefix, prop);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
@@ -304,6 +350,7 @@ public class QueryOn extends HttpServlet {
 		String otype = null;
 		ActionType atype = null;
 		DBIdentifiable dbobj = null;
+		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), reqspec.modelId);
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
@@ -379,7 +426,7 @@ public class QueryOn extends HttpServlet {
 					log.warn("strange... rel is null");
 					rel = SchemaModelUtils.getRelation(model, reqspec, true); //XXX: option to search views based on property?
 				}
-				doSelect(rel, reqspec, resp);
+				doSelect(model, rel, reqspec, resp);
 				}
 				break;
 			case SELECT_ANY:
@@ -393,7 +440,7 @@ public class QueryOn extends HttpServlet {
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
 					if(!sqlCommandExecuted) {
-						doSelect(relation, reqspec, resp);
+						doSelect(model, relation, reqspec, resp);
 					}
 				}
 				catch(SQLException e) {
@@ -430,7 +477,7 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case STATUS:
-				doStatus(reqspec, currentUser, resp);
+				doStatus(model, reqspec, currentUser, resp);
 				break;
 			case MANAGE:
 				doManage(reqspec, req, resp);
@@ -494,7 +541,7 @@ public class QueryOn extends HttpServlet {
 		return relation;
 	}
 	
-	void doSelect(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
 		String finalSql = null;
 		try {
@@ -695,7 +742,7 @@ public class QueryOn extends HttpServlet {
 	static final List<String> viewAllColumns  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
-	void doStatus(RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
+	void doStatus(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;

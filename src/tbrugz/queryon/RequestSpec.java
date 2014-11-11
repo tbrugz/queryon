@@ -23,6 +23,7 @@ public class RequestSpec {
 	final HttpServletRequest request;
 
 	final String httpMethod;
+	final String modelId;
 	final String object;
 	final int offset, limit;
 	final String loStrategy;
@@ -53,6 +54,8 @@ public class RequestSpec {
 		else {
 			httpMethod = req.getMethod();
 		}
+		
+		this.modelId = req.getParameter("model");
 		
 		String varUrl = req.getPathInfo();
 		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }
