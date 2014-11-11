@@ -18,6 +18,7 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ModelUtils;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
 /*
@@ -43,37 +44,6 @@ public class QueryOnSchema extends HttpServlet {
 		}
 		
 		return URIpartz;
-	}
-	
-	Collection<? extends DBIdentifiable> getCollectionFromModel(SchemaModel model, DBObjectType type) {
-		switch (type) {
-		case TABLE:
-			return model.getTables();
-		case EXECUTABLE:
-		case FUNCTION:
-		case PACKAGE:
-		case PACKAGE_BODY:
-		case PROCEDURE:
-		case TYPE:
-		case TYPE_BODY:
-			return model.getExecutables();
-		case FK:
-			return model.getForeignKeys();
-		case MATERIALIZED_VIEW:
-		case VIEW:
-			return model.getViews();
-		case TRIGGER:
-			return model.getTriggers();
-		case INDEX:
-			return model.getIndexes();
-		case SEQUENCE:
-			return model.getSequences();
-		case SYNONYM:
-			return model.getSynonyms();
-		default:
-			break;
-		}
-		throw new BadRequestException("Invalid object type: "+type);
 	}
 	
 	@Override
@@ -128,9 +98,9 @@ public class QueryOnSchema extends HttpServlet {
 		ShiroUtils.checkPermission(currentUser, objType+":SHOW", fullObjectName);
 		
 		SchemaModel model = (SchemaModel) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_MODEL);
-		Collection<? extends DBIdentifiable> dbids = getCollectionFromModel(model, type);
+		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
-		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, DBIdentifiable.getType4Diff(type), schemaName, objectName);
+		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type, schemaName, objectName);
 		if(dbid==null) {
 			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type+" not found", 404);
 		}

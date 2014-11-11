@@ -46,6 +46,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.ModelUtils;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -548,8 +549,8 @@ public class QueryOn extends HttpServlet {
 		
 		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
 
-		List<FK> fks = DBIdentifiable.getImportedKeys(relation, model.getForeignKeys());
-		List<Constraint> uks = DBIdentifiable.getUKs(relation);
+		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
+		List<Constraint> uks = ModelUtils.getUKs(relation);
 		
 		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
 			String contentLocation = reqspec.getCanonicalUrl(prop);
