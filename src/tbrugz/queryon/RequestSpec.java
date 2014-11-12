@@ -55,7 +55,8 @@ public class RequestSpec {
 			httpMethod = req.getMethod();
 		}
 		
-		this.modelId = req.getParameter("model");
+		this.modelId = SchemaModelUtils.getModelId(req);
+		//TODO test if model with this id exists
 		
 		String varUrl = req.getPathInfo();
 		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }

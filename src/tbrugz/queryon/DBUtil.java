@@ -1,9 +1,16 @@
 package tbrugz.queryon;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Properties;
+
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import tbrugz.sqldump.util.ConnectionUtil;
 
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);
@@ -48,6 +55,17 @@ public class DBUtil {
 		}
 		log.info("unknown sql type for column type: "+colType);
 		return Types.OTHER;
+	}
+	
+	public static String getDBConnPrefix(Properties prop, String modelId) {
+		String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
+		return prop.getProperty(prefix+".connpropprefix", prefix);
+	}
+	
+	public static Connection initDBConn(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
+		//String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
+		//prefix = prop.getProperty(prefix+".connpropprefix", prefix);
+		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop);
 	}
 
 }

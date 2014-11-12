@@ -225,7 +225,7 @@ public class QueryOn extends HttpServlet {
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
 			if(modelIds!=null) {
 				for(String id: modelIds) {
-					models.put(id, modelGrabber(prop, CONN_PROPS_PREFIX+"."+id));
+					models.put(id, modelGrabber(prop, id));
 				}
 				String defaultModel = prop.getProperty(PROP_MODELS_DEFAULT);
 				if(defaultModel==null && models.size()>0) {
@@ -234,7 +234,7 @@ public class QueryOn extends HttpServlet {
 				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
 			}
 			else {
-				models.put(null, modelGrabber(prop, CONN_PROPS_PREFIX));
+				models.put(null, modelGrabber(prop, null));
 			}
 			context.setAttribute(ATTR_MODEL_MAP, models);
 			//model = SchemaModelUtils.getDefaultModel(context);
@@ -272,7 +272,7 @@ public class QueryOn extends HttpServlet {
 					Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
 					for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
 						try {
-							ProcessorServlet.doProcess(p, context, entry.getValue());
+							ProcessorServlet.doProcess(p, context, entry.getKey());
 						}
 						catch(Exception e) {
 							log.warn("Exception executing processor on startup [model="+entry.getKey()+"]: "+e, e);
@@ -294,8 +294,8 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	//XXX: move to SchemaModelUtils?
-	static SchemaModel modelGrabber(Properties prop, String prefix) throws ClassNotFoundException, SQLException, NamingException {
-		String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS);
+	static SchemaModel modelGrabber(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
+		String grabClassName = prop.getProperty(CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"")+SUFFIX_GRABCLASS);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
 			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+PROP_GRABCLASS+"']";
@@ -308,7 +308,7 @@ public class QueryOn extends HttpServlet {
 		
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			conn = ConnectionUtil.initDBConnection(prefix, prop);
+			conn = ConnectionUtil.initDBConnection(DBUtil.getDBConnPrefix(prop, modelId), prop);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
@@ -542,7 +542,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
-		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		String finalSql = null;
 		try {
 		
@@ -626,7 +626,7 @@ public class QueryOn extends HttpServlet {
 	 * - run query with limit of 0 or 1? set parameters with what? null? random?
 	 */
 	void doValidate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
-		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 			SQL sql = SQL.createSQL(relation, reqspec);
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
@@ -663,7 +663,8 @@ public class QueryOn extends HttpServlet {
 	 */
 	void doExecute(ExecutableObject eo, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		log.info("eo: "+eo);
-		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		
 		try {
 			
 		StringBuffer sql = new StringBuffer();
@@ -794,7 +795,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
-		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 		SQL sql = SQL.createDeleteSQL(relation);
 
@@ -841,7 +842,7 @@ public class QueryOn extends HttpServlet {
 	}
 
 	void doUpdate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 
 		SQL sql = SQL.createUpdateSQL(relation);
@@ -896,7 +897,7 @@ public class QueryOn extends HttpServlet {
 	}
 
 	void doInsert(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 
 		SQL sql = SQL.createInsertSQL(relation);
@@ -1151,7 +1152,7 @@ public class QueryOn extends HttpServlet {
 
 		for(SqlCommand cmd: cmds) {
 			if(cmd.matches(sql)) {
-				Connection conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, prop);
+				Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 				ResultSet rs = cmd.run(conn);
 				try {
 					//XXX: mayApplyLimitOffset should be true or false?
