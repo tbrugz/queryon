@@ -7,7 +7,9 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
+	<link href="css/prism.css" rel="stylesheet" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="js/prism.js"></script>
 	<script>
 	var queryOnUrl = 'q/';
 	var queryOnSchemaUrl = 'qos/';
@@ -115,12 +117,17 @@ getDDL = function() {
 		url: url,
 		success: function(data) {
 			//console.log(data);
-			document.getElementById('content').innerHTML = data;
-			document.getElementById('content').style.display = 'block';
+			var container = document.getElementById('content-container');
+			container.style.display = 'block';
+			var block = document.getElementById('content');
+			block.innerHTML = data;
+			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
+			Prism.highlightElement(block);
 		},
 		error: function() {
 			//TODO: show error
-			document.getElementById('content').style.display = 'none';
+			var container = document.getElementById('content-container');
+			container.style.display = 'none';
 		}
 	});
 }
@@ -155,14 +162,14 @@ loadSelect = function(data, selectId, callback) {
 	}
 	#content-container {
 		position: relative;
-		top: 34px;
+		top: 24px;
 	}
 	#logo {
 		font-size: 11pt;
 		font-weight: bolder;
 		background-color: #666;
 	}
-	#content {
+	/*#content {
 		display: block;
 		unicode-bidi: embed;
 		font-family: monospace;
@@ -170,7 +177,7 @@ loadSelect = function(data, selectId, callback) {
 		padding: 4px;
 		border: 10px solid #ddd;
 		background-color: whitesmoke;
-	}
+	}*/
 	</style>
 </head>
 <body>
@@ -206,10 +213,7 @@ loadSelect = function(data, selectId, callback) {
 	<div id="messages"></div>
 </div>
 
-<div id="content-container">
-	<div id="content" style="display: none;">
-	</div>
-</div>
+<pre id="content-container" style="display: none;"><code id="content" class="language-sql"></code></pre>
 
 <div id="dialog-container">
 	<div id="dialog">
