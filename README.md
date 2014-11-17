@@ -22,7 +22,8 @@ license
 license - notable exceptions
 ----------------------------
 * `/web/js/ace/*` - BSD license - <https://github.com/ajaxorg/ace/blob/master/LICENSE>
-* `/web/js/sigma/*` - MIT License - <https://github.com/jacomyal/sigma.js/blob/master/LICENSE.txt>
 * `/web/js/jquery-*` - MIT License - <https://jquery.org/license/>
 * `/web/js/jquery.key.js` - MIT License - <https://github.com/OscarGodson/jKey>
 * `/web/[js|css]/prism.[js|css]` - MIT License - <https://github.com/LeaVerou/prism/blob/gh-pages/LICENSE>
+* `/web/js/sigma/*` - MIT License - <https://github.com/jacomyal/sigma.js/blob/master/LICENSE.txt>
+* `/web/js/typeahead.bundle.js`- MIT License - <https://github.com/twitter/typeahead.js/blob/master/LICENSE>
