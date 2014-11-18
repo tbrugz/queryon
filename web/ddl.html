@@ -11,10 +11,10 @@
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script type="text/javascript" src="js/prism.js"></script>
 	<script>
-	var queryOnUrl = 'q/';
-	var queryOnSchemaUrl = 'qos/';
+var queryOnUrl = 'q/';
+var queryOnSchemaUrl = 'qos/';
 
-typemap = {
+var typemap = {
 		"TABLE": "table",
 		"FK": "fk",
 		"VIEW": "view",
@@ -36,6 +36,8 @@ typemap = {
 		"COLUMN": null
 };
 
+var schemasByModel = {};
+
 $(document).ready(
 	function() {
 		var tts = [];
@@ -56,30 +58,56 @@ $.ajax({
 		if(json.models) {
 			loadSelect(json.models, 'model');
 		}
+		if(json.models.length>1) {
+			document.getElementById('model').parentNode.style.display = 'inline-block';
+		}
+		for(var i=0;i<json.models.length;i++) {
+			loadSchemas(json.models[i]);
+		}
 		/*if(json.types) {
 			loadSelect(json.types, 'type');
 		}*/
 	}
 });
 
-//TODO: schemas by model?
-$.ajax({
-	url: 'info/schemas.jsp',
-	success: function(data) {
-		var json = JSON.parse(data);
-		//console.log(json);
-		if(json.schemas) {
-			loadSelect(json.schemas, 'schema');
+//TODOne: schemas by model?
+loadSchemas = function(model) {
+	var url = 'info/schemas.jsp'+(model?'?model='+model:'');
+	//console.log('loadSchemas url:', url);
+	$.ajax({
+		url: url,
+		success: function(data) {
+			var json = JSON.parse(data);
+			//console.log(json);
+			if(json.schemas) {
+				schemasByModel[model] = json.schemas;
+				//XXX: merge model's schemas?
+				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
+				joinSchemas();
+			}
 		}
-	}
-});
+	});
+}
+
+joinSchemas = function() {
+	if(Object.keys(schemasByModel).length < document.getElementById('model').childElementCount) { return; }
+	/*for(var i=0;i<Object.keys(schemasByModel).length;i++) {
+		var m = Object.keys(schemasByModel)[i];
+		for(var j=0;i<m[i].length;i++) {
+			schemas[i] = 
+		}
+	}*/
+	onModelChanged();
+}
 
 onModelChanged = function() {
+	var m = document.getElementById('model').value;
+	loadSelect(schemasByModel[m], 'schema');
 	loadObjectList();
 }
 
 onSchemaChanged = function() {
-	//loadObjectList();
+	loadObjectList();
 }
 
 onObjTypeChanged = function() {
@@ -90,7 +118,12 @@ onObjectChanged = function() {}
 
 loadObjectList = function() {
 	var type = typemap[document.getElementById('type').value];
-	var url = queryOnUrl+type+'.json?model='+document.getElementById('model').value;
+	var model = document.getElementById('model').value;
+	var schema = document.getElementById('schema').value;
+	var url = queryOnUrl+type
+		+ (schema? '/'+schema:'')
+		+ '.json'
+		+ (model?'?model='+model:'');
 	console.log("loadObjectList: url=",url);
 	$.ajax({
 		//TODO: filter by schema?
@@ -142,6 +175,15 @@ loadSelect = function(data, selectId, callback) {
 	}
 }
 
+/*mergeSelect = function(data, selectId, idCallback, descCallback) {
+	if(!idCallback) { idCallback = function(obj) { return obj; } }
+	if(!descCallback) { descCallback = function(obj) { return obj; } }
+	//$('#'+selectId).empty();
+	for(var i=0;i<data.length;i++) {
+		$('#'+selectId).append("<option value='"+idCallback(data[i])+"'>"+descCallback(data[i])+"</option>");
+	}
+}*/
+
 	</script>
 	<style type="text/css">
 	#nav {
@@ -185,10 +227,10 @@ loadSelect = function(data, selectId, callback) {
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>DDL</span></span>
 
-	<label>
+	<label style="display: none">
 		model: <select id="model" onchange="onModelChanged();"></select>
 	</label>
-	<label style="display: none">
+	<label>
 		schema: <select id="schema" onchange="onSchemaChanged();"></select>
 	</label>
 	<label>
