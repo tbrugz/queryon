@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QOn + diff</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<!-- link href="css/prism.css" rel="stylesheet" /-->
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<!-- script type="text/javascript" src="js/prism.js"></script-->
+	<link rel="stylesheet" href="http://rawgit.com/cemerick/jsdifflib/master/diffview.css">
+	<script src="http://rawgit.com/cemerick/jsdifflib/master/difflib.js"></script>
+	<script src="http://rawgit.com/cemerick/jsdifflib/master/diffview.js"></script>
+	<script>
+var queryOnUrl = 'q/';
+var queryOnSchemaUrl = 'qos/';
+
+var typemap = {
+		"TABLE": "table",
+		"FK": "fk",
+		"VIEW": "view",
+		"INDEX": null,
+		"EXECUTABLE": null,
+		"TRIGGER": "executable",
+		"SEQUENCE": null,
+		"SYNONYM": null,
+		"GRANT": null,
+		"MATERIALIZED_VIEW": "view",
+		"FUNCTION": "executable",
+		"JAVA_SOURCE": null,
+		"PACKAGE": "executable",
+		"PACKAGE_BODY": "executable",
+		"PROCEDURE": "executable",
+		"TYPE": "executable",
+		"TYPE_BODY": "executable",
+		"CONSTRAINT": null,
+		"COLUMN": null
+};
+
+var schemasByModel = {};
+
+$(document).ready(
+	function() {
+		var tts = [];
+		var keys = Object.keys(typemap);
+		//console.log(keys.length);
+		for(var i=0;i<keys.length;i++) {
+			if(typemap[keys[i]]) { tts.push(keys[i]); }
+		}
+		loadSelect(tts, 'type');
+	}
+);
+
+$.ajax({
+	url: 'info/model.jsp',
+	success: function(data) {
+		var json = JSON.parse(data);
+		//console.log(json);
+		if(json.models) {
+			loadSelect(json.models, 'modelFrom');
+			loadSelect(json.models, 'modelTo');
+			//XXX select different model in each 'select' 
+		}
+		/*if(json.models.length>1) {
+			document.getElementById('modelFrom').parentNode.style.display = 'inline-block';
+			document.getElementById('modelTo').parentNode.style.display = 'inline-block';
+		}*/
+		for(var i=0;i<json.models.length;i++) {
+			loadSchemas(json.models[i]);
+		}
+		/*if(json.types) {
+			loadSelect(json.types, 'type');
+		}*/
+	}
+});
+
+//TODOne: schemas by model?
+loadSchemas = function(model) {
+	var url = 'info/schemas.jsp'+(model?'?model='+model:'');
+	//console.log('loadSchemas url:', url);
+	$.ajax({
+		url: url,
+		success: function(data) {
+			var json = JSON.parse(data);
+			//console.log(json);
+			if(json.schemas) {
+				schemasByModel[model] = json.schemas;
+				//XXX: merge model's schemas?
+				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
+				joinSchemas();
+			}
+		}
+	});
+}
+
+joinSchemas = function() {
+	if(Object.keys(schemasByModel).length < document.getElementById('modelFrom').childElementCount) { return; }
+	/*for(var i=0;i<Object.keys(schemasByModel).length;i++) {
+		var m = Object.keys(schemasByModel)[i];
+		for(var j=0;i<m[i].length;i++) {
+			schemas[i] = 
+		}
+	}*/
+	onModelChanged();
+}
+
+onModelChanged = function() {
+	//TODO: merge models...
+	var m = document.getElementById('modelFrom').value;
+	loadSelect(schemasByModel[m], 'schema');
+	loadObjectList();
+}
+
+onSchemaChanged = function() {
+	loadObjectList();
+}
+
+onObjTypeChanged = function() {
+	loadObjectList();
+}
+
+onObjectChanged = function() {}
+
+loadObjectList = function() {
+	var type = typemap[document.getElementById('type').value];
+	var model = document.getElementById('modelFrom').value;
+	var schema = document.getElementById('schema').value;
+	var url = queryOnUrl+type
+		+ (schema? '/'+schema:'')
+		+ '.json'
+		+ (model?'?model='+model:'');
+	console.log("loadObjectList: url=",url);
+	$.ajax({
+		//TODO: filter by schema?
+		url: url,
+		success: function(data) {
+			//console.log(data);
+			//var jj = JSON.parse(data);
+			var keys = Object.keys(data);
+			data = data[Object.keys(data)[0]];
+			//console.log(data);
+			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
+		}
+	});
+}
+
+getDDL = function(modelId, contentId, callback) {
+	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
+		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
+		+ document.getElementById('object').value
+		+'?model='+document.getElementById(modelId).value;
+	console.log("getDDL: url=", url);
+	$.ajax({
+		//TODO: filter by schema?
+		url: url,
+		success: function(data) {
+			//console.log(data);
+			var block = document.getElementById(contentId);
+			var container = block.parentNode;
+			container.style.display = 'block';
+			block.innerHTML = data;
+			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
+			//Prism.highlightElement(block);
+			if(callback) { callback(); }
+		},
+		error: function(err) {
+			//TODO: show error
+			console.log('error=',err)
+			var block = document.getElementById(contentId);
+			var container = block.parentNode;
+			container.style.display = 'none';
+			block.innerHTML = '';
+		}
+	});
+}
+
+doDiff = function() {
+	getDDL('modelFrom','content-from', doDiffUsingJS);
+	getDDL('modelTo','content-to', doDiffUsingJS);
+}
+
+doClear = function() {
+	var from = document.getElementById('content-from');
+	var to = document.getElementById('content-to');
+	from.innerHTML = '';
+	from.parentNode.style.display = 'none';
+	to.innerHTML = '';
+	to.parentNode.style.display = 'none';
+	document.getElementById('diffoutput').innerHTML = '';
+}
+
+doDiffUsingJS = function() {
+	var from = document.getElementById('content-from').innerHTML;
+	var to = document.getElementById('content-to').innerHTML;
+	if(from && to) {
+		diffUsingJS(1, from, to,
+			document.getElementById('modelFrom').value, document.getElementById('modelTo').value,
+			'diffoutput');
+	}
+	//TODO: call diff api (sqldiff processor?)
+}
+
+diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
+	"use strict";
+	var byId = function (id) { return document.getElementById(id); },
+		base = difflib.stringAsLines(from),
+		newtxt = difflib.stringAsLines(to),
+		sm = new difflib.SequenceMatcher(base, newtxt),
+		opcodes = sm.get_opcodes(),
+		diffoutputdiv = byId(outputId),
+		contextSize = 3; //null; //byId("contextSize").value;
+
+	diffoutputdiv.innerHTML = "";
+	contextSize = contextSize || null;
+
+	diffoutputdiv.appendChild(diffview.buildView({
+		baseTextLines: base,
+		newTextLines: newtxt,
+		opcodes: opcodes,
+		baseTextName: fromTitle,
+		newTextName: toTitle,
+		contextSize: contextSize,
+		viewType: viewType
+	}));
+}
+
+// ----- utility functions
+
+loadSelect = function(data, selectId, callback) {
+	if(!callback) { callback = function(obj) { return obj; } }
+	$('#'+selectId).empty();
+	for(var i=0;i<data.length;i++) {
+		$('#'+selectId).append("<option value='"+callback(data[i])+"'>"+callback(data[i])+"</option>");
+	}
+}
+
+/*mergeSelect = function(data, selectId, idCallback, descCallback) {
+	if(!idCallback) { idCallback = function(obj) { return obj; } }
+	if(!descCallback) { descCallback = function(obj) { return obj; } }
+	//$('#'+selectId).empty();
+	for(var i=0;i<data.length;i++) {
+		$('#'+selectId).append("<option value='"+idCallback(data[i])+"'>"+descCallback(data[i])+"</option>");
+	}
+}*/
+
+	</script>
+	<style type="text/css">
+	#nav {
+		background-color: #222;
+		color: #ddd;
+		font-weight: bold;
+		font-size: 10pt;
+		padding: 3px;
+		padding-bottom: 5px;
+		position: fixed;
+		top: 0px;
+		right: 0px;
+		left: 0px;
+		/*height: 30px;*/
+		z-index: 10;
+		overflow-y: auto;
+		max-height: 100%;
+	}
+	#content-container {
+		position: relative;
+		top: 24px;
+	}
+	#logo {
+		font-size: 11pt;
+		font-weight: bolder;
+		background-color: #666;
+	}
+	code {
+		display: block;
+		unicode-bidi: embed;
+		font-family: monospace;
+		white-space: pre;
+		padding: 4px;
+		border: 10px solid #ddd;
+		background-color: whitesmoke;
+		overflow-x: scroll;
+	}
+	textarea.code {
+		width: 100%;
+		height: 300px;
+	}
+	#diffoutput {
+		font-family: monospace;
+		white-space: pre;
+		clear:both;
+		border: 10px solid #ddd;
+		width: 100%;
+	}
+	#diffoutput table {
+		min-width: 90%;
+	}
+	</style>
+</head>
+<body>
+
+<div id="nav" class="navbar">
+	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
+
+	<label style="background-color: #A93636">
+		modelFrom: <select id="modelFrom" onchange="onModelChanged();"></select>
+	</label>
+	<label>
+		schema: <select id="schema" onchange="onSchemaChanged();"></select>
+	</label>
+	<label>
+		type: <select id="type" onchange="onObjTypeChanged();"></select>
+	</label>
+	<label>
+		object: <select id="object" onchange="onObjectChanged();"></select>
+	</label>
+	<label style="background-color: #36A979">
+		modelTo: <select id="modelTo" onchange="onModelChanged();"></select>
+	</label>
+	
+	<span id="navbar-prop">
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doDiff();"/>
+		<input type="button" value="clear" onclick="doClear();"/>
+	</span>
+
+	<span id="navbar-links">
+	</span>
+	
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+	
+	<div id="messages"></div>
+</div>
+
+<div style="top: 26px; position: absolute; width: 100%;">
+
+	<div style="width: 50%;float: left;"><pre style="display: none;"><code id="content-from" class="language-sql"></code></pre></div>
+	<div style="width: 50%;float: right;"><pre style="display: none;"><code id="content-to" class="language-sql"></code></pre></div>
+	<!-- span style="position:relative; width: 49%; float:left;"><textarea id="content-from" class="code language-sql"></textarea></span>
+	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
+	
+	<div id="diffoutput"></div>
+</div>
+
+
+<div id="dialog-container">
+	<div id="dialog">
+	</div>
+</div>
+
+<div id="status-container" class="status">
+</div>
+
+</body>
+</html>
