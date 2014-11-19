@@ -9,7 +9,6 @@ Database objects are defined by a properties file. See
 [queryon.template.properties](https://bitbucket.org/tbrugz/queryon/src/tip/src/queryon.template.properties)
 for more info.
 
-
 -- [Telmo Brugnara](mailto:tbrugz@gmail.com)
 
 

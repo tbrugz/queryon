@@ -204,6 +204,16 @@ doClear = function() {
 	to.innerHTML = '';
 	to.parentNode.style.display = 'none';
 	document.getElementById('diffoutput').innerHTML = '';
+	
+	var diffc = document.getElementById('diffoutput-container');
+	diffc.style.display = 'none';
+	
+	var mblock = document.getElementById('content-from-msg');
+	mblock.innerHTML = '';
+	mblock.style.display = 'none';
+	mblock = document.getElementById('content-to-msg');
+	mblock.innerHTML = '';
+	mblock.style.display = 'none';
 }
 
 doDiffUsingJS = function(viewType) {
