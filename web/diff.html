@@ -41,6 +41,8 @@ var typemap = {
 
 var schemasByModel = {};
 
+var defaultModelId = 'modelTo';
+
 $(document).ready(
 	function() {
 		var tts = [];
@@ -96,7 +98,7 @@ loadSchemas = function(model) {
 }
 
 joinSchemas = function() {
-	if(Object.keys(schemasByModel).length < document.getElementById('modelFrom').childElementCount) { return; }
+	if(Object.keys(schemasByModel).length < document.getElementById(defaultModelId).childElementCount) { return; }
 	/*for(var i=0;i<Object.keys(schemasByModel).length;i++) {
 		var m = Object.keys(schemasByModel)[i];
 		for(var j=0;i<m[i].length;i++) {
@@ -108,7 +110,7 @@ joinSchemas = function() {
 
 onModelChanged = function() {
 	//TODO: merge models...
-	var m = document.getElementById('modelFrom').value;
+	var m = document.getElementById(defaultModelId).value;
 	loadSelect(schemasByModel[m], 'schema');
 	loadObjectList();
 }
@@ -125,7 +127,7 @@ onObjectChanged = function() {}
 
 loadObjectList = function() {
 	var type = typemap[document.getElementById('type').value];
-	var model = document.getElementById('modelFrom').value;
+	var model = document.getElementById(defaultModelId).value;
 	var schema = document.getElementById('schema').value;
 	var url = queryOnUrl+type
 		+ (schema? '/'+schema:'')
@@ -159,19 +161,32 @@ getDDL = function(modelId, contentId, callback) {
 			//console.log(data);
 			var block = document.getElementById(contentId);
 			var container = block.parentNode;
+			var mblock = document.getElementById(contentId+"-msg");
 			container.style.display = 'block';
 			block.innerHTML = data;
+			mblock.innerHTML = '';
+			mblock.style.display = 'none';
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
 			//Prism.highlightElement(block);
 			if(callback) { callback(); }
 		},
 		error: function(err) {
 			//TODO: show error
-			console.log('error=',err)
+			console.log('error=',err.status,err);
 			var block = document.getElementById(contentId);
 			var container = block.parentNode;
+			var mblock = document.getElementById(contentId+"-msg");
+			//if(err.status==404) {
+			//var message = 'Object \''+document.getElementById('object').value+'\' not found on model \''+document.getElementById(modelId).value+'\'';
+			mblock.style.display = 'block';
+			mblock.innerHTML = '<b>'+document.getElementById(modelId).value+':</b> '+err.responseText;
+			//}
+			//else {
+			//	mblock.style.display = 'none';
+			//}
 			container.style.display = 'none';
 			block.innerHTML = '';
+			if(callback) { callback(); }
 		}
 	});
 }
@@ -191,19 +206,27 @@ doClear = function() {
 	document.getElementById('diffoutput').innerHTML = '';
 }
 
-doDiffUsingJS = function() {
+doDiffUsingJS = function(viewType) {
+	if(viewType === undefined) { viewType = 1; }
 	var from = document.getElementById('content-from').innerHTML;
 	var to = document.getElementById('content-to').innerHTML;
+	var diffc = document.getElementById('diffoutput-container');
 	if(from && to) {
-		diffUsingJS(1, from, to,
+		diffc.style.display = 'block';
+		diffUsingJS(viewType, from, to,
 			document.getElementById('modelFrom').value, document.getElementById('modelTo').value,
 			'diffoutput');
+	}
+	else {
+		diffc.style.display = 'none';
+		document.getElementById('diffoutput').innerHTML = "";
 	}
 	//TODO: call diff api (sqldiff processor?)
 }
 
 diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 	"use strict";
+	//console.log("viewType=",viewType);
 	var byId = function (id) { return document.getElementById(id); },
 		base = difflib.stringAsLines(from),
 		newtxt = difflib.stringAsLines(to),
@@ -224,6 +247,15 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 		contextSize: contextSize,
 		viewType: viewType
 	}));
+}
+
+toggleDiff = function() {
+	var btn = document.getElementById('togglediffbtn');
+	if(btn.value=='inline'){
+		doDiffUsingJS(0);btn.value='2 pane';
+	}else{
+		doDiffUsingJS(1);btn.value='inline';
+	}
 }
 
 // ----- utility functions
@@ -282,20 +314,42 @@ loadSelect = function(data, selectId, callback) {
 		background-color: whitesmoke;
 		overflow-x: scroll;
 	}
+	.message {
+		margin: 10px;
+		background-color: #f77;
+		padding: 4px;
+	}
 	textarea.code {
 		width: 100%;
 		height: 300px;
 	}
+	
+	.code-container {
+		width: 50%;
+	}
+	
+	.code-container pre {
+		margin-top: 0;
+	}
+	
 	#diffoutput {
 		font-family: monospace;
 		white-space: pre;
-		clear:both;
+		/*clear:both;*/
 		border: 10px solid #ddd;
 		width: 100%;
+	}
+	#diffoutput-container {
+		display: none;
+		clear: both;
+	}
+	#diffoutput-container input {
+		border:1px solid #999; background-color: whitesmoke;
 	}
 	#diffoutput table {
 		min-width: 90%;
 	}
+	
 	</style>
 </head>
 <body>
@@ -304,7 +358,10 @@ loadSelect = function(data, selectId, callback) {
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
 
 	<label style="background-color: #A93636">
-		modelFrom: <select id="modelFrom" onchange="onModelChanged();"></select>
+		modelOrig: <select id="modelFrom" onchange="onModelChanged();"></select>
+	</label>
+	<label style="background-color: #36A979">
+		modelNew: <select id="modelTo" onchange="onModelChanged();"></select>
 	</label>
 	<label>
 		schema: <select id="schema" onchange="onSchemaChanged();"></select>
@@ -314,9 +371,6 @@ loadSelect = function(data, selectId, callback) {
 	</label>
 	<label>
 		object: <select id="object" onchange="onObjectChanged();"></select>
-	</label>
-	<label style="background-color: #36A979">
-		modelTo: <select id="modelTo" onchange="onModelChanged();"></select>
 	</label>
 	
 	<span id="navbar-prop">
@@ -335,14 +389,23 @@ loadSelect = function(data, selectId, callback) {
 	<div id="messages"></div>
 </div>
 
-<div style="top: 26px; position: absolute; width: 100%;">
+<div style="top: 33px; position: absolute; width: 98%;">
 
-	<div style="width: 50%;float: left;"><pre style="display: none;"><code id="content-from" class="language-sql"></code></pre></div>
-	<div style="width: 50%;float: right;"><pre style="display: none;"><code id="content-to" class="language-sql"></code></pre></div>
+	<div class="code-container" style="float: left;">
+		<div id="content-from-msg" class="message" style="display: none;"></div>
+		<pre style="display: none;"><code id="content-from" class="language-sql"></code></pre>
+	</div>
+	<div class="code-container" style="float: right;">
+		<div id="content-to-msg" class="message" style="display: none;"></div>
+		<pre style="display: none;"><code id="content-to" class="language-sql"></code></pre>
+	</div>
 	<!-- span style="position:relative; width: 49%; float:left;"><textarea id="content-from" class="code language-sql"></textarea></span>
 	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
 	
-	<div id="diffoutput"></div>
+	<div id="diffoutput-container">
+		<input id="togglediffbtn" type="button" value="inline" style="float:right; margin-right: 10px;" onclick="toggleDiff();">
+		<div id="diffoutput"></div>
+	</div>
 </div>
 
 
