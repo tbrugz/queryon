@@ -146,7 +146,7 @@ public class QueryOn extends HttpServlet {
 		}*/
 	}
 	
-	static final Log log = LogFactory.getLog(QueryOn.class);
+	private static final Log log = LogFactory.getLog(QueryOn.class);
 
 	static final String INITP_PROPERTIES_PATH = "properties-resource";
 	//static final String INITP_MODEL_ID = "model-id";
@@ -743,7 +743,7 @@ public class QueryOn extends HttpServlet {
 	static final List<String> viewAllColumns  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
-	void doStatus(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException {
+	void doStatus(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;

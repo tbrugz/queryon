@@ -25,7 +25,6 @@ import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
-import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 

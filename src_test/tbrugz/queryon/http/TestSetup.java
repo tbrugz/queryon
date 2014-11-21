@@ -31,7 +31,12 @@ public class TestSetup {
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run() {
 				System.err.println("shutting down winstone");
-				winstone.shutdown();
+				try {
+					winstone.shutdown();
+				}
+				catch(Exception e) {
+					System.err.println("Exception shutting down: "+e);
+				}
 				System.err.println("winstone shutted down");
 			}
 		});

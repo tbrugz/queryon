@@ -1,12 +1,15 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -58,13 +61,20 @@ public class QueryOnSchema extends HttpServlet {
 		catch(ServletException e) {
 			//e.printStackTrace();
 			throw e;
+		} catch (ClassNotFoundException e) {
+			throw new ServletException(e);
+		} catch (SQLException e) {
+			throw new ServletException(e);
+		} catch (NamingException e) {
+			e.printStackTrace();
+			throw new ServletException(e);
 		}
 	}
 	
 	/*
 	 * XXX: output syntax? don't think so...
 	 */
-	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {
 		List<String> partz = parseQS(req);
 		if(partz.size()<2) {
 			throw new BadRequestException("Malformed URL");
@@ -76,7 +86,7 @@ public class QueryOnSchema extends HttpServlet {
 		String fullObjectName = partz.get(1);
 		String schemaName = null;
 		String objectName = fullObjectName;
-		String modelId = req.getParameter("model");
+		String modelId = SchemaModelUtils.getModelId(req);
 		
 		if(objectName.contains(".")) {
 			String[] onPartz = objectName.split("\\.");
@@ -99,6 +109,9 @@ public class QueryOnSchema extends HttpServlet {
 		ShiroUtils.checkPermission(currentUser, objType+":SHOW", fullObjectName);
 		
 		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelId);
+		if(model==null) {
+			throw new BadRequestException("Unknown model: "+modelId);
+		}
 
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
