@@ -14,7 +14,7 @@
 	<script src="js/jsdifflib/difflib.js"></script>
 	<script src="js/jsdifflib/diffview.js"></script>
 	<script>
-var queryOnUrl = 'q/';
+var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
 
 var typemap = {
@@ -126,7 +126,8 @@ onObjTypeChanged = function() {
 onObjectChanged = function() {}
 
 loadObjectList = function() {
-	var type = typemap[document.getElementById('type').value];
+	var origType = document.getElementById('type').value;
+	var type = typemap[origType];
 	var model = document.getElementById(defaultModelId).value;
 	var schema = document.getElementById('schema').value;
 	var url = queryOnUrl+type
@@ -143,7 +144,11 @@ loadObjectList = function() {
 			var keys = Object.keys(data);
 			data = data[Object.keys(data)[0]];
 			//console.log(data);
-			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
+			//TODO filtering data on client, should be on server...
+			loadSelect(data, 'object', function(data) { if(data.type && data.type!=origType) { return null; }; return (data.schemaName?data.schemaName+".":"")+data.name; });
+		},
+		error: function(error) {
+			console.log("loadObjectList error=",error);
 		}
 	});
 }
@@ -163,7 +168,7 @@ getDDL = function(modelId, contentId, callback) {
 			var container = block.parentNode;
 			var mblock = document.getElementById(contentId+"-msg");
 			container.style.display = 'block';
-			block.innerHTML = data;
+			block.innerHTML = safeTags(data);
 			mblock.innerHTML = '';
 			mblock.style.display = 'none';
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
@@ -274,8 +279,15 @@ loadSelect = function(data, selectId, callback) {
 	if(!callback) { callback = function(obj) { return obj; } }
 	$('#'+selectId).empty();
 	for(var i=0;i<data.length;i++) {
+		var name = callback(data[i]);
+		if(name==null) { continue; }
 		$('#'+selectId).append("<option value='"+callback(data[i])+"'>"+callback(data[i])+"</option>");
 	}
+}
+
+// see: http://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
+safeTags = function (str) {
+	return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
 }
 
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {
