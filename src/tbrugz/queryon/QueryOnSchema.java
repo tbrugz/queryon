@@ -1,7 +1,6 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,6 +112,8 @@ public class QueryOnSchema extends HttpServlet {
 			throw new BadRequestException("Unknown model: "+modelId);
 		}
 
+		refreshModel(type, prop, modelId, model, schemaName, objectName);
+		
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
 		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type, schemaName, objectName);
@@ -121,6 +122,9 @@ public class QueryOnSchema extends HttpServlet {
 		}
 		
 		resp.getWriter().write(dbid.getDefinition(true));
+	}
+	
+	void refreshModel(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName) throws ClassNotFoundException, SQLException, NamingException {
 	}
 	
 }
