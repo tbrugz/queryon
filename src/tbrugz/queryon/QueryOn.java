@@ -783,6 +783,13 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("unknown object: "+reqspec.object);
 		}
 		
+		rs = filterStatus(rs, reqspec, currentUser);
+		
+		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
+		if(rs!=null) { rs.close(); }
+	}
+	
+	ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser) throws SQLException {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
@@ -790,8 +797,7 @@ public class QueryOn extends HttpServlet {
 			// filter by [object-type]:SELECT:[schema]:[name]
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[6]:SELECT:[1]:[2]");
 		}
-		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
-		if(rs!=null) { rs.close(); }
+		return rs;
 	}
 	
 	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {

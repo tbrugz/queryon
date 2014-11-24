@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,20 +20,24 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
-import tbrugz.sqldump.dbmodel.Column;
-import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
 public class QueryOnInstant extends QueryOn {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnInstant.class);
 	
 	static final TableType[] tableTypes = new TableType[]{ TableType.TABLE };
+	static final TableType[] viewTypes = new TableType[]{ TableType.VIEW, TableType.MATERIALIZED_VIEW, TableType.SYSTEM_VIEW };
+	
 	static final List<TableType> tableTypesList = Arrays.asList(tableTypes);
+	static final List<TableType> viewTypesList = Arrays.asList(viewTypes);
 	
 	@Override
 	void doStatus(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
@@ -41,15 +46,28 @@ public class QueryOnInstant extends QueryOn {
 		}
 		
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		//DatabaseMetaData dbmd = conn.getMetaData();
 		DBMSResources res = DBMSResources.instance();
 		DBMSFeatures feat = res.databaseSpecificFeaturesClass();
+		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
 		String schemaName = reqspec.params.get(0);
+		ResultSet rs;
+		String objectName;
 		
 		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
-			grabTablesNames(model, schemaName, conn.getMetaData());
+			//XXX: chache into model?
+			List<Relation> rels = grabRelationNames(schemaName, dbmd, tableTypesList);
+			objectName = SO_TABLE;
+			//List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableAllColumns, rels, Relation.class);
 		}
 		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
-			feat.grabDBViews(model, schemaName, conn); //XXX: too much data?
+			//XXX: chache into model?
+			List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
+			//log.info("md: "+dbmd.getClass());
+			objectName = SO_VIEW;
+			//List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
 		}
 		else if(SO_RELATION.equalsIgnoreCase(reqspec.object)) {
 			throw new BadRequestException("status not implemented for "+reqspec.object+" object");
@@ -58,126 +76,97 @@ public class QueryOnInstant extends QueryOn {
 			//feat.grabDBViews(model, schemaName, conn); //XXX: too much data?
 		}
 		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
-			feat.grabDBExecutables(model, schemaName, conn); //XXX: too much data?
+			objectName = SO_EXECUTABLE;
+			//XXX: chache into model?
+			//TODO: split executable's types
+			//XXX: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
+			//XXX: packages: get package names from procedures/functions catalog names
+			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			
+			//long initT = System.currentTimeMillis();
+			List<ExecutableObject> proc = jgrab.doGrabProcedures(dbmd, schemaName, false);
+			List<ExecutableObject> func = jgrab.doGrabFunctions(dbmd, schemaName, false);
+			//System.out.println("grab executables on ["+schemaName+"]: elapsed="+(System.currentTimeMillis()-initT));
+			
+			proc.addAll(func);
+			
+			//List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 		}
 		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
-			grabFKs(model, schemaName, conn.getMetaData());
+			objectName = SO_FK;
+			//XXX: chache into model?
+			List<FK> list = grabFKs(schemaName, dbmd);
+			//List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
+			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
 		}
 		else {
+			conn.close();
 			throw new BadRequestException("unknown object: "+reqspec.object);
 		}
 		
 		conn.close();
 		
-		super.doStatus(model, reqspec, currentUser, resp);
+		//super.doStatus(model, reqspec, currentUser, resp);
+		rs = filterStatus(rs, reqspec, currentUser);
+		
+		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, null, null, true, resp);
+		if(rs!=null) { rs.close(); }
 	}
 	
-	static void grabTablesNames(SchemaModel model, String schemaName, DatabaseMetaData dbmd) throws SQLException {
+	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypesList) throws SQLException {
+		List<Relation> ret = new ArrayList<Relation>();
 		ResultSet rs = dbmd.getTables(null, schemaName, null, null);
+		int count = 0;
 		while(rs.next()) {
 			String name = rs.getString("TABLE_NAME");
-			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
-			if(t!=null) { continue; }
-			TableType ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), name);
-			if(!tableTypesList.contains(ttype)) { continue; }
+			//Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
+			String type = rs.getString("TABLE_TYPE");
+			TableType ttype = TableType.getTableType(type, name);
+			if(!tableTypesList.contains(ttype)) {
+				log.info("ignored table: "+name+" ["+type+"/"+ttype+"] should be of type ["+tableTypesList+"]");
+				continue;
+			}
+			//if(t!=null) { continue; }
 			
 			Table newt = new Table();
 			newt.setSchemaName(schemaName);
 			newt.setName(name);
+			newt.setType(ttype);
 			newt.setRemarks(rs.getString("REMARKS"));
-			boolean added = model.getTables().add(newt);
-			if(!added) {
+			ret.add(newt);
+			count++;
+			//boolean added = model.getTables().add(newt);
+			/*if(!added) {
 				log.warn("error adding table: "+name);
 			}
+			else {
+				count++;
+			}*/
 		}
+		log.warn(count+" objects added");
+		return ret;
 	}
 
-	static void grabTable(SchemaModel model, String schemaName, String tableName, DatabaseMetaData dbmd, DBMSFeatures feat) throws SQLException {
-		if(tableName==null) throw new IllegalArgumentException("tableName cannot be null");
-		String fullTableName = (schemaName!=null?schemaName+".":"")+tableName;
-		log.info("grabbing new table: "+fullTableName);
-		ResultSet rs = dbmd.getTables(null, schemaName, tableName, null);
-		while(rs.next()) {
-			String name = rs.getString("TABLE_NAME");
-			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
-			//if(t!=null && t.getColumns()!=null && t.getColumns().size()>0) { continue; }
-			if(t!=null && t.getColumnCount()>0) { continue; }
-			
-			Table newt = new Table();
-			newt.setSchemaName(schemaName);
-			newt.setName(name);
-			newt.setRemarks(rs.getString("REMARKS"));
-
-			//feat.addTableSpecificFeatures(newt, rs);
-			
-			//----
-			//columns
-			ResultSet cols = dbmd.getColumns(null, schemaName, tableName, null);
-			int numCol = 0;
-			while(cols.next()) {
-				Column c = JDBCSchemaGrabber.retrieveColumn(cols);
-				newt.getColumns().add(c);
-				//feat.addColumnSpecificFeatures(c, cols);
-				numCol++;
-				//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
-			}
-			JDBCSchemaGrabber.closeResultSetAndStatement(cols);
-			if(numCol==0) {
-				throw new SQLException("Table "+fullTableName+" contains no columns");
-			}
-			
-			//PKs
-			newt.getConstraints().addAll(JDBCSchemaGrabber.grabRelationPKs(dbmd, newt));
-
-			//FKs
-			model.getForeignKeys().addAll(JDBCSchemaGrabber.grabRelationFKs(dbmd, feat, newt, true, false));
-			
-			/*
-			//GRANTs
-			if(doSchemaGrabTableGrants) {
-				log.debug("getting grants from "+fullTablename);
-				ResultSet grantrs = dbmd.getTablePrivileges(null, newt.getSchemaName(), tableName);
-				newt.setGrants( grabSchemaGrants(grantrs) );
-				closeResultSetAndStatement(grantrs);
-			}
-			
-			//INDEXes
-			if(doSchemaGrabIndexes && TableType.TABLE.equals(table.getType()) && !tableOnly) {
-				log.debug("getting indexes from "+fullTablename);
-				ResultSet indexesrs = dbmd.getIndexInfo(null, newt.getSchemaName(), tableName, false, false);
-				grabSchemaIndexes(indexesrs, model.getIndexes());
-				closeResultSetAndStatement(indexesrs);
-			}
-			*/
-			
-			//----
-			boolean added = model.getTables().add(newt);
-			if(!added) {
-				model.getTables().remove(newt);
-				added = model.getTables().add(newt);
-			}
-			if(!added) {
-				log.warn("error adding table: "+name);
-			}
-		}
-	}
-	
-	static void grabFKs(SchemaModel model, String schemaName, DatabaseMetaData dbmd) throws SQLException {
+	static List<FK> grabFKs(String schemaName, DatabaseMetaData dbmd) throws SQLException {
+		List<FK> ret = new ArrayList<FK>();
 		ResultSet fkrs = dbmd.getExportedKeys(null, schemaName, null);
 		int count = 0;
 		while(fkrs.next()) {
 			String fkName = fkrs.getString("FK_NAME");
-			FK fk = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getForeignKeys(), schemaName, fkName);
-			if(fk!=null) { continue; }
+			//FK fk = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getForeignKeys(), schemaName, fkName);
+			//if(fk!=null) { continue; }
 			
 			FK newfk = new FK();
-			newfk.setSchemaName(schemaName);
+			newfk.setSchemaName(schemaName); //fkSchemaName
 			newfk.setName(fkName);
 			newfk.setFkTable(fkrs.getString("FKTABLE_NAME"));
 			newfk.setPkTable(fkrs.getString("PKTABLE_NAME"));
-			model.getForeignKeys().add(newfk);
+			newfk.setPkTableSchemaName(fkrs.getString("PKTABLE_SCHEM"));
+			ret.add(newfk);
 			count++;
 		}
 		log.info("FKs count = "+count);
+		return ret;
 	}
 }
