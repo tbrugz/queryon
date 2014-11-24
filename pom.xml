@@ -85,7 +85,7 @@
         <artifactId>maven-war-plugin</artifactId>
         <version>2.4</version>
         <configuration>
-          <webappDirectory>web</webappDirectory>
+          <!-- webappDirectory>web</webappDirectory-->
           <warSourceDirectory>web</warSourceDirectory> <!-- http://maven.apache.org/plugins/maven-war-plugin/war-mojo.html#warSourceDirectory -->
           <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> <!-- skinny war -->
         </configuration>

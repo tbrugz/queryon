@@ -1149,7 +1149,7 @@ public class QueryOn extends HttpServlet {
 	 * - !dbinfo ; !describe ; !tables ; !columns <table> ; !exportedkeys ; !importedkeys ; !indexes ; !metadata ; !primarykeys, !procedures ; // sqlline - http://sqlline.sourceforge.net/
 	 * - $showtables [<xxx>] ; $showcolumns <xxx> ; $tables [<xxx>] ; $columns <xxx> ; $schemas
 	 * 
-	 * XXX: getCatalogs()? exportedkeys, importedkeys, indexes, primarykeys
+	 * TODO: getCatalogs()? exportedkeys, importedkeys, indexes, primarykeys
 	 */
 	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowSchemas(), new ShowTables(), new ShowColumns() };
 	
