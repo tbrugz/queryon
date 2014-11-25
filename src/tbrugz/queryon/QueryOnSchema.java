@@ -116,15 +116,35 @@ public class QueryOnSchema extends HttpServlet {
 		
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
-		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type, schemaName, objectName);
+		DBObjectType type4Filter = type4filter(type);
+		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type4Filter, schemaName, objectName);
 		if(dbid==null) {
-			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type+" not found", 404);
+			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found", 404);
 		}
 		
 		resp.getWriter().write(dbid.getDefinition(true));
+		/*
+		String script = null;
+		if(dbid instanceof Table) {
+			Table t = (Table) dbid;
+			script = t.getDefinition(true, true, false, false, false, null, / *List<FK>* / null);
+		}
+		else {
+			script = dbid.getDefinition(true);
+		}
+		resp.getWriter().write(script);
+		*/
 	}
 	
 	void refreshModel(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName) throws ClassNotFoundException, SQLException, NamingException {
+	}
+	
+	DBObjectType type4filter(DBObjectType type) {
+		switch (type) {
+		case PACKAGE: return DBObjectType.PACKAGE_BODY;
+		default:
+			return type;
+		}
 	}
 	
 }

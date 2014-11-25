@@ -353,7 +353,9 @@ public class QueryOn extends HttpServlet {
 		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), reqspec.modelId);
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
-		if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
+		DBObjectType statusType = statusObject(reqspec.object.toUpperCase());
+		//if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
+		if(statusType!=null) {
 			atype = ActionType.STATUS;
 			otype = reqspec.object.toLowerCase();
 		}
@@ -477,7 +479,7 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case STATUS:
-				doStatus(model, reqspec, currentUser, resp);
+				doStatus(model, statusType, reqspec, currentUser, resp);
 				break;
 			case MANAGE:
 				doManage(reqspec, req, resp);
@@ -743,7 +745,7 @@ public class QueryOn extends HttpServlet {
 	static final List<String> viewAllColumns  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
 	
-	void doStatus(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
@@ -1177,5 +1179,15 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		return false;
+	}
+	
+	static DBObjectType statusObject(String name) {
+		try {
+			DBObjectType type = DBObjectType.valueOf(name);
+			return type;
+		}
+		catch(IllegalArgumentException e) {
+			return null;
+		}
 	}
 }
