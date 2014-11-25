@@ -23,13 +23,38 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 
 	void refreshModel(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName) throws ClassNotFoundException, SQLException, NamingException {
 		//XXX update table|fks?
-		if(type==DBObjectType.TABLE) {
-			Connection conn = DBUtil.initDBConn(prop, modelId);
-			DBMSResources res = DBMSResources.instance();
-			DBMSFeatures feat = res.databaseSpecificFeaturesClass();
-			grabTable(model, schemaName, objectName, conn.getMetaData(), feat); // grab table & update model
-			conn.close();
+		Connection conn = DBUtil.initDBConn(prop, modelId);
+		DBMSResources res = DBMSResources.instance();
+		DBMSFeatures feat = res.databaseSpecificFeaturesClass();
+		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+		
+		switch(type) {
+		case TABLE:
+			grabTable(model, schemaName, objectName, dbmd, feat); // grab table & update model
+			break;
+		case VIEW:
+		case MATERIALIZED_VIEW:
+			feat.grabDBViews(model, schemaName, objectName, conn);
+			break;
+		case PROCEDURE:
+		case FUNCTION:
+		case PACKAGE:
+		case PACKAGE_BODY:
+		case EXECUTABLE:
+			feat.grabDBExecutables(model, schemaName, objectName, conn);
+			break;
+		case TRIGGER:
+			feat.grabDBTriggers(model, schemaName, objectName, conn);
+			break;
+		case FK:
+			//XXX how to get FK from dbmd by name? just grab from model (the 'cache')
+			log.info("object of type "+type+" grabbed (?) from model cache");
+			break;
+		default:
+			log.warn("object of type "+type+" cannot be refreshed");
 		}
+		
+		conn.close();
 	}
 	
 	void grabTable(SchemaModel model, String schemaName, String tableName, DatabaseMetaData dbmd, DBMSFeatures feat) throws SQLException {

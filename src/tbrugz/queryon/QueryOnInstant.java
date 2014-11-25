@@ -55,18 +55,18 @@ public class QueryOnInstant extends QueryOn {
 		String objectName;
 		
 		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
-			//XXX: chache into model?
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, tableTypesList);
 			objectName = SO_TABLE;
 			//List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
+			//XXX: cache into model?
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableAllColumns, rels, Relation.class);
 		}
 		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
-			//XXX: chache into model?
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
 			//log.info("md: "+dbmd.getClass());
 			objectName = SO_VIEW;
 			//List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
+			//XXX: cache into model?
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
 		}
 		else if(SO_RELATION.equalsIgnoreCase(reqspec.object)) {
@@ -77,7 +77,6 @@ public class QueryOnInstant extends QueryOn {
 		}
 		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
 			objectName = SO_EXECUTABLE;
-			//XXX: chache into model?
 			//TODO: split executable's types
 			//XXX: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
 			//XXX: packages: get package names from procedures/functions catalog names
@@ -89,15 +88,22 @@ public class QueryOnInstant extends QueryOn {
 			//System.out.println("grab executables on ["+schemaName+"]: elapsed="+(System.currentTimeMillis()-initT));
 			
 			proc.addAll(func);
+
+			//XXX: cache into model?
 			
 			//List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 		}
 		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
 			objectName = SO_FK;
-			//XXX: chache into model?
-			List<FK> list = grabFKs(schemaName, dbmd);
+			//List<FK> list = grabFKs(schemaName, dbmd);
+			
+			ResultSet fkrs = dbmd.getImportedKeys(null, schemaName, null);
+			List<FK> list = JDBCSchemaGrabber.grabSchemaFKs(fkrs, feat);
+			
 			//List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
+			//XXXxx: caching into model...
+			model.getForeignKeys().addAll(list);
 			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
 		}
 		else {
@@ -124,7 +130,7 @@ public class QueryOnInstant extends QueryOn {
 			String type = rs.getString("TABLE_TYPE");
 			TableType ttype = TableType.getTableType(type, name);
 			if(!tableTypesList.contains(ttype)) {
-				log.info("ignored table: "+name+" ["+type+"/"+ttype+"] should be of type ["+tableTypesList+"]");
+				//log.info("ignored table: "+name+" ["+type+"/"+ttype+"] should be of type ["+tableTypesList+"]");
 				continue;
 			}
 			//if(t!=null) { continue; }
@@ -144,10 +150,11 @@ public class QueryOnInstant extends QueryOn {
 				count++;
 			}*/
 		}
-		log.warn(count+" objects added");
+		log.info(count+" objects added");
 		return ret;
 	}
 
+	/*
 	static List<FK> grabFKs(String schemaName, DatabaseMetaData dbmd) throws SQLException {
 		List<FK> ret = new ArrayList<FK>();
 		ResultSet fkrs = dbmd.getExportedKeys(null, schemaName, null);
@@ -166,7 +173,8 @@ public class QueryOnInstant extends QueryOn {
 			ret.add(newfk);
 			count++;
 		}
-		log.info("FKs count = "+count);
+		//log.info("FKs count = "+count);
 		return ret;
 	}
+	*/
 }
