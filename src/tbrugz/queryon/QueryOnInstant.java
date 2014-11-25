@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
@@ -20,6 +22,7 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Relation;
@@ -29,6 +32,9 @@ import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
+/*
+ * TODO: 'instant' servlets SHOULD NOT modify model, right?
+ */
 public class QueryOnInstant extends QueryOn {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnInstant.class);
@@ -40,46 +46,82 @@ public class QueryOnInstant extends QueryOn {
 	static final List<TableType> viewTypesList = Arrays.asList(viewTypes);
 	
 	@Override
-	void doStatus(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		if(reqspec.params==null || reqspec.params.size()<1) {
 			throw new BadRequestException("no schema informed");
 		}
 		
-		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
-		//DatabaseMetaData dbmd = conn.getMetaData();
-		DBMSResources res = DBMSResources.instance();
-		DBMSFeatures feat = res.databaseSpecificFeaturesClass();
-		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
-		String schemaName = reqspec.params.get(0);
+		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		final DBMSResources res = DBMSResources.instance();
+		final DBMSFeatures feat = res.databaseSpecificFeaturesClass();
+		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+		final String schemaName = reqspec.params.get(0);
 		ResultSet rs;
-		String objectName;
 		
-		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
+		//final DBObjectType type = DBObjectType.valueOf(reqspec.object.toUpperCase());
+		final String objectName = statusType.desc();
+		
+		switch (statusType) {
+		case TABLE: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, tableTypesList);
-			objectName = SO_TABLE;
-			//List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
-			//XXX: cache into model?
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableAllColumns, rels, Relation.class);
+			break;
 		}
-		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
+		case VIEW: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
-			//log.info("md: "+dbmd.getClass());
-			objectName = SO_VIEW;
-			//List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
-			//XXX: cache into model?
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
+			break;
 		}
-		else if(SO_RELATION.equalsIgnoreCase(reqspec.object)) {
-			throw new BadRequestException("status not implemented for "+reqspec.object+" object");
+		case RELATION: {
+			throw new BadRequestException("status not implemented for "+statusType+" object");
 			
 			//grabTables(model, schemaName, conn.getMetaData());
 			//feat.grabDBViews(model, schemaName, conn); //XXX: too much data?
 		}
-		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_EXECUTABLE;
-			//TODO: split executable's types
-			//XXX: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
-			//XXX: packages: get package names from procedures/functions catalog names
+		case FUNCTION: {
+			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			List<ExecutableObject> func = jgrab.doGrabFunctions(dbmd, schemaName, false);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, func, ExecutableObject.class);
+			//XXX: filter by type 'FUNCTION', filter by packageName == null ?
+			break;
+		}
+		case PROCEDURE: {
+			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
+			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			List<ExecutableObject> proc = jgrab.doGrabProcedures(dbmd, schemaName, false);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
+			//XXX: filter by type 'PROCEDURE', filter by packageName == null ?
+			break;
+		}
+		case PACKAGE: {
+			//XXXxx: packages: get package names from procedures/functions catalog names
+			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			List<ExecutableObject> proc = jgrab.doGrabProcedures(dbmd, schemaName, false);
+			List<ExecutableObject> func = jgrab.doGrabFunctions(dbmd, schemaName, false);
+			proc.addAll(func);
+
+			List<ExecutableObject> pkgs = new ArrayList<ExecutableObject>();
+			Set<String> pkgNames = new TreeSet<String>();
+			for(ExecutableObject eo: proc) {
+				if(eo.getPackageName()!=null) {
+					pkgNames.add(eo.getPackageName());
+				}
+			}
+			for(String pkg: pkgNames) {
+				ExecutableObject eo = new ExecutableObject();
+				eo.setName(pkg);
+				eo.setSchemaName(schemaName);
+				eo.setType(DBObjectType.PACKAGE);
+				pkgs.add(eo);
+			}
+
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, pkgs, ExecutableObject.class);
+			break;
+		}
+		case EXECUTABLE: {
+			throw new BadRequestException("status not implemented for "+statusType+" object");
+			//TODOne: split executable's types
+			/*
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
 			
 			//long initT = System.currentTimeMillis();
@@ -89,31 +131,29 @@ public class QueryOnInstant extends QueryOn {
 			
 			proc.addAll(func);
 
-			//XXX: cache into model?
-			
-			//List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
+			break;
+			*/
 		}
-		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_FK;
+		case FK: {
 			//List<FK> list = grabFKs(schemaName, dbmd);
 			
 			ResultSet fkrs = dbmd.getImportedKeys(null, schemaName, null);
 			List<FK> list = JDBCSchemaGrabber.grabSchemaFKs(fkrs, feat);
 			
-			//List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
-			//XXXxx: caching into model...
-			model.getForeignKeys().addAll(list);
+			//XXXxx: not caching into model...
+			//model.getForeignKeys().addAll(list);
 			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
+			break;
 		}
-		else {
+		default: {
 			conn.close();
-			throw new BadRequestException("unknown object: "+reqspec.object);
+			throw new BadRequestException("unknown object: "+statusType);
+		}
 		}
 		
 		conn.close();
 		
-		//super.doStatus(model, reqspec, currentUser, resp);
 		rs = filterStatus(rs, reqspec, currentUser);
 		
 		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, null, null, true, resp);
