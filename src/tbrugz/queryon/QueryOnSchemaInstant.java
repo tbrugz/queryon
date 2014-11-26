@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -7,6 +8,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.servlet.http.HttpServletResponse;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -28,7 +30,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			doSchemaGrabTableIndexes = false,
 			doSchemaGrabTableTriggers = false;
 
-	void refreshModel(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName) throws ClassNotFoundException, SQLException, NamingException {
+	@Override
+	void dumpObject(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName, HttpServletResponse resp)
+			throws ClassNotFoundException, SQLException, NamingException, IOException {
 		//XXX update table|fks?
 		Connection conn = DBUtil.initDBConn(prop, modelId);
 		DBMSResources res = DBMSResources.instance();
@@ -37,9 +41,11 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		
 		switch(type) {
 		case TABLE:
-			grabTable(model, schemaName, objectName, dbmd, feat); // grab table & update model
-			//XXX: grab triggers & FKs?
-			break;
+			Table t = grabTable(schemaName, objectName, dbmd, feat); // grab table & update model
+			dump(t, resp);
+			//XXX: grab (& dump) triggers & FKs?
+			conn.close(); return;
+			//break;
 		case VIEW:
 		case MATERIALIZED_VIEW:
 			feat.grabDBViews(model, schemaName, objectName, conn);
@@ -63,20 +69,27 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			log.warn("object of type "+type+" cannot be refreshed");
 		}
 		
+		super.dumpObject(type, prop, modelId, model, schemaName, objectName, resp);
+		
 		conn.close();
 	}
 	
-	void grabTable(SchemaModel model, String schemaName, String tableName, DatabaseMetaData dbmd, DBMSFeatures feat) throws SQLException {
+	void dump(DBIdentifiable dbid, HttpServletResponse resp) throws IOException {
+		resp.getWriter().write(dbid.getDefinition(true));
+	}
+	
+	Table grabTable(String schemaName, String tableName, DatabaseMetaData dbmd, DBMSFeatures feat) throws SQLException {
 		if(tableName==null) throw new IllegalArgumentException("tableName cannot be null");
 		String fullTableName = (schemaName!=null?schemaName+".":"")+tableName;
 		log.info("grabbing new table: "+fullTableName);
+		Table ret = null;
 		ResultSet rs = dbmd.getTables(null, schemaName, tableName, null);
 		JDBCSchemaGrabber grabber = new JDBCSchemaGrabber();
 		while(rs.next()) {
 			String name = rs.getString("TABLE_NAME");
-			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
+			//Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
 			//if(t!=null && t.getColumns()!=null && t.getColumns().size()>0) { continue; }
-			if(t!=null && t.getColumnCount()>0) { continue; }
+			//if(t!=null && t.getColumnCount()>0) { continue; }
 			
 			Table newt = feat.getTableObject();
 			newt.setSchemaName(schemaName);
@@ -106,7 +119,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			newt.getConstraints().addAll(JDBCSchemaGrabber.grabRelationPKs(dbmd, newt));
 
 			//FKs
-			model.getForeignKeys().addAll(JDBCSchemaGrabber.grabRelationFKs(dbmd, feat, newt, true, false));
+			//model.getForeignKeys().addAll(JDBCSchemaGrabber.grabRelationFKs(dbmd, feat, newt, true, false));
 			
 			//GRANTs
 			if(doSchemaGrabTableGrants) {
@@ -116,6 +129,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 				JDBCSchemaGrabber.closeResultSetAndStatement(grantrs);
 			}
 			
+			/*
 			//INDEXes
 			if(doSchemaGrabTableIndexes) {// && TableType.TABLE.equals(newt.getType())) {
 				//log.debug("getting indexes from "+fullTableName);
@@ -136,17 +150,27 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			if(doSchemaGrabTableTriggers) {
 				feat.grabDBTriggers(model, schemaName, name, null, dbmd.getConnection());
 			}
-			
+			*/
+			if(ret==null) {
+				ret = newt;
+			}
+			else {
+				rs.close();
+				throw new IllegalStateException("more than 1 table with same name? ["+fullTableName+"]");
+			}
 			//----
-			boolean added = model.getTables().add(newt);
+			/*boolean added = tables.add(newt);
 			if(!added) {
-				model.getTables().remove(newt);
-				added = model.getTables().add(newt);
+				tables.remove(newt);
+				added = tables.add(newt);
+				if(!added) {
+					log.warn("error adding table: "+name);
+				}
 			}
-			if(!added) {
-				log.warn("error adding table: "+name);
-			}
+			*/
 		}
+		rs.close();
+		return ret;
 	}
 	
 }

@@ -112,17 +112,8 @@ public class QueryOnSchema extends HttpServlet {
 			throw new BadRequestException("Unknown model: "+modelId);
 		}
 
-		refreshModel(type, prop, modelId, model, schemaName, objectName);
+		dumpObject(type, prop, modelId, model, schemaName, objectName, resp);
 		
-		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
-		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
-		DBObjectType type4Filter = type4filter(type);
-		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type4Filter, schemaName, objectName);
-		if(dbid==null) {
-			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found", 404);
-		}
-		
-		resp.getWriter().write(dbid.getDefinition(true));
 		/*
 		String script = null;
 		if(dbid instanceof Table) {
@@ -136,7 +127,17 @@ public class QueryOnSchema extends HttpServlet {
 		*/
 	}
 	
-	void refreshModel(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName) throws ClassNotFoundException, SQLException, NamingException {
+	void dumpObject(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName, HttpServletResponse resp) 
+			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
+		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
+		DBObjectType type4Filter = type4filter(type);
+		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type4Filter, schemaName, objectName);
+		if(dbid==null) {
+			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found", 404);
+		}
+		
+		resp.getWriter().write(dbid.getDefinition(true));
 	}
 	
 	DBObjectType type4filter(DBObjectType type) {
