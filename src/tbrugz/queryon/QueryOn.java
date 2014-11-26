@@ -87,15 +87,8 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	// 'status objects' (SO)
-	public static final String SO_TABLE = "table", 
-			SO_VIEW = "view",
-			SO_RELATION = "relation", //tables + views 
-			SO_EXECUTABLE = "executable",
-			SO_FK = "fk";
-	
-	public static final String[] STATUS_OBJECTS = {
-		SO_TABLE, SO_VIEW, SO_RELATION, SO_EXECUTABLE, SO_FK,
-		SO_TABLE.toUpperCase(), SO_VIEW.toUpperCase(), SO_RELATION.toUpperCase(), SO_EXECUTABLE.toUpperCase(), SO_FK.toUpperCase()
+	public static final DBObjectType[] STATUS_OBJECTS = {
+		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.RELATION, DBObjectType.EXECUTABLE, DBObjectType.FK
 	};
 	
 	public static final String ACTION_QUERY_ANY = "QueryAny";
@@ -347,17 +340,18 @@ public class QueryOn extends HttpServlet {
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 		
-		String otype = null;
-		ActionType atype = null;
+		final String otype;
+		final ActionType atype;
 		DBIdentifiable dbobj = null;
 		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), reqspec.modelId);
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
+		
 		DBObjectType statusType = statusObject(reqspec.object.toUpperCase());
-		//if(Arrays.asList(STATUS_OBJECTS).contains(reqspec.object)) {
+		//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
 		if(statusType!=null) {
 			atype = ActionType.STATUS;
-			otype = reqspec.object.toLowerCase();
+			otype = statusType.name();
 		}
 		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
 			atype = ActionType.SELECT_ANY;
@@ -749,40 +743,40 @@ public class QueryOn extends HttpServlet {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
-		String objectName = null;
+		final String objectName = statusType.desc();
 		//XXX: filter by schemaName, name? ResultSetFilterDecorator(rs, colpositions, colvalues)?
-		if(SO_TABLE.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_TABLE;
+		switch (statusType) {
+		case TABLE: {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
 			rs = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, tableAllColumns, list, Table.class);
 			//XXX importedFKs = ...
+			break;
 		}
-		else if(SO_VIEW.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_VIEW;
+		case VIEW: {
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
 			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, list, View.class);
 			//XXX importedFKs = ...
+			break;
 		}
-		else if(SO_RELATION.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_RELATION;
+		case RELATION: {
 			List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables()); //XXX: sort relations?
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, list, Relation.class);
-			// importedFKs = ... ?
+			//XXX importedFKs = ... ?
+			break;
 		}
-		else if(SO_EXECUTABLE.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_EXECUTABLE;
+		case EXECUTABLE: {
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, list, ExecutableObject.class);
-			//XXX importedFKs = ...
+			break;
 		}
-		else if(SO_FK.equalsIgnoreCase(reqspec.object)) {
-			objectName = SO_FK;
+		case FK: {
 			List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
 			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
-			//XXX importedFKs = ...
+			break;
 		}
-		else {
-			throw new BadRequestException("unknown object: "+reqspec.object);
+		default: {
+			throw new BadRequestException("unknown status object: "+statusType);
+		}
 		}
 		
 		rs = filterStatus(rs, reqspec, currentUser);

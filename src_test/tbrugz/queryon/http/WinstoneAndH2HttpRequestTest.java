@@ -154,6 +154,8 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		try {
 			HttpEntity entity1 = response1.getEntity();
+			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+			//System.out.println("content: "+getContent(response1));
 			InputStream instream = entity1.getContent();
 			Document doc = dBuilder.parse(instream);
 			NodeList nl = doc.getElementsByTagName("tr");
