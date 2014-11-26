@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -20,7 +22,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 
 /*
- * TODO: 'instant' servlets SHOULD NOT modify model, right?
+ * TODOne: 'instant' servlets SHOULD NOT modify model, right?
  */
 public class QueryOnSchemaInstant extends QueryOnSchema {
 
@@ -33,47 +35,65 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	@Override
 	void dumpObject(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
-		//XXX update table|fks?
 		Connection conn = DBUtil.initDBConn(prop, modelId);
+		try {
+			dump(getObject(type, schemaName, objectName, conn), resp);
+		}
+		finally {
+			conn.close();
+		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, Connection conn) throws SQLException {
 		DBMSResources res = DBMSResources.instance();
 		DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+
+		List ret = new ArrayList();
 		
 		switch(type) {
 		case TABLE:
 			Table t = grabTable(schemaName, objectName, dbmd, feat); // grab table & update model
-			dump(t, resp);
+			//dump(t, resp);
 			//XXX: grab (& dump) triggers & FKs?
-			conn.close(); return;
+			return t;
 			//break;
 		case VIEW:
 		case MATERIALIZED_VIEW:
 			//log.info("before:: #view = "+model.getViews().size()+" ["+schemaName+"."+objectName+"]");
-			feat.grabDBViews(model.getViews(), schemaName, objectName, conn);
-			//log.info("after:: #view = "+model.getViews().size());
+			//List<View> views = new ArrayList<View>();
+			feat.grabDBViews(ret, schemaName, objectName, conn);
 			break;
 		case PROCEDURE:
 		case FUNCTION:
 		case PACKAGE:
 		case PACKAGE_BODY:
 		case EXECUTABLE:
-			feat.grabDBExecutables(model.getExecutables(), schemaName, objectName, conn);
+			feat.grabDBExecutables(ret, schemaName, objectName, conn);
+			if(type==DBObjectType.PACKAGE || type==DBObjectType.PACKAGE_BODY) {
+				QueryOnInstant.keepExecsByType(ret, type); //DBObjectType.PACKAGE_BODY);
+			}
 			break;
 		case TRIGGER:
 			//XXX: really grab trigger?
-			feat.grabDBTriggers(model.getTriggers(), schemaName, null, objectName, conn);
+			feat.grabDBTriggers(ret, schemaName, null, objectName, conn);
 			break;
 		case FK:
 			//XXX how to get FK from dbmd by name? just grab from model (the 'cache')
-			log.info("object of type "+type+" grabbed (?) from model cache");
-			break;
+			//log.info("object of type "+type+" grabbed (?) from model cache");
+			//break;
 		default:
-			log.warn("object of type "+type+" cannot be refreshed");
+			log.warn("object of type "+type+" cannot be grabbed");
 		}
-		
-		super.dumpObject(type, prop, modelId, model, schemaName, objectName, resp);
-		
-		conn.close();
+
+		if(ret.size()==0) {
+			throw new BadRequestException("Object of type '"+type+"' not found: "+schemaName+"."+objectName, 404);
+		}
+		if(ret.size()>1) {
+			log.warn("more than one [#"+ret.size()+"] object of type '"+type+"' grabbed: "+schemaName+"."+objectName);
+		}
+		return (DBIdentifiable) ret.get(0);
 	}
 	
 	void dump(DBIdentifiable dbid, HttpServletResponse resp) throws IOException {

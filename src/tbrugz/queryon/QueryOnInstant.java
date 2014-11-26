@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -81,6 +82,7 @@ public class QueryOnInstant extends QueryOn {
 		case FUNCTION: {
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
 			List<ExecutableObject> func = jgrab.doGrabFunctions(dbmd, schemaName, false);
+			removeExecsWithinPackages(func);
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, func, ExecutableObject.class);
 			//XXX: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
@@ -89,10 +91,13 @@ public class QueryOnInstant extends QueryOn {
 			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
 			List<ExecutableObject> proc = jgrab.doGrabProcedures(dbmd, schemaName, false);
+			removeExecsWithinPackages(proc);
+			keepExecsByType(proc, DBObjectType.PROCEDURE);
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 			//XXX: filter by type 'PROCEDURE', filter by packageName == null ?
 			break;
 		}
+		case PACKAGE_BODY:
 		case PACKAGE: {
 			//XXXxx: packages: get package names from procedures/functions catalog names
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
@@ -193,7 +198,35 @@ public class QueryOnInstant extends QueryOn {
 		log.info(count+" objects added");
 		return ret;
 	}
+	
+	static void removeExecsWithinPackages(List<ExecutableObject> execs) {
+		int initSize = execs.size();
+		int removed = 0;
+		Iterator<ExecutableObject> iter = execs.iterator();
+		while(iter.hasNext()){
+			ExecutableObject eo = iter.next();
+			if(eo.getPackageName()!=null) {
+				iter.remove();
+				removed++;
+			}
+		}
+		log.info("removeExecsWithinPackages:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+execs.size());
+	}
 
+	static void keepExecsByType(List<ExecutableObject> execs, DBObjectType type) {
+		int initSize = execs.size();
+		int removed = 0;
+		Iterator<ExecutableObject> iter = execs.iterator();
+		while(iter.hasNext()){
+			ExecutableObject eo = iter.next();
+			if(eo.getType()!=type) {
+				iter.remove();
+				removed++;
+			}
+		}
+		log.info("removeExecsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+execs.size());
+	}
+	
 	/*
 	static List<FK> grabFKs(String schemaName, DatabaseMetaData dbmd) throws SQLException {
 		List<FK> ret = new ArrayList<FK>();
