@@ -48,18 +48,20 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			//break;
 		case VIEW:
 		case MATERIALIZED_VIEW:
-			feat.grabDBViews(model, schemaName, objectName, conn);
+			//log.info("before:: #view = "+model.getViews().size()+" ["+schemaName+"."+objectName+"]");
+			feat.grabDBViews(model.getViews(), schemaName, objectName, conn);
+			//log.info("after:: #view = "+model.getViews().size());
 			break;
 		case PROCEDURE:
 		case FUNCTION:
 		case PACKAGE:
 		case PACKAGE_BODY:
 		case EXECUTABLE:
-			feat.grabDBExecutables(model, schemaName, objectName, conn);
+			feat.grabDBExecutables(model.getExecutables(), schemaName, objectName, conn);
 			break;
 		case TRIGGER:
 			//XXX: really grab trigger?
-			feat.grabDBTriggers(model, schemaName, null, objectName, conn);
+			feat.grabDBTriggers(model.getTriggers(), schemaName, null, objectName, conn);
 			break;
 		case FK:
 			//XXX how to get FK from dbmd by name? just grab from model (the 'cache')
