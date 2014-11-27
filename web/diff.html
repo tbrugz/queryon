@@ -17,24 +17,32 @@
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
 
+/*
+ * TODO: get object types by database type (info/objtypes.jsp ?)
+ * XXX: show hourglass (?) icon on 'select's & DDL divs
+ * XXX: clear way of showing if there are differences between objects (#lines added, changed, removed)
+ * XXX: show model name above DDL div
+ * XXX: option (xtra button) to show table's row count; compare tables' content
+ */
+
 var typemap = {
 		"TABLE": "table",
-		"FK": "fk",
+		"FK": null, //"fk", //??
 		"VIEW": "view",
 		"INDEX": null,
 		"EXECUTABLE": null,
-		"TRIGGER": "executable",
+		"TRIGGER": null, //"executable", ??
 		"SEQUENCE": null,
 		"SYNONYM": null,
 		"GRANT": null,
-		"MATERIALIZED_VIEW": "view",
-		"FUNCTION": "executable",
+		"MATERIALIZED_VIEW": null, //"view",
+		"FUNCTION": "function",
 		"JAVA_SOURCE": null,
-		"PACKAGE": "executable",
-		"PACKAGE_BODY": "executable",
-		"PROCEDURE": "executable",
-		"TYPE": "executable",
-		"TYPE_BODY": "executable",
+		"PACKAGE": "package",
+		"PACKAGE_BODY": "package_body", //"executable",
+		"PROCEDURE": "procedure",
+		"TYPE": null, //"executable",
+		"TYPE_BODY": null, //"executable",
 		"CONSTRAINT": null,
 		"COLUMN": null
 };
@@ -144,8 +152,8 @@ loadObjectList = function() {
 			var keys = Object.keys(data);
 			data = data[Object.keys(data)[0]];
 			//console.log(data);
-			//TODO filtering data on client, should be on server...
-			loadSelect(data, 'object', function(data) { if(data.type && data.type!=origType) { return null; }; return (data.schemaName?data.schemaName+".":"")+data.name; });
+			//TODOxx filtering data on client, should be on server...
+			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
 		},
 		error: function(error) {
 			console.log("loadObjectList error=",error);
