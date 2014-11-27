@@ -78,7 +78,7 @@ th {
 }
 
 .simplebutton {
-	background-color: #999;
+	background-color: #767676;
 	font-weight: bold;
 	border: 0;
 	padding: 0;
@@ -88,7 +88,7 @@ th {
 	background-color: #666;
 	padding: 0 1px 0 2px;
 	margin: 0px 1px 0px 2px;
-	border: solid 1px #999;
+	border: solid 1px #767676;
 	display: inline-block;
 }
 
@@ -104,6 +104,10 @@ input.mainaction {
 }
 
 input.onaction {
+	background-color: #f90;
+}
+
+select.onaction {
 	background-color: #f90;
 }
 

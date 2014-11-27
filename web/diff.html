@@ -10,6 +10,7 @@
 	<!-- link href="css/prism.css" rel="stylesheet" /-->
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- script type="text/javascript" src="js/prism.js"></script-->
+	<script src="js/qon-util.js"></script>
 	<link rel="stylesheet" href="css/diffview.css">
 	<script src="js/jsdifflib/difflib.js"></script>
 	<script src="js/jsdifflib/diffview.js"></script>
@@ -143,6 +144,7 @@ loadObjectList = function() {
 		+ '.json'
 		+ (model?'?model='+model:'');
 	console.log("loadObjectList: url=",url);
+	btnActionStart('object');
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -154,9 +156,11 @@ loadObjectList = function() {
 			//console.log(data);
 			//TODOxx filtering data on client, should be on server...
 			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
+			btnActionStop('object');
 		},
 		error: function(error) {
 			console.log("loadObjectList error=",error);
+			btnActionStop('object');
 		}
 	});
 }
@@ -285,11 +289,15 @@ toggleDiff = function() {
 
 loadSelect = function(data, selectId, callback) {
 	if(!callback) { callback = function(obj) { return obj; } }
+	var sel = document.getElementById(selectId);
+	var prevOptionValue = sel.value;
 	$('#'+selectId).empty();
 	for(var i=0;i<data.length;i++) {
 		var name = callback(data[i]);
 		if(name==null) { continue; }
-		$('#'+selectId).append("<option value='"+callback(data[i])+"'>"+callback(data[i])+"</option>");
+		var optionValue = callback(data[i]);
+		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
+		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+optionValue+"</option>");
 	}
 }
 
@@ -387,10 +395,10 @@ safeTags = function (str) {
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
 
-	<label style="background-color: #A93636">
-		modelOrig: <select id="modelFrom" onchange="onModelChanged();"></select>
+	<label><!--  style="background-color: #A93636"-->
+		modelOrig: <select id="modelFrom"></select>
 	</label>
-	<label style="background-color: #36A979">
+	<label style="background-color: #188859">
 		modelNew: <select id="modelTo" onchange="onModelChanged();"></select>
 	</label>
 	<label>
