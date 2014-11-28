@@ -37,7 +37,11 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, modelId);
 		try {
-			dump(getObject(type, schemaName, objectName, conn), resp);
+			DBIdentifiable dbid = getObject(type, schemaName, objectName, conn);
+			if(dbid==null) {
+				throw new BadRequestException("null object? [ "+schemaName+"."+objectName+" ; type="+type+" ]");
+			}
+			dump(dbid, resp);
 		}
 		finally {
 			conn.close();
@@ -97,6 +101,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	}
 	
 	void dump(DBIdentifiable dbid, HttpServletResponse resp) throws IOException {
+		if(dbid==null) {
+			throw new BadRequestException("null object?");
+		}
 		resp.getWriter().write(dbid.getDefinition(true));
 	}
 	

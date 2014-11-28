@@ -288,7 +288,8 @@ public class QueryOn extends HttpServlet {
 	
 	//XXX: move to SchemaModelUtils?
 	static SchemaModel modelGrabber(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
-		String grabClassName = prop.getProperty(CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"")+SUFFIX_GRABCLASS);
+		final String prefix = DBUtil.getDBConnPrefix(prop, modelId);
+		String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS);
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
 			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+PROP_GRABCLASS+"']";
@@ -301,7 +302,7 @@ public class QueryOn extends HttpServlet {
 		
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			conn = ConnectionUtil.initDBConnection(DBUtil.getDBConnPrefix(prop, modelId), prop);
+			conn = ConnectionUtil.initDBConnection(prefix, prop);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}

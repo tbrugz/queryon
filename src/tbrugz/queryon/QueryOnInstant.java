@@ -81,28 +81,28 @@ public class QueryOnInstant extends QueryOn {
 		}
 		case FUNCTION: {
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
-			List<ExecutableObject> func = jgrab.doGrabFunctions(dbmd, schemaName, false);
+			List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
 			removeExecsWithinPackages(func);
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, func, ExecutableObject.class);
-			//XXX: filter by type 'FUNCTION', filter by packageName == null ?
+			//XXXdone: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
 		}
 		case PROCEDURE: {
 			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
-			List<ExecutableObject> proc = jgrab.doGrabProcedures(dbmd, schemaName, false);
+			List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
 			removeExecsWithinPackages(proc);
 			keepExecsByType(proc, DBObjectType.PROCEDURE);
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
-			//XXX: filter by type 'PROCEDURE', filter by packageName == null ?
+			//XXXdone: filter by type 'PROCEDURE', filter by packageName == null ?
 			break;
 		}
 		case PACKAGE_BODY:
 		case PACKAGE: {
 			//XXXxx: packages: get package names from procedures/functions catalog names
 			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
-			List<ExecutableObject> proc = jgrab.doGrabProcedures(dbmd, schemaName, false);
-			List<ExecutableObject> func = jgrab.doGrabFunctions(dbmd, schemaName, false);
+			List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
+			List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
 			proc.addAll(func);
 
 			List<ExecutableObject> pkgs = new ArrayList<ExecutableObject>();
@@ -197,6 +197,25 @@ public class QueryOnInstant extends QueryOn {
 		}
 		log.info(count+" objects added");
 		return ret;
+	}
+	
+	List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
+		try {
+			if(grabFunctions) {
+				return jgrab.doGrabFunctions(dbmd, schemaName, false);
+			}
+			return jgrab.doGrabProcedures(dbmd, schemaName, false);
+		}
+		catch(LinkageError e) {
+			log.warn("abstract method error: "+e);
+		}
+		catch(RuntimeException e) {
+			log.warn("runtime exception grabbing functions: "+e);
+		}
+		catch(SQLException e) {
+			log.warn("sql exception grabbing functions: "+e);
+		}
+		return new ArrayList<ExecutableObject>();
 	}
 	
 	static void removeExecsWithinPackages(List<ExecutableObject> execs) {
