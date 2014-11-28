@@ -119,8 +119,12 @@ input.filter {
 	width: 8em;
 }
 
+input[readonly="readonly"] {
+	background-color: #ccc;
+}
+
 #dialog input[type=button] {
-	margin: 3px;	
+	margin: 3px;
 }
 
 #filters input[type=button] {

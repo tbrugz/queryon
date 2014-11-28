@@ -14,6 +14,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	out.write("permission denied");
 	return;
 }
+modelId = SchemaModelUtils.getModelId(request);
 %>
 <!DOCTYPE html>
 <html>
@@ -43,6 +44,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 		if(!sqlString) { sqlString = editor.getValue(); }
 		
 		var reqData = {
+			model : document.getElementById('model').value,
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
 			sql: sqlString,
@@ -104,6 +106,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 			url : queryOnUrl+"/ValidateAny",
 			type : "POST",
 			data : {
+				model : document.getElementById('model').value,
 				schema : document.getElementById('schema').value,
 				name : document.getElementById('name').value,
 				sql: sqlString,
@@ -151,6 +154,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 				"sqldump.query.q1.name": name,
 				"sqldump.query.q1.sql": editor.getValue(),
 				"sqldump.query.q1.remarks": document.getElementById('remarks').value,
+				"model": document.getElementById('model').value,
 				"queryon.qon-queries.action": "write",
 				"queryon.qon-queries.querynames": name,
 				"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
@@ -341,6 +345,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 <body onload="updateUI();">
 <%!
 SchemaModel model = null;
+String modelId = null;
 String schemaName = null;
 String queryName = null;
 String query = "";
@@ -350,7 +355,7 @@ boolean queryLoaded = false;
 %>
 
 <%
-model = SchemaModelUtils.getModel(application, request.getParameter("model"));
+model = SchemaModelUtils.getModel(application, modelId);
 schemaName = request.getParameter("schema");
 queryName = request.getParameter("name");
 query = "";
@@ -406,6 +411,8 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
+	<label>model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
+	
 	<span id="actions-container">
 		<a id="url-reload" href="" title="Reload query">reload</a>
 		<a id="url-permalink" href="" target="_blank">permalink</a>
