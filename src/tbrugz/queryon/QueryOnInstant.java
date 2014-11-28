@@ -54,6 +54,7 @@ public class QueryOnInstant extends QueryOn {
 		}
 		
 		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
 		final DBMSResources res = DBMSResources.instance();
 		final DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());

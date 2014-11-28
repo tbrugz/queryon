@@ -55,6 +55,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, Connection conn) throws SQLException {
 		DBMSResources res = DBMSResources.instance();
+		res.updateMetaData(conn.getMetaData(), true);
 		DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
 

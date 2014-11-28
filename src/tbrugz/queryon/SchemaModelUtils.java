@@ -126,6 +126,12 @@ public class SchemaModelUtils {
 		if(modelReq==null) {
 			modelReq = (String) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 		}
+		else {
+			Set<String> models = getModelIds(req.getSession().getServletContext());
+			if(!models.contains(modelReq)) {
+				throw new BadRequestException("Model id '"+modelReq+"' undefined");
+			}
+		}
 		return modelReq;
 	}
 }
