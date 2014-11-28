@@ -54,9 +54,13 @@ public class QueryOnInstant extends QueryOn {
 		}
 		
 		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
-		DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
 		final DBMSResources res = DBMSResources.instance();
-		final DBMSFeatures feat = res.databaseSpecificFeaturesClass();
+		//String dbid = res.detectDbId(conn.getMetaData(), true);
+		//final DBMSFeatures feat = res.getSpecificFeatures(dbid);
+		final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
+		
+		//res.updateMetaData(conn.getMetaData(), true);
+		//final DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
 		final String schemaName = reqspec.params.get(0);
 		ResultSet rs;
