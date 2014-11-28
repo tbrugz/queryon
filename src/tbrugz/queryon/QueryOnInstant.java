@@ -46,6 +46,7 @@ public class QueryOnInstant extends QueryOn {
 	static final List<TableType> tableTypesList = Arrays.asList(tableTypes);
 	static final List<TableType> viewTypesList = Arrays.asList(viewTypes);
 	
+	@SuppressWarnings("resource")
 	@Override
 	void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		if(reqspec.params==null || reqspec.params.size()<1) {

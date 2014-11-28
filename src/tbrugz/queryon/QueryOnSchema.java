@@ -29,7 +29,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 public class QueryOnSchema extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	static final Log log = LogFactory.getLog(QueryOnSchema.class);
+	private static final Log log = LogFactory.getLog(QueryOnSchema.class);
 	
 	List<String> parseQS(HttpServletRequest req) {
 		String varUrl = req.getPathInfo();

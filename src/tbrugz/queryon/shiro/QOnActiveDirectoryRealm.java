@@ -63,7 +63,7 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm {
         String searchFilter = "(&(objectClass=*)(mail={0}))";
         Object[] searchArguments = new Object[]{userPrincipalName};
 
-        NamingEnumeration answer = ldapContext.search(searchBase, searchFilter, searchArguments, searchCtls);
+        NamingEnumeration<SearchResult> answer = ldapContext.search(searchBase, searchFilter, searchArguments, searchCtls);
 
         while (answer.hasMoreElements()) {
             SearchResult sr = (SearchResult) answer.next();
@@ -75,7 +75,7 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm {
             Attributes attrs = sr.getAttributes();
 
             if (attrs != null) {
-                NamingEnumeration ae = attrs.getAll();
+                NamingEnumeration<? extends Attribute> ae = attrs.getAll();
                 while (ae.hasMore()) {
                     Attribute attr = (Attribute) ae.next();
 

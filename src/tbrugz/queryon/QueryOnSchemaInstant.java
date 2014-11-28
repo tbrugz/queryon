@@ -12,6 +12,9 @@ import java.util.Properties;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
@@ -27,6 +30,7 @@ import tbrugz.sqldump.def.DBMSResources;
 public class QueryOnSchemaInstant extends QueryOnSchema {
 
 	private static final long serialVersionUID = 1L;
+	private static final Log log = LogFactory.getLog(QueryOnSchemaInstant.class);
 	
 	boolean doSchemaGrabTableGrants = false,
 			doSchemaGrabTableIndexes = false,
