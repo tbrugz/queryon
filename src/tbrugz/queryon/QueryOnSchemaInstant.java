@@ -59,6 +59,8 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		//DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
 		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+		
+		//log.info("feats: "+feat.getClass().getName()+" metadata: "+dbmd.getClass().getName());
 
 		List ret = new ArrayList();
 		

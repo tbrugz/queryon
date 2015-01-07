@@ -173,7 +173,9 @@ public class QueryOnInstant extends QueryOn {
 	
 	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypesList) throws SQLException {
 		List<Relation> ret = new ArrayList<Relation>();
+		long initTime = System.currentTimeMillis();
 		ResultSet rs = dbmd.getTables(null, schemaName, null, null);
+		log.debug("getTables: elapsed = "+(System.currentTimeMillis()-initTime));
 		int count = 0;
 		while(rs.next()) {
 			String name = rs.getString("TABLE_NAME");

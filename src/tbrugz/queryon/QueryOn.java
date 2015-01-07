@@ -164,6 +164,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
 	
 	static final String SUFFIX_GRABCLASS = ".grabclass";
+	//static final String SUFFIX_SQLDIALECT = ".sqldialect";
 	static final String PROP_GRABCLASS = "queryon.grabclass";
 	
 	static final String REQ_ATTR_CONTENTLOCATION = "attr.contentlocation";
@@ -216,6 +217,7 @@ public class QueryOn extends HttpServlet {
 			
 			Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
+			log.debug("modelIds="+modelIds);
 			if(modelIds!=null) {
 				for(String id: modelIds) {
 					models.put(id, modelGrabber(prop, id));
@@ -289,10 +291,12 @@ public class QueryOn extends HttpServlet {
 	//XXX: move to SchemaModelUtils?
 	static SchemaModel modelGrabber(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		final String prefix = DBUtil.getDBConnPrefix(prop, modelId);
-		String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS);
+		final String grabClassProp = prefix+SUFFIX_GRABCLASS;
+		String grabClassName = prop.getProperty(grabClassProp, prop.getProperty(PROP_GRABCLASS));
+		
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
-			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+PROP_GRABCLASS+"']";
+			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+grabClassProp+"' or '"+PROP_GRABCLASS+"']";
 			log.warn(message);
 			throw new RuntimeException(message);
 		}
@@ -307,12 +311,17 @@ public class QueryOn extends HttpServlet {
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
+		//String dialect = prop.getProperty(prefix+SUFFIX_SQLDIALECT);
 		String dialect = prop.getProperty(PROP_SQLDIALECT);
 		if(dialect!=null) {
 			log.info("setting sql-dialect: "+dialect);
 			sm.setSqlDialect(dialect);
 		}
-		DBMSResources.instance().updateDbId(sm.getSqlDialect());
+		/*else if(sm.getSqlDialect()==null && conn!=null) {
+			dialect = DBMSResources.instance().detectDbId(conn.getMetaData(), false);
+			sm.setSqlDialect(dialect);
+		}*/
+		DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: should NOT be a singleton
 		
 		if(conn!=null) { conn.close(); }
 		return sm;
