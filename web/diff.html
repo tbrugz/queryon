@@ -165,7 +165,7 @@ loadObjectList = function() {
 	});
 }
 
-getDDL = function(modelId, contentId, callback) {
+getDDL = function(modelId, contentId, contentTitleId, callback) {
 	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
@@ -179,10 +179,12 @@ getDDL = function(modelId, contentId, callback) {
 			var block = document.getElementById(contentId);
 			var container = block.parentNode;
 			var mblock = document.getElementById(contentId+"-msg");
+			var blocktitle = document.getElementById(contentTitleId);
 			container.style.display = 'block';
 			block.innerHTML = safeTags(data);
 			mblock.innerHTML = '';
 			mblock.style.display = 'none';
+			blocktitle.innerHTML = document.getElementById(modelId).value;
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
 			//Prism.highlightElement(block);
 			if(callback) { callback(); }
@@ -209,8 +211,8 @@ getDDL = function(modelId, contentId, callback) {
 }
 
 doDiff = function() {
-	getDDL('modelFrom','content-from', doDiffUsingJS);
-	getDDL('modelTo','content-to', doDiffUsingJS);
+	getDDL('modelFrom','content-from','content-from-title', doDiffUsingJS);
+	getDDL('modelTo','content-to','content-to-title', doDiffUsingJS);
 }
 
 doClear = function() {
@@ -274,6 +276,46 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 		contextSize: contextSize,
 		viewType: viewType
 	}));
+	
+	//console.log(base, newtxt);
+	diffedLineCount(opcodes);
+}
+
+diffedLineCount = function(opcodes) {
+	//console.log(opcodes); //, fromTitle, toTitle, contextSize, viewType);
+
+	var deleted = 0,
+		added = 0,
+		chunksReplace = 0,
+		chunksInsert = 0,
+		chunksDelete = 0;
+	for(var i=0;i<opcodes.length;i++) {
+		if(opcodes[i][0]=='replace') {
+			chunksReplace++;
+			deleted += opcodes[i][2]-opcodes[i][1];
+			added += opcodes[i][4]-opcodes[i][3];
+		}
+		if(opcodes[i][0]=='insert') {
+			chunksInsert++;
+			deleted += opcodes[i][2]-opcodes[i][1];
+			added += opcodes[i][4]-opcodes[i][3];
+		}
+		if(opcodes[i][0]=='delete') {
+			chunksDelete++;
+			deleted += opcodes[i][2]-opcodes[i][1];
+			added += opcodes[i][4]-opcodes[i][3];
+		}
+	}
+	console.log("chunksReplace=", chunksReplace, "chunksInsert=", chunksInsert, "chunksDelete=", chunksDelete,
+			"deleted lines=", deleted, "added lines=", added);
+	
+	var statstext = '';
+	if(added > 0) { statstext += '<span class="added" title="'+added+' lines added">'+added+'</span>'; }
+	if(deleted > 0) { statstext += '<span class="deleted" title="'+deleted+' lines deleted">'+deleted+'</span>'; }
+	if(added == 0 && deleted == 0)  { statstext += '<span class="nochanges">no changes</span>'; }
+	
+	var stats = document.getElementById('diffstats');
+	stats.innerHTML = statstext;
 }
 
 toggleDiff = function() {
@@ -347,8 +389,6 @@ safeTags = function (str) {
 		unicode-bidi: embed;
 		font-family: monospace;
 		white-space: pre;
-		padding: 4px;
-		border: 10px solid #ddd;
 		background-color: whitesmoke;
 		overflow-x: scroll;
 	}
@@ -363,11 +403,21 @@ safeTags = function (str) {
 	}
 	
 	.code-container {
-		width: 50%;
+		width: 48%;
+		padding: 4px;
+		border: 10px solid #ddd;
 	}
 	
 	.code-container pre {
 		margin-top: 0;
+	}
+	
+	.code-title {
+		background-color: #fff;
+		display: block;
+		font-weight: bold;
+		padding: 4px;
+		border-bottom: 1px solid #ccc;
 	}
 	
 	#diffoutput {
@@ -388,6 +438,20 @@ safeTags = function (str) {
 		min-width: 90%;
 	}
 	
+	#diffstats {
+		font-family: monospace;
+		border: 10px solid #ddd;
+	}
+	#diffstats span {
+		border: 1px solid #aaa;
+		padding: 4px 8px 4px 8px;
+	}
+	#diffstats .added {
+		background-color:#9E9;
+	}
+	#diffstats .deleted {
+		background-color:#E99;
+	}
 	</style>
 </head>
 <body>
@@ -431,17 +495,18 @@ safeTags = function (str) {
 
 	<div class="code-container" style="float: left;">
 		<div id="content-from-msg" class="message" style="display: none;"></div>
-		<pre style="display: none;"><code id="content-from" class="language-sql"></code></pre>
+		<pre style="display: none;"><span class="code-title" id="content-from-title"></span><code id="content-from" class="language-sql"></code></pre>
 	</div>
 	<div class="code-container" style="float: right;">
 		<div id="content-to-msg" class="message" style="display: none;"></div>
-		<pre style="display: none;"><code id="content-to" class="language-sql"></code></pre>
+		<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
 	</div>
 	<!-- span style="position:relative; width: 49%; float:left;"><textarea id="content-from" class="code language-sql"></textarea></span>
 	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
 	
 	<div id="diffoutput-container">
 		<input id="togglediffbtn" type="button" value="inline" style="float:right; margin-right: 10px;" onclick="toggleDiff();">
+		<div id="diffstats"></div>
 		<div id="diffoutput"></div>
 	</div>
 </div>

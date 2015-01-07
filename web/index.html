@@ -232,7 +232,6 @@
 		font-weight: bold;
 		font-size: 10pt;
 		padding: 3px;
-		position: fixed;
 		top: 0px;
 		right: 0px;
 		left: 0px;
@@ -334,7 +333,6 @@
 	}
 	
 	#status-container {
-		position: fixed;
 		bottom: 0;
 		padding: 2px;
 		right: 0;
@@ -348,6 +346,22 @@
 		background-color: rgb(146, 218, 136);
 	}
 	
+	@media screen {
+		#nav {
+			position: fixed;
+		}
+		#status-container {
+			position: fixed;
+		}
+	}
+	@media print {
+		#nav {
+			position: absolute;
+		}
+		#status-container {
+			position: absolute;
+		}
+	}
 	</style>
 </head>
 <body onload="onLoad();">
@@ -380,6 +394,7 @@
 	</span>
 	
 	<span id="authinfo">
+		<!-- model -->
 		<span id="username"></span>
 		<span id="authaction"></span>
 	</span>
