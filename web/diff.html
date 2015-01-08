@@ -253,6 +253,15 @@ doDiffUsingJS = function(viewType) {
 	//TODO: call diff api (sqldiff processor?)
 }
 
+diffHasChanges = function(opcodes) {
+	for(var i=0;i<opcodes.length;i++) {
+		if(opcodes[i][0]!='equal') {
+			return true;
+		}
+	}
+	return false;
+}
+
 diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 	"use strict";
 	//console.log("viewType=",viewType);
@@ -267,18 +276,24 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 	diffoutputdiv.innerHTML = "";
 	contextSize = contextSize || null;
 
-	diffoutputdiv.appendChild(diffview.buildView({
-		baseTextLines: base,
-		newTextLines: newtxt,
-		opcodes: opcodes,
-		baseTextName: fromTitle,
-		newTextName: toTitle,
-		contextSize: contextSize,
-		viewType: viewType
-	}));
-	
 	//console.log(base, newtxt);
 	diffedLineCount(opcodes);
+	
+	if(diffHasChanges(opcodes)) {
+		diffoutputdiv.appendChild(diffview.buildView({
+			baseTextLines: base,
+			newTextLines: newtxt,
+			opcodes: opcodes,
+			baseTextName: fromTitle,
+			newTextName: toTitle,
+			contextSize: contextSize,
+			viewType: viewType
+		}));
+		byId('togglediffbtn').style.visibility = 'visible';
+	}
+	else {
+		byId('togglediffbtn').style.visibility = 'hidden';
+	}
 }
 
 diffedLineCount = function(opcodes) {
