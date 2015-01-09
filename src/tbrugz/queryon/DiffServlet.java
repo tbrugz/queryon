@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.subject.Subject;
 
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.TableDiff;
@@ -21,7 +22,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 /*
- * TODO: apply diff option
+ * TODO: apply diff option - add authorization like <type>:APPLYDIFF:<model>:<schema>:<name>
  */
 public class DiffServlet extends HttpServlet {
 
@@ -60,11 +61,14 @@ public class DiffServlet extends HttpServlet {
 		}
 		log.info("partz: "+partz);
 		
-		// TODO: diff authorization
-		
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
 		
 		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		
+		// TODOne: diff authorization
+		// XXX add <type>:DIFF authorization instead of <type>:SHOW ?
+		Subject currentUser = ShiroUtils.getSubject(prop);
+		ShiroUtils.checkPermission(currentUser, obj.getType()+":SHOW", obj.getFullObjectName());
 		
 		String modelIdFrom = SchemaModelUtils.getModelId(req, "modelFrom");
 		String modelIdTo = SchemaModelUtils.getModelId(req, "modelTo");
