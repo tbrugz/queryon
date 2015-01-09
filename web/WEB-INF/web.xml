@@ -36,6 +36,11 @@
 	</servlet>
 	
 	<servlet>
+		<servlet-name>DiffServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.DiffServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
 		<servlet-name>Cool303</servlet-name>
 		<servlet-class>tbrugz.queryon.Cool303RedirectionServlet</servlet-class>
 		<init-param>
@@ -62,6 +67,11 @@
 	<servlet-mapping>
 		<servlet-name>QueryOnInstant</servlet-name>
 		<url-pattern>/qoi/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>DiffServlet</servlet-name>
+		<url-pattern>/qdiff/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

@@ -17,6 +17,8 @@ import tbrugz.sqldump.dbmodel.View;
 
 public class SchemaModelUtils {
 	
+	public static final String PARAM_MODEL = "model";
+	
 	static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) throws ServletException {
 		Relation relation = null;
 		
@@ -122,14 +124,19 @@ public class SchemaModelUtils {
 	}
 	
 	public static String getModelId(HttpServletRequest req) {
-		String modelReq = req.getParameter("model");
+		return getModelId(req, PARAM_MODEL);
+	}
+	
+	public static String getModelId(HttpServletRequest req, String param) {
+		String modelReq = req.getParameter(param);
 		if(modelReq==null) {
 			modelReq = (String) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 		}
 		else {
 			Set<String> models = getModelIds(req.getSession().getServletContext());
 			if(!models.contains(modelReq)) {
-				throw new BadRequestException("Model id '"+modelReq+"' undefined");
+				throw new BadRequestException( "Model id '"+modelReq+"' undefined"
+						+(PARAM_MODEL.equals(param)?"":" [param="+param+"]") );
 			}
 		}
 		return modelReq;
