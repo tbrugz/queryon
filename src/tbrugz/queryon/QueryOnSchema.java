@@ -31,7 +31,7 @@ public class QueryOnSchema extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnSchema.class);
 	
-	List<String> parseQS(HttpServletRequest req) {
+	public static List<String> parseQS(HttpServletRequest req) {
 		String varUrl = req.getPathInfo();
 		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }
 		
@@ -80,12 +80,12 @@ public class QueryOnSchema extends HttpServlet {
 		}
 		log.info("partz: "+partz);
 		
+		/*
 		DBObjectType type = null;
 		String objType = partz.get(0).toUpperCase();
 		String fullObjectName = partz.get(1);
 		String schemaName = null;
 		String objectName = fullObjectName;
-		String modelId = SchemaModelUtils.getModelId(req);
 		
 		if(objectName.contains(".")) {
 			String[] onPartz = objectName.split("\\.");
@@ -101,18 +101,22 @@ public class QueryOnSchema extends HttpServlet {
 		catch(IllegalArgumentException e) {
 			throw new BadRequestException("Unknown object type: "+objType);
 		}
+		*/
 		
+		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
+		
+		String modelId = SchemaModelUtils.getModelId(req);
 		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		Subject currentUser = ShiroUtils.getSubject(prop);
-		ShiroUtils.checkPermission(currentUser, objType+":SHOW", fullObjectName);
+		ShiroUtils.checkPermission(currentUser, obj.getType()+":SHOW", obj.getFullObjectName());
 		
 		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelId);
 		if(model==null) {
 			throw new BadRequestException("Unknown model: "+modelId);
 		}
 
-		dumpObject(type, prop, modelId, model, schemaName, objectName, resp);
+		dumpObject(obj.getType(), prop, modelId, model, obj.getSchemaName(), obj.getName(), resp);
 		
 		/*
 		String script = null;
@@ -127,12 +131,23 @@ public class QueryOnSchema extends HttpServlet {
 		*/
 	}
 	
+	DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
+		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
+		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
+		//DBObjectType type4Filter = type4filter(type);
+		return DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type, schemaName, objectName);
+	}
+	
 	void dumpObject(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName, HttpServletResponse resp) 
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		/*
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
 		DBObjectType type4Filter = type4filter(type);
 		DBIdentifiable dbid = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(dbids, type4Filter, schemaName, objectName);
+		*/
+		DBObjectType type4Filter = type4filter(type);
+		DBIdentifiable dbid = getObject(type4Filter, schemaName, objectName, model, prop, modelId);
 		if(dbid==null) {
 			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found", 404);
 		}
