@@ -30,6 +30,8 @@ public class QueryOnSchema extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnSchema.class);
+
+	String lastDialect;
 	
 	public static List<String> parseQS(HttpServletRequest req) {
 		String varUrl = req.getPathInfo();
@@ -153,6 +155,7 @@ public class QueryOnSchema extends HttpServlet {
 		}
 		
 		resp.getWriter().write(dbid.getDefinition(true));
+		lastDialect = model.getSqlDialect();
 	}
 	
 	DBObjectType type4filter(DBObjectType type) {
@@ -161,6 +164,10 @@ public class QueryOnSchema extends HttpServlet {
 		default:
 			return type;
 		}
+	}
+	
+	String getLastDialect() {
+		return lastDialect;
 	}
 	
 }

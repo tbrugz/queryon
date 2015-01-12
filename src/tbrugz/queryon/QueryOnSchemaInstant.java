@@ -63,6 +63,8 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			if(dbid==null) {
 				throw new BadRequestException("null object? [ "+schemaName+"."+objectName+" ; type="+type+" ]");
 			}
+			lastDialect = DBMSResources.instance().detectDbId(conn.getMetaData(), false);
+			//log.debug("lastDialect: "+getLastDialect());
 			return dbid;
 		}
 		finally {
@@ -123,6 +125,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		if(ret.size()>1) {
 			log.warn("more than one [#"+ret.size()+"] object of type '"+type+"' grabbed: "+schemaName+"."+objectName);
 		}
+
 		return (DBIdentifiable) ret.get(0);
 	}
 	
