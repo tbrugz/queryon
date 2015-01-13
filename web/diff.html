@@ -17,6 +17,7 @@
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
+var queryOnDiffUrl = 'qdiff/';
 
 /*
  * TODO: get object types by database type (info/objtypes.jsp ?)
@@ -211,6 +212,7 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 }
 
 doDiff = function() {
+	doClear();
 	getDDL('modelFrom','content-from','content-from-title', doDiffUsingJS);
 	getDDL('modelTo','content-to','content-to-title', doDiffUsingJS);
 }
@@ -233,6 +235,15 @@ doClear = function() {
 	mblock = document.getElementById('content-to-msg');
 	mblock.innerHTML = '';
 	mblock.style.display = 'none';
+	
+	document.getElementById('ddldiff-container').style.display = 'none';
+	doClearDdlOutput();
+}
+
+doClearDdlOutput = function() {
+	var block = document.getElementById('ddldiff-output');
+	block.innerHTML = '';
+	block.style.display = 'none';
 }
 
 doDiffUsingJS = function(viewType) {
@@ -249,8 +260,10 @@ doDiffUsingJS = function(viewType) {
 	else {
 		diffc.style.display = 'none';
 		document.getElementById('diffoutput').innerHTML = "";
+		
+		document.getElementById('ddldiff-container').style.display = 'block';
+		doClearDdlOutput();
 	}
-	//TODO: call diff api (sqldiff processor?)
 }
 
 diffHasChanges = function(opcodes) {
@@ -340,6 +353,34 @@ toggleDiff = function() {
 	}else{
 		doDiffUsingJS(1);btn.value='inline';
 	}
+}
+
+getDDLdiff = function() {
+	// /qdiff/TABLE/<shcema>.<object>?modelFrom=x&modelTo=y
+	var url = queryOnDiffUrl+document.getElementById('type').value+'/'
+		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
+		+ document.getElementById('object').value
+		+'?modelFrom='+document.getElementById('modelFrom').value
+		+'&modelTo='+document.getElementById('modelTo').value;
+	console.log("getDDLdiff: url=", url);
+	btnActionStart('getDdlDiffBtn');
+	$.ajax({
+		//TODO: filter by schema?
+		url: url,
+		success: function(data) {
+			var block = document.getElementById('ddldiff-output');
+			if(data=='') {
+				data = '-- no changes';
+			}
+			block.innerHTML = safeTags(data);
+			block.style.display = 'block';
+			btnActionStop('getDdlDiffBtn');
+		},
+		error: function(error) {
+			console.log("loadObjectList error=",error);
+			btnActionStop('getDdlDiffBtn');
+		}
+	});
 }
 
 // ----- utility functions
@@ -434,6 +475,9 @@ safeTags = function (str) {
 		padding: 4px;
 		border-bottom: 1px solid #ccc;
 	}
+	.content-elem {
+		border: 10px solid #ddd;
+	}
 	
 	#diffoutput {
 		font-family: monospace;
@@ -446,7 +490,7 @@ safeTags = function (str) {
 		display: none;
 		clear: both;
 	}
-	#diffoutput-container input {
+	input.content-btn {
 		border:1px solid #999; background-color: whitesmoke;
 	}
 	#diffoutput table {
@@ -466,6 +510,16 @@ safeTags = function (str) {
 	}
 	#diffstats .deleted {
 		background-color:#E99;
+	}
+	
+	#ddldiff-container {
+		display: none;
+		clear: both;
+	}
+	#ddldiff-output {
+		overflow-x: auto;
+		padding: 5px;
+		width: 80%;
 	}
 	</style>
 </head>
@@ -520,9 +574,17 @@ safeTags = function (str) {
 	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
 	
 	<div id="diffoutput-container">
-		<input id="togglediffbtn" type="button" value="inline" style="float:right; margin-right: 10px;" onclick="toggleDiff();">
+		<input id="togglediffbtn" type="button" value="inline" class="content-btn" style="float:right; margin-right: 10px;" onclick="toggleDiff();">
 		<div id="diffstats"></div>
 		<div id="diffoutput"></div>
+	</div>
+
+	<div id="ddldiff-container">
+		<div id="ddldiff-controls" class="content-elem">
+			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
+		</div>
+		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
+		<code id="ddldiff-output" class="language-sql content-elem"></code>
 	</div>
 </div>
 
