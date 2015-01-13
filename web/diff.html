@@ -115,17 +115,24 @@ joinSchemas = function() {
 			schemas[i] = 
 		}
 	}*/
-	onModelChanged();
+	loadModel();
 }
 
-onModelChanged = function() {
+loadModel = function() {
 	//TODO: merge models...
 	var m = document.getElementById(defaultModelId).value;
 	loadSelect(schemasByModel[m], 'schema');
+	refreshSelectsState();
 	loadObjectList();
 }
 
+onModelChanged = function() {
+	updateState();
+	loadModel();
+}
+
 onSchemaChanged = function() {
+	updateState();
 	loadObjectList();
 }
 
@@ -383,6 +390,33 @@ getDDLdiff = function() {
 	});
 }
 
+function updateState() {
+	var select = document.getElementById('modelFrom');
+	var modelFrom = select.options[select.selectedIndex].value;
+	var select = document.getElementById('modelTo');
+	var modelTo = select.options[select.selectedIndex].value;
+	var select = document.getElementById('schema');
+	var schema = select.options[select.selectedIndex].value;
+	if(modelFrom && modelTo && schema) {
+		history.replaceState(null, null, "#"+modelFrom+"/"+modelTo+"/"+schema);
+	}
+}
+
+function refreshSelectsState() {
+	var hash = window.location.hash;
+	if(hash.indexOf('#')==0) {
+		hash = hash.substring(1);
+		var parts = hash.split('/');
+		var modelFrom = document.getElementById('modelFrom');
+		modelFrom.value = parts[0];
+		var modelTo = document.getElementById('modelTo');
+		modelTo.value = parts[1];
+		var schema = document.getElementById('schema');
+		schema.value = parts[2];
+	}
+}
+
+
 // ----- utility functions
 
 loadSelect = function(data, selectId, callback) {
@@ -529,7 +563,7 @@ safeTags = function (str) {
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
 
 	<label><!--  style="background-color: #A93636"-->
-		modelOrig: <select id="modelFrom"></select>
+		modelOrig: <select id="modelFrom" onchange="updateState();"></select>
 	</label>
 	<label style="background-color: #188859">
 		modelNew: <select id="modelTo" onchange="onModelChanged();"></select>
