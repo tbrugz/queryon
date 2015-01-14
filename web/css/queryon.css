@@ -104,7 +104,7 @@ input.mainaction {
 }
 
 input.onaction {
-	background-color: #f90;
+	background-color: #f90 !important;
 }
 
 select.onaction {

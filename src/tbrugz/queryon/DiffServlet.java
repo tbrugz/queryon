@@ -1,7 +1,9 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -28,12 +30,16 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 
 /*
- * TODO: apply diff option - add authorization like <type>:APPLYDIFF:<model>:<schema>:<name>
+ * TODOne: apply diff option - add authorization like <type>:APPLYDIFF:<model>:<schema>:<name>
+ * TODO: apply ddl: how to create objects in schema other than the connection's (datasource) default??
+ * TODO: add data diff!
  */
 public class DiffServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(DiffServlet.class);
+	
+	final boolean instant = true; //setup 'instant' in init()
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -81,6 +87,20 @@ public class DiffServlet extends HttpServlet {
 		if(modelIdFrom.equals(modelIdTo)) {
 			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
 		}
+
+		boolean doApply = getDoApply(req);
+		if(doApply) {
+			String permissionPattern = obj.getType()+":APPLYDIFF:"+modelIdFrom;
+			log.info("aplying to '"+modelIdFrom+"'... permission: "+permissionPattern+" :: "+obj.getFullObjectName());
+			ShiroUtils.checkPermission(currentUser, permissionPattern, obj.getFullObjectName());
+			if(!instant) {
+				throw new BadRequestException("cannot apply diff to non-instant QOS");
+			}
+			DBIdentifiableDiff.addComments = false;
+		}
+		else {
+			DBIdentifiableDiff.addComments = true;
+		}
 		
 		SchemaModel modelFrom = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdFrom);
 		if(modelFrom==null) {
@@ -90,8 +110,8 @@ public class DiffServlet extends HttpServlet {
 		if(modelTo==null) {
 			throw new BadRequestException("Unknown model (to): "+modelIdTo);
 		}
-		
-		QueryOnSchema qos = new QueryOnSchemaInstant(); // XXX use factory? new QueryOnSchema() / QueryOnSchemaInstant() ...
+
+		QueryOnSchema qos = getQOS();
 		
 		DBIdentifiable dbidFrom = null;
 		DBIdentifiable dbidTo = null;
@@ -127,6 +147,8 @@ public class DiffServlet extends HttpServlet {
 			throw new BadRequestException("Object "+obj+" not found on both '"+modelIdFrom+"' and '"+modelIdTo+"' models");
 		}
 		
+		List<Diff> diffs = null;
+		
 		if(dbidFrom==null) {
 			Diff diff = null;
 			if(dbidTo instanceof Table) {
@@ -135,36 +157,38 @@ public class DiffServlet extends HttpServlet {
 			else {
 				diff = new DBIdentifiableDiff(ChangeType.ADD, null, dbidTo, null);
 			}
-			dumpDiffs(newSingleElemList(diff), resp);
+			diffs = newSingleElemList(diff);
 		}
 		else if(dbidTo==null) {
 			Diff diff = null;
 			if(dbidFrom instanceof Table) {
-				diff = new TableDiff(ChangeType.DROP, (Table)dbidFrom);
+				diff = new TableDiff(ChangeType.DROP, (Table) dbidFrom);
 			}
 			else {
 				diff = new DBIdentifiableDiff(ChangeType.DROP, dbidFrom, null, null);
 			}
-			dumpDiffs(newSingleElemList(diff), resp);
+			diffs = newSingleElemList(diff);
 		}
 		else if(dbidFrom instanceof Table && dbidTo instanceof Table) {
 			Table origTable = (Table) dbidFrom;
 			Table newTable = (Table) dbidTo;
-			List<Diff> diffs = TableDiff.tableDiffs(origTable, newTable);
+			diffs = TableDiff.tableDiffs(origTable, newTable);
 			if(diffs.size()==0) {
 				log.info("no diffs found");
-				//XXX: return 404?
+				//XXX: return 404? maybe not...
 			}
-
 			//SchemaDiff.logInfo(diffs);
-
-			dumpDiffs(diffs, resp);
 		}
 		else {
 			Diff diff = new DBIdentifiableDiff(ChangeType.REPLACE, dbidFrom, dbidTo, null);
-			dumpDiffs(newSingleElemList(diff), resp);
-			
-			//throw new BadRequestException("Object "+obj+" is not a table");
+			diffs = newSingleElemList(diff);
+		}
+
+		if(doApply) {
+			applyDiffs(diffs, prop, modelIdFrom, resp);
+		}
+		else {
+			dumpDiffs(diffs, resp);
 		}
 		
 	}
@@ -173,11 +197,48 @@ public class DiffServlet extends HttpServlet {
 		List<Diff> l = new ArrayList<Diff>(); l.add(e);
 		return l;
 	}
+	
+	QueryOnSchema getQOS() {
+		if(instant) {
+			return new QueryOnSchemaInstant(); // XXXxx use factory? new QueryOnSchema() / QueryOnSchemaInstant() ...
+		}
+		return new QueryOnSchema();
+	}
+	
+	boolean getDoApply(HttpServletRequest req) {
+		String apply = req.getParameter("doApply");
+		return apply!=null && apply.equals("true");
+	}
 
 	void dumpDiffs(List<Diff> diffs, HttpServletResponse resp) throws IOException {
 		for(Diff d: diffs) {
 			resp.getWriter().write(d.getDiff());
 			resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
+		}
+	}
+	
+	void applyDiffs(List<Diff> diffs, Properties prop, String modelId, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException {
+		Connection conn = DBUtil.initDBConn(prop, modelId);
+		String sql = null;
+		try {
+			for(Diff d: diffs) {
+				List<String> sqls = d.getDiffList();
+				for(String s: sqls) {
+					Statement st = conn.createStatement();
+					sql = s;
+					//sql = d.getDiff();
+					boolean retIsRs = st.execute(sql);
+					int count = st.getUpdateCount();
+					resp.getWriter().write(sql+" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] */");
+					resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
+				}
+			}
+		}
+		catch(SQLException e) {
+			throw new BadRequestException("Error: ["+e+"] ; sql =\n"+sql);
+		}
+		finally {
+			conn.close();
 		}
 	}
 	

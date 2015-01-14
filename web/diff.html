@@ -219,6 +219,7 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 }
 
 doDiff = function() {
+	btnActionStart('go-button');
 	doClear();
 	getDDL('modelFrom','content-from','content-from-title', doDiffUsingJS);
 	getDDL('modelTo','content-to','content-to-title', doDiffUsingJS);
@@ -251,6 +252,12 @@ doClearDdlOutput = function() {
 	var block = document.getElementById('ddldiff-output');
 	block.innerHTML = '';
 	block.style.display = 'none';
+	var block = document.getElementById('ddldiff-msg');
+	block.innerHTML = '';
+	block.style.display = 'none';
+	var applyBtn = document.getElementById('applyDdlDiffBtn');
+	applyBtn.style.display = 'none';
+	applyBtn.value = 'apply DDL diff (?!?)...';
 }
 
 doDiffUsingJS = function(viewType) {
@@ -263,6 +270,7 @@ doDiffUsingJS = function(viewType) {
 		diffUsingJS(viewType, from, to,
 			document.getElementById('modelFrom').value, document.getElementById('modelTo').value,
 			'diffoutput');
+		btnActionStop('go-button');
 	}
 	else {
 		diffc.style.display = 'none';
@@ -362,29 +370,42 @@ toggleDiff = function() {
 	}
 }
 
-getDDLdiff = function() {
+getDDLdiff = function(apply) {
+	apply = apply==='true'?'true':false;
 	// /qdiff/TABLE/<shcema>.<object>?modelFrom=x&modelTo=y
 	var url = queryOnDiffUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
 		+'?modelFrom='+document.getElementById('modelFrom').value
-		+'&modelTo='+document.getElementById('modelTo').value;
+		+'&modelTo='+document.getElementById('modelTo').value
+		+(apply?"&doApply=true":"");
 	console.log("getDDLdiff: url=", url);
 	btnActionStart('getDdlDiffBtn');
+	var block = document.getElementById('ddldiff-output');
+	block.style.display = 'none';
+	var msg = document.getElementById('ddldiff-msg');
+	msg.style.display = 'none';
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
 		success: function(data) {
-			var block = document.getElementById('ddldiff-output');
-			if(data=='') {
-				data = '-- no changes';
+			var content = data;
+			if(content=='') {
+				content = '-- no changes';
 			}
-			block.innerHTML = safeTags(data);
+			block.innerHTML = safeTags(content);
 			block.style.display = 'block';
+			var applyBtn = document.getElementById('applyDdlDiffBtn');
+			if(data) {
+				applyBtn.style.display = 'initial';
+				applyBtn.value = 'apply DDL diff to '+document.getElementById('modelFrom').value;
+			}
 			btnActionStop('getDdlDiffBtn');
 		},
 		error: function(error) {
 			console.log("loadObjectList error=",error);
+			msg.style.display = 'block';
+			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
 			btnActionStop('getDdlDiffBtn');
 		}
 	});
@@ -525,7 +546,8 @@ safeTags = function (str) {
 		clear: both;
 	}
 	input.content-btn {
-		border:1px solid #999; background-color: whitesmoke;
+		border:1px solid #999;
+		background-color: whitesmoke;
 	}
 	#diffoutput table {
 		min-width: 90%;
@@ -553,6 +575,9 @@ safeTags = function (str) {
 	#ddldiff-output {
 		overflow-x: auto;
 		padding: 5px;
+		width: 80%;
+	}
+	#ddldiff-msg {
 		width: 80%;
 	}
 	</style>
@@ -616,8 +641,10 @@ safeTags = function (str) {
 	<div id="ddldiff-container">
 		<div id="ddldiff-controls" class="content-elem">
 			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
+			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
+		<div id="ddldiff-msg" class="message" style="display: none;"></div>
 		<code id="ddldiff-output" class="language-sql content-elem"></code>
 	</div>
 </div>
