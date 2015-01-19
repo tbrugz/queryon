@@ -151,7 +151,7 @@ public class QueryOnSchema extends HttpServlet {
 		DBObjectType type4Filter = type4filter(type);
 		DBIdentifiable dbid = getObject(type4Filter, schemaName, objectName, model, prop, modelId);
 		if(dbid==null) {
-			throw new BadRequestException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found", 404);
+			throw new NotFoundException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found");
 		}
 		
 		resp.getWriter().write(dbid.getDefinition(true));

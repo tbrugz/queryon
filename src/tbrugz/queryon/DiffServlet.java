@@ -116,18 +116,17 @@ public class DiffServlet extends HttpServlet {
 		DBIdentifiable dbidFrom = null;
 		DBIdentifiable dbidTo = null;
 		
-		//XXX: add NotFoundException (404) ?
 		try {
 			dbidFrom = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelFrom, prop, modelIdFrom);
 		}
-		catch(BadRequestException e) {
-			log.info("not found(?): "+e);
+		catch(NotFoundException e) {
+			log.info("not found: "+e);
 		}
 		try {
 			dbidTo = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelTo, prop, modelIdTo);
 		}
-		catch(BadRequestException e) {
-			log.info("not found(?): "+e);
+		catch(NotFoundException e) {
+			log.info("not found: "+e);
 		}
 		
 		final DBMSResources res = DBMSResources.instance();
@@ -137,14 +136,14 @@ public class DiffServlet extends HttpServlet {
 		//res.updateDbId(qos.getLastDialect());
 		
 		/*if(dbidFrom==null) {
-			throw new BadRequestException("Object "+obj+" not found on model "+modelIdFrom);
+			throw new NotFoundException("Object "+obj+" not found on model "+modelIdFrom);
 		}
 		if(dbidTo==null) {
-			throw new BadRequestException("Object "+obj+" not found on model "+modelIdTo);
+			throw new NotFoundException("Object "+obj+" not found on model "+modelIdTo);
 		}*/
 		
 		if(dbidFrom==null && dbidTo==null) {
-			throw new BadRequestException("Object "+obj+" not found on both '"+modelIdFrom+"' and '"+modelIdTo+"' models");
+			throw new NotFoundException("Object "+obj+" not found on both '"+modelIdFrom+"' and '"+modelIdTo+"' models");
 		}
 		
 		List<Diff> diffs = null;

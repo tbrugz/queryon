@@ -61,7 +61,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		try {
 			DBIdentifiable dbid = getObject(type, schemaName, objectName, conn);
 			if(dbid==null) {
-				throw new BadRequestException("null object? [ "+schemaName+"."+objectName+" ; type="+type+" ]");
+				throw new NotFoundException("null object? [ "+schemaName+"."+objectName+" ; type="+type+" ]");
 			}
 			lastDialect = DBMSResources.instance().detectDbId(conn.getMetaData(), false);
 			//log.debug("lastDialect: "+getLastDialect());
@@ -120,7 +120,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		}
 
 		if(ret.size()==0) {
-			throw new BadRequestException("Object of type '"+type+"' not found: "+schemaName+"."+objectName, 404);
+			throw new NotFoundException("Object of type '"+type+"' not found: "+schemaName+"."+objectName);
 		}
 		if(ret.size()>1) {
 			log.warn("more than one [#"+ret.size()+"] object of type '"+type+"' grabbed: "+schemaName+"."+objectName);

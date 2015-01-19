@@ -378,7 +378,7 @@ public class QueryOn extends HttpServlet {
 		else {
 			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 			if(dbobj==null) {
-				throw new BadRequestException("object not found: "+reqspec.object, HttpServletResponse.SC_NOT_FOUND);
+				throw new NotFoundException("object not found: "+reqspec.object);
 			}
 			
 			if(dbobj instanceof Relation) {
@@ -828,7 +828,7 @@ public class QueryOn extends HttpServlet {
 		if(fullKeyDefined(reqspec, pk)) {
 			if(count==0) {
 				conn.rollback();
-				throw new BadRequestException("Element not found", 404);
+				throw new NotFoundException("Element not found");
 			}
 			if(count>1) {
 				//may never occur...
