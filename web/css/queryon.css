@@ -131,6 +131,13 @@ input[readonly="readonly"] {
 	padding: 3px 3px 3px 3px;
 }
 
+.external {
+	background-image: url(../image/external-link-ltr-icon.png);
+	background-position: right 3px center;
+	background-repeat: no-repeat;
+	padding-right: 18px !important;
+}
+
 /* typeahead */
 
 .tt-dropdown-menu {

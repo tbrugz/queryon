@@ -18,6 +18,7 @@
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
 var queryOnDiffUrl = 'qdiff/';
+var queryOnDataDiffUrl = 'datadiff/';
 
 /*
  * TODO: get object types by database type (info/objtypes.jsp ?)
@@ -271,6 +272,12 @@ doDiffUsingJS = function(viewType) {
 			document.getElementById('modelFrom').value, document.getElementById('modelTo').value,
 			'diffoutput');
 		btnActionStop('go-button');
+		//XXX
+		if(document.getElementById('type').value=='TABLE') {
+			var ddbtn = document.getElementById('doDataDiffBtn');
+			ddbtn.style.display = 'initial';
+			ddbtn.href = getDataDiffUrl();
+		}
 	}
 	else {
 		diffc.style.display = 'none';
@@ -278,6 +285,7 @@ doDiffUsingJS = function(viewType) {
 		
 		document.getElementById('ddldiff-container').style.display = 'block';
 		doClearDdlOutput();
+		document.getElementById('doDataDiffBtn').style.display = 'none';
 	}
 }
 
@@ -397,6 +405,7 @@ getDDLdiff = function(apply) {
 			block.style.display = 'block';
 			var applyBtn = document.getElementById('applyDdlDiffBtn');
 			if(data) {
+				//TODO: test if user has APPLY permission in type/model/schema (ajax) ...
 				applyBtn.style.display = 'initial';
 				applyBtn.value = 'apply DDL diff to '+document.getElementById('modelFrom').value;
 			}
@@ -409,6 +418,19 @@ getDDLdiff = function(apply) {
 			btnActionStop('getDdlDiffBtn');
 		}
 	});
+}
+
+getDataDiffUrl = function() {
+	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
+	+ document.getElementById('object').value
+	+'?modelFrom='+document.getElementById('modelFrom').value
+	+'&modelTo='+document.getElementById('modelTo').value
+	;
+}
+
+doDataDiff = function() {
+	var url = getDataDiffUrl();
+	window.open(url);
 }
 
 function updateState() {
@@ -549,6 +571,13 @@ safeTags = function (str) {
 		border:1px solid #999;
 		background-color: whitesmoke;
 	}
+	/*a.content-btn {
+		border:1px solid #999;
+		padding: 3px 9px 3px 9px;
+		font-weight: bold;
+		text-decoration: none;
+		background-color: whitesmoke;
+	}*/
 	#diffoutput table {
 		min-width: 90%;
 	}
@@ -641,6 +670,7 @@ safeTags = function (str) {
 	<div id="ddldiff-container">
 		<div id="ddldiff-controls" class="content-elem">
 			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
+			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data" onClick="doDataDiff();"/>
 			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
