@@ -1,4 +1,4 @@
-package tbrugz.queryon;
+package tbrugz.queryon.diff;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,18 +16,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.AbstractHttpServlet;
+import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.DBUtil;
+import tbrugz.queryon.NamedTypedDBObject;
+import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.QueryOnSchema;
+import tbrugz.queryon.QueryOnSchemaInstant;
+import tbrugz.queryon.SchemaModelUtils;
+import tbrugz.queryon.ShiroUtils;
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.HTMLDiff;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
 import tbrugz.sqldump.datadump.DataDump;
-import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
-import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
@@ -42,7 +48,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	long loopLimit = 1000;
 	
 	@Override
-	void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<2) {
 			throw new BadRequestException("Malformed URL");
@@ -130,13 +136,13 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		return new QueryOnSchema();
 	}*/
 	
-	Table getTable(QueryOnSchema qos, NamedTypedDBObject obj, Properties prop, SchemaModel model, String modelId) throws ClassNotFoundException, SQLException, NamingException {
+	/*Table getTable(QueryOnSchema qos, NamedTypedDBObject obj, Properties prop, SchemaModel model, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		DBIdentifiable dbid = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), model, prop, modelId);
 		if(dbid instanceof Table) {
 			return (Table) dbid;
 		}
 		throw new BadRequestException("Object '"+obj+"' is not a table");
-	}
+	}*/
 	
 	List<String> getKeyCols(Table table) {
 		List<String> keyCols = null;

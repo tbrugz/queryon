@@ -37,12 +37,12 @@
 	
 	<servlet>
 		<servlet-name>DiffServlet</servlet-name>
-		<servlet-class>tbrugz.queryon.DiffServlet</servlet-class>
+		<servlet-class>tbrugz.queryon.diff.DiffServlet</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>DataDiffServlet</servlet-name>
-		<servlet-class>tbrugz.queryon.DataDiffServlet</servlet-class>
+		<servlet-class>tbrugz.queryon.diff.DataDiffServlet</servlet-class>
 	</servlet>
 	
 	<servlet>

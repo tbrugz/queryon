@@ -56,7 +56,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	}
 
 	@Override
-	DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
+	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
 		Connection conn = DBUtil.initDBConn(prop, modelId);
 		try {
 			DBIdentifiable dbid = getObject(type, schemaName, objectName, conn);
@@ -73,7 +73,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, Connection conn) throws SQLException {
+	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, Connection conn) throws SQLException {
 		final DBMSResources res = DBMSResources.instance();
 		//res.updateMetaData(conn.getMetaData(), true);
 		//DBMSFeatures feat = res.databaseSpecificFeaturesClass();

@@ -133,7 +133,7 @@ public class QueryOnSchema extends HttpServlet {
 		*/
 	}
 	
-	DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
+	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
 		//DBObjectType type4Filter = type4filter(type);
@@ -166,7 +166,7 @@ public class QueryOnSchema extends HttpServlet {
 		}
 	}
 	
-	String getLastDialect() {
+	public String getLastDialect() {
 		return lastDialect;
 	}
 	

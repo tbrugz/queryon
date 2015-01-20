@@ -42,6 +42,6 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 		}
 	}
 
-	abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException;
+	public abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException;
 	
 }

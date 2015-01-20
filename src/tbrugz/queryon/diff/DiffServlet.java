@@ -1,4 +1,4 @@
-package tbrugz.queryon;
+package tbrugz.queryon.diff;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,6 +16,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.AbstractHttpServlet;
+import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.DBUtil;
+import tbrugz.queryon.NamedTypedDBObject;
+import tbrugz.queryon.NotFoundException;
+import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.QueryOnSchema;
+import tbrugz.queryon.QueryOnSchemaInstant;
+import tbrugz.queryon.SchemaModelUtils;
+import tbrugz.queryon.ShiroUtils;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.DBIdentifiableDiff;
@@ -34,7 +42,7 @@ import tbrugz.sqldump.def.DBMSResources;
  * TODO: apply ddl: how to create objects in schema other than the connection's (datasource) default??
  * TODO: add data diff!
  */
-public class DiffServlet extends HttpServlet {
+public class DiffServlet extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(DiffServlet.class);
@@ -42,31 +50,7 @@ public class DiffServlet extends HttpServlet {
 	final boolean instant = true; //setup 'instant' in init()
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		//throw new BadRequestException("Only POST allowed", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		doPost(req, resp);
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		try {
-			doProcess(req, resp);
-		} catch(BadRequestException e) {
-			log.warn("BadRequestException: "+e.getMessage());
-			resp.setStatus(e.getCode());
-			resp.getWriter().write(e.getMessage());
-		} /*catch (ServletException e) {
-			//e.printStackTrace();
-			throw e;
-		} */ catch (Exception e) {
-			//e.printStackTrace();
-			throw new ServletException(e);
-		}
-	}
-
-	void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<2) {
 			throw new BadRequestException("Malformed URL");
@@ -90,6 +74,7 @@ public class DiffServlet extends HttpServlet {
 
 		boolean doApply = getDoApply(req);
 		if(doApply) {
+			// XXX do NOT allow HTTP GET method...
 			String permissionPattern = obj.getType()+":APPLYDIFF:"+modelIdFrom;
 			log.info("aplying to '"+modelIdFrom+"'... permission: "+permissionPattern+" :: "+obj.getFullObjectName());
 			ShiroUtils.checkPermission(currentUser, permissionPattern, obj.getFullObjectName());
