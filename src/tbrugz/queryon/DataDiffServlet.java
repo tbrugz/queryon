@@ -22,13 +22,14 @@ import tbrugz.sqldiff.datadiff.HTMLDiff;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
 import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.util.ConnectionUtil;
 
@@ -108,6 +109,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			ResultSetDiff rsdiff = new ResultSetDiff();
 			rsdiff.setLimit(loopLimit);
 			
+			DBMSResources.instance().updateMetaData(connFrom.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
 			log.debug("diff for table '"+table+"'...");
 			DiffSyntax ds = getSyntax(obj, prop);
 			rsdiff.diff(rsTo, rsFrom, table.getName(), keyCols, ds, resp.getWriter());
