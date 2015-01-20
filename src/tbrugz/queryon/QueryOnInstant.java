@@ -174,8 +174,13 @@ public class QueryOnInstant extends QueryOn {
 	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypesList) throws SQLException {
 		List<Relation> ret = new ArrayList<Relation>();
 		long initTime = System.currentTimeMillis();
+		//String[] ttypes = null;
+		//if(tableTypesList!=null) { ttypes = tableTypeArr2StringArr(tableTypesList); }
+		//ResultSet rs = dbmd.getTables(null, schemaName, null, ttypes);
 		ResultSet rs = dbmd.getTables(null, schemaName, null, null);
-		log.debug("getTables: elapsed = "+(System.currentTimeMillis()-initTime));
+		long elapsed = (System.currentTimeMillis()-initTime);
+		//taking too long? monitor generated SQL? jdbc connection proxy?
+		log.debug("getTables: elapsed = "+elapsed);
 		int count = 0;
 		while(rs.next()) {
 			String name = rs.getString("TABLE_NAME");
@@ -203,7 +208,7 @@ public class QueryOnInstant extends QueryOn {
 				count++;
 			}*/
 		}
-		log.info(count+" objects added");
+		log.info(count+" relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;
 	}
 	
@@ -254,6 +259,13 @@ public class QueryOnInstant extends QueryOn {
 		log.info("removeExecsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+execs.size());
 	}
 	
+	static String[] tableTypeArr2StringArr(List<TableType> types) {
+		String[] ret = new String[types.size()];
+		for(int i=0;i<types.size();i++) {
+			ret[i] = types.get(i).toString();
+		}
+		return ret;
+	}
 	/*
 	static List<FK> grabFKs(String schemaName, DatabaseMetaData dbmd) throws SQLException {
 		List<FK> ret = new ArrayList<FK>();
