@@ -39,6 +39,11 @@
 		<servlet-name>DiffServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.DiffServlet</servlet-class>
 	</servlet>
+
+	<servlet>
+		<servlet-name>DataDiffServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.DataDiffServlet</servlet-class>
+	</servlet>
 	
 	<servlet>
 		<servlet-name>Cool303</servlet-name>
@@ -72,6 +77,11 @@
 	<servlet-mapping>
 		<servlet-name>DiffServlet</servlet-name>
 		<url-pattern>/qdiff/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>DataDiffServlet</servlet-name>
+		<url-pattern>/datadiff/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

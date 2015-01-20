@@ -63,7 +63,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			if(dbid==null) {
 				throw new NotFoundException("null object? [ "+schemaName+"."+objectName+" ; type="+type+" ]");
 			}
-			lastDialect = DBMSResources.instance().detectDbId(conn.getMetaData(), false);
+			lastDialect = DBMSResources.instance().detectDbId(conn.getMetaData());
 			//log.debug("lastDialect: "+getLastDialect());
 			return dbid;
 		}
