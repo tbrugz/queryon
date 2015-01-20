@@ -16,16 +16,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.HTMLDiff;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.ConnectionUtil;
-import tbrugz.sqldump.util.Utils;
 
 public class DataDiffServlet extends AbstractHttpServlet {
 
@@ -62,24 +64,33 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		//String metadataId = req.getParameter("metadata");
 		//if(metadataId==null) { metadataId = modelIdFrom; }
 		
-		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), metadataId);
+		/*SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), metadataId);
 		if(model==null) {
 			throw new BadRequestException("Unknown model: "+metadataId);
-		}
+		}*/
 		
-		QueryOnSchema qos = getQOS();
-		Table table = getTable(qos, obj, prop, model, metadataId);
+		QueryOnSchemaInstant qos = new QueryOnSchemaInstant();
+		//Table table = getTable(qos, obj, prop, model, metadataId);
 		
-		String columnsForSelect = getColumnsForSelect(table);
-
-		List<String> keyCols = getKeyCols(table);
-		
-		String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
-
 		Connection connFrom = DBUtil.initDBConn(prop, modelIdFrom);
 		Connection connTo = DBUtil.initDBConn(prop, modelIdTo);
 		
 		try {
+			Table tFrom = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connFrom);
+			Table tTo = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTo);
+
+			List<Column> cols = DataDiff.getCommonColumns(tFrom, tTo);
+			String columnsForSelect = DataDiff.getColumnsForSelect(cols);
+			List<String> keyColsFrom = getKeyCols(tFrom);
+			List<String> keyColsTo = getKeyCols(tFrom);
+			log.info("keyCols: f="+keyColsFrom+" t="+keyColsTo+" / equals?="+keyColsFrom.equals(keyColsTo));
+			
+			List<String> keyCols = keyColsFrom;
+			Table table = tFrom;
+			
+			//XXX test if keycols are the same in both models ?
+			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
+			
 			ResultSet rsFrom = runQuery(connFrom, sql, modelIdFrom, table.getQualifiedName());
 			ResultSet rsTo = runQuery(connTo, sql, modelIdTo, table.getQualifiedName());
 			
@@ -88,7 +99,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 			log.debug("diff for table '"+table+"'...");
 			DiffSyntax ds = getSyntax(prop);
-			rsdiff.diff(rsFrom, rsTo, table.getName(), keyCols, ds, resp.getWriter());
+			rsdiff.diff(rsTo, rsFrom, table.getName(), keyCols, ds, resp.getWriter());
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
 			rsFrom.close(); rsTo.close();
@@ -99,12 +110,12 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 	
-	QueryOnSchema getQOS() {
+	/*QueryOnSchema getQOS() {
 		if(instant) {
 			return new QueryOnSchemaInstant(); // XXXxx use factory? new QueryOnSchema() / QueryOnSchemaInstant() ...
 		}
 		return new QueryOnSchema();
-	}
+	}*/
 	
 	Table getTable(QueryOnSchema qos, NamedTypedDBObject obj, Properties prop, SchemaModel model, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		DBIdentifiable dbid = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), model, prop, modelId);
@@ -136,10 +147,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 	
-	static String getColumnsForSelect(Table t) {
-		return Utils.join(t.getColumnNames(), ", ");
-	}
-	
+	//TODO: get syntax based on URL or accept header
 	static DiffSyntax getSyntax(Properties prop) throws SQLException {
 		//List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
 		

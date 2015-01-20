@@ -14,9 +14,9 @@ import tbrugz.sqldump.util.Utils;
 public class DumpSyntaxUtils {
 	static Log log = LogFactory.getLog(DumpSyntaxUtils.class);
 	
-	Map<String, DumpSyntax> syntaxesByFormat = new HashMap<String, DumpSyntax>();
-	Map<String, DumpSyntax> syntaxesByFileExtension = new HashMap<String, DumpSyntax>();
-	Map<String, DumpSyntax> syntaxesByMimeType = new HashMap<String, DumpSyntax>();
+	final Map<String, DumpSyntax> syntaxesByFormat = new HashMap<String, DumpSyntax>();
+	final Map<String, DumpSyntax> syntaxesByFileExtension = new HashMap<String, DumpSyntax>();
+	final Map<String, DumpSyntax> syntaxesByMimeType = new HashMap<String, DumpSyntax>();
 
 	public DumpSyntaxUtils(Properties prop) {
 		for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
