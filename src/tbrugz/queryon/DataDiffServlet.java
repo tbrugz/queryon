@@ -20,13 +20,16 @@ import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.HTMLDiff;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
+import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
 import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.util.ConnectionUtil;
 
 public class DataDiffServlet extends AbstractHttpServlet {
@@ -59,7 +62,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		
 		String metadataId = SchemaModelUtils.getModelId(req, "metadata");
-		log.info("metadataId: "+metadataId+" / "+req.getParameter("metadata"));
+		log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
 		//XXX: 'common'(metadata) boolean parameter: get common columns from both models 
 		//String metadataId = req.getParameter("metadata");
 		//if(metadataId==null) { metadataId = modelIdFrom; }
@@ -82,8 +85,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			List<Column> cols = DataDiff.getCommonColumns(tFrom, tTo);
 			String columnsForSelect = DataDiff.getColumnsForSelect(cols);
 			List<String> keyColsFrom = getKeyCols(tFrom);
-			List<String> keyColsTo = getKeyCols(tFrom);
-			log.info("keyCols: f="+keyColsFrom+" t="+keyColsTo+" / equals?="+keyColsFrom.equals(keyColsTo));
+			List<String> keyColsTo = getKeyCols(tTo);
+			log.debug("keyCols: f="+keyColsFrom+" t="+keyColsTo+" / equals?="+keyColsFrom.equals(keyColsTo));
 			
 			List<String> keyCols = keyColsFrom;
 			Table table = tFrom;
@@ -94,11 +97,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			ResultSet rsFrom = runQuery(connFrom, sql, modelIdFrom, table.getQualifiedName());
 			ResultSet rsTo = runQuery(connTo, sql, modelIdTo, table.getQualifiedName());
 			
+			// testing column types equality
+			ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsTo.getMetaData()); 
+			ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsFrom.getMetaData());
+			if(!sRSColmd.equals(tRSColmd)) {
+				log.warn("["+table+"] metadata from ResultSets differ");
+				log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
+			}
+			
 			ResultSetDiff rsdiff = new ResultSetDiff();
 			rsdiff.setLimit(loopLimit);
-	
+			
 			log.debug("diff for table '"+table+"'...");
-			DiffSyntax ds = getSyntax(prop);
+			DiffSyntax ds = getSyntax(obj, prop);
 			rsdiff.diff(rsTo, rsFrom, table.getName(), keyCols, ds, resp.getWriter());
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
@@ -147,13 +158,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 	
-	//TODO: get syntax based on URL or accept header
-	static DiffSyntax getSyntax(Properties prop) throws SQLException {
-		//List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
-		
-		DiffSyntax ds = new HTMLDiff();
+	//XXX: get syntax based on URL or accept header
+	static DiffSyntax getSyntax(NamedTypedDBObject obj, Properties prop) throws SQLException {
+		DiffSyntax ds = null;
+		if("sql".equals(obj.getMimeType())) {
+			ds = new SQLDataDiffSyntax();
+		}
+		else if("html".equals(obj.getMimeType()) || obj.getMimeType()==null){
+			ds = new HTMLDiff();
+		}
+		else {
+			throw new BadRequestException("unknown data type: "+obj.getMimeType());
+		}
 		ds.procProperties(prop);
-		//dss.add(ds);
 		
 		return ds;
 	}

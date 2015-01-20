@@ -139,7 +139,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	Table grabTable(String schemaName, String tableName, DatabaseMetaData dbmd, DBMSFeatures feat) throws SQLException {
 		if(tableName==null) throw new IllegalArgumentException("tableName cannot be null");
 		String fullTableName = (schemaName!=null?schemaName+".":"")+tableName;
-		log.info("grabbing new table: "+fullTableName);
+		log.debug("grabbing new table: "+fullTableName);
 		Table ret = null;
 		ResultSet rs = dbmd.getTables(null, schemaName, tableName, null);
 		JDBCSchemaGrabber grabber = new JDBCSchemaGrabber();
