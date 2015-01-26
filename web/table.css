@@ -20,6 +20,15 @@ th {
 	background-color: #fff;
 }
 
+td[title] {
+	text-decoration: underline;
+	/* -moz-text-decoration-line: underline; */
+	/* border-bottom: 1px dashed #999; */
+	-moz-text-decoration-style: dashed;
+	-webkit-text-decoration-style: dashed; 
+	text-decoration-style: dashed; 
+}
+
 /* datadiff */
 tr.equal td {
 	background-color: #ddd;

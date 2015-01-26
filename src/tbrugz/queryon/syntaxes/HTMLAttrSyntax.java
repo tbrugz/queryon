@@ -18,9 +18,9 @@ import tbrugz.sqldump.util.SQLUtils;
 
 public class HTMLAttrSyntax extends HTMLDataDump {
 	
-	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_HREF"}; //XXX: change to enum!
+	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_TITLE", "_HREF"}; //XXX: change to enum!
 	//static final List<String> ATTRIB = Arrays.asList(new String[]{SUFFIXES[0].substring(1).toLowerCase(), SUFFIXES[1].substring(1).toLowerCase()});
-	static final List<String> ATTRIBS = Arrays.asList("style", "class");
+	static final List<String> ATTRIBS = Arrays.asList("style", "class", "title");
 	
 	/*static final Map<String, StringDecorator> decorators = new HashMap<String, StringDecorator>();
 	
@@ -125,7 +125,10 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				if(attrs!=null) {
 					for(String key: attrs.keySet()) {
 						if(ATTRIBS.contains(key)) {
-							attrsStr += " "+key+"=\""+attrs.get(key)+"\"";
+							String attrVal = attrs.get(key);
+							if(attrVal!=null) {
+								attrsStr += " "+key+"=\""+attrs.get(key)+"\"";
+							}
 						}
 						value = decorateValue(attrs, key, String.valueOf(value));
 					}
