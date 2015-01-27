@@ -119,7 +119,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			if(finalColNames.contains(colName)) {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, escape);
+				Object origVal = vals.get(i);
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, escape);
 				Map<String,String> attrs = attrsVals.get(colName);
 				String attrsStr = "";
 				if(attrs!=null) {
@@ -133,7 +134,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 						value = decorateValue(attrs, key, String.valueOf(value));
 					}
 				}
-				sb.append( "<td"+attrsStr+">"+ value +"</td>");
+				sb.append( "<td"
+						+(origVal==null?" null=\"true\"":"")
+						+attrsStr+">"+ value +"</td>");
 			}
 		}
 		sb.append("</tr>");

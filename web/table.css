@@ -28,6 +28,9 @@ td[title] {
 	-webkit-text-decoration-style: dashed; 
 	text-decoration-style: dashed; 
 }
+td[null] {
+	background-color: #888;
+}
 
 /* datadiff */
 tr.equal td {
