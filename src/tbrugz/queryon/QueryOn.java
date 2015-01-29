@@ -296,7 +296,9 @@ public class QueryOn extends HttpServlet {
 		
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
-			String message = "schema grabber class '"+grabClassName+"' not found [prop '"+grabClassProp+"' or '"+PROP_GRABCLASS+"']";
+			String message = "schema grabber class '"+grabClassName+"' not found [prop '"
+					+(!PROP_GRABCLASS.equals(grabClassProp)?grabClassProp+"' or '":"")
+					+PROP_GRABCLASS+"']";
 			log.warn(message);
 			throw new RuntimeException(message);
 		}

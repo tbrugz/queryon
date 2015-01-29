@@ -15,6 +15,7 @@ if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	return;
 }
 modelId = SchemaModelUtils.getModelId(request);
+//System.out.println("modelId: "+modelId+" ; "+(modelId==null));
 %>
 <!DOCTYPE html>
 <html>
@@ -38,17 +39,20 @@ modelId = SchemaModelUtils.getModelId(request);
 	var queryOnUrl = 'q';
 	var processorUrl = 'processor';
 	var isQuerySaved = false;
+	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;
 
 	function doRun() {
 		var sqlString = editor.getSelectedText();
 		if(!sqlString) { sqlString = editor.getValue(); }
 		
 		var reqData = {
-			model : document.getElementById('model').value,
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
 			sql: sqlString,
 		};
+		if(modelId!=null) {
+			reqData.model = document.getElementById('model').value; // or modelId
+		}
 		
 		var params = document.querySelectorAll('.parameter');
 		//var paramsStr = '';
@@ -101,16 +105,20 @@ modelId = SchemaModelUtils.getModelId(request);
 			sqlString = editor.getValue();
 			usingSelected = false;
 		}
+
+		var reqData = {
+			schema : document.getElementById('schema').value,
+			name : document.getElementById('name').value,
+			sql: sqlString
+		}
+		if(modelId!=null) {
+			reqData.model = document.getElementById('model').value; // or modelId
+		}
 		
 		var request = $.ajax({
 			url : queryOnUrl+"/ValidateAny",
 			type : "POST",
-			data : {
-				model : document.getElementById('model').value,
-				schema : document.getElementById('schema').value,
-				name : document.getElementById('name').value,
-				sql: sqlString,
-			},
+			data : reqData,
 			dataType : "html"
 		});
 		
@@ -142,24 +150,29 @@ modelId = SchemaModelUtils.getModelId(request);
 		var schema = document.getElementById('schema').value;
 		var name = document.getElementById('name').value;
 		
+		var reqData = {
+			/*"sqldump.queries.addtomodel": "true",
+			"sqldump.queries.runqueries": "false",
+			"sqldump.queries.grabcolsinfofrommetadata": "true",*/
+			"sqldump.queries": "q1",
+			"sqldump.query.q1.schemaname": schema,
+			"sqldump.query.q1.name": name,
+			"sqldump.query.q1.sql": editor.getValue(),
+			"sqldump.query.q1.remarks": document.getElementById('remarks').value,
+			//"model": document.getElementById('model').value,
+			"queryon.qon-queries.action": "write",
+			"queryon.qon-queries.querynames": name,
+			"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
+			"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
+		}
+		if(modelId!=null) {
+			reqData.model = document.getElementById('model').value; // or modelId
+		}
+		
 		var request = $.ajax({
 			url : processorUrl+"/queryon.processor.QOnQueries",
 			type : "POST",
-			data : {
-				/*"sqldump.queries.addtomodel": "true",
-				"sqldump.queries.runqueries": "false",
-				"sqldump.queries.grabcolsinfofrommetadata": "true",*/
-				"sqldump.queries": "q1",
-				"sqldump.query.q1.schemaname": schema,
-				"sqldump.query.q1.name": name,
-				"sqldump.query.q1.sql": editor.getValue(),
-				"sqldump.query.q1.remarks": document.getElementById('remarks').value,
-				"model": document.getElementById('model').value,
-				"queryon.qon-queries.action": "write",
-				"queryon.qon-queries.querynames": name,
-				"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
-				"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
-			},
+			data : reqData,
 			dataType : "html"
 		});
 
@@ -326,6 +339,14 @@ modelId = SchemaModelUtils.getModelId(request);
 	function updateUI() {
 		document.getElementById('queryResult').style.top = document.getElementById('spec').offsetHeight + 'px';
 	}
+	
+	window.addEventListener('load', function() {
+		if(modelId==null) {
+			//document.getElementById('modelLabel').style.display = 'none';
+			document.getElementById('modelLabel').innerHTML = '';
+		}
+		
+	});
 </script>
 <script type="text/javascript">
 	$(document).jkey('f8',function(){
@@ -411,7 +432,7 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
-	<label>model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
+	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
 	
 	<span id="actions-container">
 		<a id="url-reload" href="" title="Reload query">reload</a>
