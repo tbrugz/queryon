@@ -11,7 +11,7 @@
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script type="text/javascript" src="js/prism.js"></script>
 	<script>
-var queryOnUrl = 'q/';
+var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
 
 var typemap = {
@@ -25,13 +25,13 @@ var typemap = {
 		"SYNONYM": null,
 		"GRANT": null,
 		"MATERIALIZED_VIEW": "view",
-		"FUNCTION": "executable",
+		"FUNCTION": "function",
 		"JAVA_SOURCE": null,
-		"PACKAGE": "executable",
-		"PACKAGE_BODY": "executable",
-		"PROCEDURE": "executable",
-		"TYPE": "executable",
-		"TYPE_BODY": "executable",
+		"PACKAGE": "package",
+		"PACKAGE_BODY": "package_body",
+		"PROCEDURE": "procedure",
+		"TYPE":null,
+		"TYPE_BODY": null,
 		"CONSTRAINT": null,
 		"COLUMN": null
 };
@@ -117,14 +117,15 @@ onObjTypeChanged = function() {
 onObjectChanged = function() {}
 
 loadObjectList = function() {
-	var type = typemap[document.getElementById('type').value];
-	var model = document.getElementById('model').value;
+	var origType = document.getElementById('type').value;
+	var type = typemap[origType];
+	var model = getModel();
 	var schema = document.getElementById('schema').value;
 	var url = queryOnUrl+type
 		+ (schema? '/'+schema:'')
 		+ '.json'
 		+ (model?'?model='+model:'');
-	console.log("loadObjectList: url=",url);
+	console.log("loadObjectList: model=",model,"url=",url);
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -140,11 +141,12 @@ loadObjectList = function() {
 }
 
 getDDL = function() {
+	var model = getModel();
 	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
-		+'?model='+document.getElementById('model').value;
-	console.log("getDDL: url=", url);
+		+(model?'?model='+document.getElementById('model').value:"");
+	console.log("getDDL: model=", model, "url=", url);
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -163,6 +165,11 @@ getDDL = function() {
 			container.style.display = 'none';
 		}
 	});
+}
+
+getModel = function() {
+	var model = document.getElementById('model').value;
+	return model=="null"?null:model;
 }
 
 // ----- utility functions

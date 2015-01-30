@@ -1,11 +1,19 @@
-<%@page import="java.util.Arrays"
+<%@page import="java.util.Set"
+%><%@page import="java.util.Arrays"
 %><%@page import="tbrugz.sqldump.dbmodel.DBObjectType"
 %><%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"
 %><%@page import="tbrugz.sqldump.util.Utils"
 %><%@page import="tbrugz.queryon.SchemaModelUtils"
 %><%!
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
+%><%
+	String models = null;
+	Set<String> modelSet = SchemaModelUtils.getModelIds(application);
+	//System.out.println(modelSet);
+	if(modelSet!=null && modelSet.size()>0 && modelSet.iterator().next()!=null) {
+		models = Utils.join(modelSet, ", ", sqd);
+	}
 %>{
-	"models": [<%= String.valueOf(Utils.join(SchemaModelUtils.getModelIds(application), ", ", sqd)) %>]
+	"models": [<%= models %>]
 	<% //, "types": [< %//= Utils.join(Arrays.asList(DBObjectType.values()), ", ", sqd) % >] %>
 }
