@@ -20,6 +20,24 @@ import tbrugz.sqldump.util.Utils;
 public class RequestSpec {
 	static final Log log = LogFactory.getLog(RequestSpec.class);
 	
+	/*public class Filter {
+		final String id;
+		final boolean multiple;
+		final String prefixAccept;
+		final Map<String, String[]> map;
+		
+		public Filter(String id, boolean multiple, Map map) {
+			this.id = id;
+			this.multiple = multiple;
+			this.prefixAccept = id+":";
+			this.map = map;
+		}
+		
+		boolean accept(String s) {
+			return s.startsWith(prefixAccept);
+		}
+	}*/
+	
 	final HttpServletRequest request;
 
 	final String httpMethod;
@@ -34,11 +52,13 @@ public class RequestSpec {
 	final DumpSyntax outputSyntax;
 	final boolean distinct;
 	
-	// eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
+	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
+	// 'in', 'nin - not in', 'null', 'nnull - not null'
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
+	final Map<String, String[]> filterNotIn = new HashMap<String, String[]>(); // not in (fnin)
 	final Map<String, String> filterLike = new HashMap<String, String>();
-	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), not in (fni?), is null (fnull), is not null (fnn/finn)
+	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), is null (fnull), is not null (fnn/fnnull)
 	final Map<String, String> updateValues = new HashMap<String, String>();
 
 	final List<String> orderCols = new ArrayList<String>();
@@ -180,6 +200,10 @@ public class RequestSpec {
 		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
 		
+		//List<Filter> filters = new ArrayList<Filter>();
+		//Filter fnin = new Filter("fnin", true, filterNotIn);
+		//filters.add(fnin);
+		
 		for(String param: params.keySet()) {
 			if(param.startsWith("feq:")) {
 				String col = param.substring(4);
@@ -191,6 +215,11 @@ public class RequestSpec {
 				String[] values = params.get(param);
 				filterIn.put(col, values);
 			}
+			else if(param.startsWith("fnin:")) {
+				String col = param.substring(5);
+				String[] values = params.get(param);
+				filterNotIn.put(col, values);
+			}
 			else if(param.startsWith("flk:")) {
 				String col = param.substring(4);
 				String value = params.get(param)[0];
@@ -201,6 +230,13 @@ public class RequestSpec {
 				String value = params.get(param)[0];
 				updateValues.put(col, value);
 			}
+			/*else {
+				for(Filter f: filters) {
+					if(f.accept(param)) {
+						
+					}
+				}
+			}*/
 
 			//XXX: warn unknown parameters
 		}

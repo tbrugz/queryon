@@ -1045,6 +1045,8 @@ public class QueryOn extends HttpServlet {
 			Set<String> columns = new HashSet<String>();
 			columns.addAll(colNames);
 			//XXX bind parameters: column type?
+			
+			// filter: equals
 			for(String col: reqspec.filterEquals.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
 					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
@@ -1054,6 +1056,7 @@ public class QueryOn extends HttpServlet {
 					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
 				}
 			}
+			// filter: like
 			for(String col: reqspec.filterLike.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
 					sql.bindParameterValues.add(reqspec.filterLike.get(col));
@@ -1063,11 +1066,30 @@ public class QueryOn extends HttpServlet {
 					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
 				}
 			}
+			// filter: in
 			for(String col: reqspec.filterIn.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
 					StringBuffer sb = new StringBuffer();
 					sb.append(SQL.sqlIdDecorator.get(col)+" in (");
 					String[] values = reqspec.filterIn.get(col);
+					for(int i=0;i<values.length;i++) {
+						String value = values[i];
+						sb.append((i>0?", ":"")+"?");
+						sql.bindParameterValues.add(value);
+					}
+					sb.append(")");
+					sql.addFilter(sb.toString());
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
+			// filter: not in
+			for(String col: reqspec.filterNotIn.keySet()) {
+				if(!validateFilterColumnNames || columns.contains(col)) {
+					StringBuffer sb = new StringBuffer();
+					sb.append(SQL.sqlIdDecorator.get(col)+" not in (");
+					String[] values = reqspec.filterNotIn.get(col);
 					for(int i=0;i<values.length;i++) {
 						String value = values[i];
 						sb.append((i>0?", ":"")+"?");

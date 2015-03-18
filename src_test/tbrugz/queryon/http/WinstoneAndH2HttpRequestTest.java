@@ -411,6 +411,7 @@ public class WinstoneAndH2HttpRequestTest {
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
 		NodeList nl = doc.getElementsByTagName("row");
+		//System.out.println("nrows: "+nl.getLength());
 		Assert.assertEquals(expectedReturnRows, nl.getLength());
 		
 		EntityUtils.consume(entity1);
@@ -438,6 +439,16 @@ public class WinstoneAndH2HttpRequestTest {
 		baseReturnCountTest("/EMP.xml?flk:NAME=j%25", 2);
 	}
 
+	@Test
+	public void testGetXmlEmpFilterNotIn() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200", 4);
+	}
+
+	@Test
+	public void testGetXmlEmpFilterNotIn2() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200&fnin:SALARY=1000", 2);
+	}
+	
 	//--------------------------- QueryOnSchema Tests -------------------------------
 	
 	int getReturnCodeQOS(String query) throws ClientProtocolException, IOException {
