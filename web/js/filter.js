@@ -3,7 +3,8 @@ var bhvalues = null;
 
 var operatorsInfo = {
 	"in": {"name":"in"},
-	"nin": {"name":"not in"}
+	"nin": {"name":"not in"},
+	"lk": {"name":"like"}
 };
 
 if(typeof Bloodhound != 'undefined') {
