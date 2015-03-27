@@ -1,6 +1,11 @@
 
 var bhvalues = null;
 
+var operatorsInfo = {
+	"in": {"name":"in"},
+	"nin": {"name":"not in"}
+};
+
 if(typeof Bloodhound != 'undefined') {
 	bhvalues = new Bloodhound({
 		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
@@ -33,12 +38,19 @@ function addFilterDialog() {
 	var selectHTML = "<select name='fin-column' id='fin-column' onchange='refreshAutocomplete()'>";
 	for(var i=0;i<cols.length;i++) {
 		var colz = cols[i];
-		selectHTML += "<option name='"+colz+"'>"+colz+"</option>";
+		selectHTML += "<option value='"+colz+"'>"+colz+"</option>";
 	}
 	selectHTML += '</select>';
+	
+	var operatorsHTML = "<select name='fil-operator' id='fil-operator' class='operator'>";
+	var keys = Object.keys(operatorsInfo);
+	for(var i=0; i<keys.length; i++) {
+		operatorsHTML += "<option value='"+keys[i]+"'>"+operatorsInfo[keys[i]].name+"</option>";
+	}
+	operatorsHTML += "</select>";
+	
 	dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
-		+ "<em>in </em>"
-		//+ "<select><option value='in'>in</option></select> "
+		+ operatorsHTML
 		+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
 		+ "<input type='button' value='add & close' onclick='addFilterIn();closeFilterDialog();'/>"
 		+ "<input type='button' value='add' onclick='addFilterIn();'/>"
@@ -100,18 +112,21 @@ function refreshAutocomplete() {
 
 function addFilterIn() {
 	var col = document.getElementById('fin-column').value;
+	var operator = document.getElementById('fil-operator').value;
 	var value = document.getElementById('fin-value').value;
 	var filters = document.getElementById('filters');
-	var finContainerId = "fin_"+col;
+	var finContainerId = "f"+operator+"_"+col;
 	var finContainer = document.getElementById(finContainerId);
+	//console.log("operator: "+operator);
+	
 	if(finContainer==null) {
-		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>in</em> (<span>"
-			+ "<span><input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> (<span>"
+			+ "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
 			+ "</span>)</label>";
 	}
 	else {
-		finContainer.getElementsByTagName('span')[0].innerHTML += "<span><input type='text' class='filter' name='fin:"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+		finContainer.getElementsByTagName('span')[0].innerHTML += "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
 	}
 	updateFromFilters();
