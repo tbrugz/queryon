@@ -1059,8 +1059,14 @@ public class QueryOn extends HttpServlet {
 			// filter: like
 			for(String col: reqspec.filterLike.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
-					sql.bindParameterValues.add(reqspec.filterLike.get(col));
-					sql.addFilter(SQL.sqlIdDecorator.get(col)+" like ?");
+					//sql.bindParameterValues.add(reqspec.filterLike.get(col));
+					//sql.addFilter(SQL.sqlIdDecorator.get(col)+" like ?");
+					
+					String[] values = reqspec.filterLike.get(col);
+					for(int i=0;i<values.length;i++) {
+						sql.bindParameterValues.add(values[i]);
+						sql.addFilter(SQL.sqlIdDecorator.get(col)+" like ?");
+					}
 				}
 				else {
 					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");

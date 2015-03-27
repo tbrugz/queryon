@@ -57,7 +57,7 @@ public class RequestSpec {
 	final Map<String, String> filterEquals = new HashMap<String, String>();
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 	final Map<String, String[]> filterNotIn = new HashMap<String, String[]>(); // not in (fnin)
-	final Map<String, String> filterLike = new HashMap<String, String>();
+	final Map<String, String[]> filterLike = new HashMap<String, String[]>();
 	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), is null (fnull), is not null (fnn/fnnull)
 	final Map<String, String> updateValues = new HashMap<String, String>();
 
@@ -222,8 +222,8 @@ public class RequestSpec {
 			}
 			else if(param.startsWith("flk:")) {
 				String col = param.substring(4);
-				String value = params.get(param)[0];
-				filterLike.put(col, value);
+				String[] values = params.get(param);
+				filterLike.put(col, values);
 			}
 			else if(param.startsWith("v:")) {
 				String col = param.substring(2);
