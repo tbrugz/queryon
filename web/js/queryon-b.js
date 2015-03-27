@@ -67,7 +67,7 @@ function doRun(selectId, containerId, messagesId) {
 	for (var i = 0; i < filters.length; ++i) {
 		var item = filters[i];
 		//console.log(item);
-		queryString += '&'+item.name+"="+item.value;
+		queryString += '&'+item.name+"="+encodeURIComponent(item.value);
 	}
 	
 	var order = document.getElementById('order').value;

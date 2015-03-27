@@ -145,8 +145,8 @@
 			var item = filters[i];
 			//queryString += '&'+item.name+"="+item.value;
 			//queryString = append2url(queryString, item.name+"="+item.value);
-			urlpl.href = append2url(urlpl.href, item.name+"="+item.value);
-			urldown.href = append2url(urldown.href, item.name+"="+item.value);
+			urlpl.href = append2url(urlpl.href, item.name+"="+encodeURIComponent(item.value));
+			urldown.href = append2url(urldown.href, item.name+"="+encodeURIComponent(item.value));
 		}
 		
 		var order = document.getElementById('order').value;
