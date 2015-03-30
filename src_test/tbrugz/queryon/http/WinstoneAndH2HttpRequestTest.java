@@ -446,6 +446,11 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@Test
+	public void testGetXmlEmpFilterNotLike() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fnlk:NAME=%25a%25", 2);
+	}
+	
+	@Test
 	public void testGetXmlEmpFilterNotIn() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200", 4);
 	}

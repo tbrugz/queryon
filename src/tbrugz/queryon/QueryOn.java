@@ -1072,6 +1072,19 @@ public class QueryOn extends HttpServlet {
 					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
 				}
 			}
+			// filter: not like
+			for(String col: reqspec.filterNotLike.keySet()) {
+				if(!validateFilterColumnNames || columns.contains(col)) {
+					String[] values = reqspec.filterNotLike.get(col);
+					for(int i=0;i<values.length;i++) {
+						sql.bindParameterValues.add(values[i]);
+						sql.addFilter(SQL.sqlIdDecorator.get(col)+" not like ?");
+					}
+				}
+				else {
+					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+				}
+			}
 			// filter: in
 			for(String col: reqspec.filterIn.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
