@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -39,12 +40,21 @@ public class QOnQueries extends SQLQueries {
 	static final String SUFFIX_QUERY_NAMES = ".querynames";
 	static final String SUFFIX_LIMIT_INSERT_EXACT = ".limit.insert.exact";
 	static final String SUFFIX_LIMIT_UPDATE_EXACT = ".limit.update.exact";
+	static final String SUFFIX_METADATA_ALLOW_QUERY_EXEC = ".metadata.allow-query-exec";
 	
 	static final String ACTION_READ = "read";
 	static final String ACTION_WRITE = "write";
 	static final String ACTION_REMOVE = "remove";
 	
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";
+	
+	boolean metadataAllowQueryExec = false;
+	
+	@Override
+	public void setProperties(Properties prop) {
+		super.setProperties(prop);
+		metadataAllowQueryExec = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_METADATA_ALLOW_QUERY_EXEC, metadataAllowQueryExec);
+	}
 	
 	public void process() {
 		Set<View> origViews = new HashSet<View>();
@@ -141,8 +151,29 @@ public class QOnQueries extends SQLQueries {
 			query.setColumns(DataDumpUtils.getColumns(rsmd));
 		} catch (SQLException e) {
 			query.setColumns(new ArrayList<Column>());
-			log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");
-			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
+			if(metadataAllowQueryExec) {
+				long initTime = System.currentTimeMillis();
+				log.debug("executing query '"+queryName+"' to grab metadata");
+				try {
+					ParameterMetaData pmd = stmt.getParameterMetaData();
+					int params = pmd.getParameterCount();
+					stmt.setFetchSize(1);
+					for(int i=1;i<=params;i++) {
+						stmt.setObject(i, null);
+					}
+					ResultSet rs = stmt.executeQuery();
+					query.setColumns(DataDumpUtils.getColumns(rs.getMetaData()));
+					log.info("executed query '"+queryName+"' [elapsed: "+(System.currentTimeMillis()-initTime)+"ms]");
+				}
+				catch(SQLException e2) {
+					log.warn("resultset exec sqlexception: "+e2.toString().trim()+" [query='"+queryName+"']");
+					log.debug("resultset exec sqlexception: "+e2.getMessage().trim()+" [query='"+queryName+"']", e2);
+				}
+			}
+			else {
+				log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");
+				log.debug("resultset metadata's sqlexception: "+e.getMessage().trim()+" [query='"+queryName+"']", e);
+			}
 		}
 		
 		try {
