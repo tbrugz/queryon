@@ -1041,21 +1041,21 @@ public class QueryOn extends HttpServlet {
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
 		
 		List<String> colNames = relation.getColumnNames();
+		String relationName = relation.getName();
+		
 		if(colNames!=null) {
 			Set<String> columns = new HashSet<String>();
 			columns.addAll(colNames);
 			//XXX bind parameters: column type?
 			
-			// filter: equals
-			for(String col: reqspec.filterEquals.keySet()) {
-				if(!validateFilterColumnNames || columns.contains(col)) {
-					sql.bindParameterValues.add(reqspec.filterEquals.get(col));
-					sql.addFilter(SQL.sqlIdDecorator.get(col)+" = ?");
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
-				}
-			}
+			// uni-valued filters
+			addUniqueFilter(reqspec.filterEquals, columns, sql, "=", relationName);
+			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName);
+			addUniqueFilter(reqspec.filterGreaterThan, columns, sql, ">", relationName);
+			addUniqueFilter(reqspec.filterGreaterOrEqual, columns, sql, ">=", relationName);
+			addUniqueFilter(reqspec.filterLessThan, columns, sql, "<", relationName);
+			addUniqueFilter(reqspec.filterLessOrEqual, columns, sql, "<=", relationName);
+			
 			// filter: like
 			for(String col: reqspec.filterLike.keySet()) {
 				if(!validateFilterColumnNames || columns.contains(col)) {
@@ -1069,7 +1069,7 @@ public class QueryOn extends HttpServlet {
 					}
 				}
 				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+					log.warn("unknown column: "+col+" [relation="+relationName+"]");
 				}
 			}
 			// filter: not like
@@ -1082,7 +1082,7 @@ public class QueryOn extends HttpServlet {
 					}
 				}
 				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+					log.warn("unknown column: "+col+" [relation="+relationName+"]");
 				}
 			}
 			// filter: in
@@ -1100,7 +1100,7 @@ public class QueryOn extends HttpServlet {
 					sql.addFilter(sb.toString());
 				}
 				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+					log.warn("unknown column: "+col+" [relation="+relationName+"]");
 				}
 			}
 			// filter: not in
@@ -1118,13 +1118,25 @@ public class QueryOn extends HttpServlet {
 					sql.addFilter(sb.toString());
 				}
 				else {
-					log.warn("unknown column: "+col+" [relation="+relation.getName()+"]");
+					log.warn("unknown column: "+col+" [relation="+relationName+"]");
 				}
 			}
 		}
 		else {
 			if(reqspec.filterEquals.size()>0) {
 				log.warn("relation '"+relation.getName()+"' has no columns specified");
+			}
+		}
+	}
+	
+	void addUniqueFilter(final Map<String, String> valueMap, Set<String> columns, SQL sql, String compareSymbol, String relationName) {
+		for(String col: valueMap.keySet()) {
+			if(!validateFilterColumnNames || columns.contains(col)) {
+				sql.bindParameterValues.add(valueMap.get(col));
+				sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareSymbol+" ?");
+			}
+			else {
+				log.warn("unknown column: "+col+" [relation="+relationName+"]");
 			}
 		}
 	}

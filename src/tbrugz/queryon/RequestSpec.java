@@ -53,13 +53,24 @@ public class RequestSpec {
 	final boolean distinct;
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
-	// 'in', 'nin - not in', 'null', 'nnull - not null'
+	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
+	
+	// unique value filters
 	final Map<String, String> filterEquals = new HashMap<String, String>();
+	final Map<String, String> filterNotEquals = new HashMap<String, String>();
+	final Map<String, String> filterGreaterThan = new HashMap<String, String>();
+	final Map<String, String> filterGreaterOrEqual = new HashMap<String, String>();
+	final Map<String, String> filterLessThan = new HashMap<String, String>();
+	final Map<String, String> filterLessOrEqual = new HashMap<String, String>();
+	
+	// multiple value filters
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 	final Map<String, String[]> filterNotIn = new HashMap<String, String[]>(); // not in (fnin)
 	final Map<String, String[]> filterLike = new HashMap<String, String[]>();
 	final Map<String, String[]> filterNotLike = new HashMap<String, String[]>();
-	//XXX: add filters: greater than (fgt/fge), less than (flt/fle), not equal (fne), is null (fnull), is not null (fnn/fnnull)
+	
+	//XXX: add filters: is null (fnull), is not null (fnn/fnnull), between (btwn)?
+	
 	final Map<String, String> updateValues = new HashMap<String, String>();
 
 	final List<String> orderCols = new ArrayList<String>();
@@ -211,6 +222,33 @@ public class RequestSpec {
 				String value = params.get(param)[0];
 				filterEquals.put(col, value);
 			}
+			else if(param.startsWith("fne:")) {
+				String col = param.substring(4);
+				String value = params.get(param)[0];
+				filterNotEquals.put(col, value);
+			}
+			
+			else if(param.startsWith("fgt:")) {
+				String col = param.substring(4);
+				String value = params.get(param)[0];
+				filterGreaterThan.put(col, value);
+			}
+			else if(param.startsWith("fge:")) {
+				String col = param.substring(4);
+				String value = params.get(param)[0];
+				filterGreaterOrEqual.put(col, value);
+			}
+			else if(param.startsWith("flt:")) {
+				String col = param.substring(4);
+				String value = params.get(param)[0];
+				filterLessThan.put(col, value);
+			}
+			else if(param.startsWith("fle:")) {
+				String col = param.substring(4);
+				String value = params.get(param)[0];
+				filterLessOrEqual.put(col, value);
+			}
+			
 			else if(param.startsWith("fin:")) {
 				String col = param.substring(4);
 				String[] values = params.get(param);

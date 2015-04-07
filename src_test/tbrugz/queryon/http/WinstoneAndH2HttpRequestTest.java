@@ -424,6 +424,36 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void testGetXmlEmpFilterEq() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?feq:SUPERVISOR_ID=1", 2);
+	}
+
+	@Test
+	public void testGetXmlEmpFilterNe() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fne:SUPERVISOR_ID=1", 3);
+	}
+	
+	@Test
+	public void testGetXmlEmpFilterGt() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fgt:SALARY=1200", 2);
+	}
+	
+	@Test
+	public void testGetXmlEmpFilterGe() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fge:SALARY=1200", 3);
+	}
+	
+	@Test
+	public void testGetXmlEmpFilterLt() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?flt:SALARY=1000", 0);
+	}
+	
+	@Test
+	public void testGetXmlEmpFilterLe() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fle:SALARY=1000", 2);
+	}
+	
+	@Test
 	public void testGetXmlEmpFilterIn() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml?fin:SUPERVISOR_ID=1", 2);
 	}
