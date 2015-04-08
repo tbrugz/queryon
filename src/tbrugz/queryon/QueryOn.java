@@ -1050,77 +1050,19 @@ public class QueryOn extends HttpServlet {
 			
 			// uni-valued filters
 			addUniqueFilter(reqspec.filterEquals, columns, sql, "=", relationName);
-			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName);
+			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName); //XXX should be multi-valued?
 			addUniqueFilter(reqspec.filterGreaterThan, columns, sql, ">", relationName);
 			addUniqueFilter(reqspec.filterGreaterOrEqual, columns, sql, ">=", relationName);
 			addUniqueFilter(reqspec.filterLessThan, columns, sql, "<", relationName);
 			addUniqueFilter(reqspec.filterLessOrEqual, columns, sql, "<=", relationName);
-			
-			// filter: like
-			for(String col: reqspec.filterLike.keySet()) {
-				if(!validateFilterColumnNames || columns.contains(col)) {
-					//sql.bindParameterValues.add(reqspec.filterLike.get(col));
-					//sql.addFilter(SQL.sqlIdDecorator.get(col)+" like ?");
-					
-					String[] values = reqspec.filterLike.get(col);
-					for(int i=0;i<values.length;i++) {
-						sql.bindParameterValues.add(values[i]);
-						sql.addFilter(SQL.sqlIdDecorator.get(col)+" like ?");
-					}
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relationName+"]");
-				}
-			}
-			// filter: not like
-			for(String col: reqspec.filterNotLike.keySet()) {
-				if(!validateFilterColumnNames || columns.contains(col)) {
-					String[] values = reqspec.filterNotLike.get(col);
-					for(int i=0;i<values.length;i++) {
-						sql.bindParameterValues.add(values[i]);
-						sql.addFilter(SQL.sqlIdDecorator.get(col)+" not like ?");
-					}
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relationName+"]");
-				}
-			}
-			// filter: in
-			for(String col: reqspec.filterIn.keySet()) {
-				if(!validateFilterColumnNames || columns.contains(col)) {
-					StringBuffer sb = new StringBuffer();
-					sb.append(SQL.sqlIdDecorator.get(col)+" in (");
-					String[] values = reqspec.filterIn.get(col);
-					for(int i=0;i<values.length;i++) {
-						String value = values[i];
-						sb.append((i>0?", ":"")+"?");
-						sql.bindParameterValues.add(value);
-					}
-					sb.append(")");
-					sql.addFilter(sb.toString());
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relationName+"]");
-				}
-			}
-			// filter: not in
-			for(String col: reqspec.filterNotIn.keySet()) {
-				if(!validateFilterColumnNames || columns.contains(col)) {
-					StringBuffer sb = new StringBuffer();
-					sb.append(SQL.sqlIdDecorator.get(col)+" not in (");
-					String[] values = reqspec.filterNotIn.get(col);
-					for(int i=0;i<values.length;i++) {
-						String value = values[i];
-						sb.append((i>0?", ":"")+"?");
-						sql.bindParameterValues.add(value);
-					}
-					sb.append(")");
-					sql.addFilter(sb.toString());
-				}
-				else {
-					log.warn("unknown column: "+col+" [relation="+relationName+"]");
-				}
-			}
+
+			// multi-valued filters
+			addMultiFilter(reqspec.filterLike, columns, sql, "like ?", relationName);
+			addMultiFilter(reqspec.filterNotLike, columns, sql, "not like ?", relationName);
+
+			// multi-valued with subexpression filters
+			addMultiFilterSubexpression(reqspec.filterIn, columns, sql, "in", relationName);
+			addMultiFilterSubexpression(reqspec.filterNotIn, columns, sql, "not in", relationName);
 		}
 		else {
 			if(reqspec.filterEquals.size()>0) {
@@ -1141,7 +1083,42 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void addOriginalParameters(RequestSpec reqspec, SQL sql) throws SQLException {
+	void addMultiFilter(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName) {
+		for(String col: valueMap.keySet()) {
+			if(!validateFilterColumnNames || columns.contains(col)) {
+				String[] values = valueMap.get(col);
+				for(int i=0;i<values.length;i++) {
+					sql.bindParameterValues.add(values[i]);
+					sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareExpression); //" like ?"
+				}
+			}
+			else {
+				log.warn("unknown column: "+col+" [relation="+relationName+"]");
+			}
+		}
+	}
+
+	void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName) {
+		for(String col: valueMap.keySet()) {
+			if(!validateFilterColumnNames || columns.contains(col)) {
+				StringBuffer sb = new StringBuffer();
+				sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" (");
+				String[] values = valueMap.get(col);
+				for(int i=0;i<values.length;i++) {
+					String value = values[i];
+					sb.append((i>0?", ":"")+"?");
+					sql.bindParameterValues.add(value);
+				}
+				sb.append(")");
+				sql.addFilter(sb.toString());
+			}
+			else {
+				log.warn("unknown column: "+col+" [relation="+relationName+"]");
+			}
+		}
+	}
+	
+	static void addOriginalParameters(RequestSpec reqspec, SQL sql) throws SQLException {
 		int informedParams = reqspec.params.size();
 		//XXX bind all or bind none?
 		//int bindParamsLoop = informedParams; //bind all
@@ -1161,13 +1138,13 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void bindParameters(PreparedStatement st, SQL sql) throws SQLException {
+	static void bindParameters(PreparedStatement st, SQL sql) throws SQLException {
 		for(int i=0;i<sql.bindParameterValues.size();i++) {
 			st.setString(i+1, sql.bindParameterValues.get(i));
 		}
 	}
 	
-	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, 
+	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
