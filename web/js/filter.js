@@ -2,10 +2,16 @@
 var bhvalues = null;
 
 var operatorsInfo = {
-	"in": {"name":"in"},
-	"nin": {"name":"not in"},
-	"lk": {"name":"like"},
-	"nlk": {"name":"not like"}
+	"in":  {"name":"in", "multiple": true },
+	"nin": {"name":"not in", "multiple": true },
+	"lk":  {"name":"like", "multiple": true },
+	"nlk": {"name":"not like", "multiple": true },
+	// eq, ne ?
+	//"": {"name":"", "multiple":}
+	"gt": { "name":">", "multiple": false },
+	"ge": { "name":"&ge;", "multiple": false },
+	"lt": { "name":"<", "multiple": false },
+	"le": { "name":"&le;", "multiple": false }
 };
 
 if(typeof Bloodhound != 'undefined') {
@@ -128,8 +134,16 @@ function addFilterIn() {
 			+ "</span>)</label>";
 	}
 	else {
-		finContainer.getElementsByTagName('span')[0].innerHTML += "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
-			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
+		if(operatorsInfo[operator].multiple) {
+			// add filter value
+			finContainer.getElementsByTagName('span')[0].innerHTML += "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+				+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
+		}
+		else {
+			// replace filter value
+			finContainer.getElementsByTagName('span')[0].innerHTML = "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+				+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
+		}
 	}
 	updateFromFilters();
 	//makeHrefs();

@@ -77,8 +77,8 @@ th {
 	display: inline-block;
 }
 
-.simplebutton {
-	background-color: #767676;
+input[type=button].simplebutton {
+	background-color: #aaa;
 	font-weight: bold;
 	border: 0;
 	padding: 0;
@@ -123,19 +123,17 @@ input[readonly="readonly"] {
 	background-color: #ccc;
 }
 
-#dialog input[type=button] {
-	margin: 3px;
-}
-
-#filters input[type=button] {
-	padding: 3px 3px 3px 3px;
-}
-
 .external {
 	background-image: url(../image/external-link-ltr-icon.png);
 	background-position: right 3px center;
 	background-repeat: no-repeat;
 	padding-right: 18px !important;
+}
+
+/* filters */
+
+#filters input[type=button] {
+	padding: 1px 3px 1px 3px;
 }
 
 /* dialog */
@@ -144,6 +142,11 @@ input[readonly="readonly"] {
 	background-color: #eeeeee;
 	padding: 2px;
 	margin-right: 4px;
+}
+
+#dialog input[type=button] {
+	margin: 3px;
+	padding: 3px;
 }
 
 /* typeahead */
