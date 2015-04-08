@@ -128,15 +128,21 @@ function addFilterIn() {
 	//console.log("operator: "+operator);
 	
 	if(finContainer==null) {
-		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> (<span>"
+		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> "
+			+ (operatorsInfo[operator].multiple?"(":"")
+			+ "<span>"
 			+ "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
-			+ "</span>)</label>";
+			+ "</span>"
+			+ (operatorsInfo[operator].multiple?")":"")
+			+ "</label>";
 	}
 	else {
 		if(operatorsInfo[operator].multiple) {
 			// add filter value
-			finContainer.getElementsByTagName('span')[0].innerHTML += "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+			finContainer.getElementsByTagName('span')[0].innerHTML += "<span>"
+				//+ "," // if first element is removed it doesn't looks good
+				+ "<input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
 				+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
 		}
 		else {
