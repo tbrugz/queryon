@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
+import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
 import tbrugz.queryon.sqlcmd.ShowColumns;
@@ -48,7 +49,9 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.ModelUtils;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -189,7 +192,10 @@ public class QueryOn extends HttpServlet {
 	//String modelId;
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
+	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	boolean validateFilterColumnNames = true;
+	
+	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY+":"+ActionType.SELECT_ANY.name();
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -434,6 +440,9 @@ public class QueryOn extends HttpServlet {
 					log.warn("strange... rel is null");
 					rel = SchemaModelUtils.getRelation(model, reqspec, true); //XXX: option to search views based on property?
 				}
+				if(! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) {
+					checkGrantsAndRolesMatches(PrivilegeType.SELECT, rel);
+				}
 				doSelect(model, rel, reqspec, resp);
 				}
 				break;
@@ -516,6 +525,29 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	void checkGrantsAndRolesMatches(PrivilegeType privilege, Relation rel) {
+		boolean check = grantsAndRolesMatches(privilege, rel.getGrants());
+		if(!check) {
+			throw new BadRequestException("no "+privilege+" permission on "+rel.getName(), HttpServletResponse.SC_FORBIDDEN);
+		}
+	}
+	
+	boolean grantsAndRolesMatches(PrivilegeType privilege, List<Grant> grants) {
+		if(grants==null || grants.size()==0) {
+			return true;
+		}
+		Set<String> roles = ShiroUtils.getCurrentUserRoles();
+		log.info("grantsAndRolesMatches:: grants: "+grants);
+		log.info("grantsAndRolesMatches:: roles: "+roles);
+		for(Grant grant: grants) {
+			if( privilege.equals(grant.getPrivilege()) && roles.contains(grant.getGrantee()) ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -747,9 +779,17 @@ public class QueryOn extends HttpServlet {
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"?
-	static final List<String> tableAllColumns =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "PKConstraint"});
-	static final List<String> viewAllColumns  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
-	static final List<String> relationAllColumns  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "parameterCount"});
+	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants"});
+	
+	static final List<String> tableAllColumns;// =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "PKConstraint"});
+	static final List<String> viewAllColumns;//  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
+	static final List<String> relationAllColumns;//  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
+	
+	static {
+		tableAllColumns = new ArrayList<String>(); tableAllColumns.addAll(relationCommonCols); tableAllColumns.addAll(Arrays.asList(new String[]{"PKConstraint"}));
+		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(Arrays.asList(new String[]{"parameterCount"}));
+		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(Arrays.asList(new String[]{"parameterCount"}));
+	}
 	
 	@SuppressWarnings("resource")
 	void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
@@ -757,6 +797,7 @@ public class QueryOn extends HttpServlet {
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
 		final String objectName = statusType.desc();
+		PrivilegeType privilege = PrivilegeType.SELECT;
 		//XXX: filter by schemaName, name? ResultSetFilterDecorator(rs, colpositions, colvalues)?
 		switch (statusType) {
 		case TABLE: {
@@ -780,6 +821,7 @@ public class QueryOn extends HttpServlet {
 		case EXECUTABLE: {
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, list, ExecutableObject.class);
+			privilege = PrivilegeType.EXECUTE;
 			break;
 		}
 		case FK: {
@@ -792,19 +834,22 @@ public class QueryOn extends HttpServlet {
 		}
 		}
 		
-		rs = filterStatus(rs, reqspec, currentUser);
+		rs = filterStatus(rs, reqspec, currentUser, privilege);
 		
 		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
 		if(rs!=null) { rs.close(); }
 	}
 	
-	ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser) throws SQLException {
+	ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser, PrivilegeType privilege) throws SQLException {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
 		if(doFilterStatusByPermission) {
 			// filter by [object-type]:SELECT:[schema]:[name]
-			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[6]:SELECT:[1]:[2]");
+			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[6]:"+privilege+":[1]:[2]");
+		}
+		if(doFilterStatusByQueryGrants && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) {
+			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getCurrentUserRoles(), privilege, "grants");
 		}
 		return rs;
 	}

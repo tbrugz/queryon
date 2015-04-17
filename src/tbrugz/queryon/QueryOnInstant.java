@@ -26,6 +26,7 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -165,7 +166,7 @@ public class QueryOnInstant extends QueryOn {
 		
 		conn.close();
 		
-		rs = filterStatus(rs, reqspec, currentUser);
+		rs = filterStatus(rs, reqspec, currentUser, PrivilegeType.SELECT);
 		
 		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, null, null, true, resp);
 		if(rs!=null) { rs.close(); }
@@ -212,7 +213,7 @@ public class QueryOnInstant extends QueryOn {
 		return ret;
 	}
 	
-	List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
+	static List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
 		try {
 			if(grabFunctions) {
 				return jgrab.doGrabFunctions(dbmd, schemaName, false);

@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="tbrugz.sqldump.datadump.DataDumpUtils"%>
@@ -159,6 +160,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			"sqldump.query.q1.name": name,
 			"sqldump.query.q1.sql": editor.getValue(),
 			"sqldump.query.q1.remarks": document.getElementById('remarks').value,
+			"sqldump.query.q1.roles": document.getElementById('roles').value,
 			//"model": document.getElementById('model').value,
 			"queryon.qon-queries.action": "write",
 			"queryon.qon-queries.querynames": name,
@@ -371,6 +373,7 @@ String schemaName = null;
 String queryName = null;
 String query = "";
 String remarks = "";
+String roles = "";
 int numOfParameters = 0;
 boolean queryLoaded = false;
 %>
@@ -381,6 +384,8 @@ schemaName = request.getParameter("schema");
 queryName = request.getParameter("name");
 query = "";
 remarks = "";
+roles = "";
+
 numOfParameters = 0;
 queryLoaded = false;
 
@@ -401,6 +406,7 @@ if(queryName!=null) {
 		
 		schemaName = v.getSchemaName();
 		remarks = v.getRemarks();
+		roles = QOnQueries.getGrantsStr(v.getGrants());
 		queryLoaded = true;
 		if(v.getParameterCount()!=null) {
 			numOfParameters = v.getParameterCount();
@@ -432,6 +438,7 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
+	<label id="rolesLabel">roles: <input type="text" id="roles" name="roles" value="<%= roles %>"/></label>
 	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
 	
 	<span id="actions-container">

@@ -19,6 +19,7 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.ProcessingException;
@@ -98,9 +99,10 @@ public class QOnQueries extends SQLQueries {
 		model.getViews().addAll(origViews);
 	}
 	
+	//XXX: test if table has all columns?
 	void readFromDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String sql = "select schema, name, query, remarks from "+qonQueriesTable;
+		String sql = "select schema, name, query, remarks, roles_filter from "+qonQueriesTable;
 				//+" order by schema, name";
 		
 		ResultSet rs = null;
@@ -118,6 +120,7 @@ public class QOnQueries extends SQLQueries {
 			String queryName = rs.getString(2);
 			String query = rs.getString(3);
 			String remarks = rs.getString(4);
+			String rolesFilterStr = rs.getString(5);
 			
 			try {
 			PreparedStatement stinn = conn.prepareStatement(query);
@@ -127,7 +130,7 @@ public class QOnQueries extends SQLQueries {
 			//		/*List<String> params*/ null,
 			//		/*String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend*/ null, null, null);
 			
-			count += addQueryFromDB(schema, queryName, stinn, query, remarks);
+			count += addQueryFromDB(schema, queryName, stinn, query, remarks, rolesFilterStr);
 			}
 			catch(SQLException e) {
 				log.warn("error reading query '"+queryName+"': "+e);
@@ -137,12 +140,13 @@ public class QOnQueries extends SQLQueries {
 		log.info("QOn processed [added/replaced "+count+" queries]");
 	}
 	
-	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks) {
+	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr) {
 		Query query = new Query();
 		query.setSchemaName(schemaName);
 		query.setName(queryName);
 		query.setQuery(sql);
 		query.setRemarks(remarks);
+		addRolesToQuery(query, rolesFilterStr);
 
 		try {
 			// resultset metadata
@@ -227,8 +231,8 @@ public class QOnQueries extends SQLQueries {
 	 */
 	void writeToDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String updateSql = "update "+qonQueriesTable+" set schema = ?, query = ?, remarks = ? where name = ?";
-		String insertSql = "insert into "+qonQueriesTable+" (schema, query, remarks, name) values (?, ?, ?, ?)";
+		String updateSql = "update "+qonQueriesTable+" set schema = ?, query = ?, remarks = ?, roles_filter = ? where name = ?";
+		String insertSql = "insert into "+qonQueriesTable+" (schema, query, remarks, roles_filter, name) values (?, ?, ?, ?, ?)";
 		PreparedStatement updateSt = conn.prepareStatement(updateSql);
 		PreparedStatement insertSt = conn.prepareStatement(insertSql);
 
@@ -250,14 +254,16 @@ public class QOnQueries extends SQLQueries {
 					updateSt.setString(1, v.getSchemaName());
 					updateSt.setString(2, v.getQuery());
 					updateSt.setString(3, v.getRemarks());
-					updateSt.setString(4, v.getName());
+					updateSt.setString(4, getGrantsStr(v.getGrants()));
+					updateSt.setString(5, v.getName());
 					int countU = updateSt.executeUpdate();
 					countUpdates += countU;
 					if(countU==0) {
 						insertSt.setString(1, v.getSchemaName());
 						insertSt.setString(2, v.getQuery());
 						insertSt.setString(3, v.getRemarks());
-						insertSt.setString(4, v.getName());
+						insertSt.setString(4, getGrantsStr(v.getGrants()));
+						insertSt.setString(5, v.getName());
 						int countI = insertSt.executeUpdate();
 						countInserts += countI;
 						if(countI==0) {
@@ -318,6 +324,18 @@ public class QOnQueries extends SQLQueries {
 		}
 		
 		log.info("QOn processed ["+countAllDeletes+" deleted queries in table "+qonQueriesTable+"]");
+	}
+	
+	public static String getGrantsStr(List<Grant> grants) {
+		if(grants==null || grants.size()==0) {
+			return null;
+		}
+		
+		List<String> grantees = new ArrayList<String>();
+		for(Grant g: grants) {
+			grantees.add(g.getGrantee());
+		}
+		return Utils.join(grantees, ROLES_DELIMITER_STR);
 	}
 	
 }

@@ -25,7 +25,7 @@
 			console.log(info);
 			if(info.authenticated) {
 				username = info.username;
-				isAdmin = info.roles.indexOf("admin")>=0;
+				isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
 			}
 			else {
 				username = '';
