@@ -4,8 +4,11 @@
 package tbrugz.queryon.shiro;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -26,6 +29,46 @@ import org.slf4j.LoggerFactory;
 public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm {
 
     private static final Logger log = LoggerFactory.getLogger(QOnActiveDirectoryRealm.class);
+    
+    private String searchFilter = "(&(objectClass=*)(userPrincipalName={0}))";
+    
+    private String groupRolesRegexMapper;
+
+    private String regexMapperRolePrefix;
+    
+    private String regexMapperRoleSuffix;
+	
+	public String getSearchFilter() {
+		return searchFilter;
+	}
+
+	public void setSearchFilter(String searchFilter) {
+		this.searchFilter = searchFilter;
+	}
+
+	public String getGroupRolesRegexMapper() {
+		return groupRolesRegexMapper;
+	}
+
+	public void setGroupRolesRegexMapper(String groupRolesRegexMapper) {
+		this.groupRolesRegexMapper = groupRolesRegexMapper;
+	}
+	
+	public String getRegexMapperRolePrefix() {
+		return regexMapperRolePrefix;
+	}
+
+	public void setRegexMapperRolePrefix(String regexMapperRolePrefix) {
+		this.regexMapperRolePrefix = regexMapperRolePrefix;
+	}
+
+	public String getRegexMapperRoleSuffix() {
+		return regexMapperRoleSuffix;
+	}
+
+	public void setRegexMapperRoleSuffix(String regexMapperRoleSuffix) {
+		this.regexMapperRoleSuffix = regexMapperRoleSuffix;
+	}
 
     protected AuthorizationInfo queryForAuthorizationInfo(PrincipalCollection principals, LdapContextFactory ldapContextFactory) throws NamingException {
 
@@ -60,10 +103,17 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm {
         //SHIRO-115 - prevent potential code injection:
         //String searchFilter = "(&(objectClass=*)(userPrincipalName={0}))";
         //String searchFilter = "(&(objectClass=*)(sAMAccountName={0}))";
-        String searchFilter = "(&(objectClass=*)(mail={0}))";
+        //String searchFilter = "(&(objectClass=*)(mail={0}))";
         Object[] searchArguments = new Object[]{userPrincipalName};
 
         NamingEnumeration<SearchResult> answer = ldapContext.search(searchBase, searchFilter, searchArguments, searchCtls);
+        
+        Pattern groupRolesRegexPattern = null;
+        // "CN=(.+?),CN=Users,DC=example,DC=com"
+        // "ad_", ""
+        if(groupRolesRegexMapper!=null) {
+            groupRolesRegexPattern = Pattern.compile(groupRolesRegexMapper);
+        }
 
         while (answer.hasMoreElements()) {
             SearchResult sr = (SearchResult) answer.next();
@@ -86,14 +136,41 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm {
                         if (log.isDebugEnabled()) {
                             log.debug("Groups found for user [" + username + "]: " + groupNames);
                         }
+                        //"CN=IT,CN=Users,DC=example,DC=com"
 
                         Collection<String> rolesForGroups = getRoleNamesForGroups(groupNames);
                         roleNames.addAll(rolesForGroups);
+                        
+                        if(groupRolesRegexPattern!=null) {
+	                        Collection<String> rolesForRegex = getRoleNamesFromGroupNamesRegex(groupNames, groupRolesRegexPattern);
+	                        roleNames.addAll(rolesForRegex);
+                        }
                     }
                 }
             }
         }
         return roleNames;
     }
+    
+    public AuthorizationInfo getAuthorizationInfo(PrincipalCollection principals) {
+        return super.getAuthorizationInfo(principals);
+    }
+    
+    protected Collection<String> getRoleNamesFromGroupNamesRegex(Collection<String> groupNames, Pattern pattern) {
+        Set<String> roleNames = new HashSet<String>(groupNames.size());
+
+        for (String groupName : groupNames) {
+            Matcher matcher = pattern.matcher(groupName);
+            if(matcher.matches()) {
+                int matchGroup = matcher.groupCount()>0?1:0;
+                String match = matcher.group(matchGroup);
+                roleNames.add( (regexMapperRolePrefix!=null?regexMapperRolePrefix:"")
+                        +match
+                        +(regexMapperRoleSuffix!=null?regexMapperRolePrefix:"") );
+            }
+        }
+        return roleNames;
+    }
+    
 
 }
