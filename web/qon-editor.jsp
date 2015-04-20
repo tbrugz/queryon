@@ -41,6 +41,17 @@ modelId = SchemaModelUtils.getModelId(request);
 	var processorUrl = 'processor';
 	var isQuerySaved = false;
 	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;
+	var rolesInfo = {};
+	
+	$.ajax({
+		dataType: 'text',
+		url: 'allroles.json',
+		success: function(data) {
+			rolesInfo = JSON.parse(data);
+			//console.log(rolesInfo);
+			refreshRolesInfo();
+		}
+	});
 
 	function doRun() {
 		var sqlString = editor.getSelectedText();
@@ -342,6 +353,84 @@ modelId = SchemaModelUtils.getModelId(request);
 		document.getElementById('queryResult').style.top = document.getElementById('spec').offsetHeight + 'px';
 	}
 	
+	function refreshRolesInfo() {
+		var r = document.getElementById('roles');
+		var rl = document.getElementById('rolesLabel');
+		
+		if(! rolesInfo.useRoles) {
+			r.disabled = true;
+			r.readOnly = true;
+			rl.style.display='none';
+			return;
+		}
+		
+		rl.style.display='initial';
+		if(rolesInfo.roles && rolesInfo.roles.length>0) {
+			console.log('multi-roles');
+			refreshRolesCount();
+			var rc = document.getElementById('rolesCount');
+			var rolesBtn = document.getElementById('rolesBtn');
+			r.style.display='none';
+			rc.style.display='initial';
+			rolesBtn.style.display='initial';
+			var rtext = document.getElementById('rolesLabelText');
+			rtext.innerHTML = 'roles#';
+		}
+	}
+
+	function refreshRolesCount() {
+		var r = document.getElementById('roles');
+		var rc = document.getElementById('rolesCount');
+		//console.log(rc.innerHTML);
+		if(!r.value) {
+			rc.innerHTML = '(public)';
+		}
+		else {
+			rc.innerHTML = r.value.split('|').length;
+		}
+	}
+	
+	function showRolesDialog() {
+		var rd=document.getElementById('rolesListDialogContainer');
+		rd.style.display='block';
+		
+		var r = document.getElementById('roles');
+		var rolesValues = r.value.split('|');
+		//console.log(rolesInfo);
+		
+		var rdc=document.getElementById('rolesListDialogContent');
+		for(var i=0;i<rolesInfo.roles.length;i++) {
+			rdc.innerHTML += '<div><input name="roleName" class="rolesCheck" type="checkbox" value="'+rolesInfo.roles[i]+'"'
+				+(rolesValues.indexOf(rolesInfo.roles[i])>=0?" checked":"")
+				+'/>'+rolesInfo.roles[i]+'</div>\n';
+		}
+	}
+	
+	function updateRoles() {
+		var cboxes = document.getElementsByName('roleName');
+		var len = cboxes.length;
+		var rolesStr = '';
+		for (var i=0; i<len; i++) {
+			if(cboxes[i].checked) {
+				if(rolesStr) { rolesStr += '|'; }
+				rolesStr += cboxes[i].value;
+			}
+		}
+		var r=document.getElementById('roles');
+		r.value = rolesStr;
+		refreshRolesCount();
+		
+		closeRolesDialog();
+	}
+	
+	function closeRolesDialog() {
+		var rcont=document.getElementById('rolesListDialogContainer');
+		rcont.style.display='none';
+
+		var rdc=document.getElementById('rolesListDialogContent');
+		rdc.innerHTML = '';
+	}
+	
 	window.addEventListener('load', function() {
 		if(modelId==null) {
 			//document.getElementById('modelLabel').style.display = 'none';
@@ -438,7 +527,12 @@ if(remarks==null) { remarks = ""; }
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
-	<label id="rolesLabel">roles: <input type="text" id="roles" name="roles" value="<%= roles %>"/></label>
+	<label id="rolesLabel">
+		<span id="rolesLabelText">roles:</span>
+		<input type="text" id="roles" name="roles" value="<%= roles %>"/>
+		<span id="rolesCount"></span>
+		<input type="button" id="rolesBtn" value="+/- roles" onclick="showRolesDialog()"/>
+	</label>
 	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
 	
 	<span id="actions-container">
@@ -465,6 +559,18 @@ if(remarks==null) { remarks = ""; }
 </div>
 
 <div id="messages"></div>
+</div>
+
+<div id="rolesListDialogContainer">
+	<div id="rolesListDialog">
+		<form id="rolesForm">
+		<div id="rolesListDialogContent"></div>
+		<div id="rolesListDialogBtns">
+			<input type="button" value="change roles" onclick="updateRoles();"/>
+			<input type="button" value="close" onclick="closeRolesDialog();"/>
+		</div>
+		</form>
+	</div>
 </div>
 
 <div class="container">

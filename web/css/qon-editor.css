@@ -109,3 +109,48 @@ a, a:visited {
 	font-weight: bold;
 	/*margin: 2px 4px 2px 4px;*/
 }
+
+/* roles */
+
+#rolesLabel {
+	display: none;
+}
+
+#rolesLabel input[type=button] {
+	padding: 0px 9px 0px 9px;
+}
+
+#rolesCount {
+	display: none;
+	background-color: rgb(146, 218, 136);
+	/*padding: 2px 4px 2px 3px;*/
+	padding: 0px 4px 0px 3px;
+	border: 1px solid #888;
+}
+
+#rolesBtn {
+	display: none;
+	border: 1px solid #999;
+	margin: 2px;
+}
+
+#rolesListDialogContainer {
+	display: none;
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	width: 30em;
+	z-index: 100;
+	max-height: 80%;
+}
+
+#rolesListDialog {
+	position: relative;
+	background-color: #fff;
+	border: 3px solid #999;
+	padding: 3px;
+}
+
+#rolesListDialogBtns {
+	padding-top: 10px;
+}

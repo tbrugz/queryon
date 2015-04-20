@@ -1,0 +1,9 @@
+{
+"useRoles": true,
+"roles":
+[
+"admin",
+"desenv",
+"user"
+]
+}
