@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.shiro.QOnActiveDirectoryRealm"%>
 <%@page import="org.apache.shiro.session.Session"%>
 <%@page import="org.apache.shiro.cache.Cache"%>
 <%@page import="org.apache.shiro.realm.activedirectory.ActiveDirectoryRealm"%>
@@ -25,6 +26,7 @@
 	<title>QueryOn</title>
 	<link href="../css/queryon.css" rel="stylesheet">
 	<link href="../css/qon-login.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="favicon.png" />
 </head>
 <body>
 <%
@@ -86,7 +88,7 @@ out.write("\n<br><b>lastAccessTime</b>: "+ss.getLastAccessTime());
 
 Collection<Object> keys = ss.getAttributeKeys();
 if(keys!=null) {
-	out.write("session attrs::\n<ul>");
+	out.write("\n<br><b>session attrs</b>::\n<ul>");
 	for(Object o: keys) {
 		out.write("\n<li><b>"+o+"</b>: "+ss.getAttribute(o));
 	}
@@ -97,10 +99,11 @@ if(keys!=null) {
 
 <p>
     <shiro:hasRole name="admin"><li>admin<br/></shiro:hasRole>
+    <shiro:hasRole name="developer"><li>developer<br/></shiro:hasRole>
     <shiro:hasRole name="user"><li>user<br/></shiro:hasRole>
     
 <%
-String[] roles = new String[]{"admin", "user"};
+String[] roles = new String[]{"admin", "developer", "user"};
 for(String s: roles) {
 	out.write("<li>role '"+s+"': "+currentUser.hasRole(s));
 }
@@ -136,26 +139,38 @@ if(sm instanceof RealmSecurityManager) {
 	RealmSecurityManager rsm = (RealmSecurityManager) sm;
 	Collection<Realm> rs = rsm.getRealms();
 	if(rs!=null) {
-		out.write("<br>#realms = "+rs.size());
+		out.write("\n<br><br><b>#realms</b> = "+rs.size());
 		for(Realm r: rs) {
 			if(r instanceof AuthorizingRealm) {
 				out.write("<br><b>authorizing realm:: "+r.getName()+" / "+r.getClass().getSimpleName()+"</b> ");
 				AuthorizingRealm ar = (AuthorizingRealm) r;
 				//ar.doGetAuthorizationInfo(currentUser.getPrincipals());
+				//ar.getAuthorizationInfo(pc);
 				
 				Cache<Object, AuthorizationInfo> cache = ar.getAuthorizationCache();
 				if(cache!=null) {
 					Collection<AuthorizationInfo> ais = cache.values();
 					if(ais!=null) {
 						for(AuthorizationInfo ai: ais) {
-							out.write(ai.toString());
-							out.write("<ul><li>roles:: "+ai.getRoles()+"</li>");
+							out.write("<ul><li>AuthorizationInfo:: "+ai.toString()+"</li>");
+							out.write("<li>roles:: "+ai.getRoles()+"</li>");
 							out.write("<li>permissions:: "+ai.getStringPermissions()+"</li></ul>");
 						}
 					}
-					
-					if(ar instanceof ActiveDirectoryRealm) {
-						ActiveDirectoryRealm adr = (ActiveDirectoryRealm) ar;
+				}
+				
+				if(ar instanceof ActiveDirectoryRealm) {
+					//ActiveDirectoryRealm adr = (ActiveDirectoryRealm) ar;
+					//adr.getAuthorizationInfo(pc);
+					if(ar instanceof QOnActiveDirectoryRealm) {
+						QOnActiveDirectoryRealm qadr = (QOnActiveDirectoryRealm) ar;
+						AuthorizationInfo ai = qadr.getAuthorizationInfo(pc);
+						if(ai!=null) {
+							out.write("<br><b>QOnActiveDirectoryRealm roles</b>:: "+ai.getRoles()+"<br>");
+						}
+						else {
+							out.write("<br><b>QOnActiveDirectoryRealm </b>:: null AuthorizationInfo<br>");
+						}
 					}
 				}
 			}
