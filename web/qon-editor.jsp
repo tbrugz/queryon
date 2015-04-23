@@ -292,7 +292,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		if(saved) { // }(qname != null) && (qname != '')) {
 			document.getElementById('schema').disabled = true;
 			document.getElementById('name').disabled = true;
-			container.style.display = 'inline';
+			container.style.display = 'initial';
 			isQuerySaved = true;
 		}
 		else {
@@ -434,7 +434,9 @@ modelId = SchemaModelUtils.getModelId(request);
 	window.addEventListener('load', function() {
 		if(modelId==null) {
 			//document.getElementById('modelLabel').style.display = 'none';
-			document.getElementById('modelLabel').innerHTML = '';
+			var ml = document.getElementById('modelLabel');
+			ml.innerHTML = '';
+			ml.style.display = 'none';
 		}
 		
 	});
@@ -535,12 +537,14 @@ if(remarks==null) { remarks = ""; }
 	</label>
 	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
 	
+	<span id="xtra-actions">
 	<span id="actions-container">
 		<a id="url-reload" href="" title="Reload query">reload</a>
 		<a id="url-permalink" href="" target="_blank">permalink</a>
 		<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
 	</span>
 	<span id="username"><%= currentUser.getPrincipal() %></span>
+	</span>
 </div>
 
 <div id="editor"><%= DataDumpUtils.xmlEscapeText( query ) %></div>

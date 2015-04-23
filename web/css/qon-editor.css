@@ -16,13 +16,16 @@
 label {
 	background-color: #ddd;
 	font-weight: bold;
+	padding-left: 3px;
 }
 .container {
-	border: 1px solid #999;
+	/*border: 1px solid #999;*/
 	margin-top: 2px;
 	margin-bottom: 2px;
 }
 #button-container {
+	padding-bottom: 2px;
+	border-bottom: 1px solid #999;
 	display: inline-block;
 	width: 100%;
 }
@@ -67,6 +70,8 @@ a, a:visited {
 }
 
 #objectid-container {
+	display: inline-block;
+	width: 100%;
 }
 
 #editor {
@@ -102,9 +107,14 @@ a, a:visited {
 	padding: 2px;
 }
 
-#username {
+#xtra-actions {
 	float: right;
+	padding: 2px 0px 2px 5px;
+}
+
+#username {
 	padding: 3px 5px 3px 5px;
+	margin-left: 15px;
 	background-color: #B8B5B5;
 	font-weight: bold;
 	/*margin: 2px 4px 2px 4px;*/
