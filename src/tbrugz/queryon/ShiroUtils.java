@@ -18,7 +18,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
-import tbrugz.queryon.shiro.QOnActiveDirectoryRealm;
+import tbrugz.queryon.shiro.AuthorizationInfoInformer;
 
 public class ShiroUtils {
 
@@ -84,9 +84,9 @@ public class ShiroUtils {
 			if(rs!=null) {
 				log.info("#realms = "+rs.size());
 				for(Realm r: rs) {
-					if(r instanceof QOnActiveDirectoryRealm) {
-						QOnActiveDirectoryRealm qonr = (QOnActiveDirectoryRealm) r;
-						AuthorizationInfo ai = qonr.getAuthorizationInfo(subject.getPrincipals()); 
+					if(r instanceof AuthorizationInfoInformer) {
+						AuthorizationInfoInformer ar = (AuthorizationInfoInformer) r;
+						AuthorizationInfo ai = ar.getAuthorizationInfo(subject.getPrincipals()); 
 						Collection<String> cr = ai.getRoles();
 						if(cr!=null) {
 							log.info("roles:: "+cr);
@@ -98,7 +98,7 @@ public class ShiroUtils {
 		}
 		return roles;
 	}
-		
+	
 	/*static Set<String> oldGetSubjectRoles(Subject subject) {
 		
 		Set<String> roles = new HashSet<String>();

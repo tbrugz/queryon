@@ -26,7 +26,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm {
+public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements AuthorizationInfoInformer {
 
     private static final Logger log = LoggerFactory.getLogger(QOnActiveDirectoryRealm.class);
     
