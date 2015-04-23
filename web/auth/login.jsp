@@ -28,7 +28,7 @@ if(username!=null) {
 	AuthenticationToken token = new UsernamePasswordToken(username, password);
 	try {
 		currentUser.login(token);
-		System.out.println("login.jsp: auth: "+username);
+		//System.out.println("login.jsp: auth: "+username);
 		if(returnUrl!=null) {
 			out.write("<script>window.location.href = '"+returnUrl+"';</script>");
 		}

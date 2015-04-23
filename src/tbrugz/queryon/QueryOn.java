@@ -441,7 +441,7 @@ public class QueryOn extends HttpServlet {
 					rel = SchemaModelUtils.getRelation(model, reqspec, true); //XXX: option to search views based on property?
 				}
 				if(! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) {
-					checkGrantsAndRolesMatches(PrivilegeType.SELECT, rel);
+					checkGrantsAndRolesMatches(currentUser, PrivilegeType.SELECT, rel);
 				}
 				doSelect(model, rel, reqspec, resp);
 				}
@@ -525,20 +525,20 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void checkGrantsAndRolesMatches(PrivilegeType privilege, Relation rel) {
-		boolean check = grantsAndRolesMatches(privilege, rel.getGrants());
+	void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, Relation rel) {
+		boolean check = grantsAndRolesMatches(subject, privilege, rel.getGrants());
 		if(!check) {
 			throw new BadRequestException("no "+privilege+" permission on "+rel.getName(), HttpServletResponse.SC_FORBIDDEN);
 		}
 	}
 	
-	boolean grantsAndRolesMatches(PrivilegeType privilege, List<Grant> grants) {
+	boolean grantsAndRolesMatches(Subject subject, PrivilegeType privilege, List<Grant> grants) {
 		if(grants==null || grants.size()==0) {
 			return true;
 		}
-		Set<String> roles = ShiroUtils.getCurrentUserRoles();
-		log.info("grantsAndRolesMatches:: grants: "+grants);
-		log.info("grantsAndRolesMatches:: roles: "+roles);
+		Set<String> roles = ShiroUtils.getSubjectRoles(subject);
+		//log.info("grantsAndRolesMatches:: grants: "+grants);
+		//log.info("grantsAndRolesMatches:: roles: "+roles);
 		for(Grant grant: grants) {
 			if( privilege.equals(grant.getPrivilege()) && roles.contains(grant.getGrantee()) ) {
 				return true;
@@ -849,7 +849,7 @@ public class QueryOn extends HttpServlet {
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[6]:"+privilege+":[1]:[2]");
 		}
 		if(doFilterStatusByQueryGrants && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) {
-			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getCurrentUserRoles(), privilege, "grants");
+			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getSubjectRoles(currentUser), privilege, "grants");
 		}
 		return rs;
 	}

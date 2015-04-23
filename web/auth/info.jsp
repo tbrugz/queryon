@@ -20,7 +20,7 @@
 			
 		// roles
 		out.write(",\n\t\"roles\": [");
-		Set<String> roles = ShiroUtils.getCurrentUserRoles();
+		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		boolean is1st = true;
 		for(String role: roles) {
 			if(currentUser.hasRole(role)) {

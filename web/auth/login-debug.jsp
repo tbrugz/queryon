@@ -1,3 +1,4 @@
+<%@page import="java.util.Set"%>
 <%@page import="tbrugz.queryon.shiro.QOnActiveDirectoryRealm"%>
 <%@page import="org.apache.shiro.session.Session"%>
 <%@page import="org.apache.shiro.cache.Cache"%>
@@ -149,10 +150,12 @@ if(sm instanceof RealmSecurityManager) {
 				
 				Cache<Object, AuthorizationInfo> cache = ar.getAuthorizationCache();
 				if(cache!=null) {
-					Collection<AuthorizationInfo> ais = cache.values();
-					if(ais!=null) {
-						for(AuthorizationInfo ai: ais) {
-							out.write("<ul><li>AuthorizationInfo:: "+ai.toString()+"</li>");
+					Set<Object> cacheKeys = cache.keys();
+					if(cacheKeys!=null) {
+						for(Object key: cacheKeys) {
+							AuthorizationInfo ai = cache.get(key);
+							//Collection<AuthorizationInfo> ais = cache.values();
+							out.write("<ul><li>AuthorizationInfo:: "+key+" / "+ai.toString()+"</li>");
 							out.write("<li>roles:: "+ai.getRoles()+"</li>");
 							out.write("<li>permissions:: "+ai.getStringPermissions()+"</li></ul>");
 						}

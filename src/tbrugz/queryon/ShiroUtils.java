@@ -12,13 +12,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.cache.Cache;
 import org.apache.shiro.mgt.RealmSecurityManager;
-import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
+
+import tbrugz.queryon.shiro.QOnActiveDirectoryRealm;
 
 public class ShiroUtils {
 
@@ -70,34 +70,27 @@ public class ShiroUtils {
 		throw new BadRequestException("no authorization for any of "+permissionsStr, HttpServletResponse.SC_FORBIDDEN);
 	}
 	
-	public static Set<String> getCurrentUserRoles() {
+	public static Set<String> getSubjectRoles(Subject subject) {
 		Set<String> roles = new HashSet<String>();
+		Object principal = subject.getPrincipal();
+		if(principal==null) {
+			return roles;
+		}
 		org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
 		
 		if(sm instanceof RealmSecurityManager) {
 			RealmSecurityManager rsm = (RealmSecurityManager) sm;
 			Collection<Realm> rs = rsm.getRealms();
 			if(rs!=null) {
-				//out.write("<br>#realms = "+rs.size());
+				log.info("#realms = "+rs.size());
 				for(Realm r: rs) {
-					if(r instanceof AuthorizingRealm) {
-						//out.write("<br><b>authorizing realm:: "+r.getName()+" / "+r.getClass().getSimpleName()+"</b> ");
-						AuthorizingRealm ar = (AuthorizingRealm) r;
-						//ar.doGetAuthorizationInfo(currentUser.getPrincipals());
-						//ar.getAuthorizationInfo(pc);
-						
-						Cache<Object, AuthorizationInfo> cache = ar.getAuthorizationCache();
-						if(cache!=null) {
-							Collection<AuthorizationInfo> ais = cache.values();
-							if(ais!=null) {
-								for(AuthorizationInfo ai: ais) {
-									//out.write("<ul><li>roles:: "+ai.getRoles()+"</li>");
-									Collection<String> cr = ai.getRoles();
-									if(cr!=null) {
-										roles.addAll(cr);
-									}
-								}
-							}
+					if(r instanceof QOnActiveDirectoryRealm) {
+						QOnActiveDirectoryRealm qonr = (QOnActiveDirectoryRealm) r;
+						AuthorizationInfo ai = qonr.getAuthorizationInfo(subject.getPrincipals()); 
+						Collection<String> cr = ai.getRoles();
+						if(cr!=null) {
+							log.info("roles:: "+cr);
+							roles.addAll(cr);
 						}
 					}
 				}
@@ -105,5 +98,60 @@ public class ShiroUtils {
 		}
 		return roles;
 	}
+		
+	/*static Set<String> oldGetSubjectRoles(Subject subject) {
+		
+		Set<String> roles = new HashSet<String>();
+		Object principal = subject.getPrincipal();
+		if(principal==null) {
+			return roles;
+		}
+		org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
+		
+		if(sm instanceof RealmSecurityManager) {
+			RealmSecurityManager rsm = (RealmSecurityManager) sm;
+			Collection<Realm> rs = rsm.getRealms();
+			if(rs!=null) {
+				log.info("#realms = "+rs.size());
+				for(Realm r: rs) {
+					if(r instanceof AuthorizingRealm) {
+						log.info("authorizing realm:: "+r.getName()+" / "+r.getClass().getSimpleName());
+						AuthorizingRealm ar = (AuthorizingRealm) r;
+						//ar.doGetAuthorizationInfo(currentUser.getPrincipals());
+						//ar.getAuthorizationInfo(pc);
+						
+						Cache<Object, AuthorizationInfo> cache = ar.getAuthorizationCache();
+						if(cache!=null) {
+							log.info("cache:: "+cache+" "+principal+" "+principal.getClass());
+							AuthorizationInfo ai = cache.get(principal);
+							if(ai!=null) {
+								log.info("AuthorizationInfo:: "+ai);
+								Collection<String> cr = ai.getRoles();
+								if(cr!=null) {
+									log.info("roles:: "+cr);
+									roles.addAll(cr);
+								}
+							}
+							else {
+								log.info("cache-keys:: "+cache.keys());
+							}
+							/*Set<Object> cacheKeys = cache.keys();
+							if(cacheKeys!=null) {
+								for(Object key: cacheKeys) {
+									AuthorizationInfo ai = cache.get(key);
+									//out.write("<ul><li>roles:: "+ai.getRoles()+"</li>");
+									Collection<String> cr = ai.getRoles();
+									if(cr!=null) {
+										roles.addAll(cr);
+									}
+								}
+							}* /
+						}
+					}
+				}
+			}
+		}
+		return roles;
+	}*/
 	
 }
