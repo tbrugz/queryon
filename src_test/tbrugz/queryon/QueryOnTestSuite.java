@@ -12,6 +12,7 @@ import tbrugz.queryon.sqlcmd.SqlCommandTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	SQLTest.class,
 	DirectMappingTest.class,
 	ResultSetDecoratorsTest.class,
 	ResultSetTest.class,

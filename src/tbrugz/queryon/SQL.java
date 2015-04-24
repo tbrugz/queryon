@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
@@ -36,14 +38,17 @@ public class SQL {
 	
 	static boolean validateOrderColumnNames = true;
 	
+	//final String initialSql;
 	String sql;
 	final Relation relation;
 	boolean orderByApplyed = false;
+	boolean allowEncapsulation = true;
 	Integer originalBindParameterCount;
 	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	
 	protected SQL(String sql, Relation relation) {
+		//this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
 	}
@@ -69,6 +74,7 @@ public class SQL {
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
 			SQL sql = new SQL( q.getQuery() , relation);
+			processSqlXtraMetadata(sql);
 			sql.originalBindParameterCount = q.getParameterCount(); 
 			return sql;
 		}
@@ -271,6 +277,22 @@ public class SQL {
 	
 	public static String quoteString() {
 		return DBMSResources.instance().getIdentifierQuoteString();
+	}
+	
+	/* ----------------- extra SQL metadata ----------------- */
+	
+	static final Pattern allowEncapsulationPattern = Pattern.compile("/\\*.*\\ballow\\-encapsulation\\s*=\\s*(true|false)\\b.*\\*/", Pattern.DOTALL);
+	
+	static void processSqlXtraMetadata(SQL sql) {
+		String s = sql.getSql();
+		Matcher m = allowEncapsulationPattern.matcher(s);
+		//log.info("s: "+s+" matcher: "+m);
+		if(!m.find()) { return; }
+		
+		String g1 = m.group(1);
+		if(g1!=null) {
+			sql.allowEncapsulation = g1.equals("true");
+		}
 	}
 	
 }
