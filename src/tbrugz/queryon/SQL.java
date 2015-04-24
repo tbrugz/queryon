@@ -41,16 +41,23 @@ public class SQL {
 	//final String initialSql;
 	String sql;
 	final Relation relation;
+	final boolean allowEncapsulation;
+	final Integer originalBindParameterCount;
+	
 	boolean orderByApplyed = false;
-	boolean allowEncapsulation = true;
-	Integer originalBindParameterCount;
 	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	
-	protected SQL(String sql, Relation relation) {
+	protected SQL(String sql, Relation relation, Integer originalBindParameterCount) {
 		//this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
+		this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationPattern, true);
+		this.originalBindParameterCount = originalBindParameterCount;
+	}
+
+	protected SQL(String sql, Relation relation) {
+		this(sql, relation, null);
 	}
 	
 	public String getSql() {
@@ -73,9 +80,9 @@ public class SQL {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.getQuery() , relation);
-			processSqlXtraMetadata(sql);
-			sql.originalBindParameterCount = q.getParameterCount(); 
+			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount());
+			//processSqlXtraMetadata(sql);
+			//sql.originalBindParameterCount = q.getParameterCount();
 			return sql;
 		}
 		else if(relation instanceof Table) {
@@ -283,16 +290,16 @@ public class SQL {
 	
 	static final Pattern allowEncapsulationPattern = Pattern.compile("/\\*.*\\ballow\\-encapsulation\\s*=\\s*(true|false)\\b.*\\*/", Pattern.DOTALL);
 	
-	static void processSqlXtraMetadata(SQL sql) {
-		String s = sql.getSql();
-		Matcher m = allowEncapsulationPattern.matcher(s);
+	static boolean processPatternBoolean(String sql, Pattern pattern, boolean defaultValue) {
+		Matcher m = pattern.matcher(sql);
 		//log.info("s: "+s+" matcher: "+m);
-		if(!m.find()) { return; }
+		if(!m.find()) { return defaultValue; }
 		
 		String g1 = m.group(1);
 		if(g1!=null) {
-			sql.allowEncapsulation = g1.equals("true");
+			return g1.equals("true");
 		}
+		return defaultValue;
 	}
 	
 }
