@@ -144,9 +144,6 @@ public class RequestSpec {
 			}
 		}
 		outputSyntax = outputSyntaxTmp;
-
-		
-
 		
 		//---------------------
 		
