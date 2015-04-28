@@ -43,6 +43,7 @@ public class SQL {
 	final Relation relation;
 	final boolean allowEncapsulation;
 	final Integer originalBindParameterCount;
+	final Integer limitMax;
 	
 	boolean orderByApplyed = false;
 	List<String> bindParameterValues = new ArrayList<String>();
@@ -52,7 +53,8 @@ public class SQL {
 		//this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
-		this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationPattern, true);
+		this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationBooleanPattern, true);
+		this.limitMax = processPatternInteger(sql, limitMaxIntPattern);
 		this.originalBindParameterCount = originalBindParameterCount;
 	}
 
@@ -188,34 +190,34 @@ public class SQL {
 		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
 	
-	public void addLimitOffset(LimitOffsetStrategy strategy, RequestSpec reqspec) throws ServletException {
-		if(reqspec.limit<=0 && reqspec.offset<=0) { return; }
+	public void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset) throws ServletException {
+		if(limit<=0 && offset<=0) { return; }
 		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return; }
 		
 		if(strategy==LimitOffsetStrategy.SQL_LIMIT_OFFSET) {
 			//XXX assumes that the original query has no limit/offset clause
-			if(reqspec.limit>0) {
-				sql += "\nlimit "+reqspec.limit;
+			if(limit>0) {
+				sql += "\nlimit "+limit;
 			}
-			if(reqspec.offset>0) {
-				sql += "\noffset "+reqspec.offset;
+			if(offset>0) {
+				sql += "\noffset "+offset;
 			}
 		}
 		else if(strategy==LimitOffsetStrategy.SQL_ROWNUM) {
-			if(reqspec.limit>0 && reqspec.offset>0) {
+			if(limit>0 && offset>0) {
 				sql = "select * from " 
 					+"( select a.*, ROWNUM rnum from (\n"
 					+ sql
 					+"\n) a " 
-					+"where ROWNUM <= "+(reqspec.limit+reqspec.offset)+" ) "
-					+"where rnum > "+reqspec.offset;
+					+"where ROWNUM <= "+(limit+offset)+" ) "
+					+"where rnum > "+offset;
 			}
-			else if(reqspec.limit>0) {
+			else if(limit>0) {
 				if(orderByApplyed) {
-					sql = "select * from (\n"+sql+"\n) where rownum <= "+reqspec.limit; 
+					sql = "select * from (\n"+sql+"\n) where rownum <= "+limit; 
 				}
 				else {
-					addFilter("rownum <= "+reqspec.limit);
+					addFilter("rownum <= "+limit);
 				}
 			}
 			else {
@@ -223,7 +225,7 @@ public class SQL {
 					+"( select a.*, ROWNUM rnum from (\n"
 					+ sql
 					+"\n) a ) " 
-					+"where rnum > "+reqspec.offset;
+					+"where rnum > "+offset;
 			}
 		}
 		else {
@@ -288,7 +290,14 @@ public class SQL {
 	
 	/* ----------------- extra SQL metadata ----------------- */
 	
-	static final Pattern allowEncapsulationPattern = Pattern.compile("/\\*.*\\ballow\\-encapsulation\\s*=\\s*(true|false)\\b.*\\*/", Pattern.DOTALL);
+	static final String PTRN_ALLOW_ENCAPSULATION = "allow-encapsulation";
+	static final String PTRN_LIMIT_MAX = "limit-max";
+	
+	static final String PTRN_MATCH_BOOLEAN = "true|false";
+	static final String PTRN_MATCH_INT = "\\d+";
+	
+	static final Pattern allowEncapsulationBooleanPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_ALLOW_ENCAPSULATION)+"\\s*=\\s*("+PTRN_MATCH_BOOLEAN+")\\b.*\\*/", Pattern.DOTALL);
+	static final Pattern limitMaxIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_MAX)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	
 	static boolean processPatternBoolean(String sql, Pattern pattern, boolean defaultValue) {
 		Matcher m = pattern.matcher(sql);
@@ -298,6 +307,22 @@ public class SQL {
 		String g1 = m.group(1);
 		if(g1!=null) {
 			return g1.equals("true");
+		}
+		return defaultValue;
+	}
+
+	static Integer processPatternInteger(String sql, Pattern pattern) {
+		return processPatternInteger(sql, pattern, null);
+	}
+	
+	static Integer processPatternInteger(String sql, Pattern pattern, Integer defaultValue) {
+		Matcher m = pattern.matcher(sql);
+		//log.info("s: "+s+" matcher: "+m);
+		if(!m.find()) { return defaultValue; }
+		
+		String g1 = m.group(1);
+		if(g1!=null) {
+			return Integer.parseInt(g1);
 		}
 		return defaultValue;
 	}

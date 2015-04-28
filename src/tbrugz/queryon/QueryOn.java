@@ -625,7 +625,8 @@ public class QueryOn extends HttpServlet {
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
 			log.debug("pre-sql:\n"+sql.getSql());
 		}
-		sql.addLimitOffset(loStrategy, reqspec);
+		int limit = (sql.limitMax!=null && sql.limitMax < reqspec.limit) ? sql.limitMax : reqspec.limit;
+		sql.addLimitOffset(loStrategy, limit, reqspec.offset);
 		
 		//query finished!
 		
