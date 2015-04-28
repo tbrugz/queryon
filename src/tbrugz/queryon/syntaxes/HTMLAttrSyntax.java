@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.Set;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.Utils;
 
 public class HTMLAttrSyntax extends HTMLDataDump {
 	
@@ -39,7 +41,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	//static String[] ATTRS = {"style", "class"};
 	//static final int SUFFIX_NAME_SIZE =  SUFFIXES[0].length();
 	
-	Set<String> finalColNames = new HashSet<String>();
+	List<String> finalColNames = new ArrayList<String>();
 
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
 	
@@ -73,8 +75,11 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		if(prepend!=null) { out(prepend, fos); }
-		out("<table class='"+tableName+"'>", fos);
 		StringBuffer sb = new StringBuffer();
+		sb.append("<table class='"+tableName+"'>");
+		if(dumpStyleNumericAlignRight) {
+			appendStyleNumericAlignRight(sb);
+		}
 		if(dumpColElement) {
 			for(int i=0;i<lsColNames.size();i++) {
 				if(finalColNames.contains(lsColNames.get(i))) {
@@ -91,6 +96,19 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		out(sb.toString()+"</tr>\n", fos);
 	}
 	
+	protected void appendStyleNumericAlignRight(StringBuffer sb) {
+		List<String> styleSelector = new ArrayList<String>();
+		for(int i=0;i<lsColNames.size();i++) {
+			int idx = finalColNames.indexOf(lsColNames.get(i));
+			if(idx>=0 && (lsColTypes.get(i).equals(Integer.class) || lsColTypes.get(i).equals(Double.class)) ) {
+				styleSelector.add("table."+tableName+" td:nth-child("+(idx+1)+")");
+			}
+		}
+		if(styleSelector.size()>0) {
+			sb.append("\n\t<style>\n\t\t").append(Utils.join(styleSelector, ", ")).append(" { text-align: right; }\n\t</style>");
+		}
+	}
+
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
