@@ -43,6 +43,14 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
 	
+	public HTMLAttrSyntax(String padding, boolean innerTable) {
+		super(padding, innerTable);
+	}
+	
+	public HTMLAttrSyntax() {
+		super();
+	}
+	
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
@@ -72,7 +80,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	//XXX
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
-		if(prepend!=null) { out(prepend, fos); }
+		tablePrepend(fos);
+		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
 		StringBuffer sb = new StringBuffer();
 		sb.append("<table class='"+tableName+"'>");
 		if(dumpStyleNumericAlignRight) {
@@ -136,6 +145,26 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			String colName = lsColNames.get(i);
 			if(finalColNames.contains(colName)) {
 				Object origVal = vals.get(i);
+				
+				if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+					if(origVal==null) {
+						sb.append("<td></td>");
+						continue;
+					}
+					ResultSet rsInt = (ResultSet) origVal;
+					
+					out(sb.toString()+"<td>\n", fos);
+					sb = new StringBuffer();
+					
+					HTMLDataDump htmldd = new HTMLAttrSyntax(this.padding+"\t\t", true);
+					//htmldd.padding = this.padding+"\t\t";
+					//log.info(":: "+rsInt+" / "+lsColNames);
+					htmldd.procProperties(prop);
+					DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+					sb.append("\n\t</td>");
+				}
+				else {
+				
 				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, escape);
 				Map<String,String> attrs = attrsVals.get(colName);
 				String attrsStr = "";
@@ -153,6 +182,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				sb.append( "<td"
 						+(origVal==null?" null=\"true\"":"")
 						+attrsStr+">"+ value +"</td>");
+				
+				}
 			}
 		}
 		sb.append("</tr>");
