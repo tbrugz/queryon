@@ -164,3 +164,7 @@ a, a:visited {
 #rolesListDialogBtns {
 	padding-top: 10px;
 }
+
+#rolesListDialogContainer .disabled {
+	text-decoration: line-through;
+}

@@ -161,6 +161,8 @@ modelId = SchemaModelUtils.getModelId(request);
 	function doSave() {
 		var schema = document.getElementById('schema').value;
 		var name = document.getElementById('name').value;
+		var remarks = document.getElementById('remarks').value;
+		var roles = document.getElementById('roles').value;
 		
 		var reqData = {
 			/*"sqldump.queries.addtomodel": "true",
@@ -170,8 +172,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			"sqldump.query.q1.schemaname": schema,
 			"sqldump.query.q1.name": name,
 			"sqldump.query.q1.sql": editor.getValue(),
-			"sqldump.query.q1.remarks": document.getElementById('remarks').value,
-			"sqldump.query.q1.roles": document.getElementById('roles').value,
+			"sqldump.query.q1.remarks": remarks,
+			"sqldump.query.q1.roles": roles,
 			//"model": document.getElementById('model').value,
 			"queryon.qon-queries.action": "write",
 			"queryon.qon-queries.querynames": name,
@@ -181,6 +183,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		if(modelId!=null) {
 			reqData.model = document.getElementById('model').value; // or modelId
 		}
+		/*if(roles) {
+			reqData["sqldump.query.q1.roles"] = roles;
+		}*/
 		
 		var request = $.ajax({
 			url : processorUrl+"/queryon.processor.QOnQueries",
@@ -400,9 +405,22 @@ modelId = SchemaModelUtils.getModelId(request);
 		
 		var rdc=document.getElementById('rolesListDialogContent');
 		for(var i=0;i<rolesInfo.roles.length;i++) {
+			var checked = false;
+			var indexOf = rolesValues.indexOf(rolesInfo.roles[i]);
+			if(indexOf >= 0) {
+				checked = true;
+				rolesValues.splice(indexOf, 1);
+			}
 			rdc.innerHTML += '<div><input name="roleName" class="rolesCheck" type="checkbox" value="'+rolesInfo.roles[i]+'"'
-				+(rolesValues.indexOf(rolesInfo.roles[i])>=0?" checked":"")
+				+(checked?" checked":"")
 				+'/>'+rolesInfo.roles[i]+'</div>\n';
+		}
+		for(var i=0;i<rolesValues.length;i++) {
+			var role = rolesValues[i];
+			if(role) {
+				rdc.innerHTML += '<div class="disabled"><input name="roleName" class="rolesCheck" type="checkbox" disabled="true" value="'+role+'"'
+					+'/>'+role+'</div>\n';
+			}
 		}
 	}
 	
@@ -498,6 +516,7 @@ if(queryName!=null) {
 		schemaName = v.getSchemaName();
 		remarks = v.getRemarks();
 		roles = QOnQueries.getGrantsStr(v.getGrants());
+		if(roles==null) { roles = ""; }
 		queryLoaded = true;
 		if(v.getParameterCount()!=null) {
 			numOfParameters = v.getParameterCount();
