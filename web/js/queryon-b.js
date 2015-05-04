@@ -100,8 +100,9 @@ function doRun(selectId, containerId, messagesId) {
 }
 
 function addSortHrefs(containerId, order) {
-	var content = document.getElementById(containerId);
-	var headers = content.getElementsByTagName('th');
+	//var content = document.getElementById(containerId);
+	//var headers = content.getElementsByTagName('th');
+	var headers = document.querySelectorAll('#'+containerId+' > table > tbody > tr > th');
 	//console.log('headers.length: '+headers.length);
 	for(var i=0;i<headers.length;i++) {
 		var elem = headers[i];
