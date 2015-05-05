@@ -30,7 +30,11 @@ public class SchemaModelUtils {
 		
 		String[] objectParts = reqspec.object.split("\\.");
 		
-		if(objectParts.length>1) {
+		if(objectParts.length>2) {
+			throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+		}
+		
+		if(objectParts.length==2) {
 			relation = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
 		}
 		else {
@@ -44,7 +48,11 @@ public class SchemaModelUtils {
 		String[] objectParts = reqspec.object.split("\\.");
 		
 		View view = null;
-		if(objectParts.length>1) {
+		if(objectParts.length>2) {
+			throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+		}
+		
+		if(objectParts.length==2) {
 			view = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getViews(), DBObjectType.VIEW, objectParts[0], objectParts[1]);
 		}
 		else {
@@ -84,6 +92,9 @@ public class SchemaModelUtils {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[1]);
 				if(exec!=null && !objectParts[0].equals(exec.getPackageName())) { exec = null; }
 			}
+		}
+		else {
+			throw new BadRequestException("executable object must have 1, 2 or 3 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 		}
 		
 		if(exec == null) { throw new ServletException("Object "+reqspec.object+" not found"); }

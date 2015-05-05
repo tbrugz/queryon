@@ -101,8 +101,15 @@ public class RequestSpec {
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
 		int lastDotIndex = lastURIPart.lastIndexOf('.');
 		if(lastDotIndex > -1) {
-			outputTypeStr = lastURIPart.substring(lastDotIndex+1);
-			lastURIPart = lastURIPart.substring(0, lastDotIndex);
+			String outputTypeStrTmp = lastURIPart.substring(lastDotIndex+1);
+			// test for known syntax
+			if(dsutils.getDumpSyntax(outputTypeStrTmp, prop) != null) {
+				outputTypeStr = outputTypeStrTmp;
+				lastURIPart = lastURIPart.substring(0, lastDotIndex);
+			}
+			else {
+				outputTypeStr = null;
+			}
 		}
 		else {
 			outputTypeStr = null;
