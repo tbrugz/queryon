@@ -82,14 +82,14 @@ public class ShiroUtils {
 			RealmSecurityManager rsm = (RealmSecurityManager) sm;
 			Collection<Realm> rs = rsm.getRealms();
 			if(rs!=null) {
-				log.info("#realms = "+rs.size());
+				log.debug("#realms = "+rs.size());
 				for(Realm r: rs) {
 					if(r instanceof AuthorizationInfoInformer) {
 						AuthorizationInfoInformer ar = (AuthorizationInfoInformer) r;
 						AuthorizationInfo ai = ar.getAuthorizationInfo(subject.getPrincipals()); 
 						Collection<String> cr = ai.getRoles();
 						if(cr!=null) {
-							log.info("roles:: "+cr);
+							log.debug("roles:: "+cr);
 							roles.addAll(cr);
 						}
 					}

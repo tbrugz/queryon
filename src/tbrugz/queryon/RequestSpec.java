@@ -138,6 +138,7 @@ public class RequestSpec {
 		if(outputTypeStr != null) {
 			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr, prop);
 			if(outputSyntaxTmp==null) {
+				// will never happen?
 				throw new BadRequestException("Unknown output syntax: "+outputTypeStr);
 			}
 		}
@@ -147,7 +148,7 @@ public class RequestSpec {
 				outputSyntaxTmp = dsutils.getDumpSyntax(QueryOn.DEFAULT_OUTPUT_SYNTAX, prop);
 			}
 			else {
-				log.info("syntax defined by accept! syntax: "+outputSyntaxTmp.getSyntaxId()+" // "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
+				log.debug("syntax defined by accept! syntax: "+outputSyntaxTmp.getSyntaxId()+" // "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
 			}
 		}
 		outputSyntax = outputSyntaxTmp;
@@ -160,7 +161,7 @@ public class RequestSpec {
 
 		Long maxLimit = Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT);
 		String limitStr = req.getParameter("limit");
-		if(limitStr!=null) { 
+		if(limitStr!=null) {
 			int propLimit = Integer.parseInt(limitStr);
 			if(maxLimit!=null && propLimit>maxLimit) {
 				limit = (int)(long) maxLimit;

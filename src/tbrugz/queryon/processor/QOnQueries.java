@@ -146,7 +146,7 @@ public class QOnQueries extends SQLQueries {
 		query.setName(queryName);
 		query.setQuery(sql);
 		query.setRemarks(remarks);
-		addRolesToQuery(query, rolesFilterStr);
+		setQueryRoles(query, rolesFilterStr);
 
 		try {
 			// resultset metadata
