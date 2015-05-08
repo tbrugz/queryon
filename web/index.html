@@ -15,24 +15,30 @@
 	<script type="text/javascript">
 	var queryOnUrl = '/queryon/q';
 	var qonEditorUrl = 'qon-editor.jsp';
-	var username = '';
-	var isAdmin = false;
-	var authInfo = null;
+	//var username = '';
+	//var isAdmin = false;
+	var authInfo = {
+			// similar to 'auth/info.jsp'
+			authenticated: false,
+			username: null, //''
+			roles: [ ],
+			permissions: [ ]
+	}
 	
 	$.ajax({
 		url: 'auth/info.jsp',
 		success: function(data) {
 			var info = JSON.parse(data);
-			authInfo = info;
 			console.log(info);
 			if(info.authenticated) {
-				username = info.username;
-				isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
+				//username = info.username;
+				info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
 			}
 			else {
-				username = '';
-				isAdmin = false;
+				//username = '';
+				info.isAdmin = false;
 			}
+			authInfo = info;
 			refreshAuthInfo();
 		}
 	});
@@ -131,7 +137,7 @@
 			return;
 		}
 		
-		if(isAdmin) {
+		if(authInfo.isAdmin) {
 			if(relationsHash[id].relationType=="query") {
 				urled.style.display = 'initial';
 				var name = id;
@@ -207,9 +213,9 @@
 	
 	function refreshAuthInfo() {
 		var user = document.getElementById('username');
-		user.innerHTML = username;
+		user.innerHTML = authInfo.username || '';
 		var auth = document.getElementById('authaction');
-		if(username=='') {
+		if(! authInfo.authenticated) {
 			auth.innerHTML = '<a href="auth/login.jsp?return='+encodeURIComponent(window.location.href)+'">login</a>';
 			user.style.display = 'none';
 		}
@@ -219,7 +225,7 @@
 		}
 
 		var urlednew = document.getElementById("url-editor-new");
-		if(isAdmin) {
+		if(authInfo.isAdmin) {
 			urlednew.style.display = 'inline';
 			urlednew.href = qonEditorUrl;
 		}
