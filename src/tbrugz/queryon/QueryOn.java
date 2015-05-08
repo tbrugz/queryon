@@ -39,6 +39,7 @@ import tbrugz.queryon.sqlcmd.ShowColumns;
 import tbrugz.queryon.sqlcmd.ShowSchemas;
 import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
@@ -586,6 +587,9 @@ public class QueryOn extends HttpServlet {
 		String finalSql = null;
 		try {
 		
+		if(log.isDebugEnabled()) {
+			ConnectionUtil.showDBInfo(conn.getMetaData());
+		}
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
 		// add parameters for Query
@@ -1208,6 +1212,10 @@ public class QueryOn extends HttpServlet {
 		}
 		if(ds.usesAllUKs()) {
 			ds.setAllUKs(UKs);
+		}
+		
+		if(log.isDebugEnabled()) {
+			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
 		}
 		
 		ds.initDump(queryName, uniqueColumns, rs.getMetaData());
