@@ -17,11 +17,13 @@
 	var qonEditorUrl = 'qon-editor.jsp';
 	var username = '';
 	var isAdmin = false;
+	var authInfo = null;
 	
 	$.ajax({
 		url: 'auth/info.jsp',
 		success: function(data) {
 			var info = JSON.parse(data);
+			authInfo = info;
 			console.log(info);
 			if(info.authenticated) {
 				username = info.username;
@@ -61,7 +63,10 @@
 			}
 			
 			if(!found) {
-				console.log('query '+relname+' not found...'); // show 'maybe you should login' message?
+				console.log('query '+relname+' not found...');
+				if(! authInfo.authenticated) {
+					showInfoMessages('messages', 'Query <code>'+relname+'</code> not found. Maybe you should login');
+				}
 			}
 			else {
 				setParametersValues(parts);
