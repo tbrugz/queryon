@@ -164,6 +164,14 @@ function setParameters(parametersId, numparams) {
 	}
 }
 
+function setParametersValues(values) {
+	var params = document.querySelectorAll('.parameter');
+	console.log('setParametersValues: ',params);
+	for(var i=0;i<params.length;i++) {
+		params[i].value = values[i];
+	}
+}
+
 function getParameters() {
 	var params = document.querySelectorAll('.parameter');
 	var paramsStr = '';

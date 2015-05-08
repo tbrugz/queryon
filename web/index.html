@@ -48,44 +48,57 @@
 			hash = hash.substring(1);
 			var parts = hash.split('/');
 			var select = document.getElementById('objects');
+			var found = false;
+			var relname = parts.splice(0, 1);
 			for(var i = 0;i<select.length;i++) {
-				if(select.options[i].value==parts[0]) {
+				if(select.options[i].value==relname) {
 					select.options[i].selected = true;
-					onQueryChanged();
+					found = true;
+					onQueryChanged(true);
 					//updateNavBar();
 					break;
 				}
 			}
+			
+			if(!found) {
+				console.log('query '+relname+' not found...'); // show 'maybe you should login' message?
+			}
+			else {
+				setParametersValues(parts);
+			}
 		}
 	}
 	
-	function onQueryChanged() {
+	function onQueryChanged(doNotUpdateState) {
 		loadRelation('objects', 'parameters', 'content');
 		updateNavBar();
 		
 		//cleaning 'order'
 		document.getElementById('order').value = '';
 		
-		makeHrefs();
-		
 		//updateUI();
-		updateState();
+		if(!doNotUpdateState) {
+			updateState();
+		}
+
+		makeHrefs();
 	}
 	
 	function onParameterChange(i) {
-		makeHrefs();
 		updateState();
+		makeHrefs();
 	}
 	
 	function updateState() {
 		//replace href
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
-		history.replaceState(null, null, "#"+id);
+		//history.replaceState(null, null, "#"+id);
 		////var hash = id!="" ? "#"+id : "";
 		////history.replaceState(null, null, hash);
-		//var state = id+getParameters();
-		//history.replaceState(null, null, "#"+state);
+		var state = id+getParameters();
+		console.log('updateState',state);
+		history.replaceState(null, null, "#"+state);
 	}
 
 	function updateNavBar() {
@@ -96,6 +109,7 @@
 			display = 'none';
 		}
 		document.getElementById('navbar-prop').style.display = display;
+		refreshAuthInfo();
 	}
 	
 	function makeHrefs() {
@@ -162,6 +176,7 @@
 
 		//console.log('urldown.href: '+urldown.href);
 		updateUI();
+		refreshAuthInfo();
 	}
 	
 	function updateUI() {
@@ -190,11 +205,11 @@
 		user.innerHTML = username;
 		var auth = document.getElementById('authaction');
 		if(username=='') {
-			auth.innerHTML = '<a href="auth/login.jsp?return='+encodeURI(window.location.href)+'">login</a>';
+			auth.innerHTML = '<a href="auth/login.jsp?return='+encodeURIComponent(window.location.href)+'">login</a>';
 			user.style.display = 'none';
 		}
 		else {
-			auth.innerHTML = '<a href="auth/logout.jsp?return='+encodeURI(window.location.href)+'">logout</a>';
+			auth.innerHTML = '<a href="auth/logout.jsp?return='+encodeURIComponent(window.location.href)+'">logout</a>';
 			user.style.display = 'inline';
 		}
 
