@@ -1,0 +1,15 @@
+#nav {
+	background-color: #222;
+	color: #ddd;
+	font-weight: bold;
+	font-size: 10pt;
+	padding: 3px;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+	/*height: 30px;*/
+	z-index: 10;
+	overflow-y: auto;
+	max-height: 100%;
+}
+

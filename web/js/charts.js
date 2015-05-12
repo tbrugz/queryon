@@ -1,0 +1,136 @@
+
+var keyValues = function (obj, keys) {
+	var r = [];
+	for(var i=0;i<keys.length;i++) {
+		r.push(obj[keys[i]]);
+	}
+	return r;
+}
+
+var runD3multiseries = function(url, columns, containerId, callbackOk, callbackError) {
+	var container = document.getElementById(containerId);
+	
+	//console.log("container.offsetWidth",container.offsetWidth,"container.offsetHeight", container.offsetHeight);
+	var margin = {top: 20, right: 20, bottom: 30, left: 50},
+		width = container.offsetWidth - margin.left - margin.right,
+		height = container.offsetHeight - margin.top - margin.bottom;
+	
+	var seriesNames = [];
+	for(var i=0;i<columns.length;i++) {
+		seriesNames.push(columns[i].trim());
+	}
+	console.log("columns", columns, "seriesNames", seriesNames);
+	
+	var x = d3.scale.linear()
+		.range([0, width]);
+	
+	var y = d3.scale.linear()
+		.range([height, 0]);
+	
+	var xAxis = d3.svg.axis()
+		.scale(x)
+		.orient("bottom");
+	
+	var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left");
+	
+	color = d3.scale.category10();
+	
+	var line = d3.svg.line()
+		.interpolate("basis")
+		.x(function(d) { return x(d.id); })
+		.y(function(d) { return y(d.value); });
+	
+	var svg = d3.select("#"+containerId).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	/*
+	 * multiseries example: http://bl.ocks.org/mbostock/3884955
+	 */
+	d3.json(url, function(error, data) {
+		if(error) {
+			if(callbackError) { callbackError(error); }
+			else { console.log("error:: ",error); }
+			return;
+		}
+		data = data[Object.keys(data)[0]];
+		
+		//console.log("data[0]",data[0]);
+		color.domain(d3.keys(data[0]).filter(function(key) { return seriesNames.indexOf(key)>=0; }));
+		
+		for(var i=0;i<seriesNames.length;i++) {
+			if(color.domain().indexOf(seriesNames[i])<0) {
+				callbackError('column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0])+'</code>');
+				return;
+			}
+		}
+		var count = 0;
+		data.forEach(function(d) {
+			d.id = count++;
+		});
+	
+		var series = color.domain().map(function(name) {
+			return {
+				name: name,
+				values: data.map(function(d) {
+					return {id: d.id, value: +d[name]};
+				})
+			};
+		});
+	
+		x.domain(d3.extent(data, function(d) { return d.id; }));
+		var ydom = [
+			d3.min(data, function(d) { return d3.min(keyValues(d, seriesNames)); }),
+			d3.max(data, function(d) { return d3.max(keyValues(d, seriesNames)); })
+		];
+		y.domain(ydom);
+	
+		console.log("data.length", data.length, "ydom",ydom);
+	
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis);
+	
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis);
+	
+		var serie = svg.selectAll(".serie")
+			.data(series)
+			.enter().append("g")
+			.attr("class", "serie");
+		
+		serie.append("path")
+			.attr("class", "line")
+			.attr("d", function(d) { return line(d.values); })
+			.style("stroke", function(d) { return color(d.name); });
+		
+		/* legends from: http://bl.ocks.org/mbostock/3886208 */
+		
+		var legend = svg.selectAll(".legend")
+			.data(color.domain().slice().reverse())
+			.enter().append("g")
+			.attr("class", "legend")
+			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+		
+		legend.append("rect")
+			.attr("x", width - 18)
+			.attr("width", 18)
+			.attr("height", 18)
+			.style("fill", color);
+		
+		legend.append("text")
+			.attr("x", width - 24)
+			.attr("y", 9)
+			.attr("dy", ".35em")
+			.style("text-anchor", "end")
+			.text(function(d) { return d; });
+		
+		if(callbackOk) callbackOk();
+	});
+}

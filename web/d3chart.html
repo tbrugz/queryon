@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - d3 charts</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
+	<link href="css/charts.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<script src="http://d3js.org/d3.v3.js"></script>
+	<script src="js/charts.js"></script>
+	<script src="js/jquery-2.1.0.min.js"></script>
+	<script src="js/queryon-b.js"></script>
+	<script src="js/qon-util.js"></script>
+	<style type="text/css">
+#logo {
+	padding: 2px 5px 3px 5px;
+	font-weight: bolder;
+	background-color: #666;
+	margin: 3px;
+}
+#container2 {
+	padding: 5px;
+}
+#chartcontainer {
+	width: 100%;
+	height: 500px;
+}
+	</style>
+</head>
+<body>
+	<div id="nav" class="navbar">
+		<span id="logo">QOn + D3.js</span>
+		<label id="url-label">URL: <input type="text" id="url" size="80"/></label>
+		<label id="columns-label">columns: <input type="text" id="columns"/></label>
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunD3();"/>
+		<div id="messages"></div>
+	</div>
+	<div class="container" id="container2">
+		<div class="container" id="chartcontainer">
+		</div>
+	</div>
+<script>
+
+var updateUI = function() {}
+
+var doRunD3 = function() {
+	var url = document.getElementById('url').value;
+	var columns = document.getElementById('columns').value.split(',');
+	document.getElementById('chartcontainer').innerHTML = '';
+	btnActionStart('go-button');
+	runD3multiseries(url, columns, 'chartcontainer',
+			function() { btnActionStop('go-button'); },
+			function(error) {
+				console.log('error', error);
+				showErrorMessages('messages', error.responseText?error.responseText:error);
+				btnActionStop('go-button');
+			}
+		);
+}
+	
+</script>
