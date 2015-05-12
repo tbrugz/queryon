@@ -10,21 +10,47 @@ import tbrugz.queryon.SqlCommand;
 
 public class ShowColumns implements SqlCommand {
 
-	static final Pattern CMD = Pattern.compile("\\s*\\$columns(\\s+([\\w\\.]+))?\\s*", Pattern.CASE_INSENSITIVE);
+	static final Pattern CMD = Pattern.compile("\\s*\\$columns(\\s+([\\w\\.%]+))?\\s*", Pattern.CASE_INSENSITIVE);
+
+	String schema;
+	String table;
+	String column;
 	
-	String name;
+	void init() {
+		schema = null; table = null; column = null;
+	}
 	
 	public boolean matches(String sql) {
 		Matcher m = CMD.matcher(sql);
 		if(m.matches()) {
-			name = m.group(2);
+			init();
+			String nameGroup = m.group(2);
+			if(nameGroup==null) { return true; }
+			
+			String[] nameParts = nameGroup.split("\\.");
+			switch(nameParts.length) {
+			case 3:
+				column = nameParts[2];
+			case 2:
+				table = nameParts[1];
+				schema = nameParts[0];
+				break;
+			case 1:
+				table = nameParts[0];
+				break;
+			default:
+				return false;
+			}
 			return true;
 		}
 		return false;
 	}
 
 	public ResultSet run(Connection conn) throws SQLException {
-		return conn.getMetaData().getColumns(null, null, name!=null?name.toUpperCase():null, null);
+		return conn.getMetaData().getColumns(null,
+				schema!=null?schema.toUpperCase():null,
+				table!=null?table.toUpperCase():null,
+				column!=null?column.toUpperCase():null);
 	}
 
 }
