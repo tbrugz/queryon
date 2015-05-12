@@ -11,184 +11,14 @@
 	<script src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/typeahead.bundle.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script src="js/queryon-b2.js"></script>
 	<script src="js/filter.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script type="text/javascript">
-	var queryOnUrl = '/queryon/q';
-	var qonEditorUrl = 'qon-editor.jsp';
-	//var username = '';
-	//var isAdmin = false;
-	var authInfo = {
-			// similar to 'auth/info.jsp'
-			authenticated: false,
-			username: null, //''
-			roles: [ ],
-			permissions: [ ]
-	}
 	
-	$.ajax({
-		url: 'auth/info.jsp',
-		success: function(data) {
-			var info = JSON.parse(data);
-			console.log(info);
-			if(info.authenticated) {
-				//username = info.username;
-				info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
-			}
-			else {
-				//username = '';
-				info.isAdmin = false;
-			}
-			authInfo = info;
-			refreshAuthInfo();
-		}
-	});
-	
-	function onLoad() {
-		//init('q','objects');
-		init(queryOnUrl,'objects', function(containerId, rels) {
-			writeRelations(containerId, rels); updateSelectedQueryState(); makeHrefs();
-		});
-	}
-	
-	function updateSelectedQueryState() {
-		var hash = window.location.hash;
-		if(hash.indexOf('#')==0) {
-			hash = hash.substring(1);
-			var parts = hash.split('/');
-			var select = document.getElementById('objects');
-			var found = false;
-			var relname = parts.splice(0, 1);
-			for(var i = 0;i<select.length;i++) {
-				if(select.options[i].value==relname) {
-					select.options[i].selected = true;
-					found = true;
-					onQueryChanged(true);
-					//updateNavBar();
-					break;
-				}
-			}
-			
-			if(!found) {
-				console.log('query '+relname+' not found...');
-				if(! authInfo.authenticated) {
-					showInfoMessages('messages', 'Query <code>'+relname+'</code> not found. Maybe you should login');
-				}
-			}
-			else {
-				setParametersValues(parts);
-			}
-		}
-	}
-	
-	function onQueryChanged(doNotUpdateState) {
-		loadRelation('objects', 'parameters', 'content');
-		updateNavBar();
-		
-		//cleaning 'order'
-		document.getElementById('order').value = '';
-		
-		//updateUI();
-		if(!doNotUpdateState) {
-			updateState();
-		}
-
-		makeHrefs();
-	}
-	
-	function onParameterChange(i) {
-		updateState();
-		makeHrefs();
-	}
-	
-	function updateState() {
-		//replace href
-		var select = document.getElementById('objects');
-		var id = select.options[select.selectedIndex].value;
-		//history.replaceState(null, null, "#"+id);
-		////var hash = id!="" ? "#"+id : "";
-		////history.replaceState(null, null, hash);
-		var state = id+getParameters();
-		console.log('updateState',state);
-		history.replaceState(null, null, "#"+state);
-	}
-
-	function updateNavBar() {
-		var select = document.getElementById('objects');
-		var id = select.options[select.selectedIndex].value;
-		var display = 'initial';
-		if(id=="") {
-			display = 'none';
-		}
-		document.getElementById('navbar-prop').style.display = display;
-		refreshAuthInfo();
-	}
-	
-	function makeHrefs() {
-		var urled = document.getElementById("url-editor");
-		var urlpl = document.getElementById("url-permalink");
-		var urldown = document.getElementById("url-down");
-
-		var select = document.getElementById('objects');
-		var id = select.options[select.selectedIndex].value;
-		if(id=="") {
-			urled.style.display = 'none';
-			urlpl.style.display = 'none';
-			urldown.style.display = 'none';
-			return;
-		}
-		
-		if(authInfo.isAdmin) {
-			if(relationsHash[id].relationType=="query") {
-				urled.style.display = 'initial';
-				var name = id;
-				urled.href = qonEditorUrl+"?";
-				var parts = id.split('.');
-				if(parts.length>1) {
-					urled.href += "schema="+parts[0]+"&name="+parts[1];
-				}
-				else {
-					urled.href += "name="+parts[0];
-				}
-			}
-			else {
-				urled.style.display = 'none';
-			}
-		}
-
-		urlpl.style.display = 'initial';
-		urlpl.href = queryOnUrl+"/"+id;
-		urlpl.href += getParameters()+".htmlx";
-
-		urldown.style.display = 'initial';
-		urldown.href = queryOnUrl+"/"+id;
-		urldown.href += getParameters()+".csv";
-		
-		//var queryString = '';
-		
-		var filters = document.querySelectorAll('.filter');
-		for (var i = 0; i < filters.length; ++i) {
-			var item = filters[i];
-			//queryString += '&'+item.name+"="+item.value;
-			//queryString = append2url(queryString, item.name+"="+item.value);
-			urlpl.href = append2url(urlpl.href, item.name+"="+encodeURIComponent(item.value));
-			urldown.href = append2url(urldown.href, item.name+"="+encodeURIComponent(item.value));
-		}
-		
-		var order = document.getElementById('order').value;
-		if(order!=null && order!='') {
-			//queryString += '&order='+order;
-			//queryString = append2url(queryString, 'order='+order);
-			urlpl.href = append2url(urlpl.href, 'order='+order);
-			urldown.href = append2url(urldown.href, 'order='+order);
-		}
-		//console.log('queryString: '+queryString);
-
-		//console.log('urlpl.href: '+urlpl.href);
-
-		//console.log('urldown.href: '+urldown.href);
-		updateUI();
-		refreshAuthInfo();
+	var onLoad = function() {
+		loadQueries();
+		loadAuthInfo();
 	}
 	
 	function updateUI() {
@@ -210,29 +40,6 @@
 		document.getElementById('order').value = str;
 		makeHrefs();
 		doRun('objects', 'content', 'messages');
-	}
-	
-	function refreshAuthInfo() {
-		var user = document.getElementById('username');
-		user.innerHTML = authInfo.username || '';
-		var auth = document.getElementById('authaction');
-		if(! authInfo.authenticated) {
-			auth.innerHTML = '<a href="auth/login.jsp?return='+encodeURIComponent(window.location.href)+'">login</a>';
-			user.style.display = 'none';
-		}
-		else {
-			auth.innerHTML = '<a href="auth/logout.jsp?return='+encodeURIComponent(window.location.href)+'">logout</a>';
-			user.style.display = 'inline';
-		}
-
-		var urlednew = document.getElementById("url-editor-new");
-		if(authInfo.isAdmin) {
-			urlednew.style.display = 'inline';
-			urlednew.href = qonEditorUrl;
-		}
-		else {
-			urlednew.style.display = 'none';
-		}
 	}
 	
 	</script>

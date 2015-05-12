@@ -48,7 +48,7 @@ function loadRelation(selectId, parametersId, containerId) {
 	setParameters(parametersId, params);
 }
 
-function doRun(selectId, containerId, messagesId) {
+function getQueryUrl(selectId, syntax) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
 	var params = document.querySelectorAll('.parameter');
@@ -76,12 +76,21 @@ function doRun(selectId, containerId, messagesId) {
 	}
 	
 	//console.log('query-string: '+queryString);
-	console.log('url: '+baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString);
+	var returl = baseUrl+'/'+id+paramsStr
+		+(syntax?'.'+syntax:'')
+		+(queryString?'?'+queryString:'');
+	
+	console.log('url: '+returl);
+	return returl;
+}
+
+function doRun(selectId, containerId, messagesId) {
+	var finalUrl = getQueryUrl(selectId, 'htmlx');
 	
 	btnActionStart('go-button');
 	var startTimeMilis = Date.now();
 	$.ajax({
-		url: baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString,
+		url: finalUrl,
 		success: function(data) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();

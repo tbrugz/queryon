@@ -34,6 +34,11 @@ function onQueryChanged(doNotUpdateState) {
 	makeHrefs();
 }
 
+function onParameterChange(i) {
+	updateState();
+	makeHrefs();
+}
+
 function updateSelectedQueryState() {
 	var hash = window.location.hash;
 	if(hash.indexOf('#')==0) {
@@ -207,39 +212,4 @@ function refreshAuthInfo() {
 	else if(urlednew){
 		urlednew.style.display = 'none';
 	}
-}
-
-function getQueryUrl(selectId, syntax) {
-	var select = document.getElementById(selectId);
-	var id = select.options[select.selectedIndex].value;
-	var params = document.querySelectorAll('.parameter');
-	var paramsStr = '';
-	for (var i = 0; i < params.length; ++i) {
-		var item = params[i];
-		//console.log(item);
-		var str = item.value;
-		if(str=='') { str = '-'; } 
-		paramsStr += '/'+str;
-	}
-	
-	var queryString = '';
-	
-	var filters = document.querySelectorAll('.filter');
-	for (var i = 0; i < filters.length; ++i) {
-		var item = filters[i];
-		//console.log(item);
-		queryString += '&'+item.name+"="+encodeURIComponent(item.value);
-	}
-	
-	var order = document.getElementById('order').value;
-	if(order!=null && order!='') {
-		queryString += '&order='+order;
-	}
-	
-	//console.log('query-string: '+queryString);
-	console.log('url: '+baseUrl+'/'+id+paramsStr+'.htmlx?'+queryString);
-	
-	return baseUrl+'/'+id+paramsStr
-		+(syntax?'.'+syntax:'')
-		+'?'+queryString;
 }
