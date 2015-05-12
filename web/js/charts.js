@@ -19,7 +19,8 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 	for(var i=0;i<columns.length;i++) {
 		seriesNames.push(columns[i].trim());
 	}
-	console.log("columns", columns, "seriesNames", seriesNames);
+	
+	//console.log("columns", columns, "seriesNames", seriesNames);
 	
 	var x = d3.scale.linear()
 		.range([0, width]);
@@ -35,7 +36,7 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 		.scale(y)
 		.orient("left");
 	
-	color = d3.scale.category10();
+	var color = d3.scale.category10();
 	
 	var line = d3.svg.line()
 		.interpolate("basis")
@@ -59,15 +60,25 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 		}
 		data = data[Object.keys(data)[0]];
 		
+		if(seriesNames.length==0 || !seriesNames[0]) {
+			callbackError('no column selected - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>');
+			return;
+		}
+		else {
+			console.log('seriesNames',seriesNames);
+		}
+		
 		//console.log("data[0]",data[0]);
 		color.domain(d3.keys(data[0]).filter(function(key) { return seriesNames.indexOf(key)>=0; }));
 		
 		for(var i=0;i<seriesNames.length;i++) {
 			if(color.domain().indexOf(seriesNames[i])<0) {
-				callbackError('column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0])+'</code>');
+				//XXX show avaiable column that are numeric...
+				callbackError('column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>');
 				return;
 			}
 		}
+		
 		var count = 0;
 		data.forEach(function(d) {
 			d.id = count++;

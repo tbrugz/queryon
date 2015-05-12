@@ -3,6 +3,7 @@
 <head>
 	<title>QueryOn</title>
 	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -234,59 +235,8 @@
 		}
 	}
 	
-	function append2url(url, append) {
-		if(append==null || append=='') {
-			return url;
-		}
-		
-		if(url!=null && url.indexOf("?") > -1) {
-			return url+"&"+append;
-		}
-		/*else if(append!=null && append.indexOf("?")==0) {
-			return url+append;
-		}*/
-		else {
-			return url+"?"+append;
-		}
-	}
-	
 	</script>
 	<style type="text/css">
-	#nav {
-		background-color: #222;
-		color: #ddd;
-		font-weight: bold;
-		font-size: 10pt;
-		padding: 3px;
-		top: 0px;
-		right: 0px;
-		left: 0px;
-		/*height: 30px;*/
-		z-index: 10;
-		overflow-y: auto;
-		max-height: 100%;
-	}
-	#dialog-container {
-		position: fixed;
-		top: 0; bottom: 0; left: 0; right: 0;
-		background-color: #666;
-		background-color: rgba(100,100,100,0.7);
-		z-index: 20;
-		display: none;
-	}
-	#dialog {
-		position: fixed;
-		top: 20%;
-		left: 20%;
-		background-color: #ccc;
-		z-index: 20;
-		padding: 10px;
-		border: 4px solid #fff;
-	}
-	#dialog label {
-		background-color: #ddd;
-		padding: 5px;
-	}
 	#content-container {
 		/*position: fixed;*/
 		position: relative;
@@ -315,16 +265,6 @@
 		position: sticky;
 		top: 0px;
 	}
-	#nav a, #nav a:visited {
-		color: #ccc;
-	}
-	#navbar-prop {
-		display: none;
-	}
-	#navbar-links {
-		display: inline-block;
-		padding-top: 5px;
-	}
 	#order-label {
 		display: none;
 	}
@@ -345,17 +285,6 @@
 		background-color: #5A5A5A;
 		/* #238F28; #9C7909; #5A5A5A; */
 		text-decoration: initial;
-	}
-	
-	#authinfo {
-		float: right;
-		margin: 6px;
-	}
-	
-	#username {
-		background-color: #555;
-		padding: 2px;
-		display: none;
 	}
 	
 	#status-container {
@@ -411,7 +340,7 @@
 	</span>
 
 	<span id="navbar-links">
-		<a id="url-permalink" href="" target="_blank">permalink</a> <a id="url-down" href="">download</a>
+		<a id="url-permalink" href="" target="_blank">permalink</a> <a id="url-down" href="" title="download CSV">download</a>
 		<span id="navbar-actions">
 			<!-- span id="url-editor-new-cont"></span -->
 			<a id="url-editor" class="edit-link" href="" target="_blank">edit</a>

@@ -228,9 +228,12 @@ function getColumnsFromRelation(relation) {
 }
 
 function getColumnsFromContainer(containerId) {
-	var content = document.getElementById(containerId);
-	var headers = content.getElementsByTagName('th');
 	var cols = [];
+	var content = document.getElementById(containerId);
+	if(!content) {
+		return cols;
+	}
+	var headers = content.getElementsByTagName('th');
 	//console.log('headers.length: '+headers.length);
 	for(var i=0;i<headers.length;i++) {
 		var elem = headers[i];

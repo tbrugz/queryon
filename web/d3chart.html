@@ -13,7 +13,9 @@
 	<script src="js/charts.js"></script>
 	<script src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script src="js/queryon-b2.js"></script>
 	<script src="js/qon-util.js"></script>
+	<script src="js/filter.js"></script>
 	<style type="text/css">
 #logo {
 	padding: 2px 5px 3px 5px;
@@ -30,26 +32,55 @@
 }
 	</style>
 </head>
-<body>
+<body onload="onLoad();">
 	<div id="nav" class="navbar">
 		<span id="logo">QOn + D3.js</span>
-		<label id="url-label">URL: <input type="text" id="url" size="80"/></label>
-		<label id="columns-label">columns: <input type="text" id="columns"/></label>
-		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunD3();"/>
+		
+		<label>
+			<select id="objects" onchange="onQueryChanged();"></select>
+		</label>
+	
+		<span id="navbar-prop">
+			<!-- label id="url-label">URL: <input type="text" id="url" size="80"/></label-->
+			<span id="parameters"></span>
+			<span id="filters"></span>
+			<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
+			<input type="button" value="+ filter" onclick="addFilterDialog();"/>
+			<label id="columns-label">columns: <input type="text" id="columns"/></label>
+			<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunD3();"/>
+		</span>
+		
+		<span id="authinfo">
+			<span id="username"></span>
+			<span id="authaction"></span>
+		</span>
+	
 		<div id="messages"></div>
 	</div>
+
 	<div class="container" id="container2">
 		<div class="container" id="chartcontainer">
 		</div>
 	</div>
-<script>
 
+	<div id="dialog-container">
+		<div id="dialog">
+		</div>
+	</div>
+
+<script>
 var updateUI = function() {}
 
+var updateFromFilters = function() {
+	makeHrefs();
+}
+
 var doRunD3 = function() {
-	var url = document.getElementById('url').value;
+	//var url = document.getElementById('url').value;
+	var url = getQueryUrl('objects');
 	var columns = document.getElementById('columns').value.split(',');
 	document.getElementById('chartcontainer').innerHTML = '';
+	closeMessages('messages');
 	btnActionStart('go-button');
 	runD3multiseries(url, columns, 'chartcontainer',
 			function() { btnActionStop('go-button'); },
@@ -60,5 +91,11 @@ var doRunD3 = function() {
 			}
 		);
 }
-	
+
+var onLoad = function() {
+	loadQueries();
+	loadAuthInfo();
+}
 </script>
+</body>
+</html>
