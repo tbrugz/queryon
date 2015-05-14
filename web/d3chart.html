@@ -44,8 +44,8 @@
 			<!-- label id="url-label">URL: <input type="text" id="url" size="80"/></label-->
 			<span id="parameters"></span>
 			<span id="filters"></span>
-			<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 			<input type="button" value="+ filter" onclick="addFilterDialog();"/>
+			<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 			<label id="columns-label">columns: <input type="text" id="columns"/></label>
 			<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunD3();"/>
 		</span>
@@ -82,7 +82,8 @@ var doRunD3 = function() {
 	document.getElementById('chartcontainer').innerHTML = '';
 	closeMessages('messages');
 	btnActionStart('go-button');
-	runD3multiseries(url, columns, 'chartcontainer',
+	//runD3(url, columns, d3multiseries, containerId, callbackOk, callbackError);
+	runD3(url, columns, d3multiseries, 'chartcontainer',
 			function() { btnActionStop('go-button'); },
 			function(error) {
 				console.log('error', error);

@@ -7,7 +7,7 @@ var keyValues = function (obj, keys) {
 	return r;
 }
 
-var runD3multiseries = function(url, columns, containerId, callbackOk, callbackError) {
+var runD3 = function(url, columns, d3chartfunction, containerId, callbackOk, callbackError) {
 	d3.json(url, function(error, data) {
 		if(error) {
 			if(callbackError) { callbackError(error); }
@@ -16,11 +16,24 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 		}
 		data = data[Object.keys(data)[0]];
 		
-		showD3multiseries(data, columns, containerId, callbackOk, callbackError);
+		try {
+			d3chartfunction(data, columns, containerId);
+			if(callbackOk) { callbackOk(); }
+		}
+		catch (e) {
+			if(callbackError) { callbackError(e); }
+			else {
+				console.log(e);
+			}
+		}
 	});
 }
 
-var showD3multiseries = function(data, columns, containerId, callbackOk, callbackError) {
+/*var runD3multiseries = function(url, columns, containerId, callbackOk, callbackError) {
+	runD3(url, columns, d3multiseries, containerId, callbackOk, callbackError);
+}*/
+
+var d3multiseries = function(data, columns, containerId) {
 	//XXX: future thoughts: return graph instead of writin it to 'containerId'?
 	var container = document.getElementById(containerId);
 	
@@ -67,9 +80,8 @@ var showD3multiseries = function(data, columns, containerId, callbackOk, callbac
 	 * multiseries example: http://bl.ocks.org/mbostock/3884955
 	 */
 		if(seriesNames.length==0 || !seriesNames[0]) {
-			//XXX throw?
-			callbackError('no column selected - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>');
-			return;
+			//XXXdone throw?
+			throw 'no column selected - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>';
 		}
 		else {
 			console.log('seriesNames',seriesNames);
@@ -81,9 +93,8 @@ var showD3multiseries = function(data, columns, containerId, callbackOk, callbac
 		for(var i=0;i<seriesNames.length;i++) {
 			if(color.domain().indexOf(seriesNames[i])<0) {
 				//XXX show avaiable column that are numeric...
-				//XXX throw?
-				callbackError('column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>');
-				return;
+				//XXXdone throw?
+				throw 'column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>';
 			}
 		}
 		
@@ -149,7 +160,4 @@ var showD3multiseries = function(data, columns, containerId, callbackOk, callbac
 			.attr("dy", ".35em")
 			.style("text-anchor", "end")
 			.text(function(d) { return d; });
-		
-		//XXX not to call callbackOk... should be called from runD3multiseries()
-		if(callbackOk) callbackOk();
 }
