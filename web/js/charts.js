@@ -8,6 +8,20 @@ var keyValues = function (obj, keys) {
 }
 
 var runD3multiseries = function(url, columns, containerId, callbackOk, callbackError) {
+	d3.json(url, function(error, data) {
+		if(error) {
+			if(callbackError) { callbackError(error); }
+			else { console.log("error:: ",error); }
+			return;
+		}
+		data = data[Object.keys(data)[0]];
+		
+		showD3multiseries(data, columns, containerId, callbackOk, callbackError);
+	});
+}
+
+var showD3multiseries = function(data, columns, containerId, callbackOk, callbackError) {
+	//XXX: future thoughts: return graph instead of writin it to 'containerId'?
 	var container = document.getElementById(containerId);
 	
 	//console.log("container.offsetWidth",container.offsetWidth,"container.offsetHeight", container.offsetHeight);
@@ -52,15 +66,8 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 	/*
 	 * multiseries example: http://bl.ocks.org/mbostock/3884955
 	 */
-	d3.json(url, function(error, data) {
-		if(error) {
-			if(callbackError) { callbackError(error); }
-			else { console.log("error:: ",error); }
-			return;
-		}
-		data = data[Object.keys(data)[0]];
-		
 		if(seriesNames.length==0 || !seriesNames[0]) {
+			//XXX throw?
 			callbackError('no column selected - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>');
 			return;
 		}
@@ -74,6 +81,7 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 		for(var i=0;i<seriesNames.length;i++) {
 			if(color.domain().indexOf(seriesNames[i])<0) {
 				//XXX show avaiable column that are numeric...
+				//XXX throw?
 				callbackError('column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>');
 				return;
 			}
@@ -142,6 +150,6 @@ var runD3multiseries = function(url, columns, containerId, callbackOk, callbackE
 			.style("text-anchor", "end")
 			.text(function(d) { return d; });
 		
+		//XXX not to call callbackOk... should be called from runD3multiseries()
 		if(callbackOk) callbackOk();
-	});
 }
