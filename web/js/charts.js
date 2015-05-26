@@ -79,22 +79,24 @@ var d3multiseries = function(data, columns, containerId) {
 	/*
 	 * multiseries example: http://bl.ocks.org/mbostock/3884955
 	 */
+	var allCols = d3.keys(data[0]);
+	
 		if(seriesNames.length==0 || !seriesNames[0]) {
 			//XXXdone throw?
-			throw 'no column selected - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>';
+			throw 'no column selected - columns are: <code>'+allCols.join(', ')+'</code>';
 		}
 		else {
 			console.log('seriesNames',seriesNames);
 		}
 		
 		//console.log("data[0]",data[0]);
-		color.domain(d3.keys(data[0]).filter(function(key) { return seriesNames.indexOf(key)>=0; }));
+		color.domain(allCols.filter(function(key) { return seriesNames.indexOf(key)>=0; }));
 		
 		for(var i=0;i<seriesNames.length;i++) {
 			if(color.domain().indexOf(seriesNames[i])<0) {
 				//XXX show avaiable column that are numeric...
 				//XXXdone throw?
-				throw 'column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+d3.keys(data[0]).join(', ')+'</code>';
+				throw 'column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+allCols.join(', ')+'</code>';
 			}
 		}
 		
