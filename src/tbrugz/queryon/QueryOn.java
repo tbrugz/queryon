@@ -221,6 +221,7 @@ public class QueryOn extends HttpServlet {
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES));
+			log.info("syntaxes: "+DumpSyntaxRegistry.getSyntaxes());
 			
 			Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
@@ -788,7 +789,7 @@ public class QueryOn extends HttpServlet {
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"?
-	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants"});
+	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"columnNames", "columnTypes", "constraints", "remarks", "relationType", "grants"});
 	
 	static final List<String> tableAllColumns;// =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "PKConstraint"});
 	static final List<String> viewAllColumns;//  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
