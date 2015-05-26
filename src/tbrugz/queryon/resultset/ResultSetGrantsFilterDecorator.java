@@ -41,11 +41,13 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 		if(grants==null || grants.size()==0) {
 			return true;
 		}
+		//log.info("grants.size(): "+grants.size()+" ;; "+grants); 
 		
 		for(int i=0;i<grants.size();i++) {
 			Grant gr = Grant.parseGrant(grants.get(i));
 			//log.info("..RSGrantsFilter: grantee=="+gr.getGrantee()+" <<"+grants.get(i)+">> [?="+roles.contains(gr.getGrantee())+"]");
-			if(gr==null || roles.contains(gr.getGrantee())) {
+			if(gr==null) { continue; }
+			if(roles.contains(gr.getGrantee())) {
 				return true;
 			}
 		}

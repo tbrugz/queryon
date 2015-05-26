@@ -38,8 +38,8 @@ public class ShiroUtils {
 	
 	public static void checkPermission(Subject subject, String permission, String object) {
 		if(! isPermitted(subject, permission, object)) {
-			log.warn("no permission '"+permission+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
-			throw new BadRequestException(permission+": authorization required", HttpServletResponse.SC_FORBIDDEN);
+			log.warn("no permission '"+permission+"' for subject '"+subject+" on object '"+object+"' ; "+subject.getPrincipal()+"'");
+			throw new BadRequestException(permission+(object!=null?":"+object:"")+": authorization required", HttpServletResponse.SC_FORBIDDEN);
 		}
 	}
 
