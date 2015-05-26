@@ -884,7 +884,6 @@ public class QueryOn extends HttpServlet {
 		
 		if(fullKeyDefined(reqspec, pk)) {
 			if(count==0) {
-				conn.rollback();
 				throw new NotFoundException("Element not found");
 			}
 			if(count>1) {
@@ -893,11 +892,15 @@ public class QueryOn extends HttpServlet {
 				throw new ServletException("Full key defined but "+count+" elements deleted");
 			}
 		}
-		else {
-			//XXX: boundaries for # of updated (deleted) rows?
+		//XXXdone: boundaries for # of updated (deleted) rows?
+		if(reqspec.maxUpdates!=null && count > reqspec.maxUpdates) {
+			throw new BadRequestException("Delete count ["+count+"] greater than update-max ["+reqspec.maxUpdates+"]");
+		}
+		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
+			throw new BadRequestException("Delete count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
 		}
 		
-		//XXX: (heterogeneous) array to ResultSet adapter?
+		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
 		conn.commit();
 		resp.getWriter().write(count+" rows deleted");
 		
@@ -1060,7 +1063,7 @@ public class QueryOn extends HttpServlet {
 		if(pk==null) {
 			return false;
 		}
-		//log.info("#cols: pk="+pk.uniqueColumns.size()+", req="+reqspec.params.size());
+		//log.info("#cols: pk="+pk.getUniqueColumns().size()+", req="+reqspec.params.size());
 		return pk.getUniqueColumns().size() <= reqspec.params.size();
 	}
 	

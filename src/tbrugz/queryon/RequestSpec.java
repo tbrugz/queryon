@@ -45,6 +45,7 @@ public class RequestSpec {
 	final String object;
 	final int offset, limit;
 	final String loStrategy;
+	final Integer minUpdates, maxUpdates;
 	
 	final List<String> columns = new ArrayList<String>();
 	final List<String> params = new ArrayList<String>();
@@ -183,6 +184,12 @@ public class RequestSpec {
 				limit = 0;
 			}
 		}
+		
+		// max & min updates
+		String updateMaxStr = req.getParameter("updatemax");
+		String updateMinStr = req.getParameter("updatemin");
+		maxUpdates = (updateMaxStr!=null)?Integer.parseInt(updateMaxStr):null;
+		minUpdates = (updateMinStr!=null)?Integer.parseInt(updateMinStr):null;
 		
 		String fields = req.getParameter("fields");
 		if(fields!=null) {
