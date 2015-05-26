@@ -195,6 +195,7 @@ public class RequestSpec {
 		if(order!=null) {
 			List<String> orderColz = Arrays.asList(order.split(","));
 			for(String ocol: orderColz) {
+				ocol = ocol.trim();
 				if(ocol.startsWith("-")) {
 					ocol = ocol.substring(1);
 					orderAscDesc.add("DESC");

@@ -45,7 +45,7 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 		for(int i=0;i<grants.size();i++) {
 			Grant gr = Grant.parseGrant(grants.get(i));
 			//log.info("..RSGrantsFilter: grantee=="+gr.getGrantee()+" <<"+grants.get(i)+">> [?="+roles.contains(gr.getGrantee())+"]");
-			if(roles.contains(gr.getGrantee())) {
+			if(gr==null || roles.contains(gr.getGrantee())) {
 				return true;
 			}
 		}
