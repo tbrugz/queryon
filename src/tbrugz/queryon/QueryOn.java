@@ -905,6 +905,10 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows deleted");
 		
 		}
+		catch(BadRequestException e) {
+			conn.rollback();
+			throw e;
+		}
 		catch(SQLException e) {
 			conn.rollback();
 			throw e;

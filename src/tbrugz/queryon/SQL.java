@@ -165,6 +165,7 @@ public class SQL {
 			String col = reqspec.orderCols.get(i);
 			String ascDesc = reqspec.orderAscDesc.get(i);
 			if(col==null || col.equals("")) { continue; }
+			//log.debug("order by '"+col+"': cols: "+relationCols);
 			//XXXdone option to ignore unknown columns? or to not validate?
 			if(validateOrderColumnNames && relationCols!=null && !relationCols.contains(col)) {
 				throw new BadRequestException("can't order by '"+col+"' (unknown column)");
@@ -271,6 +272,12 @@ public class SQL {
 			}
 			else {
 				log.warn("no valid column specified. defaulting to 'all'");
+			}
+		}
+		else {
+			List<String> cols = table.getColumnNames();
+			if(cols!=null) {
+				columns = Utils.join(cols, ", ", sqlIdDecorator);
 			}
 		}
 		if(reqspec.distinct) {
