@@ -39,7 +39,88 @@
 		str += colName;
 		document.getElementById('order').value = str;
 		makeHrefs();
-		doRun('objects', 'content', 'messages');
+		doRun('objects', 'content', 'messages', doRunCallback);
+	}
+	
+	function doRunCallback(request) {
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		var relationType = relationsHash[id] ? relationsHash[id].relationType : null;
+		console.log('relationType: ',relationType);
+		if(relationType == 'table') {
+			var rel = relationsHash[id];
+			var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
+			var match = re.exec(rel.constraints);
+			var pkcols = null;
+			//while(match!=null) {
+			if(match!=null) {
+				//console.log(match[1]);
+				pkcols = match[1];
+				//match = re.exec(rel.constraints);
+			}
+			//var constr = rel.constraints.match(re);
+			//var re = /\[[PU]K:[A-Za-z_ ]*:[A-Za-z_, ]+\]/g;
+			
+			
+			var content = document.getElementById('content');
+			var rows = content.querySelectorAll('tr');
+			//rows[0].innerHTML += "<th>actions</th>";
+			for(var i=1;i<rows.length;i++) {
+				rows[i].innerHTML += "<td><input type=button title='update' class='btn-update' onclick='doRunUpdate("+i+")' value='&#x21bb;'/><!--&plusmn;--> "
+					+"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/></td>";
+			}
+		}
+	}
+		
+	function getPkCols() {
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		var rel = relationsHash[id];
+		var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
+		var match = re.exec(rel.constraints);
+		var pkcols = null;
+		//while(match!=null) {
+		if(match!=null) {
+			//console.log(match[1]);
+			return match[1];
+			//match = re.exec(rel.constraints);
+		}
+		return null;
+	}
+	
+	function doRunUpdate(rownum) {
+		console.log('doRunUpdate', rownum);
+	}
+	
+	function doRunDelete(rownum) {
+		console.log('doRunDelete', rownum);
+		var content = document.getElementById('content');
+		var rows = content.querySelectorAll('tr');
+		//rows[0].innerHTML += "<th>actions</th>";
+		var row = rows[rownum];
+		var pkStr = getPkCols();
+		var pk = pkStr.split(',');
+		var cols = getColumnsFromContainer('content');
+		console.log('doRunDelete row', row, 'pk', pk, 'cols', cols);
+		var idx = [];
+		for(var i=0;i<pk.length;i++) {
+			idx.push(cols.indexOf(pk[i]));
+		}
+		console.log('doRunDelete idx', idx);
+		var tds = row.querySelectorAll('td');
+		var vals = [];
+		var filter = '';
+		for(var i=0;i<idx.length;i++) {
+			vals.push(tds[idx[i]].innerHTML);
+			if(filter) { filter += ', '; }
+			filter += pk[i]+" = "+vals[i];
+		}
+		var valsKey = vals.join('/'); //XXX url encode
+		
+		//if(confirm("Do you really want to delete row "+rownum+" from table "+name+"? ["+cols[idx]+" = "+val+"]")) {
+		if(confirm("Do you really want to delete this row from table "+name+"?\n[rownum = "+rownum+" ]\n["+filter+"]")) {
+			doDelete('objects', valsKey, 'content', 'messages'); //XXX callback to remove row in table?
+		}
 	}
 	
 	</script>
@@ -75,14 +156,6 @@
 	#order-label {
 		display: none;
 	}
-	.orderbutton {
-		padding: 0;
-		font-size: smaller;
-	}
-	.orderbutton-container {
-		display: inline-block;
-		margin: 0 5px 0 5px;
-	}
 	.edit-link {
 		display: none;
 		/*margin: 0 1em 0 1em;*/
@@ -98,14 +171,6 @@
 		bottom: 0;
 		padding: 2px;
 		right: 0;
-	}
-	
-	#content input[type=button] {
-		padding: 0px;
-	}
-	
-	.button-selected {
-		background-color: rgb(146, 218, 136);
 	}
 	
 	@media screen {
@@ -142,7 +207,7 @@
 		<span id="filters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilterDialog();"/>
-		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRun('objects', 'content', 'messages');"/>
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRun('objects', 'content', 'messages', doRunCallback);"/>
 		<!-- TODO limit/offset or page/pagesize -->
 	</span>
 

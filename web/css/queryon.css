@@ -43,6 +43,7 @@ th {
 .error {
 	background-color: #faa;
 	color: #000;
+	margin-top: 3px;
 }
 
 .errorbutton {
@@ -131,6 +132,38 @@ input[readonly="readonly"] {
 	background-position: right 3px center;
 	background-repeat: no-repeat;
 	padding-right: 18px !important;
+}
+
+.orderbutton-container {
+	display: inline-block;
+	margin: 0 5px 0 5px;
+}
+
+input[type=button].orderbutton {
+	padding: 0;
+	font-size: smaller;
+}
+
+input[type=button].button-selected {
+	background-color: rgb(146, 218, 136);
+}
+
+input[type=button].btn-update {
+	background-color: orange;
+	font-family: monospace;
+	font-weight: bold;
+	width: 1.5em;
+	height: 1.5em;
+	padding: 0px 0px;
+}
+
+input[type=button].btn-delete {
+	background-color: red;
+	font-family: monospace;
+	font-weight: bold;
+	width: 1.5em;
+	height: 1.5em;
+	padding: 0px 0px;
 }
 
 /* filters */

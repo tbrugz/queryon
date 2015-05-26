@@ -84,20 +84,22 @@ function getQueryUrl(selectId, syntax) {
 	return returl;
 }
 
-function doRun(selectId, containerId, messagesId) {
+function doRun(selectId, containerId, messagesId, callback) {
 	var finalUrl = getQueryUrl(selectId, 'htmlx');
 	
 	btnActionStart('go-button');
 	var startTimeMilis = Date.now();
+	var order = document.getElementById('order').value;
 	$.ajax({
 		url: finalUrl,
-		success: function(data) {
+		success: function(data, textStatus, request) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
 			$('#'+containerId).html(data);
 			closeMessages(messagesId);
 			addSortHrefs(containerId, order);
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
+			if(callback) { callback(request); }
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
@@ -120,7 +122,7 @@ function addSortHrefs(containerId, order) {
 		if(idx>0) {
 			colname = colname.substring(0, idx);
 		}
-		//console.log('colname['+i+']: '+colname);
+		//console.log('colname['+i+']: '+colname+" ; order = ",order);
 		
 		var elemValue = colname
 			+ '<span class="orderbutton-container">';
@@ -288,4 +290,38 @@ function getValuesFromColumn(containerId, columnName) {
 	
 	//console.log(colValues);
 	return colValues;
+}
+
+function getQueryUpdateUrl(selectId, key, queryString, syntax) {
+	var select = document.getElementById(selectId);
+	var id = select.options[select.selectedIndex].value;
+	
+	var returl = baseUrl+'/'+id+'/'+key
+		+(syntax?'.'+syntax:'')
+		+(queryString?'?'+queryString:'');
+	
+	console.log('getQueryUpdateUrl: '+returl);
+	return returl;
+}
+
+function doDelete(selectId, key, containerId, messagesId, callback) {
+	var finalUrl = getQueryUpdateUrl(selectId, key, 'updatemax=1&updatemin=1', 'json');
+	
+	btnActionStart('go-button');
+	var startTimeMilis = Date.now();
+	$.ajax({
+		url: finalUrl,
+		method: 'DELETE',
+		success: function(data, textStatus, jqXHR) {
+			btnActionStop('go-button');
+			var completedTimeMilis = Date.now();
+			showInfoMessages(messagesId, jqXHR.responseText+" [please refresh page]");
+			//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
+			if(callback) { callback(request); }
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('go-button');
+			showErrorMessages(messagesId, jqXHR.responseText);
+		}
+	});
 }
