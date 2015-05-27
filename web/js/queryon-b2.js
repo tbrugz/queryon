@@ -213,3 +213,28 @@ function refreshAuthInfo() {
 		urlednew.style.display = 'none';
 	}
 }
+
+function getKeyValsForRow(rownum) {
+	var content = document.getElementById('content');
+	var rows = content.querySelectorAll('tr');
+	//rows[0].innerHTML += "<th>actions</th>";
+	var row = rows[rownum];
+	var pk = getPkCols('objects');
+	var cols = getColumnsFromContainer('content');
+	console.log('doRunDelete row', row, 'pk', pk, 'cols', cols);
+	var idx = [];
+	for(var i=0;i<pk.length;i++) {
+		idx.push(cols.indexOf(pk[i]));
+	}
+	console.log('doRunDelete idx', idx);
+	var tds = row.querySelectorAll('td');
+	var vals = [];
+	var filter = '';
+	for(var i=0;i<idx.length;i++) {
+		vals.push(tds[idx[i]].innerHTML);
+		if(filter) { filter += ', '; }
+		filter += pk[i]+" = "+vals[i];
+	}
+	var valsKey = vals.join('/'); //XXX url encode ?
+	return {key: valsKey, filter: filter};
+}

@@ -304,7 +304,7 @@ function getQueryUpdateUrl(selectId, key, queryString, syntax) {
 	return returl;
 }
 
-function doDelete(selectId, key, containerId, messagesId, callback) {
+function doDelete(selectId, key, containerId, messagesId, callback, callbackError) {
 	var finalUrl = getQueryUpdateUrl(selectId, key, 'updatemax=1&updatemin=1', 'json');
 	
 	btnActionStart('go-button');
@@ -317,11 +317,29 @@ function doDelete(selectId, key, containerId, messagesId, callback) {
 			var completedTimeMilis = Date.now();
 			showInfoMessages(messagesId, jqXHR.responseText+" [please refresh page]");
 			//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
-			if(callback) { callback(request); }
+			if(callback) { callback(jqXHR); }
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
 			showErrorMessages(messagesId, jqXHR.responseText);
+			if(callbackError) { callbackError(jqXHR); }
 		}
 	});
 }
+
+function getPkCols(selectId) {
+	var select = document.getElementById(selectId);
+	var id = select.options[select.selectedIndex].value;
+	var rel = relationsHash[id];
+	var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
+	var match = re.exec(rel.constraints);
+	var pkcols = null;
+	//while(match!=null) {
+	if(match!=null) {
+		//console.log(match[1]);
+		return match[1].split(',');
+		//match = re.exec(rel.constraints);
+	}
+	return null;
+}
+
