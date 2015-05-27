@@ -66,15 +66,96 @@
 			var rows = content.querySelectorAll('tr');
 			//rows[0].innerHTML += "<th>actions</th>";
 			for(var i=1;i<rows.length;i++) {
-				rows[i].innerHTML += "<td><input type=button title='update' class='btn-update' onclick='doRunUpdate("+i+")' value='&#x21bb;'/><!--&plusmn;--> "
+				rows[i].innerHTML += "<td><input type=button title='update' class='btn-update' onclick='doOpenUpdateDialog("+i+")' value='&#x21bb;'/><!--&plusmn;--> "
 					+"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/></td>";
 			}
 		}
 	}
 		
-	function doRunUpdate(rownum) {
-		console.log('doRunUpdate', rownum);
+	function doOpenUpdateDialog(rownum) {
+		var ret = getKeyValsForRow(rownum);
+		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		//XXX do this
+		
+		var dialogCont = document.getElementById('dialog-container');
+		dialogCont.style.display = 'block';
+		var dialog = document.getElementById('update-dialog');
+		dialog.style.display = 'block';
+		
+		dialog.innerHTML = '<div class="dialog-title">Update row '+rownum+' <span id="dialog-filter" class="obs">[ '+ret.filter+' ]</span></div>'
+			+ "<div id='dialog-messages'></div>";
+		for(var i=0;i<ret.cols.length;i++) {
+			//XXX check column permission (grants)
+			dialog.innerHTML += "<label>"+ret.cols[i]+":<input type='text' name='v:"+ret.cols[i]+"' value='"+ret.allvals[i]+"'></label><br> "
+		}
+
+		dialog.innerHTML += "<div>"
+			+ "<input type='button' value='update' class='simplebutton' onclick='doConfirmUpdate("+rownum+");'/>"
+			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
+			+ "</div>";
+			
+		updateUI();
+	}
+	
+	function doConfirmUpdate(rownum, callback, callbackError) {
+		var ret = getKeyValsForRow(rownum);
+		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
+		
+		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
+				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
+		
+		// get values
+		var dialog = document.getElementById('update-dialog');
+		var inputs = dialog.querySelectorAll('input');
+		var postData = {};
+		var newVals = [];
+		for(var i=0;i<inputs.length;i++) {
+			if(inputs[i].name.indexOf("v:")==0) {
+				if(!inputs[i].disabled) {
+					postData[inputs[i].name] = inputs[i].value;
+				}
+				newVals.push(inputs[i].value);
+			}
+		}
+		
+		postData['method'] = 'PUT';
+
+		console.log("doConfirmUpdate finalUrl", finalUrl, "postData", postData);
+		
+		//btnActionStart('go-button');
+		var startTimeMilis = Date.now();
+		$.ajax({
+			url: finalUrl,
+			// -- PUT: update ; POST: insert --
+			//method: 'PUT', //XXX not working... [RequestSpec] req.getParameterMap() does not work for PUT & data (body) params
+			data: postData,
+			success: function(data, textStatus, jqXHR) {
+				//btnActionStop('go-button');
+				var completedTimeMilis = Date.now();
+				showInfoMessages('dialog-messages', jqXHR.responseText+" [please refresh page]");
+				//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
+
+				var content = document.getElementById('content');
+				var row = content.querySelectorAll('tr')[rownum];
+				//highlight row
+				row.style.backgroundColor = "#ffa";
+				//update row values
+				var tds = row.querySelectorAll('td');
+				for(var i=0;i<ret.cols.length;i++) {
+					tds[i].innerHTML = newVals[i];
+				}
+				//XXX update dialog-filter
+				
+				if(callback) { callback(jqXHR); }
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				//btnActionStop('go-button');
+				showErrorMessages('dialog-messages', jqXHR.responseText);
+				if(callbackError) { callbackError(jqXHR); }
+			}
+		});
+		
+		//XXX closeDialogs();
 	}
 	
 	function doRunDelete(rownum) {
@@ -87,7 +168,7 @@
 				var row = content.querySelectorAll('tr')[rownum];
 				row.style.textDecoration = "line-through";
 				row.style.backgroundColor = "#faa";
-				console.log("callback OK called");
+				//console.log("callback OK called");
 				// remove row's actions?
 				row.removeChild(row.lastChild);
 				//row.lastChild.innerHTML = '';
@@ -208,6 +289,8 @@
 
 <div id="dialog-container">
 	<div id="dialog">
+	</div>
+	<div id="update-dialog">
 	</div>
 </div>
 

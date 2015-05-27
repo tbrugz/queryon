@@ -38,6 +38,7 @@ function addFilterDialog() {
 	var dialogCont = document.getElementById('dialog-container');
 	dialogCont.style.display = 'block';
 	var dialog = document.getElementById('dialog');
+	dialog.style.display = 'block';
 	var cols = getColumnsFromRelation(relationsHash[id]);
 	if(cols==null || cols.length==0) {
 		cols = getColumnsFromContainer('content');
@@ -60,9 +61,9 @@ function addFilterDialog() {
 	dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
 		+ operatorsHTML
 		+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
-		+ "<input type='button' value='add & close' onclick='addFilterIn();closeFilterDialog();'/>"
+		+ "<input type='button' value='add & close' onclick='addFilterIn();closeDialogs();'/>"
 		+ "<input type='button' value='add' onclick='addFilterIn();'/>"
-		+ "<input type='button' value='X' class='simplebutton' onclick='closeFilterDialog();'/></div>";
+		+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/></div>";
 	//dialog.style.display = 'none';
 	refreshAutocomplete();
 	
@@ -165,10 +166,13 @@ function removeFilter(element) {
 	}
 }
 
-function closeFilterDialog() {
+function closeDialogs() {
 	if(bhvalues!=null) {
 		$('#fin-value').typeahead('destroy');
 	}
 	document.getElementById('dialog').innerHTML = '';
+	document.getElementById('dialog').style.display = 'none';
+	document.getElementById('update-dialog').innerHTML = '';
+	document.getElementById('update-dialog').style.display = 'none';
 	document.getElementById('dialog-container').style.display = 'none';
 }

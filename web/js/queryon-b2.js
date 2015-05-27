@@ -221,14 +221,15 @@ function getKeyValsForRow(rownum) {
 	var row = rows[rownum];
 	var pk = getPkCols('objects');
 	var cols = getColumnsFromContainer('content');
-	console.log('doRunDelete row', row, 'pk', pk, 'cols', cols);
+	console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
 	var idx = [];
 	for(var i=0;i<pk.length;i++) {
 		idx.push(cols.indexOf(pk[i]));
 	}
-	console.log('doRunDelete idx', idx);
+	console.log('getKeyValsForRow idx', idx);
 	var tds = row.querySelectorAll('td');
 	var vals = [];
+	var allvals = [];
 	var filter = '';
 	for(var i=0;i<idx.length;i++) {
 		vals.push(tds[idx[i]].innerHTML);
@@ -236,5 +237,9 @@ function getKeyValsForRow(rownum) {
 		filter += pk[i]+" = "+vals[i];
 	}
 	var valsKey = vals.join('/'); //XXX url encode ?
-	return {key: valsKey, filter: filter};
+	for(var i=0;i<cols.length;i++) {
+		allvals.push(tds[i].innerHTML);
+	}
+
+	return {key: valsKey, filter: filter, pk: pk, pkvals: vals, cols: cols, allvals: allvals};
 }

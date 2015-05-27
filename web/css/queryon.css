@@ -172,19 +172,6 @@ input[type=button].btn-delete {
 	padding: 1px 3px 1px 3px;
 }
 
-/* dialog */
-
-#dialog select.operator {
-	background-color: #eeeeee;
-	padding: 2px;
-	margin-right: 4px;
-}
-
-#dialog input[type=button] {
-	margin: 3px;
-	padding: 3px;
-}
-
 /* typeahead */
 
 .tt-dropdown-menu {
