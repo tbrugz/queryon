@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
@@ -960,7 +961,15 @@ public class QueryOn extends HttpServlet {
 		log.info("sql update: "+sql);
 		
 		int count = st.executeUpdate();
-		//XXX: boundaries for # of updated rows?
+		
+		//XXXdone: boundaries for # of updated rows?
+		if(reqspec.maxUpdates!=null && count > reqspec.maxUpdates) {
+			throw new BadRequestException("Update count ["+count+"] greater than update-max ["+reqspec.maxUpdates+"]");
+		}
+		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
+			throw new BadRequestException("Update count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
 		resp.getWriter().write(count+" rows updated");
@@ -968,7 +977,9 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			conn.rollback();
-			throw e;
+			e.printStackTrace();
+			throw new InternalServerException("SQL Error: "+e);
+			//throw e;
 		}
 		finally {
 			conn.close();
@@ -1026,7 +1037,15 @@ public class QueryOn extends HttpServlet {
 		log.info("sql insert: "+sql);
 		
 		int count = st.executeUpdate();
-		//XXX: boundaries for # of updated rows?
+		
+		//XXXdone: boundaries for # of updated (inserted) rows?
+		if(reqspec.maxUpdates!=null && count > reqspec.maxUpdates) {
+			throw new BadRequestException("Insert count ["+count+"] greater than update-max ["+reqspec.maxUpdates+"]");
+		}
+		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
+			throw new BadRequestException("Insert count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
 		resp.setStatus(HttpServletResponse.SC_CREATED);
@@ -1035,7 +1054,8 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			conn.rollback();
-			throw e;
+			e.printStackTrace();
+			throw new InternalServerException("SQL Error: "+e);
 		}
 		finally {
 			conn.close();
