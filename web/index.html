@@ -80,6 +80,7 @@
 		var cols = getColumnsFromContainer('content');
 		//var ret = getKeyValsForRow(0);
 		doWriteUpdateDialog('Insert', 0, null, cols, null);
+		closeMessages('messages');
 	}
 	
 	function doOpenUpdateDialog(rownum) {
@@ -88,6 +89,7 @@
 		//XXX do this
 		
 		doWriteUpdateDialog('Update', rownum, ret.filter, ret.cols, ret.allvals);
+		closeMessages('messages');
 	}
 		
 	function doWriteUpdateDialog(updateType, rownum, filter, cols, vals) {
@@ -109,6 +111,7 @@
 
 		dialog.innerHTML += "<div>"
 			+ "<input type='button' value='"+updateType.toLowerCase()+"' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+");'/>"
+			+ "<input type='button' value='"+updateType.toLowerCase()+" & close' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+", true);'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
 			+ "</div>";
 			
@@ -133,7 +136,7 @@
 		return {newVals: newVals, postData: postData};
 	}
 	
-	function doConfirmUpdate(rownum, callback, callbackError) {
+	function doConfirmUpdate(rownum, closeDialog) {
 		var ret = getKeyValsForRow(rownum);
 		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
 		
@@ -160,10 +163,12 @@
 
 		console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
 		
-		doExecuteUpdateAjax(finalUrl, nv, rownum, ret.cols);
+		var messagesId = closeDialog?'messages':'dialog-messages';
+		doExecuteUpdateAjax(finalUrl, nv, rownum, ret.cols, messagesId);
+		if(closeDialog) { closeDialogs(); }
 	}
 	
-	function doExecuteUpdateAjax(finalUrl, nv, rownum, cols) {
+	function doExecuteUpdateAjax(finalUrl, nv, rownum, cols, messagesId) {
 		//btnActionStart('go-button');
 		var startTimeMilis = Date.now();
 		$.ajax({
@@ -175,7 +180,7 @@
 			success: function(data, textStatus, jqXHR) {
 				//btnActionStop('go-button');
 				var completedTimeMilis = Date.now();
-				showInfoMessages('dialog-messages', jqXHR.responseText+" [please refresh page]");
+				showInfoMessages(messagesId, jqXHR.responseText+" [please refresh page]");
 				//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 
 				var content = document.getElementById('content');
@@ -204,7 +209,7 @@
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				//btnActionStop('go-button');
-				showErrorMessages('dialog-messages', jqXHR.responseText);
+				showErrorMessages(messagesId, jqXHR.responseText);
 				//if(callbackError) { callbackError(jqXHR); }
 			}
 		});
@@ -212,7 +217,7 @@
 		//XXX closeDialogs();
 	}
 	
-	function doConfirmInsert(rownum, callback, callbackError) {
+	function doConfirmInsert(rownum, closeDialog) {
 		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
 		var cols = getColumnsFromContainer('content');
 		
@@ -222,7 +227,9 @@
 		
 		nv.postData['method'] = 'POST';
 		
-		doExecuteUpdateAjax(finalUrl, nv, null, cols);
+		var messagesId = closeDialog?'messages':'dialog-messages';
+		doExecuteUpdateAjax(finalUrl, nv, null, cols, messagesId);
+		if(closeDialog) { closeDialogs(); }
 	}
 	
 	function doRunDelete(rownum) {
