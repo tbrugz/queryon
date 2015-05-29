@@ -79,7 +79,7 @@
 		//var pk = getPkCols('objects');
 		var cols = getColumnsFromContainer('content');
 		//var ret = getKeyValsForRow(0);
-		doWriteUpdateDialog('Insert', 0, null, cols, null);
+		doWriteUpdateDialog('Insert', null, null, null, cols, null);
 		closeMessages('messages');
 	}
 	
@@ -88,22 +88,31 @@
 		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		//XXX do this
 		
-		doWriteUpdateDialog('Update', rownum, ret.filter, ret.cols, ret.allvals);
+		var maxrownum = document.getElementById('content').querySelectorAll('tr').length-1;
+		
+		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, ret.cols, ret.allvals);
 		closeMessages('messages');
 	}
 		
-	function doWriteUpdateDialog(updateType, rownum, filter, cols, vals) {
+	function doWriteUpdateDialog(updateType, rownum, maxrownum, filter, cols, vals) {
+		console.log('doWriteUpdateDialog', updateType, rownum, maxrownum, filter, cols, vals);
 		//XXX: show/validate column types...
 		var dialogCont = document.getElementById('dialog-container');
 		dialogCont.style.display = 'block';
 		var dialog = document.getElementById('update-dialog');
 		dialog.style.display = 'block';
 		
+		//XXXdone update: previous & next row buttons
 		dialog.innerHTML = '<div class="dialog-title">'+updateType+' row'
 			+ (rownum>0?' <code>'+rownum+'</code>':'')
+			+ ' <span class="orderbutton-container">'
+			+ (rownum>1?"<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum-1)+");\" value=\"&#9650;\" title=\"previous row\"/>":"")
+			+ (rownum<maxrownum?"<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum+1)+");\" value=\"&#9660;\" title=\"next row\"/>":"")
+			+ '</span>'
 			+ (filter!=null?' <span id="dialog-filter" class="obs">[ '+filter+' ]</span>':'')
 			+ '</div>'
 			+ "<div id='dialog-messages'></div>";
+			
 		for(var i=0;i<cols.length;i++) {
 			//XXX check column permission (grants)
 			dialog.innerHTML += "<label>"+cols[i]+":<input type='text' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'></label><br> "
@@ -195,7 +204,7 @@
 					}
 				}
 				else { //insert
-					var table = content.querySelector('table');
+					var table = content.querySelector('tbody');
 					var row = document.createElement("tr");
 					for(var i=0;i<cols.length;i++) {
 						row.innerHTML += '<td>'+nv.newVals[i]+'</td>';

@@ -127,17 +127,17 @@ function addSortHrefs(containerId, order) {
 		var elemValue = colname
 			+ '<span class="orderbutton-container">';
 		if(order==colname) {
-			elemValue += '<input type=button class="orderbutton button-selected" value="&#9650;"/>'
+			elemValue += '<input type=button class="orderbutton button-selected" value="&#9650;" title="sorted ASC"/>'
 		}
 		else {
-			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="&#9650;"/>'
+			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 1);" value="&#9650;" title="sort ASC"/>'
 		}
 		
 		if(order=="-"+colname) {
-			elemValue += '<input type=button class="orderbutton button-selected" value="&#9660;"/>'
+			elemValue += '<input type=button class="orderbutton button-selected" value="&#9660;" title="sorted DESC"/>'
 		}
 		else {
-			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="&#9660;"/>'
+			elemValue += '<input type=button class="orderbutton" onclick="javascript:sortBy(\''+colname+'\', 2);" value="&#9660;" title="sort DESC"/>'
 		}
 		elemValue += '</span>';
 		
