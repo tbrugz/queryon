@@ -65,6 +65,7 @@
 			var content = document.getElementById('content');
 			var rows = content.querySelectorAll('tr');
 			//rows[0].innerHTML += "<th>actions</th>";
+			rows[0].innerHTML += "<td><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></td>"
 			for(var i=1;i<rows.length;i++) {
 				rows[i].innerHTML += "<td><input type=button title='update' class='btn-update' onclick='doOpenUpdateDialog("+i+")' value='&#x21bb;'/><!--&plusmn;--> "
 					+"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/></td>";
@@ -72,38 +73,49 @@
 		}
 	}
 		
+	function doOpenInsertDialog() {
+		//var content = document.getElementById('content');
+		//var rows = content.querySelectorAll('tr');
+		//var pk = getPkCols('objects');
+		var cols = getColumnsFromContainer('content');
+		//var ret = getKeyValsForRow(0);
+		doWriteUpdateDialog('Insert', 0, null, cols, null);
+	}
+	
 	function doOpenUpdateDialog(rownum) {
 		var ret = getKeyValsForRow(rownum);
 		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		//XXX do this
 		
+		doWriteUpdateDialog('Update', rownum, ret.filter, ret.cols, ret.allvals);
+	}
+		
+	function doWriteUpdateDialog(updateType, rownum, filter, cols, vals) {
+		//XXX: show/validate column types...
 		var dialogCont = document.getElementById('dialog-container');
 		dialogCont.style.display = 'block';
 		var dialog = document.getElementById('update-dialog');
 		dialog.style.display = 'block';
 		
-		dialog.innerHTML = '<div class="dialog-title">Update row '+rownum+' <span id="dialog-filter" class="obs">[ '+ret.filter+' ]</span></div>'
+		dialog.innerHTML = '<div class="dialog-title">'+updateType+' row'
+			+ (rownum>0?' <code>'+rownum+'</code>':'')
+			+ (filter!=null?' <span id="dialog-filter" class="obs">[ '+filter+' ]</span>':'')
+			+ '</div>'
 			+ "<div id='dialog-messages'></div>";
-		for(var i=0;i<ret.cols.length;i++) {
+		for(var i=0;i<cols.length;i++) {
 			//XXX check column permission (grants)
-			dialog.innerHTML += "<label>"+ret.cols[i]+":<input type='text' name='v:"+ret.cols[i]+"' value='"+ret.allvals[i]+"'></label><br> "
+			dialog.innerHTML += "<label>"+cols[i]+":<input type='text' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'></label><br> "
 		}
 
 		dialog.innerHTML += "<div>"
-			+ "<input type='button' value='update' class='simplebutton' onclick='doConfirmUpdate("+rownum+");'/>"
+			+ "<input type='button' value='"+updateType.toLowerCase()+"' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+");'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
 			+ "</div>";
 			
 		updateUI();
 	}
 	
-	function doConfirmUpdate(rownum, callback, callbackError) {
-		var ret = getKeyValsForRow(rownum);
-		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
-		
-		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
-				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
-		
+	function getUpdateNewValues() {
 		// get values
 		var dialog = document.getElementById('update-dialog');
 		var inputs = dialog.querySelectorAll('input');
@@ -118,17 +130,48 @@
 			}
 		}
 		
-		postData['method'] = 'PUT';
-
-		console.log("doConfirmUpdate finalUrl", finalUrl, "postData", postData);
+		return {newVals: newVals, postData: postData};
+	}
+	
+	function doConfirmUpdate(rownum, callback, callbackError) {
+		var ret = getKeyValsForRow(rownum);
+		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
 		
+		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
+				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
+		/*
+		// get values
+		var dialog = document.getElementById('update-dialog');
+		var inputs = dialog.querySelectorAll('input');
+		var postData = {};
+		var newVals = [];
+		for(var i=0;i<inputs.length;i++) {
+			if(inputs[i].name.indexOf("v:")==0) {
+				if(!inputs[i].disabled) {
+					postData[inputs[i].name] = inputs[i].value;
+				}
+				newVals.push(inputs[i].value);
+			}
+		}
+		*/
+		nv = getUpdateNewValues();
+		
+		nv.postData['method'] = 'PUT';
+
+		console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
+		
+		doExecuteUpdateAjax(finalUrl, nv, rownum, ret.cols);
+	}
+	
+	function doExecuteUpdateAjax(finalUrl, nv, rownum, cols) {
 		//btnActionStart('go-button');
 		var startTimeMilis = Date.now();
 		$.ajax({
 			url: finalUrl,
 			// -- PUT: update ; POST: insert --
 			//method: 'PUT', //XXX not working... [RequestSpec] req.getParameterMap() does not work for PUT & data (body) params
-			data: postData,
+			// http://stackoverflow.com/questions/855835/servlet-parameters-and-doput
+			data: nv.postData,
 			success: function(data, textStatus, jqXHR) {
 				//btnActionStop('go-button');
 				var completedTimeMilis = Date.now();
@@ -136,26 +179,50 @@
 				//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 
 				var content = document.getElementById('content');
-				var row = content.querySelectorAll('tr')[rownum];
-				//highlight row
-				row.style.backgroundColor = "#ffa";
-				//update row values
-				var tds = row.querySelectorAll('td');
-				for(var i=0;i<ret.cols.length;i++) {
-					tds[i].innerHTML = newVals[i];
+				if(rownum!=null) { //update
+					var row = content.querySelectorAll('tr')[rownum];
+					//highlight row
+					row.style.backgroundColor = "#ffa";
+					//update row values
+					var tds = row.querySelectorAll('td');
+					for(var i=0;i<cols.length;i++) {
+						tds[i].innerHTML = nv.newVals[i];
+					}
+				}
+				else { //insert
+					var table = content.querySelector('table');
+					var row = document.createElement("tr");
+					for(var i=0;i<cols.length;i++) {
+						row.innerHTML += '<td>'+nv.newVals[i]+'</td>';
+					}
+					table.appendChild(row);
+					row.style.backgroundColor = "#ffa";
 				}
 				//XXX update dialog-filter
 				
-				if(callback) { callback(jqXHR); }
+				//if(callback) { callback(jqXHR); }
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				//btnActionStop('go-button');
 				showErrorMessages('dialog-messages', jqXHR.responseText);
-				if(callbackError) { callbackError(jqXHR); }
+				//if(callbackError) { callbackError(jqXHR); }
 			}
 		});
 		
 		//XXX closeDialogs();
+	}
+	
+	function doConfirmInsert(rownum, callback, callbackError) {
+		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
+		var cols = getColumnsFromContainer('content');
+		
+		nv = getUpdateNewValues();
+
+		console.log("doConfirmInsert key",finalUrl,nv);
+		
+		nv.postData['method'] = 'POST';
+		
+		doExecuteUpdateAjax(finalUrl, nv, null, cols);
 	}
 	
 	function doRunDelete(rownum) {

@@ -148,6 +148,15 @@ input[type=button].button-selected {
 	background-color: rgb(146, 218, 136);
 }
 
+input[type=button].btn-insert {
+	background-color: #88f;
+	font-family: monospace;
+	font-weight: bold;
+	width: 1.5em;
+	height: 1.5em;
+	padding: 0px 0px;
+}
+
 input[type=button].btn-update {
 	background-color: orange;
 	font-family: monospace;

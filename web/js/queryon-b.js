@@ -296,7 +296,8 @@ function getQueryUpdateUrl(selectId, key, queryString, syntax) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
 	
-	var returl = baseUrl+'/'+id+'/'+key
+	var returl = baseUrl+'/'+id
+		+(key?'/'+key:'')
 		+(syntax?'.'+syntax:'')
 		+(queryString?'?'+queryString:'');
 	

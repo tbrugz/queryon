@@ -102,6 +102,10 @@
 	margin: 5px 0 15px 0;
 }
 
+.dialog-title code {
+	font-size: larger;
+}
+
 .obs {
 	font-weight: normal;
 	font-style: italic;
