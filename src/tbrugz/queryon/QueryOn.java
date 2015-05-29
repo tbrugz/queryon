@@ -38,6 +38,7 @@ import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
 import tbrugz.queryon.sqlcmd.ShowColumns;
 import tbrugz.queryon.sqlcmd.ShowSchemas;
 import tbrugz.queryon.sqlcmd.ShowTables;
+import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
@@ -535,6 +536,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	boolean grantsAndRolesMatches(Subject subject, PrivilegeType privilege, List<Grant> grants) {
+		grants = QOnModelUtils.filterGrantsByPrivilegeType(grants, privilege);
 		if(grants==null || grants.size()==0) {
 			return true;
 		}
