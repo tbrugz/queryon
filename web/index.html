@@ -41,6 +41,12 @@
 		makeHrefs();
 		doRun('objects', 'content', 'messages', doRunCallback);
 	}
+
+	function sortByNone() {
+		document.getElementById('order').value = '';
+		makeHrefs();
+		doRun('objects', 'content', 'messages', doRunCallback);
+	}
 	
 	function doRunCallback(request) {
 		var select = document.getElementById('objects');
