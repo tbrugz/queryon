@@ -18,6 +18,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.shiro.AuthorizationInfoInformer;
 
 public class ShiroUtils {
@@ -39,7 +40,7 @@ public class ShiroUtils {
 	public static void checkPermission(Subject subject, String permission, String object) {
 		if(! isPermitted(subject, permission, object)) {
 			log.warn("no permission '"+permission+"' for subject '"+subject.getPrincipal()+" on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
-			throw new BadRequestException(permission+(object!=null?":"+object:"")+": authorization required", HttpServletResponse.SC_FORBIDDEN);
+			throw new ForbiddenException(permission+(object!=null?":"+object:"")+": authorization required");
 		}
 	}
 
@@ -67,7 +68,7 @@ public class ShiroUtils {
 		}
 		String permissionsStr = Arrays.asList(permissionList).toString();
 		log.warn("no permission '"+permissionsStr+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
-		throw new BadRequestException("no authorization for any of "+permissionsStr, HttpServletResponse.SC_FORBIDDEN);
+		throw new ForbiddenException("no authorization for any of "+permissionsStr);
 	}
 	
 	public static Set<String> getSubjectRoles(Subject subject) {

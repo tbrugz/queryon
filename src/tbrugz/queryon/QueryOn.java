@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
@@ -533,7 +534,7 @@ public class QueryOn extends HttpServlet {
 	void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, Relation rel) {
 		boolean check = grantsAndRolesMatches(subject, privilege, rel.getGrants());
 		if(!check) {
-			throw new BadRequestException("no "+privilege+" permission on "+rel.getName(), HttpServletResponse.SC_FORBIDDEN);
+			throw new ForbiddenException("no "+privilege+" permission on "+rel.getName());
 		}
 	}
 	
@@ -945,7 +946,7 @@ public class QueryOn extends HttpServlet {
 			}
 			//TODOne: check UPDATE permission on each row, based on grants
 			if(!hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
-				throw new BadRequestException("no update permission on column: "+relation.getName()+"."+col);
+				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
 			}
 			sb.append((i!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
@@ -1034,7 +1035,7 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
 			if(!hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
-				throw new BadRequestException("no insert permission on column: "+relation.getName()+"."+col);
+				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
 			}
 			
 			sbCols.append((i!=0?", ":"")+col);
