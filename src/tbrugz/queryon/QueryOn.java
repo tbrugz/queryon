@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;

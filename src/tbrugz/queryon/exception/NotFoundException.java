@@ -1,6 +1,8 @@
-package tbrugz.queryon;
+package tbrugz.queryon.exception;
 
 import javax.servlet.http.HttpServletResponse;
+
+import tbrugz.queryon.BadRequestException;
 
 public class NotFoundException extends BadRequestException {
 	private static final long serialVersionUID = 1L;
