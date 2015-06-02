@@ -61,14 +61,21 @@
 			//var constr = rel.constraints.match(re);
 			//var re = /\[[PU]K:[A-Za-z_ ]*:[A-Za-z_, ]+\]/g;
 			
-			
 			var content = document.getElementById('content');
 			var rows = content.querySelectorAll('tr');
+			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT'); //XXX check insert-any-column
+			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE'); //XXX check update-any-column
+			var allowDelete = relationHasGrantOfType(rel, 'DELETE');
 			//rows[0].innerHTML += "<th>actions</th>";
-			rows[0].innerHTML += "<td><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></td>"
+			if(allowInsert) {
+				rows[0].innerHTML += "<td><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></td>"
+			}
 			for(var i=1;i<rows.length;i++) {
-				rows[i].innerHTML += "<td><input type=button title='update' class='btn-update' onclick='doOpenUpdateDialog("+i+")' value='&#x21bb;'/><!--&plusmn;--> "
-					+"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/></td>";
+				if(!allowUpdate && !allowDelete) { continue; }
+				rows[i].innerHTML += "<td>"
+					+ (allowUpdate?"<input type=button title='update' class='btn-update' onclick='doOpenUpdateDialog("+i+")' value='&#x21bb;'/> ":"")
+					+  (allowDelete?"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/>":"")
+					+ "</td>";
 			}
 		}
 	}

@@ -344,3 +344,40 @@ function getPkCols(selectId) {
 	return null;
 }
 
+function hasGrantOfType(grant, column) {
+	//roles
+	/*
+	var grants = 'UPDATE';
+	var column = '';
+	 */
+	var select = document.getElementById('objects');
+	var id = select.options[select.selectedIndex].value;
+	var rel = relationsHash[id];
+	return relationHasGrantOfType(rel, grant, column);
+}
+
+function relationHasGrantOfType(relation, grant, column) {
+	//authInfo.roles
+	var roles = authInfo.roles.join("|");
+	var restr = "\\["+relation.name+";priv="+grant+";to:("+roles+");"
+		+(column?"col="+column:"")
+		+";\\]";
+	var re = new RegExp(restr);
+	console.log('roles== ',roles,'; restr==',restr,'; relation.grants==',relation.grants,'; re==',re);
+	//var match = re.exec(rel.grants);
+	var match = relation.grants.match(re);
+	return match;
+}
+
+function relationHasGrantOfTypeAnyColumn(relation, grant) {
+	//authInfo.roles
+	var roles = authInfo.roles.join("|");
+	var restr = "\\["+relation.name+";priv="+grant+";to:("+roles+");"
+		+"(col=.+)?"
+		+";\\]";
+	var re = new RegExp(restr);
+	console.log('roles== ',roles,'; restr==',restr,'; relation.grants==',relation.grants,'; re==',re);
+	//var match = re.exec(rel.grants);
+	var match = relation.grants.match(re);
+	return match;
+}
