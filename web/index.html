@@ -108,6 +108,11 @@
 		dialogCont.style.display = 'block';
 		var dialog = document.getElementById('update-dialog');
 		dialog.style.display = 'block';
+
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		var rel = relationsHash[id];
+		var allowUpdate = relationHasGrantOfType(rel, updateType.toUpperCase());
 		
 		//XXXdone update: previous & next row buttons
 		dialog.innerHTML = '<div class="dialog-title">'+updateType+' row'
@@ -121,8 +126,12 @@
 			+ "<div id='dialog-messages'></div>";
 			
 		for(var i=0;i<cols.length;i++) {
-			//XXX check column permission (grants)
-			dialog.innerHTML += "<label>"+cols[i]+":<input type='text' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'></label><br> "
+			//XXXdone check column permission (grants)
+			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
+			console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
+			dialog.innerHTML += "<label>"+cols[i]+":<input type='text' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"
+				+(disabled?" disabled='true'":"")
+				+"></label><br> "
 		}
 
 		dialog.innerHTML += "<div>"
