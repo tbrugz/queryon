@@ -18,4 +18,22 @@ public class QOnModelUtils {
 		}
 		return ret;
 	}
+	
+	public static boolean hasPermissionOnColumn(List<Grant> grants, String column) {
+		for(Grant g: grants) {
+			if(g!=null && column.equals(g.getColumn())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean hasPermissionWithoutColumn(List<Grant> grants) {
+		for(Grant g: grants) {
+			if(g!=null && g.getColumn()==null) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

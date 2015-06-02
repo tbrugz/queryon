@@ -930,13 +930,20 @@ public class QueryOn extends HttpServlet {
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
 
+		List<Grant> updateGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.UPDATE);
+		boolean hasRelationUpdatePermission  = QOnModelUtils.hasPermissionWithoutColumn(updateGrants);
+		
 		StringBuffer sb = new StringBuffer();
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(int i=0; cols.hasNext(); i++) {
 			String col = cols.next();
 			if(! columns.contains(col)) {
 				log.warn("unknown column: "+col);
-				continue;
+				throw new BadRequestException("[update] unknown column: "+col);
+			}
+			//TODOne: check UPDATE permission on each row, based on grants
+			if(!hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, col)) {
+				throw new BadRequestException("no update permission on column: "+relation.getName()+"."+col);
 			}
 			sb.append((i!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
@@ -1011,6 +1018,9 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		
+		List<Grant> insertGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.INSERT);
+		boolean hasRelationInsertPermission  = QOnModelUtils.hasPermissionWithoutColumn(insertGrants);
+		
 		StringBuffer sbCols = new StringBuffer();
 		StringBuffer sbVals = new StringBuffer();
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
@@ -1018,8 +1028,12 @@ public class QueryOn extends HttpServlet {
 			String col = cols.next();
 			if(! columns.contains(col)) {
 				log.warn("unknown 'value' column: "+col);
-				continue;
+				throw new BadRequestException("[insert] unknown column: "+col);
 			}
+			if(!hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, col)) {
+				throw new BadRequestException("no insert permission on column: "+relation.getName()+"."+col);
+			}
+			
 			sbCols.append((i!=0?", ":"")+col);
 			sbVals.append((i!=0?", ":"")+"?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
