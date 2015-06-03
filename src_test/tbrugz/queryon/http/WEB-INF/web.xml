@@ -25,6 +25,12 @@
 		<servlet-name>ProcessorServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
 	</servlet>
+
+	<servlet>
+		<servlet-name>TestServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.http.TestServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 	
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>

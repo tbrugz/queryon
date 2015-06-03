@@ -75,6 +75,16 @@
             <type>PK</type>
             <uniqueColumns>ID</uniqueColumns>
         </constraints>
+        <grants>
+            <grantee>test</grantee>
+            <privilege>INSERT</privilege>
+            <table>EMP</table>
+        </grants>
+        <grants>
+            <grantee>test</grantee>
+            <privilege>UPDATE</privilege>
+            <table>EMP</table>
+        </grants>
         <remarks></remarks>
         <type>TABLE</type>
     </table>

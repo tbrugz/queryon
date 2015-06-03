@@ -2,11 +2,11 @@ package tbrugz.queryon;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +24,9 @@ import tbrugz.queryon.shiro.AuthorizationInfoInformer;
 public class ShiroUtils {
 
 	static final Log log = LogFactory.getLog(ShiroUtils.class);
+	
+	// user for (unit) test (for now, at least)
+	static Map<Object, Set<String>> userRoles = new HashMap<Object, Set<String>>();
 	
 	public static Subject getSubject(Properties prop) {
 		Subject currentUser = SecurityUtils.getSubject();
@@ -77,6 +80,12 @@ public class ShiroUtils {
 		if(principal==null) {
 			return roles;
 		}
+		
+		Set<String> currentUserRoles = userRoles.get(principal);
+		if(currentUserRoles!=null) {
+			return currentUserRoles;
+		}
+		
 		org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
 		
 		if(sm instanceof RealmSecurityManager) {
@@ -98,6 +107,11 @@ public class ShiroUtils {
 			}
 		}
 		return roles;
+	}
+	
+	/* use carefully */
+	public static void setUserRoles(Object principal, Set<String> roles) {
+		userRoles.put(principal, roles);
 	}
 	
 	/*static Set<String> oldGetSubjectRoles(Subject subject) {
