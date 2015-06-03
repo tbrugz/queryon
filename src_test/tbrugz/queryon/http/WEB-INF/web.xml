@@ -21,6 +21,11 @@
 		<servlet-class>tbrugz.queryon.QueryOnSchema</servlet-class>
 	</servlet>
 	
+	<servlet>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
 		<url-pattern>/q/*</url-pattern>
@@ -29,6 +34,11 @@
 	<servlet-mapping>
 		<servlet-name>QueryOnSchema</servlet-name>
 		<url-pattern>/qos/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<url-pattern>/processor/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

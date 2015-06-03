@@ -34,6 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -490,15 +491,41 @@ public class WinstoneAndH2HttpRequestTest {
 		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200&fnin:SALARY=1000", 2);
 	}
 	
+	@Test
+	public void testProcessorJaxbSer() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(qonUrl+"/processor/JAXBSchemaXMLSerializer");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		////String resp = getContent(response1); System.out.println(resp);
+		
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		Document doc = dBuilder.parse(instream);
+		NodeList nl = doc.getElementsByTagName("table");
+		Assert.assertEquals(2, countNodesWithParentTagName(nl, "schemaModel"));
+	}
+	
 	//--------------------------- QueryOnSchema Tests -------------------------------
 	
-	int getReturnCodeQOS(String query) throws ClientProtocolException, IOException {
+	static int getReturnCodeQOS(String query) throws ClientProtocolException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(qonSchemaBaseUrl+query);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		//String resp = getContent(response1);
 		return response1.getStatusLine().getStatusCode();
+	}
+	
+	static int countNodesWithParentTagName(NodeList nl, String parentTag) {
+		int count = 0;
+		for (int j = 0; j < nl.getLength(); j++) {
+			Element fileElement = (Element) nl.item(j);
+			if (fileElement.getParentNode().getNodeName().equals(parentTag)) {
+				count++;
+			}
+		}
+		return count;
 	}
 	
 	@Test
