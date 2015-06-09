@@ -133,6 +133,7 @@
 			
 		for(var i=0;i<cols.length;i++) {
 			//XXXdone check column permission (grants)
+			//XXX column size & column remarks would be nice
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
 			dialog.innerHTML += "<label>"+cols[i]+":<input type='text' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"

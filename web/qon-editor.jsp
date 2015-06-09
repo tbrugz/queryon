@@ -103,7 +103,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnRun');
 			console.log(jqXHR);
-			errorMessage(jqXHR.responseText);
+			errorMessage(jqXHR.responseText
+					+(jqXHR.status==403?" (invalid session?)":"")
+					);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
@@ -152,7 +154,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnValidate');
 			console.log(jqXHR);
-			errorMessage(jqXHR.responseText);
+			errorMessage(jqXHR.responseText
+					+(jqXHR.status==403?" (invalid session?)":"")
+					);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
@@ -208,7 +212,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnSave');
 			console.log(jqXHR);
-			errorMessage('error saving query: '+jqXHR.responseText);
+			errorMessage('error saving query: '+jqXHR.responseText
+					+(jqXHR.status==403?" (invalid session?)":"")
+					);
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
@@ -234,7 +240,9 @@ modelId = SchemaModelUtils.getModelId(request);
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			console.log(jqXHR);
-			errorMessage('error removing query: '+jqXHR.responseText);
+			errorMessage('error removing query: '+jqXHR.responseText
+					+(jqXHR.status==403?" (invalid session?)":"")
+					);
 		});
 	}
 	
