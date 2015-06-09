@@ -113,60 +113,9 @@ public class ShiroUtils {
 	public static void setUserRoles(Object principal, Set<String> roles) {
 		userRoles.put(principal, roles);
 	}
-	
-	/*static Set<String> oldGetSubjectRoles(Subject subject) {
-		
-		Set<String> roles = new HashSet<String>();
-		Object principal = subject.getPrincipal();
-		if(principal==null) {
-			return roles;
-		}
-		org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
-		
-		if(sm instanceof RealmSecurityManager) {
-			RealmSecurityManager rsm = (RealmSecurityManager) sm;
-			Collection<Realm> rs = rsm.getRealms();
-			if(rs!=null) {
-				log.info("#realms = "+rs.size());
-				for(Realm r: rs) {
-					if(r instanceof AuthorizingRealm) {
-						log.info("authorizing realm:: "+r.getName()+" / "+r.getClass().getSimpleName());
-						AuthorizingRealm ar = (AuthorizingRealm) r;
-						//ar.doGetAuthorizationInfo(currentUser.getPrincipals());
-						//ar.getAuthorizationInfo(pc);
-						
-						Cache<Object, AuthorizationInfo> cache = ar.getAuthorizationCache();
-						if(cache!=null) {
-							log.info("cache:: "+cache+" "+principal+" "+principal.getClass());
-							AuthorizationInfo ai = cache.get(principal);
-							if(ai!=null) {
-								log.info("AuthorizationInfo:: "+ai);
-								Collection<String> cr = ai.getRoles();
-								if(cr!=null) {
-									log.info("roles:: "+cr);
-									roles.addAll(cr);
-								}
-							}
-							else {
-								log.info("cache-keys:: "+cache.keys());
-							}
-							/*Set<Object> cacheKeys = cache.keys();
-							if(cacheKeys!=null) {
-								for(Object key: cacheKeys) {
-									AuthorizationInfo ai = cache.get(key);
-									//out.write("<ul><li>roles:: "+ai.getRoles()+"</li>");
-									Collection<String> cr = ai.getRoles();
-									if(cr!=null) {
-										roles.addAll(cr);
-									}
-								}
-							}* /
-						}
-					}
-				}
-			}
-		}
-		return roles;
-	}*/
+
+	public static void resetUserRoles(Object principal) {
+		userRoles.remove(principal);
+	}
 	
 }

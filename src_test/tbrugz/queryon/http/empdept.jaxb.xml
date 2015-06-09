@@ -85,6 +85,11 @@
             <privilege>UPDATE</privilege>
             <table>EMP</table>
         </grants>
+        <grants>
+            <grantee>test</grantee>
+            <privilege>DELETE</privilege>
+            <table>EMP</table>
+        </grants>
         <remarks></remarks>
         <type>TABLE</type>
     </table>

@@ -49,6 +49,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;
+	static String workDir = "work/test/";
 	
 	@BeforeClass
 	public static void setup() throws IOException, ParserConfigurationException {
@@ -504,6 +505,39 @@ public class WinstoneAndH2HttpRequestTest {
 		Document doc = dBuilder.parse(instream);
 		NodeList nl = doc.getElementsByTagName("table");
 		Assert.assertEquals(2, countNodesWithParentTagName(nl, "schemaModel"));
+	}
+
+	@Test
+	public void testDelete_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpDelete httpDelete = new HttpDelete(baseUrl+"/DEPT/1");
+		HttpResponse response2 = httpclient.execute(httpDelete);
+		System.out.println("content: "+getContent(response2));
+		Assert.assertEquals("Must be Forbidden (403)", 403, response2.getStatusLine().getStatusCode());
+		httpDelete.releaseConnection();
+	}
+
+	@Test
+	public void testPost_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(baseUrl+"/DEPT?v:ID=3&v:NAME=Accounting&PARENT_ID=0");
+		
+		HttpResponse response1 = httpclient.execute(httpPost);
+		
+		Assert.assertEquals("Must be Forbidden (403)", 403, response1.getStatusLine().getStatusCode());
+		httpPost.releaseConnection();
+	}
+	
+	@Test
+	public void testPut_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&method=PUT");
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+		System.out.println("content: "+getContent(response1));
+
+		Assert.assertEquals("Must be Forbidden (403)", 403, response1.getStatusLine().getStatusCode());
+		httpPut.releaseConnection();
 	}
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------
