@@ -496,7 +496,7 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case DELETE: {
-				doDelete((Relation) dbobj, reqspec, resp);
+				doDelete((Relation) dbobj, reqspec, currentUser, resp);
 				}
 				break;
 			case STATUS:
@@ -869,7 +869,7 @@ public class QueryOn extends HttpServlet {
 		return rs;
 	}
 	
-	void doDelete(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
+	void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 		SQL sql = SQL.createDeleteSQL(relation);
@@ -883,6 +883,14 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		bindParameters(st, sql);
 
+		// roles permission
+		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
+		List<Grant> deleteGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.DELETE);
+		boolean hasRelationDeletePermission = QOnModelUtils.hasPermissionWithoutColumn(deleteGrants, roles);
+		if(!hasRelationDeletePermission) {
+			throw new ForbiddenException("no delete permission on relation: "+relation.getName());
+		}
+		
 		log.info("sql delete: "+sql);
 		
 		int count = st.executeUpdate();
