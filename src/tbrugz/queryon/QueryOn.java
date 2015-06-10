@@ -2,6 +2,7 @@ package tbrugz.queryon;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -167,6 +168,8 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
 	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
+
+	static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
 	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
@@ -199,6 +202,7 @@ public class QueryOn extends HttpServlet {
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	boolean validateFilterColumnNames = true;
+	boolean xSetRequestUtf8 = false;
 	
 	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY+":"+ActionType.SELECT_ANY.name();
 	
@@ -252,6 +256,8 @@ public class QueryOn extends HttpServlet {
 			
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
+			
+			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
 			
 			context.setAttribute(ATTR_PROP, prop);
 			
@@ -360,6 +366,14 @@ public class QueryOn extends HttpServlet {
 	
 	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
+		
+		if(xSetRequestUtf8) {
+			try {
+				req.setCharacterEncoding("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				log.warn("error setCharacterEncoding: "+e.getMessage(), e);
+			}
+		}
 		
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
@@ -573,6 +587,7 @@ public class QueryOn extends HttpServlet {
 		doGet(req, resp);
 	}
 	
+	// XXX should use RequestSpec for parameters?
 	Query getQuery(HttpServletRequest req) {
 		Query relation = new Query();
 		String name = req.getParameter("name");
