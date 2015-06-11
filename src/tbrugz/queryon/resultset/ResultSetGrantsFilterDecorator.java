@@ -18,15 +18,17 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 
 	final Set<String> roles;
 	final PrivilegeType privilege;
+	final String idColumn;
 	final String grantsColumn;
-	final int maxCol;
+	//final int maxCol;
 	
-	public ResultSetGrantsFilterDecorator(ResultSet rs, Set<String> roles, PrivilegeType privilege, String grantsColumn) throws SQLException {
+	public ResultSetGrantsFilterDecorator(ResultSet rs, Set<String> roles, PrivilegeType privilege, String idColumn, String grantsColumn) throws SQLException {
 		super(rs);
 		this.roles = roles;
 		this.privilege = privilege;
+		this.idColumn = idColumn;
 		this.grantsColumn = grantsColumn;
-		maxCol = rs.getMetaData().getColumnCount();
+		//maxCol = rs.getMetaData().getColumnCount();
 	}
 
 	@Override

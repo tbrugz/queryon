@@ -204,7 +204,7 @@ public class QueryOn extends HttpServlet {
 	boolean validateFilterColumnNames = true;
 	boolean xSetRequestUtf8 = false;
 	
-	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY+":"+ActionType.SELECT_ANY.name();
+	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -809,7 +809,7 @@ public class QueryOn extends HttpServlet {
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"?
-	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"columnNames", "columnTypes", "constraints", "remarks", "relationType", "grants"});
+	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "constraints", "remarks", "grants"});
 	
 	static final List<String> tableAllColumns;// =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "PKConstraint"});
 	static final List<String> viewAllColumns;//  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
@@ -875,11 +875,11 @@ public class QueryOn extends HttpServlet {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
 		if(doFilterStatusByPermission) {
-			// filter by [object-type]:SELECT:[schema]:[name]
-			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[6]:"+privilege+":[1]:[2]");
+			// filter by [relationType]:SELECT:[schemaName]:[name]
+			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[3]:"+privilege+":[1]:[2]");
 		}
 		if(doFilterStatusByQueryGrants && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) {
-			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getSubjectRoles(currentUser), privilege, "grants");
+			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getSubjectRoles(currentUser), privilege, "name", "grants");
 		}
 		return rs;
 	}
