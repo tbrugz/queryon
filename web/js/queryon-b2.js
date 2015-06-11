@@ -1,7 +1,7 @@
 
 /* globals */
 
-var queryOnUrl = '/queryon/q';
+var queryOnUrl = 'q';
 var qonEditorUrl = 'qon-editor.jsp';
 var authInfo = {
 		// similar to 'auth/info.jsp'
