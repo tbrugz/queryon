@@ -222,13 +222,40 @@ public class RequestSpec {
 			params.add(value);
 		}
 		
+		//Enumeration<String> en = (Enumeration<String>) req.getParameterNames();
+		//while(en.hasMoreElements()) {
+		//	String key = en.nextElement();
+		//	String[] value = req.getParameterValues(key);
+			
 		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
-		
-		//List<Filter> filters = new ArrayList<Filter>();
-		//Filter fnin = new Filter("fnin", true, filterNotIn);
-		//filters.add(fnin);
-		
+		for(Map.Entry<String,String[]> entry: params.entrySet()) {
+			String key = entry.getKey();
+			String[] value = entry.getValue();
+			
+			try {
+				
+				setUniParam("feq:", key, value, filterEquals);
+				setUniParam("fne:", key, value, filterNotEquals);
+				setUniParam("fgt:", key, value, filterGreaterThan);
+				setUniParam("fge:", key, value, filterGreaterOrEqual);
+				setUniParam("flt:", key, value, filterLessThan);
+				setUniParam("fle:", key, value, filterLessOrEqual);
+				
+				setMultiParam("fin:", key, value, filterIn);
+				setMultiParam("fnin:", key, value, filterNotIn);
+				setMultiParam("flk:", key, value, filterLike);
+				setMultiParam("fnlk:", key, value, filterNotLike);
+				
+				setUniParam("v:", key, value, updateValues);
+			}
+			catch(RuntimeException e) {
+				//log.warn("encoding error [e: "+entry+"]: "+e);
+				log.warn("setParam exception [k:"+key+"; v:"+value+"]: "+e);
+			}
+		}
+			
+		/*
 		for(String param: params.keySet()) {
 			if(param.startsWith("feq:")) {
 				String col = param.substring(4);
@@ -282,6 +309,7 @@ public class RequestSpec {
 				String[] values = params.get(param);
 				filterNotLike.put(col, values);
 			}
+			
 			else if(param.startsWith("v:")) {
 				String col = param.substring(2);
 				String value = params.get(param)[0];
@@ -293,12 +321,46 @@ public class RequestSpec {
 						
 					}
 				}
-			}*/
+			}* /
+			else {
+				//log.info("param "+param+" : "+params.get(param)[0]);
+			}
 
 			//XXX: warn unknown parameters
 		}
+		*/
 	}
 	
+	boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
+		//String key = entry.getKey();
+		//String[] value = entry.getValue();
+		if(key.startsWith(prefix)) {
+			String col = key.substring(prefix.length());
+			//String value1 = values[0];
+			//String value2 = URLDecoder.decode(value1, "UTF-8");
+			//String value2 = value1;
+			uniFilter.put(col, values[0]);
+			//log.info("setUniParam: old="+value+" ; new="+value2);
+			return true;
+		}
+		return false;
+	}
+
+	boolean setMultiParam(String prefix, String key, String[] values, Map<String, String[]> multiFilter) {
+		if(key.startsWith(prefix)) {
+			String col = key.substring(prefix.length());
+			//String[] value1 = value;
+			//for(int i=0;i<values.length;i++) {
+				//String value2 = URLDecoder.decode(value[i], "UTF-8");
+				//String value2 = values[i];
+				//log.info("setMultiParam: old="+value[i]+" ; new="+value2); 
+				//values[i] = value2;
+			//}
+			multiFilter.put(col, values);
+			return true;
+		}
+		return false;
+	}
 	
 	/*
 	 * reconstructs URL pased on RequestSpec
