@@ -170,9 +170,13 @@ function closeDialogs() {
 	if(bhvalues!=null) {
 		$('#fin-value').typeahead('destroy');
 	}
-	document.getElementById('dialog').innerHTML = '';
-	document.getElementById('dialog').style.display = 'none';
-	document.getElementById('update-dialog').innerHTML = '';
-	document.getElementById('update-dialog').style.display = 'none';
+	var components = ['dialog', 'update-dialog'];
+	for(var i=0;i<components.length;i++) {
+		var elem = document.getElementById(components[i]);
+		if(elem) {
+			elem.innerHTML = '';
+			elem.style.display = 'none';
+		}
+	}
 	document.getElementById('dialog-container').style.display = 'none';
 }

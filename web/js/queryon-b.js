@@ -229,6 +229,7 @@ function getQueryVariable(variable) {
 
 function getColumnsFromRelation(relation) {
 	var colsStr = relation.columnNames;
+	if(! colsStr) { return null; }
 	var cols = colsStr.split(",");
 
 	for(var i=cols.length-1;i>=0;i--) {

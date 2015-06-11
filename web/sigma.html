@@ -133,7 +133,7 @@ body {
 		
 		function validGraphRelation(relation) {
 			var cols = getColumnsFromRelation(relation);
-			if(cols.indexOf("SOURCE")>=0 && cols.indexOf("TARGET")>=0) {
+			if(cols && cols.indexOf("SOURCE")>=0 && cols.indexOf("TARGET")>=0) {
 				return true;
 			}
 			return false;
