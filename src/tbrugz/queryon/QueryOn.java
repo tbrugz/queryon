@@ -369,6 +369,8 @@ public class QueryOn extends HttpServlet {
 		
 		if(xSetRequestUtf8) {
 			try {
+				String origCharset = req.getCharacterEncoding();
+				log.info("setting request encoding UTF-8 [was: "+origCharset+"]");
 				req.setCharacterEncoding("UTF-8");
 			} catch (UnsupportedEncodingException e) {
 				log.warn("error setCharacterEncoding: "+e.getMessage(), e);
