@@ -126,7 +126,7 @@ public class ResultSetDecoratorsTest {
 		l1.add(b1); l1.add(b2); l1.add(b3); l1.add(b4);
 		
 		baseRS = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
-		ResultSet rs = new ResultSetGrantsFilterDecorator(baseRS, roles, PrivilegeType.SELECT, "category");
+		ResultSet rs = new ResultSetGrantsFilterDecorator(baseRS, roles, PrivilegeType.SELECT, "description", "category");
 		int countRows = 0;
 		while(rs.next()) {
 			countRows++;
