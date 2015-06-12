@@ -876,6 +876,8 @@ public class QueryOn extends HttpServlet {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
+		//log.info("doFilterStatusByQueryGrants: "+doFilterStatusByPermission+" / "+doFilterStatusByQueryGrants+" / "
+		//		+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)+":"+doNotCheckGrantsPermission);
 		if(doFilterStatusByPermission) {
 			// filter by [relationType]:SELECT:[schemaName]:[name]
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[3]:"+privilege+":[1]:[2]");

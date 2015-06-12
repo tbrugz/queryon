@@ -56,11 +56,9 @@ public class ShiroUtils {
 			object = object.replaceAll("\\.", ":");
 			permission += ":"+object;
 		}
-		//log.info("checking permission '"+permission+"', subject = "+subject);
-		return subject.isPermitted(permission);
-		/*else {
-			log.info("checked permission '"+permission+"' OK, subject = "+subject+" ; "+subject.getPrincipal());
-		}*/
+		boolean permitted =  subject.isPermitted(permission);
+		//log.info("checking permission '"+permission+"', subject = "+subject.getPrincipal()+" :: "+permitted);
+		return permitted;
 	}
 
 	public static void checkPermissionAny(Subject subject, String[] permissionList) {

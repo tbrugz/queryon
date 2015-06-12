@@ -33,17 +33,22 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 
 	@Override
 	boolean matchesValues() throws SQLException {
+		//String id = rs.getString(idColumn);
 		String grantsStr = rs.getString(grantsColumn);
-		if(grantsStr==null || grantsStr.length()<2) { return true; }
+		if(grantsStr==null || grantsStr.length()<2) {
+			//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]:: true [1]");
+			return true;
+		}
 		grantsStr = grantsStr.substring(1, grantsStr.length()-1); //removing array braquets "[]"
 		
 		List<String> grants = Utils.getStringList(grantsStr, ",");
-		//log.info("RSGrantsFilter:matchesValues:: "+grantsStr+" [roles:"+roles+"]");
+		//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]");
 		//XXX: what if columns does not exists???
 		if(grants==null || grants.size()==0 || (grants.size()==1 && grants.get(0).equals("")) ) {
+			//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]:: true [2]");
 			return true;
 		}
-		//log.info("grants.size(): "+grants.size()+" ;; "+grants); 
+		//log.info("grants.size() ["+id+"]: "+grants.size()+" ;; "+grants); 
 		
 		boolean containsRowWithPrivilege = false; //if row has no privilege of 'this.privilege' type, it should match (not restricted)
 		for(int i=0;i<grants.size();i++) {
@@ -54,10 +59,13 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 				containsRowWithPrivilege = true;
 			}
 			if(roles.contains(gr.getGrantee()) && privilege.equals(gr.getPrivilege())) {
+				//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]:: true [ok]");
 				return true;
 			}
 		}
-		return containsRowWithPrivilege?false:true;
+		boolean ret = containsRowWithPrivilege?false:true;
+		//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]:: "+ret);
+		return ret;
 	}
 
 }
