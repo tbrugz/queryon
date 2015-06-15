@@ -42,6 +42,8 @@ import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
 import tbrugz.queryon.sqlcmd.ShowColumns;
+import tbrugz.queryon.sqlcmd.ShowExportedKeys;
+import tbrugz.queryon.sqlcmd.ShowImportedKeys;
 import tbrugz.queryon.sqlcmd.ShowSchemas;
 import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.queryon.util.QOnModelUtils;
@@ -1394,10 +1396,10 @@ public class QueryOn extends HttpServlet {
 	 * - \d+ <table> //postgresql
 	 * - !dbinfo ; !describe ; !tables ; !columns <table> ; !exportedkeys ; !importedkeys ; !indexes ; !metadata ; !primarykeys, !procedures ; // sqlline - http://sqlline.sourceforge.net/
 	 * - $showtables [<xxx>] ; $showcolumns <xxx> ; $tables [<xxx>] ; $columns <xxx> ; $schemas
-	 * 
-	 * TODO: getCatalogs()? exportedkeys, importedkeys, indexes, primarykeys
+	 * x exportedkeys, x importedkeys 
+	 * TODO: getCatalogs()? indexes, primarykeys
 	 */
-	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowSchemas(), new ShowTables(), new ShowColumns() };
+	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowSchemas(), new ShowTables(), new ShowColumns(), new ShowImportedKeys(), new ShowExportedKeys() };
 	
 	boolean trySqlCommand(Query relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		String sql = relation.getQuery();
