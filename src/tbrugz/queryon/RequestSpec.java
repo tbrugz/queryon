@@ -77,6 +77,13 @@ public class RequestSpec {
 	final List<String> orderCols = new ArrayList<String>();
 	final List<String> orderAscDesc = new ArrayList<String>();
 	
+	// blob/download fields
+	final String uniValueCol;
+	final String uniValueMimetype;
+	final String uniValueMimetypeCol;
+	final String uniValueFilename;
+	final String uniValueFilenameCol;
+	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
 		this.request = req;
 		String method = req.getParameter("method");
@@ -222,11 +229,17 @@ public class RequestSpec {
 			params.add(value);
 		}
 		
+		uniValueCol = req.getParameter("valuefield");
+		uniValueMimetype = req.getParameter("mimetype");
+		uniValueMimetypeCol = req.getParameter("mimefield");
+		uniValueFilename = req.getParameter("filename");
+		uniValueFilenameCol = req.getParameter("filenamefield");
+		
 		//Enumeration<String> en = (Enumeration<String>) req.getParameterNames();
 		//while(en.hasMoreElements()) {
 		//	String key = en.nextElement();
 		//	String[] value = req.getParameterValues(key);
-			
+		
 		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
 		for(Map.Entry<String,String[]> entry: params.entrySet()) {

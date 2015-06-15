@@ -2,6 +2,7 @@ package tbrugz.queryon;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.sql.CallableStatement;
@@ -9,6 +10,7 @@ import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +69,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -677,7 +680,12 @@ public class QueryOn extends HttpServlet {
 			reqspec.request.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
 		}
 		
-		dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp);
+		if(reqspec.uniValueCol!=null) {
+			dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
+		}
+		else {
+			dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp);
+		}
 		
 		}
 		catch(SQLException e) {
@@ -1309,6 +1317,72 @@ public class QueryOn extends HttpServlet {
 			count++;
 		}
 		ds.dumpFooter(count, resp.getWriter());
+	}
+	
+	static void dumpBlob(ResultSet rs, RequestSpec reqspec, String queryName,
+			boolean mayApplyLimitOffset, HttpServletResponse resp) 
+			throws SQLException, IOException {
+		if(mayApplyLimitOffset) {
+			rs = new ResultSetLimitOffsetDecorator(rs, reqspec.limit, reqspec.offset);
+		}
+		
+		ResultSetMetaData rsmd = rs.getMetaData();
+		/*if(rsmd.getColumnCount()!=1) {
+			throw new BadRequestException("ResultSet has more than 1 column ["+queryName+"; #="+rsmd.getColumnCount()+"]");
+		}*/
+		List<String> cols = DataDumpUtils.getColumnNames(rsmd);
+		if(!cols.contains(reqspec.uniValueCol)) {
+			throw new BadRequestException("Data column '"+reqspec.uniValueCol+"' not found");
+		}
+		
+		//XXX: get mimetype from column type (BLOB=application/octet-stream, CLOB=text/plain, ...) ? http://www.rfc-editor.org/rfc/rfc2046.txt
+		String mimeType = "text/plain";
+		String filename = null;
+		
+		if(reqspec.uniValueMimetypeCol!=null && !cols.contains(reqspec.uniValueMimetypeCol)) {
+			throw new BadRequestException("Type column '"+reqspec.uniValueMimetypeCol+"' not found");
+		}
+		if(reqspec.uniValueMimetype!=null) {
+			mimeType = reqspec.uniValueMimetype;
+		}
+		//mimeType = reqspec.outputSyntax.getMimeType();
+		
+		if(reqspec.uniValueFilenameCol!=null && !cols.contains(reqspec.uniValueFilenameCol)) {
+			throw new BadRequestException("Filename column '"+reqspec.uniValueFilenameCol+"' not found");
+		}
+		if(reqspec.uniValueFilename!=null) {
+			filename = reqspec.uniValueFilename;
+		}
+		
+		if(rs.next()) {
+			if(reqspec.uniValueMimetypeCol!=null) {
+				mimeType = rs.getString(reqspec.uniValueMimetypeCol);
+			}
+			resp.addHeader("Content-Type", mimeType);
+			if(reqspec.uniValueFilenameCol!=null) {
+				filename = rs.getString(reqspec.uniValueFilenameCol);
+			}
+			if(filename!=null) {
+				resp.addHeader("Content-Disposition", "attachment; filename=" + filename);
+			}
+			InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
+			if(is!=null) {
+				IOUtil.pipeStreams(is, resp.getOutputStream());
+				is.close();
+			}
+			else {
+				// null return: null
+				//throw new BadRequestException("Null stream [column="+reqspec.uniValueCol+"]");
+			}
+		}
+		else {
+			throw new BadRequestException("ResultSet has no rows ["+queryName+"]");
+		}
+		
+		if(rs.next()) {
+			log.warn("more than 1 row, response may already be committed [query="+queryName+"]");
+			throw new BadRequestException("ResultSet has more than 1 row ["+queryName+"]");
+		}
 	}
 	
 	/*
