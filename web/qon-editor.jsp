@@ -143,6 +143,10 @@ modelId = SchemaModelUtils.getModelId(request);
 			//var container = document.getElementById('sqlparams');
 			setParameters(data);
 			makeHrefs();
+			
+			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
+			$("#queryResult").append(data);
+			
 			if(usingSelected) {
 				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully validated');
 			}

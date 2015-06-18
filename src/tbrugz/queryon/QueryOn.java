@@ -40,6 +40,7 @@ import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
+import tbrugz.queryon.resultset.ResultSetMetadata2RsAdapter;
 import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
 import tbrugz.queryon.sqlcmd.ShowColumns;
 import tbrugz.queryon.sqlcmd.ShowExportedKeys;
@@ -718,11 +719,19 @@ public class QueryOn extends HttpServlet {
 			log.info("doValidate: #params="+params);
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
-				stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
+				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
+				// dumping ResultSetMetaData as a ResultSet ;)
+				ResultSet rs = new ResultSetMetadata2RsAdapter(rsmd);
+				dumpResultSet(rs, reqspec, relation.getName(),
+						null, //pk!=null?pk.getUniqueColumns():null,
+						null, null, //fks, uks,
+						false, //applyLimitOffsetInResultSet,
+						resp);
 			}
-
-			//XXX: return number of bind parameters? return as ResultSet?
-			resp.getWriter().write(String.valueOf(params));
+			else {
+				//XXX: return number of bind parameters? return as ResultSet?
+				resp.getWriter().write(String.valueOf(params));
+			}
 		}
 		catch(SQLException e) {
 			log.info("doValidate: error validating: "+e);
