@@ -177,9 +177,11 @@ function setParameters(parametersId, numparams) {
 
 function setParametersValues(values) {
 	var params = document.querySelectorAll('.parameter');
-	console.log('setParametersValues: ',params);
+	console.log('setParametersValues: ', params, values);
 	for(var i=0;i<params.length;i++) {
-		params[i].value = values[i];
+		if(values.length>i) {
+			params[i].value = values[i];
+		}
 	}
 }
 

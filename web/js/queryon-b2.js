@@ -99,41 +99,42 @@ function makeHrefs() {
 
 	var select = document.getElementById('objects');
 	var id = select.options[select.selectedIndex].value;
-	if(id=="") {
+	if(!id) {
 		urled && (urled.style.display = 'none');
 		urlpl && (urlpl.style.display = 'none');
 		urldown && (urldown.style.display = 'none');
-		return;
+		//return;
 	}
-	
-	if(authInfo.isAdmin && urled) {
-		if(relationsHash[id].relationType=="query") {
-			urled.style.display = 'initial';
-			var name = id;
-			urled.href = qonEditorUrl+"?";
-			var parts = id.split('.');
-			if(parts.length>1) {
-				urled.href += "schema="+parts[0]+"&name="+parts[1];
+	else {
+		if(authInfo.isAdmin && urled) {
+			if(relationsHash[id].relationType=="query") {
+				urled.style.display = 'initial';
+				var name = id;
+				urled.href = qonEditorUrl+"?";
+				var parts = id.split('.');
+				if(parts.length>1) {
+					urled.href += "schema="+parts[0]+"&name="+parts[1];
+				}
+				else {
+					urled.href += "name="+parts[0];
+				}
 			}
 			else {
-				urled.href += "name="+parts[0];
+				urled.style.display = 'none';
 			}
 		}
-		else {
-			urled.style.display = 'none';
+
+		if(urlpl) {
+			urlpl.style.display = 'initial';
+			urlpl.href = queryOnUrl+"/"+id;
+			urlpl.href += getParameters()+".htmlx";
 		}
-	}
-
-	if(urlpl) {
-		urlpl.style.display = 'initial';
-		urlpl.href = queryOnUrl+"/"+id;
-		urlpl.href += getParameters()+".htmlx";
-	}
-
-	if(urldown) {
-		urldown.style.display = 'initial';
-		urldown.href = queryOnUrl+"/"+id;
-		urldown.href += getParameters()+".csv";
+	
+		if(urldown) {
+			urldown.style.display = 'initial';
+			urldown.href = queryOnUrl+"/"+id;
+			urldown.href += getParameters()+".csv";
+		}
 	}
 	
 	//var queryString = '';
@@ -162,11 +163,10 @@ function makeHrefs() {
 			urldown.href = append2url(urldown.href, 'order='+order);
 		}
 	}
-	//console.log('queryString: '+queryString);
-
-	//console.log('urlpl.href: '+urlpl.href);
-
-	//console.log('urldown.href: '+urldown.href);
+	
+	//console.log('urlpl.href: ',urlpl.href);
+	//console.log('urldown.href: ',urldown.href);
+	
 	updateUI();
 	refreshAuthInfo();
 }
@@ -186,7 +186,7 @@ function loadAuthInfo() {
 				info.isAdmin = false;
 			}
 			authInfo = info;
-			refreshAuthInfo();
+			makeHrefs();
 		}
 	});
 }

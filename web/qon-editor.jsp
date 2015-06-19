@@ -153,6 +153,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			else {
 				infoMessage('query '+document.getElementById('name').value+' sucessfully validated');
 			}
+			updateUI();
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -332,10 +333,12 @@ modelId = SchemaModelUtils.getModelId(request);
 	
 	function closeMessages(elemId) {
 		document.getElementById(elemId).innerHTML = '';
+		updateUI();
 	}
 	
 	function closeResults() {
 		document.getElementById("queryResult").innerHTML = "";
+		updateUI();
 	}
 	
 	function makeHrefs() {
