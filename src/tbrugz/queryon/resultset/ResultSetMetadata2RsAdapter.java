@@ -14,11 +14,17 @@ import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
  * http://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html#getColumns(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String)
  * http://docs.oracle.com/javase/7/docs/api/java/sql/ResultSetMetaData.html
  * 
-x TABLE_CAT String => table catalog (may be null)
-x TABLE_SCHEM String => table schema (may be null)
-x TABLE_NAME String => table name
+x! TABLE_CAT String => table catalog (may be null)
+  getCatalogName(int column)
+x! TABLE_SCHEM String => table schema (may be null)
+  getSchemaName(int column)
+x! TABLE_NAME String => table name
+  getTableName(int column)
 ! COLUMN_NAME String => column name
   getColumnName(int column)
+->  "COLUMN_LABEL", "CLASS_NAME"
+  getColumnLabel()
+  getColumnClassName()
 ! DATA_TYPE int => SQL type from java.sql.Types
   getColumnType(int column)
 ! TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
@@ -56,11 +62,30 @@ x IS_GENERATEDCOLUMN String => Indicates whether this is a generated column
   .YES --- if this a generated column
   .NO --- if this not a generated column
   .empty string --- if it cannot be determined whether this is a generated column
+
+  XXX: other ResultSetMetaData's methods ?
+    getColumnDisplaySize(int column)
+    isAutoIncrement(int column)
+    isCaseSensitive(int column)
+    isReadOnly(int column)
+    isSearchable(int column)
+    isSigned(int column)
+    isWritable(int column)
  */
 public class ResultSetMetadata2RsAdapter extends AbstractResultSet {
 
-	static final String[] columns = {"COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "DECIMAL_DIGITS", "NULLABLE", "ORDINAL_POSITION" };
-	static final Integer[] colTypes = {Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER /*NULLABLE ?*/, Types.INTEGER };
+	//private static final Log log = LogFactory.getLog(ResultSetMetadata2RsAdapter.class);
+	
+	static final String[] columns = {
+		"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME", "COLUMN_LABEL",
+		"CLASS_NAME", "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "DECIMAL_DIGITS",
+		"NULLABLE", "ORDINAL_POSITION"
+		};
+	static final Integer[] colTypes = {
+		Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+		Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
+		Types.INTEGER /*NULLABLE ?*/, Types.INTEGER
+		};
 	static final List<String> columnsList = Arrays.asList(columns);
 	
 	final ResultSetMetaData rsmd;
@@ -69,10 +94,15 @@ public class ResultSetMetadata2RsAdapter extends AbstractResultSet {
 
 	int position = -1;
 	
+	/*
+	 * XXX option to show or not "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME"
+	 * XXX option to show or not "CLASS_NAME"
+	 */
 	public ResultSetMetadata2RsAdapter(ResultSetMetaData rsmd) throws SQLException {
 		this.rsmd = rsmd;
 		rowCount = rsmd.getColumnCount();
 		metadata = new RSMetaDataTypedAdapter(null, null, columnsList, Arrays.asList(colTypes));
+		//log.debug("cols["+columnsList.size()+"]: "+columnsList+" ; types["+colTypes.length+"]: "+ Arrays.asList(colTypes)+""); 
 	}
 	
 	int getRowCount() {
@@ -147,24 +177,37 @@ public class ResultSetMetadata2RsAdapter extends AbstractResultSet {
 	
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		//{"COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "DECIMAL_DIGITS", "NULLABLE", "ORDINAL_POSITION" };
+		//"TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME", "COLUMN_LABEL",
+		//"CLASS_NAME", "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "DECIMAL_DIGITS",
+		//"NULLABLE", "ORDINAL_POSITION"
+
 		switch (columnIndex) {
 		case 1:
-			return rsmd.getColumnName(position+1);
+			return rsmd.getCatalogName(position+1);
 		case 2:
-			return rsmd.getColumnType(position+1);
+			return rsmd.getSchemaName(position+1);
 		case 3:
-			return rsmd.getColumnTypeName(position+1);
+			return rsmd.getTableName(position+1);
 		case 4:
-			return rsmd.getPrecision(position+1);
+			return rsmd.getColumnName(position+1);
 		case 5:
-			return rsmd.getScale(position+1);
+			return rsmd.getColumnLabel(position+1);
 		case 6:
-			return rsmd.isNullable(position+1);
+			return rsmd.getColumnClassName(position+1);
 		case 7:
+			return rsmd.getColumnType(position+1);
+		case 8:
+			return rsmd.getColumnTypeName(position+1);
+		case 9:
+			return rsmd.getPrecision(position+1);
+		case 10:
+			return rsmd.getScale(position+1);
+		case 11:
+			return rsmd.isNullable(position+1);
+		case 12:
 			return position+1;
 		default:
-			return null; //XXX throw?
+			throw new IllegalArgumentException("column "+columnIndex+" does not exist");
 		}
 	}
 	
