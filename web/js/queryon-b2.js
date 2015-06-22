@@ -222,6 +222,10 @@ function getKeyValsForRow(rownum) {
 	var pk = getPkCols('objects');
 	var cols = getColumnsFromContainer('content');
 	console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
+	if(pk==null) {
+		console.log('relation has no PK');
+		return;
+	}
 	var idx = [];
 	for(var i=0;i<pk.length;i++) {
 		idx.push(cols.indexOf(pk[i]));
@@ -236,6 +240,7 @@ function getKeyValsForRow(rownum) {
 		if(filter) { filter += ', '; }
 		filter += pk[i]+" = "+vals[i];
 	}
+	
 	var valsKey = vals.join('/'); //XXX url encode ?
 	for(var i=0;i<cols.length;i++) {
 		allvals.push(tds[i].innerHTML);

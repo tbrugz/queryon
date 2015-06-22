@@ -34,7 +34,7 @@ public class SQL {
 	public static final String PARAM_ORDER_CLAUSE = "$order_clause";
 	//XXX add limit/offset-clause?
 
-	static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
+	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
 	
 	static boolean validateOrderColumnNames = true;
 	

@@ -98,6 +98,7 @@
 	
 	function doOpenUpdateDialog(rownum) {
 		var ret = getKeyValsForRow(rownum);
+		if(ret==null) { return; }
 		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		//XXX do this
 		
@@ -170,7 +171,8 @@
 	
 	function doConfirmUpdate(rownum, closeDialog) {
 		var ret = getKeyValsForRow(rownum);
-		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
+		//var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
+		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
 		
 		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
 				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
@@ -189,7 +191,13 @@
 			}
 		}
 		*/
+		
 		nv = getUpdateNewValues();
+		
+		//adding update PK values to request body
+		for(var i=0;i<ret.pkvals.length;i++) {
+			nv.postData['p'+(i+1)] = ret.pkvals[i];
+		}
 		
 		nv.postData['method'] = 'PUT';
 
