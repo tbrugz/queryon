@@ -91,7 +91,6 @@
 		//var rows = content.querySelectorAll('tr');
 		//var pk = getPkCols('objects');
 		var cols = getColumnsFromContainer('content');
-		//var ret = getKeyValsForRow(0);
 		doWriteUpdateDialog('Insert', null, null, null, cols, null);
 		closeMessages('messages');
 	}
@@ -149,6 +148,10 @@
 			+ "</div>";
 			
 		updateUI();
+		
+		// a bit hacky ;)
+		document.location = "#body";
+		updateState();
 	}
 	
 	function getUpdateNewValues() {
@@ -361,7 +364,7 @@
 	}
 	</style>
 </head>
-<body onload="onLoad();">
+<body onload="onLoad();" id="body">
 
 <div id="nav" class="navbar">
 	<span id="logo">QueryOn</span>
@@ -407,8 +410,9 @@
 <div id="dialog-container">
 	<div id="dialog">
 	</div>
-	<div id="update-dialog">
-	</div>
+</div>
+
+<div id="update-dialog">
 </div>
 
 <div id="status-container" class="status">
