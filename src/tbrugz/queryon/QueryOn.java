@@ -197,6 +197,8 @@ public class QueryOn extends HttpServlet {
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	
+	public static final String HEADER_VALIDATE_PARAMCOUNT = "X-Validate-ParameterCount";
+	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	//SchemaModel model;
@@ -717,6 +719,7 @@ public class QueryOn extends HttpServlet {
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
 			log.info("doValidate: #params="+params);
+			resp.setIntHeader(HEADER_VALIDATE_PARAMCOUNT, params);
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)

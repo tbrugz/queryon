@@ -137,11 +137,12 @@ modelId = SchemaModelUtils.getModelId(request);
 		});
 		
 		btnActionStart('btnValidate');
-		request.done(function(data) {
+		request.done(function(data, textStatus, jqXHR) {
 			btnActionStop('btnValidate');
-			console.log('#params = '+data);
+			var paramCount = jqXHR.getResponseHeader('X-Validate-ParameterCount');
+			console.log('#params = '+paramCount);
 			//var container = document.getElementById('sqlparams');
-			setParameters(data);
+			setParameters(paramCount);
 			makeHrefs();
 			
 			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
