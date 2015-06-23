@@ -15,6 +15,7 @@ create table qon_queries (
 create table qon_tables (
 	schema varchar(100),
 	name varchar(100) not null,
+	column_names varchar(400),
 	remarks varchar(400),
 	roles_select varchar(1000),
 	roles_insert varchar(1000),
@@ -41,6 +42,7 @@ create table qon_queries (
 create table qon_tables (
 	schema varchar2(100),
 	name varchar2(100) not null,
+	column_names varchar2(400),
 	remarks varchar2(400),
 	roles_select varchar2(1000),
 	roles_insert varchar2(1000),

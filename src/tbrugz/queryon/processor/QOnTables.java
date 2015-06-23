@@ -45,7 +45,7 @@ public class QOnTables extends AbstractSQLProc {
 	
 	void readFromDatabase() throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
-		String sql = "select schema, name, remarks"
+		String sql = "select schema, name, column_names, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable;
@@ -63,14 +63,16 @@ public class QOnTables extends AbstractSQLProc {
 		while(rs.next()) {
 			String schema = rs.getString(1);
 			String tableName = rs.getString(2);
-			String remarks = rs.getString(3);
-			String rolesSelectFilterStr = rs.getString(4);
-			String rolesInsertFilterStr = rs.getString(5);
-			String rolesUpdateFilterStr = rs.getString(6);
-			String rolesDeleteFilterStr = rs.getString(7);
-			String rolesInsertColumnsFilterStr = rs.getString(8);
-			String rolesUpdateColumnsFilterStr = rs.getString(9);
-			//XXX default_select_filter ; default_select_projection
+			String columnNames = rs.getString(3);
+			String remarks = rs.getString(4);
+			String rolesSelectFilterStr = rs.getString(5);
+			String rolesInsertFilterStr = rs.getString(6);
+			String rolesUpdateFilterStr = rs.getString(7);
+			String rolesDeleteFilterStr = rs.getString(8);
+			String rolesInsertColumnsFilterStr = rs.getString(9);
+			String rolesUpdateColumnsFilterStr = rs.getString(10);
+			//XXX default_select_filter
+			//XXXdone default_select_projection: column_names
 			
 			try {
 				String split = "\\|";
@@ -82,7 +84,7 @@ public class QOnTables extends AbstractSQLProc {
 				//List<String> rolesInsertCols = Utils.getStringList(rolesInsertColumnsFilterStr, "|");
 				//List<String> rolesUpdate = Utils.getStringList(rolesUpdateColumnsFilterStr, "|");
 				
-				count += addTable(schema, tableName, remarks,
+				count += addTable(schema, tableName, columnNames, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
 			}
@@ -94,14 +96,17 @@ public class QOnTables extends AbstractSQLProc {
 		log.info("QOn processed [added/replaced "+count+" tables]");
 	}
 
-	private int addTable(String schema, String tableName, String remarks,
+	private int addTable(String schema, String tableName, String columnNames, String remarks,
 			List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
 			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) throws SQLException {
 		Table t = new Table();
 		t.setSchemaName(schema);
 		t.setName(tableName);
 
-		PreparedStatement stmt = conn.prepareStatement("select * from "
+		if(columnNames==null) {
+			columnNames = "*";
+		}
+		PreparedStatement stmt = conn.prepareStatement("select "+columnNames+" from "
 				+ (schema!=null?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
 				);
