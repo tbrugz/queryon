@@ -1000,6 +1000,7 @@ public class QueryOn extends HttpServlet {
 			sb.append((i!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
 		}
+		//log.debug("bindpars [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
 
 		if("".equals(sb.toString())) {
 			throw new BadRequestException("No valid columns");
@@ -1177,6 +1178,11 @@ public class QueryOn extends HttpServlet {
 				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
 			}
 			else {
+				if(reqspec.params.size()>pk.getUniqueColumns().size()) {
+					log.warn("parameter count [#"+reqspec.params.size()+"] bigger than pk size [#"+pk.getUniqueColumns().size()+"]");
+					log.debug("parameters: "+reqspec.params);
+					//XXX throw BadRequest ?
+				}
 				for(int i=0;i<pk.getUniqueColumns().size();i++) {
 					if(reqspec.params.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
