@@ -224,7 +224,7 @@ function getKeyValsForRow(rownum) {
 	console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
 	if(pk==null) {
 		console.log('relation has no PK');
-		return;
+		return null;
 	}
 	var idx = [];
 	for(var i=0;i<pk.length;i++) {
@@ -242,6 +242,14 @@ function getKeyValsForRow(rownum) {
 	}
 	
 	var valsKey = vals.join('/'); //XXX url encode ?
+	/*
+	var valsKey = '';
+	for(var i=0; i<vals.length; i++) {
+		if(i!=0) { valsKey += "/"; }
+		valsKey += encodeURIComponent(vals[i]);
+	}
+	*/
+	
 	for(var i=0;i<cols.length;i++) {
 		allvals.push(tds[i].innerHTML);
 	}

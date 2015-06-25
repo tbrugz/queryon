@@ -97,7 +97,10 @@
 	
 	function doOpenUpdateDialog(rownum) {
 		var ret = getKeyValsForRow(rownum);
-		if(ret==null) { return; }
+		if(ret==null) {
+			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
+			return;
+		}
 		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		//XXX do this
 		
@@ -109,6 +112,7 @@
 		
 	function doWriteUpdateDialog(updateType, rownum, maxrownum, filter, cols, vals) {
 		console.log('doWriteUpdateDialog', updateType, rownum, maxrownum, filter, cols, vals);
+		//XXX: highlight current row...
 		//XXX: show/validate column types...
 		var dialogCont = document.getElementById('dialog-container');
 		dialogCont.style.display = 'block';
@@ -280,6 +284,11 @@
 	
 	function doRunDelete(rownum) {
 		var ret = getKeyValsForRow(rownum);
+		if(!ret) {
+			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
+			//alert("relation has no PK");
+			return;
+		}
 		console.log("key",ret.key,"filter",ret.filter);
 		//XXX create html confirm dialog, or show question in messages (warning style)
 		

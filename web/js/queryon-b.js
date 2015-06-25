@@ -230,6 +230,7 @@ function getQueryVariable(variable) {
 }
 
 function getColumnsFromRelation(relation) {
+	console.log("getColumnsFromRelation",relation);
 	var colsStr = relation.columnNames;
 	if(! colsStr) { return null; }
 	var cols = colsStr.split(",");
@@ -331,11 +332,17 @@ function doDelete(selectId, key, containerId, messagesId, callback, callbackErro
 	});
 }
 
+function getCurrentRelation(selectId) {
+	var select = document.getElementById(selectId);
+	var id = select.options[select.selectedIndex].value;
+	return relationsHash[id];
+}
+
 function getPkCols(selectId) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
 	var rel = relationsHash[id];
-	var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
+	var re = /\[[PU]K:[A-Za-z0-9_ ]*:([A-Za-z0-9_, ]+)\]/g;
 	var match = re.exec(rel.constraints);
 	var pkcols = null;
 	//while(match!=null) {
