@@ -16,6 +16,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.Utils;
 
@@ -45,7 +46,7 @@ public class QOnTables extends AbstractSQLProc {
 	
 	void readFromDatabase() throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
-		String sql = "select schema, name, column_names, remarks"
+		String sql = "select schema, name, column_names, pk_column_names, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable;
@@ -64,15 +65,18 @@ public class QOnTables extends AbstractSQLProc {
 			String schema = rs.getString(1);
 			String tableName = rs.getString(2);
 			String columnNames = rs.getString(3);
-			String remarks = rs.getString(4);
-			String rolesSelectFilterStr = rs.getString(5);
-			String rolesInsertFilterStr = rs.getString(6);
-			String rolesUpdateFilterStr = rs.getString(7);
-			String rolesDeleteFilterStr = rs.getString(8);
-			String rolesInsertColumnsFilterStr = rs.getString(9);
-			String rolesUpdateColumnsFilterStr = rs.getString(10);
+			String pkColumnNamesStr = rs.getString(4);
+			String remarks = rs.getString(5);
+			String rolesSelectFilterStr = rs.getString(6);
+			String rolesInsertFilterStr = rs.getString(7);
+			String rolesUpdateFilterStr = rs.getString(8);
+			String rolesDeleteFilterStr = rs.getString(9);
+			String rolesInsertColumnsFilterStr = rs.getString(10);
+			String rolesUpdateColumnsFilterStr = rs.getString(11);
 			//XXX default_select_filter
 			//XXXdone default_select_projection: column_names
+			
+			List<String> pkColumnNames = Utils.getStringList(pkColumnNamesStr, ",");
 			
 			try {
 				String split = "\\|";
@@ -80,11 +84,11 @@ public class QOnTables extends AbstractSQLProc {
 				List<String> rolesInsert = Utils.getStringList(rolesInsertFilterStr, split);
 				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, split);
 				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, split);
-
+				
 				//List<String> rolesInsertCols = Utils.getStringList(rolesInsertColumnsFilterStr, "|");
 				//List<String> rolesUpdate = Utils.getStringList(rolesUpdateColumnsFilterStr, "|");
 				
-				count += addTable(schema, tableName, columnNames, remarks,
+				count += addTable(schema, tableName, columnNames, pkColumnNames, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
 			}
@@ -96,12 +100,14 @@ public class QOnTables extends AbstractSQLProc {
 		log.info("QOn processed [added/replaced "+count+" tables]");
 	}
 
-	private int addTable(String schema, String tableName, String columnNames, String remarks,
+	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, String remarks,
 			List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
 			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) throws SQLException {
 		Table t = new Table();
 		t.setSchemaName(schema);
 		t.setName(tableName);
+		//XXX table type: what if it is a view? t.setType(TableType.VIEW); ?
+		//XXXdone option to add primary key (for tables/views that doesn't have them, or to setup a different PK for a table)
 
 		if(columnNames==null) {
 			columnNames = "*";
@@ -113,8 +119,16 @@ public class QOnTables extends AbstractSQLProc {
 		ResultSetMetaData rsmd = stmt.getMetaData();
 		t.setColumns(DataDumpUtils.getColumns(rsmd));
 		
-		List<Constraint> pks = JDBCSchemaGrabber.grabRelationPKs(conn.getMetaData(), t);
-		t.getConstraints().addAll(pks);
+		if(pkColumnNames!=null) {
+			Constraint pk = new Constraint();
+			pk.setType(ConstraintType.PK);
+			pk.setUniqueColumns(pkColumnNames);
+			t.getConstraints().add(pk);
+		}
+		else {
+			List<Constraint> pks = JDBCSchemaGrabber.grabRelationPKs(conn.getMetaData(), t);
+			t.getConstraints().addAll(pks);
+		}
 		//log.info("PKs: "+pks);
 		
 		List<Grant> grants = t.getGrants();
