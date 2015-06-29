@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,21 @@ public class QOnTables extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(QOnTables.class);
 	
+	public static class StringQuoterEscaperDecorator extends StringDecorator {
+		final String quote;
+		final String quotePtrn;
+		
+		public StringQuoterEscaperDecorator(String quote) {
+			this.quote = quote;
+			this.quotePtrn = Pattern.quote(quote);
+		}
+		
+		@Override
+		public String get(String str) {
+			return str==null?null:quote+str.replaceAll(quotePtrn, "")+quote;
+		}
+	}
+	
 	static final String PROP_PREFIX = "queryon.qon-tables";
 	
 	static final String SUFFIX_ACTION = ".action";
@@ -36,7 +52,7 @@ public class QOnTables extends AbstractSQLProc {
 	
 	static final String DEFAULT_TABLES_TABLE = "qon_tables";
 	
-	public static StringDecorator sqlStringValuesDecorator = new StringDecorator.StringQuoterDecorator("'"); //XXX should escape "'" inside strings...
+	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
 	
 	public void process() {
 		try {
