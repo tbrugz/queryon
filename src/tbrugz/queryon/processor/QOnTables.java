@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.SQL;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
@@ -18,6 +19,7 @@ import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class QOnTables extends AbstractSQLProc {
@@ -28,10 +30,13 @@ public class QOnTables extends AbstractSQLProc {
 	
 	static final String SUFFIX_ACTION = ".action";
 	static final String SUFFIX_TABLE = ".table";
+	static final String SUFFIX_TABLE_NAMES = ".names";
 
 	static final String ACTION_READ = "read";
 	
 	static final String DEFAULT_TABLES_TABLE = "qon_tables";
+	
+	public static StringDecorator sqlStringValuesDecorator = new StringDecorator.StringQuoterDecorator("'"); //XXX should escape "'" inside strings...
 	
 	public void process() {
 		try {
@@ -41,15 +46,18 @@ public class QOnTables extends AbstractSQLProc {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new BadRequestException("SQL exception: "+e);
 		}
 	}
 	
 	void readFromDatabase() throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		List<String> tables = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_TABLE_NAMES, ",");
 		String sql = "select schema, name, column_names, pk_column_names, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
-				+" from "+qonTablesTable;
+				+" from "+qonTablesTable
+				+(tables!=null?" where name in ("+Utils.join(tables, ",", sqlStringValuesDecorator)+")":"");
 		
 		ResultSet rs = null;
 		try {
@@ -97,7 +105,7 @@ public class QOnTables extends AbstractSQLProc {
 			}
 		}
 		
-		log.info("QOn processed [added/replaced "+count+" tables]");
+		log.info("QOnTables processed [added/replaced "+count+" tables]");
 	}
 
 	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, String remarks,
@@ -140,6 +148,9 @@ public class QOnTables extends AbstractSQLProc {
 		addColumnGrants(grants, tableName, PrivilegeType.INSERT, rolesInsertColumnsFilterStr);
 		addColumnGrants(grants, tableName, PrivilegeType.UPDATE, rolesUpdateColumnsFilterStr);
 		
+		if(model.getTables().contains(t)) {
+			model.getTables().remove(t);
+		}
 		return model.getTables().add(t)?1:0;
 	}
 	

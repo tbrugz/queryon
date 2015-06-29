@@ -256,6 +256,11 @@
 				//XXX update dialog-filter
 				
 				//if(callback) { callback(jqXHR); }
+				// run QOnTables processor
+				var rel = getCurrentRelation('objects');
+				if(rel.name=="QON_TABLES") { //XXX: using default table name, query for actual table name...
+					reloadTables(messagesId, nv.postData["v:NAME"]);
+				}
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				//btnActionStop('go-button');
@@ -265,6 +270,31 @@
 		});
 		
 		//XXX closeDialogs();
+	}
+	
+	function reloadTables(messagesId, tableName) {
+		console.log('reloadTables', tableName);
+		var reqData = {
+				"queryon.qon-tables.action": "read",
+				"queryon.qon-tables.names": tableName
+			}
+		var request = $.ajax({
+			url : processorUrl+"/queryon.processor.QOnTables",
+			type : "POST",
+			data : reqData,
+			dataType : "html"
+		});
+		
+		btnActionStart('btnSave');
+		request.done(function(data) {
+			btnActionStop('btnSave');
+			console.log(data);
+			appendInfoMessages(messagesId, ' - table '+tableName+' reloaded');
+		});
+		request.fail(function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('btnSave');
+			console.log(jqXHR);
+		});
 	}
 	
 	function doConfirmInsert(rownum, closeDialog) {

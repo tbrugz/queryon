@@ -199,15 +199,20 @@ function getParameters() {
 }
 
 function showInfoMessages(messagesId, text) {
-	$('#'+messagesId).html(text+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='infobutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','info');
 	updateUI();
 }
 
 function showErrorMessages(messagesId, text) {
-	$('#'+messagesId).html(text+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','error');
 	//$('#'+messagesId).addClass('error'); //when to remove?
+	updateUI();
+}
+
+function appendInfoMessages(messagesId, text) {
+	$('#'+messagesId+" span").append(text);
 	updateUI();
 }
 

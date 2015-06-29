@@ -3,6 +3,7 @@
 
 var queryOnUrl = 'q';
 var qonEditorUrl = 'qon-editor.jsp';
+var processorUrl = 'processor';
 var authInfo = {
 		// similar to 'auth/info.jsp'
 		authenticated: false,
