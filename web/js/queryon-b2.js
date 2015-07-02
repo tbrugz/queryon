@@ -176,6 +176,7 @@ function makeHrefs() {
 function loadAuthInfo() {
 	$.ajax({
 		url: 'auth/info.jsp',
+		dataType: "text",
 		success: function(data) {
 			var info = JSON.parse(data);
 			console.log('authinfo',info);
@@ -196,6 +197,7 @@ function loadAuthInfo() {
 function loadSettings() {
 	$.ajax({
 		url: 'info/settings.jsp',
+		dataType: "text",
 		success: function(data) {
 			var info = JSON.parse(data);
 			console.log('settings',info);

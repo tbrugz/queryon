@@ -92,6 +92,7 @@ function doRun(selectId, containerId, messagesId, callback) {
 	var order = document.getElementById('order').value;
 	$.ajax({
 		url: finalUrl,
+		dataType: "html",
 		success: function(data, textStatus, request) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
@@ -322,6 +323,7 @@ function doDelete(selectId, key, containerId, messagesId, callback, callbackErro
 	$.ajax({
 		url: finalUrl,
 		method: 'DELETE',
+		dataType: "text",
 		success: function(data, textStatus, jqXHR) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();

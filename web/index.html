@@ -225,6 +225,7 @@
 			//method: 'PUT', //XXX not working... [RequestSpec] req.getParameterMap() does not work for PUT & data (body) params
 			// http://stackoverflow.com/questions/855835/servlet-parameters-and-doput
 			data: nv.postData,
+			dataType: "text",
 			success: function(data, textStatus, jqXHR) {
 				//btnActionStop('go-button');
 				var completedTimeMilis = Date.now();
