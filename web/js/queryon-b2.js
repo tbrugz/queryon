@@ -10,7 +10,8 @@ var authInfo = {
 		username: null, //''
 		roles: [ ],
 		permissions: [ ]
-}
+};
+var settings = {};
 
 /* functions */
 
@@ -188,6 +189,17 @@ function loadAuthInfo() {
 			}
 			authInfo = info;
 			makeHrefs();
+		}
+	});
+}
+
+function loadSettings() {
+	$.ajax({
+		url: 'info/settings.jsp',
+		success: function(data) {
+			var info = JSON.parse(data);
+			console.log('settings',info);
+			settings = info;
 		}
 	});
 }

@@ -19,6 +19,7 @@
 	var onLoad = function() {
 		loadQueries();
 		loadAuthInfo();
+		loadSettings();
 	}
 	
 	function updateUI() {
@@ -258,7 +259,7 @@
 				//if(callback) { callback(jqXHR); }
 				// run QOnTables processor
 				var rel = getCurrentRelation('objects');
-				if(rel.name=="QON_TABLES") { //XXX: using default table name, query for actual table name...
+				if(rel.name && (rel.name==settings["queryon.qon-tables.table"])) { //XXXdone: using default table name, query for actual table name...
 					reloadTables(messagesId, nv.postData["v:NAME"]);
 				}
 			},
@@ -290,6 +291,7 @@
 			btnActionStop('btnSave');
 			console.log(data);
 			appendInfoMessages(messagesId, ' - table '+tableName+' reloaded');
+			loadQueries(); // reloading updated queries
 		});
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnSave');

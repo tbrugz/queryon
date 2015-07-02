@@ -50,7 +50,7 @@ public class QOnTables extends AbstractSQLProc {
 
 	static final String ACTION_READ = "read";
 	
-	static final String DEFAULT_TABLES_TABLE = "qon_tables";
+	public static final String DEFAULT_TABLES_TABLE = "QON_TABLES";
 	
 	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
 	
