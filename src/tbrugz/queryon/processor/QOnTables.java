@@ -1,5 +1,7 @@
 package tbrugz.queryon.processor;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -53,20 +55,28 @@ public class QOnTables extends AbstractSQLProc {
 	public static final String DEFAULT_TABLES_TABLE = "QON_TABLES";
 	
 	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
+
+	Writer writer;
 	
 	public void process() {
 		try {
 			String action = prop.getProperty(PROP_PREFIX+SUFFIX_ACTION, ACTION_READ);
 			if(ACTION_READ.equals(action)) {
-				readFromDatabase();
+				int count = readFromDatabase();
+				if(writer!=null) {
+					writer.write(String.valueOf(count));
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new BadRequestException("SQL exception: "+e);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new BadRequestException("IO exception: "+e);
 		}
 	}
 	
-	void readFromDatabase() throws SQLException {
+	int readFromDatabase() throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
 		List<String> tables = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_TABLE_NAMES, ",");
 		String sql = "select schema, name, column_names, pk_column_names, remarks"
@@ -122,6 +132,7 @@ public class QOnTables extends AbstractSQLProc {
 		}
 		
 		log.info("QOnTables processed [added/replaced "+count+" tables]");
+		return count;
 	}
 
 	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, String remarks,
@@ -191,6 +202,16 @@ public class QOnTables extends AbstractSQLProc {
 				grants.add(new Grant(owner, sarr[0], pt, grantee, false));
 			}
 		}
+	}
+	
+	@Override
+	public boolean acceptsOutputWriter() {
+		return true;
+	}
+	
+	@Override
+	public void setOutputWriter(Writer writer) {
+		this.writer = writer;
 	}
 	
 }

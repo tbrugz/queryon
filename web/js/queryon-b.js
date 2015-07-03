@@ -212,9 +212,13 @@ function showErrorMessages(messagesId, text) {
 	updateUI();
 }
 
-function appendInfoMessages(messagesId, text) {
+function appendMessages(messagesId, text) {
 	$('#'+messagesId+" span").append(text);
 	updateUI();
+}
+
+function changeMessagesClass(messagesId, clazz) {
+	$('#'+messagesId).attr('class',clazz);
 }
 
 function closeMessages(messagesId) {
