@@ -46,7 +46,8 @@ th {
 	margin-top: 3px;
 }
 
-.errorbutton {
+/* .errorbutton { */
+.error .closebutton {
 	background-color: #f66;
 	font-weight: bold;
 	border: 0;
@@ -59,7 +60,8 @@ th {
 	margin-top: 3px;
 }
 
-.infobutton {
+/* .infobutton { */
+.info .closebutton {
 	background-color: #66f;
 	font-weight: bold;
 	border: 0;

@@ -70,8 +70,8 @@
 			
 			var content = document.getElementById('content');
 			var rows = content.querySelectorAll('tr');
-			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT'); //XXX check insert-any-column
-			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE'); //XXX check update-any-column
+			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT'); // check insert-any-column
+			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE'); // check update-any-column
 			var allowDelete = relationHasGrantOfType(rel, 'DELETE');
 			//rows[0].innerHTML += "<th>actions</th>";
 			if(allowInsert) {
@@ -103,7 +103,6 @@
 			return;
 		}
 		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
-		//XXX do this
 		
 		var maxrownum = document.getElementById('content').querySelectorAll('tr').length-1;
 		
@@ -129,8 +128,8 @@
 		dialog.innerHTML = '<div class="dialog-title">'+updateType+' row'
 			+ (rownum>0?' <code>'+rownum+'</code>':'')
 			+ ' <span class="orderbutton-container">'
-			+ (rownum>1?"<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum-1)+");\" value=\"&#9650;\" title=\"previous row\"/>":"")
-			+ (rownum<maxrownum?"<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum+1)+");\" value=\"&#9660;\" title=\"next row\"/>":"")
+			+ "<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum-1)+");\" value=\"&#9650;\" title=\"previous row\" "+(rownum==1?"disabled":"")+"/>"
+			+ "<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum+1)+");\" value=\"&#9660;\" title=\"next row\" "+(rownum==maxrownum?"disabled":"")+"/>"
 			+ '</span>'
 			+ (filter!=null?' <span id="dialog-filter" class="obs">[ '+filter+' ]</span>':'')
 			+ '</div>'
@@ -270,8 +269,6 @@
 				//if(callbackError) { callbackError(jqXHR); }
 			}
 		});
-		
-		//XXX closeDialogs();
 	}
 	
 	function reloadTables(messagesId, tableName) {
@@ -333,8 +330,8 @@
 			return;
 		}
 		console.log("key",ret.key,"filter",ret.filter);
-		//XXX create html confirm dialog, or show question in messages (warning style)
 		
+		//XXX create html confirm dialog, or show question in messages (warning style)
 		if(confirm("Do you really want to delete this row from table "+name+"?\n[rownum = "+rownum+" ]\n["+ret.filter+"]")) {
 			doDelete('objects', ret.key, 'content', 'messages', function() {
 				var row = content.querySelectorAll('tr')[rownum];

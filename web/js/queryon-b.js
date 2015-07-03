@@ -105,7 +105,7 @@ function doRun(selectId, containerId, messagesId, callback) {
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
 			showErrorMessages(messagesId, jqXHR.responseText);
-			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 			//$('#'+messagesId).attr('class','error');
 		}
 	});
@@ -200,13 +200,13 @@ function getParameters() {
 }
 
 function showInfoMessages(messagesId, text) {
-	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='infobutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','info');
 	updateUI();
 }
 
 function showErrorMessages(messagesId, text) {
-	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='errorbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
+	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','error');
 	//$('#'+messagesId).addClass('error'); //when to remove?
 	updateUI();

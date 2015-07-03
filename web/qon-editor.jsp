@@ -324,12 +324,12 @@ modelId = SchemaModelUtils.getModelId(request);
 	
 	function errorMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='error message'>"+message+"<input type='button' class='errorbutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+		$('#messages').html("<div class='error message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 
 	function infoMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='info message'>"+message+"<input type='button' class='infobutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+		$('#messages').html("<div class='info message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 	
 	function closeMessages(elemId) {

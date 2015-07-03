@@ -74,7 +74,7 @@
 
 #update-dialog {
 	position: absolute;
-	top: 20%;
+	top: 10%;
 	left: 20%;
 	background-color: #ccc;
 	z-index: 30;
