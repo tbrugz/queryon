@@ -7,7 +7,7 @@ import org.junit.Test;
 import tbrugz.queryon.processor.QOnTables;
 import tbrugz.sqldump.util.StringDecorator;
 
-public class StringUtils {
+public class StringUtilsTest {
 
 	@Test
 	public void testStringQuoterEscaperDecorator() {

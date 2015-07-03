@@ -9,7 +9,7 @@ import tbrugz.queryon.r2rml.DirectMappingTest;
 import tbrugz.queryon.resultset.ResultSetDecoratorsTest;
 import tbrugz.queryon.resultset.ResultSetTest;
 import tbrugz.queryon.sqlcmd.SqlCommandTest;
-import tbrugz.queryon.util.StringUtils;
+import tbrugz.queryon.util.StringUtilsTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -18,7 +18,7 @@ import tbrugz.queryon.util.StringUtils;
 	ResultSetDecoratorsTest.class,
 	ResultSetTest.class,
 	SqlCommandTest.class,
-	StringUtils.class,
+	StringUtilsTest.class,
 	WinstoneAndH2HttpRequestTest.class,
 })
 public class QueryOnTestSuite {
