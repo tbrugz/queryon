@@ -53,7 +53,32 @@
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
 		var relationType = relationsHash[id] ? relationsHash[id].relationType : null;
-		console.log('relationType: ',relationType);
+		var rsLimit = parseInt(request.getResponseHeader('X-ResultSet-Limit'));
+		var rownum = getRowCount('content');
+		var offset = document.getElementById('offset').value;
+		var prevOffset = -1, nextOffset = -1;
+		offset = offset ? parseInt(offset) : 0;
+		console.log('relationType',relationType,'limit',rsLimit,'rownum',rownum,'offset',offset);
+		var limOffNav = document.getElementById('limoff-nav');
+		limOffNav.innerHTML = '';
+		
+		// offset, next/previous page
+		/* &#9658 rightwards filled triangle
+		   &#9668 leftwards filled triangle */
+		if(offset>0) {
+			//may be "previous page"
+			prevOffset = offset-rsLimit<0?0:offset-rsLimit;
+			console.log('prev-offset',prevOffset);
+			limOffNav.innerHTML += " <input type='button' value='&#9668;' onclick='document.getElementById(\"offset\").value="+prevOffset+";doRun(\"objects\", \"content\", \"messages\", doRunCallback);' />";
+		}
+		if(rsLimit==rownum) {
+			//may be "next page"
+			nextOffset = offset+rsLimit;
+			console.log('next-offset',nextOffset);
+			limOffNav.innerHTML += " <input type='button' value='&#9658;' onclick='document.getElementById(\"offset\").value="+nextOffset+";doRun(\"objects\", \"content\", \"messages\", doRunCallback);' />";
+		}
+		
+		// insert/update/delete
 		if(relationType == 'table') {
 			var rel = relationsHash[id];
 			var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
@@ -104,7 +129,7 @@
 		}
 		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		
-		var maxrownum = document.getElementById('content').querySelectorAll('tr').length-1;
+		var maxrownum = getRowCount('content');
 		
 		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, ret.cols, ret.allvals);
 		closeMessages('messages');
@@ -156,6 +181,10 @@
 		// a bit hacky ;)
 		document.location = "#body";
 		updateState();
+	}
+	
+	function getRowCount(elementId) {
+		return document.getElementById(elementId).querySelectorAll('tr').length-1;
 	}
 	
 	function getUpdateNewValues() {
@@ -375,9 +404,14 @@
 		position: sticky;
 		top: 0px;
 	}
+	
 	#order-label {
 		display: none;
 	}
+	#offset-label {
+		display: none;
+	}
+	
 	.edit-link {
 		display: none;
 		/*margin: 0 1em 0 1em;*/
@@ -429,8 +463,10 @@
 		<span id="filters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilterDialog();" title="add filter"/>
+		<!-- TODOne limit/offset or page/pagesize -->
+		<label id="offset-label">offset: <input type="text" name="offset" id="offset" onchange="makeHrefs();"/></label>
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRun('objects', 'content', 'messages', doRunCallback);" title="execute query"/>
-		<!-- TODO limit/offset or page/pagesize -->
+		<span id="limoff-nav"></span>
 	</span>
 
 	<span id="navbar-links">

@@ -1330,6 +1330,7 @@ public class QueryOn extends HttpServlet {
 		if(contentLocation!=null) {
 			resp.addHeader("Content-Location", contentLocation);
 		}
+		resp.addHeader("X-ResultSet-Limit", String.valueOf(reqspec.limit));
 		
 		ds.dumpHeader(resp.getWriter());
 		while(rs.next()) {

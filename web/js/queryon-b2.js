@@ -27,6 +27,9 @@ function onQueryChanged(doNotUpdateState) {
 	
 	//cleaning 'order'
 	document.getElementById('order').value = '';
+
+	//cleaning 'offset'
+	document.getElementById('offset').value = '';
 	
 	//updateUI();
 	if(!doNotUpdateState) {
@@ -163,6 +166,16 @@ function makeHrefs() {
 		}
 		if(urldown) {
 			urldown.href = append2url(urldown.href, 'order='+order);
+		}
+	}
+
+	var offset = document.getElementById('offset').value;
+	if(offset!=null && offset>0) {
+		if(urlpl) {
+			urlpl.href = append2url(urlpl.href, 'offset='+offset);
+		}
+		if(urldown) {
+			urldown.href = append2url(urldown.href, 'offset='+offset);
 		}
 	}
 	

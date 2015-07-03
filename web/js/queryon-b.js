@@ -75,6 +75,11 @@ function getQueryUrl(selectId, syntax) {
 		queryString += '&order='+order;
 	}
 	
+	var offset = document.getElementById('offset').value;
+	if(offset!=null && offset>0) {
+		queryString += '&offset='+offset;
+	}
+	
 	//console.log('query-string: '+queryString);
 	var returl = baseUrl+'/'+id+paramsStr
 		+(syntax?'.'+syntax:'')
@@ -97,6 +102,7 @@ function doRun(selectId, containerId, messagesId, callback) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
 			$('#'+containerId).html(data);
+			console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
 			closeMessages(messagesId);
 			addSortHrefs(containerId, order);
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
