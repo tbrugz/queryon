@@ -69,13 +69,13 @@
 			//may be "previous page"
 			prevOffset = offset-rsLimit<0?0:offset-rsLimit;
 			console.log('prev-offset',prevOffset);
-			limOffNav.innerHTML += " <input type='button' value='&#9668;' onclick='document.getElementById(\"offset\").value="+prevOffset+";doRun(\"objects\", \"content\", \"messages\", doRunCallback);' />";
+			limOffNav.innerHTML += " <input type='button' value='&#9668;' onclick='document.getElementById(\"offset\").value="+prevOffset+";makeHrefs();doRun(\"objects\", \"content\", \"messages\", doRunCallback);' title='previous page (offset = "+prevOffset+")' />";
 		}
 		if(rsLimit==rownum) {
 			//may be "next page"
 			nextOffset = offset+rsLimit;
 			console.log('next-offset',nextOffset);
-			limOffNav.innerHTML += " <input type='button' value='&#9658;' onclick='document.getElementById(\"offset\").value="+nextOffset+";doRun(\"objects\", \"content\", \"messages\", doRunCallback);' />";
+			limOffNav.innerHTML += " <input type='button' value='&#9658;' onclick='document.getElementById(\"offset\").value="+nextOffset+";makeHrefs();doRun(\"objects\", \"content\", \"messages\", doRunCallback);' title='next page (offset = "+nextOffset+")' />";
 		}
 		
 		// insert/update/delete
