@@ -75,7 +75,8 @@ function getQueryUrl(selectId, syntax) {
 		queryString += '&order='+order;
 	}
 	
-	var offset = document.getElementById('offset').value;
+	var offset = document.getElementById('offset');
+	if(offset) { offset = offset.value; };
 	if(offset!=null && offset>0) {
 		queryString += '&offset='+offset;
 	}

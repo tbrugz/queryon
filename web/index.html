@@ -363,6 +363,7 @@
 		//XXX create html confirm dialog, or show question in messages (warning style)
 		if(confirm("Do you really want to delete this row from table "+name+"?\n[rownum = "+rownum+" ]\n["+ret.filter+"]")) {
 			doDelete('objects', ret.key, 'content', 'messages', function() {
+				var content = document.getElementById('content');
 				var row = content.querySelectorAll('tr')[rownum];
 				row.style.textDecoration = "line-through";
 				row.style.backgroundColor = "#faa";

@@ -29,7 +29,8 @@ function onQueryChanged(doNotUpdateState) {
 	document.getElementById('order').value = '';
 
 	//cleaning 'offset'
-	document.getElementById('offset').value = '';
+	var offset = document.getElementById('offset');
+	if(offset) { offset.value = ''; };
 	
 	//updateUI();
 	if(!doNotUpdateState) {
@@ -169,7 +170,8 @@ function makeHrefs() {
 		}
 	}
 
-	var offset = document.getElementById('offset').value;
+	var offset = document.getElementById('offset');
+	if(offset) { offset = offset.value; };
 	if(offset!=null && offset>0) {
 		if(urlpl) {
 			urlpl.href = append2url(urlpl.href, 'offset='+offset);
