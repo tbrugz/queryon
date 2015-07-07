@@ -97,9 +97,9 @@ loadSchemas = function(model) {
 		url: url,
 		success: function(data) {
 			var json = JSON.parse(data);
-			//console.log(json);
+			//console.log('loadSchemas, schemas',model,json);
 			if(json.schemas) {
-				schemasByModel[model] = json.schemas;
+				schemasByModel[model?model:""] = json.schemas;
 				//XXX: merge model's schemas?
 				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
 				joinSchemas();
@@ -109,6 +109,7 @@ loadSchemas = function(model) {
 }
 
 joinSchemas = function() {
+	//console.log('joinSchemas, schemas',Object.keys(schemasByModel).length,document.getElementById(defaultModelId).childElementCount);
 	if(Object.keys(schemasByModel).length < document.getElementById(defaultModelId).childElementCount) { return; }
 	/*for(var i=0;i<Object.keys(schemasByModel).length;i++) {
 		var m = Object.keys(schemasByModel)[i];
@@ -122,6 +123,7 @@ joinSchemas = function() {
 loadModel = function() {
 	//TODO: merge models...
 	var m = document.getElementById(defaultModelId).value;
+	//console.log('loadModel, model:', m, defaultModelId, schemasByModel[m], schemasByModel);
 	loadSelect(schemasByModel[m], 'schema');
 	refreshSelectsState();
 	loadObjectList();
@@ -149,7 +151,8 @@ loadObjectList = function() {
 	var model = document.getElementById(defaultModelId).value;
 	var schema = document.getElementById('schema').value;
 	var url = queryOnUrl+type
-		+ (schema? '/'+schema:'')
+		//+ (schema? '/'+schema:'')
+		+ '/'+schema
 		+ '.json'
 		+ (model?'?model='+model:'');
 	console.log("loadObjectList: url=",url);
@@ -175,11 +178,12 @@ loadObjectList = function() {
 }
 
 getDDL = function(modelId, contentId, contentTitleId, callback) {
+	var model = document.getElementById(modelId).value;
 	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
-		+'?model='+document.getElementById(modelId).value;
-	console.log("getDDL: url=", url);
+		+ (model ? '?model='+model : '');
+	console.log("getDDL: url=", url, 'modelId=', modelId, 'model=', model);
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -266,12 +270,13 @@ doDiffUsingJS = function(viewType) {
 	var from = document.getElementById('content-from').innerHTML;
 	var to = document.getElementById('content-to').innerHTML;
 	var diffc = document.getElementById('diffoutput-container');
-	if(from && to) {
+	if(from && to
+		&& (document.getElementById('modelFrom').value != document.getElementById('modelTo').value)
+		) {
 		diffc.style.display = 'block';
 		diffUsingJS(viewType, from, to,
 			document.getElementById('modelFrom').value, document.getElementById('modelTo').value,
 			'diffoutput');
-		btnActionStop('go-button');
 		//XXX
 		if(document.getElementById('type').value=='TABLE') {
 			var ddbtn = document.getElementById('doDataDiffBtn');
@@ -287,6 +292,7 @@ doDiffUsingJS = function(viewType) {
 		doClearDdlOutput();
 		document.getElementById('doDataDiffBtn').style.display = 'none';
 	}
+	btnActionStop('go-button');
 }
 
 diffHasChanges = function(opcodes) {
@@ -379,6 +385,15 @@ toggleDiff = function() {
 }
 
 getDDLdiff = function(apply) {
+	var msg = document.getElementById('ddldiff-msg');
+	if(document.getElementById('modelFrom').value == document.getElementById('modelTo').value) {
+		console.log("getDDLdiff: same model");
+		msg.style.display = 'block';
+		msg.innerHTML = 'modelOrig and modelNew must not be the same';
+		btnActionStop('getDdlDiffBtn');
+		return;
+	}
+	
 	apply = apply==='true'?'true':false;
 	// /qdiff/TABLE/<shcema>.<object>?modelFrom=x&modelTo=y
 	var url = queryOnDiffUrl+document.getElementById('type').value+'/'
@@ -391,7 +406,6 @@ getDDLdiff = function(apply) {
 	btnActionStart('getDdlDiffBtn');
 	var block = document.getElementById('ddldiff-output');
 	block.style.display = 'none';
-	var msg = document.getElementById('ddldiff-msg');
 	msg.style.display = 'none';
 	$.ajax({
 		//TODO: filter by schema?
@@ -435,9 +449,9 @@ doDataDiff = function() {
 
 function updateState() {
 	var select = document.getElementById('modelFrom');
-	var modelFrom = select.options[select.selectedIndex].value;
+	var modelFrom = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	var select = document.getElementById('modelTo');
-	var modelTo = select.options[select.selectedIndex].value;
+	var modelTo = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	var select = document.getElementById('schema');
 	var schema = select.options[select.selectedIndex].value;
 	if(modelFrom && modelTo && schema) {
@@ -467,6 +481,7 @@ loadSelect = function(data, selectId, callback) {
 	var sel = document.getElementById(selectId);
 	var prevOptionValue = sel.value;
 	$('#'+selectId).empty();
+	if(data==null) { console.log('null data; selectId: ',selectId); return; }
 	for(var i=0;i<data.length;i++) {
 		var name = callback(data[i]);
 		if(name==null) { continue; }
