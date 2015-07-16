@@ -48,9 +48,9 @@ public class ShowColumns implements SqlCommand {
 
 	public ResultSet run(Connection conn) throws SQLException {
 		return conn.getMetaData().getColumns(null,
-				schema!=null?schema.toUpperCase():null,
-				table!=null?table.toUpperCase():null,
-				column!=null?column.toUpperCase():null);
+				schema!=null?schema:null,
+				table!=null?table:null,
+				column!=null?column:null);
 	}
 
 }

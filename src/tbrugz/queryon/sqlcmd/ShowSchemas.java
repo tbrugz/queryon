@@ -40,7 +40,7 @@ public class ShowSchemas implements SqlCommand {
 
 	public ResultSet run(Connection conn) throws SQLException {
 		return conn.getMetaData().getSchemas(null,
-				schema!=null?schema.toUpperCase():null);
+				schema!=null?schema:null);
 	}
 
 }

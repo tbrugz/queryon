@@ -17,8 +17,8 @@ public class ShowExportedKeys extends AbstractTableCommand {
 	@Override
 	public ResultSet run(Connection conn) throws SQLException {
 		return conn.getMetaData().getExportedKeys(null
-				,schema!=null?schema.toUpperCase():null
-				,table!=null?table.toUpperCase():null);
+				,schema!=null?schema:null
+				,table!=null?table:null);
 	}
 
 }
