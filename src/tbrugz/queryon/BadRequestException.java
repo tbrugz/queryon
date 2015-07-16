@@ -15,6 +15,15 @@ public class BadRequestException extends RuntimeException {
 		super(message);
 		this.code = code;
 	}
+
+	public BadRequestException(String message, Throwable t) {
+		this(message,  HttpServletResponse.SC_BAD_REQUEST, t);
+	}
+	
+	public BadRequestException(String message, int code, Throwable t) {
+		super(message, t);
+		this.code = code;
+	}
 	
 	public int getCode() {
 		return code;

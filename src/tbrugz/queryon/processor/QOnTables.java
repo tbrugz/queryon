@@ -147,12 +147,21 @@ public class QOnTables extends AbstractSQLProc {
 		if(columnNames==null) {
 			columnNames = "*";
 		}
-		PreparedStatement stmt = conn.prepareStatement("select "+columnNames+" from "
+		
+		String sql = "select "+columnNames+" from "
 				+ (schema!=null?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
-				);
-		ResultSetMetaData rsmd = stmt.getMetaData();
-		t.setColumns(DataDumpUtils.getColumns(rsmd));
+				;
+		try {
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			ResultSetMetaData rsmd = stmt.getMetaData();
+			t.setColumns(DataDumpUtils.getColumns(rsmd));
+		}
+		catch(SQLException e) {
+			String message = "addTable ["+tableName+"]: exception: "+e.getMessage().trim()+"\nsql: "+sql;
+			//log.warn(message);
+			throw new BadRequestException(message, e);
+		}
 		
 		if(pkColumnNames!=null) {
 			Constraint pk = new Constraint();

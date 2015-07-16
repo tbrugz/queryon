@@ -296,7 +296,7 @@ public class QueryOn extends HttpServlet {
 							ProcessorServlet.doProcess(p, context, entry.getKey());
 						}
 						catch(Exception e) {
-							log.warn("Exception executing processor on startup [model="+entry.getKey()+"]: "+e, e);
+							log.warn("Exception executing processor on startup [model="+entry.getKey()+"]: "+e);
 							//XXX: fail on error?
 						}
 					}
@@ -1013,12 +1013,12 @@ public class QueryOn extends HttpServlet {
 		// xtra filters
 		filterByXtraParams(relation, reqspec, sql);
 
-		log.info("pre-sql update: "+sql);
+		//log.info("pre-sql update: "+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		bindParameters(st, sql);
 
-		log.info("sql update: "+sql);
+		log.debug("sql update: "+sql);
 		
 		int count = st.executeUpdate();
 		
