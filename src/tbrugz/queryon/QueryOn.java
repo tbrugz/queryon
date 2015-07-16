@@ -273,7 +273,7 @@ public class QueryOn extends HttpServlet {
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw new ServletException(message, e);
 		} catch (Error e) {
 			log.error(e.toString());

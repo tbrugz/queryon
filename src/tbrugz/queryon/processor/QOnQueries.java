@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.Column;
@@ -250,6 +251,7 @@ public class QOnQueries extends SQLQueries {
 		for(View v: vs) {
 			if(v instanceof Query) {
 				if(queriesToUpdate.contains(v.getName())) {
+					try {
 					//schema, query, name
 					updateSt.setString(1, v.getSchemaName());
 					updateSt.setString(2, v.getQuery());
@@ -276,6 +278,11 @@ public class QOnQueries extends SQLQueries {
 					}
 					if(limitUpdateCountExact!=null && limitUpdateCountExact!=countUpdates) {
 						throw new BadRequestException("error updating/inserting query '"+v.getName()+"': update count ["+countUpdates+"] does not match exact limit ["+limitUpdateCountExact+"]");
+					}
+					}
+					catch(SQLException e) {
+						String message = "sqlexception: "+e.toString().trim()+"\nsql-update: "+updateSql+"\nsql-insert: "+insertSql;
+						throw new InternalServerException(message, e);
 					}
 				}
 			}

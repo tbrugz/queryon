@@ -68,11 +68,11 @@ public class QOnTables extends AbstractSQLProc {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new BadRequestException("SQL exception: "+e);
+			//e.printStackTrace();
+			throw new BadRequestException("SQL exception: "+e, e);
 		} catch (IOException e) {
-			e.printStackTrace();
-			throw new BadRequestException("IO exception: "+e);
+			//e.printStackTrace();
+			throw new BadRequestException("IO exception: "+e, e);
 		}
 	}
 	

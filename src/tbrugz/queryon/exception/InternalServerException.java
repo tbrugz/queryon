@@ -11,4 +11,8 @@ public class InternalServerException extends BadRequestException {
 	public InternalServerException(String message) {
 		super(message, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
+
+	public InternalServerException(String message, Throwable t) {
+		super(message, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
+	}
 }
