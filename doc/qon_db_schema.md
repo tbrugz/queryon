@@ -5,7 +5,8 @@ create table qon_queries (
 	schema varchar(100),
 	name varchar(100) not null,
 	remarks varchar(400),
-	query clob,
+	query clob, -- ansi(?), oracle
+	--query text, -- pgsql, mysql
 	--query varchar(4000),
 	roles_filter varchar(1000),
 	constraint qon_queries_pk primary key (name)

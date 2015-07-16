@@ -132,7 +132,7 @@ public class SQL {
 		}
 		else if(filter.length()>0) {
 			if(relation!=null && relation instanceof Query) {
-				sql = "select * from (\n"+sql+"\n)";
+				sql = "select * from (\n"+sql+"\n) qon_filter";
 			}
 			sql += " where "+filter+" "+PARAM_FILTER_CLAUSE;
 		}
@@ -147,7 +147,7 @@ public class SQL {
 		if(!sql.contains(PARAM_ORDER_CLAUSE)) {
 			sqlOrder = " " + PARAM_ORDER_CLAUSE;
 		}
-		sql = "select "+columns+" from (\n"+sql+"\n)"+sqlFilter+sqlOrder;
+		sql = "select "+columns+" from (\n"+sql+"\n) qon_projection "+sqlFilter+sqlOrder;
 	}
 	
 	public void applyOrder(RequestSpec reqspec) {
@@ -178,7 +178,7 @@ public class SQL {
 			sql = sql.replace(PARAM_ORDER_CLAUSE, sb.toString());
 		}
 		else {
-			sql = "select * from (\n"+sql+"\n) "+sb.toString();
+			sql = "select * from (\n"+sql+"\n) qon_order "+sb.toString();
 		}
 		orderByApplyed = true;
 	}
