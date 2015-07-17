@@ -72,7 +72,7 @@ public class SQL {
 	
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
 		String sql = "select "+PARAM_PROJECTION_CLAUSE+
-			" from " + (table.getSchemaName()!=null?sqlIdDecorator.get(table.getSchemaName())+".":"") + sqlIdDecorator.get(table.getName())+
+			" from " + (SQL.valid(table.getSchemaName())?sqlIdDecorator.get(table.getSchemaName())+".":"") + sqlIdDecorator.get(table.getName())+
 			" " + PARAM_WHERE_CLAUSE+
 			" " + PARAM_ORDER_CLAUSE;
 		return sql;
@@ -100,7 +100,7 @@ public class SQL {
 
 	public static SQL createInsertSQL(Relation relation) {
 		String sql = "insert into "+
-				(relation.getSchemaName()!=null?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
+				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")" +
 				" values (" + PARAM_INSERT_VALUES_CLAUSE+")";
 		return new SQL(sql, relation);
@@ -108,7 +108,7 @@ public class SQL {
 
 	public static SQL createUpdateSQL(Relation relation) {
 		String sql = "update "+
-				(relation.getSchemaName()!=null?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
+				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" set " + PARAM_UPDATE_SET_CLAUSE +
 				" " + PARAM_WHERE_CLAUSE;
 		return new SQL(sql, relation);
@@ -116,7 +116,7 @@ public class SQL {
 
 	public static SQL createDeleteSQL(Relation relation) {
 		String sql = "delete "+
-				"from " + (relation.getSchemaName()!=null?relation.getSchemaName()+".":"") + relation.getName()+
+				"from " + (SQL.valid(relation.getSchemaName())?relation.getSchemaName()+".":"") + relation.getName()+
 				" " + PARAM_WHERE_CLAUSE;
 		return new SQL(sql, relation);
 	}
@@ -293,6 +293,10 @@ public class SQL {
 	
 	public static String quoteString() {
 		return DBMSResources.instance().getIdentifierQuoteString();
+	}
+	
+	public static boolean valid(String s) {
+		return s!=null && !s.equals("");
 	}
 	
 	/* ----------------- extra SQL metadata ----------------- */

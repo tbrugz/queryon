@@ -144,12 +144,12 @@ public class QOnTables extends AbstractSQLProc {
 		//XXX table type: what if it is a view? t.setType(TableType.VIEW); ?
 		//XXXdone option to add primary key (for tables/views that doesn't have them, or to setup a different PK for a table)
 
-		if(columnNames==null) {
+		if(!SQL.valid(columnNames)) {
 			columnNames = "*";
 		}
 		
 		String sql = "select "+columnNames+" from "
-				+ (schema!=null?SQL.sqlIdDecorator.get(schema)+".":"")
+				+ (SQL.valid(schema)?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
 				;
 		try {
@@ -201,6 +201,8 @@ public class QOnTables extends AbstractSQLProc {
 		if(columnRoles==null) { return; }
 		List<String> rolesCols = Utils.getStringList(columnRoles, "\\|");
 		for(String s: rolesCols) {
+			if(!SQL.valid(s)) { continue; }
+			
 			String[] sarr = s.split(":");
 			if(sarr.length!=2) {
 				log.warn("addColumnGrants: col syntax error: "+s);

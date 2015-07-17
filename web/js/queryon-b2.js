@@ -64,7 +64,7 @@ function updateSelectedQueryState() {
 		}
 		
 		if(!found) {
-			console.log('query '+relname+' not found...');
+			console.log('query '+relname+' not found...', authInfo.authenticated);
 			if(! authInfo.authenticated) {
 				showInfoMessages('messages', 'Query <code>'+relname+'</code> not found. Maybe you should login');
 			}
@@ -194,7 +194,7 @@ function loadAuthInfo() {
 		dataType: "text",
 		success: function(data) {
 			var info = JSON.parse(data);
-			console.log('authinfo',info);
+			console.log('authInfo', info);
 			if(info.authenticated) {
 				//username = info.username;
 				info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
