@@ -2,7 +2,7 @@
 sql ansi
 --------
 create table qon_queries (
-	schema varchar(100),
+	schema_name varchar(100),
 	name varchar(100) not null,
 	remarks varchar(400),
 	query clob, -- ansi(?), oracle
@@ -14,7 +14,7 @@ create table qon_queries (
 )
 
 create table qon_tables (
-	schema varchar(100),
+	schema_name varchar(100),
 	name varchar(100) not null,
 	column_names varchar(400),
 	pk_column_names varchar(400),

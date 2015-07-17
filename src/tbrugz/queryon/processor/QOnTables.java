@@ -79,7 +79,7 @@ public class QOnTables extends AbstractSQLProc {
 	int readFromDatabase() throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
 		List<String> tables = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_TABLE_NAMES, ",");
-		String sql = "select schema, name, column_names, pk_column_names, remarks"
+		String sql = "select schema_name, name, column_names, pk_column_names, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable

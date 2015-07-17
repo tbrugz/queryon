@@ -103,7 +103,7 @@ public class QOnQueries extends SQLQueries {
 	//XXX: test if table has all columns?
 	void readFromDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String sql = "select schema, name, query, remarks, roles_filter from "+qonQueriesTable;
+		String sql = "select schema_name, name, query, remarks, roles_filter from "+qonQueriesTable;
 				//+" order by schema, name";
 		
 		ResultSet rs = null;
@@ -232,8 +232,8 @@ public class QOnQueries extends SQLQueries {
 	 */
 	void writeToDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String updateSql = "update "+qonQueriesTable+" set schema = ?, query = ?, remarks = ?, roles_filter = ? where name = ?";
-		String insertSql = "insert into "+qonQueriesTable+" (schema, query, remarks, roles_filter, name) values (?, ?, ?, ?, ?)";
+		String updateSql = "update "+qonQueriesTable+" set schema_name = ?, query = ?, remarks = ?, roles_filter = ? where name = ?";
+		String insertSql = "insert into "+qonQueriesTable+" (schema_name, query, remarks, roles_filter, name) values (?, ?, ?, ?, ?)";
 		PreparedStatement updateSt = conn.prepareStatement(updateSql);
 		PreparedStatement insertSt = conn.prepareStatement(insertSql);
 
