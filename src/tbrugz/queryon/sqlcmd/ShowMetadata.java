@@ -14,8 +14,14 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.SqlCommand;
 import tbrugz.queryon.resultset.ResultSetObjectAdaptor;
 
+/*
+ * Command to query info from DatabaseMetaData
+ * 
+ * see: http://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html
+ * 
+ * TODO: add optional parameters (default is string - if parameter is parseable as int, convert to int ; if starts & ends with "'", use inner value as string)
+ */
 public class ShowMetadata implements SqlCommand {
-	//	storesLowerCaseIdentifiers()
 
 	static final Log log = LogFactory.getLog(ShowMetadata.class);
 	
@@ -60,7 +66,10 @@ public class ShowMetadata implements SqlCommand {
 	
 	public ResultSet run(Connection conn) throws SQLException {
 		if(throwable!=null) {
-			throw new SQLException("invoke exception: "+throwable);
+			throw new SQLException("method exception: "+throwable);
+		}
+		if(methodName==null) {
+			throw new SQLException("method not defined");
 		}
 		
 		try {
@@ -68,12 +77,11 @@ public class ShowMetadata implements SqlCommand {
 			if(o instanceof ResultSet) {
 				return (ResultSet) o;
 			}
-			//List<Object> l = new ArrayList<Object>();
-			//l.add(o);
 			return new ResultSetObjectAdaptor(methodName, o);
 		} catch (Exception e) {
-			//log.warn();
-			throw new SQLException("invoke exception: "+e, e);
+			String message = "invoke exception: "+e;
+			log.warn(message, e);
+			throw new SQLException(message, e);
 		}
 	}
 }
