@@ -1,4 +1,4 @@
-<project name="queryon" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="queryon" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<property name="proj.name" value="queryon"/>
 	
@@ -285,5 +285,9 @@
 		<get dest="${lib.dir}/kmlutils.jar" src="http://cdn.bitbucket.org/tbrugz/kmlutils/downloads/svg2kml.jar" verbose="true"/>
 		<get dest="${lib.dir}" src="http://cdn.bitbucket.org/tbrugz/sqldump/downloads/sqldump.jar" verbose="true"/>
 	</target-->
+	
+	<artifact:dependencies pathId="mvn.test.classpath" useScope="test" cacheDependencyRefs="true">
+		<pom file="pom.xml"/>
+	</artifact:dependencies>
 	
 </project>
