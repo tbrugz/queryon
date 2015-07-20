@@ -13,6 +13,9 @@
   <packaging>war</packaging>
   <version>0.6.0</version>
   
+  <name>queryon</name>
+  <description>Web application that creates a REST API based on database objects (tables, views, queries) from a RDBMS</description>
+  
   <!-- 
   http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
   http://blog.miloszikic.com/2010/04/maven-war-plugin-and-non-default-webapp.html
@@ -30,6 +33,26 @@
     
     <checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
   </properties>
+  
+  <licenses>
+    <license>
+      <name>GNU Affero General Public License, Version 3</name>
+      <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:hg:https://bitbucket.org/tbrugz/queryon</connection>
+    <developerConnection>scm:hg:https://bitbucket.org/tbrugz/queryon</developerConnection>
+    <url>https://bitbucket.org/tbrugz/queryon</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>tbrugz</id>
+      <name>Telmo Brugnara</name>
+      <email>tbrugz@gmail.com</email>
+    </developer>
+  </developers>
   
   <build>
     <!-- directory>target</directory>
