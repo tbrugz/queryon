@@ -11,7 +11,7 @@
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>queryon</artifactId>
   <packaging>war</packaging>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.6.0</version>
   
   <!-- 
   http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html

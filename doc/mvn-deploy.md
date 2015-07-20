@@ -16,7 +16,7 @@ mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=pat
 * http://stackoverflow.com/a/22715898/616413
 
 ```
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0-SNAPSHOT -Dfile=target/queryon-0.6.0-SNAPSHOT.war -Dpackaging=war -DgeneratePom=true -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
+mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0 -Dfile=target/queryon-0.6.0.war -Dpackaging=war -DgeneratePom=true -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
 
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0-SNAPSHOT -Dfile=target/queryon-0.6.0-SNAPSHOT-sources.jar -Dpackaging=jar -Dclassifier=sources -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
+mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0 -Dfile=target/queryon-0.6.0-sources.jar -Dpackaging=jar -Dclassifier=sources -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
 ```
