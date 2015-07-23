@@ -10,6 +10,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.util.QOnModelUtils;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.util.ConnectionUtil;
 
 public class DBUtil {
@@ -69,4 +71,24 @@ public class DBUtil {
 		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop);
 	}
 
+	public static Connection initDBConn(Properties prop, String modelId, SchemaModel model) throws ClassNotFoundException, SQLException, NamingException {
+		try {
+			Connection conn = initDBConn(prop, modelId);
+			QOnModelUtils.setModelMetadata(model, conn);
+			return conn;
+		}
+		catch(ClassNotFoundException e) {
+			QOnModelUtils.setModelExceptionMetadata(model, e);
+			throw e;
+		}
+		catch(SQLException e) {
+			QOnModelUtils.setModelExceptionMetadata(model, e);
+			throw e;
+		}
+		catch(NamingException e) {
+			QOnModelUtils.setModelExceptionMetadata(model, e);
+			throw e;
+		}
+	}
+	
 }

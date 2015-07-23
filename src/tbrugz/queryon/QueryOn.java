@@ -192,6 +192,7 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_PROP = "prop";
 	public static final String ATTR_MODEL_MAP = "modelmap";
 	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
+	public static final String ATTR_INIT_ERROR = "initerror";
 	
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_POST = "POST";
@@ -275,10 +276,12 @@ public class QueryOn extends HttpServlet {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);
 			//e.printStackTrace();
+			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw new ServletException(message, e);
 		} catch (Error e) {
 			log.error(e.toString());
 			e.printStackTrace();
+			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
 		}
 	}
@@ -335,7 +338,7 @@ public class QueryOn extends HttpServlet {
 		
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			conn = ConnectionUtil.initDBConnection(prefix, prop);
+			conn = DBUtil.initDBConn(prop, prefix);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
@@ -352,7 +355,10 @@ public class QueryOn extends HttpServlet {
 		}*/
 		DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: should NOT be a singleton
 		
-		if(conn!=null) { conn.close(); }
+		if(conn!=null) {
+			QOnModelUtils.setModelMetadata(sm, conn);
+			conn.close();
+		}
 		return sm;
 	}
 

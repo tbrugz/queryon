@@ -158,8 +158,9 @@ public class ProcessorServlet extends HttpServlet {
 	}
 	
 	static void doProcessProcessor(Processor pc, Properties prop, String modelId, ServletContext context, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+		SchemaModel sm = null;
 		if(pc.needsSchemaModel()) {
-			SchemaModel sm = SchemaModelUtils.getModel(context, modelId);
+			sm = SchemaModelUtils.getModel(context, modelId);
 			if(sm==null) {
 				throw new ServletException("schema model attribute is null!");
 			}
@@ -168,8 +169,7 @@ public class ProcessorServlet extends HttpServlet {
 		
 		Connection conn = null;
 		if(pc.needsConnection()) {
-			//conn = ConnectionUtil.initDBConnection(QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:""), prop);
-			conn = DBUtil.initDBConn(prop, modelId);
+			conn = DBUtil.initDBConn(prop, modelId, sm);
 			pc.setConnection(conn);
 		}
 		
