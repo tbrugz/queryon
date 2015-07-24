@@ -10,6 +10,8 @@
 	<link href="css/prism.css" rel="stylesheet" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script type="text/javascript" src="js/prism.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script src="js/ddl.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
@@ -147,10 +149,13 @@ getDDL = function() {
 		+ document.getElementById('object').value
 		+(model?'?model='+document.getElementById('model').value:"");
 	console.log("getDDL: model=", model, "url=", url);
+	closeMessages('messages');
+	btnActionStart('go-button');
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
 		success: function(data) {
+			btnActionStop('go-button');
 			//console.log(data);
 			var container = document.getElementById('content-container');
 			container.style.display = 'block';
@@ -159,7 +164,9 @@ getDDL = function() {
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
 			Prism.highlightElement(block);
 		},
-		error: function() {
+		error: function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('go-button');
+			showErrorMessages('messages', jqXHR.responseText);
 			//TODO: show error
 			var container = document.getElementById('content-container');
 			container.style.display = 'none';
@@ -171,6 +178,8 @@ getModel = function() {
 	var model = document.getElementById('model').value;
 	return model=="null"?null:model;
 }
+
+updateUI = function() {}
 
 // ----- utility functions
 
