@@ -667,8 +667,8 @@ public class QueryOn extends HttpServlet {
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
 			log.debug("pre-sql:\n"+sql.getSql());
 		}
-		int limit = (sql.limitMax!=null && sql.limitMax < reqspec.limit) ? sql.limitMax : reqspec.limit;
-		sql.addLimitOffset(loStrategy, limit, reqspec.offset);
+		//int limit = (sql.limitMax!=null && sql.limitMax < reqspec.limit) ? sql.limitMax : reqspec.limit;
+		sql.addLimitOffset(loStrategy, reqspec.offset);
 		
 		//query finished!
 		
@@ -696,7 +696,7 @@ public class QueryOn extends HttpServlet {
 			dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
 		}
 		else {
-			dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp);
+			dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp, sql.limit);
 		}
 		
 		}
@@ -1312,8 +1312,15 @@ public class QueryOn extends HttpServlet {
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
+		dumpResultSet(rs, reqspec, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, reqspec.limit);
+	}
+	
+	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, 
+			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
+			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
+			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
-			rs = new ResultSetLimitOffsetDecorator(rs, reqspec.limit, reqspec.offset);
+			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
 		}
 		int count = 0;
 		DumpSyntax ds = reqspec.outputSyntax;
@@ -1337,7 +1344,7 @@ public class QueryOn extends HttpServlet {
 		if(contentLocation!=null) {
 			resp.addHeader("Content-Location", contentLocation);
 		}
-		resp.addHeader("X-ResultSet-Limit", String.valueOf(reqspec.limit));
+		resp.addHeader("X-ResultSet-Limit", String.valueOf(limit));
 		
 		ds.dumpHeader(resp.getWriter());
 		while(rs.next()) {

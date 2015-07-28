@@ -44,22 +44,26 @@ public class SQL {
 	final boolean allowEncapsulation;
 	final Integer originalBindParameterCount;
 	final Integer limitMax;
+	final Integer limit;
 	
 	boolean orderByApplyed = false;
 	List<String> bindParameterValues = new ArrayList<String>();
 	//XXX add 'final String initialSql;'?
 	
-	protected SQL(String sql, Relation relation, Integer originalBindParameterCount) {
+	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
 		//this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
 		this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationBooleanPattern, true);
 		this.limitMax = processPatternInteger(sql, limitMaxIntPattern);
 		this.originalBindParameterCount = originalBindParameterCount;
+		this.limit = (limitMax!=null && reqspecLimit!=null) ?
+				(limitMax < reqspecLimit ? limitMax : reqspecLimit) :
+				(limitMax!=null ? limitMax : reqspecLimit);
 	}
 
 	protected SQL(String sql, Relation relation) {
-		this(sql, relation, null);
+		this(sql, relation, null, null);
 	}
 	
 	public String getSql() {
@@ -82,16 +86,16 @@ public class SQL {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount());
+			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), reqspec!=null?reqspec.limit:null);
 			//processSqlXtraMetadata(sql);
 			//sql.originalBindParameterCount = q.getParameterCount();
 			return sql;
 		}
 		else if(relation instanceof Table) {
-			return new SQL(createSQLstr(relation, reqspec), relation);
+			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
 		}
 		else if(relation instanceof View) {
-			return new SQL(createSQLstr(relation, reqspec), relation);
+			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
 		}
 		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
 		
@@ -191,7 +195,11 @@ public class SQL {
 		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
 	
-	public void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset) throws ServletException {
+	public void addLimitOffset(LimitOffsetStrategy strategy, int offset) throws ServletException {
+		addLimitOffset(strategy, this.limit, offset);
+	}
+	
+	protected void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset) throws ServletException {
 		if(limit<=0 && offset<=0) { return; }
 		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return; }
 		
