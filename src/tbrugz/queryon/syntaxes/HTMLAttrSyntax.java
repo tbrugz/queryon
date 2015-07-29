@@ -49,6 +49,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	
 	public HTMLAttrSyntax() {
 		super();
+		dumpColElement = true;
 	}
 	
 	@Override
@@ -88,11 +89,13 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			appendStyleNumericAlignRight(sb);
 		}
 		if(dumpColElement) {
+			sb.append("\n<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
 				if(finalColNames.contains(lsColNames.get(i))) {
-					sb.append("\n\t<col class=\"type_"+lsColTypes.get(i).getSimpleName()+"\"/>");
+					sb.append("\n\t<col type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
 				}
 			}
+			sb.append("\n</colgroup>");
 		}
 		sb.append("\n\t<tr>");
 		for(int i=0;i<lsColNames.size();i++) {
