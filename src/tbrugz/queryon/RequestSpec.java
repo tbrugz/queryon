@@ -84,6 +84,9 @@ public class RequestSpec {
 	final String uniValueFilename;
 	final String uniValueFilenameCol;
 	
+	// file extensions to be ignored by RequestSpec
+	final String[] standardFileExt = { "blob" };
+	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
 		this.request = req;
 		String method = req.getParameter("method");
@@ -117,6 +120,10 @@ public class RequestSpec {
 			}
 			else {
 				outputTypeStr = null;
+				List<String> ignoreFileExt = Arrays.asList(standardFileExt);
+				if(ignoreFileExt.contains(outputTypeStrTmp)) {
+					lastURIPart = lastURIPart.substring(0, lastDotIndex);
+				}
 			}
 		}
 		else {

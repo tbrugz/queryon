@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
@@ -1366,12 +1367,18 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("ResultSet has more than 1 column ["+queryName+"; #="+rsmd.getColumnCount()+"]");
 		}*/
 		List<String> cols = DataDumpUtils.getColumnNames(rsmd);
-		if(!cols.contains(reqspec.uniValueCol)) {
+		int colIndex = cols.indexOf(reqspec.uniValueCol);
+		if(colIndex==-1) {
 			throw new BadRequestException("Data column '"+reqspec.uniValueCol+"' not found");
 		}
-		
-		//XXX: get mimetype from column type (BLOB=application/octet-stream, CLOB=text/plain, ...) ? http://www.rfc-editor.org/rfc/rfc2046.txt
+
 		String mimeType = "text/plain";
+		//XXXdone: get mimetype from column type (BLOB=application/octet-stream, CLOB=text/plain, ...) ? http://www.rfc-editor.org/rfc/rfc2046.txt
+		List<Class<?>> types = DataDumpUtils.getColumnTypes(rsmd);
+		if(Blob.class.equals( types.get(colIndex) )) {
+			mimeType = "application/octet-stream";
+		}
+		
 		String filename = null;
 		
 		if(reqspec.uniValueMimetypeCol!=null && !cols.contains(reqspec.uniValueMimetypeCol)) {
