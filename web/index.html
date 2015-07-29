@@ -77,6 +77,32 @@
 			console.log('next-offset',nextOffset);
 			limOffNav.innerHTML += " <input type='button' value='&#9658;' onclick='document.getElementById(\"offset\").value="+nextOffset+";makeHrefs();doRun(\"objects\", \"content\", \"messages\", doRunCallback);' title='next page (offset = "+nextOffset+")' />";
 		}
+
+		var content = document.getElementById('content');
+		
+		// blob links
+		var cols = content.querySelectorAll('colgroup > col');
+		var blobIndexes = [];
+		for(var i=0;i<cols.length;i++) {
+			if(cols[i].getAttribute("type")=="Blob") {
+				blobIndexes.push(i);
+			}
+		}
+		var cols = getColumnsFromContainer('content');
+		console.log("blobIndexes: ",blobIndexes,cols);
+		if(blobIndexes.length>0) {
+			var rows = content.querySelectorAll('tr');
+			for(var i=1;i<rows.length;i++) {
+				for(var ci=0;ci<blobIndexes.length;ci++) {
+					//console.log("i ",i," ci ",ci," blobIndexes[ci] ",blobIndexes[ci]," val ",rows[i].children[blobIndexes[ci]]);
+					if(rows[i].children[blobIndexes[ci]].getAttribute("null")==null) {
+						var currval = rows[i].children[blobIndexes[ci]].innerHTML;
+						rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\"javascript:doDownloadBlob("+i+",'"+cols[blobIndexes[ci]]+"')"
+							+"\">"+currval+"</a>";
+					}
+				}
+			}
+		}
 		
 		// insert/update/delete
 		if(relationType == 'table') {
@@ -93,7 +119,6 @@
 			//var constr = rel.constraints.match(re);
 			//var re = /\[[PU]K:[A-Za-z_ ]*:[A-Za-z_, ]+\]/g;
 			
-			var content = document.getElementById('content');
 			var rows = content.querySelectorAll('tr');
 			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT'); // check insert-any-column
 			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE'); // check update-any-column
@@ -373,6 +398,15 @@
 				//row.lastChild.innerHTML = '';
 			});
 		}
+	}
+	
+	function doDownloadBlob(rownum, col) {
+		var ret = getKeyValsForRow(rownum);
+		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'valuefield='+col, 'blob');
+		
+		console.log("doDownloadBlob key",ret.key,"pk",ret.pk,"pkvals"
+				,ret.pkvals,"cols",ret.cols,"finalUrl",finalUrl);
+		window.open(finalUrl);
 	}
 	
 	</script>

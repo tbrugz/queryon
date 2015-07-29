@@ -280,7 +280,7 @@ function getColumnsFromContainer(containerId) {
 }
 
 function getValuesFromColumn(containerId, columnName) {
-	var cols = getColumnsFromContainer(containerId)
+	var cols = getColumnsFromContainer(containerId);
 	var colPos = cols.indexOf(columnName);
 	if(colPos==-1) {
 		console.log("column "+columnName+" not found");
