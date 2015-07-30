@@ -326,6 +326,15 @@ function getQueryUpdateUrl(selectId, key, queryString, syntax) {
 	return returl;
 }
 
+function getQueryUrlById(id, key, queryString, syntax) {
+	var returl = baseUrl+'/'+id
+		+(key?'/'+key:'')
+		+(syntax?'.'+syntax:'')
+		+(queryString?'?'+queryString:'');
+	
+	return returl;
+}
+
 function doDelete(selectId, key, containerId, messagesId, callback, callbackError) {
 	var finalUrl = getQueryUpdateUrl(selectId, key, 'updatemax=1&updatemin=1', 'json');
 	

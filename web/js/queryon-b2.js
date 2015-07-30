@@ -251,7 +251,7 @@ function getKeyValsForRow(rownum) {
 	var row = rows[rownum];
 	var pk = getPkCols('objects');
 	var cols = getColumnsFromContainer('content');
-	console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
+	//console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
 	if(pk==null) {
 		console.log('relation has no PK');
 		return null;
@@ -260,7 +260,7 @@ function getKeyValsForRow(rownum) {
 	for(var i=0;i<pk.length;i++) {
 		idx.push(cols.indexOf(pk[i]));
 	}
-	console.log('getKeyValsForRow idx', idx);
+	//console.log('getKeyValsForRow idx', idx);
 	var tds = row.querySelectorAll('td');
 	var vals = [];
 	var allvals = [];
@@ -285,4 +285,22 @@ function getKeyValsForRow(rownum) {
 	}
 
 	return {key: valsKey, filter: filter, pk: pk, pkvals: vals, cols: cols, allvals: allvals};
+}
+
+function getKeyValsForTr(pk, cols, tr) {
+	var tds = tr.querySelectorAll('td');
+
+	var idx = [];
+	for(var i=0;i<pk.length;i++) {
+		idx.push(cols.indexOf(pk[i]));
+	}
+	
+	var vals = [];
+	for(var i=0;i<idx.length;i++) {
+		vals.push(tds[idx[i]].innerHTML);
+	}
+	
+	var valsKey = vals.join('/'); //XXX url encode ?
+
+	return {key: valsKey, pkvals: vals};
 }

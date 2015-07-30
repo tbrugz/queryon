@@ -81,6 +81,7 @@
 		var content = document.getElementById('content');
 		
 		// blob links
+		var pk = getPkCols('objects');
 		var cols = content.querySelectorAll('colgroup > col');
 		var blobIndexes = [];
 		for(var i=0;i<cols.length;i++) {
@@ -89,18 +90,29 @@
 			}
 		}
 		var cols = getColumnsFromContainer('content');
-		console.log("blobIndexes: ",blobIndexes,cols);
+		console.log("blobIndexes: ",blobIndexes,cols,pk);
 		if(blobIndexes.length>0) {
+			if(pk) {
 			var rows = content.querySelectorAll('tr');
 			for(var i=1;i<rows.length;i++) {
+				var row = rows[i];
 				for(var ci=0;ci<blobIndexes.length;ci++) {
 					//console.log("i ",i," ci ",ci," blobIndexes[ci] ",blobIndexes[ci]," val ",rows[i].children[blobIndexes[ci]]);
-					if(rows[i].children[blobIndexes[ci]].getAttribute("null")==null) {
-						var currval = rows[i].children[blobIndexes[ci]].innerHTML;
-						rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\"javascript:doDownloadBlob("+i+",'"+cols[blobIndexes[ci]]+"')"
+					if(row.children[blobIndexes[ci]].getAttribute("null")==null) {
+						var currval = row.children[blobIndexes[ci]].innerHTML;
+						//console.log("row",i,row);
+						var keyret = getKeyValsForTr(pk, cols, row);
+						//valsKey
+						rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\""+getQueryUrlById(id,keyret.key,"valuefield="+cols[blobIndexes[ci]],'blob')
 							+"\">"+currval+"</a>";
+						//rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\"javascript:doDownloadBlob("+i+",'"+cols[blobIndexes[ci]]+"')"
+						//	+"\">"+currval+"</a>";
 					}
 				}
+			}
+			}
+			else {
+				console.log('relation '+id+' has no PK, blob download disabled. blobindexes: ',blobIndexes);
 			}
 		}
 		
@@ -400,6 +412,7 @@
 		}
 	}
 	
+	/*
 	function doDownloadBlob(rownum, col) {
 		var ret = getKeyValsForRow(rownum);
 		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'valuefield='+col, 'blob');
@@ -408,6 +421,7 @@
 				,ret.pkvals,"cols",ret.cols,"finalUrl",finalUrl);
 		window.open(finalUrl);
 	}
+	*/
 	
 	</script>
 	<style type="text/css">
