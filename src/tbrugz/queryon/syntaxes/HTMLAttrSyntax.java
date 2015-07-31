@@ -92,7 +92,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			sb.append("\n<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
 				if(finalColNames.contains(lsColNames.get(i))) {
-					sb.append("\n\t<col type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
+					sb.append("\n\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
 				}
 			}
 			sb.append("\n</colgroup>");
