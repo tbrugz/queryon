@@ -92,27 +92,39 @@
 		var cols = getColumnsFromContainer('content');
 		console.log("blobIndexes: ",blobIndexes,cols,pk);
 		if(blobIndexes.length>0) {
-			if(pk) {
 			var rows = content.querySelectorAll('tr');
-			for(var i=1;i<rows.length;i++) {
-				var row = rows[i];
-				for(var ci=0;ci<blobIndexes.length;ci++) {
-					//console.log("i ",i," ci ",ci," blobIndexes[ci] ",blobIndexes[ci]," val ",rows[i].children[blobIndexes[ci]]);
-					if(row.children[blobIndexes[ci]].getAttribute("null")==null) {
-						var currval = row.children[blobIndexes[ci]].innerHTML;
-						//console.log("row",i,row);
-						var keyret = getKeyValsForTr(pk, cols, row);
-						//valsKey
-						rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\""+getQueryUrlById(id,keyret.key,"valuefield="+cols[blobIndexes[ci]],'blob')
-							+"\">"+currval+"</a>";
-						//rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\"javascript:doDownloadBlob("+i+",'"+cols[blobIndexes[ci]]+"')"
-						//	+"\">"+currval+"</a>";
+			if(pk) {
+				for(var i=1;i<rows.length;i++) {
+					var row = rows[i];
+					for(var ci=0;ci<blobIndexes.length;ci++) {
+						//console.log("i ",i," ci ",ci," blobIndexes[ci] ",blobIndexes[ci]," val ",rows[i].children[blobIndexes[ci]]);
+						if(row.children[blobIndexes[ci]].getAttribute("null")==null) {
+							var currval = row.children[blobIndexes[ci]].innerHTML;
+							//console.log("row",i,row);
+							var keyret = getKeyValsForTr(pk, cols, row);
+							//valsKey
+							rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\""+getQueryUrlById(id,keyret.key,"valuefield="+cols[blobIndexes[ci]],'blob')
+								+"\">"+currval+"</a>";
+							//rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\"javascript:doDownloadBlob("+i+",'"+cols[blobIndexes[ci]]+"')"
+							//	+"\">"+currval+"</a>";
+						}
 					}
 				}
 			}
-			}
 			else {
-				console.log('relation '+id+' has no PK, blob download disabled. blobindexes: ',blobIndexes);
+				//limit=1&offset=7
+				for(var i=1;i<rows.length;i++) {
+					var row = rows[i];
+					for(var ci=0;ci<blobIndexes.length;ci++) {
+						if(row.children[blobIndexes[ci]].getAttribute("null")==null) {
+							var currval = row.children[blobIndexes[ci]].innerHTML;
+							rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\""+getQueryUrlById(id,null,"limit=1&offset="+(i-1)+"&valuefield="+cols[blobIndexes[ci]],'blob')
+								+"\">"+currval+"</a>";
+						}
+					}
+				}
+				
+				//console.log('relation '+id+' has no PK, blob download disabled. blobindexes: ',blobIndexes);
 			}
 		}
 		
