@@ -127,6 +127,7 @@ public class QueryOn extends HttpServlet {
 		SQL_ROWNUM,
 		SQL_FETCH_FIRST //ANSI:2008? offset?
 		;
+		// XXX TOP ? - sqlserver... http://www.tutorialspoint.com/sql/sql-top-clause.htm / http://stackoverflow.com/questions/11226153/oracle-equivalent-rownum-for-sql-server-2005
 		
 		static final String PROPFILE_DBMS_SPECIFIC = "/dbms-specific-queryon.properties";
 		static final ParametrizedProperties prop = new ParametrizedProperties();
@@ -157,7 +158,8 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	private static final Log log = LogFactory.getLog(QueryOn.class);
-
+	private static final Log logFilter = LogFactory.getLog(QueryOn.class.getName()+".filter");
+	
 	static final String INITP_PROPERTIES_PATH = "properties-resource";
 	//static final String INITP_MODEL_ID = "model-id";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
@@ -302,6 +304,7 @@ public class QueryOn extends HttpServlet {
 						}
 						catch(Exception e) {
 							log.warn("Exception executing processor on startup [model="+entry.getKey()+"]: "+e);
+							log.debug("Exception executing processor on startup [model="+entry.getKey()+"]: "+e.getMessage(), e);
 							//XXX: fail on error?
 						}
 					}
@@ -311,7 +314,8 @@ public class QueryOn extends HttpServlet {
 						ProcessorServlet.doProcess(p, context, null);
 					}
 					catch(Exception e) {
-						log.warn("Exception executing processor on startup: "+e, e);
+						log.warn("Exception executing processor on startup: "+e);
+						log.debug("Exception executing processor on startup: "+e.getMessage(), e);
 						//XXX: fail on error?
 					}
 				}
@@ -1093,6 +1097,7 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
 			if(!hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
+				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles); 
 				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
 			}
 			
@@ -1196,6 +1201,7 @@ public class QueryOn extends HttpServlet {
 					//String s = reqspec.params.get(i);
 					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.getUniqueColumns().get(i))+" = ?"; //+reqspec.params.get(i)
 					sql.bindParameterValues.add(reqspec.params.get(i));
+					logFilter.info("filterByKey: value["+i+"]="+reqspec.params.get(i));
 				}
 			}
 		}
@@ -1241,6 +1247,7 @@ public class QueryOn extends HttpServlet {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				sql.bindParameterValues.add(valueMap.get(col));
 				sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareSymbol+" ?");
+				logFilter.info("addUniqueFilter: values="+valueMap.get(col));
 			}
 			else {
 				log.warn("unknown column: "+col+" [relation="+relationName+"]");
@@ -1256,6 +1263,7 @@ public class QueryOn extends HttpServlet {
 					sql.bindParameterValues.add(values[i]);
 					sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareExpression); //" like ?"
 				}
+				logFilter.info("addMultiFilter: values="+Arrays.asList(values));
 			}
 			else {
 				log.warn("unknown column: "+col+" [relation="+relationName+"]");
@@ -1276,6 +1284,7 @@ public class QueryOn extends HttpServlet {
 				}
 				sb.append(")");
 				sql.addFilter(sb.toString());
+				logFilter.info("addMultiFilterSubexpression: values="+Arrays.asList(values));
 			}
 			else {
 				log.warn("unknown column: "+col+" [relation="+relationName+"]");
