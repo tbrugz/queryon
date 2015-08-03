@@ -214,12 +214,28 @@ public class SQL {
 		}
 		else if(strategy==LimitOffsetStrategy.SQL_ROWNUM) {
 			if(limit>0 && offset>0) {
-				sql = "select * from " 
-					+"( select a.*, ROWNUM rnum from (\n"
-					+ sql
-					+"\n) a " 
-					+"where ROWNUM <= "+(limit+offset)+" ) "
+				/* //works, but query below is simpler
+				sql =
+					 "select * from\n"
+					+"  ( select * from\n" 
+					+"    ( select a.*, ROWNUM rnum from\n"
+					+"      (\n"
+					+       sql+"\n"
+					+"      ) a\n"
+					+"    )\n" 
+					+"    where rnum <= "+(limit+offset)+"\n"
+					+"  )\n"
 					+"where rnum > "+offset;
+				*/
+				sql =
+					 "select * from\n"
+					+"   ( select a.*, ROWNUM rnum from\n"
+					+"      (\n"
+					+       sql+"\n"
+					+"      ) a\n"
+					+"   )\n" 
+					+"where rnum <= "+(limit+offset)+"\n"
+					+"and rnum > "+offset;
 			}
 			else if(limit>0) {
 				if(orderByApplyed) {
