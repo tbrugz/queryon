@@ -178,7 +178,9 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
 	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
-
+	
+	static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
+	
 	static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
 	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
@@ -244,7 +246,7 @@ public class QueryOn extends HttpServlet {
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 
-			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES));
+			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
 			log.info("syntaxes: "+DumpSyntaxRegistry.getSyntaxes());
 			
 			Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
@@ -346,7 +348,7 @@ public class QueryOn extends HttpServlet {
 		
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
-			conn = DBUtil.initDBConn(prop, prefix);
+			conn = DBUtil.initDBConn(prop, modelId);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}

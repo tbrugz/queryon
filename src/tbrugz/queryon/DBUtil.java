@@ -59,15 +59,17 @@ public class DBUtil {
 		return Types.OTHER;
 	}
 	
-	public static String getDBConnPrefix(Properties prop, String modelId) {
+	static String getDBConnPrefix(Properties prop, String modelId) {
 		String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
-		return prop.getProperty(prefix+".connpropprefix", prefix);
+		String ret = prop.getProperty(prefix+".connpropprefix", prefix);
+		//log.info("getDBConnPrefix: modelId = "+modelId+" ; ret = "+ret);
+		return ret;
 	}
 	
 	public static Connection initDBConn(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		//String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
 		//prefix = prop.getProperty(prefix+".connpropprefix", prefix);
-		log.debug("modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId));
+		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId));
 		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop);
 	}
 
