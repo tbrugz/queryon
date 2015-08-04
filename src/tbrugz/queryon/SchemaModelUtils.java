@@ -131,7 +131,9 @@ public class SchemaModelUtils {
 	}
 	
 	public static Set<String> getModelIds(ServletContext context) {
-		return getModels(context).keySet();
+		Map<String, SchemaModel> models = getModels(context);
+		if(models==null) { return null; }
+		return models.keySet();
 	}
 	
 	public static String getModelId(HttpServletRequest req) {

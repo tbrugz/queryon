@@ -7,11 +7,15 @@
 	String[] exposedKeys = {"queryon.models","queryon.models.default","queryon.qon-tables.table"};
 	String[] defaultValues = {null, null, QOnTables.DEFAULT_TABLES_TABLE};
 	
+	int i = 0;
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-	for(int i=0;i<exposedKeys.length;i++) {
+	if(prop!=null) {
+	for(;i<exposedKeys.length;) {
 		String k = exposedKeys[i];
 		if(i>0) { out.write(",\n"); }
 		out.write(sqd.get(k)+": "+sqd.get(prop.getProperty(k, defaultValues[i])));
+		i++;
+	}
 	}
 	
 	/*InputStream inputStream = application.getResourceAsStream("/META-INF/MANIFEST.MF");
@@ -24,8 +28,9 @@
 	p2.load(application.getResourceAsStream("/WEB-INF/classes/queryon-version.properties"));
 	//p2.load(application.getResourceAsStream("/queryon-version.properties"));
 	for(Map.Entry<Object, Object> entry: p2.entrySet()) {
-		out.write(",\n");
+		if(i>0) { out.write(",\n"); }
 		out.write(sqd.get((String)entry.getKey())+": "+sqd.get((String)entry.getValue()));
+		i++;
 	}
 %>
 }

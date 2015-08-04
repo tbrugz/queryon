@@ -9,7 +9,7 @@
 %>{<%
 	StringDecorator quoter = new StringDecorator.StringQuoterDecorator("\"");
 	Subject currentUser = SecurityUtils.getSubject();
-	boolean authenticated= currentUser.isAuthenticated();
+	boolean authenticated = currentUser.isAuthenticated();
 	out.write("\n\t\"authenticated\": "+authenticated);
 	//if(authenticated) {
 		// username

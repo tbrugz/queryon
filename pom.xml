@@ -197,6 +197,9 @@
         <version>9.3.1.v20150714</version>
         <configuration>
           <webAppSourceDirectory>${basedir}/web</webAppSourceDirectory>
+          <webApp>
+            <contextPath>/queryon</contextPath>
+          </webApp>
           <!-- <webXml>${basedir}/web/WEB-INF/web.xml</webXml>
           <jettyEnvXml>${basedir}/web/WEB-INF/jetty-env.xml</jettyEnvXml>
           <classesDirectory>${basedir}/target/classes</classesDirectory> -->
