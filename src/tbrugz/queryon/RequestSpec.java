@@ -84,8 +84,10 @@ public class RequestSpec {
 	final String uniValueFilename;
 	final String uniValueFilenameCol;
 	
+	final static int DEFAULT_LIMIT = 100;
+	
 	// file extensions to be ignored by RequestSpec
-	final String[] standardFileExt = { "blob" };
+	final static String[] standardFileExt = { "blob" };
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
 		this.request = req;
@@ -174,7 +176,7 @@ public class RequestSpec {
 		if(offsetStr!=null) { offset = Integer.parseInt(offsetStr); }
 		else { offset = 0; }
 
-		Long maxLimit = Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT);
+		Long maxLimit = Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT); //XXX: add DEFAULT_LIMIT_MAX ?
 		String limitStr = req.getParameter("limit");
 		if(limitStr!=null) {
 			int propLimit = Integer.parseInt(limitStr);
@@ -195,7 +197,7 @@ public class RequestSpec {
 			}
 			else {
 				//limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
-				limit = 0;
+				limit = DEFAULT_LIMIT;
 			}
 		}
 		
