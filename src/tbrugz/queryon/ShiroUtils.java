@@ -32,8 +32,8 @@ public class ShiroUtils {
 		Subject currentUser = SecurityUtils.getSubject();
 		if(currentUser.getPrincipal()==null) {
 			//TODOne: get static info from properties...
-			Object userIdentity = prop.getProperty(QueryOn.PROP_AUTH_ANONUSER);
-			String realmName = prop.getProperty(QueryOn.PROP_AUTH_ANONREALM);
+			Object userIdentity = prop.getProperty(QueryOn.PROP_AUTH_ANONUSER, QueryOn.DEFAULT_AUTH_ANONUSER);
+			String realmName = prop.getProperty(QueryOn.PROP_AUTH_ANONREALM, QueryOn.DEFAULT_AUTH_ANONREALM);
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
 			currentUser = new Subject.Builder().principals(principals).buildSubject();
 		}

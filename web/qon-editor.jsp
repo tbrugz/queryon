@@ -1,3 +1,5 @@
+<%@page import="java.util.*"%>
+<%@page import="tbrugz.queryon.ShiroUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
@@ -9,7 +11,8 @@
 <%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.queryon.SchemaModelUtils"%><%
-Subject currentUser = SecurityUtils.getSubject();
+Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Subject currentUser = ShiroUtils.getSubject(prop);
 if(!currentUser.isPermitted("SELECT_ANY:SELECT_ANY")) {
 	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 	out.write("permission denied");

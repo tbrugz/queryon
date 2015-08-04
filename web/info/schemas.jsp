@@ -30,7 +30,7 @@ public String normalize(String s) {
 	}
 	
 	List<String> schemas = new ArrayList<String>();
-	Properties prop = (Properties) request.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 	//out.write(DBUtil.getDBConnPrefix(prop, modelId));
 	if(prop!=null) {
 		try {

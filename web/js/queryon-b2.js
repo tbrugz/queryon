@@ -195,14 +195,7 @@ function loadAuthInfo() {
 		success: function(data) {
 			var info = JSON.parse(data);
 			console.log('authInfo', info);
-			if(info.authenticated) {
-				//username = info.username;
-				info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
-			}
-			else {
-				//username = '';
-				info.isAdmin = false;
-			}
+			info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
 			authInfo = info;
 			makeHrefs();
 		}

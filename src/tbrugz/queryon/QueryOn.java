@@ -184,6 +184,9 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
 	
+	static final String DEFAULT_AUTH_ANONUSER = "anonymous";
+	static final String DEFAULT_AUTH_ANONREALM = "anonRealm";
+	
 	static final String SUFFIX_GRABCLASS = ".grabclass";
 	//static final String SUFFIX_SQLDIALECT = ".sqldialect";
 	static final String PROP_GRABCLASS = "queryon.grabclass";
