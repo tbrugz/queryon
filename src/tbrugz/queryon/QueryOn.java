@@ -163,6 +163,8 @@ public class QueryOn extends HttpServlet {
 	static final String INITP_PROPERTIES_PATH = "properties-resource";
 	//static final String INITP_MODEL_ID = "model-id";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
+	static final String DEFAULT_PROPERTIES_VALUES_RESOURCE = "/queryon-defaults.properties";
+	
 	static final String CONN_PROPS_PREFIX = "queryon";
 	
 	static final String PROP_MODELS = "queryon.models";
@@ -238,12 +240,14 @@ public class QueryOn extends HttpServlet {
 	void doInit(ServletContext context) throws ServletException {
 		try {
 			prop.clear();
-			log.info("loading properties: "+propertiesResource);
 			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
 			String path = "http://"+InetAddress.getLocalHost().getHostName()+"/";
 			//+getServletContext().getContextPath();
 			prop.setProperty(PROP_BASE_URL, path);
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
+			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
+			
+			log.info("loading properties: "+propertiesResource);
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));

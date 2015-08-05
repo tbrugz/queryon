@@ -29,7 +29,7 @@ mvn org.eclipse.jetty:jetty-maven-plugin:9.3.1.v20150714:help
 
 mvn org.eclipse.jetty:jetty-maven-plugin:9.3.1.v20150714:run
 
-mvn org.mortbay.jetty:jetty-maven-plugin::run
+... mvn org.mortbay.jetty:jetty-maven-plugin::run
 
 ```
 
@@ -37,7 +37,7 @@ run tomcat
 ----------
 
 ```
-mvn org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:run
+... mvn org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:run
 ```
 
 

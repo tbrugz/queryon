@@ -19,7 +19,7 @@
 
 	<fileset id="fileset.base" dir="lib">
 		<!--include name="sqldump.jar" /-->
-		<include name="sqldump-0.9.12.jar" />
+		<!--include name="sqldump-0.9.12.jar" /-->
 		<include name="commons-logging-1.1.1.jar" />
 		<include name="log4j-1.2.16.jar" />
 		
@@ -167,8 +167,8 @@
 		<java classpathref="classpath.h2" classname="org.h2.tools.Server" fork="true">
 			<arg value="-tcp"/>
 			<arg value="-web"/>
-			<arg value="-baseDir"/>
-			<arg value="${h2.basedir}"/>
+			<!--arg value="-baseDir"/>
+			<arg value="${h2.basedir}"/-->
 			<!--arg value="-trace"/-->
 		</java>
 	</target>
