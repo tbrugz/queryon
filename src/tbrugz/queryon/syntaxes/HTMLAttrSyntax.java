@@ -19,8 +19,13 @@ import tbrugz.sqldump.util.Utils;
 public class HTMLAttrSyntax extends HTMLDataDump {
 	
 	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_TITLE", "_HREF"}; //XXX: change to enum!
+	
 	//static final List<String> ATTRIB = Arrays.asList(new String[]{SUFFIXES[0].substring(1).toLowerCase(), SUFFIXES[1].substring(1).toLowerCase()});
 	static final List<String> ATTRIBS = Arrays.asList("style", "class", "title");
+
+	static final String[] ROWWIDE_COLS = {"ROW_STYLE", "ROW_CLASS"};
+	transient final List<String> ROWWIDE_COLS_LIST = Arrays.asList(ROWWIDE_COLS);
+	static final List<String> ROWWIDE_ATTRIBS = Arrays.asList("style", "class");
 	
 	/*static final Map<String, StringDecorator> decorators = new HashMap<String, StringDecorator>();
 	
@@ -40,6 +45,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	//static final int SUFFIX_NAME_SIZE =  SUFFIXES[0].length();
 	
 	List<String> finalColNames = new ArrayList<String>();
+	List<String> rowSpecialAttr = new ArrayList<String>();
+	List<Integer> rowSpecialAttrIdx = new ArrayList<Integer>();
 
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
 	
@@ -59,6 +66,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		lsColNames.clear();
 		lsColTypes.clear();
 		finalColNames.clear();
+		rowSpecialAttr.clear();
+		rowSpecialAttrIdx.clear();
 		
 		for(int i=0;i<numCol;i++) {
 			boolean isFullColumn = true;
@@ -68,6 +77,11 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				if(colname.endsWith(suf)) {
 					isFullColumn = false;
 				}
+			}
+			if(ROWWIDE_COLS_LIST.contains(colname)) {
+				isFullColumn = false;
+				rowSpecialAttr.add(colname);
+				rowSpecialAttrIdx.add(i);
 			}
 			
 			if(isFullColumn) {
@@ -122,10 +136,21 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
-		sb.append("\t"+"<tr>");
-		Map<String, Map<String,String>> attrsVals = new HashMap<String, Map<String,String>>();
+		sb.append("\t"+"<tr");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
+		for(int i=0;i<rowSpecialAttrIdx.size();i++) {
+			int idx = rowSpecialAttrIdx.get(i);
+			String colName = rowSpecialAttr.get(i);
+			int rowIdx = ROWWIDE_COLS_LIST.indexOf(colName);
+			String attrib = ROWWIDE_ATTRIBS.get(rowIdx);
+			Object val = vals.get(idx);
+			if(val!=null) {
+				sb.append(" "+attrib+"=\""+val+"\"");
+			}
+		}
+		sb.append(">");
 		
+		Map<String, Map<String,String>> attrsVals = new HashMap<String, Map<String,String>>();
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			if(!finalColNames.contains(colName)) {
@@ -144,6 +169,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				}
 			}
 		}
+		
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			if(finalColNames.contains(colName)) {
@@ -176,7 +202,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 						if(ATTRIBS.contains(key)) {
 							String attrVal = attrs.get(key);
 							if(attrVal!=null) {
-								attrsStr += " "+key+"=\""+attrs.get(key)+"\"";
+								attrsStr += " "+key+"=\""+attrVal+"\"";
 							}
 						}
 						value = decorateValue(attrs, key, String.valueOf(value));
