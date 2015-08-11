@@ -186,20 +186,37 @@ public class QOnQueries extends SQLQueries {
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
 			int inParams = 0;
+			List<String> paramsTypes = new ArrayList<String>();
+			
 			for(int i=1;i<=params;i++) {
 				int pmode = ParameterMetaData.parameterModeIn; // assuming IN parameter
+				String ptype = null;
+				
 				try {
 					pmode = pmd.getParameterMode(i);
 				}
 				catch(SQLException e) {
 					log.debug("Exception getting parameter mode ["+queryName+"/"+i+"]: "+e);
-				} 
-				if(pmode==ParameterMetaData.parameterModeIn) { inParams++; }
+				}
+				
+				try {
+					ptype = pmd.getParameterTypeName(i);
+				}
+				catch(SQLException e) {
+					log.debug("Exception getting parameter type ["+queryName+"/"+i+"]: "+e);
+				}
+				
+				if(pmode==ParameterMetaData.parameterModeIn) {
+					inParams++;
+					paramsTypes.add(ptype);
+				}
 				else {
 					log.warn("Parameter of mode '"+pmode+"' not understood for query '"+queryName+"/"+i+"'");
 				}
 			}
 			query.setParameterCount(inParams);
+			query.setParameterTypes(paramsTypes);
+			//log.info("#params = "+inParams+" types = "+paramsTypes); 
 		} catch (SQLException e) {
 			query.setParameterCount(null);
 			log.warn("parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");

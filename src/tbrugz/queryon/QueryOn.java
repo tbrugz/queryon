@@ -210,6 +210,7 @@ public class QueryOn extends HttpServlet {
 	public static final String METHOD_DELETE = "DELETE";
 	
 	public static final String HEADER_VALIDATE_PARAMCOUNT = "X-Validate-ParameterCount";
+	public static final String HEADER_VALIDATE_PARAMTYPES = "X-Validate-ParameterTypes";
 	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
@@ -512,7 +513,7 @@ public class QueryOn extends HttpServlet {
 					}
 				}
 				catch(SQLException e) {
-					throw new BadRequestException(e.getMessage());
+					throw new BadRequestException(e.getMessage(), e);
 				}
 				break;
 			case VALIDATE_ANY:
@@ -521,7 +522,7 @@ public class QueryOn extends HttpServlet {
 					doValidate(relation, reqspec, resp);
 				}
 				catch(SQLException e) {
-					throw new BadRequestException(e.getMessage());
+					throw new BadRequestException(e.getMessage(), e);
 				}
 				break;
 			case EXECUTE:
@@ -739,8 +740,18 @@ public class QueryOn extends HttpServlet {
 
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
-			log.info("doValidate: #params="+params);
+			List<String> paramsTypes = new ArrayList<String>();
+			try {
+				for(int i=1;i<=params;i++) {
+					paramsTypes.add(pmd.getParameterTypeName(i));
+				}
+			}
+			catch(SQLException e) {
+				log.warn("exception: ParameterMetaData.getParameterTypeName: "+e.getMessage());
+			}
+			//log.info("doValidate: #params="+params+" ; types = "+paramsTypes);
 			resp.setIntHeader(HEADER_VALIDATE_PARAMCOUNT, params);
+			resp.setHeader(HEADER_VALIDATE_PARAMTYPES, paramsTypes.toString());
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
@@ -862,8 +873,8 @@ public class QueryOn extends HttpServlet {
 	
 	static {
 		tableAllColumns = new ArrayList<String>(); tableAllColumns.addAll(relationCommonCols); tableAllColumns.addAll(Arrays.asList(new String[]{"PKConstraint"}));
-		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(Arrays.asList(new String[]{"parameterCount"}));
-		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(Arrays.asList(new String[]{"parameterCount"}));
+		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(Arrays.asList(new String[]{"parameterCount", "parameterTypes"}));
+		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(Arrays.asList(new String[]{"parameterCount", "parameterTypes"}));
 	}
 	
 	@SuppressWarnings("resource")
