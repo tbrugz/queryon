@@ -1,4 +1,11 @@
 
+queryon ng
+----------
+* build: added status.jsp & build.revisionNumber
+* web: blob dump ui
+* web: added map ui (mapproc)
+
+
 queryon 0.6.0
 -------------
 * added ProcessorServlet
