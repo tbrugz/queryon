@@ -1,0 +1,522 @@
+<html>
+<head>
+<title>QOn + MapProc</title>
+<link rel="stylesheet" type="text/css" href="css/mapproc.css" />
+<link rel="stylesheet" type="text/css" href="css/qonmap.css" />
+<link rel="icon" type="image/png" href="../favicon.png" />
+<script src="../js/jquery-2.1.0.min.js"></script>
+<!-- <script type="text/javascript" src="js/jquery-1.7.js"></script> -->
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="js/mapproc.js"></script>
+<script type="text/javascript" src="js/mapproc.sa.js"></script>
+<script type="text/javascript" src="js/jscolor/jscolor.js"></script>
+<script type="text/javascript">
+/*
+ * Mapproc project, see: https://bitbucket.org/tbrugz/mapproc/
+ */
+//TODO: constants for map center position
+var places, catData, seriesData;
+var gmapsPlaces = {};
+var map;
+var mapCenter = [-16, -48]; //XXX get from maps.json
+
+function loadNakedMap(map_canvas_id, mapUrl) {
+	//var dataPlaces = mapUrl;
+	console.log("loadNakedMap:: mapUrl=",mapUrl);
+	var jqxhrPlaces = $.ajax({
+		url: mapUrl,
+		dataType: 'text',
+		success: function(data) {
+			//okNumber++;
+			//XXX search all features of Polygon type?
+			data = JSON.parse(data);
+			places = data.features;
+			var mymap = loadNakedMapCallback(map_canvas_id);
+			//if(okNumber==3) { doIt(); }
+			
+			//http://stackoverflow.com/questions/11029948/enabling-event-propogation-effectively-in-google-maps-api-v3
+			//addMapMouseListeners(mymap, document.getElementById('position'));
+		},
+		error: function() { alert("error Places ["+mapUrl+"]"); }
+	});
+	//.error()
+}
+
+function addMapMouseListeners(map, element) {
+	google.maps.event.addListener(map, 'mousemove', function(event) {
+		updatePosition(event, element);
+	});
+	google.maps.event.addListener(map, 'mouseover', function(event) {
+		element.style.display = 'block';
+	});
+	google.maps.event.addListener(map, 'mouseout', function(event) {
+		element.style.display = 'none';
+	});	
+}
+	
+function updatePosition(event, element) {
+	element.innerHTML = (''+event.latLng.lat()).substr(0,8)+"; "+(''+event.latLng.lng()).substr(0,8);
+}
+
+function loadNakedMapCallback(map_canvas_id) {
+	
+	var count = 0;
+	var box = new google.maps.LatLngBounds();
+	for(idx in places) {
+		var thisplace = places[idx];
+		var id = idx;
+		if(thisplace.properties && thisplace.properties.id) {
+			id = thisplace.properties.id;
+		}
+		//console.log(thisplace);
+		var polygons = new Array();
+		for(polyid in thisplace.geometry.coordinates) {
+			var coords = new Array();
+			for(c in thisplace.geometry.coordinates[polyid]) {
+				var latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyid][c][1], thisplace.geometry.coordinates[polyid][c][0]);
+				coords.push( latlng );
+				box.extend( latlng );
+			}
+			polygons.push(coords);
+		}
+		var theplace = new google.maps.Polygon({
+			paths: polygons,
+			strokeColor: "#444444",
+			strokeOpacity: 0.8,
+			strokeWeight: 1,
+			fillColor: DEFAULT_FILL_COLOR,
+			fillOpacity: 0.7
+		});
+		theplace.id = id;
+		if(thisplace.properties) {
+			theplace.name = thisplace.properties.name;
+			theplace.description = thisplace.properties.description;
+		}
+		theplace.setMap(map);
+		gmapsPlaces[theplace.id] = theplace;
+		count++;
+		//if(count>10) { break; }
+	}
+	
+	map.fitBounds(box);
+	//console.log(box);
+	return map;
+}
+
+function loadData(dataUrl) {
+	//XXX: json with 2 columns: 1st is id, 2nd is value ;
+	//     1st colname is object-label ; 2nd is value_label - what about measure-unit?
+	//var dataUrl = document.getElementById('dataUrl').value;
+	console.log("loadData:: dataurl=",dataUrl);
+	var jqxhrSeries = $.ajax({ url: dataUrl,
+		dataType: 'text',
+		success: function(data) {
+			//okNumber++;
+			seriesData = null;
+			try {
+				//parse JSON series
+				var qonData = JSON.parse(data);
+				//TODO: create seriesData from qonData
+				var selc = document.getElementById('dataColumn');
+				var col = selc.options[selc.selectedIndex].value;
+				seriesData = transformQonData(qonData, col);
+			}
+			catch(e) {
+				//try CSV parse
+				try {
+					seriesData = parseCSV(data, ";");
+					console.log("csv: seriesData=",seriesData);
+				}
+				catch(e) {
+					alert("error Series ["+dataUrl+"]: "+e);
+				}
+			}
+			if(seriesData) { loadDataCallback(); }
+			//if(okNumber==3) { doIt(); }
+		},
+		error: function() { alert("error Series ["+dataUrl+"]"); }
+	});
+	//.error()
+}
+
+function parseCSV(csv, sep) {
+	var nl = /\r?\n/;
+	var lines = csv.split(nl);
+	if(!lines.length || lines.length <= 1) { throw "error parsing CSV"; }
+	var header = lines[0].split(sep);
+	var sdata = { objectLabel: normalize(header[0]), valueLabel: normalize(header[1]), valueType: "FLOAT", series: {} };
+	for(var i=1;i<lines.length;i++) {
+		var values = lines[i].split(sep);
+		if(lines[i].length>0 && (!values.length || values.length <= 1)) { throw "error parsing CSV line "+(i+1)+": "+lines[i]; }
+		sdata.series[values[0]] = values[1];
+	}
+	return sdata;
+}
+
+function normalize(value) {
+	return value.replace(/[\"\']/g,"");
+}
+
+function createCatElements() {
+	//TODO: double-clickable cat elements (shows only elements from thar category) - .class for placemarks - only change clas style
+	//console.log(catData);
+	var ncats = Object.keys(catData).length;
+	//var divLimits = getLinearCategoriesLimits(0, 100, ncats);
+	var catheight = 100/ncats;
+	var container = document.getElementById('categories_canvas');
+	while (container.hasChildNodes()) {
+		container.removeChild(container.lastChild);
+	}
+	//console.log(ncats+" ; "+divLimits);
+	var catDataIndexes = [];
+	//var counter = ncats-1;
+	for(var id in catData) {
+		catDataIndexes.push(id);
+	}
+	catDataIndexes.reverse();
+	for(var idx in catDataIndexes) {
+	//for(var i=0; i<ncats; i++) {
+		var id = catDataIndexes[idx];
+		var cat = document.createElement('div');
+		cat.setAttribute('id', id);
+		cat.setAttribute('class', 'category');
+		cat.setAttribute('style', 'height: '+catheight+'%;');
+		var catInt = document.createElement('div');
+		catInt.setAttribute('class', 'categoryInternal');
+		catInt.setAttribute('style', 'background-color: #'+catData[id].color+'; height: 100%; width: 100%;');
+		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'", null, "'+catData[id].description+'")'); //catData[id].description
+		catInt.innerHTML = '#'+id;
+		//cat.setAttribute('onclick', 'showPlaceInfo(id, "'+catData[id].name+'", "'+catData[id].description+'")'); //catData[id].description
+		//cat.setAttribute('onclick', function() { showPlaceInfo(id, "", ""); }); //catData[id].description
+		//console.log(cat);
+		cat.appendChild(catInt);
+		container.appendChild(cat);
+	}
+	var mapcanvas = document.getElementById('map_canvas');
+	mapcanvas.style.right = "" + (parseInt(container.style.width) + 0.3) + "em";
+	container.style.display = 'block';
+}
+
+function resetMap() {
+	document.getElementById('place_info').style.display='none';
+	
+	for(var id in gmapsPlaces) {
+		var placemark = gmapsPlaces[id];
+		placemark.fillColor = DEFAULT_FILL_COLOR;
+		placemark.setMap(null);
+		placemark.setMap(map); //atualiza placemark no mapa - 'null' retira elemento do mapa
+		placemark.catId = null;
+		placemark.description = null;
+		//TODO: removeListener
+		//google.maps.event.removeListener(placemark.listener);
+	}
+	
+	//console.log('reset');
+	var container = document.getElementById('categories_canvas');
+	container.style.display = 'none';
+	var mapcanvas = document.getElementById('map_canvas');
+	mapcanvas.style.right = 0;
+	
+	global_selectCatIdElements = 0;
+	closeCatInfo();
+}
+	
+function loadDataCallback() {
+	//console.log(seriesData.series);
+	//TODOne: remove (or not) data elements not present in map
+	var genCatLimitsFromExistingPlacemarks = document.getElementById('genCatLimitsFromExistingPlacemarks').checked;
+	//console.log('genCatLimitsFromExistingPlacemarks: '+genCatLimitsFromExistingPlacemarks)
+	if(genCatLimitsFromExistingPlacemarks) {
+		removeSeriesDataWhenPlacemarkNotFound(gmapsPlaces, seriesData);
+	}
+	
+	var maxval = max(seriesData.series);
+	var minval = min(seriesData.series);
+	var numOfCategories = document.getElementById('numOfCategories').value;
+	console.log('vals: min=',minval,' max=',maxval,' #cats= '+numOfCategories );
+	//TODO: log/linear/percentile cat limits
+	var catLimits;
+	var scaleType = document.getElementById('scaleType').value;
+	if(scaleType=='LINEAR') {
+		catLimits = getLinearCategoriesLimits(minval, maxval, numOfCategories);
+	}
+	else if(scaleType=='QUANTILE') {
+		catLimits = getQuantileCategoriesLimits(seriesValues(seriesData.series), numOfCategories);
+	}
+	else {
+		catLimits = getLogCategoriesLimits(minval, maxval, numOfCategories);
+	}
+	console.log("catLimits=",catLimits);
+	
+	var cats = genCategoriesFromLimits(catLimits);
+	catData = cats;
+
+	console.log('cats=', cats);
+	
+	var colorFrom = document.getElementById('colorFrom').value;
+	var colorTo = document.getElementById('colorTo').value;
+	var colors = [colorFrom];
+	var xtracol = document.getElementById('xtraColorsContainer');
+	var colorElements = xtracol.querySelectorAll('input.color');
+	for(var i=colorElements.length-1;i>=0;i--) {
+		colors.push(rgbColor2kmlColor(colorElements[i].value));
+	}
+	colors.push(colorTo);
+
+	//console.log('color: from='+colorFrom+'; to='+ colorTo+" ; all="+colors);
+	//procStylesFromCategories(cats, colorFrom, colorTo, seriesData.valueLabel);
+	procStylesFromCategoriesMultipleColors(cats, colors, seriesData.valueLabel);
+	
+	//console.log("hex:: "+hexString(2)+"; "+hexString(9)+"; "+hexString(10)+"; "+hexString(11)+"; "+hexString(250)+"; "+hexString(255));
+	
+	applySeriesDataAndStyle(gmapsPlaces, seriesData, cats, map);
+	//applySeriesData(gmapsPlaces, seriesData, cats);
+	//applyStyleColor(gmapsPlaces, cats);
+	createCatElements();
+	
+	closeCatInfo();
+	//TODO: option to select (show only) placemarks from given category
+	//TODO: remove placemark not found? nah... add all not found to 'unknown' category
+}
+
+function loadGoogleMaps(map_canvas_id) {
+	var myOptions = {
+			zoom: 5,
+			//TODOne: posicionamento automatico... ?
+			position: new google.maps.LatLng(mapCenter[0], mapCenter[1]),
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+		};
+
+	map = new google.maps.Map(document.getElementById(map_canvas_id), myOptions);
+	map.setCenter(myOptions.position);
+}
+
+function addColorButton() {
+	/*<div id="xtraColorsContainer">
+	</div>
+	<input type="button" value="+" onclick="addColorButton" style="width: 2em;"><br/>
+	Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorFromRGB" value="FFFF00" onchange="changeColor('colorFromRGB', 'colorFrom')"/> <input type="hidden" id="colorFrom" name="colorFrom"/><br/>*/
+	var cont = document.getElementById('xtraColorsContainer');
+	//console.log(cont);
+	var span = document.createElement('span');
+	span.setAttribute('style','display: inline-block');
+	span.innerHTML += 'Color: <input type="text" class="color small"/><input type="button" value="-" onclick="this.parentElement.parentElement.removeChild(this.parentElement);" class="symbol">';
+	cont.appendChild(span);
+	jscolor.bind();
+}
+
+function addDataSeriesDialog() {
+	var div = document.createElement('div');
+	div.setAttribute('id','seriesDialog');
+	div.setAttribute('class','dialog');
+	div.innerHTML = "<div><label>Name: <input type='text' id='seriesName'/></label><br/>"
+		+"<label>URL: <input type='text' id='seriesUrl'/></label><br/>"
+		+"<input type='button' value='add' onclick='addElement2Select(document.getElementById(\"dataUrl\"),{\"name\":document.getElementById(\"seriesName\").value,\"url\":document.getElementById(\"seriesUrl\").value});document.getElementById(\"dataUrl\").value=document.getElementById(\"seriesUrl\").value;removeElement(this.parentElement.parentElement);'>"
+		+"<input type='button' value='cancel' onclick='removeElement(this.parentElement.parentElement);'></div>";
+	var cont = document.getElementsByTagName('body')[0];
+	cont.appendChild(div);
+}
+
+function addElement2Select(select, element) {
+	if(element.div) {
+		select.innerHTML += "<option disabled>"+element.div+"</option>\n";
+	}
+	else {
+		select.innerHTML += "<option value='"+element.url+"'"+(element['default']?" selected":"")+" columnNames='"+element.columnNames+"'>"+element.name+"</option>\n";
+	}
+}
+
+function removeElement(elem) {
+	elem.parentElement.removeChild(elem);
+}
+
+function refreshDataUrlColumns() {
+	var sel = document.getElementById('dataUrl');
+	var collist = sel.options[sel.selectedIndex].getAttribute('columnnames');
+	var cols = collist.split(",");
+	var selCols = document.getElementById('dataColumn');
+	selCols.innerHTML = '';
+	for(var i=0;i<cols.length;i++) {
+		var cc = cols[i].trim();
+		selCols.innerHTML += "<option value="+cc+">"+cc+"</option>\n";
+	}
+}
+
+function transformQonData(qonData, column) {
+	// GEOM_ID, GEOM_NAME, 
+	var data = {
+			"objectLabel": "GEOM_ID",
+			"valueLabel": column,
+			"valueType": "FLOAT",
+			"measureUnit": "",
+			"series": {
+			}
+		};
+	qonData = getQonData(qonData);
+	for(var i=0;i<qonData.length;i++) {
+		data.series[qonData[i]["GEOM_ID"]] = qonData[i][column];
+	}
+	return data;
+}
+
+function getQonData(qonData) {
+	var keys = Object.keys(qonData);
+	var index = 0;
+	if(keys[index].startsWith("$") || keys[index].startsWith("@")) { index = 1; }
+	return qonData[keys[index]];
+}
+
+$.ajax({
+	url: '../q/relation.json',
+	dataType: 'text',
+	success: function(data) {
+		var seriesData = JSON.parse(data);
+		var sources = seriesData.relation;
+		//console.log(sources);
+		var select = document.getElementById('dataUrl');
+		for(var i=0;i<sources.length;i++) {
+			if(sources[i].columnNames.indexOf("GEOM_ID")>0) {
+				var elname = (sources[i].schemaName?sources[i].schemaName+".":"")+sources[i].name;
+				addElement2Select(select,
+					{
+						"div": false,
+						"url": "../q/"+elname+".json",
+						"name": elname,
+						"columnNames": sources[i].columnNames.substring(1,sources[i].columnNames.length-1)
+					}
+				);
+			}
+		}
+		refreshDataUrlColumns();
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+		console.log('datasources.json', jqXHR, textStatus, errorThrown);
+	}
+});
+
+$.ajax({
+	url: 'maps.json',
+	dataType: 'text',
+	success: function(data) {
+		var mapsData = JSON.parse(data);
+		var sources = mapsData.maps;
+		//console.log(sources);
+		var select = document.getElementById('mapUrl');
+		for(var i=0;i<sources.length;i++) {
+			addElement2Select(select, sources[i]);
+		}
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+		console.log('maps.json', jqXHR, textStatus, errorThrown);
+	}
+});
+
+</script>
+</head>
+<body onload="changeColor('colorFromRGB', 'colorFrom');changeColor('colorToRGB', 'colorTo');loadGoogleMaps('map_canvas');">
+
+<div class="boxsmall logo">
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> + MapProc<sup style="color: #fa0; font-size: 10pt;">beta!</sup></span>
+</div>
+
+<div id="form">
+
+<div class="boxsmall">
+Map:
+<select name="mapUrl" id="mapUrl">
+</select>
+<br/>
+<input value="Load" type="button" style="width: auto;"
+	onclick="loadNakedMap('map_canvas', document.getElementById('mapUrl').options[document.getElementById('mapUrl').selectedIndex].value);">
+<input value="Reset" type="button" style="width: auto;"
+	onclick="loadGoogleMaps('map_canvas');gmapsPlaces = {};">
+</div>
+
+<form id="theform" action="proc/">
+
+<div class="boxsmall">
+Data:
+<select name="dataUrl" id="dataUrl" onchange="refreshDataUrlColumns()">
+</select>
+<!-- TODO add parameters, add filters -->
+<!-- <input type="button" value="+" onclick="addDataSeriesDialog();" class="symbol"> --><br/>
+Column:
+<select name="dataColumn" id="dataColumn">
+</select>
+</div>
+
+<div id="categoriesGenComp" class="boxsmall">
+#Cat: 
+<select name="numOfCategories" id="numOfCategories">
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5" selected>5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="12">12</option>
+<option value="15">15</option>
+<option value="20">20</option>
+<option value="25">25</option>
+</select><br/>
+Scale: 
+<select name="scaleType" id="scaleType">
+	<option value="LINEAR">LINEAR</option>
+	<option value="LOG">LOG</option>
+	<option value="QUANTILE" selected>QUANTILE</option>
+</select><br/>
+Normalize Limits? <input type="checkbox" class="smaller" name="genCatLimitsFromExistingPlacemarks" id="genCatLimitsFromExistingPlacemarks" value="1" checked/><br/>
+</div>
+
+<div id="colorsContainer" class="boxsmall">
+Color Max: <input type="text" class="color small" id="colorToRGB" name="colorToRGB" value="FF0000" onchange="changeColor('colorToRGB', 'colorTo')"/> <input type="hidden" id="colorTo" name="colorTo"/>
+<div id="xtraColorsContainer" style="display: inline;">
+</div>
+<input type="button" value="+" onclick="addColorButton()" class="symbol"><br/>
+Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorFromRGB" value="FFFF00" onchange="changeColor('colorFromRGB', 'colorFrom')"/> <input type="hidden" id="colorFrom" name="colorFrom"/><br/>
+</div>
+
+<!-- 
+Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound" value="1"/><br/ -->
+<br/>
+<input type="button" value="Load Data" class="medium" onClick="loadData(document.getElementById('dataUrl').value);"/><br/>
+<input type="button" value="Reset" class="medium" onClick="resetMap();"/><br/>
+<br/>
+<!-- input type="button" value="Open in GMaps" class="medium" onClick="openInGoogleMaps('theform');"/><br/ -->
+<input type="submit" value="Download" class="small"/><br/>
+</form>
+
+</div>
+
+<div id="map_canvas" class="canvas" style="position: absolute; top: 0; bottom: 0; left: 16em; right: 0; border: 1px solid black;"></div>
+
+<div id="position" style=""></div>
+
+<div id="categories_canvas" class="canvas" style="position: absolute; top: 0; bottom: 0; width: 4em; right: 0; border: 1px solid black; z-index: 2; display: none;"></div>
+
+<div id="messages" style="position: absolute; bottom: 8px; left: 16.3em; border: 1px solid black; display: none;"></div>
+
+<div id="map_location" style="width: 800px; height: 60px; border: 1px solid black; background-color: #ddd; display: none;"></div>
+
+<div id="place_info" style="position: absolute; height: 11em; bottom: 4px; width: 15em; left: 4px; border: 1px solid black; display: none;">
+	<div id="place_info_close" style="float: right; top: 0px; right: 0px;"><a href="#" onclick="document.getElementById('place_info').style.display='none';">[x]</a></div>
+	<span class="label debug" id="placeIdLabel">id: </span><span id="placeId" class="placeInfo debug"></span>
+	<span class="label debug">cat: </span><span id="placeCat" class="placeInfo debug"></span><br/>
+	<span class="label" id="placeNameLabel">name: </span><div id="placeName" class="placeInfo"></div>
+	<span class="label">desc: <br/></span><div id="placeDesc" class="placeInfo"></div>
+</div>
+
+<div id="category_info" style="position: absolute; bottom: 0; height: 1em; left: 16em; right: 4.3em; border: 1px solid black; display: none;">
+	<div id="category_info_contents">
+		<div id="category_info_close" style="float: right; top: 0px; right: 0px;"><a href="#" onclick="closeCatInfo();">[x]</a></div>
+		<span>cat #</span><span id="category_info_id"></span>
+		<span>| info: </span><span id="category_info_text"></span>
+		<span id="category_info_button_container"></span>
+	</div>
+</div>
+
+</body>
+</html>

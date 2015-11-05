@@ -1,0 +1,6 @@
+{
+"maps": [
+	{ "id":"XX", "name": "Map XX", "url": "geojson/XX.json", "default": true }
+],
+"mapcenter": [-16, -48]
+}

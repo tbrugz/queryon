@@ -1,0 +1,22 @@
+<html>
+<head>
+	<title>jscolor demo</title>
+</head>
+<body>
+
+	<script type="text/javascript" src="jscolor.js"></script>
+
+	Click here: <input class="color" value="66ff00" id="myColor" onchange="
+	document.getElementById('red').value = this.color.rgb[0];
+	document.getElementById('grn').value = this.color.rgb[1];
+	document.getElementById('blu').value = this.color.rgb[2];
+	document.getElementById('earthColor').value = 'AA'+this.value.substring(4,6)+this.value.substring(2,4)+this.value.substring(0,2);
+	"/>
+	--- earth: <input id="earthColor"/>
+
+	<br/>
+	
+R<input id="red" size="5">  G<input id="grn" size="5">  B<input id="blu" size="5">
+
+</body>
+</html>
