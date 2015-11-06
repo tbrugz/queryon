@@ -5,8 +5,7 @@
 <link rel="stylesheet" type="text/css" href="css/qonmap.css" />
 <link rel="icon" type="image/png" href="../favicon.png" />
 <script src="../js/jquery-2.1.0.min.js"></script>
-<!-- <script type="text/javascript" src="js/jquery-1.7.js"></script> -->
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
 <script type="text/javascript" src="js/mapproc.js"></script>
 <script type="text/javascript" src="js/mapproc.sa.js"></script>
 <script type="text/javascript" src="js/jscolor/jscolor.js"></script>
@@ -197,7 +196,7 @@ function createCatElements() {
 	container.style.display = 'block';
 }
 
-function resetMap() {
+function resetMapData() {
 	document.getElementById('place_info').style.display='none';
 	
 	for(var id in gmapsPlaces) {
@@ -366,6 +365,20 @@ function getQonData(qonData) {
 	return qonData[keys[index]];
 }
 
+function loadMap() {
+	var mapUrl = document.getElementById('mapUrl');
+	loadNakedMap('map_canvas', mapUrl.options[mapUrl.selectedIndex].value);
+	document.getElementById('btn-loaddata').disabled = false;
+	document.getElementById('btn-resetdata').disabled = false;
+}
+
+function resetMap() {
+	loadGoogleMaps('map_canvas');
+	gmapsPlaces = {};
+	document.getElementById('btn-loaddata').disabled = true;
+	document.getElementById('btn-resetdata').disabled = true;
+}
+
 $.ajax({
 	url: '../q/relation.json',
 	dataType: 'text',
@@ -427,9 +440,9 @@ Map:
 </select>
 <br/>
 <input value="Load" type="button" style="width: auto;"
-	onclick="loadNakedMap('map_canvas', document.getElementById('mapUrl').options[document.getElementById('mapUrl').selectedIndex].value);">
+	onclick="loadMap();">
 <input value="Reset" type="button" style="width: auto;"
-	onclick="loadGoogleMaps('map_canvas');gmapsPlaces = {};">
+	onclick="resetMap();">
 </div>
 
 <form id="theform" action="proc/">
@@ -482,11 +495,13 @@ Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorF
 <!-- 
 Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound" value="1"/><br/ -->
 <br/>
-<input type="button" value="Load Data" class="medium" onClick="loadData(document.getElementById('dataUrl').value);"/><br/>
-<input type="button" value="Reset" class="medium" onClick="resetMap();"/><br/>
+<input type="button" id="btn-loaddata" value="Load Data" class="medium" onClick="loadData(document.getElementById('dataUrl').value);" disabled/><br/>
+<input type="button" id="btn-resetdata" value="Reset Data" class="medium" onClick="resetMapData();" disabled/><br/>
 <br/>
 <!-- input type="button" value="Open in GMaps" class="medium" onClick="openInGoogleMaps('theform');"/><br/ -->
+<!-- 
 <input type="submit" value="Download" class="small"/><br/>
+ -->
 </form>
 
 </div>
