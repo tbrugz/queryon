@@ -110,6 +110,7 @@ modelId = SchemaModelUtils.getModelId(request);
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
 			closeResults();
+			updateUI();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
@@ -168,6 +169,7 @@ modelId = SchemaModelUtils.getModelId(request);
 					);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			updateUI();
 		});
 	}
 	
@@ -216,6 +218,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			//XXX: reload query after save?
 			validateEditComponents(true);
 			history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
+			updateUI();
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -225,6 +228,7 @@ modelId = SchemaModelUtils.getModelId(request);
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			updateUI();
 		});
 	}
 
@@ -374,7 +378,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	}
 	
 	function updateUI() {
-		document.getElementById('queryResult').style.top = document.getElementById('spec').offsetHeight + 'px';
+		document.getElementById('queryResult').style.top = (document.getElementById('spec').offsetHeight + 0) + 'px';
 	}
 	
 	function refreshRolesInfo() {
@@ -615,7 +619,7 @@ if(remarks==null) { remarks = ""; }
 	</div>
 </div>
 
-<div class="container">
+<div class="container" id="resultContainer">
 	<div id="queryResult"></div>
 </div>
 

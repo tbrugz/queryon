@@ -68,6 +68,9 @@ function updateSelectedQueryState() {
 			if(! authInfo.authenticated) {
 				showInfoMessages('messages', 'Query <code>'+relname+'</code> not found. Maybe you should login');
 			}
+			/*else {
+				closeMessages('messages');
+			}*/
 		}
 		else {
 			setParametersValues(parts);

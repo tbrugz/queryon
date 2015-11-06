@@ -52,6 +52,7 @@ td[null] {
 }
 
 /* datadiff */
+
 tr.equal td {
 	background-color: #ddd;
 	/*background-color: #99f;*/

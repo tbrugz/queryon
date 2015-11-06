@@ -167,7 +167,6 @@ getDDL = function() {
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
 			showErrorMessages('messages', jqXHR.responseText);
-			//TODO: show error
 			var container = document.getElementById('content-container');
 			container.style.display = 'none';
 		}
