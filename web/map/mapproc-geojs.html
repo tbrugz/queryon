@@ -309,7 +309,7 @@ function loadDataCategoricalSeries() {
 	var keys = Object.keys(shash);
 	var numOfCategories = keys.length;
 	var catLimits = [];
-	var skeys = keys.sort();
+	var skeys = keys.sort(); // null becomes 'null' ?
 	console.log('series sorted keys:',skeys);
 	//skeys.push(skeys[skeys.length-1]);
 	skeys.push(null);

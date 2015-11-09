@@ -80,7 +80,10 @@ function isNumeric(n) {
 
 function isNumericArray(series) {
 	for(var i in series) {
-		if(!isNumeric(series[i])) { return false; }
+		if((series[i] != null) && !isNumeric(series[i])) {
+			//console.log("non-numeric: "+series[i]);
+			return false;
+		}
 	}
 	return true;
 }
@@ -157,6 +160,9 @@ function normalizeNum(float) {
 }
 
 function getCat(value, catData, isNumerical) {
+	/*if(value==null) {
+		console.log("nullvalue: "+value+" ; isNumerical: "+isNumerical);
+	}*/
 	if(isNumerical) {
 		var numValue = normalizeNum(value);
 		for(id in catData) {
@@ -169,7 +175,10 @@ function getCat(value, catData, isNumerical) {
 	}
 	else {
 		for(id in catData) {
-			if( (value == catData[id].startval) ) {
+			/*if(value==null) {
+				console.log("nullvalue: ",value," ; isNumerical: ",isNumerical," ; ",catData[id].startval);
+			}*/
+			if( ((""+value) == catData[id].startval) ) {
 				//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
 				return id;
 			}
@@ -492,6 +501,6 @@ function getCategoryInfoNavigation(currentCatId) {
 	if(currentCatId < catlen) {
 		str += "<a href='#' onclick='showCategoryInfo("+(1+currentCatId)+")'> &gt; </a>";
 	}
-	console.log("getCategoryInfoNavigation: "+currentCatId+" / "+catlen);
+	//console.log("getCategoryInfoNavigation: "+currentCatId+" / "+catlen);
 	return "[ "+str+" ]";
 }
