@@ -149,24 +149,50 @@ function seriesHash(series) {
 var DEFAULT_FILL_COLOR = "#cccccc";
 var ERROR_FILL_COLOR = "#444444";
 var global_selectCatIdElements = 0;
+var global_numberOfCats = 0;
 
 function normalizeNum(float) {
 	return Math.round(float * 1000);
 	//return float; //float.toFixed(0);
 }
 
-function getCat(value, catData) {
-	var numValue = normalizeNum(value);
-	for(id in catData) {
-		//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
-		if( (value == catData[id].startval) ||
-			(numValue >= normalizeNum(catData[id].startval) && numValue <= normalizeNum(catData[id].endval))
-			) {
-			return id;
+function getCat(value, catData, isNumerical) {
+	if(isNumerical) {
+		var numValue = normalizeNum(value);
+		for(id in catData) {
+			if( (numValue >= normalizeNum(catData[id].startval) && numValue <= normalizeNum(catData[id].endval)) ) {
+				//console.log("id: "+id+"; v:"+value+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+				return id;
+			}
+			//console.log("..id: "+id+"; v:"+value+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+		}
+	}
+	else {
+		for(id in catData) {
+			if( (value == catData[id].startval) ) {
+				//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+				return id;
+			}
 		}
 	}
 	return null;
 }
+
+/*
+function getCatNum(value, catData) {
+	var numValue = normalizeNum(value);
+	for(id in catData) {
+		if( //(value == catData[id].startval) ||
+			(numValue >= normalizeNum(catData[id].startval) && numValue <= normalizeNum(catData[id].endval))
+			) {
+			//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+			return id;
+		}
+		//console.log("..id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+	}
+	return null;
+}
+*/
 
 function genCategoriesFromLimits(vals) {
 	var cats = {};
@@ -179,6 +205,7 @@ function genCategoriesFromLimits(vals) {
 		//cats.push(cat);
 		cats[i] = cat;
 	}
+	global_numberOfCats = vals.length - 1;
 	return cats;
 }
 
@@ -281,14 +308,14 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 	//console.log(gmapsPlaces);
 }*/
 
-function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map) {
+function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumericData) {
 	var countOk = 0, countUndef = 0;
 	for(var id in gPlaceMarks) {
 		var placemark = gPlaceMarks[id];
 		
 		//set data
 		placemark.dataValue = seriesData.series[id];
-		placemark.catId = getCat(placemark.dataValue, catData);
+		placemark.catId = getCat(placemark.dataValue, catData, isNumericData); //numeric or categorical...
 		//TODO: numberFormat (grouping char, ...)
 		//console.log("seriesData=",seriesData);
 		
@@ -359,9 +386,11 @@ function showPlaceInfo(id, name, description, catId) {
 	document.getElementById('place_info').style.display = 'block';
 }
 
-function showCategoryInfo(id, name, description) {
+function showCategoryInfo(id) {
+	var categ = document.getElementById('cat'+id);
+	//categ.style.border = '1px #000 solid'; //remove style later...
 	document.getElementById('category_info_id').innerHTML = id;
-	document.getElementById('category_info_text').innerHTML = description;
+	document.getElementById('category_info_text').innerHTML = categ.getAttribute('description');
 	document.getElementById('category_info').style.display = 'block';
 	document.getElementById('map_canvas').style.bottom = 
 		"" + (parseInt(document.getElementById('category_info').style.height) + 0.4) + "em";
@@ -384,7 +413,7 @@ function showCategoryInfo(id, name, description) {
 		//container.innerHTML = "[<a href='#' onClick='selectFromAllCategories("+id+");'>show all elements</a>] [#elements = "+countIn+"];
 	}
 	else {
-		container.innerHTML = "[<a href='#' onClick='selectFromCategory("+id+");'>show elements from cat #"+id+"</a>]";
+		container.innerHTML = getCategoryInfoNavigation(id) + "[<a href='#' onClick='selectFromCategory("+id+");'>show elements from cat #"+id+"</a>]";
 	}
 }
 
@@ -423,7 +452,7 @@ function selectFromCategory(selectCatId) {
 	//console.log('selectFromCategory.count: '+countIn+' / '+countOut+' // in+out = '+(countIn+countOut)+' / all = '+Object.keys(gmapsPlaces).length);
 
 	var container = document.getElementById('category_info_button_container');
-	container.innerHTML = "[<a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a>] [#elements = "+countIn+"]";
+	container.innerHTML = getCategoryInfoNavigation(selectCatId) + "[<a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a>] [#elements = "+countIn+"]";
 	
 	global_selectCatIdElements = selectCatId;
 }
@@ -447,8 +476,22 @@ function selectFromAllCategories(oldSelectCatId) {
 	
 	if(oldSelectCatId) {
 		var container = document.getElementById('category_info_button_container');
-		container.innerHTML = "[<a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a>]";
+		container.innerHTML = getCategoryInfoNavigation(oldSelectCatId) + "[<a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a>]";
 	}
 	
 	global_selectCatIdElements = 0;
+}
+
+function getCategoryInfoNavigation(currentCatId) {
+	var catlen = global_numberOfCats;
+	currentCatId = parseInt(currentCatId);
+	var str = "";
+	if(currentCatId > 1) {
+		str = "<a href='#' onclick='showCategoryInfo("+(-1+currentCatId)+")'> &lt; </a>";
+	}
+	if(currentCatId < catlen) {
+		str += "<a href='#' onclick='showCategoryInfo("+(1+currentCatId)+")'> &gt; </a>";
+	}
+	console.log("getCategoryInfoNavigation: "+currentCatId+" / "+catlen);
+	return "[ "+str+" ]";
 }

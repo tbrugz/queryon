@@ -177,14 +177,18 @@ function createCatElements() {
 	//for(var i=0; i<ncats; i++) {
 		var id = catDataIndexes[idx];
 		var cat = document.createElement('div');
-		cat.setAttribute('id', id);
+		cat.setAttribute('id', 'cat'+id);
 		cat.setAttribute('class', 'category');
 		cat.setAttribute('style', 'height: '+catheight+'%;');
+		cat.setAttribute('description', catData[id].description);
 		var catInt = document.createElement('div');
 		catInt.setAttribute('class', 'categoryInternal');
 		catInt.setAttribute('style', 'background-color: #'+catData[id].color+'; height: 100%; width: 100%;');
-		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'", null, "'+catData[id].description+'")'); //catData[id].description
-		catInt.innerHTML = '#'+id;
+		//catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'", null, "'+catData[id].description+'")'); //catData[id].description
+		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'")');
+		if(ncats < 25) {
+			catInt.innerHTML = '#'+id;
+		}
 		//cat.setAttribute('onclick', 'showPlaceInfo(id, "'+catData[id].name+'", "'+catData[id].description+'")'); //catData[id].description
 		//cat.setAttribute('onclick', function() { showPlaceInfo(id, "", ""); }); //catData[id].description
 		//console.log(cat);
@@ -264,7 +268,7 @@ function loadDataCallback() {
 	
 	//console.log("hex:: "+hexString(2)+"; "+hexString(9)+"; "+hexString(10)+"; "+hexString(11)+"; "+hexString(250)+"; "+hexString(255));
 	
-	applySeriesDataAndStyle(gmapsPlaces, seriesData, cats, map);
+	applySeriesDataAndStyle(gmapsPlaces, seriesData, cats, map, isNumericData);
 	//applySeriesData(gmapsPlaces, seriesData, cats);
 	//applyStyleColor(gmapsPlaces, cats);
 	createCatElements();
@@ -575,8 +579,8 @@ Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound"
 	<div id="category_info_contents">
 		<div id="category_info_close" style="float: right; top: 0px; right: 0px;"><a href="#" onclick="closeCatInfo();">[x]</a></div>
 		<span>cat #</span><span id="category_info_id"></span>
-		<span>| info: </span><span id="category_info_text"></span>
 		<span id="category_info_button_container"></span>
+		<span> info: </span><span id="category_info_text"></span>
 	</div>
 </div>
 
