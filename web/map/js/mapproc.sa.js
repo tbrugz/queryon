@@ -74,6 +74,17 @@ function isInteger(x) {
 	return x % 1 === 0;
 }
 
+function isNumeric(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function isNumericArray(series) {
+	for(var i in series) {
+		if(!isNumeric(series[i])) { return false; }
+	}
+	return true;
+}
+
 function max(series) {
 	var max = -Number.MAX_VALUE;
 	for(var i in series) {
@@ -120,6 +131,19 @@ function seriesValues(series) {
 	return ret;
 }
 
+function seriesHash(series) {
+	var ret = {};
+	for(var i in series) {
+		if(ret[series[i]]) {
+			ret[series[i]]++
+		}
+		else {
+			ret[series[i]] = 1;
+		}
+	}
+	return ret;
+}
+
 //----
 
 var DEFAULT_FILL_COLOR = "#cccccc";
@@ -132,10 +156,12 @@ function normalizeNum(float) {
 }
 
 function getCat(value, catData) {
-	value = normalizeNum(value);
+	var numValue = normalizeNum(value);
 	for(id in catData) {
-		//$("#debug").append("id: "+id+"; v:"+value+":"+catData[id].startval+"-"+catData[id].endval+"\n");
-		if(value >= normalizeNum(catData[id].startval) && value <= normalizeNum(catData[id].endval)) {
+		//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+		if( (value == catData[id].startval) ||
+			(numValue >= normalizeNum(catData[id].startval) && numValue <= normalizeNum(catData[id].endval))
+			) {
 			return id;
 		}
 	}
@@ -156,6 +182,8 @@ function genCategoriesFromLimits(vals) {
 	return cats;
 }
 
+// XXX deprecated?
+/*
 function procStylesFromCategories(cats, colorFrom, colorTo, valueLabel) {
 	//console.log(colorFrom);
 	//console.log(colorTo);
@@ -187,6 +215,7 @@ function procStylesFromCategories(cats, colorFrom, colorTo, valueLabel) {
 	
 	return cats;
 }
+*/
 
 function extractInts(colors, idx) {
 	var ints = [];
@@ -196,7 +225,7 @@ function extractInts(colors, idx) {
 	return ints;
 }
 
-function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel) {
+function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNumericData) {
 	//console.log(colors);
 
 	var numCat = Object.keys(cats).length;
@@ -214,7 +243,12 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel) {
 		cats[c].color = hexString(Math.round(colorsR[i])) + hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsB[i]));
 		//TODO: format numbers! integer, float, ...
 		//cats[c].description = cats[c].startval + " &lt; # " + valueLabel + " &lt; " + cats[c].endval;
-		cats[c].description = formatFloat(cats[c].startval) + " &le; # " + valueLabel + " &le; " + formatFloat(cats[c].endval);
+		if(isNumericData) {
+			cats[c].description = formatFloat(cats[c].startval) + " &le; # " + valueLabel + " &le; " + formatFloat(cats[c].endval);
+		}
+		else {
+			cats[c].description = valueLabel + " = " + cats[c].startval;
+		}
 		
 		//console.log('cat: '+c+'/'+colorsA[i]+'/'+colorsB[i]);
 		//console.log(cats[c].kmlcolor);
@@ -258,7 +292,8 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map) {
 		//TODO: numberFormat (grouping char, ...)
 		//console.log("seriesData=",seriesData);
 		
-		placemark.description = seriesData.valueLabel + ': '+formatFloat(seriesData.series[id])
+		placemark.description = seriesData.valueLabel + ': '
+			+ (isNumeric(seriesData.series[id]) ? formatFloat(seriesData.series[id]) : seriesData.series[id])
 			+ (seriesData.measureUnit?' ' + seriesData.measureUnit:"");
 		if(placemark.catId==undefined) {
 			//console.warn('undefined cat: '+id+' / '+placemark.name); //+' / '+placemark.catId);

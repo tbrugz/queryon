@@ -228,23 +228,19 @@ function loadDataCallback() {
 	if(genCatLimitsFromExistingPlacemarks) {
 		removeSeriesDataWhenPlacemarkNotFound(gmapsPlaces, seriesData);
 	}
+
+	var catLimits = null;
+	var isNumericData = true;
 	
-	var maxval = max(seriesData.series);
-	var minval = min(seriesData.series);
-	var numOfCategories = document.getElementById('numOfCategories').value;
-	console.log('vals: min=',minval,' max=',maxval,' #cats= '+numOfCategories );
-	//TODO: log/linear/percentile cat limits
-	var catLimits;
-	var scaleType = document.getElementById('scaleType').value;
-	if(scaleType=='LINEAR') {
-		catLimits = getLinearCategoriesLimits(minval, maxval, numOfCategories);
+	if(isNumericArray(seriesData.series)) {
+		console.log('is numeric series!');
+		catLimits = loadDataNumericSeries(seriesData);
+	} else {
+		console.log('is NOT numeric series!');
+		catLimits = loadDataCategoricalSeries(seriesData);
+		isNumericData = false;
 	}
-	else if(scaleType=='QUANTILE') {
-		catLimits = getQuantileCategoriesLimits(seriesValues(seriesData.series), numOfCategories);
-	}
-	else {
-		catLimits = getLogCategoriesLimits(minval, maxval, numOfCategories);
-	}
+
 	console.log("catLimits=",catLimits);
 	
 	var cats = genCategoriesFromLimits(catLimits);
@@ -264,7 +260,7 @@ function loadDataCallback() {
 
 	//console.log('color: from='+colorFrom+'; to='+ colorTo+" ; all="+colors);
 	//procStylesFromCategories(cats, colorFrom, colorTo, seriesData.valueLabel);
-	procStylesFromCategoriesMultipleColors(cats, colors, seriesData.valueLabel);
+	procStylesFromCategoriesMultipleColors(cats, colors, seriesData.valueLabel, isNumericData);
 	
 	//console.log("hex:: "+hexString(2)+"; "+hexString(9)+"; "+hexString(10)+"; "+hexString(11)+"; "+hexString(250)+"; "+hexString(255));
 	
@@ -276,6 +272,41 @@ function loadDataCallback() {
 	closeCatInfo();
 	//TODO: option to select (show only) placemarks from given category
 	//TODO: remove placemark not found? nah... add all not found to 'unknown' category
+}
+
+function loadDataNumericSeries(seriesData) {
+	var numOfCategories = document.getElementById('numOfCategories').value;
+	var maxval = max(seriesData.series);
+	var minval = min(seriesData.series);
+	console.log('vals: min=',minval,' max=',maxval,' #cats= '+numOfCategories );
+	//TODO: log/linear/percentile cat limits
+	var catLimits;
+	var scaleType = document.getElementById('scaleType').value;
+	if(scaleType=='LINEAR') {
+		catLimits = getLinearCategoriesLimits(minval, maxval, numOfCategories);
+	}
+	else if(scaleType=='QUANTILE') {
+		catLimits = getQuantileCategoriesLimits(seriesValues(seriesData.series), numOfCategories);
+	}
+	else {
+		// LOG
+		catLimits = getLogCategoriesLimits(minval, maxval, numOfCategories);
+	}
+	return catLimits;
+}
+
+function loadDataCategoricalSeries() {
+	var shash = seriesHash(seriesData.series)
+	console.log('series hash:',shash);
+	var keys = Object.keys(shash);
+	var numOfCategories = keys.length;
+	var catLimits = [];
+	var skeys = keys.sort();
+	console.log('series sorted keys:',skeys);
+	//skeys.push(skeys[skeys.length-1]);
+	skeys.push(null);
+	
+	return skeys;
 }
 
 function loadGoogleMaps(map_canvas_id) {
@@ -329,6 +360,8 @@ function removeElement(elem) {
 	elem.parentElement.removeChild(elem);
 }
 
+/* -------------- queryon functions -------------- */
+
 function refreshDataUrlColumns() {
 	var sel = document.getElementById('dataUrl');
 	var collist = sel.options[sel.selectedIndex].getAttribute('columnnames');
@@ -363,6 +396,20 @@ function getQonData(qonData) {
 	var index = 0;
 	if(keys[index].startsWith("$") || keys[index].startsWith("@")) { index = 1; }
 	return qonData[keys[index]];
+}
+
+function dataColumnChanged() {
+	// XXX set isCategoricalData
+}
+
+function isCategoricalDataChanged() {
+	// XXX enable/disable "createCategoriesFromDataSeries"
+}
+
+/* -------------- end queryon functions -------------- */
+
+function createCategoriesFromDataSeries() {
+	// XXX create categories from series data
 }
 
 function loadMap() {
