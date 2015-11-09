@@ -235,14 +235,18 @@ function loadDataCallback() {
 
 	var catLimits = null;
 	var isNumericData = true;
+	var isCategoricalDataChk = document.getElementById('isCategoricalData').checked;
 	
-	if(isNumericArray(seriesData.series)) {
+	if(isNumericArray(seriesData.series) && !isCategoricalDataChk) {
 		console.log('is numeric series!');
 		catLimits = loadDataNumericSeries(seriesData);
 	} else {
 		console.log('is NOT numeric series!');
 		catLimits = loadDataCategoricalSeries(seriesData);
 		isNumericData = false;
+		document.getElementById('isCategoricalData').checked = true;
+		document.getElementById('categoriesCounter').value = catLimits.length-1;
+		isCategoricalDataChanged();
 	}
 
 	console.log("catLimits=",catLimits);
@@ -408,6 +412,16 @@ function dataColumnChanged() {
 
 function isCategoricalDataChanged() {
 	// XXX enable/disable "createCategoriesFromDataSeries"
+	if(document.getElementById('isCategoricalData').checked) {
+		document.getElementById('categoriesGenComp').style.display = 'none';
+		document.getElementById('categoriesCounterContainer').style.display = 'block';
+		//document.getElementById('shouldCreateCategoriesFromDataSeries').disabled = false;
+	}
+	else {
+		document.getElementById('categoriesGenComp').style.display = 'block';
+		document.getElementById('categoriesCounterContainer').style.display = 'none';
+		//document.getElementById('shouldCreateCategoriesFromDataSeries').disabled = false;
+	}
 }
 
 /* -------------- end queryon functions -------------- */
@@ -505,11 +519,20 @@ Data:
 <!-- TODO add parameters, add filters -->
 <!-- <input type="button" value="+" onclick="addDataSeriesDialog();" class="symbol"> --><br/>
 Column:
-<select name="dataColumn" id="dataColumn">
+<select name="dataColumn" id="dataColumn" onchange="dataColumnChanged()" style="width: 10em;">
 </select>
+<label>
+	<input type="checkbox" name="isCategoricalData" id="isCategoricalData" style="width:inherit;" onchange="isCategoricalDataChanged();"/>
+	Categorical Data?
+</label>
 </div>
 
 <div id="categoriesGenComp" class="boxsmall">
+<!-- <label>
+<input type="checkbox" name="shouldCreateCategoriesFromDataSeries" id="shouldCreateCategoriesFromDataSeries" style="width:inherit;" onchange="createCategoriesFromDataSeries()"/>
+Create categories from series' data?
+</label><br/>
+ -->
 #Cat: 
 <select name="numOfCategories" id="numOfCategories">
 <option value="2">2</option>
@@ -532,7 +555,16 @@ Scale:
 	<option value="LOG">LOG</option>
 	<option value="QUANTILE" selected>QUANTILE</option>
 </select><br/>
-Normalize Limits? <input type="checkbox" class="smaller" name="genCatLimitsFromExistingPlacemarks" id="genCatLimitsFromExistingPlacemarks" value="1" checked/><br/>
+<label>
+<input type="checkbox" class="smaller" name="genCatLimitsFromExistingPlacemarks" id="genCatLimitsFromExistingPlacemarks" value="1" checked/>
+Normalize Limits?
+</label>
+<br/>
+</div>
+
+<div id="categoriesCounterContainer" class="boxsmall" style="display: none;">
+#Cat: 
+<input type="text" name="categoriesCounter" id="categoriesCounter" style="width: 5em" readonly />
 </div>
 
 <div id="colorsContainer" class="boxsmall">
