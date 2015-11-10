@@ -219,6 +219,8 @@ function resetMapData() {
 	container.style.display = 'none';
 	var mapcanvas = document.getElementById('map_canvas');
 	mapcanvas.style.right = 0;
+	var categoriesCounter = document.getElementById('categoriesCounter');
+	categoriesCounter.value = '';
 	
 	global_selectCatIdElements = 0;
 	closeCatInfo();
@@ -304,14 +306,20 @@ function loadDataNumericSeries(seriesData) {
 }
 
 function loadDataCategoricalSeries() {
-	var shash = seriesHash(seriesData.series)
+	/* var shash = seriesHash(seriesData.series)
 	console.log('series hash:',shash);
 	var keys = Object.keys(shash);
 	var numOfCategories = keys.length;
-	var catLimits = [];
 	var skeys = keys.sort(); // null becomes 'null' ?
 	console.log('series sorted keys:',skeys);
 	//skeys.push(skeys[skeys.length-1]);
+	skeys.push(null); */
+
+	var dvarr = distinctValuesArray(seriesData.series);
+	console.log('distinctValuesArray:',dvarr);
+	var numOfCategories = dvarr.length;
+	var skeys = dvarr.sort(); // null becomes 'null' ?
+	console.log('series sorted keys:',skeys);
 	skeys.push(null);
 	
 	return skeys;
@@ -564,7 +572,7 @@ Normalize Limits?
 
 <div id="categoriesCounterContainer" class="boxsmall" style="display: none;">
 #Cat: 
-<input type="text" name="categoriesCounter" id="categoriesCounter" style="width: 5em" readonly />
+<input type="text" name="categoriesCounter" id="categoriesCounter" style="width: 5em" readonly disabled />
 </div>
 
 <div id="colorsContainer" class="boxsmall">

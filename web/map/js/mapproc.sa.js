@@ -134,7 +134,7 @@ function seriesValues(series) {
 	return ret;
 }
 
-function seriesHash(series) {
+/*function seriesHash(series) {
 	var ret = {};
 	for(var i in series) {
 		if(ret[series[i]]) {
@@ -142,6 +142,16 @@ function seriesHash(series) {
 		}
 		else {
 			ret[series[i]] = 1;
+		}
+	}
+	return ret;
+}*/
+
+function distinctValuesArray(series) {
+	var ret = [];
+	for(var i in series) {
+		if(ret.indexOf(series[i])<0) {
+			ret.push(series[i]);
 		}
 	}
 	return ret;
@@ -178,7 +188,7 @@ function getCat(value, catData, isNumerical) {
 			/*if(value==null) {
 				console.log("nullvalue: ",value," ; isNumerical: ",isNumerical," ; ",catData[id].startval);
 			}*/
-			if( ((""+value) == catData[id].startval) ) {
+			if( (value == catData[id].startval) ) {
 				//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
 				return id;
 			}
