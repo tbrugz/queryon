@@ -288,8 +288,8 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 	var colorsB = getLinearCategoriesLimitsMultipleValues(extractInts(colors, 2), numCat);
 	var colorsG = getLinearCategoriesLimitsMultipleValues(extractInts(colors, 4), numCat);
 	var colorsR = getLinearCategoriesLimitsMultipleValues(extractInts(colors, 6), numCat);
-	//console.log(colors)
-	//console.log(extractInts(colors, 0), extractInts(colors, 2), extractInts(colors, 4), extractInts(colors, 6))
+	//console.log('procStylesFromCategoriesMultipleColors: colors: ',colors);
+	//console.log('extractInts:', extractInts(colors, 0), extractInts(colors, 2), extractInts(colors, 4), extractInts(colors, 6))
 
 	var i=0;
 	for(var c in cats) {
