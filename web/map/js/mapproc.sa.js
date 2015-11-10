@@ -169,6 +169,15 @@ function normalizeNum(float) {
 	//return float; //float.toFixed(0);
 }
 
+// http://stackoverflow.com/a/3627747/616413
+function rgb2hex(rgb) {
+	rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+	function hex(x) {
+		return ("0" + parseInt(x).toString(16)).slice(-2);
+	}
+	return ("" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3])).toUpperCase();
+}
+
 function getCat(value, catData, isNumerical) {
 	/*if(value==null) {
 		console.log("nullvalue: "+value+" ; isNumerical: "+isNumerical);
@@ -513,4 +522,47 @@ function getCategoryInfoNavigation(currentCatId) {
 	}
 	//console.log("getCategoryInfoNavigation: "+currentCatId+" / "+catlen);
 	return "[ "+str+" ]";
+}
+
+function setColorsFromCategories() {
+	var catdiv = document.getElementById('categories_canvas');
+	if(catdiv==null) {
+		console.warn("elem 'categories_canvas' does not exsits");
+		return;
+	}
+	var cats = catdiv.querySelectorAll(".category");
+	var catnum = cats.length;
+	
+	var coldiv = document.getElementById('colorsContainer');
+	var colors = coldiv.querySelectorAll("input.color");
+	var colnum = colors.length;
+	console.log('catnum: '+catnum+' ; colors: '+colnum)
+	//while()
+	for(var i=colnum; i<catnum;i++) {
+		addColorButton();
+	}
+	//----------
+	var colors = coldiv.querySelectorAll("input.color");
+	var colnum = colors.length;
+	console.log('colors',colors);
+	//for(var i=0)
+	for(var i=colnum;i>0;i--) {
+		var col = colors[colnum-i];
+		var catid = 'cat'+i;
+		var cat = document.getElementById(catid).querySelector('.categoryInternal');
+		console.log('cat "'+catid+'":',cat.style+" ; "+colnum+" , "+i);
+		col.style.backgroundColor = cat.style.backgroundColor;
+		col.value = rgb2hex(cat.style.backgroundColor);
+	}
+}
+
+function resetColorsDiv(colorTo, colorFrom) {
+	var div = document.getElementById('xtraColorsContainer');
+	div.innerHTML = '';
+	var cFrom = document.getElementById('colorFromRGB');
+	cFrom.value = colorFrom;
+	cFrom.style.backgroundColor = '#'+colorFrom;
+	var cTo = document.getElementById('colorToRGB');
+	cTo.value = colorTo;
+	cTo.style.backgroundColor = '#'+colorTo;
 }

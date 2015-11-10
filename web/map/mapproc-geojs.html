@@ -96,8 +96,16 @@ function loadNakedMapCallback(map_canvas_id) {
 		count++;
 		//if(count>10) { break; }
 	}
-	
-	map.fitBounds(box);
+
+	if(map) {
+		map.fitBounds(box);
+	}
+	else {
+		var message = "Error loading map";
+		console.warn(message);
+		alert(message);
+	}
+
 	//console.log(box);
 	return map;
 }
@@ -188,6 +196,7 @@ function createCatElements() {
 		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'")');
 		if(ncats < 25) {
 			catInt.innerHTML = '#'+id;
+			//XXX category text color should constrast with background (black/white)
 		}
 		//cat.setAttribute('onclick', 'showPlaceInfo(id, "'+catData[id].name+'", "'+catData[id].description+'")'); //catData[id].description
 		//cat.setAttribute('onclick', function() { showPlaceInfo(id, "", ""); }); //catData[id].description
@@ -221,6 +230,8 @@ function resetMapData() {
 	mapcanvas.style.right = 0;
 	var categoriesCounter = document.getElementById('categoriesCounter');
 	categoriesCounter.value = '';
+
+	document.getElementById('setColorsFromCats').disabled = true;
 	
 	global_selectCatIdElements = 0;
 	closeCatInfo();
@@ -278,6 +289,8 @@ function loadDataCallback() {
 	//applySeriesData(gmapsPlaces, seriesData, cats);
 	//applyStyleColor(gmapsPlaces, cats);
 	createCatElements();
+
+	document.getElementById('setColorsFromCats').disabled = false;
 	
 	closeCatInfo();
 	//TODO: option to select (show only) placemarks from given category
@@ -581,6 +594,8 @@ Color Max: <input type="text" class="color small" id="colorToRGB" name="colorToR
 </div>
 <input type="button" value="+" onclick="addColorButton()" class="symbol"><br/>
 Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorFromRGB" value="FFFF00" onchange="changeColor('colorFromRGB', 'colorFrom')"/> <input type="hidden" id="colorFrom" name="colorFrom"/><br/>
+<input type=button id="setColorsFromCats" style="font-size: 7pt;" class="small" value="Update" onclick="setColorsFromCategories();" title="update colors from categories" disabled/>
+<input type=button id="resetColors" style="font-size: 7pt;" class="small" value="Reset" onclick="resetColorsDiv('FF0000','FFFF00');" title="reset colors"/>
 </div>
 
 <!-- 
