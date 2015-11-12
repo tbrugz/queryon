@@ -441,7 +441,7 @@ function showCategoryInfo(id) {
 		//container.innerHTML = "[<a href='#' onClick='selectFromAllCategories("+id+");'>show all elements</a>] [#elements = "+countIn+"];
 	}
 	else {
-		container.innerHTML = getCategoryInfoNavigation(id) + "[<a href='#' onClick='selectFromCategory("+id+");'>show elements from cat #"+id+"</a>]";
+		container.innerHTML = getCategoryInfoNavigation(id) + "[ <a href='#' onClick='selectFromCategory("+id+");'>show elements from cat #"+id+"</a> ]";
 	}
 }
 
@@ -480,7 +480,7 @@ function selectFromCategory(selectCatId) {
 	//console.log('selectFromCategory.count: '+countIn+' / '+countOut+' // in+out = '+(countIn+countOut)+' / all = '+Object.keys(gmapsPlaces).length);
 
 	var container = document.getElementById('category_info_button_container');
-	container.innerHTML = getCategoryInfoNavigation(selectCatId) + "[<a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a>] [#elements = "+countIn+"]";
+	container.innerHTML = getCategoryInfoNavigation(selectCatId) + "[ <a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a> ] [#elements = "+countIn+"]";
 	
 	global_selectCatIdElements = selectCatId;
 }
@@ -504,7 +504,7 @@ function selectFromAllCategories(oldSelectCatId) {
 	
 	if(oldSelectCatId) {
 		var container = document.getElementById('category_info_button_container');
-		container.innerHTML = getCategoryInfoNavigation(oldSelectCatId) + "[<a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a>]";
+		container.innerHTML = getCategoryInfoNavigation(oldSelectCatId) + "[ <a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a> ]";
 	}
 	
 	global_selectCatIdElements = 0;
@@ -515,10 +515,10 @@ function getCategoryInfoNavigation(currentCatId) {
 	currentCatId = parseInt(currentCatId);
 	var str = "";
 	if(currentCatId > 1) {
-		str = "<a href='#' onclick='showCategoryInfo("+(-1+currentCatId)+")'> &lt; </a>";
+		str = " <a href='#' onclick='showCategoryInfo("+(-1+currentCatId)+")'>&lt;</a> ";
 	}
 	if(currentCatId < catlen) {
-		str += "<a href='#' onclick='showCategoryInfo("+(1+currentCatId)+")'> &gt; </a>";
+		str += " <a href='#' onclick='showCategoryInfo("+(1+currentCatId)+")'>&gt;</a> ";
 	}
 	//console.log("getCategoryInfoNavigation: "+currentCatId+" / "+catlen);
 	return "[ "+str+" ]";
@@ -536,7 +536,7 @@ function setColorsFromCategories() {
 	var coldiv = document.getElementById('colorsContainer');
 	var colors = coldiv.querySelectorAll("input.color");
 	var colnum = colors.length;
-	console.log('catnum: '+catnum+' ; colors: '+colnum)
+	//console.log('catnum: '+catnum+' ; colors: '+colnum)
 	//while()
 	for(var i=colnum; i<catnum;i++) {
 		addColorButton();
@@ -544,13 +544,13 @@ function setColorsFromCategories() {
 	//----------
 	var colors = coldiv.querySelectorAll("input.color");
 	var colnum = colors.length;
-	console.log('colors',colors);
+	//console.log('colors',colors);
 	//for(var i=0)
 	for(var i=colnum;i>0;i--) {
 		var col = colors[colnum-i];
 		var catid = 'cat'+i;
 		var cat = document.getElementById(catid).querySelector('.categoryInternal');
-		console.log('cat "'+catid+'":',cat.style+" ; "+colnum+" , "+i);
+		//console.log('cat "'+catid+'":',cat.style+" ; "+colnum+" , "+i);
 		col.style.backgroundColor = cat.style.backgroundColor;
 		col.value = rgb2hex(cat.style.backgroundColor);
 	}

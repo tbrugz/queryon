@@ -194,7 +194,7 @@ function createCatElements() {
 		catInt.setAttribute('style', 'background-color: #'+catData[id].color+'; height: 100%; width: 100%;');
 		//catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'", null, "'+catData[id].description+'")'); //catData[id].description
 		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'")');
-		if(ncats < 25) {
+		if(ncats <= 25) {
 			catInt.innerHTML = '#'+id;
 			//XXX category text color should constrast with background (black/white)
 		}
@@ -433,6 +433,12 @@ function dataColumnChanged() {
 	// XXX set isCategoricalData
 }
 
+/* function createCategoriesFromDataSeries() {
+	// XXX create categories from series data
+} */
+
+/* -------------- end queryon functions -------------- */
+
 function isCategoricalDataChanged() {
 	// XXX enable/disable "createCategoriesFromDataSeries"
 	if(document.getElementById('isCategoricalData').checked) {
@@ -445,12 +451,6 @@ function isCategoricalDataChanged() {
 		document.getElementById('categoriesCounterContainer').style.display = 'none';
 		//document.getElementById('shouldCreateCategoriesFromDataSeries').disabled = false;
 	}
-}
-
-/* -------------- end queryon functions -------------- */
-
-function createCategoriesFromDataSeries() {
-	// XXX create categories from series data
 }
 
 function loadMap() {
@@ -467,6 +467,7 @@ function resetMap() {
 	document.getElementById('btn-resetdata').disabled = true;
 }
 
+function ajaxCallsOnLoad() {
 $.ajax({
 	url: '../q/relation.json',
 	dataType: 'text',
@@ -501,20 +502,39 @@ $.ajax({
 	success: function(data) {
 		var mapsData = JSON.parse(data);
 		var sources = mapsData.maps;
-		//console.log(sources);
+		//console.log('sources', sources,'mapsData.showOptionsIfUnique',mapsData.showOptionsIfUnique);
 		var select = document.getElementById('mapUrl');
+		
 		for(var i=0;i<sources.length;i++) {
 			addElement2Select(select, sources[i]);
+		}
+
+		if(mapsData.showOptionsIfUnique===false && sources.length==1) {
+			document.getElementById('mapbox').style.display = 'none';
+			// http://stackoverflow.com/a/8678038/616413
+			google.maps.event.addListenerOnce(map, 'idle', function(){
+				//loaded fully
+				loadMap();
+			});
 		}
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 		console.log('maps.json', jqXHR, textStatus, errorThrown);
 	}
 });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	//alert("Ready!");
+	changeColor('colorFromRGB', 'colorFrom');
+	changeColor('colorToRGB', 'colorTo');
+	loadGoogleMaps('map_canvas');
+	ajaxCallsOnLoad();
+}, false);
 
 </script>
 </head>
-<body onload="changeColor('colorFromRGB', 'colorFrom');changeColor('colorToRGB', 'colorTo');loadGoogleMaps('map_canvas');">
+<body>
 
 <div class="boxsmall logo">
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> + MapProc<sup style="color: #fa0; font-size: 10pt;">beta!</sup></span>
@@ -522,11 +542,10 @@ $.ajax({
 
 <div id="form">
 
-<div class="boxsmall">
-Map:
-<select name="mapUrl" id="mapUrl">
-</select>
-<br/>
+<div class="boxsmall" id="mapbox">
+Map<span id="mapbox2">:
+<select name="mapUrl" id="mapUrl" style="width: 10em;">
+</select><br/></span>
 <input value="Load" type="button" style="width: auto;"
 	onclick="loadMap();">
 <input value="Reset" type="button" style="width: auto;"
@@ -537,7 +556,7 @@ Map:
 
 <div class="boxsmall">
 Data:
-<select name="dataUrl" id="dataUrl" onchange="refreshDataUrlColumns()">
+<select name="dataUrl" id="dataUrl" onchange="refreshDataUrlColumns()" style="width: 10em;">
 </select>
 <!-- TODO add parameters, add filters -->
 <!-- <input type="button" value="+" onclick="addDataSeriesDialog();" class="symbol"> --><br/>

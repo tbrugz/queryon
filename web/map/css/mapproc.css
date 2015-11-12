@@ -73,6 +73,7 @@ input.symbol {
 	/* TODO: margin... */
 	/*border: 2px solid #bbb;
 	margin: 1px;*/
+	font-family: monospace;
 }
 
 #place_info {
