@@ -50,6 +50,7 @@ function createBlobLinks() {
 		//if(!Number.isInteger(currentOffset)) { currentOffset = 0; }
 		
 		var rows = content.querySelectorAll('tr');
+		//var rows = content.getElementsByTagName('tr');
 		var urlPrepend = location.pathname + queryString;
 		if(typeof(getCurrentRelation) == "function") {
 			urlPrepend = queryOnUrl + "/" + getId(getCurrentRelation('objects')) + queryString;
@@ -58,7 +59,7 @@ function createBlobLinks() {
 		for(var i=1;i<rows.length;i++) {
 			var row = rows[i];
 			for(var ci=0;ci<blobIndexes.length;ci++) {
-				if(row.children[blobIndexes[ci]].getAttribute("null")==null) {
+				if(/*row.children[blobIndexes[ci]]!=null && */row.parentNode.parentNode === content && row.children[blobIndexes[ci]].getAttribute("null")==null) {
 					var currval = row.children[blobIndexes[ci]].innerHTML;
 					var offset = (i-1+currentOffset);
 					rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend
