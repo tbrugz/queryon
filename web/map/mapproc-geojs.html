@@ -191,7 +191,10 @@ function createCatElements() {
 		cat.setAttribute('description', catData[id].description);
 		var catInt = document.createElement('div');
 		catInt.setAttribute('class', 'categoryInternal');
-		catInt.setAttribute('style', 'background-color: #'+catData[id].color+'; height: 100%; width: 100%;');
+		catInt.setAttribute('style', 'background-color: #'+catData[id].color+
+				'; height: 100%; width: 100%;'+
+				'color: #'+(hexColorIsDark(catData[id].color)?'ffffff':'000000')+';');
+		
 		//catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'", null, "'+catData[id].description+'")'); //catData[id].description
 		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'")');
 		if(ncats <= 25) {

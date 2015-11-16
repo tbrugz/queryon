@@ -157,6 +157,14 @@ function distinctValuesArray(series) {
 	return ret;
 }
 
+function hexColorIsDark(hcolor) {
+	var r = parseInt(hcolor.substring(0,2), 16);
+	var g = parseInt(hcolor.substring(2,4), 16);
+	var b = parseInt(hcolor.substring(4,6), 16);
+	
+	return (r+g+b)/3 < (256-6)/2;
+}
+
 //----
 
 var DEFAULT_FILL_COLOR = "#cccccc";
