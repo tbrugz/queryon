@@ -32,13 +32,23 @@ function createBlobLinks() {
 	var cols = content.querySelectorAll('colgroup > col');
 	var blobNames = [];
 	var blobIndexes = [];
+	var allColNames = [];
 	for(var i=0;i<cols.length;i++) {
 		if(cols[i].getAttribute("type")=="Blob") {
 			blobNames.push(cols[i].getAttribute("colname"));
 			blobIndexes.push(i);
 		}
+		allColNames.push(cols[i].getAttribute("colname"));
 	}
-	console.log("table.js: tableName",tableName,"cols",cols,"blobNames",blobNames,"blobIndexes",blobIndexes);
+
+	var blobFileExtIndex = [];
+	for(var i=0;i<blobNames.length;i++) {
+		var idx = allColNames.indexOf(blobNames[i]+"_FILEEXT");
+		blobFileExtIndex.push(idx);
+	}
+	//XXX add blobNames[i]+"_MIMETYPE" ?
+
+	console.log("table.js: tableName",tableName,"cols",cols,"blobNames",blobNames,"blobIndexes",blobIndexes,"blobFileExtIndex",blobFileExtIndex);
 	
 	if(blobIndexes.length>0) {
 		//XXX get current offset!!!
@@ -61,11 +71,12 @@ function createBlobLinks() {
 			for(var ci=0;ci<blobIndexes.length;ci++) {
 				if(/*row.children[blobIndexes[ci]]!=null && */row.parentNode.parentNode === content && row.children[blobIndexes[ci]].getAttribute("null")==null) {
 					var currval = row.children[blobIndexes[ci]].innerHTML;
+					var fileExt = blobFileExtIndex[ci]>=0 ? row.children[blobFileExtIndex[ci]].innerHTML : "blob" ;
 					var offset = (i-1+currentOffset);
-					rows[i].children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend
+					row.children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend
 						+ (queryString?"&":"?")
 						+"limit=1&offset="+offset+"&valuefield="+blobNames[ci]
-						+"&filename=queryon_"+tableName+"_"+blobNames[ci]+"_"+(offset+1)+".blob"
+						+"&filename=queryon_"+tableName+"_"+blobNames[ci]+"_"+(offset+1)+"."+fileExt
 						+"\">"+currval+"</a>";
 				}
 			}
