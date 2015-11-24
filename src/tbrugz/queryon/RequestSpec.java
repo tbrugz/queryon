@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,8 @@ public class RequestSpec {
 		}
 	}*/
 	
+	public static final String SYNTAXES_INFO_RESOURCE = "/tbrugz/queryon/syntaxes/syntaxinfo.properties";
+	
 	final HttpServletRequest request;
 
 	final String httpMethod;
@@ -45,6 +48,8 @@ public class RequestSpec {
 	final String object;
 	final int offset, limit;
 	final String loStrategy;
+	
+	// data manipulation (DML) properties
 	final Integer minUpdates, maxUpdates;
 	
 	final List<String> columns = new ArrayList<String>();
@@ -76,6 +81,17 @@ public class RequestSpec {
 
 	final List<String> orderCols = new ArrayList<String>();
 	final List<String> orderAscDesc = new ArrayList<String>();
+
+	// syntax properties resource
+	static final Properties syntaxProperties = new Properties();
+	static {
+		try {
+			syntaxProperties.load(RequestSpec.class.getResourceAsStream(SYNTAXES_INFO_RESOURCE));
+		} catch (Exception e) {
+			log.warn("Error loading resource '"+SYNTAXES_INFO_RESOURCE+"'", e);
+			e.printStackTrace();
+		}
+	}
 	
 	// blob/download fields
 	final String uniValueCol;
@@ -169,6 +185,8 @@ public class RequestSpec {
 			}
 		}
 		outputSyntax = outputSyntaxTmp;
+
+		setSyntaxProps(outputSyntax, req, prop);
 		
 		//---------------------
 		
@@ -382,6 +400,44 @@ public class RequestSpec {
 			return true;
 		}
 		return false;
+	}
+	
+	void setSyntaxProps(DumpSyntax ds, HttpServletRequest req, Properties initProps) {
+		List<String> pkeys = Utils.getStringListFromProp(syntaxProperties, ds.getSyntaxId()+".allowed-parameters", ",");
+		//<syntax>.parameter@callback.prop=sqldump.datadump.<syntax>.zzz
+		//<syntax>.parameter@callback.regex=[a-zA-Z_][a-zA-Z_0-9]*
+		if(pkeys==null) { return; }
+		
+		Properties newProps = new Properties();
+		for(String key: pkeys) {
+			String val = req.getParameter(key);
+			if(val!=null) {
+				String regex = syntaxProperties.getProperty(ds.getSyntaxId()+".parameter@"+key+".regex");
+				String prop = syntaxProperties.getProperty(ds.getSyntaxId()+".parameter@"+key+".prop");
+				if(regex==null || prop==null) {
+					log.warn("["+ds.getSyntaxId()+"] syntax properties '"+prop+"' & '"+regex+"' must be set in '"+SYNTAXES_INFO_RESOURCE+"'");
+				}
+				else {
+					if(Pattern.matches(regex, val)) {
+						newProps.put(prop, val);
+					}
+					else {
+						log.warn("["+ds.getSyntaxId()+"] parameter '"+key+"' does not match pattern '"+regex+"': "+val);
+					}
+				}
+			}
+		}
+
+		Properties modifiedProps = new Properties();
+		modifiedProps.putAll(initProps);
+		if(newProps.size()>0) {
+			log.info("["+ds.getSyntaxId()+"] parameter props: "+newProps);
+			modifiedProps.putAll(newProps);
+		}
+		else {
+			log.info("["+ds.getSyntaxId()+"] no parameter props");
+		}
+		ds.procProperties(modifiedProps);
 	}
 	
 	/*
