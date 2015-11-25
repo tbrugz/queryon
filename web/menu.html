@@ -13,6 +13,9 @@
 		li {
 			margin: 4px 0 4px 0;
 		}
+		li[auth=true] {
+			background-color: #eb8;
+		}
 		li[dev=true] {
 			background-color: #bbb;
 		}
@@ -24,6 +27,8 @@
 	<li><a href="sigma.html">graphs - sigma</a>
 	<li><a href="d3chart.html">charts - d3</a>
 	<li><a href="map/mapproc-geojs.html">map - google maps + mapproc</a>
+	<li auth="true"><a href="auth/login.jsp">login</a>
+	<li auth="true"><a href="auth/logout.jsp">logout</a>
 	<li dev="true"><a href="ddl.html">ddl</a>
 	<li dev="true"><a href="diff.html">diff</a>
 	<li dev="true"><a href="qon-editor.jsp">query editor</a>
