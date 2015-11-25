@@ -5,6 +5,7 @@
 	<link href="css/queryon.css" rel="stylesheet">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script src="js/qon-base.js"></script>
 	<script src="js/queryon-b.js"></script>
 	<script src="js/filter.js"></script>
 	<script src="js/qon-util.js"></script>
@@ -235,7 +236,7 @@ body {
 			console.log('url['+qid+']: '+url);
 			var jqxhr = $.getJSON(url, function(data) {
 				btnActionStop('go-button');
-				data = data[Object.keys(data)[0]];
+				data = getQonData(data);
 				s.graph.clear();
 				//console.log(data);
 				//XXX: test if valid query (valid columns)

@@ -1,3 +1,6 @@
+/*
+ * depends on qon-base.js
+ */
 
 var keyValues = function (obj, keys) {
 	var r = [];
@@ -14,7 +17,7 @@ var runD3 = function(url, columns, d3chartfunction, containerId, callbackOk, cal
 			else { console.log("error:: ",error); }
 			return;
 		}
-		data = data[Object.keys(data)[0]];
+		data = getQonData(data);
 		
 		try {
 			d3chartfunction(data, columns, containerId);

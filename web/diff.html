@@ -10,6 +10,7 @@
 	<!-- link href="css/prism.css" rel="stylesheet" /-->
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- script type="text/javascript" src="js/prism.js"></script-->
+	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<link rel="stylesheet" href="css/diffview.css">
 	<script src="js/jsdifflib/difflib.js"></script>
@@ -164,7 +165,7 @@ loadObjectList = function() {
 			//console.log(data);
 			//var jj = JSON.parse(data);
 			var keys = Object.keys(data);
-			data = data[Object.keys(data)[0]];
+			data = getQonData(data);
 			//console.log(data);
 			//TODOxx filtering data on client, should be on server...
 			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });

@@ -6,6 +6,7 @@
 <link rel="icon" type="image/png" href="../favicon.png" />
 <script src="../js/jquery-2.1.0.min.js"></script>
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
+<script type="text/javascript" src="../js/qon-base.js"></script>
 <script type="text/javascript" src="js/mapproc.js"></script>
 <script type="text/javascript" src="js/mapproc.sa.js"></script>
 <script type="text/javascript" src="js/jscolor/jscolor.js"></script>
@@ -423,13 +424,6 @@ function transformQonData(qonData, column) {
 		data.series[qonData[i]["GEOM_ID"]] = qonData[i][column];
 	}
 	return data;
-}
-
-function getQonData(qonData) {
-	var keys = Object.keys(qonData);
-	var index = 0;
-	if(keys[index].startsWith("$") || keys[index].startsWith("@")) { index = 1; }
-	return qonData[keys[index]];
 }
 
 function dataColumnChanged() {
