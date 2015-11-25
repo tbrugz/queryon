@@ -129,6 +129,7 @@ loadObjectList = function() {
 		+ '.json'
 		+ (model?'?model='+model:'');
 	console.log("loadObjectList: model=",model,"url=",url);
+	btnActionStart('object');
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -139,6 +140,11 @@ loadObjectList = function() {
 			data = getQonData(data);
 			//console.log(data);
 			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
+			btnActionStop('object');
+		},
+		error: function(error) {
+			console.log("loadObjectList error=",error);
+			btnActionStop('object');
 		}
 	});
 }
