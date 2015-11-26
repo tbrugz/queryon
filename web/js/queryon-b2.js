@@ -1,4 +1,8 @@
 
+/*
+ * depends on qon-base.js
+ */
+
 /* globals */
 
 var queryOnUrl = 'q';
