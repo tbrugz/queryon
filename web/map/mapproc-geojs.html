@@ -7,6 +7,7 @@
 <script src="../js/jquery-2.1.0.min.js"></script>
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
 <script type="text/javascript" src="../js/qon-base.js"></script>
+<script type="text/javascript" src="../js/queryon-b.js"></script>
 <script type="text/javascript" src="js/mapproc.js"></script>
 <script type="text/javascript" src="js/mapproc.sa.js"></script>
 <script type="text/javascript" src="js/jscolor/jscolor.js"></script>
@@ -19,6 +20,7 @@ var places, catData, seriesData;
 var gmapsPlaces = {};
 var map;
 var mapCenter = [-16, -48]; //XXX get from maps.json
+//var baseurl = '../q';
 
 function loadNakedMap(map_canvas_id, mapUrl) {
 	//var dataPlaces = mapUrl;
@@ -387,7 +389,7 @@ function addElement2Select(select, element) {
 		select.innerHTML += "<option disabled>"+element.div+"</option>\n";
 	}
 	else {
-		select.innerHTML += "<option value='"+element.url+"'"+(element['default']?" selected":"")+" columnNames='"+element.columnNames+"'>"+element.name+"</option>\n";
+		select.innerHTML += "<option value='"+element.value+"'"+(element['default']?" selected":"")+" parameterCount='"+element.parameterCount+"' columnNames='"+element.columnNames+"'>"+element.name+"</option>\n";
 	}
 }
 
@@ -399,7 +401,10 @@ function removeElement(elem) {
 
 function refreshDataUrlColumns() {
 	var sel = document.getElementById('dataUrl');
-	var collist = sel.options[sel.selectedIndex].getAttribute('columnnames');
+	var selOption = sel.options[sel.selectedIndex];
+
+	setParameters('parameters', selOption.getAttribute('parameterCount'));
+	var collist = selOption.getAttribute('columnnames');
 	var cols = collist.split(",");
 	var selCols = document.getElementById('dataColumn');
 	selCols.innerHTML = '';
@@ -428,6 +433,17 @@ function transformQonData(qonData, column) {
 
 function dataColumnChanged() {
 	// XXX set isCategoricalData
+}
+
+function qonLoadData() {
+	var baseurl = '../q';
+	//document.getElementById('dataUrl').value;
+	var url = getQueryUrl('dataUrl', 'json', baseurl);
+	console.log('baseurl',baseurl,'url',url);
+	loadData(url);
+}
+
+function onParameterChange() {
 }
 
 /* function createCategoriesFromDataSeries() {
@@ -479,8 +495,10 @@ $.ajax({
 				addElement2Select(select,
 					{
 						"div": false,
+						"value": elname,
 						"url": "../q/"+elname+".json",
 						"name": elname,
+						"parameterCount": sources[i].parameterCount,
 						"columnNames": sources[i].columnNames.substring(1,sources[i].columnNames.length-1)
 					}
 				);
@@ -503,7 +521,11 @@ $.ajax({
 		var select = document.getElementById('mapUrl');
 		
 		for(var i=0;i<sources.length;i++) {
-			addElement2Select(select, sources[i]);
+			addElement2Select(select,
+				{
+					"value": sources[i].url,
+					"name": sources[i].name,
+				});
 		}
 
 		if(mapsData.showOptionsIfUnique===false && sources.length==1) {
@@ -555,6 +577,8 @@ Map<span id="mapbox2">:
 Data:
 <select name="dataUrl" id="dataUrl" onchange="refreshDataUrlColumns()" style="width: 10em;">
 </select>
+<span id="parameters"></span>
+
 <!-- TODO add parameters, add filters -->
 <!-- <input type="button" value="+" onclick="addDataSeriesDialog();" class="symbol"> --><br/>
 Column:
@@ -619,7 +643,7 @@ Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorF
 <!-- 
 Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound" value="1"/><br/ -->
 <br/>
-<input type="button" id="btn-loaddata" value="Load Data" class="medium" onClick="loadData(document.getElementById('dataUrl').value);" disabled/><br/>
+<input type="button" id="btn-loaddata" value="Load Data" class="medium" onClick="qonLoadData();" disabled/><br/>
 <input type="button" id="btn-resetdata" value="Reset Data" class="medium" onClick="resetMapData();" disabled/><br/>
 <br/>
 <!-- input type="button" value="Open in GMaps" class="medium" onClick="openInGoogleMaps('theform');"/><br/ -->

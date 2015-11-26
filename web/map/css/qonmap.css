@@ -15,3 +15,14 @@ body {
 	border: 2px solid #666;
 	/* padding: 2px; */
 }
+
+.parameter-label {
+	display: inline-block;
+	background-color: #bbb;
+	padding: 2px;
+	margin: 2px;
+}
+
+input.parameter {
+	width: 4em;
+}

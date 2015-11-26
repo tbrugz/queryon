@@ -48,7 +48,7 @@ function loadRelation(selectId, parametersId, containerId) {
 	setParameters(parametersId, params);
 }
 
-function getQueryUrl(selectId, syntax) {
+function getQueryUrl(selectId, syntax, baseUrlParam) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
 	var params = document.querySelectorAll('.parameter');
@@ -70,9 +70,12 @@ function getQueryUrl(selectId, syntax) {
 		queryString += '&'+item.name+"="+encodeURIComponent(item.value);
 	}
 	
-	var order = document.getElementById('order').value;
-	if(order!=null && order!='') {
-		queryString += '&order='+order;
+	var order = document.getElementById('order');
+	if(order) {
+		order = order.value;
+		if(order!=null && order!='') {
+			queryString += '&order='+order;
+		}
 	}
 	
 	var offset = document.getElementById('offset');
@@ -82,7 +85,8 @@ function getQueryUrl(selectId, syntax) {
 	}
 	
 	//console.log('query-string: '+queryString);
-	var returl = baseUrl+'/'+id+paramsStr
+	var returl = (baseUrlParam?baseUrlParam:baseUrl)
+		+'/'+id+paramsStr
 		+(syntax?'.'+syntax:'')
 		+(queryString?'?'+queryString:'');
 	
