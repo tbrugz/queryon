@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+//import java.nio.charset.Charset;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -270,6 +271,7 @@ public class QueryOn extends HttpServlet {
 			else {
 				models.put(null, modelGrabber(prop, null));
 			}
+			//log.debug("charset: "+Charset.defaultCharset());
 			context.setAttribute(ATTR_MODEL_MAP, models);
 			//model = SchemaModelUtils.getDefaultModel(context);
 			dsutils = new DumpSyntaxUtils(prop);
@@ -755,6 +757,10 @@ public class QueryOn extends HttpServlet {
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
+				if(rsmd==null) {
+					String message = "can't get metadata of: <code>"+sql.getFinalSql().trim()+"</code>";
+					throw new BadRequestException(message);
+				}
 				// dumping ResultSetMetaData as a ResultSet ;)
 				ResultSet rs = new ResultSetMetadata2RsAdapter(rsmd);
 				dumpResultSet(rs, reqspec, relation.getName(),
