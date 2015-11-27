@@ -168,3 +168,14 @@ a, a:visited {
 #rolesListDialogContainer .disabled {
 	text-decoration: line-through;
 }
+
+#help {
+	background-color: #9B9BCE;
+	padding: 2px 3px 2px 3px;
+	font-family: monospace;
+	margin-left: 15px;
+}
+
+#help a {
+	text-decoration: none;
+}

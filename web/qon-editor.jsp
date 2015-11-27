@@ -574,8 +574,8 @@ if(remarks==null) { remarks = ""; }
 	<label id="rolesLabel">
 		<span id="rolesLabelText">roles:</span>
 		<input type="text" id="roles" name="roles" value="<%= roles %>"/>
-		<span id="rolesCount"></span>
-		<input type="button" id="rolesBtn" value="+/- roles" onclick="showRolesDialog()"/>
+		<span id="rolesCount" title="# of current allowed roles"></span>
+		<input type="button" id="rolesBtn" value="+/- roles" title="Add/Remove roles" onclick="showRolesDialog()"/>
 	</label>
 	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
 	
@@ -585,6 +585,7 @@ if(remarks==null) { remarks = ""; }
 		<a id="url-permalink" href="" target="_blank">permalink</a>
 		<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
 	</span>
+	<span id="help"><a href="reader.html" title="Editor's help" target="_blank">?</a></span>
 	<span id="username"><%= currentUser.getPrincipal() %></span>
 	</span>
 </div>
