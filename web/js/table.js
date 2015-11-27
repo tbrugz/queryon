@@ -46,7 +46,7 @@ function createBlobLinks() {
 		var idx = allColNames.indexOf(blobNames[i]+"_FILEEXT");
 		blobFileExtIndex.push(idx);
 	}
-	//XXX add blobNames[i]+"_MIMETYPE" ?
+	//XXX add blobNames[i]+"_MIMETYPE" ? blobNames[i]+"_FILENAME" ?
 
 	console.log("table.js: tableName",tableName,"cols",cols,"blobNames",blobNames,"blobIndexes",blobIndexes,"blobFileExtIndex",blobFileExtIndex);
 	

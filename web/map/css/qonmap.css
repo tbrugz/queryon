@@ -21,8 +21,18 @@ body {
 	background-color: #bbb;
 	padding: 2px;
 	margin: 2px;
+	font-family: monospace;
 }
 
 input.parameter {
 	width: 4em;
+}
+
+#dataRemarks {
+	font-size: small;
+	background-color: #f0f0f0;
+	font-family: monospace;
+	padding: 2px;
+	display: none;
+	margin: 2px;
 }

@@ -389,7 +389,7 @@ function addElement2Select(select, element) {
 		select.innerHTML += "<option disabled>"+element.div+"</option>\n";
 	}
 	else {
-		select.innerHTML += "<option value='"+element.value+"'"+(element['default']?" selected":"")+" parameterCount='"+element.parameterCount+"' columnNames='"+element.columnNames+"'>"+element.name+"</option>\n";
+		select.innerHTML += "<option value='"+element.value+"'"+(element['default']?" selected":"")+" parameterCount='"+element.parameterCount+"' columnNames='"+element.columnNames+"' remarks='"+element.remarks+"'>"+element.name+"</option>\n";
 	}
 }
 
@@ -402,7 +402,16 @@ function removeElement(elem) {
 function refreshDataUrlColumns() {
 	var sel = document.getElementById('dataUrl');
 	var selOption = sel.options[sel.selectedIndex];
+	var dataRemarks = document.getElementById('dataRemarks');
 
+	var remarks = selOption.getAttribute('remarks');
+	if(remarks) {
+		dataRemarks.style.display = 'block';
+		dataRemarks.innerHTML = remarks;
+	}
+	else {
+		dataRemarks.style.display = 'none';
+	}
 	setParameters('parameters', selOption.getAttribute('parameterCount'));
 	var collist = selOption.getAttribute('columnnames');
 	var cols = collist.split(",");
@@ -499,7 +508,8 @@ $.ajax({
 						"url": "../q/"+elname+".json",
 						"name": elname,
 						"parameterCount": sources[i].parameterCount,
-						"columnNames": sources[i].columnNames.substring(1,sources[i].columnNames.length-1)
+						"columnNames": sources[i].columnNames.substring(1,sources[i].columnNames.length-1),
+						"remarks": sources[i].remarks ? sources[i].remarks.replace(/['"]/gi, "") : ''
 					}
 				);
 			}
@@ -577,6 +587,7 @@ Map<span id="mapbox2">:
 Data:
 <select name="dataUrl" id="dataUrl" onchange="refreshDataUrlColumns()" style="width: 10em;">
 </select>
+<div id="dataRemarks"></div>
 <span id="parameters"></span>
 
 <!-- TODO add parameters, add filters -->
