@@ -387,6 +387,7 @@ public class QueryOn extends HttpServlet {
 			doService(req, resp);
 		}
 		catch(BadRequestException e) {
+			//e.printStackTrace();
 			resp.setStatus(e.getCode());
 			resp.getWriter().write(e.getMessage());
 		}

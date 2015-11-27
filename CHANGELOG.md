@@ -4,6 +4,10 @@ queryon ng
 * build: added status.jsp & build.revisionNumber
 * web: blob dump ui
 * web: added map ui (mapproc)
+* added DumpSyntax parameters/properties
+* added json & csv parameters
+* added menu.html
+* added qon-editor help doc & markdown parser
 
 
 queryon 0.6.0

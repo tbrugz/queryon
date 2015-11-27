@@ -431,7 +431,7 @@ public class RequestSpec {
 		Properties modifiedProps = new Properties(); //XXX use ParametrizedProps?
 		modifiedProps.putAll(initProps);
 		if(newProps.size()>0) {
-			log.info("["+ds.getSyntaxId()+"] parameter props: "+newProps);
+			log.debug("["+ds.getSyntaxId()+"] parameter props: "+newProps);
 			modifiedProps.putAll(newProps);
 		}
 		else {
