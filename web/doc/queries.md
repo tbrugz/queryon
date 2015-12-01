@@ -26,7 +26,8 @@ Special columns
 Special query constructs inside SQL comments (`/* ... */`)
 ----------------
 
-* `allow-encapsulation=<false|true>` - allow the query to be encapsulated by the QueryOn engine so that the query may be paginated in the database, for example. In some edge cases this may be a problem, so it can be disabled (default is *false*)
+* `allow-encapsulation=<false|true>` - allow the query to be encapsulated with another query by the QueryOn engine so that the query results
+  may be paginated in the database, for example. In some edge cases this may be a problem, so it can be disabled (default is *false*)
 * `limit-max=<numeric>` - limit the number of rows that may be returned by the query in a single request.
 
 

@@ -31,11 +31,28 @@ table tr td table tr td table tr td table tr:hover td {
 }
 td {
 	border: 1px solid #bbb;
+	padding: 2px 5px 2px 5px;
 }
 th {
 	border: 1px solid #bbb;
 	background-color: #fff;
+	padding: 1px 5px 1px 5px;
 }
+
+/*
+col & colgroup see:
+https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col
+http://quirksmode.org/css/css2/columns.html
+*/
+/*
+col[type="Blob"] {
+	background-color: #cfc;
+}
+
+col[type="Integer"] {
+	text-align: right;
+}
+*/
 
 /* table tr:nth-child(2n) {} */
 	

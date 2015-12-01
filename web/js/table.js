@@ -47,6 +47,7 @@ function createBlobLinks() {
 		blobFileExtIndex.push(idx);
 	}
 	//XXX add blobNames[i]+"_MIMETYPE" ? blobNames[i]+"_FILENAME" ?
+	//XXX style: 'display: none' to blobNames[i]+"_FILEEXT" columns?
 
 	console.log("table.js: tableName",tableName,"cols",cols,"blobNames",blobNames,"blobIndexes",blobIndexes,"blobFileExtIndex",blobFileExtIndex);
 	
@@ -59,6 +60,7 @@ function createBlobLinks() {
 		queryString = removeLimitOffset(queryString);
 		//if(!Number.isInteger(currentOffset)) { currentOffset = 0; }
 		
+		// ':scope'? http://stackoverflow.com/questions/3680876/using-queryselectorall-to-retrieve-direct-children
 		var rows = content.querySelectorAll('tr');
 		//var rows = content.getElementsByTagName('tr');
 		var urlPrepend = location.pathname + queryString;
