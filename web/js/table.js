@@ -66,19 +66,25 @@ function createBlobLinks() {
 			urlPrepend = queryOnUrl + "/" + getId(getCurrentRelation('objects')) + queryString;
 		}
 		console.log("table.js: currentOffset", currentOffset, "queryString", queryString, "urlPrepend", urlPrepend);
+		var rownum = 0;
 		for(var i=1;i<rows.length;i++) {
 			var row = rows[i];
-			for(var ci=0;ci<blobIndexes.length;ci++) {
-				if(/*row.children[blobIndexes[ci]]!=null && */row.parentNode.parentNode === content && row.children[blobIndexes[ci]].getAttribute("null")==null) {
+			if(/*row.children[blobIndexes[ci]]!=null && */row.parentNode.parentNode === content) {
+				for(var ci=0;ci<blobIndexes.length;ci++) {
+					if(row.children[blobIndexes[ci]].getAttribute("null")==null) {
+						
 					var currval = row.children[blobIndexes[ci]].innerHTML;
 					var fileExt = blobFileExtIndex[ci]>=0 ? row.children[blobFileExtIndex[ci]].innerHTML : "blob" ;
-					var offset = (i-1+currentOffset);
+					var offset = (rownum+currentOffset);
 					row.children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend
 						+ (queryString?"&":"?")
 						+"limit=1&offset="+offset+"&valuefield="+blobNames[ci]
 						+"&filename=queryon_"+tableName+"_"+blobNames[ci]+"_"+(offset+1)+"."+fileExt
 						+"\">"+currval+"</a>";
+					
+					}
 				}
+				rownum++;
 			}
 		}
 	}
