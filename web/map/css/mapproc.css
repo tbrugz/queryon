@@ -137,3 +137,8 @@ hr {
 	padding: 10px;
 	border: 2px solid;
 }
+
+#colorsContainer {
+	max-height: 30em;
+	overflow-y: scroll;
+}

@@ -187,14 +187,11 @@ function rgb2hex(rgb) {
 }
 
 function getCat(value, catData, isNumerical) {
-	/*if(value==null) {
-		console.log("nullvalue: "+value+" ; isNumerical: "+isNumerical);
-	}*/
 	if(isNumerical) {
 		var numValue = normalizeNum(value);
 		for(id in catData) {
 			if( (numValue >= normalizeNum(catData[id].startval) && numValue <= normalizeNum(catData[id].endval)) ) {
-				//console.log("id: "+id+"; v:"+value+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+				//console.log("num, id: "+id+"; v:"+value+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
 				return id;
 			}
 			//console.log("..id: "+id+"; v:"+value+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
@@ -202,11 +199,8 @@ function getCat(value, catData, isNumerical) {
 	}
 	else {
 		for(id in catData) {
-			/*if(value==null) {
-				console.log("nullvalue: ",value," ; isNumerical: ",isNumerical," ; ",catData[id].startval);
-			}*/
-			if( (value == catData[id].startval) ) {
-				//console.log("id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
+			if( (value === catData[id].startval) ) {
+				//console.log("nn, id: "+id+"; v:"+value+"; numValue:"+numValue+" ; interval:"+catData[id].startval+" ~ "+catData[id].endval+"\n");
 				return id;
 			}
 		}
@@ -346,6 +340,7 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 
 function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumericData) {
 	var countOk = 0, countUndef = 0;
+	//console.log("applySeriesDataAndStyle:: isNumericData=",isNumericData,"seriesData=",seriesData,"catData=",catData);
 	for(var id in gPlaceMarks) {
 		var placemark = gPlaceMarks[id];
 		
@@ -353,12 +348,11 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 		placemark.dataValue = seriesData.series[id];
 		placemark.catId = getCat(placemark.dataValue, catData, isNumericData); //numeric or categorical...
 		//TODO: numberFormat (grouping char, ...)
-		//console.log("seriesData=",seriesData);
 		
 		placemark.description = seriesData.valueLabel + ': '
 			+ (isNumeric(seriesData.series[id]) ? formatFloat(seriesData.series[id]) : seriesData.series[id])
 			+ (seriesData.measureUnit?' ' + seriesData.measureUnit:"");
-		if(placemark.catId==undefined) {
+		if(placemark.catId==undefined || placemark.catId==null) {
 			//console.warn('undefined cat: '+id+' / '+placemark.name); //+' / '+placemark.catId);
 			placemark.fillColor = ERROR_FILL_COLOR;
 			placemark.setMap(null);
