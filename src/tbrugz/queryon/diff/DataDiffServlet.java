@@ -1,6 +1,7 @@
 package tbrugz.queryon.diff;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,6 +35,7 @@ import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
@@ -44,7 +46,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(DataDiffServlet.class);
 
-	final boolean instant = true;
+	//final boolean instant = true;
 	long loopLimit = 1000;
 	
 	@Override
@@ -68,8 +70,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
 		}
 		
-		String metadataId = SchemaModelUtils.getModelId(req, "metadata");
-		log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
+		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
+		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
 		//XXX: 'common'(metadata) boolean parameter: get common columns from both models 
 		//String metadataId = req.getParameter("metadata");
 		//if(metadataId==null) { metadataId = modelIdFrom; }
@@ -100,33 +102,37 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			
 			//XXX test if keycols are the same in both models ?
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
-			
-			ResultSet rsFrom = runQuery(connFrom, sql, modelIdFrom, table.getQualifiedName());
-			ResultSet rsTo = runQuery(connTo, sql, modelIdTo, table.getQualifiedName());
-			
-			// testing column types equality
-			ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsTo.getMetaData()); 
-			ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsFrom.getMetaData());
-			if(!sRSColmd.equals(tRSColmd)) {
-				log.warn("["+table+"] metadata from ResultSets differ");
-				log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
-			}
-			
-			ResultSetDiff rsdiff = new ResultSetDiff();
-			rsdiff.setLimit(loopLimit);
-			
-			DBMSResources.instance().updateMetaData(connFrom.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
-			log.debug("diff for table '"+table+"'...");
 			DiffSyntax ds = getSyntax(obj, prop);
-			rsdiff.diff(rsTo, rsFrom, table.getName(), keyCols, ds, resp.getWriter());
-			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
-			rsFrom.close(); rsTo.close();
+			runDiff(connFrom, connTo, sql, table, keyCols, modelIdFrom, modelIdTo, ds, resp.getWriter());
 		}
 		finally {
 			ConnectionUtil.closeConnection(connFrom);
 			ConnectionUtil.closeConnection(connTo);
 		}
+	}
+	
+	void runDiff(Connection connFrom, Connection connTo, String sql, NamedDBObject table, List<String> keyCols, String modelIdFrom, String modelIdTo, DiffSyntax ds, Writer writer) throws SQLException, IOException {
+		ResultSet rsFrom = runQuery(connFrom, sql, modelIdFrom, getQualifiedName(table));
+		ResultSet rsTo = runQuery(connTo, sql, modelIdTo, getQualifiedName(table));
+		
+		// testing column types equality
+		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsTo.getMetaData()); 
+		ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsFrom.getMetaData());
+		if(!sRSColmd.equals(tRSColmd)) {
+			log.warn("["+table+"] metadata from ResultSets differ");
+			log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
+		}
+		
+		ResultSetDiff rsdiff = new ResultSetDiff();
+		rsdiff.setLimit(loopLimit);
+		
+		DBMSResources.instance().updateMetaData(connFrom.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
+		log.debug("diff for table '"+table+"'...");
+		rsdiff.diff(rsTo, rsFrom, table.getName(), keyCols, ds, writer);
+		log.info("table '"+table+"' data diff: "+rsdiff.getStats());
+		
+		rsFrom.close(); rsTo.close();
 	}
 	
 	/*QueryOnSchema getQOS() {
@@ -181,6 +187,10 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		ds.procProperties(prop);
 		
 		return ds;
+	}
+	
+	static String getQualifiedName(NamedDBObject obj) {
+		return (obj.getSchemaName()!=null?obj.getSchemaName()+".":"")+obj.getName();
 	}
 	
 }
