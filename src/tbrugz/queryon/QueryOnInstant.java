@@ -26,11 +26,14 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.MaterializedView;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
+import tbrugz.sqldump.dbmodel.Trigger;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
@@ -43,9 +46,16 @@ public class QueryOnInstant extends QueryOn {
 	
 	static final TableType[] tableTypes = new TableType[]{ TableType.TABLE };
 	static final TableType[] viewTypes = new TableType[]{ TableType.VIEW, TableType.MATERIALIZED_VIEW, TableType.SYSTEM_VIEW };
+	static final TableType[] materializedViewTypes = new TableType[]{ TableType.MATERIALIZED_VIEW };
 	
 	static final List<TableType> tableTypesList = Arrays.asList(tableTypes);
 	static final List<TableType> viewTypesList = Arrays.asList(viewTypes);
+	static final List<TableType> materializedViewTypesList = Arrays.asList(materializedViewTypes);
+	
+	static final List<String> statusTriggerAllColumns;
+	static {
+		statusTriggerAllColumns = new ArrayList<String>(); statusTriggerAllColumns.addAll(statusUniqueColumns); statusTriggerAllColumns.addAll(Arrays.asList(new String[]{"tableName"}));
+	}
 	
 	@SuppressWarnings("resource")
 	@Override
@@ -77,6 +87,13 @@ public class QueryOnInstant extends QueryOn {
 		}
 		case VIEW: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
+			break;
+		}
+		case MATERIALIZED_VIEW: {
+			//List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
+			//keepRelationsByType(rels, "materialized view");
+			List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
 			break;
 		}
@@ -130,6 +147,15 @@ public class QueryOnInstant extends QueryOn {
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, pkgs, ExecutableObject.class);
 			break;
 		}
+		case TRIGGER: {
+			List<Trigger> triggers = new ArrayList<Trigger>();
+			//XXX: DBMSFeatures show have a grabDbTriggerNames ... trigger body is retrieved every time...
+			feat.grabDBTriggers(triggers, schemaName, null, null, conn);
+			//log.info("#triggers: "+triggers.size());
+
+			rs = new ResultSetListAdapter<Trigger>(objectName, statusTriggerAllColumns, triggers, Trigger.class);
+			break;
+		}
 		case EXECUTABLE: {
 			throw new BadRequestException("status not implemented for "+statusType+" object");
 			//TODOne: split executable's types
@@ -166,7 +192,7 @@ public class QueryOnInstant extends QueryOn {
 		
 		conn.close();
 		
-		rs = filterStatus(rs, reqspec, currentUser, PrivilegeType.SELECT);
+		rs = filterStatus(rs, reqspec, currentUser, PrivilegeType.SELECT); //XXX: should be SHOW privilege?
 		
 		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, null, null, true, resp);
 		if(rs!=null) { rs.close(); }
@@ -257,8 +283,24 @@ public class QueryOnInstant extends QueryOn {
 				removed++;
 			}
 		}
-		log.info("removeExecsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+execs.size());
+		log.info("keepExecsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+execs.size());
 	}
+
+	/*
+	static void keepRelationsByType(List<Relation> relations, String relationType) {
+		int initSize = relations.size();
+		int removed = 0;
+		Iterator<Relation> iter = relations.iterator();
+		while(iter.hasNext()){
+			Relation v = iter.next();
+			if(!v.getRelationType().equals(relationType)) {
+				iter.remove();
+				removed++;
+			}
+		}
+		log.info("keepRelationsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+relations.size());
+	}
+	*/
 	
 	static String[] tableTypeArr2StringArr(List<TableType> types) {
 		String[] ret = new String[types.size()];

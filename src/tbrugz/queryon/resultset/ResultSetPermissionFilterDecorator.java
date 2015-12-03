@@ -8,6 +8,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+//import tbrugz.sqldump.util.SQLUtils;
+
 public class ResultSetPermissionFilterDecorator extends AbstractResultSetFilterDecorator {
 	
 	static final Log log = LogFactory.getLog(ResultSetPermissionFilterDecorator.class);
@@ -21,6 +23,7 @@ public class ResultSetPermissionFilterDecorator extends AbstractResultSetFilterD
 		this.subject = subject;
 		this.permissionPattern = permissionPattern;
 		maxCol = rs.getMetaData().getColumnCount();
+		//log.info("permissionPattern: "+permissionPattern+" ; columns [#"+maxCol+"]: "+SQLUtils.getColumnNames(rs.getMetaData()));
 		//XXX: pre-compile pattern?
 	}
 
@@ -38,7 +41,7 @@ public class ResultSetPermissionFilterDecorator extends AbstractResultSetFilterD
 			permission = permission.replaceAll("\\["+i+"\\]", colValue);
 		}
 		boolean permitted = subject.isPermitted(permission);
-		//log.info("RSPFD: permission: "+permission+" / "+permitted);
+		//log.info("RSPFD: permission: "+permissionPattern+" / "+permission+" / "+permitted);
 		return permitted;
 	}
 	
