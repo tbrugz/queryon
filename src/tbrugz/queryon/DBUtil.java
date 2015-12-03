@@ -59,7 +59,7 @@ public class DBUtil {
 		return Types.OTHER;
 	}
 	
-	static String getDBConnPrefix(Properties prop, String modelId) {
+	public static String getDBConnPrefix(Properties prop, String modelId) {
 		String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
 		String ret = prop.getProperty(prefix+".connpropprefix", prefix);
 		//log.info("getDBConnPrefix: modelId = "+modelId+" ; ret = "+ret);

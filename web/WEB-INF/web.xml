@@ -51,6 +51,11 @@
 	</servlet>
 	
 	<servlet>
+		<servlet-name>DiffManyServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.diff.DiffManyServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
 		<servlet-name>Cool303</servlet-name>
 		<servlet-class>tbrugz.queryon.Cool303RedirectionServlet</servlet-class>
 		<init-param>
@@ -92,6 +97,11 @@
 	<servlet-mapping>
 		<servlet-name>Diff2QServlet</servlet-name>
 		<url-pattern>/diff2q/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>DiffManyServlet</servlet-name>
+		<url-pattern>/diffmany/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

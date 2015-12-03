@@ -55,8 +55,9 @@ public class Diff2QServlet extends DataDiffServlet {
 		Connection connTo = DBUtil.initDBConn(prop, modelIdTo);
 		
 		try {
-			String keyColsParam = req.getParameter("keycols");
 			String sqlParam = req.getParameter("sql");
+			//XXX req.getParameterValues("keycols"); ??
+			String keyColsParam = req.getParameter("keycols");
 			List<String> keyCols = Utils.getStringList(keyColsParam, ",");
 			
 			String sql = sqlParam;
