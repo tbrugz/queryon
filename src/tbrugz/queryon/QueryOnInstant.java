@@ -26,14 +26,13 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
-import tbrugz.sqldump.dbmodel.MaterializedView;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Trigger;
-import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
@@ -78,6 +77,7 @@ public class QueryOnInstant extends QueryOn {
 		
 		//final DBObjectType type = DBObjectType.valueOf(reqspec.object.toUpperCase());
 		final String objectName = statusType.desc();
+		//log.info("doStatus: "+statusType+" ; "+objectName);
 		
 		switch (statusType) {
 		case TABLE: {
@@ -172,6 +172,14 @@ public class QueryOnInstant extends QueryOn {
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 			break;
 			*/
+		}
+		case SEQUENCE: {
+			List<Sequence> seqs = new ArrayList<Sequence>();
+			feat.grabDBSequences(seqs, schemaName, null, conn);
+			log.info("#sequences: "+seqs.size());
+
+			rs = new ResultSetListAdapter<Sequence>(objectName, statusUniqueColumns, seqs, Sequence.class);
+			break;
 		}
 		case FK: {
 			//List<FK> list = grabFKs(schemaName, dbmd);

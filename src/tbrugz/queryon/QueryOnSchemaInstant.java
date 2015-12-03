@@ -112,6 +112,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			//XXX: really grab trigger?
 			feat.grabDBTriggers(ret, schemaName, null, objectName, conn);
 			break;
+		case SEQUENCE:
+			feat.grabDBSequences(ret, schemaName, objectName, conn);
+			break;
 		case FK:
 			//XXX how to get FK from dbmd by name? just grab from model (the 'cache')
 			//log.info("object of type "+type+" grabbed (?) from model cache");
