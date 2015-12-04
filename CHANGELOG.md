@@ -8,6 +8,8 @@ queryon ng
 * added json & csv parameters
 * added menu.html
 * added qon-editor help doc & markdown parser
+* datadiff: added Diff2QServlet
+* diff: added DiffManyServlet (579)
 
 
 queryon 0.6.0

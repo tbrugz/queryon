@@ -116,9 +116,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			feat.grabDBSequences(ret, schemaName, objectName, conn);
 			break;
 		case FK:
-			//XXX how to get FK from dbmd by name? just grab from model (the 'cache')
-			//log.info("object of type "+type+" grabbed (?) from model cache");
-			//break;
+			//XXX how to get FK from dbmd by name (only filtering by table or schema...)? grab from model (the 'cache')? not "instant"...
+			log.info("FK [type "+type+"] '"+objectName+"' cannot be grabbed");
+			break;
 		default:
 			log.warn("object of type "+type+" cannot be grabbed");
 		}

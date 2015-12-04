@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	static final Log log = LogFactory.getLog(DiffManyServlet.class);
 
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
 		
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<1) {

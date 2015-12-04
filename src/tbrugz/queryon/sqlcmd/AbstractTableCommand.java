@@ -8,6 +8,11 @@ import java.util.regex.Pattern;
 
 import tbrugz.queryon.SqlCommand;
 
+/*
+ * sqlcmd: see
+ *   https://github.com/julianhyde/sqlline/blob/master/doc/manual.xml
+ *   https://github.com/julianhyde/sqlline ; https://github.com/mapr/sqlline ; beeline: https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients
+ */
 public abstract class AbstractTableCommand implements SqlCommand {
 
 	//static final Pattern CMD  = Pattern.compile ...
