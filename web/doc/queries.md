@@ -6,7 +6,7 @@ Queries may have special columns which makes them behave differently under *Quer
 Columns with a special *suffix* will alter the behavior or appearance of the same column without the suffix.
 Queries may also have special constructs inside SQL comments to alter their behavior.
 
-QueryOn's editor also allows for special commands that are useful to query datamase's metadata.
+QueryOn's editor also allows for special commands that are useful to query database's metadata.
 
 
 Special columns
@@ -20,15 +20,16 @@ Special columns
 **html(x) + table.js**:
 
 * blob columns have download link
-* `_FILEEXT` suffix: blob download link uses this file extension
+* `_FILEEXT` suffix: blob download link uses it's value as file extension
 
 
 Special query constructs inside SQL comments (`/* ... */`)
 ----------------
 
-* `allow-encapsulation=<false|true>` - allow the query to be encapsulated with another query by the QueryOn engine so that the query results
-  may be paginated in the database, for example. In some edge cases this may be a problem, so it can be disabled (default is *false*)
-* `limit-max=<numeric>` - limit the number of rows that may be returned by the query in a single request.
+* `allow-encapsulation=<false|true>` - allows the query to be encapsulated within another query by the QueryOn engine so
+  that, for example, the query results may be paginated in the database. In some edge cases this may be a problem, so
+  it can be disabled (default is *false*)
+* `limit-max=<numeric>` - limits the number of rows that may be returned by the query in a single request
 
 
 Query commands

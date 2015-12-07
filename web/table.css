@@ -38,6 +38,10 @@ th {
 	background-color: #fff;
 	padding: 1px 5px 1px 5px;
 }
+caption {
+	font-weight: bold;
+	font-size: 14pt;
+}
 
 /*
 col & colgroup see:
