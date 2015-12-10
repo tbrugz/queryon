@@ -585,7 +585,7 @@ if(remarks==null) { remarks = ""; }
 		<a id="url-permalink" href="" target="_blank">permalink</a>
 		<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
 	</span>
-	<span id="help"><a href="reader.html" title="Editor's help" target="_blank">?</a></span>
+	<span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span>
 	<span id="username"><%= currentUser.getPrincipal() %></span>
 	</span>
 </div>

@@ -8,6 +8,7 @@ Queries may also have special constructs inside SQL comments to alter their beha
 
 QueryOn's editor also allows for special commands that are useful to query database's metadata.
 
+See also: [API documentation](#doc/api.md)
 
 Special columns
 ----------------
@@ -65,3 +66,4 @@ The source and target nodes may have special properties, as follows:
 Query results may be visualized as a map. To that end, a Geojson map should be accessible from the QueryOn instalation and each feature should have an `id` property.
 Also, the query should have a column named `GEOM_ID` so that the map feature and the query result's row may be matched. Once matched, the fill color of the feature
 will change according toi the selected column value.
+
