@@ -13,7 +13,7 @@ Where
 * `<syntax>` is the syntax of the return. Common values are `csv`, `html`, `htmlx`, `json`, `xml`, `ffc` & `sql`
 
 **htmlx** is a syntax in which some columns have a special meaning.
-For more information see [Queries Features / Special columns](#doc/queries.md)
+For more information see [Queries Features / Special columns](queries.md)
 
 Parameters
 ----------
@@ -50,6 +50,27 @@ Useful for Blob types.
 * `mimefield` - the column name that represents the mimetype of the value
 * `filename` - the filename to be used in the return
 * `filenamefield` - the column that contains the filename of the value
+
+Syntax-based parameters
+-----------------------
+
+Some parameters are specific to a syntax. Below you can find more about them:
+
+### CSV
+
+* `header` - returns (or not) the header row (default is `true`)
+* `delimiter` - delimiter character between fields (columns) - default is `,`
+
+### JSON
+
+* `callback` - padding to be used for [JSONP](https://en.wikipedia.org/wiki/JSONP) (*optional*)  
+
+More info about syntax-based parameters may be found at
+[syntaxinfo.properties](https://bitbucket.org/tbrugz/queryon/src/default/src_resources/tbrugz/queryon/syntaxes/syntaxinfo.properties)
+
+
+More information
+----------------
 
 Details about the implementation of the parameters may be found on the
 [RequestSpec](https://bitbucket.org/tbrugz/queryon/src/default/src/tbrugz/queryon/RequestSpec.java)

@@ -8,6 +8,8 @@
 	<script src="js/markdown.js"></script>
 	<script>
 
+var mdRegex = /^\w[\w\./]*\.md$/ ;
+
 document.addEventListener('DOMContentLoaded',updatePageContent);
 
 window.onhashchange = updatePageContent;
@@ -23,6 +25,11 @@ function updatePageContent() {
 		url = url.substring(1);
 		console.log("url", url);
 	}
+
+	if(url.match(mdRegex) == null) {
+		console.log("not a local MD link...", url);
+		return;
+	}
 	
 	$.ajax({
 		url: url,
@@ -30,7 +37,7 @@ function updatePageContent() {
 		success: function(data) {
 			var md = markdown.toHTML(data);
 			document.getElementById('preview').innerHTML = md;
-			//postProcess();
+			postProcess();
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			console.log('error reading: '+url, jqXHR, textStatus, errorThrown);
@@ -38,18 +45,23 @@ function updatePageContent() {
 	});
 }
 
-/*
 function postProcess() {
 	var as = document.querySelectorAll('a');
 	for(var i=0;i<as.length;i++) {
 		var a = as[i];
-		console.log('link', a, a.href);
-		if(a.href && a.href.indexOf("#doc/") > -1) {
-			a.onclick = function() { refreshPage(a.href); };
+		var href = a.getAttribute("href");
+		//console.log('link', a, href);
+		//if(a.href && a.href.indexOf("#doc/") > -1) {
+		if(href && href.match(mdRegex) != null) {
+			//a.onclick = function() { refreshPage(a.href); };
+			var oldhref = href
+			a.href = '#doc/'+href;
+			console.log('new-link: ', a, a.getAttribute("href"), "; old-link: ", oldhref);
 		}
 	}
 }
 
+/*
 function refreshPage(link) {
 	console.log('doc link', link);
 	document.location.reload();
@@ -67,6 +79,12 @@ function refreshPage(link) {
 		background-color: #fff;
 		border: 1px dotted #aaa;
 		padding: 0 2px 0 2px;
+	}
+	h1 {
+		margin-top: 0.3em;
+	}
+	h3 {
+		font-size: 1.1em;
 	}
 	</style>
 </head>

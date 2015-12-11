@@ -8,7 +8,7 @@ Queries may also have special constructs inside SQL comments to alter their beha
 
 QueryOn's editor also allows for special commands that are useful to query database's metadata.
 
-See also: [API documentation](#doc/api.md)
+See also: [API documentation](api.md)
 
 Special columns
 ----------------
