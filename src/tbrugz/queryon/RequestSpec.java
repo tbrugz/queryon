@@ -17,6 +17,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.util.Utils;
 
+/**
+ * see: /web/doc/api.md
+ */
 //XXX: order by? 3a,1d,2d?
 public class RequestSpec {
 	static final Log log = LogFactory.getLog(RequestSpec.class);
@@ -412,10 +415,12 @@ public class RequestSpec {
 		for(String key: pkeys) {
 			String val = req.getParameter(key);
 			if(val!=null) {
-				String regex = syntaxProperties.getProperty(ds.getSyntaxId()+".parameter@"+key+".regex");
-				String prop = syntaxProperties.getProperty(ds.getSyntaxId()+".parameter@"+key+".prop");
+				String regexKey = ds.getSyntaxId()+".parameter@"+key+".regex";
+				String propKey = ds.getSyntaxId()+".parameter@"+key+".prop";
+				String regex = syntaxProperties.getProperty(regexKey);
+				String prop = syntaxProperties.getProperty(propKey);
 				if(regex==null || prop==null) {
-					log.warn("["+ds.getSyntaxId()+"] syntax properties '"+prop+"' & '"+regex+"' must be set in '"+SYNTAXES_INFO_RESOURCE+"'");
+					log.warn("["+ds.getSyntaxId()+"] syntax properties '"+regexKey+"' & '"+propKey+"' must be set in '"+SYNTAXES_INFO_RESOURCE+"'");
 				}
 				else {
 					if(Pattern.matches(regex, val)) {
