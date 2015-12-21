@@ -1388,6 +1388,12 @@ public class QueryOn extends HttpServlet {
 			ds.dumpRow(rs, count, resp.getWriter());
 			count++;
 		}
+		if(count==0) {
+			// rfc2616-sec10.html : 10.2.5 204 No Content
+			//https://benramsey.com/blog/2008/05/http-status-204-no-content-and-205-reset-content/
+			//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			//resp.addIntHeader("X-ResultSet-Count", count);
+		}
 		ds.dumpFooter(count, resp.getWriter());
 	}
 	

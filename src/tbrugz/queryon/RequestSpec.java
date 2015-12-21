@@ -433,15 +433,20 @@ public class RequestSpec {
 			}
 		}
 
+		if(newProps.size()==0) {
+			return;
+		}
+		
 		Properties modifiedProps = new Properties(); //XXX use ParametrizedProps?
 		modifiedProps.putAll(initProps);
-		if(newProps.size()>0) {
+		//if(newProps.size()>0) {
 			log.debug("["+ds.getSyntaxId()+"] parameter props: "+newProps);
 			modifiedProps.putAll(newProps);
-		}
+		/*}
 		else {
 			//log.info("["+ds.getSyntaxId()+"] no parameter props");
-		}
+			return;
+		}*/
 		ds.procProperties(modifiedProps);
 	}
 	
