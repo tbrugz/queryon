@@ -44,9 +44,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	//static String[] ATTRS = {"style", "class"};
 	//static final int SUFFIX_NAME_SIZE =  SUFFIXES[0].length();
 	
-	List<String> finalColNames = new ArrayList<String>();
-	List<String> rowSpecialAttr = new ArrayList<String>();
-	List<Integer> rowSpecialAttrIdx = new ArrayList<Integer>();
+	final List<String> finalColNames = new ArrayList<String>();
+	final List<String> rowSpecialAttr = new ArrayList<String>();
+	final List<Integer> rowSpecialAttrIdx = new ArrayList<Integer>();
 
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
 	
@@ -105,6 +105,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		sb.append("<table class='"+tableName+"'>");
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
+		}
+		if(dumpCaptionElement){
+			sb.append("\n\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
 		}
 		if(dumpColElement) {
 			sb.append("\n<colgroup>");

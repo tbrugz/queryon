@@ -61,6 +61,10 @@ Some parameters are specific to a syntax. Below you can find more about them:
 * `header` - returns (or not) the header row (default is `true`)
 * `delimiter` - delimiter character between fields (columns) - default is `,`
 
+### HTML(X)
+
+* `title` - returns (or not) the table title/name (default is `false`)
+
 ### JSON
 
 * `callback` - padding to be used for [JSONP](https://en.wikipedia.org/wiki/JSONP) (*optional*)  
