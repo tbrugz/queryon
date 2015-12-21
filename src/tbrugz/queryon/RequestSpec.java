@@ -434,6 +434,7 @@ public class RequestSpec {
 		}
 
 		if(newProps.size()==0) {
+			ds.procProperties(initProps);
 			return;
 		}
 		
