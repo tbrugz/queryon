@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Iterator;
 
@@ -11,6 +12,12 @@ import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -402,7 +409,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	Assert.assertEquals("Should have 2 (data) rows", 2, count);*/
 
-	void baseReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
+	static void baseReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		
@@ -418,6 +425,18 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
+	}
+	
+	static Document getXmlDocument(String url) throws IOException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+url);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		//String resp = getContent(response1); System.out.println(resp);
+		
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		return dBuilder.parse(instream);
 	}
 	
 	@Test
@@ -491,6 +510,19 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetXmlEmpFilterNotIn2() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200&fnin:SALARY=1000", 2);
 	}
+
+	@Test
+	public void testGetHtmlTitleEmp() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+		Document doc = getXmlDocument("/EMP.html?fnin:SALARY=1200&fnin:SALARY=1000&title=true");
+		//String str = getString(doc);
+		//System.out.println(">>>\n"+str);
+		NodeList nl = doc.getElementsByTagName("caption");
+		Assert.assertEquals(1, countNodesWithParentTagName(nl, "table"));
+
+		doc = getXmlDocument("/EMP.html?fnin:SALARY=1200&fnin:SALARY=1000");
+		nl = doc.getElementsByTagName("caption");
+		Assert.assertEquals(0, countNodesWithParentTagName(nl, "table"));
+	}
 	
 	@Test
 	public void testProcessorJaxbSer() throws IOException, ParserConfigurationException, SAXException {
@@ -560,6 +592,16 @@ public class WinstoneAndH2HttpRequestTest {
 			}
 		}
 		return count;
+	}
+	
+	// http://stackoverflow.com/questions/5456680/xml-document-to-string
+	static String getString(Document doc) throws TransformerException {
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer = tf.newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		StringWriter writer = new StringWriter();
+		transformer.transform(new DOMSource(doc), new StreamResult(writer));
+		return writer.getBuffer().toString().replaceAll("\n|\r", "");
 	}
 	
 	@Test
