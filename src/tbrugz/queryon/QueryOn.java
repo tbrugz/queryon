@@ -800,7 +800,7 @@ public class QueryOn extends HttpServlet {
 		
 		try {
 			
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		sql.append("{ "); //sql.append("begin ");
 		if(eo.getType()==DBObjectType.FUNCTION) {
 			sql.append("?= "); //sql.append("? := ");
@@ -1024,7 +1024,7 @@ public class QueryOn extends HttpServlet {
 		List<Grant> updateGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.UPDATE);
 		boolean hasRelationUpdatePermission = QOnModelUtils.hasPermissionWithoutColumn(updateGrants, roles);
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(int i=0; cols.hasNext(); i++) {
 			String col = cols.next();
@@ -1114,8 +1114,8 @@ public class QueryOn extends HttpServlet {
 		List<Grant> insertGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.INSERT);
 		boolean hasRelationInsertPermission = QOnModelUtils.hasPermissionWithoutColumn(insertGrants, roles);
 		
-		StringBuffer sbCols = new StringBuffer();
-		StringBuffer sbVals = new StringBuffer();
+		StringBuilder sbCols = new StringBuilder();
+		StringBuilder sbVals = new StringBuilder();
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(int i=0; cols.hasNext(); i++) {
 			String col = cols.next();
@@ -1301,7 +1301,7 @@ public class QueryOn extends HttpServlet {
 	void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" (");
 				String[] values = valueMap.get(col);
 				for(int i=0;i<values.length;i++) {

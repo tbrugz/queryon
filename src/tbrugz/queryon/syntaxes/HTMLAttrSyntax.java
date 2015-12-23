@@ -98,7 +98,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	public void dumpHeader(Writer fos) throws IOException {
 		tablePrepend(fos);
 		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("<table class='"+tableName+"'>");
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
@@ -124,7 +124,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 		out(sb.toString()+"</tr>\n", fos);
 	}
 	
-	protected void appendStyleNumericAlignRight(StringBuffer sb) {
+	protected void appendStyleNumericAlignRight(StringBuilder sb) {
 		List<String> styleSelector = new ArrayList<String>();
 		for(int i=0;i<lsColNames.size();i++) {
 			int idx = finalColNames.indexOf(lsColNames.get(i));
@@ -139,7 +139,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("\t"+"<tr");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<rowSpecialAttrIdx.size();i++) {
@@ -187,7 +187,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 					ResultSet rsInt = (ResultSet) origVal;
 					
 					out(sb.toString()+"<td>\n", fos);
-					sb = new StringBuffer();
+					sb = new StringBuilder();
 					
 					HTMLDataDump htmldd = new HTMLAttrSyntax(this.padding+"\t\t", true);
 					//htmldd.padding = this.padding+"\t\t";

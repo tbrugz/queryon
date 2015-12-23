@@ -163,7 +163,7 @@ public class SQL {
 			relationCols = relation.getColumnNames();
 		}
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("order by ");
 		for(int i=0;i<reqspec.orderCols.size();i++) {
 			String col = reqspec.orderCols.get(i);
