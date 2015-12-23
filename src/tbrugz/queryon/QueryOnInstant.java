@@ -202,7 +202,7 @@ public class QueryOnInstant extends QueryOn {
 		
 		rs = filterStatus(rs, reqspec, currentUser, PrivilegeType.SELECT); //XXX: should be SHOW privilege?
 		
-		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, null, null, true, resp);
+		dumpResultSet(rs, reqspec, null, objectName, statusUniqueColumns, null, null, true, resp);
 		if(rs!=null) { rs.close(); }
 	}
 	

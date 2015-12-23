@@ -714,7 +714,7 @@ public class QueryOn extends HttpServlet {
 			dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
 		}
 		else {
-			dumpResultSet(rs, reqspec, relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp, sql.limit);
+			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp, sql.limit);
 		}
 		
 		}
@@ -764,7 +764,7 @@ public class QueryOn extends HttpServlet {
 				}
 				// dumping ResultSetMetaData as a ResultSet ;)
 				ResultSet rs = new ResultSetMetadata2RsAdapter(rsmd);
-				dumpResultSet(rs, reqspec, relation.getName(),
+				dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
 						null, //pk!=null?pk.getUniqueColumns():null,
 						null, null, //fks, uks,
 						false, //applyLimitOffsetInResultSet,
@@ -850,7 +850,7 @@ public class QueryOn extends HttpServlet {
 
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
-				dumpResultSet((ResultSet)retObject, reqspec, reqspec.object, null, null, null, true, resp);
+				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
 			}
 			else {
 				resp.getWriter().write(retObject.toString());
@@ -929,7 +929,7 @@ public class QueryOn extends HttpServlet {
 		
 		rs = filterStatus(rs, reqspec, currentUser, privilege);
 		
-		dumpResultSet(rs, reqspec, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
+		dumpResultSet(rs, reqspec, null, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
 		if(rs!=null) { rs.close(); }
 	}
 	
@@ -1345,14 +1345,14 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, 
+	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
-		dumpResultSet(rs, reqspec, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, reqspec.limit);
+		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, reqspec.limit);
 	}
 	
-	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String queryName, 
+	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
 			throws SQLException, IOException {
@@ -1372,7 +1372,7 @@ public class QueryOn extends HttpServlet {
 			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
 		}
 		
-		ds.initDump(queryName, uniqueColumns, rs.getMetaData());
+		ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
 
 		resp.addHeader("Content-Type", ds.getMimeType());
 		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
@@ -1493,7 +1493,7 @@ public class QueryOn extends HttpServlet {
 				ResultSet rs = cmd.run(conn);
 				try {
 					//XXX: mayApplyLimitOffset should be true or false?
-					dumpResultSet(rs, reqspec, relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ true, resp);
+					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ true, resp);
 				}
 				catch(SQLException e) {
 					conn.rollback();

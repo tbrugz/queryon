@@ -60,11 +60,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	}
 	
 	@Override
-	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		initDump(null, tableName, pkCols, md);
-	}
-	
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+		this.schemaName = schema;
 		this.tableName = tableName;
 		numCol = md.getColumnCount();
 		lsColNames.clear();
