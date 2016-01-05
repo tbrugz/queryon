@@ -2,13 +2,25 @@
 Queries Features
 ================
 
+Queries may have parameters that should be informed when executing the query.
 Queries may have special columns which makes them behave differently under *QueryOn*.
-Columns with a special *suffix* will alter the behavior or appearance of the same column without the suffix.
+Columns with a special *suffix* may alter the behavior or appearance of the same column without the suffix.
 Queries may also have special constructs inside SQL comments to alter their behavior.
 
 QueryOn's editor also allows for special commands that are useful to query database's metadata.
 
 See also: [API documentation](api.md)
+
+
+Parameters
+----------
+
+You may define query parameters by using characters for binding variables (usually `?`).
+Parameters will be created by the order they are defined in the query. 
+
+Example: In the query `select * from person where age > ? and name like ?` the age should be informed
+as the first parameter and the name pattern as the second parameter. 
+
 
 Special columns
 ----------------
