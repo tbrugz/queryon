@@ -13,7 +13,8 @@ var authInfo = {
 		authenticated: false,
 		username: null, //''
 		roles: [ ],
-		permissions: [ ]
+		permissions: [ ],
+		isAdmin: false
 };
 var settings = {};
 
