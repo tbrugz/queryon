@@ -14,6 +14,7 @@ h1,h2,h3 {
 	padding: 2px 9px 3px 9px;
 	display: inline-block;
 	margin-top: 2px;
+	margin-left: 5px;
 }
 
 /* table, td, th styles already on table.css - table.css takes precedence */
@@ -181,6 +182,37 @@ input[type=button].btn-delete {
 
 #filters input[type=button] {
 	padding: 1px 3px 1px 3px;
+}
+
+/* left menu */
+
+#leftmenu {
+	background-color: #ccc;
+	width: 15em;
+	padding: 10px;
+	z-index: 100;
+	position: fixed;
+	top: 0px;
+	bottom: 0px;
+}
+
+#leftmenu ul {
+	list-style: none;
+	padding: 0 0 0 5px;
+	margin: 0;
+}
+
+#leftmenu li {
+	padding: 0 0 15px 0;
+	font-weight: bold;
+}
+
+#leftmenu li a {
+	text-decoration: none;
+}
+
+#leftmenu li a, #leftmenu li a:visited {
+	color: #000;
 }
 
 /* typeahead */
