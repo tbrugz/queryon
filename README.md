@@ -9,10 +9,11 @@ Database objects are defined by a properties file. See
 [queryon.template.properties](https://bitbucket.org/tbrugz/queryon/src/tip/src/queryon.template.properties)
 for more info.
 
-More info about:
+More info about QueryOn:
 
 * the [API spec](web/doc/api.md)
 * [Query features](web/doc/queries.md)
+* "the [index](web/doc/index.md)" - in-app help index
 
 -- [Telmo Brugnara](mailto:tbrugz@gmail.com)
 
