@@ -203,7 +203,8 @@ input[type=button].btn-delete {
 }
 
 #leftmenu li {
-	padding: 0 0 15px 0;
+	padding: 2px;
+	margin: 0 0 12px 0;
 	font-weight: bold;
 }
 
@@ -213,6 +214,22 @@ input[type=button].btn-delete {
 
 #leftmenu li a, #leftmenu li a:visited {
 	color: #000;
+}
+
+/* https://gist.github.com/chsh/2341675 */
+#leftmenu li a[target="_blank"]:after {
+	/* color: #f00; */
+	content: "\f08e";
+	font-family: FontAwesome;
+	font-weight: normal;
+	font-style: normal;
+	display: inline-block;
+	text-decoration: inherit;
+	font-size: smaller;
+}
+
+#leftmenu li.dev {
+	background-color: rgba(255, 153, 0, 0.43);
 }
 
 /* typeahead */
