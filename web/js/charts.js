@@ -2,6 +2,8 @@
  * depends on qon-base.js
  */
 
+//XXX: repaint on window.resize ?
+
 var keyValues = function (obj, keys) {
 	var r = [];
 	for(var i=0;i<keys.length;i++) {
@@ -41,7 +43,7 @@ var d3multiseries = function(data, columns, containerId) {
 	var container = document.getElementById(containerId);
 	
 	//console.log("container.offsetWidth",container.offsetWidth,"container.offsetHeight", container.offsetHeight);
-	var margin = {top: 20, right: 20, bottom: 30, left: 50},
+	var margin = {top: 20, right: 20, bottom: 30, left: 60}, //XXX: left should be dependent on y-values magnitude
 		width = container.offsetWidth - margin.left - margin.right,
 		height = container.offsetHeight - margin.top - margin.bottom;
 	
@@ -124,7 +126,12 @@ var d3multiseries = function(data, columns, containerId) {
 		];
 		y.domain(ydom);
 	
-		console.log("data.length", data.length, "ydom",ydom);
+		console.log("data.length", data.length, "ydom", ydom, "typeof ydom[0]:", typeof ydom[0]);
+		if(typeof ydom[0] != "number") {
+			console.warn("Series data for series ",seriesNames," not numeric [ydom= ", ydom, "]");
+			throw "Series data for series "+seriesNames+" not numeric <code>[ydom= "+ydom+"]</code>";
+			//return;
+		}
 	
 		svg.append("g")
 			.attr("class", "x axis")
