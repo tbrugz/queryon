@@ -37,7 +37,7 @@
 </head>
 <body onload="onLoad();">
 	<div id="nav" class="navbar">
-		<span id="logo">QOn + D3.js</span>
+		<span id="logo">QOn + d3.js</span>
 		
 		<label>
 			<select id="objects" onchange="onQueryChanged();"></select>
@@ -48,8 +48,8 @@
 			<span id="parameters"></span>
 			<span id="filters"></span>
 			<input type="button" value="+ filter" onclick="addFilterDialog();"/>
-			<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
-			<label id="columns-label">columns: <input type="text" id="columns"/></label>
+			<label id="columns-label">columns: <input type="text" id="columns" onchange="onNavElementChanged();"/></label>
+			<label id="order-label">order: <input type="text" name="order" id="order" onchange="onNavElementChanged();"/></label>
 			<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunD3();"/>
 		</span>
 		
@@ -75,6 +75,7 @@
 var updateUI = function() {}
 
 var updateFromFilters = function() {
+	updateState();
 	makeHrefs();
 }
 
@@ -94,6 +95,29 @@ var doRunD3 = function() {
 				btnActionStop('go-button');
 			}
 		);
+}
+
+function updateState() {
+	//replace href
+	var select = document.getElementById('objects');
+	var id = select.options[select.selectedIndex].value;
+	var columns = document.getElementById('columns').value;
+	var order = document.getElementById('order').value;
+	var state = id+getParameters()+"|"+columns+"|"+order;
+	//console.log('chart: updateState: ',state);
+	history.replaceState(null, null, "#"+state);
+}
+
+function updateSelectedQueryState() {
+	var bigParts = updateSelectedQueryStateParameters();
+	//console.log('chart: updateSelectedQueryState: ', bigParts);
+	document.getElementById('columns').value = bigParts[1] || '';
+	document.getElementById('order').value = bigParts[2] || '';
+}
+
+function onNavElementChanged() {
+	updateState();
+	makeHrefs();
 }
 
 var onLoad = function() {
