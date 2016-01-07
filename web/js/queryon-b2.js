@@ -51,10 +51,15 @@ function onParameterChange(i) {
 }
 
 function updateSelectedQueryState() {
+	updateSelectedQueryStateParameters();
+}
+
+function updateSelectedQueryStateParameters() {
 	var hash = window.location.hash;
 	if(hash.indexOf('#')==0) {
 		hash = hash.substring(1);
-		var parts = hash.split('/');
+		var bigParts = hash.split('|');
+		var parts = bigParts[0].split('/');
 		var select = document.getElementById('objects');
 		var found = false;
 		var relname = parts.splice(0, 1);
@@ -80,6 +85,8 @@ function updateSelectedQueryState() {
 		else {
 			setParametersValues(parts);
 		}
+		
+		return bigParts;
 	}
 }
 

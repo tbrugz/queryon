@@ -39,9 +39,9 @@ Special columns
 Special query constructs inside SQL comments (`/* ... */`)
 ----------------
 
-* `allow-encapsulation=<false|true>` - allows the query to be encapsulated within another query by the QueryOn engine so
+* `allow-encapsulation=<true|false>` - allows the query to be encapsulated within another query by the QueryOn engine so
   that, for example, the query results may be paginated in the database. In some edge cases this may be a problem, so
-  it can be disabled (default is *false*)
+  it can be disabled (default is *true*)
 * `limit-max=<numeric>` - limits the number of rows that may be returned by the query in a single request
 
 
@@ -73,9 +73,18 @@ The source and target nodes may have special properties, as follows:
 * `[SOURCE|TARGET]_COLOR` - source/target color, value should be a valid [web color](https://en.wikipedia.org/wiki/Web_colors), e.g.: `#ccc`
 * `[SOURCE|TARGET]_SIZE` - source/target size, default is `1`
 
+Default implementation of graphs visualization uses the [Sigma.js javascript library](http://sigmajs.org/).
+
 **map**
 
 Query results may be visualized as a map. To that end, a Geojson map should be accessible from the QueryOn instalation and each feature should have an `id` property.
 Also, the query should have a column named `GEOM_ID` so that the map feature and the query result's row may be matched. Once matched, the fill color of the feature
 will change according toi the selected column value.
 
+Default implementation of maps visualization uses the [Google Maps API](https://developers.google.com/maps/) and the [Mapproc framework](https://bitbucket.org/tbrugz/mapproc).
+
+**chart**
+
+Queries may be visualized as charts with any column that is numeric, so no special column names need to be used.
+
+Default implementation of charts visualization uses the [d3.js javascript library](http://d3js.org/).
