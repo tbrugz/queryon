@@ -166,7 +166,9 @@ function makeHrefs() {
 		}
 	}
 	
-	var order = document.getElementById('order').value;
+	var orderElem = document.getElementById('order');
+	if(orderElem) {
+	var order = orderElem.value;
 	if(order!=null && order!='') {
 		//queryString += '&order='+order;
 		//queryString = append2url(queryString, 'order='+order);
@@ -176,6 +178,7 @@ function makeHrefs() {
 		if(urldown) {
 			urldown.href = append2url(urldown.href, 'order='+order);
 		}
+	}
 	}
 
 	var offset = document.getElementById('offset');

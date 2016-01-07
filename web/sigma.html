@@ -3,11 +3,13 @@
 <head>
 	<title>QOn with sigma.js</title>
 	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
 	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script src="js/queryon-b2.js"></script>
 	<script src="js/filter.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/menu.js"></script>
@@ -87,7 +89,7 @@ body {
 
 </style>
 </head>
-<body onload="javascript:init('q','objects', writeOptions);updateUI();">
+<body onload="javascript:onLoad();">
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + sigma<span style="color: #ec5148">js</span></span>
 
@@ -107,6 +109,11 @@ body {
 		<input type="button" id="forcebutton" value="start force layout" onclick="toggleForce(s);"/>
 		<input type="button" value="+" onclick="graphIncreaseSize();"/>
 		<input type="button" value="-" onclick="graphDecreaseSize();"/>
+	</span>
+	
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
 	</span>
 	
 	<div id="messages"></div>
@@ -153,6 +160,13 @@ body {
 		}
 		
 		function updateFromFilters() {
+			updateUI();
+		}
+		
+		var onLoad = function() {
+			//loadQueries();
+			init('q','objects', writeOptions);
+			loadAuthInfo();
 			updateUI();
 		}
 		
