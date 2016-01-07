@@ -216,6 +216,11 @@ input[type=button].btn-delete {
 	color: #000;
 }
 
+#leftmenu li a em {
+	color: #777;
+	font-size: smaller;
+}
+
 /* https://gist.github.com/chsh/2341675 */
 #leftmenu li a[target="_blank"]:after {
 	/* color: #f00; */
@@ -230,6 +235,10 @@ input[type=button].btn-delete {
 
 #leftmenu li.dev {
 	background-color: rgba(255, 153, 0, 0.43);
+}
+
+#leftmenu li.current {
+	background-color: #fff;
 }
 
 /* typeahead */

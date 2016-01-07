@@ -44,11 +44,20 @@ function toggleMenu() {
 	menu.setAttribute("id", "leftmenu");
 	var innerContent = '';
 	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
+	var hasLoginLink = document.getElementById('authaction') != null;
 	for(var i=0;i<lis.length;i++) {
 		var li = lis[i];
-		//XXX: index, d3chart: do not show login, logout (graph: add login/out)
-		//XXX: all: do not show (linkable) self
-		if(!li.classList.contains("dev") || isDeveloper) {
+		//XXXdone: index, d3chart: do not show login, logout
+		//XXX: graph: add login/out
+		//~XXX: all: do not show (linkable) self - current!
+		if( (!li.classList.contains("dev") || isDeveloper)
+			&& (!li.classList.contains("auth") || !hasLoginLink) ) {
+			var href = li.getElementsByTagName("a")[0].getAttribute("href");
+			if(href.startsWith(".")) { href = href.substring(1); }
+			//console.log("menu["+i+"]: ",location.pathname," ; ",href);
+			if(location.pathname.endsWith(href)) {
+				li.classList.add("current");
+			}
 			innerContent += li.outerHTML;
 		}
 	}
