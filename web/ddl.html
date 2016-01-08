@@ -67,6 +67,7 @@ $.ajax({
 		for(var i=0;i<json.models.length;i++) {
 			loadSchemas(json.models[i]);
 		}
+		updateSelectedQueryState();
 		/*if(json.types) {
 			loadSelect(json.types, 'type');
 		}*/
@@ -88,6 +89,7 @@ loadSchemas = function(model) {
 				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
 				joinSchemas();
 			}
+			updateSelectedQueryState();
 		}
 	});
 }
@@ -100,26 +102,67 @@ joinSchemas = function() {
 			schemas[i] = 
 		}
 	}*/
-	onModelChanged();
+	onModelChanged(true);
 }
 
-onModelChanged = function() {
+onModelChanged = function(doNotUpdateFragment) {
 	var m = document.getElementById('model').value;
 	loadSelect(schemasByModel[m], 'schema');
 	loadObjectList();
+	if(!doNotUpdateFragment) { updateURLFragment(); }
 }
 
-onSchemaChanged = function() {
+onSchemaChanged = function(doNotUpdateFragment) {
 	loadObjectList();
+	if(!doNotUpdateFragment) { updateURLFragment(); }
 }
 
-onObjTypeChanged = function() {
+onObjTypeChanged = function(doNotUpdateFragment) {
 	loadObjectList();
+	if(!doNotUpdateFragment) { updateURLFragment(); }
 }
 
-onObjectChanged = function() {}
+onObjectChanged = function(doNotUpdateFragment) {
+	if(!doNotUpdateFragment) { updateURLFragment(); }
+}
 
-loadObjectList = function() {
+updateURLFragment = function() {
+	var model = document.getElementById('model').value;
+	var schema = document.getElementById('schema').value;
+	var type = document.getElementById('type').value;
+	var object = document.getElementById('object').value;
+	
+	var state = model+"/"+schema+"/"+type+"/"+object;
+	history.replaceState(null, null, "#"+state);
+}
+
+updateSelectedQueryState = function(doUpdateFragment) {
+	var hash = window.location.hash;
+	if(hash.indexOf('#')==0) {
+		hash = hash.substring(1);
+		var parts = hash.split('/');
+		//console.log("updateSelectedQueryState",parts)
+		
+		var model = document.getElementById('model');
+		var schema = document.getElementById('schema');
+		var type = document.getElementById('type');
+		var object = document.getElementById('object');
+		
+		var updated = false;
+		updated |= updateSelectValue(model, parts[0]);
+		updated |= updateSelectValue(schema, parts[1]);
+		updated |= updateSelectValue(type, parts[2]);
+		//updated |= updateSelectValue(object, parts[3]);
+		if(updated) {
+			loadObjectList( function() { updateSelectValue(object, parts[3]); if(doUpdateFragment) {updateURLFragment();} });
+		}
+		else {
+			updateSelectValue(object, parts[3]); if(doUpdateFragment) {updateURLFragment();}
+		}
+	}
+}
+
+loadObjectList = function(callback) {
 	var origType = document.getElementById('type').value;
 	var type = typemap[origType];
 	var model = getModel();
@@ -128,7 +171,11 @@ loadObjectList = function() {
 		+ (schema? '/'+schema:'')
 		+ '.json'
 		+ (model?'?model='+model:'');
-	console.log("loadObjectList: model=",model,"url=",url);
+	if(!schema) {
+		console.log("loadObjectList: no schema... model=",model,"url=",url,"type=",type,"schema=",schema);
+		return;
+	}
+	console.log("loadObjectList: model=",model,"url=",url,"type=",type,"schema=",schema);
 	btnActionStart('object');
 	$.ajax({
 		//TODO: filter by schema?
@@ -139,7 +186,7 @@ loadObjectList = function() {
 			var keys = Object.keys(data);
 			data = getQonData(data);
 			//console.log(data);
-			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
+			loadSelect(data, 'object', function(data) { updateSelectedQueryState(true); return (data.schemaName?data.schemaName+".":"")+data.name; });
 			btnActionStop('object');
 		},
 		error: function(error) {
@@ -195,6 +242,19 @@ loadSelect = function(data, selectId, callback) {
 	for(var i=0;i<data.length;i++) {
 		$('#'+selectId).append("<option value='"+callback(data[i])+"'>"+callback(data[i])+"</option>");
 	}
+}
+
+updateSelectValue = function(select, value) {
+	//console.log("updateSelectValue", select, value, select.selectedIndex);
+	var prevIdx = select.selectedIndex;
+	for(var i=0;i<select.options.length;i++) {
+		if(select.options[i].value == value) {
+			select.selectedIndex = i;
+			if(prevIdx!=i) { return true; }
+			return false;
+		}
+	}
+	return false;
 }
 
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {
