@@ -172,6 +172,63 @@ modelId = SchemaModelUtils.getModelId(request);
 			updateUI();
 		});
 	}
+
+	function doExplain() {
+		var sqlString = editor.getSelectedText();
+		var usingSelected = true;
+		if(!sqlString) {
+			sqlString = editor.getValue();
+			usingSelected = false;
+		}
+
+		var reqData = {
+			schema : document.getElementById('schema').value,
+			name : document.getElementById('name').value,
+			sql: sqlString
+		}
+		if(modelId!=null) {
+			reqData.model = document.getElementById('model').value; // or modelId
+		}
+		
+		var request = $.ajax({
+			url : queryOnUrl+"/ExplainAny",
+			type : "POST",
+			data : reqData,
+			dataType : "html"
+		});
+		
+		btnActionStart('btnExplain');
+		request.done(function(data, textStatus, jqXHR) {
+			btnActionStop('btnExplain');
+			//var paramCount = jqXHR.getResponseHeader('X-Validate-ParameterCount');
+			//console.log('#params = '+paramCount);
+			//var container = document.getElementById('sqlparams');
+			//setParameters(paramCount);
+			//makeHrefs();
+			
+			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
+			$("#queryResult").append(data);
+			
+			if(usingSelected) {
+				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully explained');
+			}
+			else {
+				infoMessage('query '+document.getElementById('name').value+' sucessfully explained');
+			}
+			updateUI();
+		});
+
+		request.fail(function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('btnExplain');
+			console.log(jqXHR);
+			errorMessage(jqXHR.responseText
+					+(jqXHR.status==403?" (invalid session?)":"")
+					);
+			closeResults();
+			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			updateUI();
+		});
+	}
 	
 	function doSave() {
 		var schema = document.getElementById('schema').value;
@@ -598,6 +655,7 @@ if(remarks==null) { remarks = ""; }
 	
 	<div id="button-container">
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
+		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain Query Plan">
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
 		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
 		<input type="button" id="btnDownload" value="download" onclick="doDownload();" title="Download CSV" style="float: right;"/>
