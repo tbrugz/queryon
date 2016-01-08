@@ -56,6 +56,7 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -101,6 +102,7 @@ public class QueryOn extends HttpServlet {
 		//XXXxx: FINDBYKEY action? return only the first result
 		SELECT_ANY,
 		VALIDATE_ANY,
+		EXPLAIN_ANY,
 		MANAGE
 	}
 	
@@ -111,6 +113,7 @@ public class QueryOn extends HttpServlet {
 	
 	public static final String ACTION_QUERY_ANY = "QueryAny";
 	public static final String ACTION_VALIDATE_ANY = "ValidateAny";
+	public static final String ACTION_EXPLAIN_ANY = "ExplainAny";
 	
 	public static final String CONST_QUERY = "QUERY";
 	public static final String CONST_RELATION = "RELATION";
@@ -434,6 +437,10 @@ public class QueryOn extends HttpServlet {
 			atype = ActionType.VALIDATE_ANY;
 			otype = ActionType.VALIDATE_ANY.name();
 		}
+		else if(ACTION_EXPLAIN_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
+			atype = ActionType.EXPLAIN_ANY;
+			otype = ActionType.EXPLAIN_ANY.name();
+		}
 		else if(ActionType.MANAGE.name().equals(reqspec.object)) {
 			atype = ActionType.MANAGE;
 			otype = ActionType.MANAGE.name();
@@ -523,6 +530,15 @@ public class QueryOn extends HttpServlet {
 				try {
 					Query relation = getQuery(req);
 					doValidate(relation, reqspec, resp);
+				}
+				catch(SQLException e) {
+					throw new BadRequestException(e.getMessage(), e);
+				}
+				break;
+			case EXPLAIN_ANY:
+				try {
+					Query relation = getQuery(req);
+					doExplain(relation, reqspec, resp);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -778,6 +794,35 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			log.info("doValidate: error validating: "+e);
 			//log.debug("doValidate: error validating: "+e.getMessage(), e);
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.close();
+		}
+	}
+
+	void doExplain(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		try {
+			final DBMSResources res = DBMSResources.instance();
+			final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
+			
+			if(!feat.supportsExplainPlan()) {
+				throw new BadRequestException("Explain plan not avaiable for database: "+feat.getClass().getSimpleName());
+			}
+			
+			SQL sql = SQL.createSQL(relation, reqspec);
+			ResultSet rs = feat.explainPlan(sql.getFinalSql(), conn);
+
+			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
+					null, //pk!=null?pk.getUniqueColumns():null,
+					null, null, //fks, uks,
+					false, //applyLimitOffsetInResultSet,
+					resp);
+		}
+		catch(SQLException e) {
+			log.info("doExplain: error explaining: "+e);
 			conn.rollback();
 			throw e;
 		}
