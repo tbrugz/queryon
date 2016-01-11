@@ -171,7 +171,7 @@
 		//var rows = content.querySelectorAll('tr');
 		//var pk = getPkCols('objects');
 		var cols = getColumnsFromContainer('content');
-		doWriteUpdateDialog('Insert', null, null, null, cols, null);
+		doWriteUpdateDialog('Insert', null, null, null, cols, null, null);
 		closeMessages('messages');
 	}
 	
@@ -181,16 +181,16 @@
 			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
 			return;
 		}
-		console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
+		//console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals,"colTypes",ret.colTypes);
 		
 		var maxrownum = getRowCount('content');
 		
-		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, ret.cols, ret.allvals);
+		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, ret.cols, ret.allvals, ret.colTypes);
 		closeMessages('messages');
 	}
 		
-	function doWriteUpdateDialog(updateType, rownum, maxrownum, filter, cols, vals) {
-		console.log('doWriteUpdateDialog', updateType, rownum, maxrownum, filter, cols, vals);
+	function doWriteUpdateDialog(updateType, rownum, maxrownum, filter, cols, vals, colTypes) {
+		//console.log('doWriteUpdateDialog', updateType, rownum, maxrownum, filter, cols, vals);
 		//XXX: highlight current row...
 		//XXX: show/validate column types...
 		var dialogCont = document.getElementById('dialog-container');
@@ -207,24 +207,36 @@
 		dialog.innerHTML = '<div class="dialog-title">'+updateType+' row'
 			+ (rownum>0?' <code>'+rownum+'</code>':'')
 			+ ' <span class="orderbutton-container">'
-			+ "<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum-1)+");\" value=\"&#9650;\" title=\"previous row\" "+(rownum==1?"disabled":"")+"/>"
-			+ "<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum+1)+");\" value=\"&#9660;\" title=\"next row\" "+(rownum==maxrownum?"disabled":"")+"/>"
+			+ (rownum>0?""
+				+ "<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum-1)+");\" value=\"&#9650;\" title=\"previous row\" "+(rownum==1?"disabled":"")+"/>"
+				+ "<input type=button class=\"orderbutton\" onclick=\"doOpenUpdateDialog("+(rownum+1)+");\" value=\"&#9660;\" title=\"next row\" "+(rownum==maxrownum?"disabled":"")+"/>"
+				:"")
 			+ '</span>'
 			+ (filter!=null?' <span id="dialog-filter" class="obs">[ '+filter+' ]</span>':'')
 			+ '</div>'
 			+ "<div id='dialog-messages'></div>";
 			
+		var dialogContent = "<div id='dialog-content'>";
 		for(var i=0;i<cols.length;i++) {
 			//XXXdone check column permission (grants)
 			//XXX column size & column remarks would be nice
+			//~XXX Integer, Double, Date
+			var colT = !colTypes[i]?"text":
+				colTypes[i]=="Integer"?"number":
+				colTypes[i]=="Double"?"number":
+				colTypes[i]=="Date"?"text": //XXX"datetime-local":
+				"text";
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
-			dialog.innerHTML += "<label>"+cols[i]+":<input type='text' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"
+			dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"
 				+(disabled?" disabled='true'":"")
-				+"></label><br> "
+				+">"
+				+(colTypes[i]=="String"?"":" <em>("+colTypes[i]+")</em>")
+				+"</label><br> "
 		}
+		dialogContent += "</div>"
 
-		dialog.innerHTML += "<div>"
+		dialog.innerHTML += dialogContent+"</div><div>"
 			+ "<input type='button' value='"+updateType.toLowerCase()+"' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+");'/>"
 			+ "<input type='button' value='"+updateType.toLowerCase()+" & close' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+", true);'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
@@ -291,7 +303,7 @@
 		
 		nv.postData['method'] = 'PUT';
 
-		console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
+		//console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
 		
 		var messagesId = closeDialog?'messages':'dialog-messages';
 		doExecuteUpdateAjax(finalUrl, nv, rownum, ret.cols, messagesId);
@@ -371,7 +383,7 @@
 		btnActionStart('btnSave');
 		request.done(function(data, textStatus, jqXHR) {
 			btnActionStop('btnSave');
-			console.log(data);
+			//console.log(data);
 			// test for count (data)==1
 			if(data=="1") {
 				appendMessages(messagesId, ' - table <code>'+tableName+'</code> reloaded');
@@ -396,7 +408,7 @@
 		
 		nv = getUpdateNewValues();
 
-		console.log("doConfirmInsert key",finalUrl,nv);
+		//console.log("doConfirmInsert key",finalUrl,nv);
 		
 		nv.postData['method'] = 'POST';
 		
@@ -412,7 +424,7 @@
 			//alert("relation has no PK");
 			return;
 		}
-		console.log("key",ret.key,"filter",ret.filter);
+		//console.log("doRunDelete: key",ret.key,"filter",ret.filter);
 		
 		//XXX create html confirm dialog, or show question in messages (warning style)
 		if(confirm("Do you really want to delete this row from table "+name+"?\n[rownum = "+rownum+" ]\n["+ret.filter+"]")) {
@@ -563,7 +575,9 @@
 	</div>
 </div>
 
-<div id="update-dialog">
+<div id="update-dialog-container">
+	<div id="update-dialog">
+	</div>
 </div>
 
 <div id="status-container" class="status">

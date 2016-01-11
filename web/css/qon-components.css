@@ -72,16 +72,28 @@
 	padding: 5px;
 }
 
+#update-dialog-container {
+}
+
 #update-dialog {
-	position: absolute;
-	top: 10%;
+	position: fixed;
+	top: 5%;
 	left: 20%;
-	background-color: #ccc;
+	right: 20%;
+	bottom: 5%;
 	z-index: 30;
+	overflow-y: auto;
+	
+	/* position: relative; */
+	background-color: #ccc;
 	padding: 10px;
 	border: 4px solid #fff;
-	right: 20%;
 	display: none;
+}
+
+#dialog-content {
+	/* overflow-y: auto; */
+	background-color: #ccc;
 }
 
 #update-dialog label {
@@ -99,6 +111,10 @@
 #update-dialog input[type=button] {
 	margin: 3px;
 	padding: 3px;
+}
+
+#update-dialog input[type=text] {
+	width: 20em;
 }
 
 .dialog-title {

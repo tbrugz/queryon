@@ -283,6 +283,22 @@ function getColumnsFromContainer(containerId) {
 	return cols;
 }
 
+function getColumnsTypesFromContainer(containerId) {
+	var colTypes = [];
+	var content = document.getElementById(containerId);
+	if(!content) {
+		return colTypes;
+	}
+	var cols = content.querySelectorAll('table > colgroup > col');
+	//console.log('cols.length: '+cols.length);
+	for(var i=0;i<cols.length;i++) {
+		var elem = cols[i];
+		var ct = elem.getAttribute('type');
+		colTypes.push(ct);
+	}
+	return colTypes;
+}
+
 function getValuesFromColumn(containerId, columnName) {
 	var cols = getColumnsFromContainer(containerId);
 	var colPos = cols.indexOf(columnName);

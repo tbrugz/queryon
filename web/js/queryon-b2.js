@@ -294,8 +294,10 @@ function getKeyValsForRow(rownum) {
 	for(var i=0;i<cols.length;i++) {
 		allvals.push(tds[i].innerHTML);
 	}
+	
+	var colTypes = getColumnsTypesFromContainer('content');
 
-	return {key: valsKey, filter: filter, pk: pk, pkvals: vals, cols: cols, allvals: allvals};
+	return {key: valsKey, filter: filter, pk: pk, pkvals: vals, cols: cols, allvals: allvals, colTypes: colTypes};
 }
 
 function getKeyValsForTr(pk, cols, tr) {

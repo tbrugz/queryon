@@ -194,6 +194,7 @@ input[type=button].btn-delete {
 	position: fixed;
 	top: 0px;
 	bottom: 0px;
+	border-right: 3px #999 solid;
 }
 
 #leftmenu ul {
