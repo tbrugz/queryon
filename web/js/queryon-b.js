@@ -300,14 +300,23 @@ function getColumnsTypesFromContainer(containerId) {
 }
 
 function getColumnsRemarks() {
-	rel = getCurrentRelation('objects');
+	var rel = getCurrentRelation('objects');
 	var arr = rel.columnRemarks.substring(1, rel.columnRemarks.length-1).split(",");
 	var ret = [];
 	for(var i=0;i<arr.length;i++) {
 		ret.push(arr[i].trim());
 	}
 	return ret;
-	//.forEach(function(elt) { elt.trim(); });
+}
+
+function getColumnsTypesFromHash() {
+	var rel = getCurrentRelation('objects');
+	var arr = rel.columnTypes.substring(1, rel.columnTypes.length-1).split(",");
+	var ret = [];
+	for(var i=0;i<arr.length;i++) {
+		ret.push(arr[i].trim());
+	}
+	return ret;
 }
 
 function getValuesFromColumn(containerId, columnName) {

@@ -14,6 +14,8 @@ var operatorsInfo = {
 	"le": { "name":"&le;", "multiple": false }
 };
 
+var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
+
 if(typeof Bloodhound != 'undefined') {
 	bhvalues = new Bloodhound({
 		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
@@ -74,7 +76,14 @@ function refreshAutocomplete() {
 	if(bhvalues==null) { return; }
 	var sel = document.getElementById('fin-column');
 	var columnName = sel.options[sel.selectedIndex].value;
-	console.log('autocomplete: col='+columnName);
+	var input = document.getElementById('fin-value');
+	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
+	
+	console.log('autocomplete: col='+columnName+' ; type= ['+colType+']');
+	
+	var inputType = 'text';
+	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
+	input.setAttribute('type', inputType);
 	
 	// constructs the suggestion engine
 	/*var bhvalues = new Bloodhound({
@@ -120,19 +129,24 @@ function refreshAutocomplete() {
 }
 
 function addFilterIn() {
-	var col = document.getElementById('fin-column').value;
+	var sel = document.getElementById('fin-column');
+	var col = sel.value;
 	var operator = document.getElementById('fil-operator').value;
 	var value = document.getElementById('fin-value').value;
 	var filters = document.getElementById('filters');
 	var finContainerId = "f"+operator+"_"+col;
 	var finContainer = document.getElementById(finContainerId);
+	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
+	var inputType = 'text';
+	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
+	
 	//console.log("operator: "+operator);
 	
 	if(finContainer==null) {
 		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> "
 			+ (operatorsInfo[operator].multiple?"(":"")
 			+ "<span>"
-			+ "<span><input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+			+ "<span><input type='"+inputType+"' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
 			+ "</span>"
 			+ (operatorsInfo[operator].multiple?")":"")
@@ -143,7 +157,7 @@ function addFilterIn() {
 			// add filter value
 			finContainer.getElementsByTagName('span')[0].innerHTML += "<span>"
 				//+ "," // if first element is removed it doesn't looks good
-				+ "<input type='text' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+				+ "<input type='"+inputType+"' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
 				+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>";
 		}
 		else {
