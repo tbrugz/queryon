@@ -187,8 +187,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			if(doSchemaGrabTableGrants) {
 				//log.debug("getting grants from "+fullTableName);
 				ResultSet grantrs = dbmd.getTablePrivileges(null, newt.getSchemaName(), tableName);
-				newt.setGrants( grabber.grabSchemaGrants(grantrs) );
+				newt.setGrants( grabber.grabSchemaGrants(grantrs, false) );
 				JDBCSchemaGrabber.closeResultSetAndStatement(grantrs);
+				//XXX: grab column privileges ?
 			}
 			
 			/*

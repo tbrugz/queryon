@@ -57,6 +57,7 @@ public class ResultSetTest {
 		Assert.assertEquals("c2", rsla.getString(3));
 		
 		Assert.assertFalse("Must not have 4th element", rsla.next());
+		rsla.close();
 	}
 
 	@Test
@@ -70,6 +71,7 @@ public class ResultSetTest {
 		Assert.assertEquals("3", rs.getString(1));
 		rs.absolute(1);
 		Assert.assertEquals("1", rs.getString(1));
+		rs.close();
 	}
 
 	@Test
@@ -86,6 +88,7 @@ public class ResultSetTest {
 		Assert.assertEquals("3", rs.getString(1));
 		rs.absolute(1);
 		Assert.assertEquals("1", rs.getString(1));
+		rs.close();
 	}
 	
 	@Test
@@ -93,6 +96,7 @@ public class ResultSetTest {
 		l1 = new ArrayList<TestBean>();
 		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("testbeanLA", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
 		Assert.assertFalse("Must not have any element", rs.next());
+		rs.close();
 	}
 	
 	@Test
@@ -102,6 +106,7 @@ public class ResultSetTest {
 			Assert.assertTrue("Must have "+i+" element", rs.next());
 		}
 		Assert.assertFalse("Must not have 4th element", rs.next());
+		rs.close();
 	}
 
 	@Test
@@ -114,6 +119,7 @@ public class ResultSetTest {
 			Assert.assertTrue("Must have "+i+" element", rs.next());
 		}
 		Assert.assertFalse("Must not have 4th element", rs.next());
+		rs.close();
 	}
 	
 	@Test
@@ -132,5 +138,6 @@ public class ResultSetTest {
 		Assert.assertNull("column 'xyz' of 3rd line must be null", rs.getString("xyz"));
 		
 		Assert.assertFalse("Must not have 4th element", rs.next());
+		rs.close();
 	}
 }

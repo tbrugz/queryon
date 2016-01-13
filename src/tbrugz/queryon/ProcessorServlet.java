@@ -201,7 +201,10 @@ public class ProcessorServlet extends HttpServlet {
 			if(os!=null) {
 				os.flush();
 			}
-			if(conn!=null) { conn.close(); }
+			if(conn!=null) {
+				//QOnModelUtils.setModelMetadata(sm, conn);
+				conn.close();
+			}
 		}
 	}
 	

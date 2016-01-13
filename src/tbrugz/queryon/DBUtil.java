@@ -70,7 +70,7 @@ public class DBUtil {
 		//String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
 		//prefix = prop.getProperty(prefix+".connpropprefix", prefix);
 		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId));
-		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop);
+		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop, true);
 	}
 
 	public static Connection initDBConn(Properties prop, String modelId, SchemaModel model) throws ClassNotFoundException, SQLException, NamingException {

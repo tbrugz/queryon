@@ -180,7 +180,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
-	static final String PROP_SQLDIALECT = "queryon.sqldialect";
+	static final String PROP_SQLDIALECT = "queryon.sqldialect"; //TODO: sqldialect per model...
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
 	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
@@ -707,8 +707,7 @@ public class QueryOn extends HttpServlet {
 		//query finished!
 		
 		finalSql = sql.getFinalSql();
-		log.debug("sql:\n"+finalSql);
-		//XXX log sql parameter values?
+		//log.info("sql:\n"+sql);
 		
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		bindParameters(st, sql);
@@ -1058,9 +1057,10 @@ public class QueryOn extends HttpServlet {
 
 	void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		SQL sql = null;
 		try {
 
-		SQL sql = SQL.createUpdateSQL(relation);
+		sql = SQL.createUpdateSQL(relation);
 		
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
@@ -1081,6 +1081,7 @@ public class QueryOn extends HttpServlet {
 			if(!hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
 				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
 			}
+			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
 			sb.append((i!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
 		}
@@ -1121,7 +1122,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			conn.rollback();
-			e.printStackTrace();
+			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql, e); //e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
 			//throw e;
 		}
@@ -1172,7 +1173,7 @@ public class QueryOn extends HttpServlet {
 				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles); 
 				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
 			}
-			
+			//XXX timestamp '' ?
 			sbCols.append((i!=0?", ":"")+col);
 			sbVals.append((i!=0?", ":"")+"?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
