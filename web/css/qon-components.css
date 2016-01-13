@@ -92,8 +92,18 @@
 }
 
 #dialog-content {
-	/* overflow-y: auto; */
+	overflow-y: auto;
 	background-color: #ccc;
+	z-index: 30;
+	border: 2px solid #999;
+
+	position: absolute;
+	right: 5px;
+	left: 5px;
+	/* top: 20%;
+	bottom: 20%; */
+	top: 120px;
+	bottom: 30px;
 }
 
 #update-dialog label {
@@ -117,6 +127,14 @@
 	width: 20em;
 }
 
+#update-dialog .dialog-title {
+	z-index: 35;
+	/* position: fixed;
+	top: 5%;
+	left: 20%;
+	right: 20%; */
+}
+
 .dialog-title {
 	font-weight: bold;
 	margin: 5px 0 15px 0;
@@ -134,6 +152,13 @@
 }
 
 #dialog-messages {
+	/* position: absolute; */
 	margin: 5px 0 15px 0;
 	border: 2px solid #000;
+	z-index: 35;
+}
+
+#dialog-footer {
+	position: absolute;
+	bottom: 0px;
 }

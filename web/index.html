@@ -220,11 +220,11 @@
 		for(var i=0;i<cols.length;i++) {
 			//XXXdone check column permission (grants)
 			//XXX column size & column remarks would be nice
-			//~XXX Integer, Double, Date
+			//~XXX Integer, Double, Date - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 			var colT = !colTypes[i]?"text":
 				colTypes[i]=="Integer"?"number":
 				colTypes[i]=="Double"?"number":
-				colTypes[i]=="Date"?"text": //XXX"datetime-local":
+				colTypes[i]=="Date"?"text": //XXX "datetime-local": "text":
 				"text";
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
@@ -236,7 +236,7 @@
 		}
 		dialogContent += "</div>"
 
-		dialog.innerHTML += dialogContent+"</div><div>"
+		dialog.innerHTML += dialogContent+"</div><div id='dialog-footer'>"
 			+ "<input type='button' value='"+updateType.toLowerCase()+"' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+");'/>"
 			+ "<input type='button' value='"+updateType.toLowerCase()+" & close' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+", true);'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
