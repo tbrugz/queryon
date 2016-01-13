@@ -102,14 +102,21 @@
 	left: 5px;
 	/* top: 20%;
 	bottom: 20%; */
-	top: 120px;
+	top: 115px;
 	bottom: 30px;
+}
+
+#dialog-content .remarks {
+	display: inline-block;
+	padding: 0 5px 0 5px;
+	background-color: rgba(255, 221, 136, 0.9); /* #ccc; */
 }
 
 #update-dialog label {
 	background-color: #ddd;
-	padding: 5px;
+	padding: 3px;
 	display: block;
+	margin-bottom: 5px;
 }
 
 #update-dialog select.operator {
@@ -137,7 +144,7 @@
 
 .dialog-title {
 	font-weight: bold;
-	margin: 5px 0 15px 0;
+	margin: 5px 0 10px 0;
 }
 
 .dialog-title code {

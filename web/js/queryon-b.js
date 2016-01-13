@@ -299,6 +299,17 @@ function getColumnsTypesFromContainer(containerId) {
 	return colTypes;
 }
 
+function getColumnsRemarks() {
+	rel = getCurrentRelation('objects');
+	var arr = rel.columnRemarks.substring(1, rel.columnRemarks.length-1).split(",");
+	var ret = [];
+	for(var i=0;i<arr.length;i++) {
+		ret.push(arr[i].trim());
+	}
+	return ret;
+	//.forEach(function(elt) { elt.trim(); });
+}
+
 function getValuesFromColumn(containerId, columnName) {
 	var cols = getColumnsFromContainer(containerId);
 	var colPos = cols.indexOf(columnName);

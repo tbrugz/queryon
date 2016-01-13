@@ -217,6 +217,7 @@
 			+ "<div id='dialog-messages'></div>";
 			
 		var dialogContent = "<div id='dialog-content'>";
+		var colRemarks = getColumnsRemarks();
 		for(var i=0;i<cols.length;i++) {
 			//XXXdone check column permission (grants)
 			//XXX column size & column remarks would be nice
@@ -227,12 +228,14 @@
 				colTypes[i]=="Date"?"text": //XXX "datetime-local": "text":
 				"text";
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
+			
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
 			dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"
 				+(disabled?" disabled='true'":"")
 				+">"
 				+(colTypes[i]=="String"?"":" <em>("+colTypes[i]+")</em>")
-				+"</label><br> "
+				+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+colRemarks[i]+"</span>":"")
+				+"</label> "
 		}
 		dialogContent += "</div>"
 
