@@ -16,6 +16,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.SQL;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
@@ -52,6 +53,8 @@ public class QOnTables extends AbstractSQLProc {
 
 	static final String ACTION_READ = "read";
 	
+	static final String PIPE_SPLIT = "\\|";
+	
 	public static final String DEFAULT_TABLES_TABLE = "QON_TABLES";
 	
 	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
@@ -79,7 +82,7 @@ public class QOnTables extends AbstractSQLProc {
 	int readFromDatabase() throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
 		List<String> tables = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_TABLE_NAMES, ",");
-		String sql = "select schema_name, name, column_names, pk_column_names, remarks"
+		String sql = "select schema_name, name, column_names, pk_column_names, column_remarks, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable
@@ -93,36 +96,37 @@ public class QOnTables extends AbstractSQLProc {
 		catch(SQLException e) {
 			throw new SQLException("Error fetching tables, sql: "+sql, e);
 		}
-		
+
 		int count = 0;
 		while(rs.next()) {
 			String schema = rs.getString(1);
 			String tableName = rs.getString(2);
 			String columnNames = rs.getString(3);
 			String pkColumnNamesStr = rs.getString(4);
-			String remarks = rs.getString(5);
-			String rolesSelectFilterStr = rs.getString(6);
-			String rolesInsertFilterStr = rs.getString(7);
-			String rolesUpdateFilterStr = rs.getString(8);
-			String rolesDeleteFilterStr = rs.getString(9);
-			String rolesInsertColumnsFilterStr = rs.getString(10);
-			String rolesUpdateColumnsFilterStr = rs.getString(11);
+			String columnRemarksStr = rs.getString(5);
+			String remarks = rs.getString(6);
+			String rolesSelectFilterStr = rs.getString(7);
+			String rolesInsertFilterStr = rs.getString(8);
+			String rolesUpdateFilterStr = rs.getString(9);
+			String rolesDeleteFilterStr = rs.getString(10);
+			String rolesInsertColumnsFilterStr = rs.getString(11);
+			String rolesUpdateColumnsFilterStr = rs.getString(12);
 			//XXX default_select_filter
 			//XXXdone default_select_projection: column_names
 			
 			List<String> pkColumnNames = Utils.getStringList(pkColumnNamesStr, ",");
+			List<String> columnRemarks = Utils.getStringList(columnRemarksStr, PIPE_SPLIT);
 			
 			try {
-				String split = "\\|";
-				List<String> rolesSelect = Utils.getStringList(rolesSelectFilterStr, split);
-				List<String> rolesInsert = Utils.getStringList(rolesInsertFilterStr, split);
-				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, split);
-				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, split);
+				List<String> rolesSelect = Utils.getStringList(rolesSelectFilterStr, PIPE_SPLIT);
+				List<String> rolesInsert = Utils.getStringList(rolesInsertFilterStr, PIPE_SPLIT);
+				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, PIPE_SPLIT);
+				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, PIPE_SPLIT);
 				
 				//List<String> rolesInsertCols = Utils.getStringList(rolesInsertColumnsFilterStr, "|");
 				//List<String> rolesUpdate = Utils.getStringList(rolesUpdateColumnsFilterStr, "|");
 				
-				count += addTable(schema, tableName, columnNames, pkColumnNames, remarks,
+				count += addTable(schema, tableName, columnNames, pkColumnNames, columnRemarks, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
 			}
@@ -135,7 +139,7 @@ public class QOnTables extends AbstractSQLProc {
 		return count;
 	}
 
-	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, String remarks,
+	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks, String remarks,
 			List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
 			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) throws SQLException {
 		Table t = new Table();
@@ -173,6 +177,16 @@ public class QOnTables extends AbstractSQLProc {
 			List<Constraint> pks = JDBCSchemaGrabber.grabRelationPKs(conn.getMetaData(), t);
 			t.getConstraints().addAll(pks);
 		}
+
+		if(columnRemarks!=null) {
+			List<Column> cols = t.getColumns();
+			for(int i=0;i<cols.size();i++) {
+				if(cols.get(i)!=null && columnRemarks.size()>i) {
+					cols.get(i).setRemarks(columnRemarks.get(i));
+				}
+			}
+		}
+		
 		//log.info("PKs: "+pks);
 		
 		List<Grant> grants = t.getGrants();
