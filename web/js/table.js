@@ -65,7 +65,7 @@ function createBlobLinks() {
 		//var rows = content.getElementsByTagName('tr');
 		var urlPrepend = location.pathname + queryString;
 		if(typeof(getCurrentRelation) == "function") {
-			urlPrepend = queryOnUrl + "/" + getId(getCurrentRelation('objects')) + queryString;
+			urlPrepend = queryOnUrl + "/" + getId(getCurrentRelation('objects')) + getParameters() + queryString;
 		}
 		console.log("table.js: currentOffset", currentOffset, "queryString", queryString, "urlPrepend", urlPrepend);
 		var rownum = 0;

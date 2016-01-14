@@ -109,7 +109,13 @@ a, a:visited {
 
 #xtra-actions {
 	float: right;
-	padding: 2px 0px 2px 5px;
+	margin-top: 2px;
+	padding: 0px 0px 0px 5px;
+}
+
+/* http://stackoverflow.com/questions/6737175/firefox-specific-margin */
+@-moz-document url-prefix() {
+	#xtra-actions { margin-top: 4px; }
 }
 
 #username {
@@ -170,13 +176,17 @@ a, a:visited {
 }
 
 #help {
-	background-color: #9B9BEE;
-	padding: 2px 3px 2px 3px;
-	font-family: monospace;
-	margin-left: 15px;
-	border: 1px solid;
 }
 
 #help a {
+	background-color: #9B9BEE;
+	padding: 1px 3px;
+	/* font-family: monospace; */
+	margin-left: 15px;
+	border: 1px solid #999;
 	text-decoration: none;
+}
+
+#modelLabel input {
+	width: 6em;
 }
