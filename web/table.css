@@ -72,6 +72,13 @@ td[null] {
 	background-color: #888;
 }
 
+/* predefined td classes */
+
+td.header {
+	font-weight: bold;
+	background-color: #eee;
+}
+
 /* datadiff */
 
 tr.equal td {

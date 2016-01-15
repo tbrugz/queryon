@@ -113,6 +113,10 @@ a, a:visited {
 	padding: 0px 0px 0px 5px;
 }
 
+#remarks {
+	width: 30em;
+}
+
 /* http://stackoverflow.com/questions/6737175/firefox-specific-margin */
 @-moz-document url-prefix() {
 	#xtra-actions { margin-top: 4px; }
