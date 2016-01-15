@@ -7,6 +7,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -16,6 +19,8 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 
 public class SchemaModelUtils {
+	
+	private static final Log log = LogFactory.getLog(SchemaModelUtils.class);
 	
 	public static final String PARAM_MODEL = "model";
 	
@@ -105,8 +110,11 @@ public class SchemaModelUtils {
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(SchemaModel model, RequestSpec reqspec) {
 		try {
-			return (T) getRelation(model, reqspec, true);
+			Relation r = getRelation(model, reqspec, true);
+			if(r!=null) { return (T) r; }
+			return (T) getExecutable(model, reqspec);
 		} catch (ServletException e) {
+			log.warn("getDBIdentifiableBySchemaAndName: "+e);
 			try {
 				return (T) getExecutable(model, reqspec);
 			} catch (ServletException e1) {

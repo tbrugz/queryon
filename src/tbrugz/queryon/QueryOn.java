@@ -389,6 +389,11 @@ public class QueryOn extends HttpServlet {
 		try {
 			doService(req, resp);
 		}
+		catch(InternalServerException e) {
+			e.printStackTrace();
+			resp.setStatus(e.getCode());
+			resp.getWriter().write(e.getMessage());
+		}
 		catch(BadRequestException e) {
 			//e.printStackTrace();
 			resp.setStatus(e.getCode());
@@ -865,30 +870,52 @@ public class QueryOn extends HttpServlet {
 		sql.append(" }"); //sql.append("; end;");
 		CallableStatement stmt = conn.prepareCall(sql.toString());
 		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
+		int inParamCount = 0;
 		int outParamCount = 0;
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
 			if(ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
-				stmt.setString(i+paramOffset, reqspec.params.get(i));
+				if(reqspec.params.size() <= inParamCount) {
+					throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of IN(OUT) parameter [index="+(inParamCount)+" of "+eo.getParams().size()+"]");
+				}
+				//XXX: oracle: when using IN OUT parameters, driver may require to use specific type (stmt.setDouble()) // stmt.setDouble(i+paramOffset, ...);
+				stmt.setObject(i+paramOffset, reqspec.params.get(inParamCount));
+				//log.info("["+i+"/"+(inParamCount+paramOffset)+"] setObject: "+reqspec.params.get(inParamCount));
+				inParamCount++;
 			}
 			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
 				stmt.registerOutParameter(i+paramOffset, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
+				//log.info("["+i+"/"+(outParamCount+paramOffset)+"] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(ep.getDataType()));
 				outParamCount++;
 			}
+			//log.info("["+i+"] param: "+ep);
 		}
-		log.info("sql exec: "+sql);
+		if(eo.getReturnParam()!=null) { // is function !?!
+			stmt.registerOutParameter(1, DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
+			//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
+			outParamCount++;
+		}
+		log.info("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
 		stmt.execute();
 		Object retObject = null;
+		if(eo.getReturnParam()!=null) { // is function !?!
+			retObject = stmt.getObject(1);
+		}
+		boolean warnedManyOutParams = false;
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
 			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
-				retObject = stmt.getObject(i+paramOffset);
-			}
-			if(retObject!=null) {
-				if(outParamCount>1) {
-					log.info("there are "+outParamCount+" out parameter. Only the first will be returned");
+				if(retObject!=null) {
+					if(outParamCount>1 && !warnedManyOutParams) {
+						log.info("there are "+outParamCount+" out parameter. Only the first will be returned");
+						warnedManyOutParams = true;
+					}
+					break; //got first result
+					//log.info("ret["+i+";"+(i+paramOffset)+"]: "+stmt.getObject(i+paramOffset));
 				}
-				break; //gets first result
+				else {
+					retObject = stmt.getObject(i+paramOffset);
+				}
 			}
 		}
 
@@ -907,7 +934,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			conn.rollback();
-			throw e;
+			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
 		}
 		finally {
 			conn.close();
@@ -958,7 +985,7 @@ public class QueryOn extends HttpServlet {
 		case EXECUTABLE: {
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, list, ExecutableObject.class);
-			privilege = PrivilegeType.EXECUTE;
+			//privilege = PrivilegeType.EXECUTE;
 			break;
 		}
 		case FK: {
