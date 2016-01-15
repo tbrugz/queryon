@@ -93,6 +93,24 @@
         <remarks></remarks>
         <type>TABLE</type>
     </table>
+    
+    <executable>
+        <name>IS_PRIME</name>
+        <schemaName>PUBLIC</schemaName>
+        <params>
+            <dataType>INTEGER</dataType>
+            <inout>IN</inout>
+            <name>P1</name>
+            <position>1</position>
+        </params>
+        <returnParam>
+            <dataType>BOOLEAN</dataType>
+            <inout>OUT</inout>
+            <position>0</position>
+        </returnParam>
+        <type>FUNCTION</type>
+    </executable>
+    
     <foreignKey>
         <name>EMP_DEPT_FK</name>
         <schemaName>PUBLIC</schemaName>

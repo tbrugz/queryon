@@ -439,6 +439,13 @@ public class WinstoneAndH2HttpRequestTest {
 		return dBuilder.parse(instream);
 	}
 	
+	static String httpGetContent(String url) throws IllegalStateException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet http = new HttpGet(baseUrl+url);
+		HttpResponse response = httpclient.execute(http);
+		return getContent(response);
+	}
+	
 	@Test
 	public void testGetXmlEmp() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml", 5);
@@ -570,6 +577,12 @@ public class WinstoneAndH2HttpRequestTest {
 
 		Assert.assertEquals("Must be Forbidden (403)", 403, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
+	}
+
+	@Test
+	public void testExecute() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+		String content = httpGetContent("/IS_PRIME?p1=3");
+		Assert.assertEquals("true", content);
 	}
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------
