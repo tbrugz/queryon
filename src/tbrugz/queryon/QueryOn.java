@@ -842,6 +842,10 @@ public class QueryOn extends HttpServlet {
 	 * {call <procedure-name>[(<arg1>,<arg2>, ...)]}
 	 * 
 	 * The type of all OUT parameters must be registered prior to executing the stored procedure; their values are retrieved after execution via the get methods provided here.
+	 * 
+	 * XXX: add multipart(/form-data) return?
+	 * http://stackoverflow.com/questions/4526273/what-does-enctype-multipart-form-data-mean
+	 * http://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 	 */
 	void doExecute(ExecutableObject eo, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		log.info("eo: "+eo);
@@ -908,6 +912,7 @@ public class QueryOn extends HttpServlet {
 				if(retObject!=null) {
 					if(outParamCount>1 && !warnedManyOutParams) {
 						log.info("there are "+outParamCount+" out parameter. Only the first will be returned");
+						resp.addHeader("X-Warning", "Execute-TooManyReturnParams ReturnCount="+outParamCount);
 						warnedManyOutParams = true;
 					}
 					break; //got first result
@@ -919,6 +924,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 
+		resp.addHeader("X-Execute-ReturnCount", String.valueOf(outParamCount));
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
 				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
@@ -963,6 +969,7 @@ public class QueryOn extends HttpServlet {
 		final String objectName = statusType.desc();
 		PrivilegeType privilege = PrivilegeType.SELECT;
 		//XXX: filter by schemaName, name? ResultSetFilterDecorator(rs, colpositions, colvalues)?
+		//log.info("doStatus: "+statusType);
 		switch (statusType) {
 		case TABLE: {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
