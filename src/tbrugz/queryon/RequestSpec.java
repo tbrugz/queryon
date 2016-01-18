@@ -27,7 +27,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX: add ResponseSpec? special-headers-coinvention??
  *  - X-ResultSet-Limit <n>
  *  - X-Execute-ReturnCount <n>
- *  - X-Warning-Execute-TooManyReturnParams ReturnCount=<n>
+ *  - X-Warning Execute-TooManyReturnParams ReturnCount=<n>
  * http://stackoverflow.com/questions/3561381/custom-http-headers-naming-conventions
  */
 public class RequestSpec {
