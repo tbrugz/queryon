@@ -581,7 +581,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(BadRequestException e) {
 			//XXX: do not log exception!
-			log.warn("BadRequestException: "+e.getMessage());
+			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
 			throw e;
 		}
 		catch(SQLException e) {
@@ -902,14 +902,16 @@ public class QueryOn extends HttpServlet {
 		log.info("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
 		stmt.execute();
 		Object retObject = null;
-		if(eo.getReturnParam()!=null) { // is function !?!
+		boolean gotReturn = false;
+		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
 			retObject = stmt.getObject(1);
+			gotReturn = true;
 		}
 		boolean warnedManyOutParams = false;
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
 			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
-				if(retObject!=null) {
+				if(gotReturn) {
 					if(outParamCount>1 && !warnedManyOutParams) {
 						log.info("there are "+outParamCount+" out parameter. Only the first will be returned");
 						resp.addHeader("X-Warning", "Execute-TooManyReturnParams ReturnCount="+outParamCount);
@@ -920,6 +922,7 @@ public class QueryOn extends HttpServlet {
 				}
 				else {
 					retObject = stmt.getObject(i+paramOffset);
+					gotReturn = true;
 				}
 			}
 		}

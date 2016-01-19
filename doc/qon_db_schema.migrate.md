@@ -1,6 +1,6 @@
 
-2016-01 - qon_tables: add column_remarks
-----------------------------------------
+2016-01 - qon_tables: add column_remarks ; add qon_execs
+--------------------------------------------------------
 alter table qon_tables
 	add column column_remarks varchar(4000)
 	
