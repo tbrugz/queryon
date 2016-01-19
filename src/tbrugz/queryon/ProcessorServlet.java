@@ -59,7 +59,7 @@ public class ProcessorServlet extends HttpServlet {
 		try {
 			doProcess(req, resp);
 		} catch(BadRequestException e) {
-			log.warn("BadRequestException: "+e.getMessage());
+			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
 			resp.setStatus(e.getCode());
 			resp.getWriter().write(e.getMessage());
 		} catch (ServletException e) {

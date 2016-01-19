@@ -241,7 +241,7 @@
 		dialogContent += "</div>"
 
 		dialog.innerHTML += dialogContent+"</div><div id='dialog-footer'>"
-			+ "<input type='button' value='"+updateType.toLowerCase()+"' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+");'/>"
+			+ "<input type='button' value='"+updateType.toLowerCase()+"' id='btnUpdate' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+");'/>"
 			+ "<input type='button' value='"+updateType.toLowerCase()+" & close' class='simplebutton' onclick='doConfirm"+updateType+"("+rownum+", true);'/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
 			+ "</div>";
@@ -358,9 +358,14 @@
 				//if(callback) { callback(jqXHR); }
 				// run QOnTables processor
 				var rel = getCurrentRelation('objects');
-				if(rel.name && (rel.name==settings["queryon.qon-tables.table"])) { //XXXdone: using default table name, query for actual table name...
+				if(rel.name && (rel.name.toUpperCase()==settings["queryon.qon-tables.table"].toUpperCase())) { //XXXdone: using default table name, query for actual table name...
 					reloadTables(messagesId, nv.postData["v:NAME"]);
 				}
+				//if(rel.name && (rel.name.toUpperCase()==settings["queryon.qon-execs.table"].toUpperCase())) {
+				if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
+					reloadExecs(messagesId, nv.postData["v:NAME"]);
+				}
+				console.log("doExecuteUpdateAjax",rel.name.toUpperCase()," - ",settings["queryon.qon-execs.table"].toUpperCase(),nv.postData["v:NAME"]);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				//btnActionStop('go-button');
@@ -384,9 +389,9 @@
 			dataType : "html"
 		});
 		
-		btnActionStart('btnSave');
+		btnActionStart('btnUpdate');
 		request.done(function(data, textStatus, jqXHR) {
-			btnActionStop('btnSave');
+			btnActionStop('btnUpdate');
 			//console.log(data);
 			// test for count (data)==1
 			if(data=="1") {
@@ -401,7 +406,41 @@
 			}
 		});
 		request.fail(function(jqXHR, textStatus, errorThrown) {
-			btnActionStop('btnSave');
+			btnActionStop('btnUpdate');
+			console.log(jqXHR);
+		});
+	}
+
+	function reloadExecs(messagesId, execName) {
+		//XXX: should reload all execs? even from xml/json model? what if execs are renamed?
+		console.log('reloadExecs', execName);
+		var reqData = {
+				"queryon.qon-execs.action": "read",
+				"queryon.qon-execs.names": execName
+			}
+		var request = $.ajax({
+			url : processorUrl+"/queryon.processor.QOnExecs",
+			type : "POST",
+			data : reqData,
+			dataType : "html"
+		});
+		
+		btnActionStart('btnUpdate');
+		request.done(function(data, textStatus, jqXHR) {
+			btnActionStop('btnUpdate');
+			//console.log(data);
+			// test for count (data)==1
+			//if(data=="1") {
+			if(parseInt(data)!=NaN) {
+				appendMessages(messagesId, ' - executable <code>'+execName+'</code> reloaded');
+			}
+			else {
+				appendMessages(messagesId, ' - error validating executable <code>'+execName+'</code>');
+				changeMessagesClass(messagesId, 'error');
+			}
+		});
+		request.fail(function(jqXHR, textStatus, errorThrown) {
+			btnActionStop('btnUpdate');
 			console.log(jqXHR);
 		});
 	}

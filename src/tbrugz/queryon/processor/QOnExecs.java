@@ -133,7 +133,7 @@ public class QOnExecs extends AbstractSQLProc {
 					ep.setInout(ExecutableParameter.INOUT.valueOf(parameterInouts.get(i)));
 				}
 			}
-			log.info("EP: "+ep);
+			//log.info("ExecParam["+i+"]: "+ep);
 			eps.add(ep);
 		}
 		e.setParams(eps);
@@ -143,11 +143,13 @@ public class QOnExecs extends AbstractSQLProc {
 		}
 		//e.setBody(body);
 		
+		//TODO: validate executable! PreparedStatement, ResultSetMetadata ?
+		
 		if(model.getExecutables().contains(e)) {
 			model.getExecutables().remove(e);
 		}
 		
-		log.info("E: "+e+" ; pc="+parameterCount);
+		//log.info("Exec: "+e+" ; pc="+parameterCount);
 		return model.getExecutables().add(e)?1:0;
 	}
 	
@@ -155,4 +157,10 @@ public class QOnExecs extends AbstractSQLProc {
 	public boolean acceptsOutputWriter() {
 		return true;
 	}
+	
+	@Override
+	public void setOutputWriter(Writer writer) {
+		this.writer = writer;
+	}
+	
 }

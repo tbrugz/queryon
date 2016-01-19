@@ -1,11 +1,12 @@
+<%@page import="tbrugz.queryon.processor.QOnExecs"%>
 <%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"%>
 <%@page import="tbrugz.queryon.processor.QOnTables"%>
 <%@page import="java.util.*, tbrugz.queryon.QueryOn"%>
 {
 <%
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
-	String[] exposedKeys = {"queryon.models","queryon.models.default","queryon.qon-tables.table"};
-	String[] defaultValues = {null, null, QOnTables.DEFAULT_TABLES_TABLE};
+	String[] exposedKeys = {"queryon.models","queryon.models.default","queryon.qon-tables.table","queryon.qon-execs.table"};
+	String[] defaultValues = {null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE};
 	
 	int i = 0;
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
