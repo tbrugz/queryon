@@ -222,10 +222,11 @@
 			//XXXdone check column permission (grants)
 			//XXX column size & column remarks would be nice
 			//~XXX Integer, Double, Date - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
-			var colT = !colTypes[i]?"text":
-				colTypes[i]=="Integer"?"number":
-				colTypes[i]=="Double"?"number":
-				colTypes[i]=="Date"?"text": //XXX "datetime-local": "text":
+			var colTypeOrig = (colTypes && colTypes[i])?colTypes[i]:'String';
+			var colT = (!colTypeOrig)?"text":
+				colTypeOrig=="Integer"?"number":
+				colTypeOrig=="Double"?"number":
+				colTypeOrig=="Date"?"text": //XXX "datetime-local": "text":
 				"text";
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			
@@ -233,7 +234,7 @@
 			dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"
 				+(disabled?" disabled='true'":"")
 				+">"
-				+(colTypes[i]=="String"?"":" <em>("+colTypes[i]+")</em>")
+				+(colTypeOrig=="String"?"":" <em>("+colTypeOrig+")</em>")
 				+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+colRemarks[i]+"</span>":"")
 				+"</label> "
 		}

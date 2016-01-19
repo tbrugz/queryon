@@ -12,7 +12,7 @@ create table qon_execs (
 	exec_type varchar(100),
 	package_name varchar(100),
 	body clob,
-	parameter_count integer,
+	parameter_count integer not null,
 	parameter_names varchar(1000),
 	parameter_types varchar(1000),
 	parameter_inouts varchar(1000),

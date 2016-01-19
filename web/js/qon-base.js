@@ -2,7 +2,7 @@
  * should not depend on anything...
  */
 
-function getQonData(qonData) {
+function getQonData(qonData) { //JSON...
 	var keys = Object.keys(qonData);
 	var index = 0;
 	if(keys[index].startsWith("$") || keys[index].startsWith("@")) { index = 1; }

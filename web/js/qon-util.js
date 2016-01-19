@@ -1,12 +1,11 @@
 /* 
- * depends on jquery
  */
 
 function btnActionStart(btnId) {
-	$('#'+btnId).addClass('onaction');
+	document.getElementById(btnId).classList.add("onaction");
 	//XXX add hourglass-like icon? css transitions?
 }
 
 function btnActionStop(btnId) {
-	$('#'+btnId).removeClass('onaction');
+	document.getElementById(btnId).classList.remove("onaction");
 }

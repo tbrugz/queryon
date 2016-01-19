@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - go!</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script src="js/qon-base.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script src="js/queryon-b.js"></script>
+	<script src="js/auth.js"></script>
+	<script src="js/menu.js"></script>
+	<script>
+var queryOnUrl = 'q/';
+
+onLoad = function() {
+	loadAuthInfo();
+	
+	var url = queryOnUrl + 'executable.json';
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener("load", loadSelectContent);
+	oReq.open("GET", url);
+	oReq.send();
+};
+
+loadSelectContent = function(oEvent) {
+	var txt = oEvent.target.responseText;
+	var execs = JSON.parse(txt);
+	console.log(execs);
+	var select = document.getElementById('objects');
+	select.innerHTML = '<option invalid="true">select executable</option>';
+	for(var i = 0;i<execs.executable.length;i++) {
+		//XXX: packageName...
+		var e = execs.executable[i];
+		var option = '<option value="'+e.qualifiedName+'" params="'+e.params+'" grants="'+e.grants+'">'+
+			e.qualifiedName+(e.remarks!=null?" - "+e.remarks:"")+'</option>';
+		select.innerHTML += option;
+	}
+	onExecChanged();
+}
+
+onExecChanged = function() {
+	var select = document.getElementById('objects');
+	var idx = select.selectedIndex;
+	var option = select.options[idx];
+	var btnGo = document.getElementById('go-button');
+	console.log("onExecChanged:", option.value, ' - ', option);
+	if(option.getAttribute("invalid")) {
+		btnGo.disabled = true;
+		document.getElementById('parameters').innerHTML = '';
+		return;
+	}
+	
+	btnGo.disabled = false;
+	var params = option.getAttribute("params");
+	var npar = params.split(",").length;
+	console.log('onExecChanged: ', params, ' - ', npar);
+	//XXX: IN, OUT, INOUT...
+	//XXX: parameterTypes...
+	setParameters('parameters', npar);
+	closeMessages('messages');
+}
+
+onParameterChange = function() {
+}
+
+makeHrefs = function() {
+	refreshAuthInfo();
+}
+
+function updateUI() {
+	document.getElementById('content-container').style.top = 10 + document.getElementById('nav').offsetHeight + 'px';
+}
+
+doGo = function() {
+	var select = document.getElementById('objects');
+	var idx = select.selectedIndex;
+	var option = select.options[idx];
+	
+	var url = queryOnUrl + option.getAttribute("value");
+	
+	var params = document.querySelectorAll('.parameter');
+	var paramsStr = '';
+	for (var i = 0; i < params.length; ++i) {
+		var item = params[i].value;
+		//if(str=='') { str = '-'; } 
+		paramsStr += (i==0?"?":"&") + "p" + (i+1) + "=" + item;
+	}
+	
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener("load", doGoCallback);
+	oReq.open("GET", url+paramsStr);
+	btnActionStart('go-button');
+	oReq.send();
+	closeMessages('messages');
+}
+
+doGoCallback = function(oEvent) {
+	btnActionStop('go-button');
+	var status = oEvent.target.status;
+	var txt = oEvent.target.responseText;
+	if(status>=400) {
+		showErrorMessages('messages', txt);
+		return;
+	}
+	var content = document.getElementById('content');
+	content.innerHTML = txt;
+	//console.log('doGoCallback: ', oEvent);
+}
+
+	</script>
+	<style type="text/css">
+#navbar-prop {
+	display: inline;
+}
+#content-container {
+	background-color: #bbb;
+	position: absolute;
+	top: 40px;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+}
+#content {
+	/* border: 1px solid #bbb; */
+	/* background-color: #ccc; */
+	margin: 8px;
+	font-family: monospace;
+	font-weight: bold;
+}
+#authinfo {
+	margin: 4px 6px 0 0;
+}
+	</style>
+</head>
+<body onload="onLoad();">
+
+<nav id="nav" class="navbar">
+	<span id="logo">Q<span style="color: #ff8a47">On</span> <span>Go!</span></span>
+
+	<label style="display: none">
+		model: <select id="model" onchange="onModelChanged();"></select>
+	</label>
+	
+	<label>
+		<select id="objects" onchange="onExecChanged();">
+		</select>
+	</label>
+	
+	<span id="navbar-prop">
+		<span id="parameters"></span>
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doGo();"/>
+	</span>
+
+	<span id="navbar-links">
+	</span>
+	
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+	
+	<div id="messages"></div>
+</nav>
+
+<div id="content-container">
+	<div id="content">
+	</div>
+</div>
+
+<div id="dialog-container">
+	<div id="dialog">
+	</div>
+</div>
+
+<div id="status-container" class="status">
+</div>
+
+</body>
+</html>
