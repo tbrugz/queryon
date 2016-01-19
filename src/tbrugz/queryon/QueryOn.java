@@ -878,7 +878,7 @@ public class QueryOn extends HttpServlet {
 		int outParamCount = 0;
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
-			if(ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
+			if(ep.getInout()==null || ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
 				if(reqspec.params.size() <= inParamCount) {
 					throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of IN(OUT) parameter [index="+(inParamCount)+" of "+eo.getParams().size()+"]");
 				}

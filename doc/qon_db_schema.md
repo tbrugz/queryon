@@ -30,6 +30,21 @@ create table qon_tables (
 	--constraint qon_tables_pk primary key (schema,name)
 )
 
+create table qon_execs (
+	schema_name varchar(100),
+	name varchar(100) not null,
+	remarks varchar(400),
+	roles_filter varchar(1000),
+	exec_type varchar(100),
+	package_name varchar(100),
+	body clob,
+	parameter_count integer,
+	parameter_names varchar(1000),
+	parameter_types varchar(1000),
+	parameter_inouts varchar(1000),
+	constraint qon_execs_pk primary key (name)
+)
+
 
 oracle
 ------
@@ -56,4 +71,19 @@ create table qon_tables (
 	roles_insert_columns varchar2(1000),
 	roles_update_columns varchar2(1000),
 	constraint qon_tables_pk primary key (name)
+)
+
+create table qon_execs (
+	schema_name varchar2(100),
+	name varchar2(100) not null,
+	remarks varchar2(400),
+	roles_filter varchar2(1000),
+	exec_type varchar2(100),
+	package_name varchar2(100),
+	body clob,
+	parameter_count integer,
+	parameter_names varchar2(1000),
+	parameter_types varchar2(1000),
+	parameter_inouts varchar2(1000),
+	constraint qon_execs_pk primary key (name)
 )
