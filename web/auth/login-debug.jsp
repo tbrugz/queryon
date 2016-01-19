@@ -127,7 +127,7 @@ for(String s: perms) {
 <%
 PrincipalCollection pc = currentUser.getPrincipals();
 if(pc!=null) {
-	List l = pc.asList();
+	List<?> l = pc.asList();
 	out.write("User info [getPrincipals()]: <ul>");
 	for(Object o: l) {
 		out.write("<li>"+o.getClass().getSimpleName()+":: "+o.toString()+"\n");
@@ -188,5 +188,5 @@ if(sm instanceof RealmSecurityManager) {
 <br><a href="../">home</a>
 <br><a href="logout.jsp">logout</a>
 <br><a href="login.jsp">login</a>
-<br><a href="loginDebug.jsp">login-debug</a>
+<br><a href="login-debug.jsp">login-debug</a>
 </body>

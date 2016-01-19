@@ -102,11 +102,12 @@ doGoCallback = function(oEvent) {
 	btnActionStop('go-button');
 	var status = oEvent.target.status;
 	var txt = oEvent.target.responseText;
+	var content = document.getElementById('content');
 	if(status>=400) {
 		showErrorMessages('messages', txt);
+		content.innerHTML = '';
 		return;
 	}
-	var content = document.getElementById('content');
 	content.innerHTML = txt;
 	//console.log('doGoCallback: ', oEvent);
 }
