@@ -876,14 +876,17 @@ public class QueryOn extends HttpServlet {
 		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
 		int inParamCount = 0;
 		int outParamCount = 0;
+		if(reqspec.params.size() < eo.getParams().size()) {
+			throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters ["+eo.getParams().size()+"]");
+		}
 		for(int i=0;i<eo.getParams().size();i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
 			if(ep.getInout()==null || ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
-				if(reqspec.params.size() <= inParamCount) {
-					throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of IN(OUT) parameter [index="+(inParamCount)+" of "+eo.getParams().size()+"]");
-				}
+				/*if(reqspec.params.size() <= i) {
+					throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of executable's parameter [i="+i+" ; inParamCount="+(inParamCount)+" ; size="+eo.getParams().size()+"]");
+				}*/
 				//XXX: oracle: when using IN OUT parameters, driver may require to use specific type (stmt.setDouble()) // stmt.setDouble(i+paramOffset, ...);
-				stmt.setObject(i+paramOffset, reqspec.params.get(inParamCount));
+				stmt.setObject(i+paramOffset, reqspec.params.get(i));
 				//log.info("["+i+"/"+(inParamCount+paramOffset)+"] setObject: "+reqspec.params.get(inParamCount));
 				inParamCount++;
 			}
@@ -894,7 +897,7 @@ public class QueryOn extends HttpServlet {
 			}
 			//log.info("["+i+"] param: "+ep);
 		}
-		if(eo.getReturnParam()!=null) { // is function !?!
+		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
 			stmt.registerOutParameter(1, DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
 			//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
 			outParamCount++;
@@ -913,7 +916,7 @@ public class QueryOn extends HttpServlet {
 			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
 				if(gotReturn) {
 					if(outParamCount>1 && !warnedManyOutParams) {
-						log.info("there are "+outParamCount+" out parameter. Only the first will be returned");
+						log.warn("there are "+outParamCount+" out parameter. Only the first will be returned");
 						resp.addHeader("X-Warning", "Execute-TooManyReturnParams ReturnCount="+outParamCount);
 						warnedManyOutParams = true;
 					}

@@ -16,6 +16,8 @@
 	<script>
 var queryOnUrl = 'q/';
 
+var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
+
 onLoad = function() {
 	loadAuthInfo();
 	
@@ -56,11 +58,14 @@ onExecChanged = function() {
 	
 	btnGo.disabled = false;
 	var params = option.getAttribute("params");
-	var npar = params.split(",").length;
-	console.log('onExecChanged: ', params, ' - ', npar);
+	params = params.substring(1, params.length-1);
+	var pars = params.split(",");
+	//var npar = pars.length;
+	
+	console.log('onExecChanged: ', pars, ' - ', pars.length);
 	//XXX: IN, OUT, INOUT...
 	//XXX: parameterTypes...
-	setParameters('parameters', npar);
+	goSetParameters('parameters', pars);
 	closeMessages('messages');
 }
 
@@ -112,6 +117,25 @@ doGoCallback = function(oEvent) {
 	//console.log('doGoCallback: ', oEvent);
 }
 
+goSetParameters = function(parametersId, pars) {
+	var paramsContainer = document.getElementById('parameters');
+	paramsContainer.innerHTML = '';
+	var content = '';
+	var numparams = pars.length;
+	for(var i=1;i<=numparams;i++) {
+		console.log("i",i,"par",pars[i-1]);
+		var parts = pars[i-1].split(";");
+		var colType = parts[2];
+		var isOut = parts[3].indexOf("OUT")==0;
+		var inputType = "text";
+		if(numericSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'number'; }
+		content += "<label class='parameter-label'>p"+i+
+			": <input type='"+inputType+"' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'"+
+			(isOut?" value='(OUT)' readonly":"")+"/></label>";
+	}
+	paramsContainer.innerHTML = content;
+}
+
 	</script>
 	<style type="text/css">
 #navbar-prop {
@@ -134,6 +158,12 @@ doGoCallback = function(oEvent) {
 }
 #authinfo {
 	margin: 4px 6px 0 0;
+}
+input[readonly] {
+	/* background-color: #ccc; */
+	background-color: rgb(235, 235, 228);
+	color: rgb(84, 84, 84);
+	border: 2px solid rgb(235, 235, 228);
 }
 	</style>
 </head>
