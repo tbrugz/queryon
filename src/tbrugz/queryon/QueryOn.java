@@ -937,7 +937,12 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		else {
-			resp.getWriter().write("execution successful - no return");
+			if(outParamCount==0) {
+				resp.getWriter().write("execution successful - no return");
+			}
+			else {
+				resp.getWriter().write("execution successful - null return");
+			}
 		}
 
 		}
