@@ -13,6 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
+import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
@@ -123,6 +125,29 @@ public class SQL {
 				"from " + (SQL.valid(relation.getSchemaName())?relation.getSchemaName()+".":"") + relation.getName()+
 				" " + PARAM_WHERE_CLAUSE;
 		return new SQL(sql, relation);
+	}
+	
+	public static String createExecuteSQLstr(ExecutableObject eo) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("{ "); //sql.append("begin ");
+		if(eo.getType()==DBObjectType.FUNCTION) {
+			sql.append("?= "); //sql.append("? := ");
+		}
+		sql.append("call ");
+		sql.append(
+			(eo.getSchemaName()!=null?eo.getSchemaName()+".":"")+
+			(eo.getPackageName()!=null?eo.getPackageName()+".":"")+
+			eo.getName());
+		if(eo.getParams()!=null) {
+			sql.append("(");
+			for(int i=0;i<eo.getParams().size();i++) {
+				//ExecutableParameter ep = eo.params.get(i);
+				sql.append((i>0?", ":"")+"?");
+			}
+			sql.append(")");
+		}
+		sql.append(" }"); //sql.append("; end;");
+		return sql.toString();
 	}
 	
 	public void addFilter(String filter) {

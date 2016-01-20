@@ -852,26 +852,8 @@ public class QueryOn extends HttpServlet {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		
 		try {
-			
-		StringBuilder sql = new StringBuilder();
-		sql.append("{ "); //sql.append("begin ");
-		if(eo.getType()==DBObjectType.FUNCTION) {
-			sql.append("?= "); //sql.append("? := ");
-		}
-		sql.append("call ");
-		sql.append(
-			(eo.getSchemaName()!=null?eo.getSchemaName()+".":"")+
-			(eo.getPackageName()!=null?eo.getPackageName()+".":"")+
-			eo.getName());
-		if(eo.getParams()!=null) {
-			sql.append("(");
-			for(int i=0;i<eo.getParams().size();i++) {
-				//ExecutableParameter ep = eo.params.get(i);
-				sql.append((i>0?", ":"")+"?");
-			}
-			sql.append(")");
-		}
-		sql.append(" }"); //sql.append("; end;");
+		
+		String sql = SQL.createExecuteSQLstr(eo);
 		CallableStatement stmt = conn.prepareCall(sql.toString());
 		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
 		int inParamCount = 0;

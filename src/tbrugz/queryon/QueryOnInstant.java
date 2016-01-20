@@ -247,7 +247,7 @@ public class QueryOnInstant extends QueryOn {
 		return ret;
 	}
 	
-	static List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
+	public static List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
 		try {
 			if(grabFunctions) {
 				return jgrab.doGrabFunctions(dbmd, schemaName, false);
