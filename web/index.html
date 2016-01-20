@@ -431,11 +431,12 @@
 			//console.log(data);
 			// test for count (data)==1
 			//if(data=="1") {
-			if(parseInt(data)!=NaN) {
-				appendMessages(messagesId, ' - executable <code>'+execName+'</code> reloaded');
+			var countExecs = parseInt(data);
+			if(countExecs!=NaN && countExecs>0) {
+				appendMessages(messagesId, ' - executable <code>'+execName+'</code> reloaded [data='+data+']');
 			}
 			else {
-				appendMessages(messagesId, ' - error validating executable <code>'+execName+'</code>');
+				appendMessages(messagesId, ' - error validating executable <code>'+execName+'</code> [data='+data+']');
 				changeMessagesClass(messagesId, 'error');
 			}
 		});

@@ -2,22 +2,32 @@ package tbrugz.queryon.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.QueryOnInstant;
+import tbrugz.sqldump.JDBCSchemaGrabber;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * XXX: do not allow qon_execs to update schema_name or name... or reload all executables on save...
+ */
 public class QOnExecs extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(QOnExecs.class);
@@ -79,6 +89,13 @@ public class QOnExecs extends AbstractSQLProc {
 			throw new SQLException("Error fetching execs, sql: "+sql, e);
 		}
 
+		final DBMSResources res = DBMSResources.instance();
+		final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
+		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+		JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+		List<ExecutableObject> execs = new ArrayList<ExecutableObject>();
+		Set<String> schemasGrabbed = new HashSet<String>();
+		
 		int count = 0;
 		while(rs.next()) {
 			String schema = rs.getString(1);
@@ -99,8 +116,18 @@ public class QOnExecs extends AbstractSQLProc {
 			List<String> parameterInouts = Utils.getStringList(parameter_inouts_str, PIPE_SPLIT);
 			
 			try {
-				count += addExecutable(schema, name, remarks, rolesFilter, exec_type,
-						packageName, parameterCount, parameterNames, parameterTypes, parameterInouts);
+				if(!schemasGrabbed.contains(schema)) {
+					execs.addAll(QueryOnInstant.grabExecutables(jgrab, dbmd, schema, true));
+					schemasGrabbed.add(schema);
+				}
+
+				if(containsExecutableWithName(execs, schema, name)) {
+					count += addExecutable(schema, name, remarks, rolesFilter, exec_type,
+							packageName, parameterCount, parameterNames, parameterTypes, parameterInouts);
+				}
+				else {
+					log.warn("executable '"+(schema!=null?schema+".":"")+name+"' not found");
+				}
 			}
 			catch(SQLException e) {
 				log.warn("error reading table '"+name+"': "+e);
@@ -143,7 +170,7 @@ public class QOnExecs extends AbstractSQLProc {
 		}
 		//e.setBody(body);
 		
-		//TODO: validate executable! PreparedStatement, ResultSetMetadata ?
+		//TODOne: validate executable! PreparedStatement, ResultSetMetadata ? see QueryOnInstant.grabExecutables()...
 		
 		if(model.getExecutables().contains(e)) {
 			model.getExecutables().remove(e);
@@ -161,6 +188,16 @@ public class QOnExecs extends AbstractSQLProc {
 	@Override
 	public void setOutputWriter(Writer writer) {
 		this.writer = writer;
+	}
+	
+	boolean containsExecutableWithName(List<ExecutableObject> execs, String schema, String name) {
+		for(ExecutableObject exec: execs) {
+			if( (exec.getSchemaName()==null || schema==null || exec.getSchemaName().equalsIgnoreCase(schema))
+				&& exec.getName().equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
