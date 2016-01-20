@@ -54,6 +54,8 @@ public class QOnExecs extends AbstractSQLProc {
 			throw new BadRequestException("SQL exception: "+e, e);
 		} catch (IOException e) {
 			throw new BadRequestException("IO exception: "+e, e);
+		} catch (Exception e) {
+			throw new BadRequestException("Exception: "+e, e);
 		}
 	}
 
@@ -131,6 +133,7 @@ public class QOnExecs extends AbstractSQLProc {
 			}
 			catch(SQLException e) {
 				log.warn("error reading table '"+name+"': "+e);
+				throw e;
 			}
 		}
 		
@@ -145,20 +148,21 @@ public class QOnExecs extends AbstractSQLProc {
 		e.setName(execName);
 		e.setPackageName(packageName);
 		e.setRemarks(remarks);
-		e.setType(DBObjectType.valueOf(execType));
+		if(execType==null) {
+			throw new BadRequestException("Executable 'type' is mandatory");
+		}
+		e.setType(DBObjectType.valueOf(execType)); // execType.toUpperCase()
 		List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
 		for(int i=0;i<parameterCount;i++) {
 			ExecutableParameter ep = new ExecutableParameter();
-			if(parameterNames.size()>i) {
-				if(parameterNames!=null && parameterNames.size()>i) {
-					ep.setName(parameterNames.get(i));
-				}
-				if(parameterTypes!=null && parameterTypes.size()>i) {
-					ep.setDataType(parameterTypes.get(i));
-				}
-				if(parameterInouts!=null && parameterInouts.size()>i) {
-					ep.setInout(ExecutableParameter.INOUT.valueOf(parameterInouts.get(i)));
-				}
+			if(parameterNames!=null && parameterNames.size()>i) {
+				ep.setName(parameterNames.get(i));
+			}
+			if(parameterTypes!=null && parameterTypes.size()>i) {
+				ep.setDataType(parameterTypes.get(i));
+			}
+			if(parameterInouts!=null && parameterInouts.size()>i) {
+				ep.setInout(ExecutableParameter.INOUT.valueOf(parameterInouts.get(i)));
 			}
 			//log.info("ExecParam["+i+"]: "+ep);
 			eps.add(ep);

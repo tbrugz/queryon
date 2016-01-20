@@ -228,6 +228,7 @@
 				colTypeOrig=="Double"?"number":
 				colTypeOrig=="Date"?"text": //XXX "datetime-local": "text":
 				"text";
+			//console.log("col["+i+"]: ",cols[i],"--",allowUpdate,"---",relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
@@ -433,16 +434,18 @@
 			//if(data=="1") {
 			var countExecs = parseInt(data);
 			if(countExecs!=NaN && countExecs>0) {
-				appendMessages(messagesId, ' - executable <code>'+execName+'</code> reloaded [data='+data+']');
+				appendMessages(messagesId, ' - executable '+(execName?'<code>'+execName+'</code>':'')+' reloaded [data='+data+']');
 			}
 			else {
-				appendMessages(messagesId, ' - error validating executable <code>'+execName+'</code> [data='+data+']');
+				appendMessages(messagesId, ' - error validating executable '+(execName?'<code>'+execName+'</code>':'')+' [data='+data+']');
 				changeMessagesClass(messagesId, 'error');
 			}
 		});
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnUpdate');
-			console.log(jqXHR);
+			appendMessages(messagesId, ' - error validating executable '+(execName?'<code>'+execName+'</code>':'')+' [status='+textStatus+']');
+			changeMessagesClass(messagesId, 'error');
+			console.log("xhr: ",jqXHR,"; error",errorThrown);
 		});
 	}
 	

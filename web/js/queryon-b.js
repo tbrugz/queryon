@@ -440,9 +440,9 @@ function relationHasGrantOfType(relation, grant, column) {
 		+(column?"col="+column:"")
 		+";\\]";
 	var re = new RegExp(restr);
-	//console.log('roles== ',roles,'; restr==',restr,'; relation.grants==',relation.grants,'; re==',re);
 	//var match = re.exec(rel.grants);
 	var match = relation.grants.match(re);
+	//console.log('roles== ',roles,'; restr==',restr,'; relation.grants==',relation.grants,'; re==',re,'; match==',match);
 	return match;
 }
 
