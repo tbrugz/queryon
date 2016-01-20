@@ -36,7 +36,9 @@ public class SchemaModelUtils {
 		String[] objectParts = reqspec.object.split("\\.");
 		
 		if(objectParts.length>2) {
-			throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			log.debug("getRelation: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			//throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			return null;
 		}
 		
 		if(objectParts.length==2) {
@@ -54,7 +56,9 @@ public class SchemaModelUtils {
 		
 		View view = null;
 		if(objectParts.length>2) {
-			throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			log.debug("getView: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			//throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			return null;
 		}
 		
 		if(objectParts.length==2) {

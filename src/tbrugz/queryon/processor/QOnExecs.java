@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.QueryOnInstant;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -35,7 +34,7 @@ public class QOnExecs extends AbstractSQLProc {
 	static final String PROP_PREFIX = "queryon.qon-execs";
 	
 	static final String SUFFIX_TABLE = ".table";
-	//static final String SUFFIX_TABLE_NAMES = ".names";
+	static final String SUFFIX_EXECS_NAMES = ".names";
 
 	static final String PIPE_SPLIT = "\\|";
 	
@@ -61,10 +60,12 @@ public class QOnExecs extends AbstractSQLProc {
 
 	int readFromDatabase() throws SQLException {
 		String qonExecsTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
+		List<String> names = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_EXECS_NAMES, ",");
 		String sql = "select schema_name, name, remarks, roles_filter, exec_type"
 				+ ", package_name, parameter_count, parameter_names, parameter_types, parameter_inouts"
 				+ ", body"
 				+ " from "+qonExecsTable
+				+(names!=null?" where name in ("+Utils.join(names, ",", QOnTables.sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
 				;
 		
 		/*
@@ -119,7 +120,9 @@ public class QOnExecs extends AbstractSQLProc {
 			
 			try {
 				if(!schemasGrabbed.contains(schema)) {
-					execs.addAll(QueryOnInstant.grabExecutables(jgrab, dbmd, schema, true));
+					execs.addAll(jgrab.doGrabFunctions(dbmd, schema, false));
+					execs.addAll(jgrab.doGrabProcedures(dbmd, schema, false));
+					//log.info("execs: "+execs);
 					schemasGrabbed.add(schema);
 				}
 
@@ -129,6 +132,7 @@ public class QOnExecs extends AbstractSQLProc {
 				}
 				else {
 					log.warn("executable '"+(schema!=null?schema+".":"")+name+"' not found");
+					//XXX: throw exception?
 				}
 			}
 			catch(SQLException e) {

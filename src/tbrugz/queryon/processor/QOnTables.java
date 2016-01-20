@@ -86,7 +86,7 @@ public class QOnTables extends AbstractSQLProc {
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable
-				+(tables!=null?" where name in ("+Utils.join(tables, ",", sqlStringValuesDecorator)+")":"");
+				+(tables!=null?" where name in ("+Utils.join(tables, ",", sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
 		
 		ResultSet rs = null;
 		try {

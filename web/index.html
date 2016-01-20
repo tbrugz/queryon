@@ -317,6 +317,7 @@
 	
 	function doExecuteUpdateAjax(finalUrl, nv, rownum, cols, messagesId) {
 		//btnActionStart('go-button');
+		//console.log("nv",nv,"rownum",rownum);
 		var startTimeMilis = Date.now();
 		$.ajax({
 			url: finalUrl,
@@ -364,7 +365,7 @@
 				}
 				//if(rel.name && (rel.name.toUpperCase()==settings["queryon.qon-execs.table"].toUpperCase())) {
 				if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
-					reloadExecs(messagesId, nv.postData["v:NAME"]);
+					reloadExecs(messagesId, nv.postData["p1"]);
 				}
 				console.log("doExecuteUpdateAjax",rel.name.toUpperCase()," - ",settings["queryon.qon-execs.table"].toUpperCase(),nv.postData["v:NAME"]);
 			},
@@ -431,10 +432,10 @@
 			btnActionStop('btnUpdate');
 			//console.log(data);
 			// test for count (data)==1
-			//if(data=="1") {
-			var countExecs = parseInt(data);
-			if(countExecs!=NaN && countExecs>0) {
-				appendMessages(messagesId, ' - executable '+(execName?'<code>'+execName+'</code>':'')+' reloaded [data='+data+']');
+			//var countExecs = parseInt(data);
+			if(data=="1") {
+			//if(countExecs!=NaN && countExecs>0) {
+				appendMessages(messagesId, ' - executable '+(execName?'<code>'+execName+'</code>':'')+' reloaded');
 			}
 			else {
 				appendMessages(messagesId, ' - error validating executable '+(execName?'<code>'+execName+'</code>':'')+' [data='+data+']');
