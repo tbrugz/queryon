@@ -69,8 +69,9 @@ public class DBUtil {
 	public static Connection initDBConn(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		//String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
 		//prefix = prop.getProperty(prefix+".connpropprefix", prefix);
-		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId));
-		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop, true);
+		boolean autocommit = false;
+		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId)+" ; autocommit = "+autocommit);
+		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop, autocommit);
 	}
 
 	public static Connection initDBConn(Properties prop, String modelId, SchemaModel model) throws ClassNotFoundException, SQLException, NamingException {
@@ -91,6 +92,18 @@ public class DBUtil {
 			QOnModelUtils.setModelExceptionMetadata(model, e);
 			throw e;
 		}
+	}
+	
+	public static boolean doRollback(Connection conn) {
+		boolean auto = false;
+		try {
+			auto = conn.getAutoCommit();
+			conn.rollback();
+		} catch (SQLException sqle) {
+			log.warn("Error in rollback [autocommit="+auto+"]: "+sqle.getMessage(), sqle);
+			return false;
+		}
+		return true;
 	}
 	
 }

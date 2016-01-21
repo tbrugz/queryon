@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.DBUtil;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.SQLQueries;
@@ -80,11 +81,7 @@ public class QOnQueries extends SQLQueries {
 			}
 		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
 			modelRollback(origViews);
-			try {
-				conn.rollback();
-			} catch (SQLException sqle) {
-				log.warn(sqle);
-			}
+			DBUtil.doRollback(conn);
 			throw e;
 		} catch (ProcessingException pe) {
 			modelRollback(origViews);

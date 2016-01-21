@@ -739,7 +739,7 @@ public class QueryOn extends HttpServlet {
 		
 		}
 		catch(SQLException e) {
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
 			//XXX: create new SQLException including the query string?
 			throw e;
@@ -798,7 +798,7 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			log.info("doValidate: error validating: "+e);
 			//log.debug("doValidate: error validating: "+e.getMessage(), e);
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			throw e;
 		}
 		finally {
@@ -827,7 +827,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			log.info("doExplain: error explaining: "+e);
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			throw e;
 		}
 		finally {
@@ -932,7 +932,7 @@ public class QueryOn extends HttpServlet {
 
 		}
 		catch(SQLException e) {
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
 		}
 		finally {
@@ -1052,7 +1052,7 @@ public class QueryOn extends HttpServlet {
 			}
 			if(count>1) {
 				//may never occur...
-				conn.rollback();
+				DBUtil.doRollback(conn);
 				throw new ServletException("Full key defined but "+count+" elements deleted");
 			}
 		}
@@ -1070,11 +1070,11 @@ public class QueryOn extends HttpServlet {
 		
 		}
 		catch(BadRequestException e) {
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			throw e;
 		}
 		catch(SQLException e) {
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			throw e;
 		}
 		finally {
@@ -1148,7 +1148,7 @@ public class QueryOn extends HttpServlet {
 
 		}
 		catch(SQLException e) {
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql, e); //e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
 			//throw e;
@@ -1234,7 +1234,7 @@ public class QueryOn extends HttpServlet {
 		
 		}
 		catch(SQLException e) {
-			conn.rollback();
+			DBUtil.doRollback(conn);
 			e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
 		}
@@ -1569,7 +1569,7 @@ public class QueryOn extends HttpServlet {
 					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ true, resp);
 				}
 				catch(SQLException e) {
-					conn.rollback();
+					DBUtil.doRollback(conn);
 					log.warn("exception in 'trySqlCommand'/"+cmd.getClass().getSimpleName()+": "+e+" ; sql:\n"+sql);
 					throw e;
 				}
@@ -1592,4 +1592,5 @@ public class QueryOn extends HttpServlet {
 			return null;
 		}
 	}
+	
 }
