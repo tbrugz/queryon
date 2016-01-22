@@ -473,4 +473,8 @@ public class RequestSpec {
 		return url+params;
 	}
 	
+	public List<String> getParams() {
+		return params;
+	}
+	
 } 

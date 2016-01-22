@@ -15,11 +15,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.UpdatePlugin;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.Utils;
@@ -27,7 +30,7 @@ import tbrugz.sqldump.util.Utils;
 /*
  * XXX: do not allow qon_execs to update schema_name or name... or reload all executables on save...
  */
-public class QOnExecs extends AbstractSQLProc {
+public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnExecs.class);
 	
@@ -206,6 +209,30 @@ public class QOnExecs extends AbstractSQLProc {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public void onInit() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onInsert(Relation relation, RequestSpec reqspec) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onUpdate(Relation relation, RequestSpec reqspec) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDelete(Relation relation, RequestSpec reqspec) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

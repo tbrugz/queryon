@@ -58,7 +58,6 @@ import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
-import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -73,7 +72,6 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
@@ -110,6 +108,8 @@ public class QueryOn extends HttpServlet {
 	public static final DBObjectType[] STATUS_OBJECTS = {
 		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.RELATION, DBObjectType.EXECUTABLE, DBObjectType.FK
 	};
+
+	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.queryon", "tbrugz.queryon.processor", "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors", "tbrugz", "" };
 	
 	public static final String ACTION_QUERY_ANY = "QueryAny";
 	public static final String ACTION_VALIDATE_ANY = "ValidateAny";
@@ -179,6 +179,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
+	static final String PROP_UPDATE_PLUGINS = "queryon.update-plugins";
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";
 	static final String PROP_SQLDIALECT = "queryon.sqldialect"; //TODO: sqldialect per model...
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
@@ -222,6 +223,8 @@ public class QueryOn extends HttpServlet {
 	//final Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 	
 	String propertiesResource = null;
+	
+	final List<UpdatePlugin> updatePlugins = new ArrayList<UpdatePlugin>();
 	//String modelId;
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
@@ -230,6 +233,8 @@ public class QueryOn extends HttpServlet {
 	boolean xSetRequestUtf8 = false;
 	
 	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
+	
+	ServletContext servletContext = null;
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -276,6 +281,7 @@ public class QueryOn extends HttpServlet {
 			}
 			//log.debug("charset: "+Charset.defaultCharset());
 			context.setAttribute(ATTR_MODEL_MAP, models);
+			servletContext = context;
 			//model = SchemaModelUtils.getDefaultModel(context);
 			dsutils = new DumpSyntaxUtils(prop);
 			
@@ -289,6 +295,9 @@ public class QueryOn extends HttpServlet {
 			
 			context.setAttribute(ATTR_PROP, prop);
 			
+			List<String> updatePluginsStrList = Utils.getStringListFromProp(prop, PROP_UPDATE_PLUGINS, ",");
+			setupUpdatePlugins(context, updatePluginsStrList);
+			
 			runOnStartupProcessors(context);
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
@@ -301,6 +310,34 @@ public class QueryOn extends HttpServlet {
 			e.printStackTrace();
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
+		}
+	}
+	
+	void setupUpdatePlugins(ServletContext context, List<String> updatePluginList) {
+		if(updatePluginList!=null) {
+			for(String upPluginStr: updatePluginList) {
+				UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
+				up.setProperties(prop);
+				updatePlugins.add(up);
+			}
+		}
+
+		Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
+		for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
+			String modelId = entry.getKey();
+			try {
+				SchemaModel sm = entry.getValue();
+				Connection conn = DBUtil.initDBConn(prop, modelId, sm);
+				
+				for(UpdatePlugin up: updatePlugins) {
+					up.setConnection(conn);
+					up.setSchemaModel(sm);
+					up.onInit();
+				}
+			}
+			catch(Exception e) {
+				log.warn("Exception starting update-plugin [model="+modelId+"]: "+e, e);
+			}
 		}
 	}
 	
@@ -344,7 +381,7 @@ public class QueryOn extends HttpServlet {
 		final String grabClassProp = prefix+SUFFIX_GRABCLASS;
 		String grabClassName = prop.getProperty(grabClassProp, prop.getProperty(PROP_GRABCLASS));
 		
-		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
+		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
 			String message = "schema grabber class '"+grabClassName+"' not found [prop '"
 					+(!PROP_GRABCLASS.equals(grabClassProp)?grabClassProp+"' or '":"")
@@ -672,7 +709,7 @@ public class QueryOn extends HttpServlet {
 		// add parameters for Query
 		addOriginalParameters(reqspec, sql);
 		
-		Constraint pk = getPK(relation);
+		Constraint pk = SchemaModelUtils.getPK(relation);
 		
 		filterByKey(relation, reqspec, pk, sql);
 
@@ -851,6 +888,7 @@ public class QueryOn extends HttpServlet {
 		log.info("eo: "+eo);
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		
+		//XXX: test for Subject's permissions
 		try {
 		
 		String sql = SQL.createExecuteSQLstr(eo);
@@ -1025,7 +1063,7 @@ public class QueryOn extends HttpServlet {
 		try {
 		SQL sql = SQL.createDeleteSQL(relation);
 
-		Constraint pk = getPK(relation);
+		Constraint pk = SchemaModelUtils.getPK(relation);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
@@ -1119,7 +1157,7 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.applyUpdate(sb.toString());
 
-		Constraint pk = getPK(relation);
+		Constraint pk = SchemaModelUtils.getPK(relation);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
@@ -1168,7 +1206,7 @@ public class QueryOn extends HttpServlet {
 		columns.addAll(relation.getColumnNames());
 
 		//use url params to set PK cols values
-		Constraint pk = getPK(relation);
+		Constraint pk = SchemaModelUtils.getPK(relation);
 		if(pk!=null) {
 			for(int i=0;i<pk.getUniqueColumns().size() && i<reqspec.params.size();i++) {
 				String pkcol = pk.getUniqueColumns().get(i);
@@ -1248,22 +1286,6 @@ public class QueryOn extends HttpServlet {
 		// - reload-config, reload-movel, rerun-processors
 		doInit(req.getSession().getServletContext());
 		resp.getWriter().write("queryon config reloaded");
-	}
-	
-	Constraint getPK(Relation relation) {
-		Constraint pk = null;
-		List<Constraint> conss = relation.getConstraints();
-		if(conss!=null) {
-			Constraint uk = null;
-			for(Constraint c: conss) {
-				if(c.getType()==ConstraintType.PK) { pk = c; break; }
-				if(c.getType()==ConstraintType.UNIQUE && uk == null) { uk = c; }
-			}
-			if(pk == null && uk != null) {
-				pk = uk;
-			}
-		}
-		return pk;
 	}
 	
 	boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {

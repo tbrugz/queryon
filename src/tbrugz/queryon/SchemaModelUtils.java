@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -17,6 +19,7 @@ import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public class SchemaModelUtils {
 	
@@ -166,4 +169,21 @@ public class SchemaModelUtils {
 		}
 		return modelReq;
 	}
+	
+	public static Constraint getPK(Relation relation) {
+		Constraint pk = null;
+		List<Constraint> conss = relation.getConstraints();
+		if(conss!=null) {
+			Constraint uk = null;
+			for(Constraint c: conss) {
+				if(c.getType()==ConstraintType.PK) { pk = c; break; }
+				if(c.getType()==ConstraintType.UNIQUE && uk == null) { uk = c; }
+			}
+			if(pk == null && uk != null) {
+				pk = uk;
+			}
+		}
+		return pk;
+	}
+	
 }

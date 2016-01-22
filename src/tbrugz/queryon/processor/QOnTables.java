@@ -13,20 +13,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
+import tbrugz.queryon.SchemaModelUtils;
+import tbrugz.queryon.UpdatePlugin;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class QOnTables extends AbstractSQLProc {
+public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnTables.class);
 	
@@ -237,6 +242,89 @@ public class QOnTables extends AbstractSQLProc {
 	@Override
 	public void setOutputWriter(Writer writer) {
 		this.writer = writer;
+	}
+
+	@Override
+	public void onInit() {
+		process();
+	}
+
+	@Override
+	public void onInsert(Relation relation, RequestSpec reqspec) {
+		if(!isQonTablesRelation(relation)) { return; }
+		//XXX: validate new relation?
+		boolean added = model.getTables().add((Table) relation);
+		log.info("onInsert: added "+relation+"? "+added);
+	}
+
+	@Override
+	public void onUpdate(Relation relation, RequestSpec reqspec) {
+		Table t = getQOnTableFromModel(relation, reqspec);
+		//XXX: validate updated relation?
+		boolean removed = model.getTables().remove(t);
+		boolean added = model.getTables().add((Table) relation);
+		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+relation+"? "+added);
+	}
+
+	@Override
+	public void onDelete(Relation relation, RequestSpec reqspec) {
+		Table t = getQOnTableFromModel(relation, reqspec);
+		boolean removed = model.getTables().remove(t);
+		log.info("onDelete: removed "+t+"? "+removed);
+		
+		/*Constraint pk = SchemaModelUtils.getPK(relation);
+		List<String> params = reqspec.getParams();
+		
+		if(pk.getUniqueColumns()==null || pk.getUniqueColumns().size()==0) {
+			log.warn("pk.getUniqueColumns().size()[1]: "+pk.getUniqueColumns());
+			return;
+		}
+		if(pk.getUniqueColumns().size()>2) {
+			log.warn("pk.getUniqueColumns().size()[2]: "+pk.getUniqueColumns());
+			return;
+		}
+		
+		String name = null;
+		String schema = null;
+		if(pk.getUniqueColumns().size()==1) {
+			name = params.get(0);
+		}
+		else {
+			schema = params.get(0);
+			name = params.get(1);
+		}
+		
+		model.getTables()
+		
+		//PK: schema_name, name | name
+		for(int i=0;i<pk.getUniqueColumns().size();i++) {
+			if(params.size()<=i) { break; }
+			filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.getUniqueColumns().get(i))+" = ?"; //+reqspec.params.get(i)
+			sql.bindParameterValues.add(params.get(i));
+			//logFilter.info("filterByKey: value["+i+"]="+reqspec.params.get(i));
+		}*/
+	}
+	
+	boolean isQonTablesRelation(Relation relation) {
+		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		if( (! qonTablesTable.equalsIgnoreCase(relation.getName()))
+			&& (! qonTablesTable.equalsIgnoreCase(relation.getSchemaName()+"."+relation.getName())) ) {
+			log.info("no qon_tables:: qonTablesTable: "+qonTablesTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
+			return true;
+		}
+		return false;
+	}
+	
+	Table getQOnTableFromModel(Relation relation, RequestSpec reqspec) {
+		if(!isQonTablesRelation(relation)) { return null; }
+		
+		DBIdentifiable dbid = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
+		if(dbid==null || !(dbid instanceof Table)) {
+			log.warn("dbid: "+dbid+" ; reqspec.getParams(): "+reqspec.getParams());
+			return null;
+		}
+		
+		return (Table) dbid;
 	}
 	
 }
