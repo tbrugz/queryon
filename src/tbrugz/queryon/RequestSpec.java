@@ -477,4 +477,8 @@ public class RequestSpec {
 		return params;
 	}
 	
+	public Map<String, String> getUpdateValues() {
+		return updateValues;
+	}
+	
 } 

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -15,13 +16,13 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
-import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
@@ -135,7 +136,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
 			}
-			catch(SQLException e) {
+			catch(RuntimeException e) {
 				log.warn("error reading table '"+tableName+"': "+e);
 			}
 		}
@@ -144,9 +145,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		return count;
 	}
 
-	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks, String remarks,
-			List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
-			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) throws SQLException {
+	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks,
+			String remarks, List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
+			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) {
 		Table t = new Table();
 		t.setSchemaName(schema);
 		t.setName(tableName);
@@ -179,8 +180,14 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			t.getConstraints().add(pk);
 		}
 		else {
-			List<Constraint> pks = JDBCSchemaGrabber.grabRelationPKs(conn.getMetaData(), t);
-			t.getConstraints().addAll(pks);
+			try {
+				List<Constraint> pks = JDBCSchemaGrabber.grabRelationPKs(conn.getMetaData(), t);
+				t.getConstraints().addAll(pks);
+			}
+			catch(SQLException e) {
+				String message = "addTable ["+tableName+"]: grabRelationPKs: exception: "+e.getMessage().trim();
+				log.warn(message);
+			}
 		}
 
 		if(columnRemarks!=null) {
@@ -250,77 +257,70 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 
 	@Override
-	public void onInsert(Relation relation, RequestSpec reqspec) {
-		if(!isQonTablesRelation(relation)) { return; }
+	public void onInsert(Relation qonRelation, RequestSpec reqspec) {
+		if(!isQonTablesRelationUpdate(qonRelation)) { return; }
 		//XXX: validate new relation?
-		boolean added = model.getTables().add((Table) relation);
-		log.info("onInsert: added "+relation+"? "+added);
+		//XXX: read from DB? or reprocess RequestSpec?
+		//boolean added = model.getTables().add((Table) qonRelation);
+		boolean added = createQonTable(reqspec);
+		log.info("onInsert: added "+qonRelation+"? "+added);
 	}
 
 	@Override
-	public void onUpdate(Relation relation, RequestSpec reqspec) {
-		Table t = getQOnTableFromModel(relation, reqspec);
+	public void onUpdate(Relation qonRelation, RequestSpec reqspec) {
+		Table t = getQOnTableFromModel(qonRelation, reqspec);
 		//XXX: validate updated relation?
-		boolean removed = model.getTables().remove(t);
-		boolean added = model.getTables().add((Table) relation);
-		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+relation+"? "+added);
-	}
-
-	@Override
-	public void onDelete(Relation relation, RequestSpec reqspec) {
-		Table t = getQOnTableFromModel(relation, reqspec);
-		boolean removed = model.getTables().remove(t);
-		log.info("onDelete: removed "+t+"? "+removed);
-		
-		/*Constraint pk = SchemaModelUtils.getPK(relation);
-		List<String> params = reqspec.getParams();
-		
-		if(pk.getUniqueColumns()==null || pk.getUniqueColumns().size()==0) {
-			log.warn("pk.getUniqueColumns().size()[1]: "+pk.getUniqueColumns());
-			return;
-		}
-		if(pk.getUniqueColumns().size()>2) {
-			log.warn("pk.getUniqueColumns().size()[2]: "+pk.getUniqueColumns());
-			return;
-		}
-		
-		String name = null;
-		String schema = null;
-		if(pk.getUniqueColumns().size()==1) {
-			name = params.get(0);
+		boolean removed = false;
+		if(t==null) {
+			log.warn("onUpdate: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation);
 		}
 		else {
-			schema = params.get(0);
-			name = params.get(1);
+			removed = model.getTables().remove(t);
 		}
-		
-		model.getTables()
-		
-		//PK: schema_name, name | name
-		for(int i=0;i<pk.getUniqueColumns().size();i++) {
-			if(params.size()<=i) { break; }
-			filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.getUniqueColumns().get(i))+" = ?"; //+reqspec.params.get(i)
-			sql.bindParameterValues.add(params.get(i));
-			//logFilter.info("filterByKey: value["+i+"]="+reqspec.params.get(i));
-		}*/
+		//boolean added = model.getTables().add((Table) qonRelation);
+		boolean added = createQonTable(reqspec);
+		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+qonRelation+"? "+added);
+	}
+
+	@Override
+	public void onDelete(Relation qonRelation, RequestSpec reqspec) {
+		Table t = getQOnTableFromModel(qonRelation, reqspec);
+		if(t==null) {
+			log.warn("onDelete: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation);
+			return;
+		}
+		boolean removed = model.getTables().remove(t);
+		log.info("onDelete: removed "+t+"? "+removed);
 	}
 	
-	boolean isQonTablesRelation(Relation relation) {
+	boolean createQonTable(RequestSpec reqspec) {
+		Map<String,String> v = reqspec.getUpdateValues();
+		
+		return addTable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("COLUMN_NAMES"), Utils.getStringList(v.get("PK_COLUMN_NAMES"), ","), Utils.getStringList(v.get("COLUMN_REMARKS"), PIPE_SPLIT),
+				v.get("REMARKS"), Utils.getStringList(v.get("ROLES_SELECT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_INSERT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_UPDATE"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_DELETE"), PIPE_SPLIT),
+				v.get("ROLES_INSERT_COLUMNS"), v.get("ROLES_UPDATE_COLUMNS"))>0;
+	}
+	
+	boolean isQonTablesRelationUpdate(Relation relation) {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		//log.info("isQonTablesRelation: "+qonTablesTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
 		if( (! qonTablesTable.equalsIgnoreCase(relation.getName()))
 			&& (! qonTablesTable.equalsIgnoreCase(relation.getSchemaName()+"."+relation.getName())) ) {
-			log.info("no qon_tables:: qonTablesTable: "+qonTablesTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
-			return true;
+			//log.info("isQonTablesRelationUpdate: no qon_tables:: qonTablesTable: "+qonTablesTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
+			return false;
 		}
-		return false;
+		return true;
 	}
 	
 	Table getQOnTableFromModel(Relation relation, RequestSpec reqspec) {
-		if(!isQonTablesRelation(relation)) { return null; }
+		if(!isQonTablesRelationUpdate(relation)) {
+			//log.info("getQOnTableFromModel: not qon_tables relation: "+relation); 
+			return null;
+		}
 		
-		DBIdentifiable dbid = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
+		Table dbid = (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, reqspec.getParams().get(0));
 		if(dbid==null || !(dbid instanceof Table)) {
-			log.warn("dbid: "+dbid+" ; reqspec.getParams(): "+reqspec.getParams());
+			log.warn("getQOnTableFromModel: dbid: "+dbid+" ; reqspec.getParams(): "+reqspec.getParams());
 			return null;
 		}
 		

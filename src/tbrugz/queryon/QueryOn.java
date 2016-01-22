@@ -321,6 +321,8 @@ public class QueryOn extends HttpServlet {
 				updatePlugins.add(up);
 			}
 		}
+		
+		log.info("update-plugins: "+updatePlugins);
 
 		Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
 		for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
@@ -1091,7 +1093,7 @@ public class QueryOn extends HttpServlet {
 			if(count>1) {
 				//may never occur...
 				DBUtil.doRollback(conn);
-				throw new ServletException("Full key defined but "+count+" elements deleted");
+				throw new InternalServerException("Full key defined but "+count+" elements deleted");
 			}
 		}
 		//XXXdone: boundaries for # of updated (deleted) rows?
@@ -1100,6 +1102,14 @@ public class QueryOn extends HttpServlet {
 		}
 		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
 			throw new BadRequestException("Delete count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+		
+		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
+		for(UpdatePlugin up: updatePlugins) {
+			up.setProperties(prop);
+			up.setSchemaModel(model);
+			//up.setConnection(conn);
+			up.onDelete(relation, reqspec);
 		}
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
@@ -1178,6 +1188,14 @@ public class QueryOn extends HttpServlet {
 		}
 		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
 			throw new BadRequestException("Update count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+		
+		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
+		for(UpdatePlugin up: updatePlugins) {
+			up.setProperties(prop);
+			up.setSchemaModel(model);
+			//up.setConnection(conn);
+			up.onUpdate(relation, reqspec);
 		}
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
@@ -1263,6 +1281,14 @@ public class QueryOn extends HttpServlet {
 		}
 		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
 			throw new BadRequestException("Insert count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+		
+		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
+		for(UpdatePlugin up: updatePlugins) {
+			up.setProperties(prop);
+			up.setSchemaModel(model);
+			//up.setConnection(conn);
+			up.onInsert(relation, reqspec);
 		}
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?

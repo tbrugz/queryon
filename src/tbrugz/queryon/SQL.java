@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Query;
@@ -279,7 +280,7 @@ public class SQL {
 			}
 		}
 		else {
-			throw new ServletException("Unknown Limit/Offset strategy: "+strategy);
+			throw new InternalServerException("Unknown Limit/Offset strategy: "+strategy);
 		}
 		
 		return;

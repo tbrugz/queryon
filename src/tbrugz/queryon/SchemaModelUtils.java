@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -27,7 +27,8 @@ public class SchemaModelUtils {
 	
 	public static final String PARAM_MODEL = "model";
 	
-	static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) throws ServletException {
+	static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) {
+		//log.info("getRelation [provided '"+reqspec.object+"']");
 		Relation relation = null;
 		
 		// search for view first
@@ -54,7 +55,7 @@ public class SchemaModelUtils {
 		return relation;
 	}
 
-	private static View getView(SchemaModel model, RequestSpec reqspec) throws ServletException {
+	private static View getView(SchemaModel model, RequestSpec reqspec) {
 		String[] objectParts = reqspec.object.split("\\.");
 		
 		View view = null;
@@ -74,7 +75,7 @@ public class SchemaModelUtils {
 		return view;
 	}
 
-	static ExecutableObject getExecutable(SchemaModel model, RequestSpec reqspec) throws ServletException {
+	static ExecutableObject getExecutable(SchemaModel model, RequestSpec reqspec) {
 		String[] objectParts = reqspec.object.split("\\.");
 		
 		ExecutableObject exec = null;
@@ -109,25 +110,25 @@ public class SchemaModelUtils {
 			throw new BadRequestException("executable object must have 1, 2 or 3 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 		}
 		
-		if(exec == null) { throw new ServletException("Object "+reqspec.object+" not found"); }
+		if(exec == null) { throw new NotFoundException("Object "+reqspec.object+" not found"); }
 		return exec;
 	}
 	
 	//XXXXX: should this be in tbrugz.sqldump.dbmodel.DBIdentifiable ? no, it uses RequestSpec as parameter
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(SchemaModel model, RequestSpec reqspec) {
-		try {
+		//try {
 			Relation r = getRelation(model, reqspec, true);
 			if(r!=null) { return (T) r; }
 			return (T) getExecutable(model, reqspec);
-		} catch (ServletException e) {
+		/*} catch (ServletException e) {
 			log.warn("getDBIdentifiableBySchemaAndName: "+e);
 			try {
 				return (T) getExecutable(model, reqspec);
 			} catch (ServletException e1) {
 				return null;
 			}
-		}
+		}*/
 	}
 	
 	@SuppressWarnings("unchecked")
