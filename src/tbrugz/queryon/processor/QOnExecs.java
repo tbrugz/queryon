@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -19,6 +20,7 @@ import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
@@ -149,7 +151,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,
-			String packageName, int parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts) throws SQLException {
+			String packageName, int parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts) {
 		ExecutableObject e = new ExecutableObject();
 		e.setSchemaName(schema);
 		e.setName(execName);
@@ -158,6 +160,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		if(execType==null) {
 			throw new BadRequestException("Executable 'type' is mandatory");
 		}
+		//log.info("inouts: "+parameterInouts);
 		e.setType(DBObjectType.valueOf(execType)); // execType.toUpperCase()
 		List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
 		for(int i=0;i<parameterCount;i++) {
@@ -168,7 +171,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			if(parameterTypes!=null && parameterTypes.size()>i) {
 				ep.setDataType(parameterTypes.get(i));
 			}
-			if(parameterInouts!=null && parameterInouts.size()>i) {
+			if(parameterInouts!=null && parameterInouts.size()>i && !"".equals(parameterInouts.get(i)) ) {
 				ep.setInout(ExecutableParameter.INOUT.valueOf(parameterInouts.get(i)));
 			}
 			//log.info("ExecParam["+i+"]: "+ep);
@@ -213,26 +216,74 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 	@Override
 	public void onInit() {
-		// TODO Auto-generated method stub
-		
+		process();
 	}
 
 	@Override
 	public void onInsert(Relation relation, RequestSpec reqspec) {
-		// TODO Auto-generated method stub
-		
+		if(!isQonExecsRelation(relation)) { return; }
+		//XXX: validate new executable?
+		boolean added = createQonExec(reqspec);
+		log.info("onInsert: added "+relation+"? "+added);
 	}
 
 	@Override
 	public void onUpdate(Relation relation, RequestSpec reqspec) {
-		// TODO Auto-generated method stub
-		
+		ExecutableObject eo = getQOnExecutableFromModel(relation, reqspec);
+		if(eo==null) {
+			return;
+		}
+		//XXX: validate updated executable?
+		boolean removed = model.getExecutables().remove(eo);
+		boolean added = createQonExec(reqspec);
+		log.info("onUpdate: removed "+eo+"? "+removed+" ; added "+relation+"? "+added);
 	}
 
 	@Override
 	public void onDelete(Relation relation, RequestSpec reqspec) {
-		// TODO Auto-generated method stub
+		ExecutableObject eo = getQOnExecutableFromModel(relation, reqspec);
+		if(eo==null) {
+			return;
+		}
+		boolean removed = model.getExecutables().remove(eo);
+		log.info("onDelete: removed "+eo+"? "+removed);
+	}
+	
+	boolean createQonExec(RequestSpec reqspec) {
+		Map<String,String> v = reqspec.getUpdateValues();
 		
+		try {
+			return addExecutable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("REMARKS"), Utils.getStringList(v.get("ROLES_FILTER"), PIPE_SPLIT), v.get("EXEC_TYPE"),
+					v.get("PACKAGE_NAME"), Integer.valueOf(v.get("PARAMETER_COUNT")), Utils.getStringList(v.get("PARAMETER_NAMES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_TYPES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_INOUTS"), PIPE_SPLIT))
+					>0;
+		}
+		catch(IllegalArgumentException e) {
+			throw new BadRequestException("Error adding Executable: "+e.getMessage(), e);
+		}
+	}
+	
+	boolean isQonExecsRelation(Relation relation) {
+		String qonExecsTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
+		//log.info("isQonExecsRelation: qonExecsTable: "+qonExecsTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
+		if( (! qonExecsTable.equalsIgnoreCase(relation.getName()))
+			&& (! qonExecsTable.equalsIgnoreCase(relation.getSchemaName()+"."+relation.getName())) ) {
+			//log.info("isQonExecsRelation: no qon_execs:: qonExecsTable: "+qonExecsTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
+			return false;
+		}
+		return true;
+	}
+	
+	ExecutableObject getQOnExecutableFromModel(Relation relation, RequestSpec reqspec) {
+		if(!isQonExecsRelation(relation)) { return null; }
+		
+		ExecutableObject eo = (ExecutableObject) DBIdentifiable.getDBIdentifiableByName(model.getExecutables(), reqspec.getParams().get(0));
+		
+		if(eo==null) {
+			log.warn("getQOnExecutableFromModel: eo: "+eo+" ; reqspec.getParams(): "+reqspec.getParams());
+			return null;
+		}
+		
+		return eo;
 	}
 	
 }

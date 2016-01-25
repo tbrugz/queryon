@@ -129,9 +129,6 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, PIPE_SPLIT);
 				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, PIPE_SPLIT);
 				
-				//List<String> rolesInsertCols = Utils.getStringList(rolesInsertColumnsFilterStr, "|");
-				//List<String> rolesUpdate = Utils.getStringList(rolesUpdateColumnsFilterStr, "|");
-				
 				count += addTable(schema, tableName, columnNames, pkColumnNames, columnRemarks, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
@@ -162,15 +159,16 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				+ (SQL.valid(schema)?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
 				;
+		//XXX validate pk_column_names
 		try {
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			t.setColumns(DataDumpUtils.getColumns(rsmd));
 		}
 		catch(SQLException e) {
-			String message = "addTable ["+tableName+"]: exception: "+e.getMessage().trim()+"\nsql: "+sql;
-			//log.warn(message);
-			throw new BadRequestException(message, e);
+			String message = "addTable ["+tableName+"]: exception: "+e.getMessage().trim();
+			log.warn(message+"\nsql: "+sql); //??
+			throw new BadRequestException(message, "\nsql: "+sql, e);
 		}
 		
 		if(pkColumnNames!=null) {
@@ -259,8 +257,8 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	@Override
 	public void onInsert(Relation qonRelation, RequestSpec reqspec) {
 		if(!isQonTablesRelationUpdate(qonRelation)) { return; }
-		//XXX: validate new relation?
-		//XXX: read from DB? or reprocess RequestSpec?
+		//XXXxx: validate new relation? createQonTable() + addTable() already does it
+		//XXXdone: read from DB? or reprocess RequestSpec? reprocessing ReqSpec...
 		//boolean added = model.getTables().add((Table) qonRelation);
 		boolean added = createQonTable(reqspec);
 		log.info("onInsert: added "+qonRelation+"? "+added);
@@ -269,14 +267,37 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	@Override
 	public void onUpdate(Relation qonRelation, RequestSpec reqspec) {
 		Table t = getQOnTableFromModel(qonRelation, reqspec);
-		//XXX: validate updated relation?
+		Map<String, String> uv = reqspec.getUpdateValues();
+		
+		//XXXxx: validate updated relation? createQonTable + addTable already does it
 		boolean removed = false;
 		if(t==null) {
-			log.warn("onUpdate: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation);
+			log.warn("onUpdate: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation); //+" ; uv: "+uv);
+			return;
 		}
 		else {
 			removed = model.getTables().remove(t);
 		}
+
+		//merge t's info with requestspec info
+		if(reqspec.getParams().size()==1 && uv.get("NAME")==null) {
+			uv.put("NAME", reqspec.getParams().get(0));
+		}
+		if(reqspec.getParams().size()==2) {
+			if(uv.get("NAME")==null) {
+				uv.put("NAME", reqspec.getParams().get(1));
+			}
+			if(uv.get("SCHEMA_NAME")==null) {
+				uv.put("SCHEMA_NAME", reqspec.getParams().get(0));
+			}
+		}
+		/*if(uv.get("SCHEMA_NAME")==null && t!=null) {
+			uv.put("SCHEMA_NAME", t.getSchemaName());
+		}
+		if(uv.get("NAME")==null && t!=null) {
+			uv.put("NAME", t.getName());
+		}*/
+			
 		//boolean added = model.getTables().add((Table) qonRelation);
 		boolean added = createQonTable(reqspec);
 		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+qonRelation+"? "+added);
@@ -286,7 +307,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	public void onDelete(Relation qonRelation, RequestSpec reqspec) {
 		Table t = getQOnTableFromModel(qonRelation, reqspec);
 		if(t==null) {
-			log.warn("onDelete: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation);
+			//log.warn("onDelete: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation);
 			return;
 		}
 		boolean removed = model.getTables().remove(t);

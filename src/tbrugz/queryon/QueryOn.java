@@ -314,15 +314,18 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void setupUpdatePlugins(ServletContext context, List<String> updatePluginList) {
+		List<String> updatePluginsStr = new ArrayList<String>();
+		updatePlugins.clear();
 		if(updatePluginList!=null) {
 			for(String upPluginStr: updatePluginList) {
 				UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
 				up.setProperties(prop);
 				updatePlugins.add(up);
+				updatePluginsStr.add(up.getClass().getSimpleName());
 			}
 		}
 		
-		log.info("update-plugins: "+updatePlugins);
+		log.info("update-plugins: "+updatePluginsStr);
 
 		Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
 		for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
@@ -437,6 +440,8 @@ public class QueryOn extends HttpServlet {
 			//e.printStackTrace();
 			resp.setStatus(e.getCode());
 			resp.getWriter().write(e.getMessage());
+			//log.warn("BRE: "+e.getMessage()+
+			//		(e.internalMessage!=null?" ; internal="+e.internalMessage:"")); 
 		}
 		catch(ServletException e) {
 			//e.printStackTrace();
@@ -1104,6 +1109,7 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("Delete count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
 		}
 		
+		//XXX: should 'onDelete' come before sql-delete? so SQL error/rollback has no influence on it?
 		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
 		for(UpdatePlugin up: updatePlugins) {
 			up.setProperties(prop);
@@ -1117,6 +1123,7 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows deleted");
 		
 		}
+		//catch(Exception e) { //XXX SQLException | BadRequestException ??
 		catch(BadRequestException e) {
 			DBUtil.doRollback(conn);
 			throw e;
@@ -1203,9 +1210,9 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows updated");
 
 		}
-		catch(SQLException e) {
+		catch(Exception e) { //XXX SQLException | BadRequestException ??
 			DBUtil.doRollback(conn);
-			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql, e); //e.printStackTrace();
+			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql,e); //e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
 			//throw e;
 		}
@@ -1297,9 +1304,9 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows inserted");
 		
 		}
-		catch(SQLException e) {
+		catch(Exception e) { //XXX SQLException | BadRequestException ??
 			DBUtil.doRollback(conn);
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
 		}
 		finally {
