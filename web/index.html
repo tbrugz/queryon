@@ -360,14 +360,16 @@
 				//if(callback) { callback(jqXHR); }
 				// run QOnTables processor
 				var rel = getCurrentRelation('objects');
-				if(rel.name && (rel.name.toUpperCase()==settings["queryon.qon-tables.table"].toUpperCase())) { //XXXdone: using default table name, query for actual table name...
-					reloadTables(messagesId, nv.postData["v:NAME"]);
+				//XXXdone: using default table name, query for actual table name...
+				if(rel.name && (settings["queryon.qon-tables.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
+					//reloadTables(messagesId, nv.postData["v:NAME"]);
+					document.getElementById('objects').innerHTML = '';
+					loadQueries();
 				}
-				//if(rel.name && (rel.name.toUpperCase()==settings["queryon.qon-execs.table"].toUpperCase())) {
-				if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
+				/*if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
 					reloadExecs(messagesId, nv.postData["p1"]);
-				}
-				console.log("doExecuteUpdateAjax",rel.name.toUpperCase()," - ",settings["queryon.qon-execs.table"].toUpperCase(),nv.postData["v:NAME"]);
+				}*/
+				console.log("doExecuteUpdateAjax, rel.name:",rel.name.toUpperCase(),'qon-tables:',settings["queryon.qon-tables.table"].toUpperCase(),nv.postData["v:NAME"]);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				//btnActionStop('go-button');
@@ -476,16 +478,26 @@
 		
 		//XXX create html confirm dialog, or show question in messages (warning style)
 		if(confirm("Do you really want to delete this row from table "+name+"?\n[rownum = "+rownum+" ]\n["+ret.filter+"]")) {
+			//console.log("doDelete:", ret.key);
 			doDelete('objects', ret.key, 'content', 'messages', function() {
 				var content = document.getElementById('content');
 				var row = content.querySelectorAll('tr')[rownum];
 				row.style.textDecoration = "line-through";
 				row.style.backgroundColor = "#faa";
-				//console.log("callback OK called");
+				//console.log("callback OK called", row, " key: ",ret.key);
 				// remove row's actions?
 				row.removeChild(row.lastChild);
 				//row.lastChild.innerHTML = '';
+				var select = document.getElementById('objects');
+				var selectId = select.options[select.selectedIndex].value;
+				
+				if(settings["queryon.qon-tables.table"].toUpperCase().indexOf(selectId)>=0) {
+					select.innerHTML = '';
+					loadQueries();
+				}
 			});
+			
+			
 		}
 	}
 	
