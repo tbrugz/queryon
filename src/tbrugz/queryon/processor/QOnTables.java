@@ -159,6 +159,14 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				+ (SQL.valid(schema)?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
 				;
+		if(pkColumnNames!=null && pkColumnNames.size()>0) {
+			for(int i=0;i<pkColumnNames.size();i++) {
+				if(!"".equals(pkColumnNames.get(i))) {
+					sql += (i==0?" where ":" and ")+pkColumnNames.get(i) + " = ? ";
+				}
+			}
+		}
+		
 		//XXX validate pk_column_names
 		try {
 			PreparedStatement stmt = conn.prepareStatement(sql);
@@ -266,20 +274,22 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 
 	@Override
 	public void onUpdate(Relation qonRelation, RequestSpec reqspec) {
-		Table t = getQOnTableFromModel(qonRelation, reqspec);
-		Map<String, String> uv = reqspec.getUpdateValues();
+		if(!isQonTablesRelationUpdate(qonRelation)) { return; }
+		
+		Table t = getQOnTableFromModel(reqspec);
 		
 		//XXXxx: validate updated relation? createQonTable + addTable already does it
 		boolean removed = false;
 		if(t==null) {
 			log.warn("onUpdate: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation); //+" ; uv: "+uv);
-			return;
+			//return;
 		}
 		else {
 			removed = model.getTables().remove(t);
 		}
 
 		//merge t's info with requestspec info
+		Map<String, String> uv = reqspec.getUpdateValues();
 		if(reqspec.getParams().size()==1 && uv.get("NAME")==null) {
 			uv.put("NAME", reqspec.getParams().get(0));
 		}
@@ -305,7 +315,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 
 	@Override
 	public void onDelete(Relation qonRelation, RequestSpec reqspec) {
-		Table t = getQOnTableFromModel(qonRelation, reqspec);
+		if(!isQonTablesRelationUpdate(qonRelation)) { return; }
+		
+		Table t = getQOnTableFromModel(reqspec);
 		if(t==null) {
 			//log.warn("onDelete: qon_table not found on model: "+reqspec.getParams()+" ; "+qonRelation);
 			return;
@@ -333,7 +345,11 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		return true;
 	}
 	
-	Table getQOnTableFromModel(Relation relation, RequestSpec reqspec) {
+	Table getQOnTableFromModel(RequestSpec reqspec) {
+		return (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, reqspec.getParams().get(0));
+	}
+	
+	/*Table getQOnTableFromModel(Relation relation, RequestSpec reqspec) {
 		if(!isQonTablesRelationUpdate(relation)) {
 			//log.info("getQOnTableFromModel: not qon_tables relation: "+relation); 
 			return null;
@@ -346,6 +362,6 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		}
 		
 		return (Table) dbid;
-	}
+	}*/
 	
 }
