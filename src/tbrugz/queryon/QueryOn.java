@@ -720,9 +720,14 @@ public class QueryOn extends HttpServlet {
 		
 		filterByKey(relation, reqspec, pk, sql);
 
-		// xtra filters
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
-		filterByXtraParams(relation, reqspec, sql);
+
+		// xtra filters
+		List<String> warnings = filterByXtraParams(relation, reqspec, sql);
+		if(warnings!=null && warnings.size()>0) {
+			String warns = Utils.join(warnings, ", ");
+			resp.addHeader("X-Warning-UnknownColumn", warns);
+		}
 		
 		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
 		//appXtraConstraints(relation, sql, reqspec, req);
@@ -1074,7 +1079,12 @@ public class QueryOn extends HttpServlet {
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
-		filterByXtraParams(relation, reqspec, sql);
+		List<String> warnings = filterByXtraParams(relation, reqspec, sql);
+		//delete warnings should not be ignored...
+		if(warnings!=null && warnings.size()>0) {
+			String warns = Utils.join(warnings, ", ");
+			throw new BadRequestException("Filter error: "+warns);
+		}
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		bindParameters(st, sql);
@@ -1178,7 +1188,12 @@ public class QueryOn extends HttpServlet {
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
-		filterByXtraParams(relation, reqspec, sql);
+		List<String> warnings = filterByXtraParams(relation, reqspec, sql);
+		//update warnings should not be ignored...
+		if(warnings!=null && warnings.size()>0) {
+			String warns = Utils.join(warnings, ", ");
+			throw new BadRequestException("Filter error: "+warns);
+		}
 
 		//log.info("pre-sql update: "+sql);
 		
@@ -1363,11 +1378,19 @@ public class QueryOn extends HttpServlet {
 		sql.addFilter(filter);
 	}
 	
-	void filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
+	/**
+	 * @param relation
+	 * @param reqspec
+	 * @param sql
+	 * @return List of warnings (filter columns not found) 
+	 */
+	List<String> filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
 		
 		List<String> colNames = relation.getColumnNames();
 		String relationName = relation.getName();
+		
+		final List<String> warnings = new ArrayList<String>();
 		
 		if(colNames!=null) {
 			Set<String> columns = new HashSet<String>();
@@ -1375,29 +1398,31 @@ public class QueryOn extends HttpServlet {
 			//XXX bind parameters: column type?
 			
 			// uni-valued filters
-			addUniqueFilter(reqspec.filterEquals, columns, sql, "=", relationName);
-			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName); //XXX should be multi-valued?
-			addUniqueFilter(reqspec.filterGreaterThan, columns, sql, ">", relationName);
-			addUniqueFilter(reqspec.filterGreaterOrEqual, columns, sql, ">=", relationName);
-			addUniqueFilter(reqspec.filterLessThan, columns, sql, "<", relationName);
-			addUniqueFilter(reqspec.filterLessOrEqual, columns, sql, "<=", relationName);
+			addUniqueFilter(reqspec.filterEquals, columns, sql, "=", relationName, warnings);
+			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName, warnings); //XXXxx should be multi-valued? nah, there is already a 'not in'
+			addUniqueFilter(reqspec.filterGreaterThan, columns, sql, ">", relationName, warnings);
+			addUniqueFilter(reqspec.filterGreaterOrEqual, columns, sql, ">=", relationName, warnings);
+			addUniqueFilter(reqspec.filterLessThan, columns, sql, "<", relationName, warnings);
+			addUniqueFilter(reqspec.filterLessOrEqual, columns, sql, "<=", relationName, warnings);
 
 			// multi-valued filters
-			addMultiFilter(reqspec.filterLike, columns, sql, "like ?", relationName);
-			addMultiFilter(reqspec.filterNotLike, columns, sql, "not like ?", relationName);
+			addMultiFilter(reqspec.filterLike, columns, sql, "like ?", relationName, warnings);
+			addMultiFilter(reqspec.filterNotLike, columns, sql, "not like ?", relationName, warnings);
 
 			// multi-valued with subexpression filters
-			addMultiFilterSubexpression(reqspec.filterIn, columns, sql, "in", relationName);
-			addMultiFilterSubexpression(reqspec.filterNotIn, columns, sql, "not in", relationName);
+			addMultiFilterSubexpression(reqspec.filterIn, columns, sql, "in", relationName, warnings);
+			addMultiFilterSubexpression(reqspec.filterNotIn, columns, sql, "not in", relationName, warnings);
 		}
 		else {
 			if(reqspec.filterEquals.size()>0) {
 				log.warn("relation '"+relation.getName()+"' has no columns specified");
 			}
 		}
+		
+		return warnings;
 	}
 	
-	void addUniqueFilter(final Map<String, String> valueMap, Set<String> columns, SQL sql, String compareSymbol, String relationName) {
+	void addUniqueFilter(final Map<String, String> valueMap, Set<String> columns, SQL sql, String compareSymbol, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				sql.bindParameterValues.add(valueMap.get(col));
@@ -1405,12 +1430,13 @@ public class QueryOn extends HttpServlet {
 				logFilter.info("addUniqueFilter: values="+valueMap.get(col));
 			}
 			else {
-				log.warn("unknown column: "+col+" [relation="+relationName+"]");
+				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
+				warnings.add("unknown filter column: "+col);
 			}
 		}
 	}
 	
-	void addMultiFilter(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName) {
+	void addMultiFilter(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				String[] values = valueMap.get(col);
@@ -1421,12 +1447,13 @@ public class QueryOn extends HttpServlet {
 				logFilter.info("addMultiFilter: values="+Arrays.asList(values));
 			}
 			else {
-				log.warn("unknown column: "+col+" [relation="+relationName+"]");
+				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
+				warnings.add("unknown filter column: "+col);
 			}
 		}
 	}
 
-	void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName) {
+	void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				StringBuilder sb = new StringBuilder();
@@ -1442,7 +1469,8 @@ public class QueryOn extends HttpServlet {
 				logFilter.info("addMultiFilterSubexpression: values="+Arrays.asList(values));
 			}
 			else {
-				log.warn("unknown column: "+col+" [relation="+relationName+"]");
+				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
+				warnings.add("unknown filter column: "+col);
 			}
 		}
 	}
