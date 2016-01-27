@@ -55,6 +55,18 @@ th {
 	color: #000;
 }
 
+.warn {
+	background-color: #fb4;
+	color: #000;
+	margin-top: 3px;
+}
+
+.warn .closebutton {
+	background-color: #f90;
+	font-weight: bold;
+	border: 0;
+}
+
 .info {
 	background-color: #aaf;
 	color: #000;

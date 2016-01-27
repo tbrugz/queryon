@@ -133,6 +133,19 @@
 		}
 		*/
 		
+		// scroll to top
+		var elem = document.getElementsByTagName('body')[0];
+		elem.scrollTop = 0;
+		
+		// filter warnings
+		// http://stackoverflow.com/questions/3241326/set-more-than-one-http-header-with-the-same-name
+		// X-Warning-UnknownColumn <message>
+		// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#getResponseHeader()
+		var warnUnknownCols = request.getResponseHeader('X-Warning-UnknownColumn');
+		if(warnUnknownCols) {
+			showWarnMessages('messages', warnUnknownCols);
+		}
+
 		// insert/update/delete
 		if(relationType == 'table') {
 			var rel = relationsHash[id];
