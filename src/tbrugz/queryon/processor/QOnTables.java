@@ -159,7 +159,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				+ (SQL.valid(schema)?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
 				;
-		if(pkColumnNames!=null && pkColumnNames.size()>0) {
+		if(validColumnList(pkColumnNames)) {
 			for(int i=0;i<pkColumnNames.size();i++) {
 				if(!"".equals(pkColumnNames.get(i))) {
 					sql += (i==0?" where ":" and ")+pkColumnNames.get(i) + " = ? ";
@@ -179,16 +179,20 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			throw new BadRequestException(message, "\nsql: "+sql, e);
 		}
 		
-		if(pkColumnNames!=null) {
+		//log.info("pkColumnNames: ["+pkColumnNames+"]");
+		
+		if(validColumnList(pkColumnNames)) {
 			Constraint pk = new Constraint();
 			pk.setType(ConstraintType.PK);
 			pk.setUniqueColumns(pkColumnNames);
 			t.getConstraints().add(pk);
+			//log.info("pk: ["+pk+"]");
 		}
 		else {
 			try {
 				List<Constraint> pks = JDBCSchemaGrabber.grabRelationPKs(conn.getMetaData(), t);
 				t.getConstraints().addAll(pks);
+				//log.info("pks: ["+pks+"]");
 			}
 			catch(SQLException e) {
 				String message = "addTable ["+tableName+"]: grabRelationPKs: exception: "+e.getMessage().trim();
@@ -309,7 +313,17 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		}*/
 			
 		//boolean added = model.getTables().add((Table) qonRelation);
-		boolean added = createQonTable(reqspec);
+		boolean added = false;
+		try {
+			added = createQonTable(reqspec);
+		}
+		catch(BadRequestException e) {
+			if(t!=null) {
+				// "model rollback"
+				model.getTables().add(t);
+			}
+			throw e;
+		}
 		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+qonRelation+"? "+added);
 	}
 
@@ -347,6 +361,10 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	
 	Table getQOnTableFromModel(RequestSpec reqspec) {
 		return (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, reqspec.getParams().get(0));
+	}
+	
+	static boolean validColumnList(List<String> cols) {
+		return cols!=null && cols.size()>0 && cols.get(0)!=null && !"".equals(cols.get(0));
 	}
 	
 	/*Table getQOnTableFromModel(Relation relation, RequestSpec reqspec) {
