@@ -424,7 +424,7 @@ public class QueryOn extends HttpServlet {
 		return sm;
 	}
 
-	//TODO: prevent sql injection
+	//TODO?: prevent sql injection
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -826,6 +826,7 @@ public class QueryOn extends HttpServlet {
 			resp.setHeader(HEADER_VALIDATE_PARAMTYPES, paramsTypes.toString());
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
+				//XXX: (also) return number of bind parameters? return as ResultSet? stmt.getParameterMetaData()...
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
 				if(rsmd==null) {
 					String message = "can't get metadata of: <code>"+sql.getFinalSql().trim()+"</code>";
@@ -840,7 +841,6 @@ public class QueryOn extends HttpServlet {
 						resp);
 			}
 			else {
-				//XXX: return number of bind parameters? return as ResultSet?
 				resp.getWriter().write(String.valueOf(params));
 			}
 		}
@@ -1133,7 +1133,6 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows deleted");
 		
 		}
-		//catch(Exception e) { //XXX SQLException | BadRequestException ??
 		catch(BadRequestException e) {
 			DBUtil.doRollback(conn);
 			throw e;
@@ -1141,6 +1140,7 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			throw e;
+			//XXX throw new InternalServerException("SQL Error: "+e);
 		}
 		finally {
 			conn.close();
@@ -1229,7 +1229,7 @@ public class QueryOn extends HttpServlet {
 			DBUtil.doRollback(conn);
 			throw e;
 		}
-		catch(Exception e) {
+		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql,e); //e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
@@ -1326,7 +1326,7 @@ public class QueryOn extends HttpServlet {
 			DBUtil.doRollback(conn);
 			throw e;
 		}
-		catch(Exception e) {
+		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			//e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);

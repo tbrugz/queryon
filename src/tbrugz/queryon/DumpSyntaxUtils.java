@@ -23,6 +23,7 @@ public class DumpSyntaxUtils {
 			DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 			if(ds!=null) {
 				ds.procProperties(prop);
+				//XXX: what if syntax was already putted?
 				syntaxesByFormat.put(ds.getSyntaxId(), ds);
 				syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
 				syntaxesByMimeType.put(ds.getMimeType(), ds);
