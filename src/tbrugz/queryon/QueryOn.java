@@ -1073,6 +1073,14 @@ public class QueryOn extends HttpServlet {
 	void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
+		// roles permission
+		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
+		List<Grant> deleteGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.DELETE);
+		boolean hasRelationDeletePermission = QOnModelUtils.hasPermissionWithoutColumn(deleteGrants, roles);
+		if(!hasRelationDeletePermission) {
+			throw new ForbiddenException("no delete permission on relation: "+relation.getName());
+		}
+
 		SQL sql = SQL.createDeleteSQL(relation);
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
@@ -1088,14 +1096,6 @@ public class QueryOn extends HttpServlet {
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		bindParameters(st, sql);
-
-		// roles permission
-		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
-		List<Grant> deleteGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.DELETE);
-		boolean hasRelationDeletePermission = QOnModelUtils.hasPermissionWithoutColumn(deleteGrants, roles);
-		if(!hasRelationDeletePermission) {
-			throw new ForbiddenException("no delete permission on relation: "+relation.getName());
-		}
 		
 		log.info("sql delete: "+sql);
 		
@@ -1225,11 +1225,14 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows updated");
 
 		}
-		catch(Exception e) { //XXX SQLException | BadRequestException ??
+		catch(BadRequestException e) {
+			DBUtil.doRollback(conn);
+			throw e;
+		}
+		catch(Exception e) {
 			DBUtil.doRollback(conn);
 			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql,e); //e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
-			//throw e;
 		}
 		finally {
 			conn.close();
@@ -1275,7 +1278,7 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
 			if(!hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
-				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles); 
+				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles);
 				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
 			}
 			//XXX timestamp '' ?
@@ -1319,7 +1322,11 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" rows inserted");
 		
 		}
-		catch(Exception e) { //XXX SQLException | BadRequestException ??
+		catch(BadRequestException e) {
+			DBUtil.doRollback(conn);
+			throw e;
+		}
+		catch(Exception e) {
 			DBUtil.doRollback(conn);
 			//e.printStackTrace();
 			throw new InternalServerException("SQL Error: "+e);
