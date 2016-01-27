@@ -261,7 +261,10 @@ function getKeyValsForRow(rownum) {
 	//rows[0].innerHTML += "<th>actions</th>";
 	var row = rows[rownum];
 	var pk = getPkCols('objects');
-	var cols = getColumnsFromContainer('content');
+
+	var relation = getCurrentRelation('objects');
+	var cols = getColumnsFromRelation(relation);
+	
 	//console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
 	if(pk==null) {
 		console.log('relation has no PK');

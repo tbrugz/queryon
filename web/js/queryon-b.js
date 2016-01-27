@@ -269,6 +269,7 @@ function getColumnsFromRelation(relation) {
 	return cols;
 }
 
+// obsolete?
 function getColumnsFromContainer(containerId) {
 	var cols = [];
 	var content = document.getElementById(containerId);
@@ -326,7 +327,9 @@ function getColumnsTypesFromHash() {
 }
 
 function getValuesFromColumn(containerId, columnName) {
-	var cols = getColumnsFromContainer(containerId);
+	//var cols = getColumnsFromContainer(containerId);
+	var relation = getCurrentRelation('objects');
+	var cols = getColumnsFromRelation(relation);
 	var colPos = cols.indexOf(columnName);
 	if(colPos==-1) {
 		console.log("column "+columnName+" not found");

@@ -167,14 +167,14 @@
 			var allowDelete = relationHasGrantOfType(rel, 'DELETE');
 			//rows[0].innerHTML += "<th>actions</th>";
 			if(allowInsert) {
-				rows[0].innerHTML += "<td><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></td>"
+				rows[0].innerHTML += "<th><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></th>"
 			}
 			for(var i=1;i<rows.length;i++) {
 				if(!allowUpdate && !allowDelete) { continue; }
-				rows[i].innerHTML += "<td>"
+				rows[i].innerHTML += "<th>"
 					+ (allowUpdate?"<input type=button title='update' class='btn-update' onclick='doOpenUpdateDialog("+i+")' value='&#x21bb;'/> ":"")
 					+ (allowDelete?"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/>":"")
-					+ "</td>";
+					+ "</th>";
 			}
 		}
 	}
@@ -183,7 +183,8 @@
 		//var content = document.getElementById('content');
 		//var rows = content.querySelectorAll('tr');
 		//var pk = getPkCols('objects');
-		var cols = getColumnsFromContainer('content');
+		var relation = getCurrentRelation('objects');
+		var cols = getColumnsFromRelation(relation);
 		doWriteUpdateDialog('Insert', null, null, null, cols, null, null);
 		closeMessages('messages');
 	}
@@ -467,7 +468,8 @@
 	
 	function doConfirmInsert(rownum, closeDialog) {
 		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
-		var cols = getColumnsFromContainer('content');
+		var relation = getCurrentRelation('objects');
+		var cols = getColumnsFromRelation(relation);
 		
 		nv = getUpdateNewValues();
 
