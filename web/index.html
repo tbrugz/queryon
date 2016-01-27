@@ -32,6 +32,12 @@
 		//document.getElementById('content-container').style.top = ($('#nav').height()+6)+'px';
 		// http://stackoverflow.com/questions/15615552/get-div-height-with-plain-javascript
 		document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
+		
+		var dc = document.getElementById('dialog-content');
+		var dm = document.getElementById('dialog-messages');
+		if(dc) {
+			dc.style.top = dm.offsetTop + dm.offsetHeight + 10 + 'px';
+		}
 	}
 	
 	function updateFromFilters() {
@@ -218,7 +224,8 @@
 		var allowUpdate = relationHasGrantOfType(rel, updateType.toUpperCase());
 		
 		//XXXdone update: previous & next row buttons
-		dialog.innerHTML = '<div class="dialog-title">'+updateType+' row'
+		dialog.innerHTML = '<div id="dialog-header">'
+			+ '<div class="dialog-title">'+updateType+' row'
 			+ (rownum>0?' <code>'+rownum+'</code>':'')
 			+ ' <span class="orderbutton-container">'
 			+ (rownum>0?""
@@ -228,7 +235,7 @@
 			+ '</span>'
 			+ (filter!=null?' <span id="dialog-filter" class="obs">[ '+filter+' ]</span>':'')
 			+ '</div>'
-			+ "<div id='dialog-messages'></div>";
+			+ "<div id='dialog-messages'></div></div>";
 			
 		var dialogContent = "<div id='dialog-content'>";
 		var colRemarks = getColumnsRemarks();
