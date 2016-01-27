@@ -3,6 +3,7 @@
  */
 
 //XXX: repaint on window.resize ?
+//XXX: labels on X axis... http://bl.ocks.org/mbostock/3886208?
 
 var keyValues = function (obj, keys) {
 	var r = [];
@@ -11,6 +12,16 @@ var keyValues = function (obj, keys) {
 	}
 	return r;
 }
+
+/*
+var chartSpecStub = {
+	rowid: null,       // row identifier - name, code -- if null, row order may be used
+	seriesX: null,     // x-value / abscissa column - for scatterplots -- if null, row order may be used
+	seriesCols: null   // series columns
+	// column acessors?
+	// x & y axis? left, right, top, bottom?
+};
+*/
 
 var runD3 = function(url, columns, d3chartfunction, containerId, callbackOk, callbackError) {
 	d3.json(url, function(error, data) {
@@ -22,6 +33,7 @@ var runD3 = function(url, columns, d3chartfunction, containerId, callbackOk, cal
 		data = getQonData(data);
 		
 		try {
+			//console.log("data",data);
 			d3chartfunction(data, columns, containerId);
 			if(callbackOk) { callbackOk(); }
 		}
@@ -57,6 +69,9 @@ var d3multiseries = function(data, columns, containerId) {
 	var x = d3.scale.linear()
 		.range([0, width]);
 	
+	//var x = d3.scale.ordinal()
+	//	.rangeRoundBands([0, width], .1);
+	
 	var y = d3.scale.linear()
 		.range([height, 0]);
 	
@@ -73,6 +88,7 @@ var d3multiseries = function(data, columns, containerId) {
 	var line = d3.svg.line()
 		.interpolate("basis")
 		.x(function(d) { return x(d.id); })
+		//.x(data.map(function(d) { return d["STATUS"]; }))
 		.y(function(d) { return y(d.value); });
 	
 	var svg = d3.select("#"+containerId).append("svg")
@@ -120,6 +136,8 @@ var d3multiseries = function(data, columns, containerId) {
 		});
 	
 		x.domain(d3.extent(data, function(d) { return d.id; }));
+		//x.domain(data.map(function(d) { return d["STATUS"]; })); //XXX: ??
+		//console.log("x.domain:",data.map(function(d) { return d["STATUS"]; }));
 		var ydom = [
 			d3.min(data, function(d) { return d3.min(keyValues(d, seriesNames)); }),
 			d3.max(data, function(d) { return d3.max(keyValues(d, seriesNames)); })
@@ -145,7 +163,15 @@ var d3multiseries = function(data, columns, containerId) {
 		var serie = svg.selectAll(".serie")
 			.data(series)
 			.enter().append("g")
-			.attr("class", "serie");
+			.attr("class", "serie")
+			//.attr("transform", function(d) { return "translate(" + x(d["STATUS"]) + ",0)"; })
+			//.attr("transform", function(d) { return "translate(" + x(d.value) + ",0)"; })
+			//.attr("transform", function(d) { return "translate(" + x(d.values) + ",0)"; })
+			;
+
+		//console.log("series: ",series);
+		//console.log("serie:",serie);
+		//console.log("serie.values:",serie.values);
 		
 		serie.append("path")
 			.attr("class", "line")

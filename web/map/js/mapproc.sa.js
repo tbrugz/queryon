@@ -301,6 +301,7 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 		//TODO: format numbers! integer, float, ...
 		//cats[c].description = cats[c].startval + " &lt; # " + valueLabel + " &lt; " + cats[c].endval;
 		if(isNumericData) {
+			//XXX: last category's 2nd comparator should have &le; - others &lt; ?
 			cats[c].description = formatFloat(cats[c].startval) + " &le; # " + valueLabel + " &le; " + formatFloat(cats[c].endval);
 		}
 		else {
@@ -345,6 +346,12 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 		var placemark = gPlaceMarks[id];
 		
 		//set data
+		/*if (typeof seriesData.series[id] !== 'undefined') {
+			placemark.dataValue = seriesData.series[id];
+		}
+		else {
+			delete placemark.dataValue;
+		}*/
 		placemark.dataValue = seriesData.series[id];
 		placemark.catId = getCat(placemark.dataValue, catData, isNumericData); //numeric or categorical...
 		//TODO: numberFormat (grouping char, ...)
