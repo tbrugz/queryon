@@ -26,21 +26,25 @@ function loadQueries() {
 	});
 }
 
-function onQueryChanged(doNotUpdateState) {
-	loadRelation('objects', 'parameters', 'content');
-	updateNavBar();
-	
+function onQueryChangedClean() {
 	//cleaning 'order'
 	document.getElementById('order').value = '';
 
 	//cleaning 'offset'
 	var offset = document.getElementById('offset');
 	if(offset) { offset.value = ''; };
+}
+
+function onQueryChanged() {
+	loadRelation('objects', 'parameters', 'content');
+	updateNavBar();
+	
+	//onQueryChangedClean();
 	
 	//updateUI();
-	if(!doNotUpdateState) {
-		updateState();
-	}
+	//if(!doNotUpdateState) {
+	//	updateState();
+	//}
 
 	makeHrefs();
 }
@@ -67,7 +71,8 @@ function updateSelectedQueryStateParameters() {
 			if(select.options[i].value==relname) {
 				select.options[i].selected = true;
 				found = true;
-				onQueryChanged(true);
+				onQueryChangedClean();
+				onQueryChanged();
 				//updateNavBar();
 				break;
 			}

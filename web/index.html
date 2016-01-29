@@ -19,6 +19,8 @@
 	<script src="js/menu.js"></script>
 	<script type="text/javascript">
 	
+	var lastQueryThatRunned = null;
+	
 	var onLoad = function() {
 		loadQueries();
 		loadAuthInfo();
@@ -139,9 +141,11 @@
 		}
 		*/
 		
-		// scroll to top
-		var elem = document.getElementsByTagName('body')[0];
-		elem.scrollTop = 0;
+		// scroll to top - only if query changed
+		if(lastQueryThatRunned==null || lastQueryThatRunned!=id) {
+			var bodyElem = document.getElementsByTagName('body')[0];
+			bodyElem.scrollTop = 0;
+		}
 		
 		// filter warnings
 		// http://stackoverflow.com/questions/3241326/set-more-than-one-http-header-with-the-same-name
@@ -183,6 +187,8 @@
 					+ "</th>";
 			}
 		}
+			
+		lastQueryThatRunned = id;
 	}
 		
 	function doOpenInsertDialog() {
@@ -613,7 +619,7 @@
 	<span id="logo">QueryOn</span>
 
 	<label>
-		<select id="objects" onchange="onQueryChanged();">
+		<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();">
 		</select>
 		<!-- add descriptions (& parameters? nah) -->
 	</label>
