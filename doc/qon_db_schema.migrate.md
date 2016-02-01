@@ -1,4 +1,16 @@
 
+2016-02 - disabled column
+-------------------------
+alter table qon_queries
+	add column disabled tinyint
+	
+alter table qon_tables
+	add column disabled tinyint
+
+alter table qon_execs
+	add column disabled tinyint
+
+
 2016-01 - qon_tables: add column_remarks ; add qon_execs
 --------------------------------------------------------
 alter table qon_tables

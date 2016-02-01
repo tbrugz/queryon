@@ -100,7 +100,9 @@ public class QOnQueries extends SQLQueries {
 	//XXX: test if table has all columns?
 	void readFromDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String sql = "select schema_name, name, query, remarks, roles_filter from "+qonQueriesTable;
+		String sql = "select schema_name, name, query, remarks, roles_filter from "+qonQueriesTable+
+				" where (disabled = 0 or disabled is null)"
+				;
 				//+" order by schema, name";
 		
 		ResultSet rs = null;

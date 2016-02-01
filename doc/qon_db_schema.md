@@ -9,6 +9,7 @@ create table qon_queries (
 	--query text, -- pgsql, mysql
 	--query varchar(4000),
 	roles_filter varchar(1000),
+	disabled tinyint,
 	constraint qon_queries_pk primary key (name)
 	--constraint qon_queries_pk primary key (schema,name)
 )
@@ -26,6 +27,7 @@ create table qon_tables (
 	roles_delete varchar(1000),
 	roles_insert_columns varchar(1000),
 	roles_update_columns varchar(1000),
+	disabled tinyint,
 	constraint qon_tables_pk primary key (name)
 	--constraint qon_tables_pk primary key (schema,name)
 )
@@ -42,6 +44,7 @@ create table qon_execs (
 	parameter_names varchar(1000),
 	parameter_types varchar(1000),
 	parameter_inouts varchar(1000),
+	disabled tinyint,
 	constraint qon_execs_pk primary key (name)
 )
 

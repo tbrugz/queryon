@@ -115,6 +115,14 @@
             <remarks>Column remarks - short descriptions (separated by "|")</remarks>
             <type>VARCHAR</type>
         </columns>
+        <columns>
+            <name>DISABLED</name>
+            <nullable>true</nullable>
+            <ordinalPosition>13</ordinalPosition>
+            <pk>false</pk>
+            <remarks>Enabled (null or 0) or disabled table?</remarks>
+            <type>TINYINT</type>
+        </columns>
         <constraints>
             <name>QON_TABLES_PK</name>
             <type>PK</type>
@@ -242,6 +250,14 @@
             <pk>false</pk>
             <remarks>Parameter In/Out types (separated by "|", values are IN, OUT, INOUT)</remarks>
             <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>DISABLED</name>
+            <nullable>true</nullable>
+            <ordinalPosition>12</ordinalPosition>
+            <pk>false</pk>
+            <remarks>Enabled (null or 0) or disabled executable?</remarks>
+            <type>TINYINT</type>
         </columns>
         <constraints>
             <name>QON_EXECS_PK</name>

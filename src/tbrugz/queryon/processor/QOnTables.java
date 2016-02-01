@@ -92,7 +92,8 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable
-				+(tables!=null?" where name in ("+Utils.join(tables, ",", sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
+				+" where (disabled = 0 or disabled is null)"
+				+(tables!=null?" and name in ("+Utils.join(tables, ",", sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
 		
 		ResultSet rs = null;
 		try {

@@ -72,7 +72,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 				+ ", package_name, parameter_count, parameter_names, parameter_types, parameter_inouts"
 				+ ", body"
 				+ " from "+qonExecsTable
-				+(names!=null?" where name in ("+Utils.join(names, ",", QOnTables.sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
+				+ " where (disabled = 0 or disabled is null)"
+				+(names!=null?" and name in ("+Utils.join(names, ",", QOnTables.sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
 				;
 		
 		/*
@@ -215,7 +216,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	
 	boolean containsExecutableWithName(List<ExecutableObject> execs, String schema, String name) {
 		for(ExecutableObject exec: execs) {
-			if( (exec.getSchemaName()==null || schema==null || exec.getSchemaName().equalsIgnoreCase(schema))
+			if( ( (exec.getSchemaName()==null && schema==null) || exec.getSchemaName().equalsIgnoreCase(schema))
 				&& exec.getName().equalsIgnoreCase(name)) {
 				return true;
 			}
