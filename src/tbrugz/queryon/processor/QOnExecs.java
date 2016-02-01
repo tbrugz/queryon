@@ -24,6 +24,8 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
@@ -136,7 +138,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 							packageName, parameterCount, parameterNames, parameterTypes, parameterInouts);
 				}
 				else {
-					log.warn("executable '"+(schema!=null?schema+".":"")+name+"' not found");
+					log.warn("executable '"+(schema!=null?schema+".":"")+(packageName!=null?packageName+".":"")+name+"' not found");
 					//XXX: throw exception?
 				}
 			}
@@ -182,6 +184,13 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			ExecutableParameter ep = new ExecutableParameter();
 			e.setReturnParam(ep);
 		}
+		if(rolesFilter!=null) {
+			for(String g: rolesFilter) {
+				Grant gr = new Grant(schema, PrivilegeType.EXECUTE, g);
+				e.getGrants().add(gr);
+			}
+		}
+		
 		//e.setBody(body);
 		
 		//TODOne: validate executable! PreparedStatement, ResultSetMetadata ? see QueryOnInstant.grabExecutables()...

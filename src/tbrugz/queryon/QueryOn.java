@@ -599,6 +599,7 @@ public class QueryOn extends HttpServlet {
 					log.warn("strange... eo is null");
 					eo = SchemaModelUtils.getExecutable(model, reqspec);
 				}
+				checkGrantsAndRolesMatches(currentUser, PrivilegeType.EXECUTE, eo);
 				doExecute(eo, reqspec, resp);
 				break;
 			case INSERT: {
@@ -649,6 +650,13 @@ public class QueryOn extends HttpServlet {
 		boolean check = grantsAndRolesMatches(subject, privilege, rel.getGrants());
 		if(!check) {
 			throw new ForbiddenException("no "+privilege+" permission on "+rel.getName());
+		}
+	}
+
+	void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, ExecutableObject eo) {
+		boolean check = grantsAndRolesMatches(subject, privilege, eo.getGrants());
+		if(!check) {
+			throw new ForbiddenException("no "+privilege+" permission on "+eo.getQualifiedName());
 		}
 	}
 	
@@ -900,7 +908,7 @@ public class QueryOn extends HttpServlet {
 		log.info("eo: "+eo);
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		
-		//XXX: test for Subject's permissions
+		//XXXdone: test for Subject's permissions
 		try {
 		
 		String sql = SQL.createExecuteSQLstr(eo);
@@ -993,15 +1001,19 @@ public class QueryOn extends HttpServlet {
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"?
 	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks","constraints", "remarks", "grants"});
-	
+	//XXX: qualifiedName needed? (no body & dumpable) 
+	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "params", "returnParam","remarks", "grants"});
+
 	static final List<String> tableAllColumns;// =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "PKConstraint"});
 	static final List<String> viewAllColumns;//  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
 	static final List<String> relationAllColumns;//  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
+	static final List<String> executableAllColumns;
 	
 	static {
 		tableAllColumns = new ArrayList<String>(); tableAllColumns.addAll(relationCommonCols); tableAllColumns.addAll(Arrays.asList(new String[]{"PKConstraint"}));
 		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(Arrays.asList(new String[]{"parameterCount", "parameterTypes"}));
 		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(Arrays.asList(new String[]{"parameterCount", "parameterTypes"}));
+		executableAllColumns = new ArrayList<String>(); executableAllColumns.addAll(executableCols);
 	}
 	
 	@SuppressWarnings("resource")
@@ -1034,8 +1046,8 @@ public class QueryOn extends HttpServlet {
 		}
 		case EXECUTABLE: {
 			List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
-			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, list, ExecutableObject.class);
-			//privilege = PrivilegeType.EXECUTE;
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, executableAllColumns, list, ExecutableObject.class);
+			privilege = PrivilegeType.EXECUTE;
 			break;
 		}
 		case FK: {
@@ -1061,10 +1073,10 @@ public class QueryOn extends HttpServlet {
 		//log.info("doFilterStatusByQueryGrants: "+doFilterStatusByPermission+" / "+doFilterStatusByQueryGrants+" / "
 		//		+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)+":"+doNotCheckGrantsPermission);
 		if(doFilterStatusByPermission) {
-			// filter by [relationType]:SELECT:[schemaName]:[name]
+			// filter by [(relation)Type]:SELECT|EXECUTE:[schemaName]:[name]
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[3]:"+privilege+":[1]:[2]");
 		}
-		if(doFilterStatusByQueryGrants && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) {
+		if(doFilterStatusByQueryGrants && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) { // XXX: doNotCheckGrantsPermission: SELECT_ANY and/or EXECUTE_ANY ?
 			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getSubjectRoles(currentUser), privilege, "name", "grants");
 		}
 		return rs;
