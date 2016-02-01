@@ -999,7 +999,7 @@ public class QueryOn extends HttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
-	// XXX: add "columns"?
+	// XXX: add "columns"? add columnNulls/columnSizes?
 	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks","constraints", "remarks", "grants"});
 	//XXX: qualifiedName needed? (no body & dumpable) 
 	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "params", "returnParam","remarks", "grants"});

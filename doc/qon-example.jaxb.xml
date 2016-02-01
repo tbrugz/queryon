@@ -33,6 +33,7 @@
             <nullable>true</nullable>
             <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>
+            <remarks>Names of the columns (separated by comma)</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -41,6 +42,7 @@
             <nullable>true</nullable>
             <ordinalPosition>4</ordinalPosition>
             <pk>false</pk>
+            <remarks>Short description of the table</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -49,6 +51,7 @@
             <nullable>true</nullable>
             <ordinalPosition>5</ordinalPosition>
             <pk>false</pk>
+            <remarks>Roles allowed to SELECT (separated by "|") - if null ALL are allowed</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -57,6 +60,7 @@
             <nullable>true</nullable>
             <ordinalPosition>6</ordinalPosition>
             <pk>false</pk>
+            <remarks>Roles allowed to INSERT (separated by "|") - if null NONE are allowed</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -65,6 +69,7 @@
             <nullable>true</nullable>
             <ordinalPosition>7</ordinalPosition>
             <pk>false</pk>
+            <remarks>Roles allowed to UPDATE (separated by "|") - if null NONE are allowed</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -73,6 +78,7 @@
             <nullable>true</nullable>
             <ordinalPosition>8</ordinalPosition>
             <pk>false</pk>
+            <remarks>Roles allowed to DELETE (separated by "|") - if null NONE are allowed</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -97,6 +103,7 @@
             <nullable>true</nullable>
             <ordinalPosition>11</ordinalPosition>
             <pk>false</pk>
+            <remarks>Names of the Primary Key (PK) columns (separated by comma)</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -105,6 +112,7 @@
             <nullable>true</nullable>
             <ordinalPosition>12</ordinalPosition>
             <pk>false</pk>
+            <remarks>Column remarks - short descriptions (separated by "|")</remarks>
             <type>VARCHAR</type>
         </columns>
         <constraints>
@@ -161,6 +169,7 @@
             <nullable>true</nullable>
             <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>
+            <remarks>Short description of the executable</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -169,6 +178,7 @@
             <nullable>true</nullable>
             <ordinalPosition>4</ordinalPosition>
             <pk>false</pk>
+            <remarks>Roles allowed to execute (separated by "|")</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -177,6 +187,7 @@
             <nullable>true</nullable>
             <ordinalPosition>5</ordinalPosition>
             <pk>false</pk>
+            <remarks>Type of executable (PROCEDURE|FUNCTION)</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -185,22 +196,24 @@
             <nullable>true</nullable>
             <ordinalPosition>6</ordinalPosition>
             <pk>false</pk>
+            <remarks>Package name (optional)</remarks>
             <type>VARCHAR</type>
         </columns>
-        <columns>
+        <!-- <columns>
             <name>BODY</name>
             <columSize>4000</columSize>
             <nullable>true</nullable>
             <ordinalPosition>7</ordinalPosition>
             <pk>false</pk>
             <type>CLOB</type>
-        </columns>
+        </columns> -->
         <columns>
             <name>PARAMETER_COUNT</name>
             <columSize>22</columSize>
             <nullable>false</nullable>
             <ordinalPosition>8</ordinalPosition>
             <pk>false</pk>
+            <remarks>Number of parameters (MANDATORY)</remarks>
             <type>NUMBER</type>
         </columns>
         <columns>
@@ -209,6 +222,7 @@
             <nullable>true</nullable>
             <ordinalPosition>9</ordinalPosition>
             <pk>false</pk>
+            <remarks>Parameter names (separated by "|")</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -217,6 +231,7 @@
             <nullable>true</nullable>
             <ordinalPosition>10</ordinalPosition>
             <pk>false</pk>
+            <remarks>Parameter types (separated by "|")</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -225,6 +240,7 @@
             <nullable>true</nullable>
             <ordinalPosition>11</ordinalPosition>
             <pk>false</pk>
+            <remarks>Parameter In/Out types (separated by "|", values are IN, OUT, INOUT)</remarks>
             <type>VARCHAR</type>
         </columns>
         <constraints>
