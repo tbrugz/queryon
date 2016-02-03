@@ -148,7 +148,7 @@
             <privilege>DELETE</privilege>
             <table>QON_TABLES</table>
         </grants>
-        <remarks>Tables avaiable to querying/editing on QueryOn</remarks>
+        <remarks>Tables available for querying/editing on QueryOn</remarks>
         <type>TABLE</type>
     </table>
     
@@ -284,7 +284,7 @@
             <privilege>DELETE</privilege>
             <table>QON_EXECS</table>
         </grants>
-        <remarks>Executables (procedures/functions) avaiable to executing on QueryOn</remarks>
+        <remarks>Executables (procedures/functions) available for executing on QueryOn</remarks>
         <type>TABLE</type>
     </table>
     

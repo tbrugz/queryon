@@ -750,7 +750,7 @@ public class QueryOn extends HttpServlet {
 
 		//limit-offset
 		//how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
-		//query type (table, view, query), resultsetType? (not avaiable at this point), database type
+		//query type (table, view, query), resultsetType? (not available at this point), database type
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		if(! sql.allowEncapsulation) {
 			loStrategy = LimitOffsetStrategy.RESULTSET_CONTROL;
@@ -870,7 +870,7 @@ public class QueryOn extends HttpServlet {
 			final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
 			
 			if(!feat.supportsExplainPlan()) {
-				throw new BadRequestException("Explain plan not avaiable for database: "+feat.getClass().getSimpleName());
+				throw new BadRequestException("Explain plan not available for database: "+feat.getClass().getSimpleName());
 			}
 			
 			SQL sql = SQL.createSQL(relation, reqspec);

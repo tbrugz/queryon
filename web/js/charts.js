@@ -115,7 +115,7 @@ var d3multiseries = function(data, columns, containerId) {
 		
 		for(var i=0;i<seriesNames.length;i++) {
 			if(color.domain().indexOf(seriesNames[i])<0) {
-				//XXX show avaiable column that are numeric...
+				//XXX show available column that are numeric...
 				//XXXdone throw?
 				throw 'column <code>'+seriesNames[i]+'</code> not found - columns are: <code>'+allCols.join(', ')+'</code>';
 			}
