@@ -32,7 +32,9 @@ function writeRelations(containerId, relations) {
 	console.log('write relations [#'+relations.length+'] to '+containerId);
 	for(var i=0;i<relations.length;i++) {
 		var id = getId(relations[i]);
-		$('#'+containerId).append("<option value='"+id+"'>"+getDescription(relations[i])+"</option>");
+		$('#'+containerId).append("<option value='"+id+"'"+
+				//" class='schema_"+relations[i].schemaName+"'"+
+				">"+getDescription(relations[i])+"</option>");
 		relationsHash[id] = relations[i];
 	}
 }
