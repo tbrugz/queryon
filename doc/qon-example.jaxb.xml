@@ -87,6 +87,7 @@
             <nullable>true</nullable>
             <ordinalPosition>9</ordinalPosition>
             <pk>false</pk>
+            <remarks>Insert permission on columns (&lt;column&gt;:&lt;role&gt;[comma&lt;role&gt;][|...])</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -95,6 +96,7 @@
             <nullable>true</nullable>
             <ordinalPosition>10</ordinalPosition>
             <pk>false</pk>
+            <remarks>Update permission on columns (&lt;column&gt;:&lt;role&gt;[comma&lt;role&gt;][|...])</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>

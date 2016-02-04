@@ -264,7 +264,7 @@
 				+(disabled?" disabled='true'":"")
 				+">"
 				+(colTypeOrig=="String"?"":" <em>("+colTypeOrig+")</em>")
-				+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+colRemarks[i]+"</span>":"")
+				+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
 				+"</label> "
 		}
 		dialogContent += "</div>"
