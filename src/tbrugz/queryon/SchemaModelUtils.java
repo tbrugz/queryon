@@ -107,10 +107,10 @@ public class SchemaModelUtils {
 			}
 		}
 		else {
-			throw new BadRequestException("executable object must have 1, 2 or 3 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			//log.warn("executable object must have 1, 2 or 3 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 		}
 		
-		if(exec == null) { throw new NotFoundException("Object "+reqspec.object+" not found"); }
+		//if(exec == null) { throw new NotFoundException("Object "+reqspec.object+" not found"); }
 		return exec;
 	}
 	

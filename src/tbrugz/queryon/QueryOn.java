@@ -596,8 +596,9 @@ public class QueryOn extends HttpServlet {
 			case EXECUTE:
 				ExecutableObject eo = (ExecutableObject) dbobj;
 				if(eo==null) {
-					log.warn("strange... eo is null");
-					eo = SchemaModelUtils.getExecutable(model, reqspec);
+					throw new IllegalStateException("Executable must not be null [object="+reqspec.object+"]");
+					//log.warn("strange... eo is null");
+					//eo = SchemaModelUtils.getExecutable(model, reqspec);
 				}
 				checkGrantsAndRolesMatches(currentUser, PrivilegeType.EXECUTE, eo);
 				doExecute(eo, reqspec, resp);
