@@ -140,6 +140,7 @@ public class RequestSpec {
 		log.debug("urlparts: "+URIpartz);
 		if(URIpartz.size()<2) { throw new BadRequestException("URL must have at least 1 part"); }
 
+		/*
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
 		int lastDotIndex = lastURIPart.lastIndexOf('.');
 		if(lastDotIndex > -1) {
@@ -160,6 +161,14 @@ public class RequestSpec {
 		else {
 			outputTypeStr = null;
 		}
+		*/
+		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
+		outputTypeStr = getSyntax(lastURIPart, dsutils, prop);
+		
+		if(outputTypeStr!=null) {
+			lastURIPart = lastURIPart.substring(0, lastURIPart.length()-1-outputTypeStr.length());
+		}
+
 		URIpartz.add( lastURIPart );
 		//log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
 		
@@ -482,4 +491,41 @@ public class RequestSpec {
 		return updateValues;
 	}
 	
-} 
+	String getSyntax(String lastUriPart, DumpSyntaxUtils dsutils, Properties prop) {
+		String outputTypeStr = null;
+		
+		int lastDotIndex = lastUriPart.lastIndexOf('.');
+		String outputTypeStrTmp = null;
+		DumpSyntax ds = null;
+		if(lastDotIndex > -1) {
+			int last2DotIndex = lastUriPart.lastIndexOf('.', lastDotIndex-1);
+			outputTypeStrTmp = lastUriPart.substring(lastDotIndex+1);
+			log.debug("lastUriPart: "+lastUriPart+" ; outputTypeStrTmp: "+outputTypeStrTmp+"; lastDotIndex="+lastDotIndex+"; last2DotIndex="+last2DotIndex);
+			
+			// test for known syntax
+			if(last2DotIndex > -1) {
+				String output2TypeStrTmp = lastUriPart.substring(last2DotIndex+1);
+				//log.debug("output2TypeStrTmp: "+output2TypeStrTmp);
+				ds = dsutils.getDumpSyntax(output2TypeStrTmp, prop);
+				if(ds != null) {
+					outputTypeStr = output2TypeStrTmp;
+				}
+			}
+			
+			if(ds==null) {
+				ds = dsutils.getDumpSyntax(outputTypeStrTmp, prop);
+				if(ds != null) {
+					outputTypeStr = outputTypeStrTmp;
+				}
+			}
+		}
+		else {
+			List<String> ignoreFileExt = Arrays.asList(standardFileExt);
+			if(ignoreFileExt.contains(outputTypeStrTmp)) {
+				outputTypeStr = outputTypeStrTmp;
+			}
+		}
+		return outputTypeStr;
+	}
+	
+}
