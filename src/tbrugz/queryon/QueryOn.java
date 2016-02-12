@@ -16,9 +16,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -260,7 +260,7 @@ public class QueryOn extends HttpServlet {
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
 			log.info("syntaxes: "+DumpSyntaxRegistry.getSyntaxes());
 			
-			Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
+			Map<String, SchemaModel> models = new LinkedHashMap<String, SchemaModel>();
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
 			log.debug("modelIds="+modelIds);
 			if(modelIds!=null) {
