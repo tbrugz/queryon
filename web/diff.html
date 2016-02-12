@@ -283,6 +283,9 @@ doDiffUsingJS = function(viewType) {
 			var ddbtn = document.getElementById('doDataDiffBtn');
 			ddbtn.style.display = 'initial';
 			ddbtn.href = getDataDiffUrl();
+			var ddsbtn = document.getElementById('doDataDiffSqlBtn');
+			ddsbtn.style.display = 'initial';
+			ddsbtn.href = getDataDiffUrl();
 		}
 	}
 	else {
@@ -292,6 +295,7 @@ doDiffUsingJS = function(viewType) {
 		document.getElementById('ddldiff-container').style.display = 'block';
 		doClearDdlOutput();
 		document.getElementById('doDataDiffBtn').style.display = 'none';
+		document.getElementById('doDataDiffSqlBtn').style.display = 'none';
 	}
 	btnActionStop('go-button');
 }
@@ -435,16 +439,17 @@ getDDLdiff = function(apply) {
 	});
 }
 
-getDataDiffUrl = function() {
+getDataDiffUrl = function(syntax) {
 	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
 	+ document.getElementById('object').value
+	+ (syntax?"."+syntax:"")
 	+'?modelFrom='+document.getElementById('modelFrom').value
 	+'&modelTo='+document.getElementById('modelTo').value
 	;
 }
 
-doDataDiff = function() {
-	var url = getDataDiffUrl();
+doDataDiff = function(syntax) {
+	var url = getDataDiffUrl(syntax);
 	window.open(url);
 }
 
@@ -686,7 +691,8 @@ safeTags = function (str) {
 	<div id="ddldiff-container">
 		<div id="ddldiff-controls" class="content-elem">
 			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
-			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data" onClick="doDataDiff();"/>
+			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
+			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/>
 			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
