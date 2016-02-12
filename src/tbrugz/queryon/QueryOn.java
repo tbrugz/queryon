@@ -214,9 +214,6 @@ public class QueryOn extends HttpServlet {
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	
-	public static final String HEADER_VALIDATE_PARAMCOUNT = "X-Validate-ParameterCount";
-	public static final String HEADER_VALIDATE_PARAMTYPES = "X-Validate-ParameterTypes";
-	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	//SchemaModel model;
@@ -562,7 +559,7 @@ public class QueryOn extends HttpServlet {
 					Query relation = getQuery(req);
 					//XXXxx: validate first & return number of parameters?
 					relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway
-					resp.addHeader("Content-Disposition", "attachment; filename=queryon_"
+					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
 					
@@ -735,7 +732,7 @@ public class QueryOn extends HttpServlet {
 		List<String> warnings = filterByXtraParams(relation, reqspec, sql);
 		if(warnings!=null && warnings.size()>0) {
 			String warns = Utils.join(warnings, ", ");
-			resp.addHeader("X-Warning-UnknownColumn", warns);
+			resp.addHeader(ResponseSpec.HEADER_WARNING_UNKNOWN_COLUMN, warns);
 		}
 		
 		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
@@ -831,8 +828,8 @@ public class QueryOn extends HttpServlet {
 				log.warn("exception: ParameterMetaData.getParameterTypeName: "+e.getMessage());
 			}
 			//log.info("doValidate: #params="+params+" ; types = "+paramsTypes);
-			resp.setIntHeader(HEADER_VALIDATE_PARAMCOUNT, params);
-			resp.setHeader(HEADER_VALIDATE_PARAMTYPES, paramsTypes.toString());
+			resp.setIntHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT, params);
+			resp.setHeader(ResponseSpec.HEADER_VALIDATE_PARAMTYPES, paramsTypes.toString());
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
 				//XXX: (also) return number of bind parameters? return as ResultSet? stmt.getParameterMetaData()...
@@ -958,7 +955,7 @@ public class QueryOn extends HttpServlet {
 				if(gotReturn) {
 					if(outParamCount>1 && !warnedManyOutParams) {
 						log.warn("there are "+outParamCount+" out parameter. Only the first will be returned");
-						resp.addHeader("X-Warning", "Execute-TooManyReturnParams ReturnCount="+outParamCount);
+						resp.addHeader(ResponseSpec.HEADER_WARNING, "Execute-TooManyReturnParams ReturnCount="+outParamCount);
 						warnedManyOutParams = true;
 					}
 					break; //got first result
@@ -971,7 +968,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 
-		resp.addHeader("X-Execute-ReturnCount", String.valueOf(outParamCount));
+		resp.addHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, String.valueOf(outParamCount));
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
 				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
@@ -1550,14 +1547,15 @@ public class QueryOn extends HttpServlet {
 		
 		ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
 
-		resp.addHeader("Content-Type", ds.getMimeType());
+		resp.setContentType(ds.getMimeType());
+		//resp.addHeader(ResponseSpec.HEADER_CONTENT_TYPE, ds.getMimeType());
 		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
 		//resp.addHeader("Content-disposition", "attachment;filename="+table.name+"."+ds.getDefaultFileExtension());
 		String contentLocation = (String) reqspec.request.getAttribute(REQ_ATTR_CONTENTLOCATION);
 		if(contentLocation!=null) {
-			resp.addHeader("Content-Location", contentLocation);
+			resp.addHeader(ResponseSpec.HEADER_CONTENT_LOCATION, contentLocation);
 		}
-		resp.addHeader("X-ResultSet-Limit", String.valueOf(limit));
+		resp.addHeader(ResponseSpec.HEADER_RESULTSET_LIMIT, String.valueOf(limit));
 		
 		if(ds.acceptsOutputStream()) {
 			ds.dumpHeader(resp.getOutputStream());
@@ -1637,12 +1635,13 @@ public class QueryOn extends HttpServlet {
 			if(reqspec.uniValueMimetypeCol!=null) {
 				mimeType = rs.getString(reqspec.uniValueMimetypeCol);
 			}
-			resp.addHeader("Content-Type", mimeType);
+			//resp.addHeader(ResponseSpec.HEADER_CONTENT_TYPE, mimeType);
+			resp.setContentType(mimeType);
 			if(reqspec.uniValueFilenameCol!=null) {
 				filename = rs.getString(reqspec.uniValueFilenameCol);
 			}
 			if(filename!=null) {
-				resp.addHeader("Content-Disposition", "attachment; filename=" + filename);
+				resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
 			}
 			InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
 			if(is!=null) {
