@@ -1561,16 +1561,20 @@ public class QueryOn extends HttpServlet {
 		
 		if(ds.acceptsOutputStream()) {
 			ds.dumpHeader(resp.getOutputStream());
-			while(rs.next()) {
+			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
+			while(hasNext) {
 				ds.dumpRow(rs, count, resp.getOutputStream());
 				count++;
+				hasNext = rs.next();
 			}
 		}
 		else {
 			ds.dumpHeader(resp.getWriter());
-			while(rs.next()) {
+			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
+			while(hasNext) {
 				ds.dumpRow(rs, count, resp.getWriter());
 				count++;
+				hasNext = rs.next();
 			}
 		}
 		

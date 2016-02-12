@@ -3,8 +3,10 @@ package tbrugz.queryon.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
@@ -584,6 +586,34 @@ public class WinstoneAndH2HttpRequestTest {
 		String content = httpGetContent("/IS_PRIME?p1=3");
 		Assert.assertEquals("true", content);
 	}
+
+	@Test
+	public void testGetRowsetSer() throws IOException, ClassNotFoundException, SQLException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP.rowset.ser?fin:SALARY=2000"); //2 rows
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		
+		ObjectInputStream ois = new ObjectInputStream(instream);
+		Object o = ois.readObject();
+
+		Assert.assertTrue("Must be instance of ResultSet", o instanceof ResultSet);
+		
+		ResultSet rs = (ResultSet) o;
+		Assert.assertTrue(rs.next());
+		Assert.assertEquals("john", rs.getString(2));
+		Assert.assertTrue(rs.next());
+		Assert.assertEquals(2, rs.getInt(1));
+		Assert.assertFalse(rs.next());
+		rs.close();
+		
+		httpPut.releaseConnection();
+	}
+
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------
 	
