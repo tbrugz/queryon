@@ -129,7 +129,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		
 		DBMSResources.instance().updateMetaData(connFrom.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
 		log.debug("diff for table '"+table+"'...");
-		rsdiff.diff(rsTo, rsFrom, table.getName(), keyCols, ds, writer);
+		rsdiff.diff(rsFrom, rsTo, table.getSchemaName(), table.getName(), keyCols, ds, writer);
 		log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 		
 		rsFrom.close(); rsTo.close();
