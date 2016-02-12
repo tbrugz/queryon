@@ -64,8 +64,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":SELECT", obj.getFullObjectName());
 		
-		String modelIdFrom = SchemaModelUtils.getModelId(req, "modelFrom");
-		String modelIdTo = SchemaModelUtils.getModelId(req, "modelTo");
+		String modelIdFrom = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_FROM);
+		String modelIdTo = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TO);
 		if(modelIdFrom.equals(modelIdTo)) {
 			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
 		}

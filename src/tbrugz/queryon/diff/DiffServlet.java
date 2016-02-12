@@ -47,8 +47,13 @@ public class DiffServlet extends AbstractHttpServlet {
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(DiffServlet.class);
 	
+	final boolean addComments = true;
 	final boolean instant = true; //setup 'instant' in init()
 
+	static final String PARAM_MODEL_FROM = "modelFrom";
+	static final String PARAM_MODEL_TO = "modelTo";
+	static final String PARAM_DO_APPLY = "doApply";
+	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
@@ -66,12 +71,14 @@ public class DiffServlet extends AbstractHttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":SHOW", obj.getFullObjectName());
 		
-		String modelIdFrom = SchemaModelUtils.getModelId(req, "modelFrom");
-		String modelIdTo = SchemaModelUtils.getModelId(req, "modelTo");
+		String modelIdFrom = SchemaModelUtils.getModelId(req, PARAM_MODEL_FROM);
+		String modelIdTo = SchemaModelUtils.getModelId(req, PARAM_MODEL_TO);
 		if(modelIdFrom.equals(modelIdTo)) {
 			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
 		}
 
+		boolean previousDBIdDiffAddComments = DBIdentifiableDiff.addComments;
+		
 		boolean doApply = getDoApply(req);
 		if(doApply) {
 			// XXX do NOT allow HTTP GET method...
@@ -175,6 +182,7 @@ public class DiffServlet extends AbstractHttpServlet {
 			dumpDiffs(diffs, resp);
 		}
 		
+		DBIdentifiableDiff.addComments = previousDBIdDiffAddComments;
 	}
 	
 	List<Diff> newSingleElemList(Diff e) {
@@ -190,7 +198,7 @@ public class DiffServlet extends AbstractHttpServlet {
 	}
 	
 	boolean getDoApply(HttpServletRequest req) {
-		String apply = req.getParameter("doApply");
+		String apply = req.getParameter(PARAM_DO_APPLY);
 		return apply!=null && apply.equals("true");
 	}
 
@@ -213,7 +221,10 @@ public class DiffServlet extends AbstractHttpServlet {
 					//sql = d.getDiff();
 					boolean retIsRs = st.execute(sql);
 					int count = st.getUpdateCount();
-					resp.getWriter().write(sql+" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] */");
+					resp.getWriter().write(sql);
+					if(addComments) {
+						resp.getWriter().write(" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] */");
+					}
 					resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
 				}
 			}
