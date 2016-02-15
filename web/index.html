@@ -198,7 +198,9 @@
 		//var pk = getPkCols('objects');
 		var relation = getCurrentRelation('objects');
 		var cols = getColumnsFromRelation(relation);
-		doWriteUpdateDialog('Insert', null, null, null, cols, null, null);
+		var colTypes = getColumnsTypesFromContainer('content');
+		
+		doWriteUpdateDialog('Insert', null, null, null, cols, null, colTypes);
 		closeMessages('messages');
 	}
 	
