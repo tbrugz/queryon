@@ -36,6 +36,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
@@ -62,7 +63,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		
 		// shiro authorization - XXX use auth other than SELECT ?
 		Subject currentUser = ShiroUtils.getSubject(prop);
-		ShiroUtils.checkPermission(currentUser, obj.getType()+":SELECT", obj.getFullObjectName());
+		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
 		
 		String modelIdFrom = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_FROM);
 		String modelIdTo = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TO);
@@ -90,6 +91,13 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		try {
 			Table tFrom = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connFrom);
 			Table tTo = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTo);
+			
+			if(tFrom==null) {
+				throw new BadRequestException("relation "+obj+" not found ["+DiffServlet.PARAM_MODEL_FROM+"]");
+			}
+			if(tTo==null) {
+				throw new BadRequestException("relation "+obj+" not found ["+DiffServlet.PARAM_MODEL_TO+"]");
+			}
 
 			List<Column> cols = DataDiff.getCommonColumns(tFrom, tTo);
 			String columnsForSelect = DataDiff.getColumnsForSelect(cols);

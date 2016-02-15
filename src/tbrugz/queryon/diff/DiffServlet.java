@@ -20,6 +20,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.DBUtil;
 import tbrugz.queryon.NamedTypedDBObject;
+import tbrugz.queryon.QOnPrivilegeType;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
@@ -69,7 +70,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		// TODOne: diff authorization
 		// XXX add <type>:DIFF authorization instead of <type>:SHOW ?
 		Subject currentUser = ShiroUtils.getSubject(prop);
-		ShiroUtils.checkPermission(currentUser, obj.getType()+":SHOW", obj.getFullObjectName());
+		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());
 		
 		String modelIdFrom = SchemaModelUtils.getModelId(req, PARAM_MODEL_FROM);
 		String modelIdTo = SchemaModelUtils.getModelId(req, PARAM_MODEL_TO);
@@ -82,7 +83,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		boolean doApply = getDoApply(req);
 		if(doApply) {
 			// XXX do NOT allow HTTP GET method...
-			String permissionPattern = obj.getType()+":APPLYDIFF:"+modelIdFrom;
+			String permissionPattern = obj.getType()+":"+QOnPrivilegeType.APPLYDIFF+":"+modelIdFrom;
 			log.info("aplying to '"+modelIdFrom+"'... permission: "+permissionPattern+" :: "+obj.getFullObjectName());
 			ShiroUtils.checkPermission(currentUser, permissionPattern, obj.getFullObjectName());
 			if(!instant) {

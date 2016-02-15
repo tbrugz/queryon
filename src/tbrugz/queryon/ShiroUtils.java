@@ -54,7 +54,7 @@ public class ShiroUtils {
 		return isPermitted(subject, permission, null);
 	}
 	
-	public static boolean isPermitted(Subject subject, String permission, String object) {
+	static boolean isPermitted(Subject subject, String permission, String object) {
 		if(object!=null) {
 			object = object.replaceAll("\\.", ":");
 			permission += ":"+object;
