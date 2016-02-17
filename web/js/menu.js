@@ -45,13 +45,15 @@ function toggleMenu() {
 	var innerContent = '';
 	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
 	var hasLoginLink = document.getElementById('authaction') != null;
+	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
 	for(var i=0;i<lis.length;i++) {
 		var li = lis[i];
 		//XXXdone: index, d3chart: do not show login, logout
 		//XXX: graph: add login/out
 		//~XXX: all: do not show (linkable) self - current!
 		if( (!li.classList.contains("dev") || isDeveloper)
-			&& (!li.classList.contains("auth") || !hasLoginLink) ) {
+			&& (!li.classList.contains("auth") || !hasLoginLink)
+			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
 			var href = li.getElementsByTagName("a")[0].getAttribute("href");
 			if(href.startsWith(".")) { href = href.substring(1); }
 			//console.log("menu["+i+"]: ",location.pathname," ; ",href);
