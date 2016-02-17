@@ -3,6 +3,7 @@
 <head>
 	<title>QueryOn - ddl</title>
 	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -13,6 +14,7 @@
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/ddl.js"></script>
+	<script src="js/auth.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
@@ -50,8 +52,13 @@ $(document).ready(
 			if(typemap[keys[i]]) { tts.push(keys[i]); }
 		}
 		loadSelect(tts, 'type');
+		loadAuthInfo();
 	}
 );
+
+makeHrefs = function() {
+	refreshAuthInfo();
+}
 
 $.ajax({
 	url: 'info/model.jsp',
@@ -292,6 +299,9 @@ updateSelectValue = function(select, value) {
 		font-size: 11pt;
 		font-weight: bolder;
 		background-color: #666;
+	}
+	#navbar-prop {
+		display: inline;
 	}
 	pre[class*="language-"] {
 		border-radius: 0;

@@ -3,6 +3,7 @@
 <head>
 	<title>QOn + diffmany</title>
 	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -12,6 +13,7 @@
 	<script type="text/javascript" src="js/prism.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
+	<script src="js/auth.js"></script>
 	<script src="js/ddl.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
@@ -52,9 +54,14 @@ $(document).ready(
 			if(typemap[keys[i]]) { tts.push(keys[i]); }
 		}
 		loadSelect(tts, 'type');
+		loadAuthInfo();
 		updateUI();
 	}
 );
+
+makeHrefs = function() {
+	refreshAuthInfo();
+}
 
 $.ajax({
 	url: 'info/model.jsp',
@@ -297,6 +304,9 @@ getSelectMultiOptions = function(selectId) {
 	}
 	#nav > label {
 		vertical-align: top;
+	}
+	#navbar-prop {
+		display: inline;
 	}
 	#content-container {
 		position: relative;
