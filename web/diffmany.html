@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QOn + diffmany</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<link href="css/prism.css" rel="stylesheet" />
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="js/prism.js"></script>
+	<script src="js/qon-base.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script>
+var queryOnUrl = 'qoi/';
+var queryOnDiffManyUrl = 'diffmany/'
+
+var typemap = {
+		"TABLE": "table",
+		"FK": "fk", //**
+		"VIEW": "view",
+		"INDEX": "index", //**
+		"EXECUTABLE": null,
+		"TRIGGER": "trigger", //"executable", ??
+		"SEQUENCE": "sequence",
+		"SYNONYM": "synonym", //**
+		"GRANT": "grant", //**
+		"MATERIALIZED_VIEW": "materialized_view", //"view",
+		"FUNCTION": "function",
+		"JAVA_SOURCE": null,
+		"PACKAGE": "package",
+		"PACKAGE_BODY": "package_body", //"executable",
+		"PROCEDURE": "procedure",
+		"TYPE": null, //"executable",
+		"TYPE_BODY": null, //"executable",
+		"CONSTRAINT": null,
+		"COLUMN": null
+};
+
+var schemasByModel = {};
+
+var defaultModelId = 'modelTo'; //modelTarget?
+
+$(document).ready(
+	function() {
+		var tts = [];
+		var keys = Object.keys(typemap);
+		//console.log(keys.length);
+		for(var i=0;i<keys.length;i++) {
+			if(typemap[keys[i]]) { tts.push(keys[i]); }
+		}
+		loadSelect(tts, 'type');
+		updateUI();
+	}
+);
+
+$.ajax({
+	url: 'info/model.jsp',
+	success: function(data) {
+		var json = JSON.parse(data);
+		//console.log(json);
+		if(json.models) {
+			loadSelect(json.models, 'modelFrom');
+			loadSelect(json.models, 'modelTo');
+			//XXX select different model in each 'select' 
+		}
+		/*if(json.models.length>1) {
+			document.getElementById('modelFrom').parentNode.style.display = 'inline-block';
+			document.getElementById('modelTo').parentNode.style.display = 'inline-block';
+		}*/
+		for(var i=0;i<json.models.length;i++) {
+			loadSchemas(json.models[i]);
+		}
+		/*if(json.types) {
+			loadSelect(json.types, 'type');
+		}*/
+	}
+});
+
+//TODOne: schemas by model?
+loadSchemas = function(model) {
+	var url = 'info/schemas.jsp'+(model?'?model='+model:'');
+	//console.log('loadSchemas url:', url);
+	$.ajax({
+		url: url,
+		success: function(data) {
+			var json = JSON.parse(data);
+			//console.log('loadSchemas, schemas',model,json);
+			if(json.schemas) {
+				schemasByModel[model?model:""] = json.schemas;
+				//XXX: merge model's schemas?
+				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
+				joinSchemas();
+			}
+		}
+	});
+}
+
+joinSchemas = function() {
+	//console.log('joinSchemas, schemas',Object.keys(schemasByModel).length,document.getElementById(defaultModelId).childElementCount);
+	if(Object.keys(schemasByModel).length < document.getElementById(defaultModelId).childElementCount) { return; }
+	/*for(var i=0;i<Object.keys(schemasByModel).length;i++) {
+		var m = Object.keys(schemasByModel)[i];
+		for(var j=0;i<m[i].length;i++) {
+			schemas[i] = 
+		}
+	}*/
+	loadModel();
+}
+
+loadModel = function() {
+	//TODO!!: merge models...
+	var m = document.getElementById(defaultModelId).value;
+	//console.log('loadModel, model:', m, defaultModelId, schemasByModel[m], schemasByModel);
+	loadSelect(schemasByModel[m], 'schema');
+	refreshSelectsState();
+}
+
+onModelChanged = function() {
+	updateState();
+	loadModel();
+}
+
+onSchemaChanged = function() {
+	updateState();
+}
+
+onObjTypeChanged = function() {
+	updateState();
+}
+
+doDiff = function() {
+	doClear();
+	getDDLdiff();
+}
+
+doClear = function() {
+}
+
+getDDLdiff = function(apply) {
+	var msg = document.getElementById('messages');
+	if(document.getElementById('modelFrom').value == document.getElementById('modelTo').value) {
+		console.log("getDDLdiff: same model");
+		msg.style.display = 'block';
+		msg.innerHTML = 'modelOrig and modelNew must not be the same';
+		//btnActionStop('go-button');
+		return;
+	}
+	
+	//apply = apply==='true'?'true':false;
+	// /qdiff/TABLE/<shcema>.<object>?modelFrom=x&modelTo=y
+	var schemas = getSelectMultiOptions('schema').join();
+	var types = getSelectMultiOptions('type').join();
+	var syntax = "sql";
+	
+	var url = queryOnDiffManyUrl
+		+ schemas + '/'
+		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
+		+ types + '/'
+		+ syntax
+		+'?modelFrom='+document.getElementById('modelFrom').value
+		+'&modelTo='+document.getElementById('modelTo').value
+		//+(apply?"&doApply=true":"")
+		;
+	console.log("getDDLdiff: url=", url);
+	btnActionStart('go-button');
+
+	var container = document.getElementById('content-container');
+	container.style.display = 'none';
+	var block = document.getElementById('content');
+	//block.style.display = 'none';
+	msg.style.display = 'none';
+	$.ajax({
+		//TODO: filter by schema?
+		url: url,
+		success: function(data) {
+			var content = data;
+			if(content=='') {
+				content = '-- no changes';
+			}
+			block.innerHTML = safeTags(content);
+			block.style.display = 'block';
+			container.style.display = 'block';
+			//var applyBtn = document.getElementById('applyDdlDiffBtn');
+			if(data) {
+				//TODO: test if user has APPLY permission in type/model/schema (ajax) ...
+				//applyBtn.style.display = 'initial';
+				//applyBtn.value = 'apply DDL diff to '+document.getElementById('modelFrom').value;
+			}
+			btnActionStop('go-button');
+			Prism.highlightElement(block);
+		},
+		error: function(error) {
+			console.log("getDDLdiff error=",error);
+			msg.style.display = 'block';
+			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
+			btnActionStop('go-button');
+		}
+	});
+}
+
+function updateState() {
+	//models
+	var select = document.getElementById('modelFrom');
+	var modelFrom = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	var select = document.getElementById('modelTo');
+	var modelTo = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	
+	//schemas & types
+	var schemas = getSelectMultiOptions('schema').join();
+	var types = getSelectMultiOptions('type').join();
+	
+	if(modelFrom && modelTo && schema) {
+		history.replaceState(null, null, "#"+modelFrom+"/"+modelTo+"/"+schemas+"/"+types);
+	}
+}
+
+function refreshSelectsState() {
+	var hash = window.location.hash;
+	if(hash.indexOf('#')==0) {
+		hash = hash.substring(1);
+		var parts = hash.split('/');
+		var modelFrom = document.getElementById('modelFrom');
+		modelFrom.value = parts[0];
+		var modelTo = document.getElementById('modelTo');
+		modelTo.value = parts[1];
+		//XXX: update selects...
+		//var schema = document.getElementById('schema');
+		//schema.value = parts[2];
+	}
+}
+
+updateUI = function() {
+	document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
+}
+
+// ----- utility functions
+
+loadSelect = function(data, selectId, callback) {
+	if(!callback) { callback = function(obj) { return obj; } }
+	var sel = document.getElementById(selectId);
+	var prevOptionValue = sel.value;
+	$('#'+selectId).empty();
+	if(data==null) { console.log('null data; selectId: ',selectId); return; }
+	for(var i=0;i<data.length;i++) {
+		var name = callback(data[i]);
+		if(name==null) { continue; }
+		var optionValue = callback(data[i]);
+		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
+		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+optionValue+"</option>");
+	}
+}
+
+// see: http://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
+safeTags = function (str) {
+	return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
+}
+
+getSelectMultiOptions = function(selectId) {
+	var select = document.getElementById(selectId);
+	var schemaOptions = select.selectedOptions;
+	var schemas = [];
+	for(var i=0; i<schemaOptions.length ; i++) {
+		schemas.push(schemaOptions[i].value); 
+	}
+	return schemas;
+}
+
+	</script>
+	<style type="text/css">
+	#nav {
+		background-color: #222;
+		color: #ddd;
+		font-weight: bold;
+		font-size: 10pt;
+		padding: 3px;
+		padding-bottom: 5px;
+		position: fixed;
+		top: 0px;
+		right: 0px;
+		left: 0px;
+		/*height: 30px;*/
+		z-index: 10;
+		overflow-y: auto;
+		max-height: 100%;
+		border-bottom: 3px solid hsl(0, 0%, 66%);
+	}
+	#nav > span {
+		vertical-align: top;
+	}
+	#nav > label {
+		vertical-align: top;
+	}
+	#content-container {
+		position: relative;
+		top: 24px;
+	}
+	#logo {
+		font-size: 11pt;
+		font-weight: normal;
+		background-color: #666;
+	}
+	/*code {
+		display: block;
+		unicode-bidi: embed;
+		font-family: monospace;
+		white-space: pre;
+		background-color: whitesmoke;
+		overflow-x: auto;
+	}*/
+	pre[class*="language-"] {
+		border-radius: 0;
+		margin: 0;
+		border: .5em solid hsl(0, 0%, 66%);
+	}
+	#models-container {
+		width: 140px;
+		display: inline-block;
+	}
+	#models-container label {
+		margin: 2px 0 2px 0;
+	}
+	.message {
+		margin: 10px;
+		background-color: #f77;
+		padding: 4px;
+	}
+	textarea.code {
+		width: 100%;
+		height: 300px;
+	}
+	
+	.code-container {
+		width: 48%;
+		padding: 4px;
+		border: 10px solid #ddd;
+	}
+	
+	.code-container pre {
+		margin-top: 0;
+	}
+	
+	.code-title {
+		background-color: #fff;
+		display: block;
+		font-weight: bold;
+		padding: 4px;
+		border-bottom: 1px solid #ccc;
+	}
+	.content-elem {
+		border: 10px solid #ddd;
+	}
+	
+	input.content-btn {
+		border:1px solid #999;
+		background-color: whitesmoke;
+	}
+	</style>
+</head>
+<body>
+
+<div id="nav" class="navbar">
+	<span id="logo"><b>Q<span style="color: #ff8a47">On</span> +</b> <span>diff<b><em>many</em></b></span></span>
+
+	<span id="models-container">
+		<label style="background-color: #188859">
+			modelNew: <select id="modelTo" onchange="onModelChanged();"></select>
+		</label>
+		<label><!--  style="background-color: #A93636"-->
+			modelOrig: <select id="modelFrom" onchange="updateState();"></select>
+		</label>
+	</span>
+	<label>
+		schema: <select id="schema" onchange="onSchemaChanged();" multiple="multiple" size="7"></select>
+	</label>
+	<label>
+		type: <select id="type" onchange="onObjTypeChanged();" multiple="multiple" size="7"></select>
+	</label>
+	
+	<span id="navbar-prop">
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doDiff();"/>
+		<input type="button" value="clear" onclick="doClear();"/>
+	</span>
+
+	<span id="navbar-links">
+	</span>
+	
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+	
+	<div id="messages"></div>
+</div>
+
+<pre id="content-container" style="display: none;"><code id="content" class="language-sql"></code></pre>
+
+<div id="dialog-container">
+	<div id="dialog">
+	</div>
+</div>
+
+<div id="status-container" class="status">
+</div>
+
+</body>
+</html>

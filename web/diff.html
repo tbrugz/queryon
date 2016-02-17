@@ -431,7 +431,7 @@ getDDLdiff = function(apply) {
 			btnActionStop('getDdlDiffBtn');
 		},
 		error: function(error) {
-			console.log("loadObjectList error=",error);
+			console.log("getDDLdiff error=",error);
 			msg.style.display = 'block';
 			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
 			btnActionStop('getDdlDiffBtn');
