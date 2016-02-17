@@ -2,8 +2,10 @@ package tbrugz.queryon.diff;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.naming.NamingException;
@@ -27,6 +29,7 @@ import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
 
 public class DiffManyServlet extends AbstractHttpServlet {
 
@@ -43,7 +46,9 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		log.info("partz: "+partz);
 		
 		String schemas = partz.get(0); // comma separated schema names
-		String syntax = partz.get(1); // valid:: json, xml, patch
+		//List<String> schemasList = Utils.getStringList(schemasStr, ",");
+		String types = partz.get(1);   // comma separated types to diff
+		String syntax = partz.get(2);  // valid:: json, xml, patch, sql
 		
 		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
@@ -61,8 +66,8 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			
 			ParametrizedProperties pp = new ParametrizedProperties();
 			pp.putAll(prop);
-			pp.put("sqldiff.target", modelIdFrom);
-			pp.put("sqldiff.source", modelIdTo);
+			pp.put("sqldiff.target", modelIdTo);
+			pp.put("sqldiff.source", modelIdFrom);
 			pp.put("sqldiff."+modelIdFrom+".connpropprefix", DBUtil.getDBConnPrefix(prop, modelIdFrom));
 			pp.put("sqldiff."+modelIdTo+".connpropprefix", DBUtil.getDBConnPrefix(prop, modelIdTo));
 			//pp.put(DBUtil.getDBConnPrefix(prop, modelIdFrom)+".diffgrabclass","JDBCSchemaGrabber");
@@ -70,11 +75,30 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			pp.put(DBUtil.getDBConnPrefix(prop, modelIdFrom)+".grabclass","JDBCSchemaGrabber");
 			pp.put(DBUtil.getDBConnPrefix(prop, modelIdTo)+".grabclass","JDBCSchemaGrabber");
 			pp.put("sqldiff.dodatadiff","false");
-			pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
-			//XXX: param: objecttypes (sqldump grab properties) - 'sqldiff.typestodiff' also?
+			pp.put("sqldiff.typestodiff", types);
 			
+			pp.put("sqldiff.dodatadiff","false");
+			pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
+			pp.put("sqldump.schemagrab.db-specific-features", "true");
+			
+			//sqldump properties...
+			pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
+			List<String> typesList = Utils.getStringList(types, ",");
+			setPropForTypes(pp, typesList);
+			
+			log.info("pp: "+pp);
+			
+			dump(pp, syntax, resp);
+		}
+		finally {
+		}
+	}
+		
+	void dump(Properties pp, String syntax, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
 			SQLDiff sqldiff = new SQLDiff();
 			sqldiff.setProperties(pp);
+			
+			//XXX: return SchemaDiff.logInfo()?
 			
 			sqldiff.procProterties();
 			// using 'syntax' param
@@ -98,8 +122,36 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			
 			int lastDiffCount = sqldiff.doIt();
 			log.info("diff count: "+lastDiffCount);
+	}
+	
+	void setPropForTypes(Properties prop, List<String> typesToGrab) {
+		Set<String> trueProps = new HashSet<String>();
+		//Set<String> falseProps = new HashSet<String>();
+		
+		String[] types = { "TABLE", "FK", "VIEW", "INDEX", "TRIGGER",
+				"SEQUENCE", "SYNONYM", "GRANT", "MATERIALIZED_VIEW", "FUNCTION",
+				"PACKAGE", "PACKAGE_BODY", "PROCEDURE" };
+		
+		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, "sqldump.dbspecificfeatures.grabviews", "sqldump.dbspecificfeatures.grabindexes", "sqldump.dbspecificfeatures.grabtriggers",
+				"sqldump.dbspecificfeatures.grabsequences", "sqldump.dbspecificfeatures.grabsynonyms", "sqldump.schemagrab.grants", null, "sqldump.dbspecificfeatures.grabexecutables",
+				"sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables" };
+		
+		for(int i=0;i<types.length; i++) {
+			String t = types[i];
+			if(typesToGrab.contains(t)) {
+				trueProps.add(props[i]);
+			}
 		}
-		finally {
+		
+		for(int i=0;i<props.length; i++) {
+			String t = props[i];
+			if(t==null) { continue; }
+			if(trueProps.contains(t)) {
+				prop.setProperty(t, "true");
+			}
+			else {
+				prop.setProperty(t, "false");
+			}
 		}
 	}
 	
