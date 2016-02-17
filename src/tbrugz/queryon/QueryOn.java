@@ -16,6 +16,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -207,6 +208,7 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_PROP = "prop";
 	public static final String ATTR_MODEL_MAP = "modelmap";
 	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
+	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	public static final String ATTR_INIT_ERROR = "initerror";
 	
 	public static final String METHOD_GET = "GET";
@@ -275,6 +277,7 @@ public class QueryOn extends HttpServlet {
 			}
 			else {
 				models.put(null, modelGrabber(prop, null));
+				context.setAttribute(ATTR_DEFAULT_MODEL, null);
 			}
 			//log.debug("charset: "+Charset.defaultCharset());
 			context.setAttribute(ATTR_MODEL_MAP, models);
@@ -291,6 +294,9 @@ public class QueryOn extends HttpServlet {
 			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
 			
 			context.setAttribute(ATTR_PROP, prop);
+			
+			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();
+			context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
 			
 			List<String> updatePluginsStrList = Utils.getStringListFromProp(prop, PROP_UPDATE_PLUGINS, ",");
 			setupUpdatePlugins(context, updatePluginsStrList);

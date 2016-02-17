@@ -29,17 +29,27 @@ public String normalize(String s) {
 	//XXX: add FKs, indexes, sequences, synonyms, triggers ??
 	}
 	
-	List<String> schemas = new ArrayList<String>();
-	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-	//out.write(DBUtil.getDBConnPrefix(prop, modelId));
-	if(prop!=null) {
-		try {
-			Connection conn = DBUtil.initDBConn(prop, modelId);
-			schemas = SQLUtils.getSchemaNames(conn.getMetaData());
-			conn.close();
-		}
-		catch(Exception e) {
-			log.warn("Exception: "+e);
+	Map<String, List<String>> schemasByModel = (Map<String, List<String>>) application.getAttribute(QueryOn.ATTR_SCHEMAS_MAP);
+	if(schemasByModel==null) {
+		schemasByModel = new HashMap<String, List<String>>();
+		application.setAttribute(QueryOn.ATTR_SCHEMAS_MAP, schemasByModel);
+	}
+	
+	List<String> schemas = schemasByModel.get(modelId);
+	
+	if(schemas==null) {
+		Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+		//out.write(DBUtil.getDBConnPrefix(prop, modelId));
+		if(prop!=null) {
+			try {
+				Connection conn = DBUtil.initDBConn(prop, modelId);
+				schemas = SQLUtils.getSchemaNames(conn.getMetaData());
+				conn.close();
+				schemasByModel.put(modelId, schemas);
+			}
+			catch(Exception e) {
+				log.warn("Exception: "+e);
+			}
 		}
 	}
 %>{
