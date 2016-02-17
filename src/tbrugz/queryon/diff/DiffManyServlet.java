@@ -27,6 +27,8 @@ import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.SQLDiff;
+import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -80,13 +82,14 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			pp.put("sqldiff.dodatadiff","false");
 			pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
 			pp.put("sqldump.schemagrab.db-specific-features", "true");
+			pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false");
 			
 			//sqldump properties...
 			pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
 			List<String> typesList = Utils.getStringList(types, ",");
 			setPropForTypes(pp, typesList);
 			
-			log.info("pp: "+pp);
+			//log.info("pp: "+pp);
 			
 			dump(pp, syntax, resp);
 		}
@@ -120,21 +123,28 @@ public class DiffManyServlet extends AbstractHttpServlet {
 				throw new BadRequestException("unknown syntax: "+syntax);
 			}
 			
+			DBMSResources.instance().setup(pp);
+			
 			int lastDiffCount = sqldiff.doIt();
 			log.info("diff count: "+lastDiffCount);
 	}
 	
 	void setPropForTypes(Properties prop, List<String> typesToGrab) {
 		Set<String> trueProps = new HashSet<String>();
-		//Set<String> falseProps = new HashSet<String>();
 		
 		String[] types = { "TABLE", "FK", "VIEW", "INDEX", "TRIGGER",
 				"SEQUENCE", "SYNONYM", "GRANT", "MATERIALIZED_VIEW", "FUNCTION",
 				"PACKAGE", "PACKAGE_BODY", "PROCEDURE" };
-		
-		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, "sqldump.dbspecificfeatures.grabviews", "sqldump.dbspecificfeatures.grabindexes", "sqldump.dbspecificfeatures.grabtriggers",
+
+				
+		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, AbstractDBMSFeatures.PROP_GRAB_VIEWS, AbstractDBMSFeatures.PROP_GRAB_INDEXES, AbstractDBMSFeatures.PROP_GRAB_TRIGGERS,
+				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, "sqldump.schemagrab.grants", null, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES,
+				AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES };
+		/*
+		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks", "sqldump.dbspecificfeatures.grabviews", "sqldump.dbspecificfeatures.grabindexes", "sqldump.dbspecificfeatures.grabtriggers",
 				"sqldump.dbspecificfeatures.grabsequences", "sqldump.dbspecificfeatures.grabsynonyms", "sqldump.schemagrab.grants", null, "sqldump.dbspecificfeatures.grabexecutables",
 				"sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables" };
+		*/
 		
 		for(int i=0;i<types.length; i++) {
 			String t = types[i];

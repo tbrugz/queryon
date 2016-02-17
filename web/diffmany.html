@@ -12,6 +12,7 @@
 	<script type="text/javascript" src="js/prism.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
+	<script src="js/ddl.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnDiffManyUrl = 'diffmany/'
@@ -139,11 +140,12 @@ doClear = function() {
 }
 
 getDDLdiff = function(apply) {
-	var msg = document.getElementById('messages');
+	//var msg = document.getElementById('messages');
 	if(document.getElementById('modelFrom').value == document.getElementById('modelTo').value) {
 		console.log("getDDLdiff: same model");
-		msg.style.display = 'block';
-		msg.innerHTML = 'modelOrig and modelNew must not be the same';
+		showErrorMessages('messages', 'modelOrig and modelNew must not be the same');
+		//msg.style.display = 'block';
+		//msg.innerHTML = 'modelOrig and modelNew must not be the same';
 		//btnActionStop('go-button');
 		return;
 	}
@@ -170,7 +172,9 @@ getDDLdiff = function(apply) {
 	container.style.display = 'none';
 	var block = document.getElementById('content');
 	//block.style.display = 'none';
-	msg.style.display = 'none';
+	
+	closeMessages('messages');
+	//msg.style.display = 'none';
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -193,8 +197,10 @@ getDDLdiff = function(apply) {
 		},
 		error: function(error) {
 			console.log("getDDLdiff error=",error);
-			msg.style.display = 'block';
-			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
+			var message = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
+			showErrorMessages('messages', message);
+			//msg.style.display = 'block';
+			//msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
 			btnActionStop('go-button');
 		}
 	});
