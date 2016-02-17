@@ -28,7 +28,6 @@ import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
-import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -82,14 +81,12 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			pp.put("sqldiff.dodatadiff","false");
 			pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
 			pp.put("sqldump.schemagrab.db-specific-features", "true");
-			pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false");
+			pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
 			
 			//sqldump properties...
 			pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
 			List<String> typesList = Utils.getStringList(types, ",");
 			setPropForTypes(pp, typesList);
-			
-			//log.info("pp: "+pp);
 			
 			dump(pp, syntax, resp);
 		}
@@ -122,8 +119,6 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			else {
 				throw new BadRequestException("unknown syntax: "+syntax);
 			}
-			
-			DBMSResources.instance().setup(pp);
 			
 			int lastDiffCount = sqldiff.doIt();
 			log.info("diff count: "+lastDiffCount);
