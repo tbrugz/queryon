@@ -11,8 +11,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.util.QOnModelUtils;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.StringDecorator;
 
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);
@@ -71,7 +74,9 @@ public class DBUtil {
 		//prefix = prop.getProperty(prefix+".connpropprefix", prefix);
 		boolean autocommit = false;
 		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId)+" ; autocommit = "+autocommit);
-		return ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop, autocommit);
+		Connection conn = ConnectionUtil.initDBConnection(getDBConnPrefix(prop, modelId), prop, autocommit);
+		initStatics(conn);
+		return conn;
 	}
 
 	public static Connection initDBConn(Properties prop, String modelId, SchemaModel model) throws ClassNotFoundException, SQLException, NamingException {
@@ -104,6 +109,19 @@ public class DBUtil {
 			return false;
 		}
 		return true;
+	}
+	
+	static boolean staticsInited = false;
+	
+	protected static void initStatics(Connection conn) throws SQLException {
+		if(!staticsInited) {
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+			String quote = feat.getIdentifierQuoteString();
+			log.debug("quote:: "+quote);
+			//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quote);
+			SQL.setDBMSFeatures(feat);
+			staticsInited = true;
+		}
 	}
 	
 }

@@ -77,7 +77,6 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
-import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 /**
@@ -285,10 +284,10 @@ public class QueryOn extends HttpServlet {
 			//model = SchemaModelUtils.getDefaultModel(context);
 			dsutils = new DumpSyntaxUtils(prop);
 			
-			log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
+			//log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 			validateFilterColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_FILTERCOLNAME, validateFilterColumnNames);
 			
-			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
+			//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
 			
 			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);

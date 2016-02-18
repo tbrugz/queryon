@@ -32,6 +32,7 @@ import tbrugz.sqldiff.datadiff.HTMLDiff;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
 import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -108,8 +109,11 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			List<String> keyCols = keyColsFrom;
 			Table table = tFrom;
 			
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connFrom.getMetaData());
+			String quote = feat.getIdentifierQuoteString();
+			
 			//XXX test if keycols are the same in both models ?
-			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
+			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
 			DiffSyntax ds = getSyntax(obj, prop);
 			
 			runDiff(connFrom, connTo, sql, table, keyCols, modelIdFrom, modelIdTo, ds, resp.getWriter());

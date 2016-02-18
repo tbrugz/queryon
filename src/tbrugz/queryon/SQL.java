@@ -14,13 +14,13 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -48,6 +48,8 @@ public class SQL {
 	final Integer originalBindParameterCount;
 	final Integer limitMax;
 	final Integer limit;
+	
+	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
 	boolean orderByApplyed = false;
 	List<String> bindParameterValues = new ArrayList<String>();
@@ -341,12 +343,19 @@ public class SQL {
 		return "SQL[\n"+sql+"\n[bindpar="+bindParameterValues+"]]";
 	}
 	
-	public static String quoteString() {
-		return DBMSResources.instance().getIdentifierQuoteString();
+	protected static String quoteString() {
+		if(features!=null) {
+			features.getIdentifierQuoteString();
+		}
+		return "\"";
 	}
 	
 	public static boolean valid(String s) {
 		return s!=null && !s.equals("");
+	}
+	
+	public static void setDBMSFeatures(DBMSFeatures feat) {
+		features = feat;
 	}
 	
 	/* ----------------- extra SQL metadata ----------------- */
