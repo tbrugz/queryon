@@ -23,6 +23,8 @@ import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
@@ -61,7 +63,9 @@ public class Diff2QServlet extends DataDiffServlet {
 			List<String> keyCols = Utils.getStringList(keyColsParam, ",");
 			
 			String sql = sqlParam;
-			DiffSyntax ds = getSyntax(obj, prop);
+
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connFrom.getMetaData());
+			DiffSyntax ds = getSyntax(obj, feat, prop);
 			
 			runDiff(connFrom, connTo, sql, obj, keyCols, modelIdFrom, modelIdTo, ds, resp.getWriter());
 		}

@@ -114,7 +114,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			
 			//XXX test if keycols are the same in both models ?
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
-			DiffSyntax ds = getSyntax(obj, prop);
+			DiffSyntax ds = getSyntax(obj, feat, prop);
 			
 			runDiff(connFrom, connTo, sql, table, keyCols, modelIdFrom, modelIdTo, ds, resp.getWriter());
 		}
@@ -185,7 +185,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	}
 	
 	//XXX: get syntax based on URL or accept header
-	static DiffSyntax getSyntax(NamedTypedDBObject obj, Properties prop) throws SQLException {
+	static DiffSyntax getSyntax(NamedTypedDBObject obj, DBMSFeatures feat, Properties prop) throws SQLException {
 		DiffSyntax ds = null;
 		if("sql".equals(obj.getMimeType())) {
 			ds = new SQLDataDiffSyntax();
@@ -197,6 +197,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			throw new BadRequestException("unknown data type: "+obj.getMimeType());
 		}
 		ds.procProperties(prop);
+		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 		
 		return ds;
 	}

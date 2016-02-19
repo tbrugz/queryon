@@ -15,6 +15,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.Utils;
 
 /**
@@ -207,8 +210,10 @@ public class RequestSpec {
 			}
 		}
 		outputSyntax = outputSyntaxTmp;
-
-		setSyntaxProps(outputSyntax, req, prop);
+		
+		SchemaModel sm = SchemaModelUtils.getModel(req.getSession().getServletContext(), this.modelId);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
+		setSyntaxProps(outputSyntax, req, feat, prop);
 		
 		//---------------------
 		
@@ -424,7 +429,9 @@ public class RequestSpec {
 		return false;
 	}
 	
-	void setSyntaxProps(DumpSyntax ds, HttpServletRequest req, Properties initProps) {
+	void setSyntaxProps(DumpSyntax ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
+		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
+		
 		List<String> pkeys = Utils.getStringListFromProp(syntaxProperties, ds.getSyntaxId()+".allowed-parameters", ",");
 		//<syntax>.parameter@callback.prop=sqldump.datadump.<syntax>.zzz
 		//<syntax>.parameter@callback.regex=[a-zA-Z_][a-zA-Z_0-9]*
