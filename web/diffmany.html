@@ -4,6 +4,7 @@
 	<title>QOn + diffmany</title>
 	<link href="css/queryon.css" rel="stylesheet">
 	<link href="css/qon-components.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -15,6 +16,7 @@
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
 	<script src="js/ddl.js"></script>
+	<script src="js/menu.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnDiffManyUrl = 'diffmany/'
@@ -150,9 +152,9 @@ getDDLdiff = function(apply) {
 	//var msg = document.getElementById('messages');
 	if(document.getElementById('modelSource').value == document.getElementById('modelTarget').value) {
 		console.log("getDDLdiff: same model");
-		showErrorMessages('messages', 'modelOrig and modelNew must not be the same');
+		showErrorMessages('messages', "model 'base' and model 'newer' must not be the same");
 		//msg.style.display = 'block';
-		//msg.innerHTML = 'modelOrig and modelNew must not be the same';
+		//msg.innerHTML = "model 'base' and model 'newer' must not be the same";
 		//btnActionStop('go-button');
 		return;
 	}
@@ -331,7 +333,7 @@ getSelectMultiOptions = function(selectId) {
 		border: .5em solid hsl(0, 0%, 66%);
 	}
 	#models-container {
-		width: 140px;
+		width: 120px;
 		display: inline-block;
 	}
 	#models-container label {
@@ -381,10 +383,10 @@ getSelectMultiOptions = function(selectId) {
 
 	<span id="models-container">
 		<label style="background-color: #188859">
-			modelNew: <select id="modelTarget" onchange="onModelChanged();"></select>
+			newer: <select id="modelTarget" onchange="onModelChanged();"></select>
 		</label>
 		<label><!--  style="background-color: #A93636"-->
-			modelOrig: <select id="modelSource" onchange="updateState();"></select>
+			base: <select id="modelSource" onchange="updateState();"></select>
 		</label>
 	</span>
 	<label>
