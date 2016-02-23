@@ -177,7 +177,10 @@ loadObjectList = function() {
 			data = getQonData(data);
 			//console.log(data);
 			//TODOxx filtering data on client, should be on server...
-			loadSelect(data, 'object', function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; });
+			loadSelect(data, 'object',
+					function(data) { return data.name; },
+					function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; }
+					);
 			btnActionStop('object');
 		},
 		error: function(error) {
@@ -505,18 +508,19 @@ diffSwitchOrder = function() {
 
 // ----- utility functions
 
-loadSelect = function(data, selectId, callback) {
-	if(!callback) { callback = function(obj) { return obj; } }
+loadSelect = function(data, selectId, callbackName, callbackValue) {
+	if(!callbackName) { callbackName = function(obj) { return obj; } }
+	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
 	var sel = document.getElementById(selectId);
 	var prevOptionValue = sel.value;
 	$('#'+selectId).empty();
 	if(data==null) { console.log('null data; selectId: ',selectId); return; }
 	for(var i=0;i<data.length;i++) {
-		var name = callback(data[i]);
+		var name = callbackName(data[i]);
 		if(name==null) { continue; }
-		var optionValue = callback(data[i]);
+		var optionValue = callbackValue(data[i]);
 		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+optionValue+"</option>");
+		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
 	}
 }
 
@@ -538,24 +542,20 @@ domSwitchOrder = function(c1id, c2id) {
 		console.warn('Elements '+c1id+' & '+c2id+' do not have the same parent: ',c1.parentNode,' / ',c2.parentNode);
 		return;
 	}
-	var parent = c1.parentNode;
 	
-	var children = parent.childNodes;
-	for (var i = 0; i < children.length; i++) {
-		if(children[i]==c1) {
-			parent.removeChild(c2);
-			parent.insertBefore(c2, c1);
-			//console.log('[c1] inserting ',c2id,' before ',c1id,'');
-			return;
-		}
-		if(children[i]==c2) {
-			parent.removeChild(c1);
-			parent.insertBefore(c1, c2);
-			//console.log('[c2] inserting ',c1id,' before ',c2id,'');
-			return;
-		}
-	}
-	console.warn('switch '+c1id+' <-> '+c2id+' did not happen...');
+	domSwith2ElementsInternal(c1, c2);
+}
+
+domSwith2ElementsInternal = function(e1, e2) {
+	var parent = e1.parentNode;
+	var placeholder = document.createElement('div');
+	
+	parent.insertBefore(placeholder, e2);
+	parent.removeChild(e2);
+	parent.insertBefore(e2, e1);
+	parent.removeChild(e1);
+	parent.insertBefore(e1, placeholder);
+	parent.removeChild(placeholder);
 }
 
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {

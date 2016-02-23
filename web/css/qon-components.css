@@ -170,3 +170,7 @@
 	position: absolute;
 	bottom: 0px;
 }
+
+#models-container select {
+	width: 70px;
+}
