@@ -56,10 +56,10 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), ActionType.SELECT_ANY.name());
 		
-		String modelIdFrom = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_FROM);
-		String modelIdTo = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TO);
-		if(modelIdFrom.equals(modelIdTo)) {
-			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
+		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE);
+		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET);
+		if(modelIdSource.equals(modelIdTarget)) {
+			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}
 		
 		try {
@@ -67,14 +67,14 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			
 			ParametrizedProperties pp = new ParametrizedProperties();
 			pp.putAll(prop);
-			pp.put("sqldiff.target", modelIdTo);
-			pp.put("sqldiff.source", modelIdFrom);
-			pp.put("sqldiff."+modelIdFrom+".connpropprefix", DBUtil.getDBConnPrefix(prop, modelIdFrom));
-			pp.put("sqldiff."+modelIdTo+".connpropprefix", DBUtil.getDBConnPrefix(prop, modelIdTo));
-			//pp.put(DBUtil.getDBConnPrefix(prop, modelIdFrom)+".diffgrabclass","JDBCSchemaGrabber");
-			//pp.put(DBUtil.getDBConnPrefix(prop, modelIdTo)+".diffgrabclass","JDBCSchemaGrabber");
-			pp.put(DBUtil.getDBConnPrefix(prop, modelIdFrom)+".grabclass","JDBCSchemaGrabber");
-			pp.put(DBUtil.getDBConnPrefix(prop, modelIdTo)+".grabclass","JDBCSchemaGrabber");
+			pp.put("sqldiff.target", modelIdTarget);
+			pp.put("sqldiff.source", modelIdSource);
+			pp.put("sqldiff."+modelIdTarget+".connpropprefix", DBUtil.getDBConnPrefix(prop, modelIdTarget));
+			pp.put("sqldiff."+modelIdSource+".connpropprefix", DBUtil.getDBConnPrefix(prop, modelIdSource));
+			//pp.put(DBUtil.getDBConnPrefix(prop, modelIdSource)+".diffgrabclass","JDBCSchemaGrabber");
+			//pp.put(DBUtil.getDBConnPrefix(prop, modelIdTarget)+".diffgrabclass","JDBCSchemaGrabber");
+			pp.put(DBUtil.getDBConnPrefix(prop, modelIdTarget)+".grabclass","JDBCSchemaGrabber");
+			pp.put(DBUtil.getDBConnPrefix(prop, modelIdSource)+".grabclass","JDBCSchemaGrabber");
 			pp.put("sqldiff.dodatadiff","false");
 			pp.put("sqldiff.typestodiff", types);
 			

@@ -43,7 +43,7 @@ var typemap = {
 
 var schemasByModel = {};
 
-var defaultModelId = 'modelTo'; //modelTarget?
+var defaultModelId = 'modelTarget';
 
 $(document).ready(
 	function() {
@@ -69,13 +69,13 @@ $.ajax({
 		var json = JSON.parse(data);
 		//console.log(json);
 		if(json.models) {
-			loadSelect(json.models, 'modelFrom');
-			loadSelect(json.models, 'modelTo');
+			loadSelect(json.models, 'modelSource');
+			loadSelect(json.models, 'modelTarget');
 			//XXX select different model in each 'select' 
 		}
 		/*if(json.models.length>1) {
-			document.getElementById('modelFrom').parentNode.style.display = 'inline-block';
-			document.getElementById('modelTo').parentNode.style.display = 'inline-block';
+			document.getElementById('modelSource').parentNode.style.display = 'inline-block';
+			document.getElementById('modelTarget').parentNode.style.display = 'inline-block';
 		}*/
 		for(var i=0;i<json.models.length;i++) {
 			loadSchemas(json.models[i]);
@@ -148,7 +148,7 @@ doClear = function() {
 
 getDDLdiff = function(apply) {
 	//var msg = document.getElementById('messages');
-	if(document.getElementById('modelFrom').value == document.getElementById('modelTo').value) {
+	if(document.getElementById('modelSource').value == document.getElementById('modelTarget').value) {
 		console.log("getDDLdiff: same model");
 		showErrorMessages('messages', 'modelOrig and modelNew must not be the same');
 		//msg.style.display = 'block';
@@ -158,7 +158,7 @@ getDDLdiff = function(apply) {
 	}
 	
 	//apply = apply==='true'?'true':false;
-	// /qdiff/TABLE/<shcema>.<object>?modelFrom=x&modelTo=y
+	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
 	var syntax = "sql";
@@ -168,8 +168,8 @@ getDDLdiff = function(apply) {
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ types + '/'
 		+ syntax
-		+'?modelFrom='+document.getElementById('modelFrom').value
-		+'&modelTo='+document.getElementById('modelTo').value
+		+'?modelSource='+document.getElementById('modelSource').value
+		+'&modelTarget='+document.getElementById('modelTarget').value
 		//+(apply?"&doApply=true":"")
 		;
 	console.log("getDDLdiff: url=", url);
@@ -197,7 +197,7 @@ getDDLdiff = function(apply) {
 			if(data) {
 				//TODO: test if user has APPLY permission in type/model/schema (ajax) ...
 				//applyBtn.style.display = 'initial';
-				//applyBtn.value = 'apply DDL diff to '+document.getElementById('modelFrom').value;
+				//applyBtn.value = 'apply DDL diff to '+document.getElementById('modelSource').value;
 			}
 			btnActionStop('go-button');
 			Prism.highlightElement(block);
@@ -215,17 +215,17 @@ getDDLdiff = function(apply) {
 
 function updateState() {
 	//models
-	var select = document.getElementById('modelFrom');
-	var modelFrom = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
-	var select = document.getElementById('modelTo');
-	var modelTo = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	var select = document.getElementById('modelSource');
+	var modelSource = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	var select = document.getElementById('modelTarget');
+	var modelTarget = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	
 	//schemas & types
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
 	
-	if(modelFrom && modelTo && schema) {
-		history.replaceState(null, null, "#"+modelFrom+"/"+modelTo+"/"+schemas+"/"+types);
+	if(modelSource && modelTarget && schema) {
+		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types);
 	}
 }
 
@@ -234,10 +234,10 @@ function refreshSelectsState() {
 	if(hash.indexOf('#')==0) {
 		hash = hash.substring(1);
 		var parts = hash.split('/');
-		var modelFrom = document.getElementById('modelFrom');
-		modelFrom.value = parts[0];
-		var modelTo = document.getElementById('modelTo');
-		modelTo.value = parts[1];
+		var modelSource = document.getElementById('modelSource');
+		modelSource.value = parts[0];
+		var modelTarget = document.getElementById('modelTarget');
+		modelTarget.value = parts[1];
 		//XXX: update selects...
 		//var schema = document.getElementById('schema');
 		//schema.value = parts[2];
@@ -381,10 +381,10 @@ getSelectMultiOptions = function(selectId) {
 
 	<span id="models-container">
 		<label style="background-color: #188859">
-			modelNew: <select id="modelTo" onchange="onModelChanged();"></select>
+			modelNew: <select id="modelTarget" onchange="onModelChanged();"></select>
 		</label>
 		<label><!--  style="background-color: #A93636"-->
-			modelOrig: <select id="modelFrom" onchange="updateState();"></select>
+			modelOrig: <select id="modelSource" onchange="updateState();"></select>
 		</label>
 	</span>
 	<label>

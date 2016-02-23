@@ -47,14 +47,14 @@ public class Diff2QServlet extends DataDiffServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), obj.getFullObjectName());
 		
-		String modelIdFrom = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_FROM);
-		String modelIdTo = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TO);
-		if(modelIdFrom.equals(modelIdTo)) {
-			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
+		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE);
+		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET);
+		if(modelIdSource.equals(modelIdTarget)) {
+			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}
 		
-		Connection connFrom = DBUtil.initDBConn(prop, modelIdFrom);
-		Connection connTo = DBUtil.initDBConn(prop, modelIdTo);
+		Connection connSource = DBUtil.initDBConn(prop, modelIdSource);
+		Connection connTarget = DBUtil.initDBConn(prop, modelIdTarget);
 		
 		try {
 			String sqlParam = req.getParameter("sql");
@@ -64,14 +64,14 @@ public class Diff2QServlet extends DataDiffServlet {
 			
 			String sql = sqlParam;
 
-			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connFrom.getMetaData());
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connSource.getMetaData());
 			DiffSyntax ds = getSyntax(obj, feat, prop);
 			
-			runDiff(connFrom, connTo, sql, obj, keyCols, modelIdFrom, modelIdTo, ds, resp.getWriter());
+			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, resp.getWriter());
 		}
 		finally {
-			ConnectionUtil.closeConnection(connFrom);
-			ConnectionUtil.closeConnection(connTo);
+			ConnectionUtil.closeConnection(connSource);
+			ConnectionUtil.closeConnection(connTarget);
 		}
 	}
 

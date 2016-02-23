@@ -51,8 +51,8 @@ public class DiffServlet extends AbstractHttpServlet {
 	final boolean addComments = true;
 	final boolean instant = true; //setup 'instant' in init()
 
-	static final String PARAM_MODEL_FROM = "modelFrom";
-	static final String PARAM_MODEL_TO = "modelTo";
+	static final String PARAM_MODEL_SOURCE = "modelSource";
+	static final String PARAM_MODEL_TARGET = "modelTarget";
 	static final String PARAM_DO_APPLY = "doApply";
 	
 	@Override
@@ -72,10 +72,10 @@ public class DiffServlet extends AbstractHttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());
 		
-		String modelIdFrom = SchemaModelUtils.getModelId(req, PARAM_MODEL_FROM);
-		String modelIdTo = SchemaModelUtils.getModelId(req, PARAM_MODEL_TO);
-		if(modelIdFrom.equals(modelIdTo)) {
-			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
+		String modelIdSource = SchemaModelUtils.getModelId(req, PARAM_MODEL_SOURCE);
+		String modelIdTarget = SchemaModelUtils.getModelId(req, PARAM_MODEL_TARGET);
+		if(modelIdSource.equals(modelIdTarget)) {
+			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}
 
 		boolean previousDBIdDiffAddComments = DBIdentifiableDiff.addComments;
@@ -83,8 +83,8 @@ public class DiffServlet extends AbstractHttpServlet {
 		boolean doApply = getDoApply(req);
 		if(doApply) {
 			// XXX do NOT allow HTTP GET method...
-			String permissionPattern = obj.getType()+":"+QOnPrivilegeType.APPLYDIFF+":"+modelIdFrom;
-			log.info("aplying to '"+modelIdFrom+"'... permission: "+permissionPattern+" :: "+obj.getFullObjectName());
+			String permissionPattern = obj.getType()+":"+QOnPrivilegeType.APPLYDIFF+":"+modelIdSource;
+			log.info("aplying to '"+modelIdSource+"'... permission: "+permissionPattern+" :: "+obj.getFullObjectName());
 			ShiroUtils.checkPermission(currentUser, permissionPattern, obj.getFullObjectName());
 			if(!instant) {
 				throw new BadRequestException("cannot apply diff to non-instant QOS");
@@ -95,28 +95,28 @@ public class DiffServlet extends AbstractHttpServlet {
 			DBIdentifiableDiff.addComments = true;
 		}
 		
-		SchemaModel modelFrom = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdFrom);
-		if(modelFrom==null) {
-			throw new BadRequestException("Unknown model (from): "+modelIdFrom);
+		SchemaModel modelSource = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdSource);
+		if(modelSource==null) {
+			throw new BadRequestException("Unknown model (source): "+modelIdSource);
 		}
-		SchemaModel modelTo = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdTo);
-		if(modelTo==null) {
-			throw new BadRequestException("Unknown model (to): "+modelIdTo);
+		SchemaModel modelTarget = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdTarget);
+		if(modelTarget==null) {
+			throw new BadRequestException("Unknown model (target): "+modelIdTarget);
 		}
 
 		QueryOnSchema qos = getQOS();
 		
-		DBIdentifiable dbidFrom = null;
-		DBIdentifiable dbidTo = null;
+		DBIdentifiable dbidSource = null;
+		DBIdentifiable dbidTarget = null;
 		
 		try {
-			dbidFrom = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelFrom, prop, modelIdFrom);
+			dbidSource = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelSource, prop, modelIdSource);
 		}
 		catch(NotFoundException e) {
 			log.info("not found: "+e);
 		}
 		try {
-			dbidTo = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelTo, prop, modelIdTo);
+			dbidTarget = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelTarget, prop, modelIdTarget);
 		}
 		catch(NotFoundException e) {
 			log.info("not found: "+e);
@@ -128,42 +128,42 @@ public class DiffServlet extends AbstractHttpServlet {
 		ColumnDiff.updateFeatures(feat);
 		//res.updateDbId(qos.getLastDialect());
 		
-		/*if(dbidFrom==null) {
-			throw new NotFoundException("Object "+obj+" not found on model "+modelIdFrom);
+		/*if(dbidSource==null) {
+			throw new NotFoundException("Object "+obj+" not found on model "+modelIdSource);
 		}
-		if(dbidTo==null) {
-			throw new NotFoundException("Object "+obj+" not found on model "+modelIdTo);
+		if(dbidTarget==null) {
+			throw new NotFoundException("Object "+obj+" not found on model "+modelIdTarget);
 		}*/
 		
-		if(dbidFrom==null && dbidTo==null) {
-			throw new NotFoundException("Object "+obj+" not found on both '"+modelIdFrom+"' and '"+modelIdTo+"' models");
+		if(dbidSource==null && dbidTarget==null) {
+			throw new NotFoundException("Object "+obj+" not found on both '"+modelIdSource+"' and '"+modelIdTarget+"' models");
 		}
 		
 		List<Diff> diffs = null;
 		
-		if(dbidFrom==null) {
+		if(dbidSource==null) {
 			Diff diff = null;
-			if(dbidTo instanceof Table) {
-				diff = new TableDiff(ChangeType.ADD, (Table)dbidTo);
+			if(dbidTarget instanceof Table) {
+				diff = new TableDiff(ChangeType.ADD, (Table)dbidTarget);
 			}
 			else {
-				diff = new DBIdentifiableDiff(ChangeType.ADD, null, dbidTo, null);
+				diff = new DBIdentifiableDiff(ChangeType.ADD, null, dbidTarget, null);
 			}
 			diffs = newSingleElemList(diff);
 		}
-		else if(dbidTo==null) {
+		else if(dbidTarget==null) {
 			Diff diff = null;
-			if(dbidFrom instanceof Table) {
-				diff = new TableDiff(ChangeType.DROP, (Table) dbidFrom);
+			if(dbidSource instanceof Table) {
+				diff = new TableDiff(ChangeType.DROP, (Table) dbidSource);
 			}
 			else {
-				diff = new DBIdentifiableDiff(ChangeType.DROP, dbidFrom, null, null);
+				diff = new DBIdentifiableDiff(ChangeType.DROP, dbidSource, null, null);
 			}
 			diffs = newSingleElemList(diff);
 		}
-		else if(dbidFrom instanceof Table && dbidTo instanceof Table) {
-			Table origTable = (Table) dbidFrom;
-			Table newTable = (Table) dbidTo;
+		else if(dbidSource instanceof Table && dbidTarget instanceof Table) {
+			Table origTable = (Table) dbidSource;
+			Table newTable = (Table) dbidTarget;
 			diffs = TableDiff.tableDiffs(origTable, newTable);
 			if(diffs.size()==0) {
 				log.info("no diffs found");
@@ -172,12 +172,12 @@ public class DiffServlet extends AbstractHttpServlet {
 			//SchemaDiff.logInfo(diffs);
 		}
 		else {
-			Diff diff = new DBIdentifiableDiff(ChangeType.REPLACE, dbidFrom, dbidTo, null);
+			Diff diff = new DBIdentifiableDiff(ChangeType.REPLACE, dbidSource, dbidTarget, null);
 			diffs = newSingleElemList(diff);
 		}
 
 		if(doApply) {
-			applyDiffs(diffs, prop, modelIdFrom, resp);
+			applyDiffs(diffs, prop, modelIdSource, resp);
 		}
 		else {
 			dumpDiffs(diffs, resp);

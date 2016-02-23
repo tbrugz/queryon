@@ -55,7 +55,7 @@ var typemap = {
 
 var schemasByModel = {};
 
-var defaultModelId = 'modelTo';
+var defaultModelId = 'modelTarget';
 
 $(document).ready(
 	function() {
@@ -80,13 +80,13 @@ $.ajax({
 		var json = JSON.parse(data);
 		//console.log(json);
 		if(json.models) {
-			loadSelect(json.models, 'modelFrom');
-			loadSelect(json.models, 'modelTo');
+			loadSelect(json.models, 'modelSource');
+			loadSelect(json.models, 'modelTarget');
 			//XXX select different model in each 'select' 
 		}
 		/*if(json.models.length>1) {
-			document.getElementById('modelFrom').parentNode.style.display = 'inline-block';
-			document.getElementById('modelTo').parentNode.style.display = 'inline-block';
+			document.getElementById('modelSource').parentNode.style.display = 'inline-block';
+			document.getElementById('modelTarget').parentNode.style.display = 'inline-block';
 		}*/
 		for(var i=0;i<json.models.length;i++) {
 			loadSchemas(json.models[i]);
@@ -234,8 +234,8 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 doDiff = function() {
 	btnActionStart('go-button');
 	doClear();
-	getDDL('modelFrom','content-from','content-from-title', doDiffUsingJS);
-	getDDL('modelTo','content-to','content-to-title', doDiffUsingJS);
+	getDDL('modelSource','content-from','content-from-title', doDiffUsingJS);
+	getDDL('modelTarget','content-to','content-to-title', doDiffUsingJS);
 }
 
 doClear = function() {
@@ -279,11 +279,11 @@ doDiffUsingJS = function(viewType) {
 	var to = document.getElementById('content-to').innerHTML;
 	var diffc = document.getElementById('diffoutput-container');
 	if(from && to
-		&& (document.getElementById('modelFrom').value != document.getElementById('modelTo').value)
+		&& (document.getElementById('modelSource').value != document.getElementById('modelTarget').value)
 		) {
 		diffc.style.display = 'block';
 		diffUsingJS(viewType, from, to,
-			document.getElementById('modelFrom').value, document.getElementById('modelTo').value,
+			document.getElementById('modelSource').value, document.getElementById('modelTarget').value,
 			'diffoutput');
 		//XXX
 		if(document.getElementById('type').value=='TABLE') {
@@ -398,7 +398,7 @@ toggleDiff = function() {
 
 getDDLdiff = function(apply) {
 	var msg = document.getElementById('ddldiff-msg');
-	if(document.getElementById('modelFrom').value == document.getElementById('modelTo').value) {
+	if(document.getElementById('modelSource').value == document.getElementById('modelTarget').value) {
 		console.log("getDDLdiff: same model");
 		msg.style.display = 'block';
 		msg.innerHTML = 'modelOrig and modelNew must not be the same';
@@ -407,12 +407,12 @@ getDDLdiff = function(apply) {
 	}
 	
 	apply = apply==='true'?'true':false;
-	// /qdiff/TABLE/<shcema>.<object>?modelFrom=x&modelTo=y
+	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
 	var url = queryOnDiffUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
-		+'?modelFrom='+document.getElementById('modelFrom').value
-		+'&modelTo='+document.getElementById('modelTo').value
+		+'?modelSource='+document.getElementById('modelSource').value
+		+'&modelTarget='+document.getElementById('modelTarget').value
 		+(apply?"&doApply=true":"");
 	console.log("getDDLdiff: url=", url);
 	btnActionStart('getDdlDiffBtn');
@@ -433,7 +433,7 @@ getDDLdiff = function(apply) {
 			if(data) {
 				//TODO: test if user has APPLY permission in type/model/schema (ajax) ...
 				applyBtn.style.display = 'initial';
-				applyBtn.value = 'apply DDL diff to '+document.getElementById('modelFrom').value;
+				applyBtn.value = 'apply DDL diff to '+document.getElementById('modelSource').value;
 			}
 			btnActionStop('getDdlDiffBtn');
 		},
@@ -450,8 +450,8 @@ getDataDiffUrl = function(syntax) {
 	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
 	+ document.getElementById('object').value
 	+ (syntax?"."+syntax:"")
-	+'?modelFrom='+document.getElementById('modelFrom').value
-	+'&modelTo='+document.getElementById('modelTo').value
+	+'?modelSource='+document.getElementById('modelSource').value
+	+'&modelTarget='+document.getElementById('modelTarget').value
 	;
 }
 
@@ -461,14 +461,14 @@ doDataDiff = function(syntax) {
 }
 
 function updateState() {
-	var select = document.getElementById('modelFrom');
-	var modelFrom = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
-	var select = document.getElementById('modelTo');
-	var modelTo = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	var select = document.getElementById('modelSource');
+	var modelSource = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	var select = document.getElementById('modelTarget');
+	var modelTarget = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	var select = document.getElementById('schema');
 	var schema = select.options[select.selectedIndex].value;
-	if(modelFrom && modelTo && schema) {
-		history.replaceState(null, null, "#"+modelFrom+"/"+modelTo+"/"+schema);
+	if(modelSource && modelTarget && schema) {
+		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schema);
 	}
 }
 
@@ -477,10 +477,10 @@ function refreshSelectsState() {
 	if(hash.indexOf('#')==0) {
 		hash = hash.substring(1);
 		var parts = hash.split('/');
-		var modelFrom = document.getElementById('modelFrom');
-		modelFrom.value = parts[0];
-		var modelTo = document.getElementById('modelTo');
-		modelTo.value = parts[1];
+		var modelSource = document.getElementById('modelSource');
+		modelSource.value = parts[0];
+		var modelTarget = document.getElementById('modelTarget');
+		modelTarget.value = parts[1];
 		var schema = document.getElementById('schema');
 		schema.value = parts[2];
 	}
@@ -648,10 +648,10 @@ safeTags = function (str) {
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
 
 	<label><!--  style="background-color: #A93636"-->
-		modelOrig: <select id="modelFrom" onchange="updateState();"></select>
+		modelOrig: <select id="modelSource" onchange="updateState();"></select>
 	</label>
 	<label style="background-color: #188859">
-		modelNew: <select id="modelTo" onchange="onModelChanged();"></select>
+		modelNew: <select id="modelTarget" onchange="onModelChanged();"></select>
 	</label>
 	<label>
 		schema: <select id="schema" onchange="onSchemaChanged();"></select>

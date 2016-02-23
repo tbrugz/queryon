@@ -66,17 +66,17 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
 		
-		String modelIdFrom = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_FROM);
-		String modelIdTo = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TO);
-		if(modelIdFrom.equals(modelIdTo)) {
-			log.warn("equal models being compared [id="+modelIdFrom+"], no diffs can be generated");
+		String modelISource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE);
+		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET);
+		if(modelISource.equals(modelIdTarget)) {
+			log.warn("equal models being compared [id="+modelISource+"], no diffs can be generated");
 		}
 		
 		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
 		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
 		//XXX: 'common'(metadata) boolean parameter: get common columns from both models 
 		//String metadataId = req.getParameter("metadata");
-		//if(metadataId==null) { metadataId = modelIdFrom; }
+		//if(metadataId==null) { metadataId = modelIdSource; }
 		
 		/*SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), metadataId);
 		if(model==null) {
@@ -86,51 +86,51 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		QueryOnSchemaInstant qos = new QueryOnSchemaInstant();
 		//Table table = getTable(qos, obj, prop, model, metadataId);
 		
-		Connection connFrom = DBUtil.initDBConn(prop, modelIdFrom);
-		Connection connTo = DBUtil.initDBConn(prop, modelIdTo);
+		Connection connSource = DBUtil.initDBConn(prop, modelISource);
+		Connection connTarget = DBUtil.initDBConn(prop, modelIdTarget);
 		
 		try {
-			Table tFrom = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connFrom);
-			Table tTo = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTo);
+			Table tSource = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connSource);
+			Table tTarget = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTarget);
 			
-			if(tFrom==null) {
-				throw new BadRequestException("relation "+obj+" not found ["+DiffServlet.PARAM_MODEL_FROM+"]");
+			if(tSource==null) {
+				throw new BadRequestException("relation "+obj+" not found ["+DiffServlet.PARAM_MODEL_SOURCE+"]");
 			}
-			if(tTo==null) {
-				throw new BadRequestException("relation "+obj+" not found ["+DiffServlet.PARAM_MODEL_TO+"]");
+			if(tTarget==null) {
+				throw new BadRequestException("relation "+obj+" not found ["+DiffServlet.PARAM_MODEL_TARGET+"]");
 			}
 
-			List<Column> cols = DataDiff.getCommonColumns(tFrom, tTo);
+			List<Column> cols = DataDiff.getCommonColumns(tSource, tTarget);
 			String columnsForSelect = DataDiff.getColumnsForSelect(cols);
-			List<String> keyColsFrom = getKeyCols(tFrom);
-			List<String> keyColsTo = getKeyCols(tTo);
-			log.debug("keyCols: f="+keyColsFrom+" t="+keyColsTo+" / equals?="+keyColsFrom.equals(keyColsTo));
+			List<String> keyColsSource = getKeyCols(tSource);
+			List<String> keyColsTarget = getKeyCols(tTarget);
+			log.debug("keyCols: s="+keyColsSource+" t="+keyColsTarget+" / equals?="+keyColsSource.equals(keyColsTarget));
 			
-			List<String> keyCols = keyColsFrom;
-			Table table = tFrom;
+			List<String> keyCols = keyColsSource;
+			Table table = tSource;
 			
-			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connFrom.getMetaData());
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connSource.getMetaData());
 			String quote = feat.getIdentifierQuoteString();
 			
 			//XXX test if keycols are the same in both models ?
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
 			DiffSyntax ds = getSyntax(obj, feat, prop);
 			
-			runDiff(connFrom, connTo, sql, table, keyCols, modelIdFrom, modelIdTo, ds, resp.getWriter());
+			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, resp.getWriter());
 		}
 		finally {
-			ConnectionUtil.closeConnection(connFrom);
-			ConnectionUtil.closeConnection(connTo);
+			ConnectionUtil.closeConnection(connSource);
+			ConnectionUtil.closeConnection(connTarget);
 		}
 	}
 	
-	void runDiff(Connection connFrom, Connection connTo, String sql, NamedDBObject table, List<String> keyCols, String modelIdFrom, String modelIdTo, DiffSyntax ds, Writer writer) throws SQLException, IOException {
-		ResultSet rsFrom = runQuery(connFrom, sql, modelIdFrom, getQualifiedName(table));
-		ResultSet rsTo = runQuery(connTo, sql, modelIdTo, getQualifiedName(table));
+	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols, String modelIdSource, String modelIdTarget, DiffSyntax ds, Writer writer) throws SQLException, IOException {
+		ResultSet rsSource = runQuery(connSource, sql, modelIdSource, getQualifiedName(table));
+		ResultSet rsTarget = runQuery(connTarget, sql, modelIdTarget, getQualifiedName(table));
 		
 		// testing column types equality
-		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsTo.getMetaData()); 
-		ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsFrom.getMetaData());
+		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData());
+		ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsTarget.getMetaData()); 
 		if(!sRSColmd.equals(tRSColmd)) {
 			log.warn("["+table+"] metadata from ResultSets differ");
 			log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
@@ -139,12 +139,12 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
 		
-		//DBMSResources.instance().updateMetaData(connFrom.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
+		//DBMSResources.instance().updateMetaData(connSource.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
 		log.debug("diff for table '"+table+"'...");
-		rsdiff.diff(rsFrom, rsTo, table.getSchemaName(), table.getName(), keyCols, ds, writer);
+		rsdiff.diff(rsSource, rsTarget, table.getSchemaName(), table.getName(), keyCols, ds, writer);
 		log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 		
-		rsFrom.close(); rsTo.close();
+		rsSource.close(); rsTarget.close();
 	}
 	
 	/*QueryOnSchema getQOS() {
@@ -176,8 +176,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	ResultSet runQuery(Connection conn, String sql, String modelId, String tableName) {
 		try {
-			PreparedStatement stmtFrom = conn.prepareStatement(sql);
-			return stmtFrom.executeQuery();
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			return stmt.executeQuery();
 		}
 		catch(SQLException e) {
 			throw new BadRequestException("error in sql exec [model="+modelId+" ; '"+tableName+"']: "+sql);
