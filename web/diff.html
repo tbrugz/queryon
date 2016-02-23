@@ -69,6 +69,10 @@ $(document).ready(
 		}
 		loadSelect(tts, 'type');
 		loadAuthInfo();
+		//console.log('ready: cookies: ',document.cookie);
+		if(document.cookie.indexOf('modelorder=base1st')) {
+			diffSwitchOrder();
+		}
 	}
 );
 
@@ -498,10 +502,14 @@ diffSwitchOrder = function() {
 	if(panels[0].style.float=='left') {
 		panels[0].style.float='right';
 		panels[1].style.float='left';
+		document.cookie = 'modelorder=baselast';
+		//console.log('modelorder=baselast');
 	}
 	else {
 		panels[0].style.float='left';
 		panels[1].style.float='right';
+		document.cookie = 'modelorder=base1st';
+		//console.log('modelorder=base1st');
 	}
 	//XXX: set cookie
 }
@@ -696,6 +704,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
 
+	<span id="models-outer">
 	<span id="models-container">
 		<label id="modelSourceLabel"><!--  style="background-color: #A93636"-->
 			base: <select id="modelSource" onchange="updateState();"></select>
@@ -705,6 +714,8 @@ domSwith2ElementsInternal = function(e1, e2) {
 		</label>
 	</span>
 	<i class="fa fa-exchange" title="switch order" onclick="diffSwitchOrder();"></i>
+	</span>
+
 	<label>
 		schema: <select id="schema" onchange="onSchemaChanged();"></select>
 	</label>

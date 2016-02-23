@@ -174,3 +174,9 @@
 #models-container select {
 	width: 70px;
 }
+
+#models-outer {
+	border: 2px solid #666;
+	padding: 4px 0 6px 0;
+	margin-right: 2px;
+}
