@@ -9,6 +9,7 @@ function loadMenu() {
 	var menu = document.createElement("i"); //<i class="fa fa-bars"></i>
 	menu.setAttribute("class", "fa fa-bars");
 	menu.setAttribute("onclick", "toggleMenu()");
+	menu.setAttribute("title", "show/hide menu");
 
 	nav.insertBefore(menu,logo);
 	
