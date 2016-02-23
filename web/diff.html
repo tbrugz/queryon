@@ -488,6 +488,20 @@ function refreshSelectsState() {
 	}
 }
 
+diffSwitchOrder = function() {
+	domSwitchOrder('modelSourceLabel','modelTargetLabel');
+	//domSwitchOrder('content-from-panel','content-to-panel');
+	var panels = [document.getElementById('content-from-panel'),document.getElementById('content-to-panel')];
+	if(panels[0].style.float=='left') {
+		panels[0].style.float='right';
+		panels[1].style.float='left';
+	}
+	else {
+		panels[0].style.float='left';
+		panels[1].style.float='right';
+	}
+	//XXX: set cookie
+}
 
 // ----- utility functions
 
@@ -509,6 +523,39 @@ loadSelect = function(data, selectId, callback) {
 // see: http://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
 safeTags = function (str) {
 	return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
+}
+
+domSwitchOrder = function(c1id, c2id) {
+	var c1 = document.getElementById(c1id);
+	var c2 = document.getElementById(c2id);
+	if(c1==null) {
+		console.warn('Elements '+c1id+' not found');
+	}
+	if(c2==null) {
+		console.warn('Elements '+c2id+' not found');
+	}
+	if(c1.parentNode != c2.parentNode) {
+		console.warn('Elements '+c1id+' & '+c2id+' do not have the same parent: ',c1.parentNode,' / ',c2.parentNode);
+		return;
+	}
+	var parent = c1.parentNode;
+	
+	var children = parent.childNodes;
+	for (var i = 0; i < children.length; i++) {
+		if(children[i]==c1) {
+			parent.removeChild(c2);
+			parent.insertBefore(c2, c1);
+			//console.log('[c1] inserting ',c2id,' before ',c1id,'');
+			return;
+		}
+		if(children[i]==c2) {
+			parent.removeChild(c1);
+			parent.insertBefore(c1, c2);
+			//console.log('[c2] inserting ',c1id,' before ',c2id,'');
+			return;
+		}
+	}
+	console.warn('switch '+c1id+' <-> '+c2id+' did not happen...');
 }
 
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {
@@ -649,12 +696,15 @@ safeTags = function (str) {
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>diff</span></span>
 
-	<label><!--  style="background-color: #A93636"-->
-		base: <select id="modelSource" onchange="updateState();"></select>
-	</label>
-	<label style="background-color: #188859">
-		newer: <select id="modelTarget" onchange="onModelChanged();"></select>
-	</label>
+	<span id="models-container">
+		<label id="modelSourceLabel"><!--  style="background-color: #A93636"-->
+			base: <select id="modelSource" onchange="updateState();"></select>
+		</label>
+		<label id="modelTargetLabel" style="background-color: #188859">
+			newer: <select id="modelTarget" onchange="onModelChanged();"></select>
+		</label>
+	</span>
+	<i class="fa fa-exchange" title="switch order" onclick="diffSwitchOrder();"></i>
 	<label>
 		schema: <select id="schema" onchange="onSchemaChanged();"></select>
 	</label>
@@ -683,13 +733,15 @@ safeTags = function (str) {
 
 <div style="top: 33px; position: absolute; width: 98%;">
 
-	<div class="code-container" style="float: left;">
-		<div id="content-from-msg" class="message" style="display: none;"></div>
-		<pre style="display: none;"><span class="code-title" id="content-from-title"></span><code id="content-from" class="language-sql"></code></pre>
-	</div>
-	<div class="code-container" style="float: right;">
-		<div id="content-to-msg" class="message" style="display: none;"></div>
-		<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
+	<div id="code-panels">
+		<div class="code-container" style="float: left;" id="content-from-panel">
+			<div id="content-from-msg" class="message" style="display: none;"></div>
+			<pre style="display: none;"><span class="code-title" id="content-from-title"></span><code id="content-from" class="language-sql"></code></pre>
+		</div>
+		<div class="code-container" style="float: right;" id="content-to-panel">
+			<div id="content-to-msg" class="message" style="display: none;"></div>
+			<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
+		</div>
 	</div>
 	<!-- span style="position:relative; width: 49%; float:left;"><textarea id="content-from" class="code language-sql"></textarea></span>
 	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
