@@ -15,7 +15,6 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
-import tbrugz.sqldump.util.StringDecorator;
 
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);

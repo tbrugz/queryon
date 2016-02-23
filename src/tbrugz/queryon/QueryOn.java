@@ -403,7 +403,7 @@ public class QueryOn extends HttpServlet {
 		Connection conn = null;
 		if(schemaGrabber.needsConnection()) {
 			conn = DBUtil.initDBConn(prop, modelId);
-			DBMSResources.instance().updateMetaData(conn.getMetaData());
+			//DBMSResources.instance().updateMetaData(conn.getMetaData());
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
@@ -417,7 +417,7 @@ public class QueryOn extends HttpServlet {
 			dialect = DBMSResources.instance().detectDbId(conn.getMetaData(), false);
 			sm.setSqlDialect(dialect);
 		}*/
-		DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: should NOT be a singleton
+		//DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: should NOT be a singleton
 		
 		if(conn!=null) {
 			QOnModelUtils.setModelMetadata(sm, conn);
