@@ -547,6 +547,7 @@ domSwitchOrder = function(c1id, c2id) {
 		console.warn('Elements '+c2id+' not found');
 	}
 	if(c1.parentNode != c2.parentNode) {
+		// not really needed...
 		console.warn('Elements '+c1id+' & '+c2id+' do not have the same parent: ',c1.parentNode,' / ',c2.parentNode);
 		return;
 	}
@@ -555,15 +556,16 @@ domSwitchOrder = function(c1id, c2id) {
 }
 
 domSwith2ElementsInternal = function(e1, e2) {
-	var parent = e1.parentNode;
+	var p1 = e1.parentNode;
+	var p2 = e1.parentNode;
 	var placeholder = document.createElement('div');
 	
-	parent.insertBefore(placeholder, e2);
-	parent.removeChild(e2);
-	parent.insertBefore(e2, e1);
-	parent.removeChild(e1);
-	parent.insertBefore(e1, placeholder);
-	parent.removeChild(placeholder);
+	p2.insertBefore(placeholder, e2);
+	p2.removeChild(e2);
+	p1.insertBefore(e2, e1);
+	p1.removeChild(e1);
+	p2.insertBefore(e1, placeholder);
+	p2.removeChild(placeholder);
 }
 
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {

@@ -146,6 +146,7 @@ doDiff = function() {
 }
 
 doClear = function() {
+	document.getElementById('content-container').style.display = 'none';
 }
 
 getDDLdiff = function(apply) {
@@ -333,8 +334,10 @@ getSelectMultiOptions = function(selectId) {
 		border: .5em solid hsl(0, 0%, 66%);
 	}
 	#models-container {
-		width: 120px;
+		width: 140px;
 		display: inline-block;
+		padding: 2px 2px 2px 4px;
+		background-color: #555;
 	}
 	#models-container label {
 		margin: 2px 0 2px 0;

@@ -176,7 +176,8 @@
 }
 
 #models-outer {
-	border: 2px solid #666;
-	padding: 4px 0 6px 0;
+	/* border: 2px solid #666; */
 	margin-right: 2px;
+	padding: 4px 0 5px 0;
+	background-color: #555;
 }
