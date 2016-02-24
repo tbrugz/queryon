@@ -64,10 +64,16 @@ function toggleMenu() {
 			innerContent += li.outerHTML;
 		}
 	}
+	
+	var closebtn = document.createElement("i");
+	closebtn.setAttribute("class", "fa fa-times closebtn");
+	closebtn.setAttribute("onclick", "toggleMenu()");
+	
 	var menuUL = document.createElement("ul");
 	menuUL.innerHTML = innerContent;
+	menu.appendChild(closebtn);
 	menu.appendChild(menuUL);
-	menu.style.top = nav.offsetHeight + 'px';
+	//menu.style.top = nav.offsetHeight + 'px';
 	//console.log("toggleMenu... admin? "+authInfo.isAdmin+" ; "+innerContent);
 
 	menuicon.classList.remove("fa-bars");

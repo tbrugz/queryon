@@ -201,12 +201,13 @@ input[type=button].btn-delete {
 #leftmenu {
 	background-color: #ccc;
 	width: 15em;
-	padding: 10px;
+	/* padding: 10px; */
 	z-index: 100;
 	position: fixed;
 	top: 0px;
 	bottom: 0px;
 	border-right: 3px #999 solid;
+	/* border-top: 3px #999 solid; */
 }
 
 #leftmenu ul {
@@ -217,7 +218,7 @@ input[type=button].btn-delete {
 
 #leftmenu li {
 	padding: 2px;
-	margin: 0 0 12px 0;
+	margin: 0 6px 12px 0;
 	font-weight: bold;
 }
 
@@ -252,9 +253,20 @@ input[type=button].btn-delete {
 #leftmenu li.multimodel {
 	background-color: rgba(255, 153, 0, 0.8);
 }
+#leftmenu li.auth {
+	background-color: rgba(140, 140, 140, 0.43);
+}
 
 #leftmenu li.current {
 	background-color: #fff;
+}
+
+#leftmenu .closebtn {
+	/* position: absolute;
+	right: 10px; */
+	border: 2px solid #888;
+	padding: 2px 2px 2px 3px;
+	margin: 8px 4px 8px 4px;
 }
 
 /* typeahead */
