@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>QueryOn - go!</title>
+	<title>QueryOn</title>
 	<link href="css/queryon.css" rel="stylesheet">
 	<link href="css/qon-components.css" rel="stylesheet">
 	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
@@ -16,6 +16,12 @@ onLoad = function() {
 }
 
 makeHrefs = function() {}
+
+loadMenuContentCallback = function () {
+	//var menu = createMenuContent(false);
+	//var content = document.getElementById('content');
+	//content.appendChild(menu);
+}
 	</script>
 	<style type="text/css">
 	#logo-container {
@@ -35,6 +41,8 @@ makeHrefs = function() {}
 <body onload="onLoad();">
 <div id="logo-container">
 	<div id="logo">Query<span style="color: #ff8a47">On</span></div>
+</div>
+<div id="content">
 </div>
 </body>
 </html>
