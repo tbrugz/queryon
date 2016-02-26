@@ -6,6 +6,7 @@
 <%
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
 	String[] exposedKeys = {"queryon.models","queryon.models.default","queryon.qon-tables.table","queryon.qon-execs.table"};
+	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
 	String[] defaultValues = {null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE};
 	
 	int i = 0;

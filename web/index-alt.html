@@ -20,6 +20,7 @@ onLoad = function() {
 makeHrefs = function() {
 	//console.log("makeHrefs");
 	loadModelsContentCallback();
+	refreshAuthInfo();
 }
 
 loadMenuContentCallback = function () {
@@ -57,9 +58,27 @@ loadModelsContentCallback = function() {
 		padding-top: 200px;
 		text-align: center;
 	}
+	#authinfo {
+		position: absolute;
+		right: 0;
+		z-index: 20;
+		padding-top: 30px;
+		padding-right: 30px;
+		font-weight: bold;
+	}
+	#authinfo span {
+		padding: 8px;
+		background-color: #aaa;
+	}
+	#username {
+	}
 	</style>
 </head>
 <body onload="onLoad();">
+<span id="authinfo">
+	<span id="username"></span>
+	<span id="authaction"></span>
+</span>
 <div id="logo-container">
 	<div id="logo">Query<span style="color: #ff8a47">On</span></div>
 </div>
