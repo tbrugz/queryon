@@ -62,6 +62,7 @@ function toggleMenu() {
 function createMenuContent(addCloseBtn) {
 	var lis = menucontent.getElementsByTagName('li');
 	var menu = document.createElement("div");
+	menu.classList.add("leftmenu");
 	var innerContent = '';
 	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
 	var hasLoginLink = document.getElementById('authaction') != null;

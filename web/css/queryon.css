@@ -210,33 +210,33 @@ input[type=button].btn-delete {
 	/* border-top: 3px #999 solid; */
 }
 
-#leftmenu ul {
+.leftmenu ul {
 	list-style: none;
 	padding: 0 0 0 5px;
 	margin: 0;
 }
 
-#leftmenu li {
+.leftmenu li {
 	padding: 2px;
 	margin: 0 6px 12px 0;
 	font-weight: bold;
 }
 
-#leftmenu li a {
+.leftmenu li a {
 	text-decoration: none;
 }
 
-#leftmenu li a, #leftmenu li a:visited {
+.leftmenu li a, #leftmenu li a:visited {
 	color: #000;
 }
 
-#leftmenu li a em {
+.leftmenu li a em {
 	color: #777;
 	font-size: smaller;
 }
 
 /* https://gist.github.com/chsh/2341675 */
-#leftmenu li a[target="_blank"]:after {
+.leftmenu li a[target="_blank"]:after {
 	/* color: #f00; */
 	content: "\f08e";
 	font-family: FontAwesome;
@@ -247,21 +247,21 @@ input[type=button].btn-delete {
 	font-size: smaller;
 }
 
-#leftmenu li.dev {
+.leftmenu li.dev {
 	background-color: rgba(255, 153, 0, 0.43);
 }
-#leftmenu li.multimodel {
+.leftmenu li.multimodel {
 	background-color: rgba(255, 153, 0, 0.8);
 }
-#leftmenu li.auth {
+.leftmenu li.auth {
 	background-color: rgba(140, 140, 140, 0.43);
 }
 
-#leftmenu li.current {
+.leftmenu li.current {
 	background-color: #fff;
 }
 
-#leftmenu .closebtn {
+.leftmenu .closebtn {
 	/* position: absolute;
 	right: 10px; */
 	border: 2px solid #888;

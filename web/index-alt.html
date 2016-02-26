@@ -18,9 +18,9 @@ onLoad = function() {
 makeHrefs = function() {}
 
 loadMenuContentCallback = function () {
-	//var menu = createMenuContent(false);
-	//var content = document.getElementById('content');
-	//content.appendChild(menu);
+	var menu = createMenuContent(false);
+	var content = document.getElementById('content');
+	content.appendChild(menu);
 }
 	</script>
 	<style type="text/css">
@@ -35,6 +35,14 @@ loadMenuContentCallback = function () {
 		left: 0;
 		right: 0;
 		position: absolute;
+	}
+	#content {
+		font-size: large;
+		position: absolute;
+		left: 40%;
+		right: 40%;
+		padding-top: 200px;
+		text-align: center;
 	}
 	</style>
 </head>
