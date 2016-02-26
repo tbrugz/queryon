@@ -1,9 +1,9 @@
 
 var modelsInfo = null;
 
-function loadModels() {
+function loadModels(callback) {
 	var oReq = new XMLHttpRequest();
-	oReq.addEventListener("load", loadModelsContent);
+	oReq.addEventListener("load", callback?callback:loadModelsContent);
 	oReq.open("GET", "info/model.jsp");
 	oReq.send();
 }
