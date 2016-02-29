@@ -45,6 +45,15 @@ public String normalize(String s) {
 				Connection conn = DBUtil.initDBConn(prop, modelId);
 				schemas = SQLUtils.getSchemaNames(conn.getMetaData());
 				conn.close();
+				List<String> s2i = Utils.getStringListFromProp(prop, QueryOn.PROP_SCHEMAS_TO_IGNORE, ",");
+				if(s2i!=null) {
+					for(int i=schemas.size()-1;i>=0;i--) {
+						String s = schemas.get(i);
+						if(s2i.contains(s)) {
+							schemas.remove(i);
+						}
+					}
+				}
 				schemasByModel.put(modelId, schemas);
 			}
 			catch(Exception e) {

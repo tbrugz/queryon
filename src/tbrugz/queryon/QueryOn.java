@@ -185,6 +185,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_VALIDATE_GETMETADATA = "queryon.validate.x-getmetadata";
 	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
+	public static final String PROP_SCHEMAS_TO_IGNORE = "queryon.schemas-to-ignore";
 	
 	static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	
