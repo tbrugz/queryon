@@ -164,6 +164,9 @@ public class SQL {
 		}
 		else if(filter.length()>0) {
 			if(relation!=null && relation instanceof Query) {
+				/*if(! allowEncapsulation) {
+					throw new BadRequestException("filter not allowed in query "+relation.getName());
+				}*/
 				sql = "select * from (\n"+sql+"\n) qon_filter";
 			}
 			sql += " where "+filter+" "+PARAM_FILTER_CLAUSE;
@@ -171,6 +174,10 @@ public class SQL {
 	}
 	
 	private void addProjection(String columns) {
+		/*if(! allowEncapsulation) {
+			throw new BadRequestException("projection not allowed in query "+relation.getName());
+		}*/
+
 		String sqlFilter = "";
 		if(!sql.contains(PARAM_WHERE_CLAUSE) && !sql.contains(PARAM_FILTER_CLAUSE)) {
 			sqlFilter = " " + PARAM_WHERE_CLAUSE;
@@ -242,6 +249,9 @@ public class SQL {
 		}
 		else if(strategy==LimitOffsetStrategy.SQL_ROWNUM) {
 			if(limit>0 && offset>0) {
+				/*if(! allowEncapsulation) {
+					throw new BadRequestException("limit/offset not allowed in query "+relation.getName());
+				}*/
 				/* //works, but query below is simpler
 				sql =
 					 "select * from\n"
@@ -267,6 +277,9 @@ public class SQL {
 			}
 			else if(limit>0) {
 				if(orderByApplyed) {
+					/*if(! allowEncapsulation) {
+						throw new BadRequestException("filter not allowed in query "+relation.getName());
+					}*/
 					sql = "select * from (\n"+sql+"\n) where rownum <= "+limit; 
 				}
 				else {
@@ -274,6 +287,9 @@ public class SQL {
 				}
 			}
 			else {
+				/*if(! allowEncapsulation) {
+					throw new BadRequestException("filter not allowed in query "+relation.getName());
+				}*/
 				sql = "select * from " 
 					+"( select a.*, ROWNUM rnum from (\n"
 					+ sql

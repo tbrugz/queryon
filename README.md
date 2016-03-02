@@ -3,7 +3,7 @@ queryon
 =======
 
 A REST-like API that follows the naked objects pattern. More like a 'naked database objects' API.
-Depends on [sqldump](https://bitbucket.org/tbrugz/sqldump) 
+Depends on [sqldump](https://bitbucket.org/tbrugz/sqldump)
 
 Database objects are defined by a properties file. See 
 [queryon.template.properties](https://bitbucket.org/tbrugz/queryon/src/tip/src/queryon.template.properties)
@@ -16,6 +16,19 @@ More info about QueryOn:
 * "the [index](web/doc/index.md)" - in-app help index
 
 -- [Telmo Brugnara](mailto:tbrugz@gmail.com)
+
+
+building
+--------
+
+Dependencies: java 1.6+ ; maven 2+
+
+Building:
+
+	`mvn install`
+
+Important: QueryOn usually depends on the latest version of [sqldump](https://bitbucket.org/tbrugz/sqldump),
+so you may need to build it first - and publish it to your local maven repo
 
 
 license

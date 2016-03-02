@@ -484,7 +484,9 @@ public class RequestSpec {
 	 * XXX may use: columns, offset, limit, filters, order??
 	 */
 	public String getCanonicalUrl(Properties prop) {
-		String url = prop.getProperty(QueryOn.PROP_BASE_URL)+object+"/";
+		String base = prop.getProperty(QueryOn.PROP_BASE_URL, "");
+		if(!base.endsWith("/")) { base += "/"; }
+		String url = base + object + "/";
 		//url = url.replaceAll("\\/+", "\\/");
 		String params = Utils.join(this.params, "/");
 		return url+params;

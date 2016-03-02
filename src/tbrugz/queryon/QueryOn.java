@@ -252,6 +252,8 @@ public class QueryOn extends HttpServlet {
 			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
 			String path = "http://"+InetAddress.getLocalHost().getHostName()+"/";
 			//+getServletContext().getContextPath();
+			// scheme://domain:port/path?query_string#fragment_id - http://en.wikipedia.org/wiki/Uniform_resource_locator
+			//String path = "http://"+InetAddress.getLocalHost().getHostName()+"/"+getServletContext().getContextPath();
 			prop.setProperty(PROP_BASE_URL, path);
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
 			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
