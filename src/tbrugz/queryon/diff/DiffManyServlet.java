@@ -27,15 +27,24 @@ import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.SQLDiff;
+import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * debugDumpModel action:
+ * <servlet>/<schemas>/<types>/<syntax>?model=<modelId>&action=debugDumpModel
+ */
 public class DiffManyServlet extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(DiffManyServlet.class);
+	
+	public static final String PARAM_ACTION = "action";
+	
+	public static final String ACTION_DUMP_DEBUG = "debugDumpModel";
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
@@ -55,6 +64,19 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), ActionType.SELECT_ANY.name());
+		
+		// debug mode
+		String action = req.getParameter(PARAM_ACTION);
+		if(action!=null) {
+			if(ACTION_DUMP_DEBUG.equals(action)) {
+				String modelId = SchemaModelUtils.getModelId(req);
+				doDumpModelDebug(modelId, prop, schemas, types, resp);
+				return;
+			}
+			else {
+				throw new BadRequestException("unknown action: "+action);
+			}
+		}
 		
 		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE);
 		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET);
@@ -76,52 +98,64 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			pp.put(DBUtil.getDBConnPrefix(prop, modelIdTarget)+".grabclass","JDBCSchemaGrabber");
 			pp.put(DBUtil.getDBConnPrefix(prop, modelIdSource)+".grabclass","JDBCSchemaGrabber");
 			pp.put("sqldiff.dodatadiff","false");
-			pp.put("sqldiff.typestodiff", types);
+			String types2diff = types;
+					/*.replaceAll("\\bFUNCTION\\b", "EXECUTABLE")
+					.replaceAll("\\bPROCEDURE\\b", "EXECUTABLE")
+					.replaceAll("\\bPACKAGE_BODY\\b", "EXECUTABLE")
+					.replaceAll("\\bPACKAGE\\b", "EXECUTABLE")
+					;*/
+			pp.put("sqldiff.typestodiff", types2diff);
 			
 			pp.put("sqldiff.dodatadiff","false");
-			pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
-			pp.put("sqldump.schemagrab.db-specific-features", "true");
-			pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
 			
-			//sqldump properties...
-			pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
-			List<String> typesList = Utils.getStringList(types, ",");
-			setPropForTypes(pp, typesList);
+			setupDumpProperties(pp, schemas, types);
 			
 			dump(pp, syntax, resp);
 		}
 		finally {
 		}
 	}
+	
+	void setupDumpProperties(Properties pp, String schemas, String types) {
+		pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
+		pp.put("sqldump.schemagrab.db-specific-features", "true");
+		pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
 		
+		//sqldump properties...
+		pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
+
+		List<String> typesList = Utils.getStringList(types, ",");
+		setPropForTypes(pp, typesList);
+	}
+	
 	void dump(Properties pp, String syntax, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
-			SQLDiff sqldiff = new SQLDiff();
-			sqldiff.setProperties(pp);
-			
-			//XXX: return SchemaDiff.logInfo()?
-			
-			sqldiff.procProterties();
-			// using 'syntax' param
-			if("xml".equals(syntax)) {
-				sqldiff.setXmlWriter(resp.getWriter());
-			}
-			else if("json".equals(syntax)) {
-				sqldiff.setJsonWriter(resp.getWriter());
-			}
-			else if("patch".equals(syntax)) {
-				sqldiff.setPatchWriter(resp.getWriter());
-			}
-			else if("sql".equals(syntax)) {
-				// "sql": every DDL in plain text...
-				CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
-				sqldiff.setCategorizedOut(cout);
-			}
-			else {
-				throw new BadRequestException("unknown syntax: "+syntax);
-			}
-			
-			int lastDiffCount = sqldiff.doIt();
-			log.info("diff count: "+lastDiffCount);
+		SQLDiff sqldiff = new SQLDiff();
+		sqldiff.setProperties(pp);
+		
+		//XXX: return SchemaDiff.logInfo()?
+		
+		sqldiff.procProterties();
+		// using 'syntax' param
+		if("xml".equals(syntax)) {
+			sqldiff.setXmlWriter(resp.getWriter());
+		}
+		else if("json".equals(syntax)) {
+			sqldiff.setJsonWriter(resp.getWriter());
+		}
+		else if("patch".equals(syntax)) {
+			sqldiff.setPatchWriter(resp.getWriter());
+		}
+		else if("sql".equals(syntax)) {
+			// "sql": every DDL in plain text...
+			CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
+			sqldiff.setCategorizedOut(cout);
+		}
+		else {
+			throw new BadRequestException("unknown syntax: "+syntax);
+		}
+		
+		int lastDiffCount = sqldiff.doIt();
+		log.info("diff count: "+lastDiffCount);
 	}
 	
 	void setPropForTypes(Properties prop, List<String> typesToGrab) {
@@ -130,7 +164,6 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		String[] types = { "TABLE", "FK", "VIEW", "INDEX", "TRIGGER",
 				"SEQUENCE", "SYNONYM", "GRANT", "MATERIALIZED_VIEW", "FUNCTION",
 				"PACKAGE", "PACKAGE_BODY", "PROCEDURE" };
-
 				
 		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, AbstractDBMSFeatures.PROP_GRAB_VIEWS, AbstractDBMSFeatures.PROP_GRAB_INDEXES, AbstractDBMSFeatures.PROP_GRAB_TRIGGERS,
 				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, "sqldump.schemagrab.grants", null, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES,
@@ -160,4 +193,21 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		}
 	}
 	
+	void doDumpModelDebug(String modelId, Properties prop, String schemas, String types, HttpServletResponse resp) {
+		ParametrizedProperties pp = new ParametrizedProperties();
+		pp.putAll(prop);
+		pp.put("sqldump.connpropprefix", DBUtil.getDBConnPrefix(prop, modelId));
+		pp.put("sqldump.grabclass", "JDBCSchemaGrabber");
+		pp.put("sqldump.processingclasses", "JAXBSchemaXMLSerializer");
+		setupDumpProperties(pp, schemas, types);
+		
+		SQLDump sqldump = new SQLDump();
+		try {
+			sqldump.doMain(null, pp, null, resp.getWriter());
+		} catch (Exception e) {
+			log.warn("Error invoking sqldump", e);
+			throw new BadRequestException("Error invoking sqldump", e);
+		}
+	}
+
 }
