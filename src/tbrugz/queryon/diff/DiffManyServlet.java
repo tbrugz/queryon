@@ -35,7 +35,8 @@ import tbrugz.sqldump.util.Utils;
 
 /*
  * debugDumpModel action:
- * <servlet>/<schemas>/<types>/<syntax>?model=<modelId>&action=debugDumpModel
+ * <servlet-context>/<schemas>/<types>/<syntax>?model=<modelId>&action=debugDumpModel
+ * - syntaxes: xml, json
  */
 public class DiffManyServlet extends AbstractHttpServlet {
 
@@ -70,7 +71,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		if(action!=null) {
 			if(ACTION_DUMP_DEBUG.equals(action)) {
 				String modelId = SchemaModelUtils.getModelId(req);
-				doDumpModelDebug(modelId, prop, schemas, types, resp);
+				doDumpModelDebug(modelId, prop, schemas, types, syntax, resp);
 				return;
 			}
 			else {
@@ -193,12 +194,22 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		}
 	}
 	
-	void doDumpModelDebug(String modelId, Properties prop, String schemas, String types, HttpServletResponse resp) {
+	void doDumpModelDebug(String modelId, Properties prop, String schemas, String types, String syntax, HttpServletResponse resp) {
 		ParametrizedProperties pp = new ParametrizedProperties();
 		pp.putAll(prop);
 		pp.put("sqldump.connpropprefix", DBUtil.getDBConnPrefix(prop, modelId));
 		pp.put("sqldump.grabclass", "JDBCSchemaGrabber");
-		pp.put("sqldump.processingclasses", "JAXBSchemaXMLSerializer");
+		
+		if("xml".equals(syntax)) {
+			pp.put("sqldump.processingclasses", "JAXBSchemaXMLSerializer");
+		}
+		else if("json".equals(syntax)) {
+			pp.put("sqldump.processingclasses", "JSONSchemaSerializer");
+		}
+		else {
+			throw new BadRequestException("unknown syntax: "+syntax);
+		}
+		
 		setupDumpProperties(pp, schemas, types);
 		
 		SQLDump sqldump = new SQLDump();
