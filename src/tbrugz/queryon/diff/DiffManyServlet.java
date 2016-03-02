@@ -50,8 +50,8 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
 		
 		List<String> partz = QueryOnSchema.parseQS(req);
-		if(partz.size()<1) {
-			throw new BadRequestException("Malformed URL");
+		if(partz.size()<3) {
+			throw new BadRequestException("Malformed URL: "+partz+" [3 parts needed]");
 		}
 		log.info("partz: "+partz);
 		
