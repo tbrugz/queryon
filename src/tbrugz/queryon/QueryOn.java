@@ -344,6 +344,8 @@ public class QueryOn extends HttpServlet {
 					up.setSchemaModel(sm);
 					up.onInit();
 				}
+				
+				ConnectionUtil.closeConnection(conn);
 			}
 			catch(Exception e) {
 				log.warn("Exception starting update-plugin [model="+modelId+"]: "+e, e);
@@ -424,7 +426,7 @@ public class QueryOn extends HttpServlet {
 		
 		if(conn!=null) {
 			QOnModelUtils.setModelMetadata(sm, conn);
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 		return sm;
 	}
@@ -808,7 +810,7 @@ public class QueryOn extends HttpServlet {
 			throw e;
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	
@@ -865,7 +867,7 @@ public class QueryOn extends HttpServlet {
 			throw e;
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 
@@ -894,7 +896,7 @@ public class QueryOn extends HttpServlet {
 			throw e;
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	
@@ -1000,7 +1002,7 @@ public class QueryOn extends HttpServlet {
 			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 
@@ -1161,7 +1163,7 @@ public class QueryOn extends HttpServlet {
 			//XXX throw new InternalServerException("SQL Error: "+e);
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 
@@ -1253,7 +1255,7 @@ public class QueryOn extends HttpServlet {
 			throw new InternalServerException("SQL Error: "+e);
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 
@@ -1350,7 +1352,7 @@ public class QueryOn extends HttpServlet {
 			throw new InternalServerException("SQL Error: "+e);
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	
@@ -1703,7 +1705,7 @@ public class QueryOn extends HttpServlet {
 					throw e;
 				}
 				finally {
-					conn.close();
+					ConnectionUtil.closeConnection(conn);
 				}
 				return true;
 			}

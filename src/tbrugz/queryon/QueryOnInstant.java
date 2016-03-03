@@ -37,6 +37,7 @@ import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
+import tbrugz.sqldump.util.ConnectionUtil;
 
 /*
  * TODO: 'instant' servlets SHOULD NOT modify model, right?
@@ -68,6 +69,8 @@ public class QueryOnInstant extends QueryOn {
 		}
 		
 		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+
+		try {
 		final DBMSResources res = DBMSResources.instance();
 		//String dbid = res.detectDbId(conn.getMetaData(), true);
 		//final DBMSFeatures feat = res.getSpecificFeatures(dbid);
@@ -217,18 +220,19 @@ public class QueryOnInstant extends QueryOn {
 			break;
 		}
 		default: {
-			conn.close();
 			log.warn("doStatus: unknown object: "+statusType);
 			throw new BadRequestException("unknown object: "+statusType);
 		}
 		}
 		
-		conn.close();
-		
 		rs = filterStatus(rs, reqspec, currentUser, PrivilegeType.SELECT); //XXX: should be SHOW privilege?
 		
 		dumpResultSet(rs, reqspec, null, objectName, statusUniqueColumns, null, null, true, resp);
 		if(rs!=null) { rs.close(); }
+		}
+		finally {
+			ConnectionUtil.closeConnection(conn);
+		}
 	}
 	
 	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypesList) throws SQLException {

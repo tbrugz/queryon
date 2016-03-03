@@ -24,6 +24,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.ConnectionUtil;
 
 /*
  * TODOne: 'instant' servlets SHOULD NOT modify model, right?
@@ -58,8 +59,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 
 	@Override
 	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
-		Connection conn = DBUtil.initDBConn(prop, modelId);
+		Connection conn = null;
 		try {
+			conn = DBUtil.initDBConn(prop, modelId);
 			DBIdentifiable dbid = getObject(type, schemaName, objectName, conn);
 			if(dbid==null) {
 				throw new NotFoundException("null object? [ "+schemaName+"."+objectName+" ; type="+type+" ]");
@@ -69,7 +71,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			return dbid;
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	

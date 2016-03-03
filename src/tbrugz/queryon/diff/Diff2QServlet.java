@@ -53,10 +53,13 @@ public class Diff2QServlet extends DataDiffServlet {
 			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}
 		
-		Connection connSource = DBUtil.initDBConn(prop, modelIdSource);
-		Connection connTarget = DBUtil.initDBConn(prop, modelIdTarget);
+		Connection connSource = null;
+		Connection connTarget = null;
 		
 		try {
+			connSource = DBUtil.initDBConn(prop, modelIdSource);
+			connTarget = DBUtil.initDBConn(prop, modelIdTarget);
+			
 			String sqlParam = req.getParameter("sql");
 			//XXX req.getParameterValues("keycols"); ??
 			String keyColsParam = req.getParameter("keycols");

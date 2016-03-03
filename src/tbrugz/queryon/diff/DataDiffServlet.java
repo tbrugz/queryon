@@ -86,10 +86,13 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		QueryOnSchemaInstant qos = new QueryOnSchemaInstant();
 		//Table table = getTable(qos, obj, prop, model, metadataId);
 		
-		Connection connSource = DBUtil.initDBConn(prop, modelISource);
-		Connection connTarget = DBUtil.initDBConn(prop, modelIdTarget);
+		Connection connSource = null;
+		Connection connTarget = null;
 		
 		try {
+			connSource = DBUtil.initDBConn(prop, modelISource);
+			connTarget = DBUtil.initDBConn(prop, modelIdTarget);
+			
 			Table tSource = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connSource);
 			Table tTarget = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTarget);
 			

@@ -37,6 +37,7 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.ConnectionUtil;
 
 /*
  * TODOne: apply diff option - add authorization like <type>:APPLYDIFF:<model>:<schema>:<name>
@@ -211,9 +212,10 @@ public class DiffServlet extends AbstractHttpServlet {
 	}
 	
 	void applyDiffs(List<Diff> diffs, Properties prop, String modelId, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException {
-		Connection conn = DBUtil.initDBConn(prop, modelId);
+		Connection conn = null;
 		String sql = null;
 		try {
+			conn = DBUtil.initDBConn(prop, modelId);
 			for(Diff d: diffs) {
 				List<String> sqls = d.getDiffList();
 				for(String s: sqls) {
@@ -234,7 +236,7 @@ public class DiffServlet extends AbstractHttpServlet {
 			throw new BadRequestException("Error: ["+e+"] ; sql =\n"+sql);
 		}
 		finally {
-			conn.close();
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	
