@@ -34,6 +34,7 @@ import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Trigger;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
@@ -45,7 +46,7 @@ public class QueryOnInstant extends QueryOn {
 	private static final Log log = LogFactory.getLog(QueryOnInstant.class);
 	
 	static final TableType[] tableTypes = new TableType[]{ TableType.TABLE };
-	static final TableType[] viewTypes = new TableType[]{ TableType.VIEW, TableType.MATERIALIZED_VIEW, TableType.SYSTEM_VIEW };
+	static final TableType[] viewTypes = new TableType[]{ TableType.VIEW }; //, TableType.MATERIALIZED_VIEW, TableType.SYSTEM_VIEW };
 	static final TableType[] materializedViewTypes = new TableType[]{ TableType.MATERIALIZED_VIEW };
 	
 	static final List<TableType> tableTypesList = Arrays.asList(tableTypes);
@@ -94,10 +95,15 @@ public class QueryOnInstant extends QueryOn {
 			break;
 		}
 		case MATERIALIZED_VIEW: {
+			List<View> rels = new ArrayList<View>();
+			feat.grabDBViews(rels, schemaName, null, conn);
+			keepRelationsByType(rels, "materialized view");
+			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, rels, View.class);
+			
 			//List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
 			//keepRelationsByType(rels, "materialized view");
-			List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
+			//List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
+			//rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
 			break;
 		}
 		case RELATION: {
@@ -234,24 +240,12 @@ public class QueryOnInstant extends QueryOn {
 		ResultSet rs = dbmd.getTables(null, schemaName, null, null);
 		long elapsed = (System.currentTimeMillis()-initTime);
 		//taking too long? monitor generated SQL? jdbc connection proxy?
-		log.debug("getTables: elapsed = "+elapsed);
+		log.debug("grabRelationNames: elapsed = "+elapsed);
 		int count = 0;
 		while(rs.next()) {
-			String name = rs.getString("TABLE_NAME");
-			//Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
-			String type = rs.getString("TABLE_TYPE");
-			TableType ttype = TableType.getTableType(type, name);
-			if(!tableTypesList.contains(ttype)) {
-				//log.info("ignored table: "+name+" ["+type+"/"+ttype+"] should be of type ["+tableTypesList+"]");
-				continue;
-			}
-			//if(t!=null) { continue; }
-			
-			Table newt = new Table();
-			newt.setSchemaName(schemaName);
-			newt.setName(name);
-			newt.setType(ttype);
-			newt.setRemarks(rs.getString("REMARKS"));
+			Table newt = newTable(rs, schemaName);
+			if(!tableTypesList.contains(newt.getType())) continue;
+
 			ret.add(newt);
 			count++;
 			//boolean added = model.getTables().add(newt);
@@ -264,6 +258,41 @@ public class QueryOnInstant extends QueryOn {
 		}
 		log.info(count+" relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;
+	}
+
+	/*
+	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, TableType tableType) throws SQLException {
+		List<Relation> ret = new ArrayList<Relation>();
+		long initTime = System.currentTimeMillis();
+		ResultSet rs = dbmd.getTables(null, schemaName, null, new String[]{ tableType.getName() });
+		long elapsed = (System.currentTimeMillis()-initTime);
+		log.info("grabRelationNames[2]: elapsed = "+elapsed);
+		int count = 0;
+		while(rs.next()) {
+			Table newt = newTable(rs, schemaName);
+			if(tableType!=newt.getType()) continue;
+
+			ret.add(newt);
+			count++;
+		}
+		log.info(count+" relations retrieved [elapsed="+elapsed+"ms]");
+		return ret;
+	}
+	*/
+	
+	static Table newTable(ResultSet rs, String schemaName) throws SQLException {
+		String name = rs.getString("TABLE_NAME");
+		//Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, name);
+		String type = rs.getString("TABLE_TYPE");
+		TableType ttype = TableType.getTableType(type, name);
+		//if(t!=null) { continue; }
+		
+		Table newt = new Table();
+		newt.setSchemaName(schemaName);
+		newt.setName(name);
+		newt.setType(ttype);
+		newt.setRemarks(rs.getString("REMARKS"));
+		return newt;
 	}
 	
 	/*
@@ -329,11 +358,10 @@ public class QueryOnInstant extends QueryOn {
 		log.info("keepExecsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+execs.size());
 	}
 
-	/*
-	static void keepRelationsByType(List<Relation> relations, String relationType) {
+	static void keepRelationsByType(List<? extends Relation> relations, String relationType) {
 		int initSize = relations.size();
 		int removed = 0;
-		Iterator<Relation> iter = relations.iterator();
+		Iterator<? extends Relation> iter = relations.iterator();
 		while(iter.hasNext()){
 			Relation v = iter.next();
 			if(!v.getRelationType().equals(relationType)) {
@@ -343,8 +371,8 @@ public class QueryOnInstant extends QueryOn {
 		}
 		log.info("keepRelationsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+relations.size());
 	}
-	*/
 	
+	/*
 	static String[] tableTypeArr2StringArr(List<TableType> types) {
 		String[] ret = new String[types.size()];
 		for(int i=0;i<types.size();i++) {
@@ -352,6 +380,8 @@ public class QueryOnInstant extends QueryOn {
 		}
 		return ret;
 	}
+	*/
+	
 	/*
 	static List<FK> grabFKs(String schemaName, DatabaseMetaData dbmd) throws SQLException {
 		List<FK> ret = new ArrayList<FK>();
