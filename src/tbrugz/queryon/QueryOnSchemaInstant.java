@@ -119,6 +119,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			//XXX how to get FK from dbmd by name (only filtering by table or schema...)? grab from model (the 'cache')? not "instant"...
 			log.info("FK [type "+type+"] '"+objectName+"' cannot be grabbed");
 			break;
+		case SYNONYM:
+			feat.grabDBSynonyms(ret, schemaName, objectName, conn);
+			break;
 		default:
 			log.warn("object of type "+type+" cannot be grabbed");
 		}

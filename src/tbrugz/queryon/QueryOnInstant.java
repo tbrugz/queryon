@@ -30,6 +30,7 @@ import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Trigger;
@@ -52,8 +53,10 @@ public class QueryOnInstant extends QueryOn {
 	static final List<TableType> materializedViewTypesList = Arrays.asList(materializedViewTypes);
 	
 	static final List<String> statusTriggerAllColumns;
+	static final List<String> statusSynonymAllColumns;
 	static {
 		statusTriggerAllColumns = new ArrayList<String>(); statusTriggerAllColumns.addAll(statusUniqueColumns); statusTriggerAllColumns.addAll(Arrays.asList(new String[]{"tableName"}));
+		statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
 	}
 	
 	@SuppressWarnings("resource")
@@ -190,6 +193,14 @@ public class QueryOnInstant extends QueryOn {
 			//XXXxx: not caching into model...
 			//model.getForeignKeys().addAll(list);
 			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
+			break;
+		}
+		case SYNONYM: {
+			List<Synonym> synonyms = new ArrayList<Synonym>();
+			feat.grabDBSynonyms(synonyms, schemaName, null, conn);
+			log.info("#synonyms: "+synonyms.size()); //+" ; synonyms: "+synonyms+" ; cols:: "+statusSynonymAllColumns);
+
+			rs = new ResultSetListAdapter<Synonym>(objectName, statusUniqueColumns, statusSynonymAllColumns, synonyms, Synonym.class);
 			break;
 		}
 		default: {
