@@ -196,7 +196,10 @@ loadObjectList = function(callback) {
 			var keys = Object.keys(data);
 			data = getQonData(data);
 			//console.log(data);
-			loadSelect(data, 'object', function(data) { updateSelectedQueryState(true); return (data.schemaName?data.schemaName+".":"")+data.name; });
+			loadSelect(data, 'object', 
+				function(data) { return data.name; },
+				function(data) { /*updateSelectedQueryState(true);*/ return (data.schemaName?data.schemaName+".":"")+data.name; }
+				);
 			btnActionStop('object');
 		},
 		error: function(error) {
@@ -246,11 +249,19 @@ updateUI = function() {}
 
 // ----- utility functions
 
-loadSelect = function(data, selectId, callback) {
-	if(!callback) { callback = function(obj) { return obj; } }
+loadSelect = function(data, selectId, callbackName, callbackValue) {
+	if(!callbackName) { callbackName = function(obj) { return obj; } }
+	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
+	var sel = document.getElementById(selectId);
+	var prevOptionValue = sel.value;
 	$('#'+selectId).empty();
+	if(data==null) { console.log('null data; selectId: ',selectId); return; }
 	for(var i=0;i<data.length;i++) {
-		$('#'+selectId).append("<option value='"+callback(data[i])+"'>"+callback(data[i])+"</option>");
+		var name = callbackName(data[i]);
+		if(name==null) { continue; }
+		var optionValue = callbackValue(data[i]);
+		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
+		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
 	}
 }
 

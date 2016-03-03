@@ -53,10 +53,10 @@ public class QueryOnInstant extends QueryOn {
 	static final List<TableType> materializedViewTypesList = Arrays.asList(materializedViewTypes);
 	
 	static final List<String> statusTriggerAllColumns;
-	static final List<String> statusSynonymAllColumns;
+	//static final List<String> statusSynonymAllColumns;
 	static {
 		statusTriggerAllColumns = new ArrayList<String>(); statusTriggerAllColumns.addAll(statusUniqueColumns); statusTriggerAllColumns.addAll(Arrays.asList(new String[]{"tableName"}));
-		statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
+		//statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
 	}
 	
 	@SuppressWarnings("resource")
@@ -150,6 +150,13 @@ public class QueryOnInstant extends QueryOn {
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, pkgs, ExecutableObject.class);
 			break;
 		}
+		/*case INDEX: {
+			List<Index> indexes = grabIndexes(schemaName, dbmd);
+			log.info("#indexes: "+indexes.size());
+
+			rs = new ResultSetListAdapter<Index>(objectName, statusUniqueColumns, indexes, Index.class);
+			break;
+		}*/
 		case TRIGGER: {
 			List<Trigger> triggers = new ArrayList<Trigger>();
 			//XXX: DBMSFeatures show have a grabDbTriggerNames ... trigger body is retrieved every time...
@@ -200,11 +207,12 @@ public class QueryOnInstant extends QueryOn {
 			feat.grabDBSynonyms(synonyms, schemaName, null, conn);
 			log.info("#synonyms: "+synonyms.size()); //+" ; synonyms: "+synonyms+" ; cols:: "+statusSynonymAllColumns);
 
-			rs = new ResultSetListAdapter<Synonym>(objectName, statusUniqueColumns, statusSynonymAllColumns, synonyms, Synonym.class);
+			rs = new ResultSetListAdapter<Synonym>(objectName, statusUniqueColumns, /*statusSynonymAllColumns,*/ synonyms, Synonym.class);
 			break;
 		}
 		default: {
 			conn.close();
+			log.warn("doStatus: unknown object: "+statusType);
 			throw new BadRequestException("unknown object: "+statusType);
 		}
 		}
@@ -257,6 +265,22 @@ public class QueryOnInstant extends QueryOn {
 		log.info(count+" relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;
 	}
+	
+	/*
+	static List<Index> grabIndexes(String schemaName, String tableName, DatabaseMetaData dbmd) throws SQLException {
+		List<Index> ret = new ArrayList<Index>();
+		//long initTime = System.currentTimeMillis();
+		
+		//XXX: table name must not be null :(
+		ResultSet indexesrs = dbmd.getIndexInfo(null, schemaName, tableName, false, false);
+		JDBCSchemaGrabber.grabSchemaIndexes(indexesrs, ret);
+		JDBCSchemaGrabber.closeResultSetAndStatement(indexesrs);
+		
+		//long elapsed = (System.currentTimeMillis()-initTime);
+		//log.debug("grabIndexes: elapsed = "+elapsed);
+		return ret;
+	}
+	*/
 	
 	static List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
 		try {
