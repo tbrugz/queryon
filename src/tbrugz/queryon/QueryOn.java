@@ -321,13 +321,13 @@ public class QueryOn extends HttpServlet {
 	void setupUpdatePlugins(ServletContext context, List<String> updatePluginList) {
 		List<String> updatePluginsStr = new ArrayList<String>();
 		updatePlugins.clear();
-		if(updatePluginList!=null) {
-			for(String upPluginStr: updatePluginList) {
-				UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
-				up.setProperties(prop);
-				updatePlugins.add(up);
-				updatePluginsStr.add(up.getClass().getSimpleName());
-			}
+		if(updatePluginList==null) { return; }
+		
+		for(String upPluginStr: updatePluginList) {
+			UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
+			up.setProperties(prop);
+			updatePlugins.add(up);
+			updatePluginsStr.add(up.getClass().getSimpleName());
 		}
 		
 		log.info("update-plugins: "+updatePluginsStr);
