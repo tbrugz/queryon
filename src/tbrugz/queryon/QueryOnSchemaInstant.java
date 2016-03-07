@@ -95,10 +95,12 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			return t;
 			//break;
 		case VIEW:
-		case MATERIALIZED_VIEW:
 			//log.info("before:: #view = "+model.getViews().size()+" ["+schemaName+"."+objectName+"]");
 			//List<View> views = new ArrayList<View>();
 			feat.grabDBViews(ret, schemaName, objectName, conn);
+			break;
+		case MATERIALIZED_VIEW:
+			feat.grabDBMaterializedViews(ret, schemaName, objectName, conn);
 			break;
 		case PROCEDURE:
 		case FUNCTION:

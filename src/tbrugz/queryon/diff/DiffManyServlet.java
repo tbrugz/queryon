@@ -35,8 +35,10 @@ import tbrugz.sqldump.util.Utils;
 
 /*
  * debugDumpModel action:
- * <servlet-context>/<schemas>/<types>/<syntax>?model=<modelId>&action=debugDumpModel
+ * <servlet-context>/<schemas>/<types>/<syntax:xml|json|sql>?model=<modelId>&action=debugDumpModel
  * - syntaxes: xml, json
+ * 
+ * XXX: create AbstractDDLDumpServlet, DdlManyServlet
  */
 public class DiffManyServlet extends AbstractHttpServlet {
 
@@ -205,6 +207,9 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		}
 		else if("json".equals(syntax)) {
 			pp.put("sqldump.processingclasses", "JSONSchemaSerializer");
+		}
+		else if("sql".equals(syntax)) {
+			pp.put("sqldump.processingclasses", "SchemaModelScriptDumper");
 		}
 		else {
 			throw new BadRequestException("unknown syntax: "+syntax);

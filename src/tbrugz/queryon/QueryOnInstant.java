@@ -99,8 +99,9 @@ public class QueryOnInstant extends QueryOn {
 		}
 		case MATERIALIZED_VIEW: {
 			List<View> rels = new ArrayList<View>();
-			feat.grabDBViews(rels, schemaName, null, conn);
-			keepRelationsByType(rels, "materialized view");
+			//feat.grabDBViews(rels, schemaName, null, conn);
+			//keepRelationsByType(rels, "materialized view");
+			feat.grabDBMaterializedViews(rels, schemaName, null, conn);
 			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, rels, View.class);
 			
 			//List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
