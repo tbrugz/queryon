@@ -5,14 +5,16 @@
 	<link href="css/queryon.css" rel="stylesheet">
 	<link href="css/qon-components.css" rel="stylesheet">
 	<link href="css/charts.css" rel="stylesheet">
+	<link href="css/nv.d3.css" rel="stylesheet">
 	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script src="js/d3.min.js"></script>
+	<script src="js/nv.d3.min.js"></script>
+	<script src="js/charts-nv.js"></script>
 	<script src="js/qon-base.js"></script>
-	<script src="js/charts-d3.js"></script>
 	<script src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
 	<script src="js/queryon-b2.js"></script>
@@ -34,11 +36,20 @@
 	width: 100%;
 	height: 500px;
 }
+svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
 	</style>
 </head>
 <body onload="onLoad();">
 	<div id="nav" class="navbar">
-		<span id="logo">QOn + d3.js</span>
+		<span id="logo">QOn + 
+			<span style="color: rgb(174, 199, 232);">nv</span>
+			<span style="color: rgb(255, 127, 14);">d3</span>.js
+			<!-- rgb(31, 119, 180); ?? -->
+		</span>
 		
 		<label>
 			<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();"></select>
@@ -51,7 +62,7 @@
 			<input type="button" value="+ filter" onclick="addFilterDialog();"/>
 			<label id="columns-label">columns: <input type="text" id="columns" onchange="onNavElementChanged();"/></label>
 			<label id="order-label">order: <input type="text" name="order" id="order" onchange="onNavElementChanged();"/></label>
-			<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunD3();"/>
+			<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunNvD3();"/>
 		</span>
 		
 		<span id="authinfo">
@@ -64,6 +75,7 @@
 
 	<div class="container" id="container2">
 		<div class="container" id="chartcontainer">
+			<svg></svg>
 		</div>
 	</div>
 
@@ -80,15 +92,14 @@ var updateFromFilters = function() {
 	makeHrefs();
 }
 
-var doRunD3 = function() {
+var doRunNvD3 = function() {
 	//var url = document.getElementById('url').value;
 	var url = getQueryUrl('objects');
 	var columns = document.getElementById('columns').value.split(',');
 	document.getElementById('chartcontainer').innerHTML = '';
 	closeMessages('messages');
 	btnActionStart('go-button');
-	//runD3(url, columns, d3multiseries, containerId, callbackOk, callbackError);
-	runD3(url, columns, d3multiseries, 'chartcontainer',
+	runNvD3(url, columns, nvD3LineChart, 'chartcontainer',
 			function() { btnActionStop('go-button'); },
 			function(error) {
 				console.log('error', error);
@@ -112,8 +123,8 @@ function updateState() {
 function updateSelectedQueryState() {
 	var bigParts = updateSelectedQueryStateParameters();
 	//console.log('chart: updateSelectedQueryState: ', bigParts);
-	document.getElementById('columns').value = bigParts[1] || '';
-	document.getElementById('order').value = bigParts[2] || '';
+	document.getElementById('columns').value = bigParts ? bigParts[1] || '' : '' ;
+	document.getElementById('order').value = bigParts ? bigParts[2] || '' : '';
 }
 
 function onNavElementChanged() {
