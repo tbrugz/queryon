@@ -41,8 +41,8 @@ license - notable exceptions
 ----------------------------
 * `/web/css/font-awesome/*` - [SIL OFL 1.1](http://scripts.sil.org/OFL) - <https://fortawesome.github.io/Font-Awesome/>
 * `/web/map/js/jscolor/*` - GNU LGPL - <http://jscolor.com/>, <http://www.gnu.org/copyleft/lesser.html>
-* `/web/js/d3*` - BSD license - <https://github.com/mbostock/d3/blob/master/LICENSE>
 * `/web/js/ace/*` - BSD license - <https://github.com/ajaxorg/ace/blob/master/LICENSE>
+* `/web/js/d3*` - BSD license - <https://github.com/mbostock/d3/blob/master/LICENSE>
 * `/web/js/jquery-*` - MIT License - <https://jquery.org/license/>
 * `/web/js/jquery.key.js` - MIT License - <https://github.com/OscarGodson/jKey>
 * `/web/[js|css]/jsdifflib/*` - BSD license - <https://github.com/cemerick/jsdifflib#license>

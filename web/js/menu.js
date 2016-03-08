@@ -78,7 +78,7 @@ function createMenuContent(addCloseBtn) {
 			var href = li.getElementsByTagName("a")[0].getAttribute("href");
 			if(href.startsWith(".")) { href = href.substring(1); }
 			//console.log("menu["+i+"]: ",location.pathname," ; ",href);
-			if(location.pathname.endsWith(href)) {
+			if(location.pathname.endsWith("/"+href)) {
 				li.classList.add("current");
 			}
 			if(li.classList.contains("auth") && href.indexOf('?return')<0) {
