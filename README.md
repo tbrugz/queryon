@@ -47,6 +47,7 @@ license - notable exceptions
 * `/web/js/jquery.key.js` - MIT License - <https://github.com/OscarGodson/jKey>
 * `/web/[js|css]/jsdifflib/*` - BSD license - <https://github.com/cemerick/jsdifflib#license>
 * `/web/js/markdown.js` - MIT License - <https://github.com/evilstreak/markdown-js#license>
+* `/web/[js|css]/nv.d3*` - Apache License 2.0 - <https://github.com/novus/nvd3/blob/master/LICENSE.md>
 * `/web/[js|css]/prism.[js|css]` - MIT License - <https://github.com/LeaVerou/prism/blob/gh-pages/LICENSE>
 * `/web/js/sigma/*` - MIT License - <https://github.com/jacomyal/sigma.js/blob/master/LICENSE.txt>
 * `/web/js/typeahead.bundle.js`- MIT License - <https://github.com/twitter/typeahead.js/blob/master/LICENSE>
