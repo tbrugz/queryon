@@ -98,16 +98,14 @@ public class QueryOnInstant extends QueryOn {
 			break;
 		}
 		case MATERIALIZED_VIEW: {
+			// using feat.grabDBMaterializedViews...
 			List<View> rels = new ArrayList<View>();
-			//feat.grabDBViews(rels, schemaName, null, conn);
-			//keepRelationsByType(rels, "materialized view");
 			feat.grabDBMaterializedViews(rels, schemaName, null, conn);
 			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, rels, View.class);
 			
-			//List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
-			//keepRelationsByType(rels, "materialized view");
-			//List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
-			//rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
+			// using dbmd.getTables...
+			/*List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);*/
 			break;
 		}
 		case RELATION: {
@@ -239,15 +237,15 @@ public class QueryOnInstant extends QueryOn {
 	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypesList) throws SQLException {
 		List<Relation> ret = new ArrayList<Relation>();
 		long initTime = System.currentTimeMillis();
-		//String[] ttypes = null;
-		//if(tableTypesList!=null) { ttypes = tableTypeArr2StringArr(tableTypesList); }
-		//ResultSet rs = dbmd.getTables(null, schemaName, null, ttypes);
-		ResultSet rs = dbmd.getTables(null, schemaName, null, null);
+		String[] ttypes = null;
+		if(tableTypesList!=null) { ttypes = tableTypeArr2StringArr(tableTypesList); }
+		ResultSet rs = dbmd.getTables(null, schemaName, null, ttypes);
 		long elapsed = (System.currentTimeMillis()-initTime);
 		//taking too long? monitor generated SQL? jdbc connection proxy?
-		log.debug("grabRelationNames: elapsed = "+elapsed);
-		int count = 0;
+		log.debug("grabRelationNames: schema = "+schemaName+" ; types = "+Arrays.toString(ttypes)+" ; dbmd = "+dbmd.getClass().getSimpleName()+" ; elapsed = "+elapsed);
+		int count = 0, countAll = 0;
 		while(rs.next()) {
+			countAll++;
 			Table newt = newTable(rs, schemaName);
 			if(!tableTypesList.contains(newt.getType())) continue;
 
@@ -261,7 +259,7 @@ public class QueryOnInstant extends QueryOn {
 				count++;
 			}*/
 		}
-		log.info(count+" relations retrieved [elapsed="+elapsed+"ms]");
+		log.info(count+" [of "+countAll+"] relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;
 	}
 
@@ -377,15 +375,13 @@ public class QueryOnInstant extends QueryOn {
 		log.info("keepRelationsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+relations.size());
 	}
 	
-	/*
 	static String[] tableTypeArr2StringArr(List<TableType> types) {
 		String[] ret = new String[types.size()];
 		for(int i=0;i<types.size();i++) {
-			ret[i] = types.get(i).toString();
+			ret[i] = types.get(i).toString().replace('_', ' ');
 		}
 		return ret;
 	}
-	*/
 	
 	/*
 	static List<FK> grabFKs(String schemaName, DatabaseMetaData dbmd) throws SQLException {
