@@ -76,10 +76,18 @@ function nvD3LineChart(data, containerId) {
 			transitionDuration : 300,
 			useInteractiveGuideline : true
 		});
+		/*var dateFormat = d3.time.format.multi([
+			["%Y-%m-%d %H:%M:%S.%L", function(d) { return d.getMilliseconds(); }],
+			["%Y-%m-%d %H:%M:%S", function(d) { return d.getSeconds()||d.getMinutes()||d.getHours(); }],
+			["%Y-%m-%d", function() { return true; }]
+		]);*/
 		// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly,
 		// return themselves, not the parent chart, so need to chain separately
-		chart.xAxis//.axisLabel("Time (s)")
-			.tickFormat(d3.format(',.1f'))
+		chart.xAxis.axisLabel("Row #")
+			.tickFormat(d3.format(',.0d'))
+			/*.tickFormat(function(d) {
+				return dateFormat(new Date(d))
+			})*/
 			.staggerLabels(true);
 		chart.yAxis//.axisLabel('Voltage (v)')
 			.tickFormat(function(d) {
