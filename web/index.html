@@ -557,11 +557,12 @@
 	}*/
 	#logo {
 		/*padding: 2px;*/
-		font-size: 11pt;
+		/* font-size: 11pt; */
 		/*padding-left: 10px;
 		padding-right: 10px;*/
+		margin-top: 3px;
 		font-weight: bolder;
-		background-color: #666;
+		background-color: #555;
 	}
 	#parameter {
 		z-index: 10;
@@ -620,7 +621,7 @@
 <body onload="onLoad();" id="body">
 
 <nav id="nav" class="navbar">
-	<span id="logo">QueryOn</span>
+	<span id="logo">Query<span style="color: #ff8a47;">On</span></span>
 
 	<label>
 		<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();">
