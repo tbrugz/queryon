@@ -194,3 +194,9 @@ a, a:visited {
 #modelLabel input {
 	width: 6em;
 }
+
+#logo {
+	font-weight: bold;
+	background-color: #777;
+	margin-top: 0px;
+}

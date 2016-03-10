@@ -31,6 +31,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX add 'enabled' column?
  * XXX add audit table (inserts, updates & deletes on table qon_queries)?
  * TODO: saving with 'SQLQueries+QOnQueries' may create inconsistencies when exception occurs in 2nd (QOnQueries) processor (can't rollback 1st processor actions)
+ * TODO: should implement UpdatePlugin
  */
 public class QOnQueries extends SQLQueries {
 

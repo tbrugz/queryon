@@ -235,6 +235,12 @@ modelId = SchemaModelUtils.getModelId(request);
 		var name = document.getElementById('name').value;
 		var remarks = document.getElementById('remarks').value;
 		var roles = document.getElementById('roles').value;
+
+		if(name==null || name=="") {
+			errorMessage('query <b>name</b> cannot be null...');
+			updateUI();
+			return;
+		}
 		
 		var reqData = {
 			/*"sqldump.queries.addtomodel": "true",
@@ -625,6 +631,7 @@ if(remarks==null) { remarks = ""; }
 
 <div id="spec">
 <div class="container" id="objectid-container">
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Editor</code></span>
 	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
