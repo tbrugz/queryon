@@ -262,7 +262,7 @@ public class QueryOn extends HttpServlet {
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
-			log.info("syntaxes: "+DumpSyntaxRegistry.getSyntaxes());
+			log.info("syntaxes: "+getSimpleClassNames(DumpSyntaxRegistry.getSyntaxes()) );
 			
 			Map<String, SchemaModel> models = new LinkedHashMap<String, SchemaModel>();
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
@@ -1722,6 +1722,15 @@ public class QueryOn extends HttpServlet {
 		catch(IllegalArgumentException e) {
 			return null;
 		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	static <T> List<String> getSimpleClassNames(List<Class<? extends T>> classes) {
+		List<String> l = new ArrayList<String>();
+		for(Class c: classes) {
+			l.add(c.getSimpleName());
+		}
+		return l;
 	}
 	
 }

@@ -94,7 +94,7 @@ loadSchemas = function(model) {
 			var json = JSON.parse(data);
 			//console.log(json);
 			if(json.schemas) {
-				schemasByModel[model] = json.schemas;
+				schemasByModel[model?model:""] = json.schemas;
 				//XXX: merge model's schemas?
 				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
 				joinSchemas();
@@ -117,7 +117,9 @@ joinSchemas = function() {
 
 onModelChanged = function(doNotUpdateFragment) {
 	var m = document.getElementById('model').value;
-	loadSelect(schemasByModel[m], 'schema');
+	var schemas = schemasByModel[m];
+	
+	loadSelect(schemas, 'schema');
 	loadObjectList();
 	if(!doNotUpdateFragment) { updateURLFragment(); }
 }

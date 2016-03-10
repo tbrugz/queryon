@@ -48,7 +48,7 @@ public class QOnModelUtils {
 			model.setMetadata(new TreeMap<String, String>());
 		}
 		model.getMetadata().put("database-product", conn.getMetaData().getDatabaseProductName());
-		model.getMetadata().put("database-version", conn.getMetaData().getDatabaseProductVersion());
+		model.getMetadata().put("database-product-version", conn.getMetaData().getDatabaseProductVersion());
 		model.getMetadata().put("database-major-version", String.valueOf(conn.getMetaData().getDatabaseMajorVersion()));
 		model.getMetadata().put("database-minor-version", String.valueOf(conn.getMetaData().getDatabaseMinorVersion()));
 		model.getMetadata().put("driver", conn.getMetaData().getDriverName());
