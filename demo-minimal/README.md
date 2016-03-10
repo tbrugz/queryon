@@ -11,7 +11,7 @@ building
 * install queryon: 
 ```
 cd ..
-mvn install
+mvn install -DskipTests
 ```
 
 * build demo-minimal: 
@@ -27,7 +27,7 @@ running
 mvn jetty:run
 ```
 
-navigate to `http://localhost:8080`
+navigate to `http://localhost:8888`
 
 
 example queries
