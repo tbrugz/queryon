@@ -61,18 +61,14 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		this.schemaName = schema;
-		this.tableName = tableName;
-		numCol = md.getColumnCount();
-		lsColNames.clear();
-		lsColTypes.clear();
+		super.initDump(schema, tableName, pkCols, md);
 		finalColNames.clear();
 		rowSpecialAttr.clear();
 		rowSpecialAttrIdx.clear();
 		
 		for(int i=0;i<numCol;i++) {
 			boolean isFullColumn = true;
-			String colname = md.getColumnName(i+1);
+			String colname = lsColNames.get(i);
 			
 			for(String suf: SUFFIXES) {
 				if(colname.endsWith(suf)) {
@@ -88,8 +84,6 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			if(isFullColumn) {
 				finalColNames.add(colname);
 			}
-			lsColNames.add(colname);
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 	}
 	
