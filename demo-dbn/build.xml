@@ -1,0 +1,57 @@
+<project name="qon-demo-dbn" basedir="."
+	xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
+
+	<artifact:dependencies pathId="sqlrun.classpath">
+		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
+		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime"/>
+		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="1.1.7" scope="runtime"/>
+		<dependency groupId="org.postgresql" artifactId="postgresql" version="9.4.1208.jre6" scope="runtime"/>
+	</artifact:dependencies>
+
+	<!--
+	
+	Mondrian::
+	* https://raw.githubusercontent.com/pentaho/mondrian/master/demo/FoodMartCreateData.zip
+	* https://github.com/pentaho/mondrian/blob/master/demo/mysql/SteelWheels.sql
+	license: Eclipse Public License v1.0
+	
+	Eclipse BIRT:
+	-> * http://www.eclipse.org/birt/documentation/sample-database.php
+	license: Eclipse Foundation Software User Agreement
+	http://www.eclipse.org/birt/resources/documentation/sample-database/ClassicModels-MySQL.zip
+	
+	Mysql tutorial:
+	* http://www.mysqltutorial.org/mysql-sample-database.aspx
+	http://www.mysqltutorial.org/download/2
+	
+	-->
+	<target name="get-data">
+		<mkdir dir="${basedir}/data/"/>
+		<get src="http://www.eclipse.org/birt/resources/documentation/sample-database/ClassicModels-MySQL.zip" dest="${basedir}/data/" usetimestamp="true"/>
+		<!--get src="https://raw.githubusercontent.com/pentaho/mondrian/master/demo/FoodMartCreateData.zip" dest="${basedir}/data/" usetimestamp="true"/>
+		<get src="https://raw.githubusercontent.com/pentaho/mondrian/master/demo/mysql/SteelWheels.sql" dest="${basedir}/data/" usetimestamp="true"/>
+		<get src="http://www.mysqltutorial.org/download/2" dest="${basedir}/data/mysqlsampledatabase1.zip" usetimestamp="true"/-->
+	</target>
+
+	<target name="unzip-data">
+		<unzip src="${basedir}/data/ClassicModels-MySQL.zip" dest="${basedir}/data/ClassicModels-MySQL"/>
+	</target>
+
+	<target name="run-sqlrun-mysql">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<!-- -help -version -->
+			<arg value="-propfile=scripts/sqlrun.mysql.properties"/>
+		</java>
+	</target>
+
+	<!-- you must create database 'classicmodels' first -->
+	<target name="run-sqlrun-pgsql">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.pgsql.properties"/>
+		</java>
+	</target>
+
+</project>
