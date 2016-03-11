@@ -210,8 +210,8 @@ body {
 		}
 		
 		function addNode(graph, prefix, elem) {
-			var id = elem[prefix];
-			var label = elem[prefix+"_LABEL"]?elem[prefix+"_LABEL"]:elem[prefix];
+			var id = ""+elem[prefix];
+			var label = elem[prefix+"_LABEL"]?elem[prefix+"_LABEL"]:id;
 			var color = elem[prefix+"_COLOR"]?elem[prefix+"_COLOR"]:'#fff';
 			var size = elem[prefix+"_SIZE"]?elem[prefix+"_SIZE"]:1;
 			var ret = graph.addNode({
@@ -274,8 +274,8 @@ body {
 						s.graph.addEdge({
 							id : eid,
 							// Reference extremities:
-							source : data[i].SOURCE,
-							target : data[i].TARGET,
+							source : ""+data[i].SOURCE,
+							target : ""+data[i].TARGET,
 							type: 'arrow',
 							//type : 'curve',
 							size: 2, //increases thickness & arrow size
