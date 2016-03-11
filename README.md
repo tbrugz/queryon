@@ -2,7 +2,7 @@
 queryon
 =======
 
-A REST-like API that follows the naked objects pattern. More like a 'naked database objects' API.
+A REST-like API that follows the naked objects pattern. A bit like a 'naked database objects' API.
 Depends on [sqldump](https://bitbucket.org/tbrugz/sqldump)
 
 Database objects are defined by a properties file. See 
@@ -31,9 +31,14 @@ Important: QueryOn usually depends on the latest version of [sqldump](https://bi
 so you may need to build it first - and publish it to your local maven repo
 
 
+demo - running
+--------------
+
+* minimal demo (using H2) - see [demo-minimal/README.md](demo-minimal/README.md)
+
+
 license
 -------
-
 [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) - except where otherwise noted
 
 
