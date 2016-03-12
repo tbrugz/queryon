@@ -95,7 +95,10 @@ WITH cte (rnum) AS (
    FROM   cte a
    WHERE  a.rnum < 9
 )
-SELECT cast(rnum as int) as source, (rnum+1)%10 as target
+SELECT cast(rnum as int) as source, (rnum+1)%10 as target,
+    'Node '||rnum as source_label, 'Node '||(rnum+1)%10 as target_label,
+    '#'||rnum||rnum||'0000' as source_color, '#'||(rnum+1)%10||(rnum+1)%10||'0000' as target_color,
+    rnum%2+1 as source_size, (rnum+1)%2+1 as target_size
 FROM cte
 ```
 
