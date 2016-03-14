@@ -9,8 +9,13 @@
 		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime"/>
 		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="1.1.7" scope="runtime"/>
 		<dependency groupId="org.postgresql" artifactId="postgresql" version="9.4.1208.jre6" scope="runtime"/>
+		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
 	</artifact:dependencies>
 
+	<artifact:dependencies pathId="h2.classpath">
+		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
+	</artifact:dependencies>
+	
 	<!--
 	
 	Mondrian::
@@ -51,6 +56,34 @@
 	<target name="run-sqlrun-pgsql">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.pgsql.properties"/>
+		</java>
+	</target>
+
+	<target name="run-sqlrun-h2">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.h2.properties"/>
+		</java>
+	</target>
+	
+	<!-- see: http://www.h2database.com/javadoc/org/h2/tools/Server.html -->
+	<target name="start-db-h2" description="start H2 database">
+		<java classpathref="h2.classpath" classname="org.h2.tools.Server" fork="true">
+			<arg value="-tcp"/>
+			<arg value="-web"/>
+			<arg value="-tcpPort"/>
+			<arg value="9092"/>
+			<arg value="-webPort"/>
+			<arg value="8082"/>
+			<arg value="-baseDir"/>
+			<arg value="./data/h2"/>
+		</java>
+	</target>
+	
+	<target name="stop-db-h2" description="stop H2 database">
+		<java classpathref="h2.classpath" classname="org.h2.tools.Server" fork="true">
+			<arg value="-tcpShutdown"/>
+			<arg value="tcp://localhost:9092"/>
+			<arg value="-tcpShutdownForce"/>
 		</java>
 	</target>
 
