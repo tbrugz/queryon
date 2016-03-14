@@ -46,7 +46,7 @@ public class QueryOnInstant extends QueryOn {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnInstant.class);
 	
-	static final TableType[] tableTypes = new TableType[]{ TableType.TABLE };
+	static final TableType[] tableTypes = new TableType[]{ TableType.TABLE, TableType.BASE_TABLE };
 	static final TableType[] viewTypes = new TableType[]{ TableType.VIEW }; //, TableType.MATERIALIZED_VIEW, TableType.SYSTEM_VIEW };
 	static final TableType[] materializedViewTypes = new TableType[]{ TableType.MATERIALIZED_VIEW };
 	
@@ -247,17 +247,13 @@ public class QueryOnInstant extends QueryOn {
 		while(rs.next()) {
 			countAll++;
 			Table newt = newTable(rs, schemaName);
-			if(!tableTypesList.contains(newt.getType())) continue;
+			if(!tableTypesList.contains(newt.getType())) {
+				//log.warn("error adding table: "+newt.getName()+" ["+newt.getType()+"]");
+				continue;
+			}
 
 			ret.add(newt);
 			count++;
-			//boolean added = model.getTables().add(newt);
-			/*if(!added) {
-				log.warn("error adding table: "+name);
-			}
-			else {
-				count++;
-			}*/
 		}
 		log.info(count+" [of "+countAll+"] relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;

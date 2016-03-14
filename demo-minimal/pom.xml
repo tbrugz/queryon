@@ -32,13 +32,20 @@
 				<version>8.1.16.v20140903</version>
 
 				<configuration>
+					<!-- https://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<!-- <webApp>
 						<contextPath>/qon</contextPath>
 					</webApp> -->
-					<httpConnector>
+					<!-- <httpConnector>
 						<port>8888</port>
-					</httpConnector>
+					</httpConnector> -->
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>8888</port>
+							<maxIdleTime>60000</maxIdleTime>
+						</connector>
+					</connectors>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -105,18 +112,6 @@
 			<version>1.4.191</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>9.3-1102-jdbc41</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-			<artifactId>mariadb-java-client</artifactId>
-			<version>1.1.7</version>
-			<scope>runtime</scope>
-		</dependency> -->
 
 	</dependencies>
 
