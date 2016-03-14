@@ -9,3 +9,4 @@ z_etc/*
 web/WEB-INF/classes/*
 demo-dbn/data/*
 demo-dbn/scripts/credentials.properties
+demo-dbn/src/main/resources/credentials.properties
