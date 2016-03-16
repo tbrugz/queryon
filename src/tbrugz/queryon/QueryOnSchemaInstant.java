@@ -152,7 +152,8 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		String fullTableName = (schemaName!=null?schemaName+".":"")+tableName;
 		log.debug("grabbing new table: "+fullTableName);
 		Table ret = null;
-		ResultSet rs = dbmd.getTables(null, schemaName, tableName, null);
+		String[] ttypes = QueryOnInstant.tableTypeArr2StringArr(QueryOnInstant.tableTypes);
+		ResultSet rs = dbmd.getTables(null, schemaName, tableName, ttypes);
 		JDBCSchemaGrabber grabber = new JDBCSchemaGrabber();
 		while(rs.next()) {
 			String name = rs.getString("TABLE_NAME");

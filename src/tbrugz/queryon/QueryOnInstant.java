@@ -371,7 +371,11 @@ public class QueryOnInstant extends QueryOn {
 		log.info("keepRelationsByType:: iniSize="+initSize+" ; removed="+removed+" ; finalSize="+relations.size());
 	}
 	
-	static String[] tableTypeArr2StringArr(List<TableType> types) {
+	public static String[] tableTypeArr2StringArr(TableType[] types) {
+		return tableTypeArr2StringArr(Arrays.asList(types));
+	}
+	
+	public static String[] tableTypeArr2StringArr(List<TableType> types) {
 		String[] ret = new String[types.size()];
 		for(int i=0;i<types.size();i++) {
 			ret[i] = types.get(i).toString().replace('_', ' ');
