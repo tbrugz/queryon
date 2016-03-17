@@ -5,7 +5,7 @@
 <link rel="stylesheet" type="text/css" href="css/qonmap.css" />
 <link rel="icon" type="image/png" href="../favicon.png" />
 <script src="../js/jquery-2.1.0.min.js"></script>
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
+<script async type="text/javascript" src="//maps.googleapis.com/maps/api/js?callback=loadGoogleMapsDefaultOnInit"></script>
 <script type="text/javascript" src="../js/qon-base.js"></script>
 <script type="text/javascript" src="../js/queryon-b.js"></script>
 <script type="text/javascript" src="js/mapproc.js"></script>
@@ -63,28 +63,62 @@ function updatePosition(event, element) {
 }
 
 function loadNakedMapCallback(map_canvas_id) {
-	
 	var count = 0;
+	var countError = 0;
 	var box = new google.maps.LatLngBounds();
 	for(idx in places) {
 		var thisplace = places[idx];
 		var id = idx;
 		if(thisplace.properties && thisplace.properties.id) {
+			//console.log("id["+id+"]: new id="+thisplace.properties.id);
 			id = thisplace.properties.id;
 		}
-		//console.log(thisplace);
-		var polygons = new Array();
-		for(polyid in thisplace.geometry.coordinates) {
-			var coords = new Array();
-			for(c in thisplace.geometry.coordinates[polyid]) {
-				var latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyid][c][1], thisplace.geometry.coordinates[polyid][c][0]);
-				coords.push( latlng );
-				box.extend( latlng );
-			}
-			polygons.push(coords);
+		else if(thisplace.id) {
+			//console.log("id["+id+"]: new id="+thisplace.id);
+			id = thisplace.id;
 		}
+		else {
+			//console.log("id["+id+"]", thisplace);
+		}
+		//console.log(thisplace);
+		if(thisplace.geometry.type=="Polygon") {}
+		else if(thisplace.geometry.type=="MultiPolygon") {}
+		else {
+			console.log(thisplace.geometry.type+" type not understood [id = "+id+" / "+thisplace.id+" ; name = "+thisplace.properties.name+"]");
+			countError++;
+			continue;
+		}
+		
+		var polygon = new Array();
+		if(thisplace.geometry.type=="Polygon") {
+			for(polyid in thisplace.geometry.coordinates) {
+				var coords = new Array();
+				for(c in thisplace.geometry.coordinates[polyid]) {
+					var latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyid][c][1], thisplace.geometry.coordinates[polyid][c][0]);
+					coords.push( latlng );
+					box.extend( latlng );
+				}
+				polygon.push(coords);
+			}
+			//console.log(thisplace.geometry.type+" type [id = "+id+" / "+thisplace.id+" ; name = "+thisplace.properties.name+"] - ",polygon);
+		}
+		else if(thisplace.geometry.type=="MultiPolygon") {
+			for(polyarr in thisplace.geometry.coordinates) {
+				for(polyid in thisplace.geometry.coordinates[polyarr]) {
+					var coords = new Array();
+					for(c in thisplace.geometry.coordinates[polyarr][polyid]) {
+						var latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyarr][polyid][c][1], thisplace.geometry.coordinates[polyarr][polyid][c][0]);
+						coords.push( latlng );
+						box.extend( latlng );
+					}
+					polygon.push(coords);
+				}
+			}
+			//console.log(thisplace.geometry.type+" type [id = "+id+" / "+thisplace.id+" ; name = "+thisplace.properties.name+"] - ",polygon);
+		}
+		
 		var theplace = new google.maps.Polygon({
-			paths: polygons,
+			paths: polygon,
 			strokeColor: "#444444",
 			strokeOpacity: 0.8,
 			strokeWeight: 1,
@@ -109,6 +143,10 @@ function loadNakedMapCallback(map_canvas_id) {
 		var message = "Error loading map";
 		console.warn(message);
 		alert(message);
+	}
+
+	if(countError>0) {
+		console.log(countError+" loading errors");
 	}
 
 	//console.log(box);
@@ -259,6 +297,7 @@ function loadDataCallback() {
 	var isCategoricalDataChk = document.getElementById('isCategoricalData').checked;
 	
 	if(isNumericArray(seriesData.series) && !isCategoricalDataChk) {
+	//if(isNumericArray(seriesData.series) || !isCategoricalDataChk) {
 		console.log('is numeric series!');
 		catLimits = loadDataNumericSeries(seriesData);
 	} else {
@@ -348,6 +387,11 @@ function loadDataCategoricalSeries() {
 	return skeys;
 }
 
+function loadGoogleMapsDefaultOnInit() {
+	loadGoogleMaps('map_canvas');
+	ajaxCallsOnLoad();
+}
+
 function loadGoogleMaps(map_canvas_id) {
 	var myOptions = {
 			zoom: 5,
@@ -404,6 +448,7 @@ function removeElement(elem) {
 function refreshDataUrlColumns() {
 	var sel = document.getElementById('dataUrl');
 	var selOption = sel.options[sel.selectedIndex];
+	if(! selOption) { return; }
 	var dataRemarks = document.getElementById('dataRemarks');
 
 	var remarks = selOption.getAttribute('remarks');
@@ -449,7 +494,14 @@ function dataColumnChanged() {
 function qonLoadData() {
 	var baseurl = '../q';
 	//document.getElementById('dataUrl').value;
-	var url = getQueryUrl('dataUrl', 'json', baseurl);
+	var selectId = 'dataUrl';
+	var select = document.getElementById(selectId);
+	if(! select.options[select.selectedIndex]) {
+		console.warn('select '+selectId+' has no options');
+		return;
+	}
+	
+	var url = getQueryUrl(selectId, 'json', baseurl);
 	console.log('baseurl',baseurl,'url',url);
 	loadData(url);
 }
@@ -559,8 +611,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	//alert("Ready!");
 	changeColor('colorFromRGB', 'colorFrom');
 	changeColor('colorToRGB', 'colorTo');
-	loadGoogleMaps('map_canvas');
-	ajaxCallsOnLoad();
+	//loadGoogleMaps('map_canvas');
+	//ajaxCallsOnLoad();
 }, false);
 
 </script>
