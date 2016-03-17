@@ -188,6 +188,7 @@ loadObjectList = function(callback) {
 		return;
 	}
 	console.log("loadObjectList: model=",model,"url=",url,"type=",type,"schema=",schema);
+	closeMessages('messages');
 	btnActionStart('object');
 	$.ajax({
 		//TODO: filter by schema?
@@ -205,7 +206,8 @@ loadObjectList = function(callback) {
 			btnActionStop('object');
 		},
 		error: function(error) {
-			console.log("loadObjectList error=",error);
+			console.log("loadObjectList error=", error);
+			showErrorMessages('messages', error.responseText);
 			btnActionStop('object');
 		}
 	});
