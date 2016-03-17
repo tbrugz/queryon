@@ -1,0 +1,7 @@
+{
+"maps": [
+	{ "id":"World", "name": "World map", "url": "countries.geo.json", "default": true }
+],
+"mapcenter": [ 0, 0],
+"showOptionsIfUnique": false
+}
