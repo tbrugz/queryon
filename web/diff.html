@@ -209,12 +209,13 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
-		success: function(data) {
+		success: function(data, textStatus, jqXHR) {
 			//console.log(data);
 			var block = document.getElementById(contentId);
 			var container = block.parentNode;
 			var mblock = document.getElementById(contentId+"-msg");
 			var blocktitle = document.getElementById(contentTitleId);
+			var ukblock = document.getElementById(contentId+"-uk");
 			container.style.display = 'block';
 			block.innerHTML = safeTags(data);
 			mblock.innerHTML = '';
@@ -222,6 +223,9 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 			blocktitle.innerHTML = document.getElementById(modelId).value;
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
 			//Prism.highlightElement(block);
+			var uk = jqXHR.getResponseHeader('X-Relation-UK');
+			console.log('['+modelId+']: '+document.getElementById('object').value+': uk='+uk);
+			ukblock.innerHTML = uk;
 			if(callback) { callback(); }
 		},
 		error: function(err) {
@@ -300,13 +304,21 @@ doDiffUsingJS = function(viewType) {
 			document.getElementById('modelSource').value, document.getElementById('modelTarget').value,
 			'diffoutput');
 		//XXX
+		document.getElementById('ddldiff-message').style.display='none';
 		if(document.getElementById('type').value=='TABLE') {
-			var ddbtn = document.getElementById('doDataDiffBtn');
-			ddbtn.style.display = 'initial';
-			ddbtn.href = getDataDiffUrl();
-			var ddsbtn = document.getElementById('doDataDiffSqlBtn');
-			ddsbtn.style.display = 'initial';
-			ddsbtn.href = getDataDiffUrl();
+			var fromUk = document.getElementById('content-from-uk').innerHTML;
+			var toUk = document.getElementById('content-to-uk').innerHTML;
+			if(toUk && fromUk) {
+				var ddbtn = document.getElementById('doDataDiffBtn');
+				ddbtn.style.display = 'initial';
+				ddbtn.href = getDataDiffUrl();
+				var ddsbtn = document.getElementById('doDataDiffSqlBtn');
+				ddsbtn.style.display = 'initial';
+				ddsbtn.href = getDataDiffUrl();
+			}
+			else {
+				document.getElementById('ddldiff-message').style.display='initial';
+			}
 		}
 	}
 	else {
@@ -705,6 +717,17 @@ domSwith2ElementsInternal = function(e1, e2) {
 	#ddldiff-msg {
 		width: 80%;
 	}
+	
+	#ddldiff-message {
+		border: 1px solid #999;
+		/* background-color: whitesmoke;
+		background-color: #f99; */
+		background-color: #fb4;
+		padding: 3px 9px 3px 9px;
+		font-weight: bold;
+		font-style: italic;
+		margin: 0px 1px 0px 1px;
+	}
 	</style>
 </head>
 <body>
@@ -755,10 +778,12 @@ domSwith2ElementsInternal = function(e1, e2) {
 	<div id="code-panels">
 		<div class="code-container" style="float: left;" id="content-from-panel">
 			<div id="content-from-msg" class="message" style="display: none;"></div>
+			<div id="content-from-uk" style="display: none;"></div>
 			<pre style="display: none;"><span class="code-title" id="content-from-title"></span><code id="content-from" class="language-sql"></code></pre>
 		</div>
 		<div class="code-container" style="float: right;" id="content-to-panel">
 			<div id="content-to-msg" class="message" style="display: none;"></div>
+			<div id="content-to-uk" style="display: none;"></div>
 			<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
 		</div>
 	</div>
@@ -777,6 +802,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
 			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/>
 			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
+			<span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span>
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
 		<div id="ddldiff-msg" class="message" style="display: none;"></div>

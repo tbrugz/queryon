@@ -19,12 +19,15 @@ import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODOne: 'instant' servlets SHOULD NOT modify model, right?
@@ -143,6 +146,12 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	void dump(DBIdentifiable dbid, HttpServletResponse resp) throws IOException {
 		if(dbid==null) {
 			throw new BadRequestException("null object?");
+		}
+		if(dbid instanceof Relation) {
+			Constraint pk = SchemaModelUtils.getPK((Relation) dbid);
+			if(pk!=null && pk.getUniqueColumns()!=null) {
+				resp.addHeader(ResponseSpec.HEADER_RELATION_UK, Utils.join(pk.getUniqueColumns(), ", "));
+			}
 		}
 		resp.getWriter().write(dbid.getDefinition(true));
 	}
