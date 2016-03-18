@@ -177,6 +177,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
 	static final String PROP_MAX_LIMIT = "queryon.limit.max";
 	static final String PROP_BASE_URL = "queryon.baseurl";
+	static final String PROP_CONTEXT_PATH = "queryon.context-path";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
 	static final String PROP_UPDATE_PLUGINS = "queryon.update-plugins";
@@ -249,13 +250,20 @@ public class QueryOn extends HttpServlet {
 	void doInit(ServletContext context) throws ServletException {
 		try {
 			prop.clear();
-			//XXX: path: add host port (request object needed?)? servlet mapping url-pattern? 
-			String path = "http://"+InetAddress.getLocalHost().getHostName()+"/";
-			//+getServletContext().getContextPath();
+			//XXX: protocol: add from ServletRequest?
+			String protocol = "http://";
+			//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
+			String path = protocol + InetAddress.getLocalHost().getHostName().toLowerCase();
+			String contextPath = getServletContext().getContextPath();
+			String rdfBase = path +
+					((!path.endsWith("/") && (!contextPath.startsWith("/"))?"/":"")) +
+					contextPath;
 			// scheme://domain:port/path?query_string#fragment_id - http://en.wikipedia.org/wiki/Uniform_resource_locator
 			//String path = "http://"+InetAddress.getLocalHost().getHostName()+"/"+getServletContext().getContextPath();
-			prop.setProperty(PROP_BASE_URL, path);
-			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, path);
+			prop.setProperty(PROP_CONTEXT_PATH, contextPath);
+			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, rdfBase);
+			log.info(PROP_CONTEXT_PATH+": "+contextPath+" ; "+RDFAbstractSyntax.PROP_RDF_BASE+": "+rdfBase);
+			
 			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
 			
 			log.info("loading properties: "+propertiesResource);
