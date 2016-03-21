@@ -81,7 +81,9 @@ makeHrefs = function() {
 	refreshAuthInfo();
 }
 
-updateUI = function() {}
+updateUI = function() {
+	document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
+}
 
 $.ajax({
 	url: 'info/model.jsp',
@@ -254,6 +256,10 @@ doDiff = function() {
 	doClear();
 	getDDL('modelSource','content-from','content-from-title', doDiffUsingJS);
 	getDDL('modelTarget','content-to','content-to-title', doDiffUsingJS);
+	if(document.getElementById('modelSource').value == document.getElementById('modelTarget').value) {
+		console.log("doDiff: using same model: "+document.getElementById('modelSource').value);
+		showWarnMessages('messages', "you're using model '"+document.getElementById('modelSource').value+"' for both 'base' & 'newer' positions");
+	}
 }
 
 doClear = function() {
@@ -774,7 +780,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 	<div id="messages"></div>
 </div>
 
-<div style="top: 33px; position: absolute; width: 98%;">
+<div id="content-container" style="top: 33px; position: absolute; width: 98%;">
 
 	<div id="code-panels">
 		<div class="code-container" style="float: left;" id="content-from-panel">
