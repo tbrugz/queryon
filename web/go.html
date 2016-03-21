@@ -11,6 +11,7 @@
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/queryon-b.js"></script>
+	<script src="js/queryon-b2.js"></script>
 	<script src="js/models.js"></script>
 	<script src="js/auth.js"></script>
 	<script src="js/menu.js"></script>
@@ -20,6 +21,7 @@ var queryOnUrl = 'q/';
 var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
 
 onLoad = function() {
+	loadSettings();
 	loadAuthInfo();
 	
 	var url = queryOnUrl + 'executable.json';
@@ -63,10 +65,12 @@ onExecChanged = function() {
 	var pars = params.split(",");
 	//var npar = pars.length;
 	
-	console.log('onExecChanged: ', pars, ' - ', pars.length);
+	console.log('onExecChanged: ', params, ' - ', pars, ' - ', pars.length);
 	//XXX: IN, OUT, INOUT...
 	//XXX: parameterTypes...
-	goSetParameters('parameters', pars);
+	if(params) {
+		goSetParameters('parameters', pars);
+	}
 	closeMessages('messages');
 }
 
@@ -75,6 +79,15 @@ onParameterChange = function() {
 
 makeHrefs = function() {
 	refreshAuthInfo();
+	console.log('auth', authInfo);
+	if(authInfo.isAdmin) {
+		var ed = document.getElementById('url-editor');
+		ed.style.display = 'initial';
+		if(settings) {
+			var url = './#' + settings["queryon.qon-execs.table"].toUpperCase();
+			ed.href = url;
+		}
+	}
 }
 
 function updateUI() {
@@ -189,6 +202,7 @@ input[readonly] {
 	<span id="navbar-prop">
 		<span id="parameters"></span>
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doGo();"/>
+		<a id="url-editor" class="edit-link" href="./#QUERYON.QON_EXECS" target="_blank" style="display: none">edit execs</a>
 	</span>
 
 	<span id="navbar-links">
