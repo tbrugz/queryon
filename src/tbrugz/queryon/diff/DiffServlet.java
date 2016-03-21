@@ -27,6 +27,8 @@ import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.sqldiff.RenameDetector;
+import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.DBIdentifiableDiff;
@@ -34,10 +36,12 @@ import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODOne: apply diff option - add authorization like <type>:APPLYDIFF:<model>:<schema>:<name>
@@ -170,13 +174,23 @@ public class DiffServlet extends AbstractHttpServlet {
 				log.info("no diffs found");
 				//XXX: return 404? maybe not...
 			}
+			else {
+				//XXXxx: option to do column & constraint rename detection?
+				boolean doRenameDetection = Utils.getPropBool(prop, SQLDiff.PROP_DO_RENAMEDETECTION, SQLDiff.DEFAULT_DO_RENAME_DETECTION);
+				if(doRenameDetection) {
+					int renames = doTableRenames(diffs, prop);
+					if(renames>0) {
+						log.debug(renames+" renames in table "+dbidSource+" diff");
+					}
+				}
+			}
 			//SchemaDiff.logInfo(diffs);
 		}
 		else {
 			Diff diff = new DBIdentifiableDiff(ChangeType.REPLACE, dbidSource, dbidTarget, null);
 			diffs = newSingleElemList(diff);
 		}
-
+		
 		if(doApply) {
 			applyDiffs(diffs, prop, modelIdSource, resp);
 		}
@@ -238,6 +252,33 @@ public class DiffServlet extends AbstractHttpServlet {
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	int doTableRenames(List<Diff> diffs, Properties prop) {
+		double minSimilarity = 0.5;
+		int renames = 0;
+		List<String> renameTypes = Utils.getStringListFromProp(prop, SQLDiff.PROP_RENAMEDETECT_TYPES, ",", RenameDetector.RENAME_TYPES);
+		if(renameTypes==null || renameTypes.contains(DBObjectType.COLUMN.toString())) {
+			//log.info("doTableRenames[COLUMN]: diffs="+diffs);
+			List<ColumnDiff> lcd = new ArrayList<ColumnDiff>();
+			for(int i=diffs.size()-1 ; i>=0 ; i--) {
+				Diff d = diffs.get(i);
+				if(d instanceof ColumnDiff) { lcd.add((ColumnDiff)d); diffs.remove(i); }
+			}
+			renames += RenameDetector.detectAndDoColumnRenames(lcd, minSimilarity);
+			diffs.addAll(lcd);
+		}
+		if(renameTypes==null || renameTypes.contains(DBObjectType.CONSTRAINT.toString())) {
+			//log.info("doTableRenames[CONSTRAINT]: diffs="+diffs);
+			List<DBIdentifiableDiff> ldd = new ArrayList<DBIdentifiableDiff>();
+			for(int i=diffs.size()-1 ; i>=0 ; i--) {
+				Diff d = diffs.get(i);
+				if(d instanceof DBIdentifiableDiff) { ldd.add((DBIdentifiableDiff)d); diffs.remove(i); }
+			}
+			renames += RenameDetector.detectAndDoConstraintRenames(ldd, minSimilarity);
+			diffs.addAll(ldd);
+		}
+		return renames;
 	}
 	
 }
