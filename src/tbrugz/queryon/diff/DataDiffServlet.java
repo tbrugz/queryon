@@ -183,7 +183,9 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			return stmt.executeQuery();
 		}
 		catch(SQLException e) {
-			throw new BadRequestException("error in sql exec [model="+modelId+" ; '"+tableName+"']: "+sql);
+			String message = "error in sql exec [model="+modelId+" ; '"+tableName+"']: "+e.toString().trim()+"\nsql: "+sql;
+			log.warn(message);
+			throw new BadRequestException(message);
 		}
 	}
 	

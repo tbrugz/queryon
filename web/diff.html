@@ -300,6 +300,7 @@ doDiffUsingJS = function(viewType) {
 		&& (document.getElementById('modelSource').value != document.getElementById('modelTarget').value)
 		) {
 		diffc.style.display = 'block';
+		
 		diffUsingJS(viewType, from, to,
 			document.getElementById('modelSource').value, document.getElementById('modelTarget').value,
 			'diffoutput');
@@ -740,7 +741,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 		<label id="modelSourceLabel"><!--  style="background-color: #A93636"-->
 			base: <select id="modelSource" onchange="updateState();"></select>
 		</label>
-		<label id="modelTargetLabel" style="background-color: #188859">
+		<label id="modelTargetLabel" class="model-target-id">
 			newer: <select id="modelTarget" onchange="onModelChanged();"></select>
 		</label>
 	</span>

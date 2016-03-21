@@ -181,3 +181,17 @@
 	padding: 4px 0 5px 0;
 	background-color: #555;
 }
+
+#modelTargetLabel, #content-to-title, #diffoutput tr th.texttitle:nth-child(4) {
+	background-color: #188859;
+	color: #ddd;
+	/*background-color: #9E9;
+	color: #000;*/
+}
+
+#modelSourceLabel, #content-from-title, #diffoutput tr th.texttitle:nth-child(2) {
+	/*background-color: #E99;
+	color: #000;*/
+}
+
+/* diff colors: #E99; #9E9; */
