@@ -1,5 +1,5 @@
 
-function runNvD3(url, columns, d3chartfunction, containerId, callbackOk, callbackError) {
+function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, callbackError) {
 	d3.json(url, function(error, data) {
 		if(error) {
 			if(callbackError) { callbackError(error); }
@@ -11,9 +11,14 @@ function runNvD3(url, columns, d3chartfunction, containerId, callbackOk, callbac
 			data = getQonData(data);
 			//seriesData = sinAndCos();
 			seriesData = rows2cols(data, columns);
+			xlabelsData = null;
+			if(xaxis) {
+				xlabelsData = rows2arr(data, xaxis);
+			}
 			
 			//console.log("seriesData", seriesData, "containerId", containerId);
-			nvD3LineChart(seriesData, containerId);
+			//console.log("xlabelsData", xlabelsData);
+			nvD3LineChart(seriesData, containerId, xlabelsData, xaxis);
 			if(callbackOk) { callbackOk(); }
 			//console.log("ok...");
 		}
@@ -63,13 +68,30 @@ function rows2cols(data, columns) {
 	return ret;
 }
 
+function rows2arr(data, column) {
+	var keys = Object.keys(data[0]);
+	if(column) {
+		if(keys.indexOf(column)<0) {
+			console.warn("x-axis col not fount: "+column);
+		}
+	}
+	
+	console.log("rows2arr: data keys=" , Object.keys(data[0]) , "; column=" , column);
+	var vals = [];
+	for(var i=0; i < data.length; i++) {
+		//vals.push( { x: i, y: data[i][column] } );
+		vals.push( data[i][column] );
+	}
+	return vals;
+}
+
 /*
  * see:
  * https://github.com/novus/nvd3/blob/master/examples/lineChart.html
  * http://nvd3.org/examples/line.html
  * http://stackoverflow.com/questions/30455485/transitionduration-function-does-not-exist-in-nvd3-js
  */
-function nvD3LineChart(data, containerId) {
+function nvD3LineChart(data, containerId, xlabelsData, xaxis) {
 	console.log("nvD3LineChart...");
 	nv.addGraph(function() {
 		var chart = nv.models.lineChart().options({
@@ -83,12 +105,20 @@ function nvD3LineChart(data, containerId) {
 		]);*/
 		// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly,
 		// return themselves, not the parent chart, so need to chain separately
-		chart.xAxis.axisLabel("Row #")
-			.tickFormat(d3.format(',.0d'))
-			/*.tickFormat(function(d) {
-				return dateFormat(new Date(d))
-			})*/
-			.staggerLabels(true);
+		if(xlabelsData && xaxis) {
+			chart.xAxis.
+				axisLabel(xaxis).
+				tickFormat(function(d){
+					return xlabelsData[d]
+				});
+		}
+		else {
+			chart.xAxis.
+				axisLabel("Row #").
+				tickFormat(d3.format(',.0d'));
+		}
+		
+		chart.xAxis.staggerLabels(true);
 		chart.yAxis//.axisLabel('Voltage (v)')
 			.tickFormat(function(d) {
 			if (d == null) {

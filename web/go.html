@@ -82,9 +82,9 @@ makeHrefs = function() {
 	console.log('auth', authInfo);
 	if(authInfo.isAdmin) {
 		var ed = document.getElementById('url-editor');
-		ed.style.display = 'initial';
-		if(settings) {
+		if(settings && settings["queryon.qon-execs.table"]) {
 			var url = './#' + settings["queryon.qon-execs.table"].toUpperCase();
+			ed.style.display = 'initial';
 			ed.href = url;
 		}
 	}
@@ -202,7 +202,7 @@ input[readonly] {
 	<span id="navbar-prop">
 		<span id="parameters"></span>
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doGo();"/>
-		<a id="url-editor" class="edit-link" href="./#QUERYON.QON_EXECS" target="_blank" style="display: none">edit execs</a>
+		<a id="url-editor" class="edit-link" href="" target="_blank" style="display: none">edit execs</a>
 	</span>
 
 	<span id="navbar-links">
