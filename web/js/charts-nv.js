@@ -1,5 +1,6 @@
 
-var MAX_X_TICKS = 50;
+var MIN_X_TICKS = 11;
+var MAX_X_TICKS = 36;
 
 function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, callbackError) {
 	d3.json(url, function(error, data) {
@@ -74,7 +75,8 @@ function rows2arr(data, column) {
 	var keys = Object.keys(data[0]);
 	if(column) {
 		if(keys.indexOf(column)<0) {
-			console.warn("x-axis col not fount: "+column);
+			//console.warn("x-axis col not fount: "+column);
+			throw "x-axis column not fount: "+column+" [columns available: "+keys.join(", ")+"]";
 		}
 	}
 	
@@ -108,14 +110,16 @@ function nvD3LineChart(data, containerId, xlabelsData, xaxis) {
 		// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly,
 		// return themselves, not the parent chart, so need to chain separately
 		var numOfTicks = (data[0].values.length>MAX_X_TICKS)?MAX_X_TICKS:data[0].values.length;
-		//console.log("numOfTicks",numOfTicks,"data[0].length",data[0].length);
+		numOfTicks = (numOfTicks<MIN_X_TICKS)?MIN_X_TICKS:numOfTicks;
+		console.log("numOfTicks",numOfTicks,"data[0].values.length",data[0].values.length);//,"data",data);
 		
 		if(xlabelsData && xaxis) {
 			chart.xAxis.
 				axisLabel(xaxis).
 				ticks(numOfTicks).
 				tickFormat(function(d){
-					return xlabelsData[d].label;
+					//console.log("d",d,"xlabelsData[d]",xlabelsData[d]);
+					return xlabelsData[d]?xlabelsData[d].label:d;
 				});
 		}
 		else {
