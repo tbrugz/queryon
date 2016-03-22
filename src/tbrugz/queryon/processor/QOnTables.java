@@ -169,14 +169,20 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		}
 		
 		//XXX validate pk_column_names
+		/*
+		 * PreparedStatement.getMetaData:
+		 * http://stackoverflow.com/questions/14245411/returning-just-column-names-of-resultset-without-actually-performing-the-query
+		 * http://stackoverflow.com/questions/9207073/column-names-for-an-ad-hoc-sql
+		 */
 		try {
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			t.setColumns(DataDumpUtils.getColumns(rsmd));
 		}
 		catch(SQLException e) {
+			// XXX get conn info (closed, valid)
 			String message = "addTable ["+tableName+"]: exception: "+e.getMessage().trim();
-			log.warn(message+"\nsql: "+sql); //??
+			log.warn(message+"\nsql: "+sql, e);
 			throw new BadRequestException(message, "\nsql: "+sql, e);
 		}
 		

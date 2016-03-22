@@ -16,10 +16,19 @@ public interface UpdatePlugin {
 	
 	public void onInit();
 	
+	/**
+	 * Inserts relation on model
+	 */
 	public void onInsert(Relation relation, RequestSpec reqspec);
-	
+
+	/**
+	 * Updates relation on model
+	 */
 	public void onUpdate(Relation relation, RequestSpec reqspec);
 	
+	/**
+	 * Deletes relation from model
+	 */
 	public void onDelete(Relation relation, RequestSpec reqspec);
 	
 }

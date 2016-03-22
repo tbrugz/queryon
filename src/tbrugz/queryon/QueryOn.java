@@ -1152,7 +1152,7 @@ public class QueryOn extends HttpServlet {
 		for(UpdatePlugin up: updatePlugins) {
 			up.setProperties(prop);
 			up.setSchemaModel(model);
-			//up.setConnection(conn);
+			//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
 			up.onDelete(relation, reqspec);
 		}
 		
@@ -1244,7 +1244,7 @@ public class QueryOn extends HttpServlet {
 		for(UpdatePlugin up: updatePlugins) {
 			up.setProperties(prop);
 			up.setSchemaModel(model);
-			//up.setConnection(conn);
+			up.setConnection(conn);
 			up.onUpdate(relation, reqspec);
 		}
 		
@@ -1340,7 +1340,7 @@ public class QueryOn extends HttpServlet {
 		for(UpdatePlugin up: updatePlugins) {
 			up.setProperties(prop);
 			up.setSchemaModel(model);
-			//up.setConnection(conn);
+			up.setConnection(conn);
 			up.onInsert(relation, reqspec);
 		}
 		
