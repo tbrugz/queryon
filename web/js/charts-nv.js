@@ -1,4 +1,6 @@
 
+var MAX_X_TICKS = 50;
+
 function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, callbackError) {
 	d3.json(url, function(error, data) {
 		if(error) {
@@ -53,7 +55,7 @@ function rows2cols(data, columns) {
 		keys = keysOk;
 	}
 	
-	console.log("data keys=" , Object.keys(data[0]) , "; cols=" , columns);
+	//console.log("data keys=" , Object.keys(data[0]) , "; cols=" , columns);
 	for(var i=0; i < keys.length; i++) {
 		var elem = {};
 		elem.key = keys[i];
@@ -76,11 +78,11 @@ function rows2arr(data, column) {
 		}
 	}
 	
-	console.log("rows2arr: data keys=" , Object.keys(data[0]) , "; column=" , column);
+	//console.log("rows2arr: data keys=" , Object.keys(data[0]) , "; column=" , column);
 	var vals = [];
 	for(var i=0; i < data.length; i++) {
-		//vals.push( { x: i, y: data[i][column] } );
-		vals.push( data[i][column] );
+		vals.push( { x: i, label: data[i][column] } );
+		//vals.push( data[i][column] );
 	}
 	return vals;
 }
@@ -105,16 +107,21 @@ function nvD3LineChart(data, containerId, xlabelsData, xaxis) {
 		]);*/
 		// chart sub-models (ie. xAxis, yAxis, etc) when accessed directly,
 		// return themselves, not the parent chart, so need to chain separately
+		var numOfTicks = (data[0].values.length>MAX_X_TICKS)?MAX_X_TICKS:data[0].values.length;
+		//console.log("numOfTicks",numOfTicks,"data[0].length",data[0].length);
+		
 		if(xlabelsData && xaxis) {
 			chart.xAxis.
 				axisLabel(xaxis).
+				ticks(numOfTicks).
 				tickFormat(function(d){
-					return xlabelsData[d]
+					return xlabelsData[d].label;
 				});
 		}
 		else {
 			chart.xAxis.
 				axisLabel("Row #").
+				ticks(numOfTicks).
 				tickFormat(d3.format(',.0d'));
 		}
 		
