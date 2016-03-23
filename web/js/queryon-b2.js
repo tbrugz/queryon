@@ -270,7 +270,7 @@ function getKeyValsForRow(rownum) {
 	var relation = getCurrentRelation('objects');
 	var cols = getColumnsFromRelation(relation);
 	
-	//console.log('getKeyValsForRow row', row, 'pk', pk, 'cols', cols);
+	//console.log('getKeyValsForRow row', row, 'pk', pk, 'cols.length', cols.length, 'cols', cols);
 	if(pk==null) {
 		console.log('relation has no PK');
 		return null;
@@ -279,8 +279,8 @@ function getKeyValsForRow(rownum) {
 	for(var i=0;i<pk.length;i++) {
 		idx.push(cols.indexOf(pk[i]));
 	}
-	//console.log('getKeyValsForRow idx', idx);
 	var tds = row.querySelectorAll('td');
+	//console.log('getKeyValsForRow idx', idx,'tds.length',tds.length);
 	var vals = [];
 	var allvals = [];
 	var filter = '';
@@ -299,11 +299,11 @@ function getKeyValsForRow(rownum) {
 	}
 	*/
 	
-	for(var i=0;i<cols.length;i++) {
+	for(var i=0;i<tds.length;i++) {
 		allvals.push(tds[i].innerHTML);
 	}
 	
-	var colTypes = getColumnsTypesFromContainer('content');
+	var colTypes = getColumnTypesFromColgroup('content');
 
 	return {key: valsKey, filter: filter, pk: pk, pkvals: vals, cols: cols, allvals: allvals, colTypes: colTypes};
 }

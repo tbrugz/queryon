@@ -198,8 +198,8 @@
 		//var rows = content.querySelectorAll('tr');
 		//var pk = getPkCols('objects');
 		var relation = getCurrentRelation('objects');
-		var cols = getColumnsFromRelation(relation);
-		var colTypes = getColumnsTypesFromContainer('content');
+		var cols = getColumnsFromColgroup('content');
+		var colTypes = getColumnTypesFromColgroup('content');
 		
 		doWriteUpdateDialog('Insert', null, null, null, cols, null, colTypes);
 		closeMessages('messages');
@@ -211,11 +211,14 @@
 			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
 			return;
 		}
+		var cols = getColumnsFromColgroup('content');
+		var colTypes = getColumnTypesFromColgroup('content');
+		
 		//console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals,"colTypes",ret.colTypes);
 		
 		var maxrownum = getRowCount('content');
 		
-		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, ret.cols, ret.allvals, ret.colTypes);
+		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, cols, ret.allvals, colTypes);
 		closeMessages('messages');
 	}
 	

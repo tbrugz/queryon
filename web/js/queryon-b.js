@@ -108,7 +108,7 @@ function doRun(selectId, containerId, messagesId, callback) {
 		success: function(data, textStatus, request) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
-			$('#'+containerId).html(data);
+			$('#'+containerId).html(data); // XXX takes too long? use iframe?
 			console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
 			closeMessages(messagesId);
 			addSortHrefs(containerId, order);
@@ -292,7 +292,25 @@ function getColumnsFromContainer(containerId) {
 	return cols;
 }
 
-function getColumnsTypesFromContainer(containerId) {
+/* returns only htmlx visible column names */
+function getColumnsFromColgroup(containerId) {
+	var colNames = [];
+	var content = document.getElementById(containerId);
+	if(!content) {
+		return colNames;
+	}
+	var cols = content.querySelectorAll('table > colgroup > col');
+	//console.log('cols.length: '+cols.length);
+	for(var i=0;i<cols.length;i++) {
+		var elem = cols[i];
+		var ct = elem.getAttribute('colname');
+		colNames.push(ct);
+	}
+	return colNames;
+}
+
+/* returns only htmlx visible column types */
+function getColumnTypesFromColgroup(containerId) {
 	var colTypes = [];
 	var content = document.getElementById(containerId);
 	if(!content) {
