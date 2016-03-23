@@ -312,6 +312,8 @@
 	
 	function doConfirmUpdate(rownum, closeDialog) {
 		var ret = getKeyValsForRow(rownum);
+		var cols = getColumnsFromColgroup('content');
+		
 		//var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
 		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
 		
@@ -345,7 +347,7 @@
 		//console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
 		
 		var messagesId = closeDialog?'messages':'dialog-messages';
-		doExecuteUpdateAjax(finalUrl, nv, rownum, ret.cols, messagesId);
+		doExecuteUpdateAjax(finalUrl, nv, rownum, cols, messagesId);
 		if(closeDialog) { closeDialogs(); }
 	}
 	
@@ -372,7 +374,7 @@
 					row = content.querySelectorAll('tr')[rownum];
 					//update row values
 					var tds = row.querySelectorAll('td');
-					for(var i=0;i<cols.length;i++) {
+					for(var i=0;i<tds.length;i++) {
 						tds[i].innerHTML = nv.newVals[i];
 						if(tds[i].hasAttribute("null")) {
 							tds[i].removeAttribute("null"); 
@@ -489,7 +491,7 @@
 	function doConfirmInsert(rownum, closeDialog) {
 		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
 		var relation = getCurrentRelation('objects');
-		var cols = getColumnsFromRelation(relation);
+		var cols = getColumnsFromColgroup('content');
 		
 		nv = getUpdateNewValues();
 
