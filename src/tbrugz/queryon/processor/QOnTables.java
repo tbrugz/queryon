@@ -149,6 +149,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		Table t = new Table();
 		t.setSchemaName(schema);
 		t.setName(tableName);
+		t.setRemarks(remarks);
 		//XXX table type: what if it is a view? t.setType(TableType.VIEW); ?
 		//XXXdone option to add primary key (for tables/views that doesn't have them, or to setup a different PK for a table)
 
