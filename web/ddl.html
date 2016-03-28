@@ -112,30 +112,35 @@ joinSchemas = function() {
 			schemas[i] = 
 		}
 	}*/
-	onModelChanged(true);
+	onModelChanged(false);
 }
 
-onModelChanged = function(doNotUpdateFragment) {
+onModelChanged = function(updateFragment) {
 	var m = document.getElementById('model').value;
 	var schemas = schemasByModel[m];
 	
 	loadSelect(schemas, 'schema');
-	loadObjectList();
-	if(!doNotUpdateFragment) { updateURLFragment(); }
+	loadObjectList(function() {
+		if(updateFragment) { updateURLFragment(); }
+	});
 }
 
-onSchemaChanged = function(doNotUpdateFragment) {
-	loadObjectList();
-	if(!doNotUpdateFragment) { updateURLFragment(); }
+onSchemaChanged = function(updateFragment) {
+	loadObjectList(function() {
+		if(updateFragment) { updateURLFragment(); }
+	});
 }
 
-onObjTypeChanged = function(doNotUpdateFragment) {
-	loadObjectList();
-	if(!doNotUpdateFragment) { updateURLFragment(); }
+onObjTypeChanged = function(updateFragment) {
+	loadObjectList(function() {
+		if(updateFragment) { updateURLFragment(); }
+	});
 }
 
-onObjectChanged = function(doNotUpdateFragment) {
-	if(!doNotUpdateFragment) { updateURLFragment(); }
+onObjectChanged = function(updateFragment) {
+	loadObjectList(function() {
+		if(updateFragment) { updateURLFragment(); }
+	});
 }
 
 updateURLFragment = function() {
@@ -204,6 +209,7 @@ loadObjectList = function(callback) {
 				function(data) { /*updateSelectedQueryState(true);*/ return (data.schemaName?data.schemaName+".":"")+data.name; }
 				);
 			btnActionStop('object');
+			if(callback) { callback(); }
 		},
 		error: function(error) {
 			console.log("loadObjectList error=", error);
@@ -344,16 +350,16 @@ updateSelectValue = function(select, value) {
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + <span>DDL</span></span>
 
 	<label style="display: none">
-		model: <select id="model" onchange="onModelChanged();"></select>
+		model: <select id="model" onchange="onModelChanged(true);"></select>
 	</label>
 	<label>
-		schema: <select id="schema" onchange="onSchemaChanged();"></select>
+		schema: <select id="schema" onchange="onSchemaChanged(true);"></select>
 	</label>
 	<label>
-		type: <select id="type" onchange="onObjTypeChanged();"></select>
+		type: <select id="type" onchange="onObjTypeChanged(true);"></select>
 	</label>
 	<label>
-		object: <select id="object" onchange="onObjectChanged();"></select>
+		object: <select id="object" onchange="onObjectChanged(true);"></select>
 	</label>
 	
 	<span id="navbar-prop">

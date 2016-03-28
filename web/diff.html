@@ -135,35 +135,41 @@ joinSchemas = function() {
 			schemas[i] = 
 		}
 	}*/
-	loadModel();
+	loadModel(true);
 }
 
-loadModel = function() {
-	//TODO: merge models...
+loadModel = function(refreshSelects) {
+	//TODO!!: merge models... add class for "base" object, "newer" object & "both" object
 	var m = document.getElementById(defaultModelId).value;
-	//console.log('loadModel, model:', m, defaultModelId, schemasByModel[m], schemasByModel);
+	//console.log('loadModel, model: ', m, 'default: ', defaultModelId); //, schemasByModel[m]); //, schemasByModel);
 	loadSelect(schemasByModel[m], 'schema');
-	refreshSelectsState();
-	loadObjectList();
+	if(refreshSelects) { refreshSelectsState(); }
+	//refreshSelectsState();
+	//loadObjectList();
+	loadObjectList(function() {
+		if(refreshSelects) { refreshSelectsState(); }
+	});
 }
 
 onModelChanged = function() {
 	updateState();
-	loadModel();
+	loadModel(false);
+	loadObjectList(function() { updateState(); });
 }
 
 onSchemaChanged = function() {
-	updateState();
-	loadObjectList();
+	loadObjectList(function() { updateState(); });
 }
 
 onObjTypeChanged = function() {
-	loadObjectList();
+	loadObjectList(function() { updateState(); });
 }
 
-onObjectChanged = function() {}
+onObjectChanged = function() {
+	updateState();
+}
 
-loadObjectList = function() {
+loadObjectList = function(callbackOk) {
 	var origType = document.getElementById('type').value;
 	var type = typemap[origType];
 	var model = document.getElementById(defaultModelId).value;
@@ -180,7 +186,7 @@ loadObjectList = function() {
 		//TODO: filter by schema?
 		url: url,
 		success: function(data) {
-			//console.log(data);
+			//console.log('loadObjectList: ok: data=',data);
 			//var jj = JSON.parse(data);
 			var keys = Object.keys(data);
 			data = getQonData(data);
@@ -191,6 +197,7 @@ loadObjectList = function() {
 					function(data) { return (data.schemaName?data.schemaName+".":"")+data.name; }
 					);
 			btnActionStop('object');
+			if(callbackOk) { callbackOk(); }
 		},
 		error: function(error) {
 			console.log("loadObjectList error=",error);
@@ -495,12 +502,20 @@ doDataDiff = function(syntax) {
 function updateState() {
 	var select = document.getElementById('modelSource');
 	var modelSource = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
-	var select = document.getElementById('modelTarget');
+	select = document.getElementById('modelTarget');
 	var modelTarget = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
-	var select = document.getElementById('schema');
+	select = document.getElementById('schema');
 	var schema = select.options[select.selectedIndex].value;
+	select = document.getElementById('type');
+	var type = select.options[select.selectedIndex].value;
+	select = document.getElementById('object');
+	var object = select.options[select.selectedIndex] ? select.options[select.selectedIndex].value : null;
+	console.log('updateState: s:', modelSource,' t:', modelTarget, 'sch:', schema, 'type:', type, 'obj:', object)
+	
 	if(modelSource && modelTarget && schema) {
-		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schema);
+		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schema
+				+(type?"/"+type+(object?"/"+object:""):"")
+				);
 	}
 }
 
@@ -515,6 +530,10 @@ function refreshSelectsState() {
 		modelTarget.value = parts[1];
 		var schema = document.getElementById('schema');
 		schema.value = parts[2];
+		var type = document.getElementById('type');
+		type.value = parts[3];
+		var object = document.getElementById('object');
+		object.value = parts[4];
 	}
 }
 

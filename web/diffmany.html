@@ -124,6 +124,7 @@ loadModel = function() {
 	var m = document.getElementById(defaultModelId).value;
 	//console.log('loadModel, model:', m, defaultModelId, schemasByModel[m], schemasByModel);
 	loadSelect(schemasByModel[m], 'schema');
+	//if(refreshSelects) { refreshSelectsState(); }
 	refreshSelectsState();
 }
 
@@ -241,9 +242,20 @@ function refreshSelectsState() {
 		modelSource.value = parts[0];
 		var modelTarget = document.getElementById('modelTarget');
 		modelTarget.value = parts[1];
-		//XXX: update selects...
-		//var schema = document.getElementById('schema');
-		//schema.value = parts[2];
+		//schemas
+		if(parts[2]) {
+			var schema = document.getElementById('schema');
+			var sVals = parts[2].split(',');
+			//console.log('schema', parts[2], '/', sVals);//, '/', schema);
+			setSelectMultiOptions(schema, sVals);
+		}
+		//object types
+		if(parts[3]) {
+			var type = document.getElementById('type');
+			var tVals = parts[3].split(',');
+			//console.log('type', parts[3], '/', tVals);
+			setSelectMultiOptions(type, tVals);
+		}
 	}
 }
 
@@ -284,6 +296,16 @@ getSelectMultiOptions = function(selectId) {
 	return schemas;
 }
 
+setSelectMultiOptions = function(select, values) {
+	for(var i=0 ; i<select.options.length ; i++) {
+		for(var j=0 ; j<values.length ; j++) {
+			if(select.options[i] && values[j] && (select.options[i].value==values[j]) ) {
+				select.options[i].selected = true;
+				//console.log('opt match! ', i, j, select.options[i], '/', values[j]);
+			}
+		}
+	}
+}
 	</script>
 	<style type="text/css">
 	#nav {
