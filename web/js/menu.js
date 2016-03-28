@@ -64,7 +64,7 @@ function createMenuContent(addCloseBtn) {
 	var menu = document.createElement("div");
 	menu.classList.add("leftmenu");
 	var innerContent = '';
-	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
+	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isDev != "undefined" && authInfo.isDev;
 	var hasLoginLink = document.getElementById('authaction') != null;
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
 	for(var i=0;i<lis.length;i++) {

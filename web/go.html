@@ -21,7 +21,7 @@ var queryOnUrl = 'q/';
 var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
 
 onLoad = function() {
-	loadSettings();
+	loadSettings(makeHrefs);
 	loadAuthInfo();
 	
 	var url = queryOnUrl + 'executable.json';
@@ -34,7 +34,7 @@ onLoad = function() {
 loadSelectContent = function(oEvent) {
 	var txt = oEvent.target.responseText;
 	var execs = JSON.parse(txt);
-	console.log(execs);
+	console.log('execs:', execs);
 	var select = document.getElementById('objects');
 	select.innerHTML = '<option invalid="true">select executable</option>';
 	for(var i = 0;i<execs.executable.length;i++) {
@@ -52,7 +52,7 @@ onExecChanged = function() {
 	var idx = select.selectedIndex;
 	var option = select.options[idx];
 	var btnGo = document.getElementById('go-button');
-	console.log("onExecChanged:", option.value, ' - ', option);
+	//console.log("onExecChanged:", option.value, ' - ', option);
 	if(option.getAttribute("invalid")) {
 		btnGo.disabled = true;
 		document.getElementById('parameters').innerHTML = '';
@@ -79,8 +79,8 @@ onParameterChange = function() {
 
 makeHrefs = function() {
 	refreshAuthInfo();
-	console.log('auth', authInfo);
-	if(authInfo.isAdmin) {
+	//console.log('auth', authInfo);
+	if(authInfo.isDev) {
 		var ed = document.getElementById('url-editor');
 		if(settings && settings["queryon.qon-execs.table"]) {
 			var url = './#' + settings["queryon.qon-execs.table"].toUpperCase();

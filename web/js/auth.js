@@ -5,7 +5,8 @@ var authInfo = {
 		username: null, //''
 		roles: [ ],
 		permissions: [ ],
-		isAdmin: false
+		isAdmin: false,
+		isDev: false
 };
 
 function loadAuthInfo() {
@@ -16,6 +17,7 @@ function loadAuthInfo() {
 			var info = JSON.parse(data);
 			console.log('authInfo', info);
 			info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
+			info.isDev = info.isAdmin;
 			authInfo = info;
 			makeHrefs();
 		}
@@ -36,7 +38,7 @@ function refreshAuthInfo() {
 	}
 
 	var urlednew = document.getElementById("url-editor-new");
-	if(authInfo.isAdmin && urlednew) {
+	if(authInfo.isDev && urlednew) {
 		urlednew.style.display = 'inline';
 		urlednew.href = qonEditorUrl;
 	}
