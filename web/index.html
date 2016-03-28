@@ -19,6 +19,7 @@
 	<script src="js/qon-util.js"></script>
 	<script src="js/menu.js"></script>
 	<script src="js/models.js"></script>
+	<script src="js/auth.js"></script>
 	<script type="text/javascript">
 	
 	var lastQueryThatRunned = null;
@@ -174,9 +175,9 @@
 			//var re = /\[[PU]K:[A-Za-z_ ]*:[A-Za-z_, ]+\]/g;
 			
 			var rows = content.querySelectorAll('tr');
-			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT'); // check insert-any-column
-			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE'); // check update-any-column
-			var allowDelete = relationHasGrantOfType(rel, 'DELETE');
+			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT') || authHasPermission('INSERT_ANY'); // check insert-any-column
+			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE') || authHasPermission('UPDATE_ANY'); // check update-any-column
+			var allowDelete = relationHasGrantOfType(rel, 'DELETE') || authHasPermission('DELETE_ANY');
 			//rows[0].innerHTML += "<th>actions</th>";
 			if(allowInsert) {
 				rows[0].innerHTML += "<th><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></th>"
@@ -234,7 +235,7 @@
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
 		var rel = relationsHash[id];
-		var allowUpdate = relationHasGrantOfType(rel, updateType.toUpperCase());
+		var allowUpdate = relationHasGrantOfType(rel, updateType.toUpperCase()) || authHasPermission(updateType.toUpperCase()+'_ANY');
 		
 		//XXXdone update: previous & next row buttons
 		dialog.innerHTML = '<div id="dialog-header">'

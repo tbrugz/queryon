@@ -46,3 +46,7 @@ function refreshAuthInfo() {
 		urlednew.style.display = 'none';
 	}
 }
+
+function authHasPermission(permission) {
+	return authInfo.permissions.indexOf(permission)>=0;
+}

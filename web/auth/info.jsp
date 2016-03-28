@@ -38,7 +38,7 @@
 	
 	//permissions
 	//XXX: fixed list of permissions...
-	String[] permissionsArr = { "SELECT_ANY" };
+	String[] permissionsArr = { "SELECT_ANY", "INSERT_ANY", "UPDATE_ANY", "DELETE_ANY", "MANAGE" };
 	List<String> userPerms = new ArrayList<String>();
 	for(String perm: permissionsArr) {
 		if(ShiroUtils.isPermitted(currentUser, perm)) {

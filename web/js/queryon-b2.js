@@ -8,7 +8,7 @@
 var queryOnUrl = 'q';
 var qonEditorUrl = 'qon-editor.jsp';
 var processorUrl = 'processor';
-var authInfo = {
+/*var authInfo = {
 		// similar to 'auth/info.jsp'
 		authenticated: false,
 		username: null, //''
@@ -16,7 +16,7 @@ var authInfo = {
 		permissions: [ ],
 		isAdmin: false,
 		isDev: false
-};
+};*/
 var settings = {};
 
 /* functions */
@@ -212,7 +212,7 @@ function makeHrefs() {
 	refreshAuthInfo();
 }
 
-function loadAuthInfo() {
+/*function loadAuthInfo() {
 	$.ajax({
 		url: 'auth/info.jsp',
 		dataType: "text",
@@ -225,7 +225,7 @@ function loadAuthInfo() {
 			makeHrefs();
 		}
 	});
-}
+}*/
 
 function loadSettings(callbackOk) {
 	$.ajax({
@@ -240,7 +240,7 @@ function loadSettings(callbackOk) {
 	});
 }
 
-function refreshAuthInfo() {
+/*function refreshAuthInfo() {
 	var user = document.getElementById('username');
 	user.innerHTML = authInfo.username || '';
 	var auth = document.getElementById('authaction');
@@ -261,7 +261,7 @@ function refreshAuthInfo() {
 	else if(urlednew){
 		urlednew.style.display = 'none';
 	}
-}
+}*/
 
 function getKeyValsForRow(rownum) {
 	var content = document.getElementById('content');
