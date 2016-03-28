@@ -1,0 +1,19 @@
+<project name="qon-demo-minimal" basedir="."
+	xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
+
+	<artifact:dependencies pathId="sqlrun.classpath">
+		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
+		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime"/>
+		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
+	</artifact:dependencies>
+
+	<target name="run-sqlrun">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=src/main/resources/queryon.sqlrun.properties"/>
+		</java>
+	</target>
+	
+</project>

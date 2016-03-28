@@ -20,6 +20,11 @@ cd demo-minimal
 mvn package
 ```
 
+* init h2 database:
+```
+ant run-sqlrun
+```
+
 running
 -------
 
@@ -62,7 +67,7 @@ WITH InfiniteRows (RowNumber) AS (
 -- Statement that executes the CTE
 SELECT RowNumber*5 as row, RowNumber*(5+sin(cast(RowNumber AS DOUBLE)/5)) as row_sin,
     rownumber*5*(rand()+0.5) as row_rand
-FROM InfiniteRows;
+FROM InfiniteRows
 ```
 ref: http://www.codeproject.com/Tips/811875/Generating-Desired-Amount-of-Rows-in-SQL-using-CTE
 
