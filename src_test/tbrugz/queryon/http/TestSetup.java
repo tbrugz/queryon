@@ -55,7 +55,7 @@ public class TestSetup {
 	
 	public static void setupShiro() {
 		// see http://shiro.apache.org/testing.html
-		Factory<org.apache.shiro.mgt.SecurityManager> factory = new IniSecurityManagerFactory("classpath:test.shiro.all-permission.ini");
+		Factory<org.apache.shiro.mgt.SecurityManager> factory = new IniSecurityManagerFactory("classpath:test.shiro.permission.ini");
 		SecurityUtils.setSecurityManager(factory.getInstance());
 	}
 	

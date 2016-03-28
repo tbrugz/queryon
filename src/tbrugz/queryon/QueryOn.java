@@ -101,7 +101,11 @@ public class QueryOn extends HttpServlet {
 		SELECT_ANY,
 		VALIDATE_ANY,
 		EXPLAIN_ANY,
-		MANAGE
+		MANAGE,
+		// not actions but special (global) permissions:
+		INSERT_ANY,
+		UPDATE_ANY,
+		DELETE_ANY
 	}
 	
 	// 'status objects' (SO)
@@ -1104,7 +1108,8 @@ public class QueryOn extends HttpServlet {
 		// roles permission
 		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		List<Grant> deleteGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.DELETE);
-		boolean hasRelationDeletePermission = QOnModelUtils.hasPermissionWithoutColumn(deleteGrants, roles);
+		boolean hasRelationDeletePermission = QOnModelUtils.hasPermissionWithoutColumn(deleteGrants, roles)
+				|| ShiroUtils.isPermitted(currentUser, ActionType.DELETE_ANY.name());
 		if(!hasRelationDeletePermission) {
 			throw new ForbiddenException("no delete permission on relation: "+relation.getName());
 		}
@@ -1187,7 +1192,8 @@ public class QueryOn extends HttpServlet {
 
 		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		List<Grant> updateGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.UPDATE);
-		boolean hasRelationUpdatePermission = QOnModelUtils.hasPermissionWithoutColumn(updateGrants, roles);
+		boolean hasRelationUpdatePermission = QOnModelUtils.hasPermissionWithoutColumn(updateGrants, roles)
+				|| ShiroUtils.isPermitted(currentUser, ActionType.UPDATE_ANY.name());
 		
 		StringBuilder sb = new StringBuilder();
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
@@ -1294,7 +1300,8 @@ public class QueryOn extends HttpServlet {
 		
 		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		List<Grant> insertGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.INSERT);
-		boolean hasRelationInsertPermission = QOnModelUtils.hasPermissionWithoutColumn(insertGrants, roles);
+		boolean hasRelationInsertPermission = QOnModelUtils.hasPermissionWithoutColumn(insertGrants, roles)
+				|| ShiroUtils.isPermitted(currentUser, ActionType.INSERT_ANY.name());
 		
 		StringBuilder sbCols = new StringBuilder();
 		StringBuilder sbVals = new StringBuilder();
