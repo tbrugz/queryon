@@ -437,8 +437,17 @@ toggleDiff = function() {
 	var btn2p = document.getElementById('togglediffbtn-2p');
 	if(btnIn.checked || !btn2p.checked) {
 		doDiffUsingJS(1);
+		document.querySelectorAll('th.texttitle')[0].style.width='96%';
+		/* var divs = document.querySelectorAll('th.texttitle');
+		for (i = 0; i < divs.length; ++i) {
+			divs[i].style.width='96%';
+		} */
 	} else {
 		doDiffUsingJS(0);
+		var divs = document.querySelectorAll('th.texttitle');
+		for (i = 0; i < divs.length; ++i) {
+			divs[i].style.width='48%';
+		}
 	}
 }
 
@@ -729,6 +738,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 	}*/
 	#diffoutput table {
 		min-width: 90%;
+		max-width: 96%;
 	}
 	
 	#diffstats {
@@ -835,7 +845,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 		<!-- <input id="togglediffbtn" type="button" value="inline" class="content-btn" style="float:right; margin-right: 10px;" onclick="toggleDiff();"> -->
 		<div style="float:right; margin-right: 10px; margin: 10px;">
 			<label class="content-btn">
-				<input id="togglediffbtn-in" type="radio" name="togglediffbtn" value="inline" onclick="toggleDiff();" checked>
+				<input id="togglediffbtn-in" type="radio" name="togglediffbtn" value="inline" onclick="toggleDiff();" checked="checked">
 				Inline
 			</label>
 			<label class="content-btn">
