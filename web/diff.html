@@ -382,10 +382,10 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 			contextSize: contextSize,
 			viewType: viewType
 		}));
-		byId('togglediffbtn').style.visibility = 'visible';
+		//byId('togglediffbtn').style.visibility = 'visible';
 	}
 	else {
-		byId('togglediffbtn').style.visibility = 'hidden';
+		//byId('togglediffbtn').style.visibility = 'hidden';
 	}
 }
 
@@ -427,11 +427,18 @@ diffedLineCount = function(opcodes) {
 }
 
 toggleDiff = function() {
-	var btn = document.getElementById('togglediffbtn');
+	/*var btn = document.getElementById('togglediffbtn');
 	if(btn.value=='inline'){
 		doDiffUsingJS(0);btn.value='2 pane';
 	}else{
 		doDiffUsingJS(1);btn.value='inline';
+	}*/
+	var btnIn = document.getElementById('togglediffbtn-in');
+	var btn2p = document.getElementById('togglediffbtn-2p');
+	if(btnIn.checked || !btn2p.checked) {
+		doDiffUsingJS(1);
+	} else {
+		doDiffUsingJS(0);
 	}
 }
 
@@ -701,8 +708,17 @@ domSwith2ElementsInternal = function(e1, e2) {
 		clear: both;
 	}
 	input.content-btn {
-		border:1px solid #999;
+		border: 1px solid #999;
 		background-color: whitesmoke;
+	}
+	label.content-btn {
+		border: 1px solid #999;
+		background-color: whitesmoke;
+		padding: 4px 8px 4px 8px;
+		margin: 10px 2px 2px 2px;
+	}
+	label.content-btn input {
+		/* display: none; */
 	}
 	/*a.content-btn {
 		border:1px solid #999;
@@ -816,7 +832,17 @@ domSwith2ElementsInternal = function(e1, e2) {
 	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
 	
 	<div id="diffoutput-container">
-		<input id="togglediffbtn" type="button" value="inline" class="content-btn" style="float:right; margin-right: 10px;" onclick="toggleDiff();">
+		<!-- <input id="togglediffbtn" type="button" value="inline" class="content-btn" style="float:right; margin-right: 10px;" onclick="toggleDiff();"> -->
+		<div style="float:right; margin-right: 10px; margin: 10px;">
+			<label class="content-btn">
+				<input id="togglediffbtn-in" type="radio" name="togglediffbtn" value="inline" onclick="toggleDiff();" checked>
+				Inline
+			</label>
+			<label class="content-btn">
+				<input id="togglediffbtn-2p" type="radio" name="togglediffbtn" value="2 pane" onclick="toggleDiff();">
+				2 panes
+			</label>
+		</div>
 		<div id="diffstats"></div>
 		<div id="diffoutput"></div>
 	</div>
