@@ -1,15 +1,18 @@
 package tbrugz.queryon.util;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.DBMSResources;
 
 public class QOnModelUtils {
 
@@ -59,8 +62,15 @@ public class QOnModelUtils {
 		model.getMetadata().put("database-minor-version", String.valueOf(conn.getMetaData().getDatabaseMinorVersion()));
 		model.getMetadata().put("driver-name", conn.getMetaData().getDriverName());
 		model.getMetadata().put("driver-version", conn.getMetaData().getDriverVersion());
-		model.getMetadata().put("dburl", conn.getMetaData().getURL());
-		model.getMetadata().put("dbuser", conn.getMetaData().getUserName());
+		model.getMetadata().put("db-url", conn.getMetaData().getURL());
+		model.getMetadata().put("db-user", conn.getMetaData().getUserName());
+		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
+		model.getMetadata().put("db-features", feat.getClass().getName());
+		//DBMSFeatures feat2 = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		//model.getMetadata().put("db-features2", feat2.getClass().getName());
+		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+		model.getMetadata().put("db-metadata", dbmd.getClass().getName());
 		
 		//log.info("metadata["+id+"]: "+model.getMetadata());
 	}

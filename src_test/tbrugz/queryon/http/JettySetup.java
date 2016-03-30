@@ -11,6 +11,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+/*
+ * https://wiki.eclipse.org/Jetty/Tutorial/Embedding_Jetty
+ * http://git.eclipse.org/c/jetty/org.eclipse.jetty.project.git/tree/example-jetty-embedded/src/main/java/org/eclipse/jetty/embedded?h=jetty-8 
+ */
 public class JettySetup {
 	
 	public static int startPort = 8889;
@@ -30,16 +34,11 @@ public class JettySetup {
 		
 		port = getAvaiablePort(startPort, maxPort);
 		setupTestUrls();
-		//Map<String, String> args = new HashMap<String, String>();
-		//args.put("webroot", "src_test/tbrugz/queryon/http"); // or any other command line args, eg port
 		
 		Connector connector = new SelectChannelConnector();
 		connector.setPort(port);
 		server.setConnectors(new Connector[]{ connector });
-		
-		//System.err.println(war + " " + path);
 
-		// https://wiki.eclipse.org/Jetty/Tutorial/Embedding_Jetty
 		WebAppContext webapp = new WebAppContext();
 		String webRoot = "src_test/tbrugz/queryon/http";
 		webapp.setDescriptor(webRoot+"/WEB-INF/web.xml");
