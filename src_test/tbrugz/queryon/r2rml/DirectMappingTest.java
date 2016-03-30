@@ -26,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import tbrugz.queryon.http.JettySetup;
 import tbrugz.queryon.http.TestSetup;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.sqldump.SQLDump;
@@ -42,13 +43,13 @@ import tbrugz.sqldump.sqlrun.SQLRun;
 public class DirectMappingTest {
 
 	@BeforeClass
-	public static void setup() throws IOException, ParserConfigurationException {
-		TestSetup.setupWinstone();
+	public static void setup() throws Exception {
+		JettySetup.setupServer();
 	}
 	
 	@AfterClass
 	public static void shutdown() {
-		TestSetup.shutdown();
+		JettySetup.shutdown();
 	}
 
 	@Before

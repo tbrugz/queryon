@@ -2,16 +2,16 @@ package tbrugz.queryon.http;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.util.Factory;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.webapp.WebAppContext;
 
-//import winstone.Launcher;
-
-public class TestSetup {
+public class JettySetup {
 	
 	public static int startPort = 8889;
 	public static int maxPort = 10000;
@@ -22,25 +22,37 @@ public class TestSetup {
 	public static String baseUrl = "http://localhost:"+port+"/q";
 	public static String qonSchemaBaseUrl = "http://localhost:"+port+"/qos";
 	
-	//private static Launcher winstone = null;
+	private static Server server = null;
 	
-	public static void setupWinstone() throws IOException {
-		//if(winstone!=null) { return; }
+	public static void setupServer() throws Exception {
+		if(server!=null) { return; }
+		Server server = new Server();
 		
 		port = getAvaiablePort(startPort, maxPort);
 		setupTestUrls();
-		Map<String, String> args = new HashMap<String, String>();
-		args.put("webroot", "src_test/tbrugz/queryon/http"); // or any other command line args, eg port
-		args.put("httpPort", ""+port);
-		args.put("ajp13Port", "-1");
-		//Launcher.initLogger(args);
-		//winstone = new Launcher(args); // spawns threads, so your application doesn't block
+		//Map<String, String> args = new HashMap<String, String>();
+		//args.put("webroot", "src_test/tbrugz/queryon/http"); // or any other command line args, eg port
 		
-		Runtime.getRuntime().addShutdownHook(new Thread(){
+		Connector connector = new SelectChannelConnector();
+		connector.setPort(port);
+		server.setConnectors(new Connector[]{ connector });
+		
+		//System.err.println(war + " " + path);
+
+		// https://wiki.eclipse.org/Jetty/Tutorial/Embedding_Jetty
+		WebAppContext webapp = new WebAppContext();
+		String webRoot = "src_test/tbrugz/queryon/http";
+		webapp.setDescriptor(webRoot+"/WEB-INF/web.xml");
+		webapp.setResourceBase(webRoot);
+		webapp.setContextPath("/");
+		webapp.setParentLoaderPriority(true);
+		server.setHandler(webapp);
+		
+		/*Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run() {
 				System.err.println("shutting down winstone");
 				try {
-					//winstone.shutdown();
+					//XXX shutdown?
 				}
 				catch(Exception e) {
 					System.err.println("Exception shutting down: "+e);
@@ -48,7 +60,11 @@ public class TestSetup {
 				}
 				System.err.println("winstone shutted down");
 			}
-		});
+		});*/
+		
+		server.start();
+		//server.join();
+		server.setStopAtShutdown(true);
 		
 		setupShiro();
 	}
@@ -98,5 +114,5 @@ public class TestSetup {
 	/*public static void main(String[] args) throws IOException {
 		setupWinstone();
 	}*/
-	
+
 }

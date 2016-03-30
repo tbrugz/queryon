@@ -61,8 +61,9 @@ public class WinstoneAndH2HttpRequestTest {
 	static String workDir = "work/test/";
 	
 	@BeforeClass
-	public static void setup() throws IOException, ParserConfigurationException {
-		TestSetup.setupWinstone();
+	public static void setup() throws Exception {
+		//TestSetup.setupWinstone();
+		JettySetup.setupServer();
 		
 		dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();
@@ -75,7 +76,8 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@AfterClass
 	public static void shutdown() {
-		TestSetup.shutdown();
+		JettySetup.shutdown();
+		//TestSetup.shutdown();
 	}
 
 	@Before
