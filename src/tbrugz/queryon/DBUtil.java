@@ -81,7 +81,7 @@ public class DBUtil {
 	public static Connection initDBConn(Properties prop, String modelId, SchemaModel model) throws ClassNotFoundException, SQLException, NamingException {
 		try {
 			Connection conn = initDBConn(prop, modelId);
-			QOnModelUtils.setModelMetadata(model, conn);
+			//QOnModelUtils.setModelMetadata(model, modelId, conn);
 			return conn;
 		}
 		catch(ClassNotFoundException e) {

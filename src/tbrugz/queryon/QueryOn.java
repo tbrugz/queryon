@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -316,6 +317,8 @@ public class QueryOn extends HttpServlet {
 			setupUpdatePlugins(context, updatePluginsStrList);
 			
 			runOnStartupProcessors(context);
+			
+			initModelsMetadata(models);
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);
@@ -327,6 +330,21 @@ public class QueryOn extends HttpServlet {
 			e.printStackTrace();
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
+		}
+	}
+	
+	void initModelsMetadata(Map<String, SchemaModel> models) throws ClassNotFoundException, SQLException, NamingException {
+		for(Entry<String, SchemaModel> e: models.entrySet()) {
+			if(! QOnModelUtils.isModelMetadataSet(e.getValue())) {
+				Connection conn = null;
+				try {
+					conn = DBUtil.initDBConn(prop, e.getKey());
+					QOnModelUtils.setModelMetadata(e.getValue(), e.getKey(), conn);
+				}
+				finally {
+					ConnectionUtil.closeConnection(conn);
+				}
+			}
 		}
 	}
 	
@@ -437,7 +455,7 @@ public class QueryOn extends HttpServlet {
 		//DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: should NOT be a singleton
 		
 		if(conn!=null) {
-			QOnModelUtils.setModelMetadata(sm, conn);
+			QOnModelUtils.setModelMetadata(sm, modelId, conn);
 			ConnectionUtil.closeConnection(conn);
 		}
 		return sm;

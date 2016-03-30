@@ -13,6 +13,8 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 
 public class QOnModelUtils {
 
+	//private static final Log log = LogFactory.getLog(QOnModelUtils.class);
+	
 	public static List<Grant> filterGrantsByPrivilegeType(List<Grant> grants, PrivilegeType priv) {
 		if(grants==null) { return null; }
 		List<Grant> ret = new ArrayList<Grant>();
@@ -42,7 +44,11 @@ public class QOnModelUtils {
 		return false;
 	}
 	
-	public static void setModelMetadata(SchemaModel model, Connection conn) throws SQLException {
+	public static boolean isModelMetadataSet(SchemaModel model) {
+		return model.getMetadata()!=null && model.getMetadata().get("database-product")!=null;
+	}
+	
+	public static void setModelMetadata(SchemaModel model, String id, Connection conn) throws SQLException {
 		if(model==null) return;
 		if(model.getMetadata()==null) {
 			model.setMetadata(new TreeMap<String, String>());
@@ -51,9 +57,12 @@ public class QOnModelUtils {
 		model.getMetadata().put("database-product-version", conn.getMetaData().getDatabaseProductVersion());
 		model.getMetadata().put("database-major-version", String.valueOf(conn.getMetaData().getDatabaseMajorVersion()));
 		model.getMetadata().put("database-minor-version", String.valueOf(conn.getMetaData().getDatabaseMinorVersion()));
-		model.getMetadata().put("driver", conn.getMetaData().getDriverName());
+		model.getMetadata().put("driver-name", conn.getMetaData().getDriverName());
 		model.getMetadata().put("driver-version", conn.getMetaData().getDriverVersion());
 		model.getMetadata().put("dburl", conn.getMetaData().getURL());
+		model.getMetadata().put("dbuser", conn.getMetaData().getUserName());
+		
+		//log.info("metadata["+id+"]: "+model.getMetadata());
 	}
 
 	public static void setModelExceptionMetadata(SchemaModel model, Throwable t) throws SQLException {
