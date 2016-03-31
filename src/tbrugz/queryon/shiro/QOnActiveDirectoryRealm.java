@@ -96,9 +96,10 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
         searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
         String userPrincipalName = username;
-        if (principalSuffix != null) {
+        //XXX: property for using (or not) principalSuffix
+        /*if (principalSuffix != null) {
             userPrincipalName += principalSuffix;
-        }
+        }*/
 
         //SHIRO-115 - prevent potential code injection:
         //String searchFilter = "(&(objectClass=*)(userPrincipalName={0}))";
