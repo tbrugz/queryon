@@ -48,7 +48,7 @@ public class DirectMappingTest {
 	}
 	
 	@AfterClass
-	public static void shutdown() {
+	public static void shutdown() throws Exception {
 		JettySetup.shutdown();
 	}
 

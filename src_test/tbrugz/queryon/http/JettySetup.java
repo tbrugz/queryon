@@ -30,7 +30,7 @@ public class JettySetup {
 	
 	public static void setupServer() throws Exception {
 		if(server!=null) { return; }
-		Server server = new Server();
+		server = new Server();
 		
 		port = getAvaiablePort(startPort, maxPort);
 		setupTestUrls();
@@ -80,9 +80,12 @@ public class JettySetup {
 		qonSchemaBaseUrl = "http://localhost:"+port+"/qos";
 	}
 
-	public static void shutdown() {
+	public static void shutdown() throws Exception {
 		//shutdownShiro(); //??
 		//winstone.shutdown();
+		server.setGracefulShutdown(0);
+		//server.stop();
+		//server.destroy();
 	}
 	
 	public static int getAvaiablePort(int testPortInit, int testPortMax) {

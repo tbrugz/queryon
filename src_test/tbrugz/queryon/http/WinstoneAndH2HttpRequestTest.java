@@ -75,7 +75,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@AfterClass
-	public static void shutdown() {
+	public static void shutdown() throws Exception {
 		JettySetup.shutdown();
 		//TestSetup.shutdown();
 	}
