@@ -29,7 +29,7 @@ public class JettySetup {
 	private static Server server = null;
 	
 	public static void setupServer() throws Exception {
-		if(server!=null) { return; }
+		if(server!=null && server.isRunning()) { return; }
 		server = new Server();
 		
 		port = getAvaiablePort(startPort, maxPort);
@@ -82,10 +82,12 @@ public class JettySetup {
 
 	public static void shutdown() throws Exception {
 		//shutdownShiro(); //??
-		//winstone.shutdown();
-		server.setGracefulShutdown(0);
-		//server.stop();
-		//server.destroy();
+		if(server!=null) {
+			//server.setGracefulShutdown(0);
+			server.stop();
+			//server.destroy();
+		}
+		server = null;
 	}
 	
 	public static int getAvaiablePort(int testPortInit, int testPortMax) {
