@@ -3,6 +3,8 @@ package tbrugz.queryon.http;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.util.Factory;
@@ -17,8 +19,10 @@ import org.eclipse.jetty.webapp.WebAppContext;
  */
 public class JettySetup {
 	
-	public static int startPort = 8889;
-	public static int maxPort = 10000;
+	private static final Log log = LogFactory.getLog(JettySetup.class);
+	
+	public static int startPort = 10320;
+	public static int maxPort = startPort+50;
 	
 	public static int port = startPort;
 	
@@ -29,10 +33,12 @@ public class JettySetup {
 	private static Server server = null;
 	
 	public static void setupServer() throws Exception {
+		log.info("setup()");
 		if(server!=null && server.isRunning()) { return; }
 		server = new Server();
 		
 		port = getAvaiablePort(startPort, maxPort);
+		log.info("setup(): port="+port);
 		setupTestUrls();
 		
 		Connector connector = new SelectChannelConnector();
@@ -62,6 +68,7 @@ public class JettySetup {
 		});*/
 		
 		server.start();
+		log.info("setup(): started...");
 		//server.join();
 		server.setStopAtShutdown(true);
 		
@@ -80,7 +87,12 @@ public class JettySetup {
 		qonSchemaBaseUrl = "http://localhost:"+port+"/qos";
 	}
 
+	/*
+	 * http://stackoverflow.com/questions/5719159/programmatic-jetty-shutdown
+	 * http://www.petervannes.nl/files/084d1067451c4f9a56f9b865984f803d-52.php
+	 */
 	public static void shutdown() throws Exception {
+		log.info("shutdown()");
 		//shutdownShiro(); //??
 		if(server!=null) {
 			//server.setGracefulShutdown(0);
@@ -92,7 +104,10 @@ public class JettySetup {
 	
 	public static int getAvaiablePort(int testPortInit, int testPortMax) {
 		int testPort = testPortInit;
-		while(!isAvaiable(testPort) && testPort<testPortMax) { testPort++; }
+		while(!isAvaiable(testPort) && testPort<=testPortMax) { testPort++; }
+		if(testPort>testPortMax) {
+			throw new IllegalArgumentException("no avaiable port: testPortInit="+testPortInit+" ; testPortMax="+testPortMax);
+		}
 		return testPort;
 	}
 	

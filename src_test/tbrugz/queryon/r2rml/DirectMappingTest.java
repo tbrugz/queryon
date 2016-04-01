@@ -27,10 +27,11 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import tbrugz.queryon.http.JettySetup;
-import tbrugz.queryon.http.TestSetup;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.sqlrun.SQLRun;
+
+import static tbrugz.queryon.http.JettySetup.*;
 
 /**
  * see:
@@ -82,11 +83,11 @@ public class DirectMappingTest {
 	@Test
 	public void testGet_Turtle_Tables_withAny23() throws IOException, ParserConfigurationException, SAXException, ExtractionException, TripleHandlerException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpGet = new HttpGet(TestSetup.baseUrl+"/table.ttl");
+		HttpGet httpGet = new HttpGet(baseUrl+"/table.ttl");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String turtleStr = WinstoneAndH2HttpRequestTest.getContent(response1);
-		DocumentSource source = new StringDocumentSource(turtleStr, TestSetup.baseUrl+"/table.ttl"); //"http://host.com/service");
+		DocumentSource source = new StringDocumentSource(turtleStr, baseUrl+"/table.ttl"); //"http://host.com/service");
 
 		Any23 runner = new Any23();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

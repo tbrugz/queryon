@@ -52,7 +52,7 @@ import com.google.gson.GsonBuilder;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
-import static tbrugz.queryon.http.TestSetup.*;
+import static tbrugz.queryon.http.JettySetup.*;
 
 public class WinstoneAndH2HttpRequestTest {
 	
