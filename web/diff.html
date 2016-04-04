@@ -303,19 +303,24 @@ doClearDdlOutput = function() {
 	applyBtn.value = 'apply DDL diff (?!?)...';
 }
 
-doDiffUsingJS = function(viewType) {
-	if(viewType === undefined) { viewType = 1; }
+doDiffUsingJS = function(viewType, inverse) {
+	if(viewType === undefined) {
+		var btnIn = document.getElementById('togglediffbtn-in');
+		viewType = (!btnIn||btnIn.checked) ? 1 : 0;
+	}
+	if(inverse === undefined) { inverse = 0; }
 	var from = document.getElementById('content-from').innerHTML;
 	var to = document.getElementById('content-to').innerHTML;
 	var diffc = document.getElementById('diffoutput-container');
 	if(from && to
 		&& (document.getElementById('modelSource').value != document.getElementById('modelTarget').value)
 		) {
+		
 		diffc.style.display = 'block';
 		
 		diffUsingJS(viewType, from, to,
 			document.getElementById('modelSource').value, document.getElementById('modelTarget').value,
-			'diffoutput');
+			'diffoutput', inverse);
 		//XXX
 		document.getElementById('ddldiff-message').style.display='none';
 		if(document.getElementById('type').value=='TABLE') {
@@ -343,6 +348,17 @@ doDiffUsingJS = function(viewType) {
 		document.getElementById('doDataDiffBtn').style.display = 'none';
 		document.getElementById('doDataDiffSqlBtn').style.display = 'none';
 	}
+	
+	if(viewType==1) {
+		document.querySelectorAll('th.texttitle')[0].style.width='96%';
+	}
+	else {
+		var divs = document.querySelectorAll('th.texttitle');
+		for (i = 0; i < divs.length; ++i) {
+			divs[i].style.width='48%';
+		}
+	}
+	
 	btnActionStop('go-button');
 }
 
@@ -355,7 +371,7 @@ diffHasChanges = function(opcodes) {
 	return false;
 }
 
-diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
+diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId, invertSides) {
 	"use strict";
 	//console.log("viewType=",viewType);
 	var byId = function (id) { return document.getElementById(id); },
@@ -380,12 +396,13 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId) {
 			baseTextName: fromTitle,
 			newTextName: toTitle,
 			contextSize: contextSize,
-			viewType: viewType
+			viewType: viewType,
+			invertSides: invertSides
 		}));
-		//byId('togglediffbtn').style.visibility = 'visible';
+		byId('togglediffbtn').style.visibility = 'visible';
 	}
 	else {
-		//byId('togglediffbtn').style.visibility = 'hidden';
+		byId('togglediffbtn').style.visibility = 'hidden';
 	}
 }
 
@@ -435,19 +452,12 @@ toggleDiff = function() {
 	}*/
 	var btnIn = document.getElementById('togglediffbtn-in');
 	var btn2p = document.getElementById('togglediffbtn-2p');
+	var inverseSides = document.getElementById('content-from-panel').style.float=='right';
+	
 	if(btnIn.checked || !btn2p.checked) {
-		doDiffUsingJS(1);
-		document.querySelectorAll('th.texttitle')[0].style.width='96%';
-		/* var divs = document.querySelectorAll('th.texttitle');
-		for (i = 0; i < divs.length; ++i) {
-			divs[i].style.width='96%';
-		} */
+		doDiffUsingJS(1, inverseSides);
 	} else {
-		doDiffUsingJS(0);
-		var divs = document.querySelectorAll('th.texttitle');
-		for (i = 0; i < divs.length; ++i) {
-			divs[i].style.width='48%';
-		}
+		doDiffUsingJS(0, inverseSides);
 	}
 }
 
@@ -557,17 +567,21 @@ diffSwitchOrder = function() {
 	domSwitchOrder('modelSourceLabel','modelTargetLabel');
 	//domSwitchOrder('content-from-panel','content-to-panel');
 	var panels = [document.getElementById('content-from-panel'),document.getElementById('content-to-panel')];
+	var btnIn = document.getElementById('togglediffbtn-in');
+	
 	if(panels[0].style.float=='left') {
 		panels[0].style.float='right';
 		panels[1].style.float='left';
 		document.cookie = 'modelorder=baselast';
 		//console.log('modelorder=baselast');
+		doDiffUsingJS(btnIn.checked, 1);
 	}
 	else {
 		panels[0].style.float='left';
 		panels[1].style.float='right';
 		document.cookie = 'modelorder=base1st';
 		//console.log('modelorder=base1st');
+		doDiffUsingJS(btnIn.checked, 0);
 	}
 	//XXX: set cookie
 }
@@ -710,7 +724,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 		white-space: pre;
 		/*clear:both;*/
 		border: 10px solid #ddd;
-		width: 100%;
+		width: 96%;
 	}
 	#diffoutput-container {
 		display: none;
@@ -736,10 +750,6 @@ domSwith2ElementsInternal = function(e1, e2) {
 		text-decoration: none;
 		background-color: whitesmoke;
 	}*/
-	#diffoutput table {
-		min-width: 90%;
-		max-width: 96%;
-	}
 	
 	#diffstats {
 		font-family: monospace;
@@ -843,7 +853,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 	
 	<div id="diffoutput-container">
 		<!-- <input id="togglediffbtn" type="button" value="inline" class="content-btn" style="float:right; margin-right: 10px;" onclick="toggleDiff();"> -->
-		<div style="float:right; margin-right: 10px; margin: 10px;">
+		<div id="togglediffbtn" style="float:right; margin-right: 10px; margin: 10px;">
 			<label class="content-btn">
 				<input id="togglediffbtn-in" type="radio" name="togglediffbtn" value="inline" onclick="toggleDiff();" checked="checked">
 				Inline

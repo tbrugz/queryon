@@ -84,8 +84,8 @@ diffview = {
 		
 		var leftTextName = invertSides ? newTextName : baseTextName;
 		var rightTextName = invertSides ? baseTextName : newTextName;
-		var leftClass = invertSides ? "newer" : "base";
-		var rightClass = invertSides ? "base" : "newer";
+		var leftClass = invertSides ? "new" : "base";
+		var rightClass = invertSides ? "base" : "new";
 		
 		var tdata = document.createElement("thead");
 		var node = document.createElement("tr");

@@ -200,14 +200,28 @@
 
 /***** diff *****/
 
-#modelTargetLabel, #content-to-title, #diffoutput tr th.texttitle:nth-child(4) {
+#modelTargetLabel, #content-to-title, #diffoutput th.texttitle.new /*, #diffoutput tr th.texttitle:nth-child(4)*/ {
 	background-color: #188859;
 	color: #ddd;
 	/*background-color: #9E9;
 	color: #000;*/
 }
 
-#modelSourceLabel, #content-from-title, #diffoutput tr th.texttitle:nth-child(2) {
+#modelSourceLabel, #content-from-title, #diffoutput th.texttitle.base /*, #diffoutput tr th.texttitle:nth-child(2)*/ {
 	/*background-color: #E99;
 	color: #000;*/
+}
+
+#diffoutput table {
+	/*table-layout: fixed;
+	min-width: 90%;
+	max-width: 96%;*/
+}
+
+#diffoutput tr th:not(.texttitle) {
+	/* background-color: #aaf;
+	width: 42px;
+	-webkit-column-width: 42px;
+	-moz-column-width: 42px;
+	column-width: 42px;*/
 }
