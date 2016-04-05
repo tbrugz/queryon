@@ -32,6 +32,8 @@ public class QueryOnSchema extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnSchema.class);
 
+	public static final String MIME_SQL = "text/plain"; //"application/sql"; - browsers may "download"
+	
 	String lastDialect;
 	
 	public static List<String> parseQS(HttpServletRequest req) {
@@ -155,6 +157,7 @@ public class QueryOnSchema extends HttpServlet {
 			throw new NotFoundException("Object "+(schemaName!=null?schemaName+".":"")+objectName+" of type "+type4Filter+" not found");
 		}
 		
+		resp.setContentType(MIME_SQL);
 		resp.getWriter().write(dbid.getDefinition(true));
 		lastDialect = model.getSqlDialect();
 	}

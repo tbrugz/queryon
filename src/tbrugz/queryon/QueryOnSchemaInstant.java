@@ -144,6 +144,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	}
 	
 	void dump(DBIdentifiable dbid, HttpServletResponse resp) throws IOException {
+		resp.setContentType(MIME_SQL);
 		if(dbid==null) {
 			throw new BadRequestException("null object?");
 		}
