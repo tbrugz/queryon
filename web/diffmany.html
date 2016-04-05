@@ -67,6 +67,7 @@ makeHrefs = function() {
 
 $.ajax({
 	url: 'info/model.jsp',
+	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
 		//console.log(json);
@@ -94,6 +95,7 @@ loadSchemas = function(model) {
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,
+		dataType: "text",
 		success: function(data) {
 			var json = JSON.parse(data);
 			//console.log('loadSchemas, schemas',model,json);
@@ -189,6 +191,7 @@ getDDLdiff = function(apply) {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
+		dataType: "text",
 		success: function(data) {
 			var content = data;
 			if(content=='') {

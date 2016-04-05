@@ -86,6 +86,7 @@ updateUI = function() {
 
 $.ajax({
 	url: 'info/model.jsp',
+	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
 		//console.log(json);
@@ -113,6 +114,7 @@ loadSchemas = function(model) {
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,
+		dataType: "text",
 		success: function(data) {
 			var json = JSON.parse(data);
 			//console.log('loadSchemas, schemas',model,json);
@@ -185,6 +187,7 @@ loadObjectList = function(callbackOk) {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
+		dataType: "json",
 		success: function(data) {
 			//console.log('loadObjectList: ok: data=',data);
 			//var jj = JSON.parse(data);
@@ -217,6 +220,7 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
+		dataType: "text",
 		success: function(data, textStatus, jqXHR) {
 			//console.log(data);
 			var block = document.getElementById(contentId);
@@ -350,7 +354,8 @@ doDiffUsingJS = function(viewType, inverse) {
 	}
 	
 	if(viewType==1) {
-		document.querySelectorAll('th.texttitle')[0].style.width='96%';
+		var div = document.querySelectorAll('th.texttitle')[0];
+		if(div) { div.style.width='96%'; }
 	}
 	else {
 		var divs = document.querySelectorAll('th.texttitle');
@@ -487,6 +492,7 @@ getDDLdiff = function(apply) {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
+		dataType: "text",
 		success: function(data) {
 			var content = data;
 			if(content=='') {
@@ -698,10 +704,13 @@ domSwith2ElementsInternal = function(e1, e2) {
 		height: 300px;
 	}
 	
+	#code-panels {
+		padding: 10px;
+	}
 	.code-container {
-		width: 48%;
-		padding: 4px;
-		border: 10px solid #ddd;
+		width: 49%;
+		/*padding: 4px;
+		border: 10px solid #ddd;*/
 	}
 	
 	.code-container pre {

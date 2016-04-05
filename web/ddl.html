@@ -65,6 +65,7 @@ makeHrefs = function() {
 
 $.ajax({
 	url: 'info/model.jsp',
+	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
 		//console.log(json);
@@ -90,6 +91,7 @@ loadSchemas = function(model) {
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,
+		dataType: "text",
 		success: function(data) {
 			var json = JSON.parse(data);
 			//console.log(json);
@@ -198,6 +200,7 @@ loadObjectList = function(callback) {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
+		dataType: "json",
 		success: function(data) {
 			//console.log(data);
 			//var jj = JSON.parse(data);
@@ -231,6 +234,7 @@ getDDL = function() {
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
+		dataType: "text",
 		success: function(data) {
 			btnActionStop('go-button');
 			//console.log(data);
