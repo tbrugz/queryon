@@ -262,8 +262,10 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 }
 
 doDiff = function() {
+	closeMessages('messages');
 	btnActionStart('go-button');
 	doClear();
+	//document.getElementById('ddldiff-container').style.display = 'none';
 	getDDL('modelSource','content-from','content-from-title', doDiffUsingJS);
 	getDDL('modelTarget','content-to','content-to-title', doDiffUsingJS);
 	if(document.getElementById('modelSource').value == document.getElementById('modelTarget').value) {
@@ -327,6 +329,8 @@ doDiffUsingJS = function(viewType, inverse) {
 			'diffoutput', inverse);
 		//XXX
 		document.getElementById('ddldiff-message').style.display='none';
+		document.getElementById('ddldiff-container').style.display = 'block';
+		
 		if(document.getElementById('type').value=='TABLE') {
 			var fromUk = document.getElementById('content-from-uk').innerHTML;
 			var toUk = document.getElementById('content-to-uk').innerHTML;
@@ -347,7 +351,8 @@ doDiffUsingJS = function(viewType, inverse) {
 		diffc.style.display = 'none';
 		document.getElementById('diffoutput').innerHTML = "";
 		
-		document.getElementById('ddldiff-container').style.display = 'block';
+		//console.log("show ddldiff-container....");
+		//document.getElementById('ddldiff-container').style.display = 'block';
 		doClearDdlOutput();
 		document.getElementById('doDataDiffBtn').style.display = 'none';
 		document.getElementById('doDataDiffSqlBtn').style.display = 'none';
@@ -405,9 +410,11 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId, invertS
 			invertSides: invertSides
 		}));
 		byId('togglediffbtn').style.visibility = 'visible';
+		byId('ddldiff-container').style.display = 'block';
 	}
 	else {
 		byId('togglediffbtn').style.visibility = 'hidden';
+		byId('ddldiff-container').style.display = 'none';
 	}
 }
 

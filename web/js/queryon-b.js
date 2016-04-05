@@ -10,6 +10,7 @@ function init(url, containerId, callback) {
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
 		url: baseUrl+'/relation.json',
+		dataType: "json",
 		success: function(data) {
 			var rels = data.relation;
 			if(rels) { console.log('Load was performed. '+rels.length+' relations loaded'); }
