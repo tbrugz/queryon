@@ -123,6 +123,8 @@ public class QueryOn extends HttpServlet {
 	public static final String CONST_QUERY = "QUERY";
 	public static final String CONST_RELATION = "RELATION";
 	
+	public static final String MIME_TEXT = "text/plain";
+	
 	/*public enum StatusObject {
 		TABLE,
 		VIEW,
@@ -887,6 +889,7 @@ public class QueryOn extends HttpServlet {
 						resp);
 			}
 			else {
+				resp.setContentType(MIME_TEXT);
 				resp.getWriter().write(String.valueOf(params));
 			}
 		}
@@ -1014,10 +1017,12 @@ public class QueryOn extends HttpServlet {
 				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
 			}
 			else {
+				resp.setContentType(MIME_TEXT);
 				resp.getWriter().write(retObject.toString());
 			}
 		}
 		else {
+			resp.setContentType(MIME_TEXT);
 			if(outParamCount==0) {
 				resp.getWriter().write("execution successful - no return");
 			}
@@ -1181,6 +1186,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
 		conn.commit();
+		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" rows deleted");
 		
 		}
@@ -1274,6 +1280,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
+		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" rows updated");
 
 		}
@@ -1372,6 +1379,7 @@ public class QueryOn extends HttpServlet {
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
 		resp.setStatus(HttpServletResponse.SC_CREATED);
+		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" rows inserted");
 		
 		}
@@ -1393,6 +1401,7 @@ public class QueryOn extends HttpServlet {
 		//TODO: only reloads model for now...
 		// - reload-config, reload-movel, rerun-processors
 		doInit(req.getSession().getServletContext());
+		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write("queryon config reloaded");
 	}
 	
@@ -1650,7 +1659,7 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("Data column '"+reqspec.uniValueCol+"' not found");
 		}
 
-		String mimeType = "text/plain";
+		String mimeType = MIME_TEXT;
 		//XXXdone: get mimetype from column type (BLOB=application/octet-stream, CLOB=text/plain, ...) ? http://www.rfc-editor.org/rfc/rfc2046.txt
 		List<Class<?>> types = DataDumpUtils.getColumnTypes(rsmd);
 		if(Blob.class.equals( types.get(colIndex) )) {

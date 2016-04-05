@@ -27,8 +27,12 @@ import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.SQLDiff;
+import tbrugz.sqldump.JAXBSchemaXMLSerializer;
+import tbrugz.sqldump.JSONSchemaSerializer;
 import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
+import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -48,6 +52,11 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	public static final String PARAM_ACTION = "action";
 	
 	public static final String ACTION_DUMP_DEBUG = "debugDumpModel";
+	
+	public static final String MIME_XML = "application/xml";
+	public static final String MIME_JSON = "application/json";
+	public static final String MIME_SQL = "text/plain"; // "application/sql"?; - browsers may "download"
+	public static final String MIME_PATCH = "text/plain"; // http://stackoverflow.com/questions/5160944/proper-mime-type-for-patch-files
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
@@ -141,17 +150,21 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		// using 'syntax' param
 		if("xml".equals(syntax)) {
 			sqldiff.setXmlWriter(resp.getWriter());
+			resp.setContentType(MIME_XML);
 		}
 		else if("json".equals(syntax)) {
 			sqldiff.setJsonWriter(resp.getWriter());
+			resp.setContentType(MIME_JSON);
 		}
 		else if("patch".equals(syntax)) {
 			sqldiff.setPatchWriter(resp.getWriter());
+			resp.setContentType(MIME_PATCH);
 		}
 		else if("sql".equals(syntax)) {
 			// "sql": every DDL in plain text...
 			CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
 			sqldiff.setCategorizedOut(cout);
+			resp.setContentType(MIME_SQL);
 		}
 		else {
 			throw new BadRequestException("unknown syntax: "+syntax);
@@ -202,18 +215,28 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		pp.put("sqldump.connpropprefix", DBUtil.getDBConnPrefix(prop, modelId));
 		pp.put("sqldump.grabclass", "JDBCSchemaGrabber");
 		
+		//SchemaModelDumper md = null;
 		if("xml".equals(syntax)) {
+			//md = new JAXBSchemaXMLSerializer();
 			pp.put("sqldump.processingclasses", "JAXBSchemaXMLSerializer");
+			resp.setContentType(MIME_XML);
 		}
 		else if("json".equals(syntax)) {
+			//md = new JSONSchemaSerializer();
 			pp.put("sqldump.processingclasses", "JSONSchemaSerializer");
+			resp.setContentType(MIME_JSON);
 		}
 		else if("sql".equals(syntax)) {
+			//md = new SchemaModelScriptDumper();
 			pp.put("sqldump.processingclasses", "SchemaModelScriptDumper");
+			resp.setContentType(MIME_SQL);
 		}
 		else {
 			throw new BadRequestException("unknown syntax: "+syntax);
 		}
+		//pp.put("sqldump.processingclasses", md.getClass().getSimpleName());
+		//resp.setContentType(md.getMimeType());
+		//log.info("class: "+md.getClass().getSimpleName()+" content-type: "+md.getMimeType());
 		
 		setupDumpProperties(pp, schemas, types);
 		

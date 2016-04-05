@@ -119,6 +119,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
 			DiffSyntax ds = getSyntax(obj, feat, prop);
 			
+			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, resp.getWriter());
 		}
 		finally {

@@ -60,6 +60,8 @@ public class DiffServlet extends AbstractHttpServlet {
 	static final String PARAM_MODEL_TARGET = "modelTarget";
 	static final String PARAM_DO_APPLY = "doApply";
 	
+	public static final String MIME_SQL = "text/plain"; //"application/sql"; - browsers may "download"
+	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
@@ -219,6 +221,7 @@ public class DiffServlet extends AbstractHttpServlet {
 	}
 
 	void dumpDiffs(List<Diff> diffs, HttpServletResponse resp) throws IOException {
+		resp.setContentType(MIME_SQL);
 		for(Diff d: diffs) {
 			resp.getWriter().write(d.getDiff());
 			resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
@@ -230,6 +233,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		String sql = null;
 		try {
 			conn = DBUtil.initDBConn(prop, modelId);
+			resp.setContentType(MIME_SQL);
 			for(Diff d: diffs) {
 				List<String> sqls = d.getDiffList();
 				for(String s: sqls) {
