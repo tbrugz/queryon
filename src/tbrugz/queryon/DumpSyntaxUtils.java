@@ -28,7 +28,7 @@ public class DumpSyntaxUtils {
 				syntaxesByFormat.put(ds.getSyntaxId(), ds);
 				syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
 				syntaxesByMimeType.put(ds.getMimeType(), ds);
-				log.debug("syntax: "+ds.getClass()+" :: id="+ds.getSyntaxId()+" ext="+ds.getDefaultFileExtension()+" ?mime="+ds.getMimeType());
+				log.debug("syntax '"+ds.getClass().getSimpleName()+"': id="+ds.getSyntaxId()+" ; ext="+ds.getDefaultFileExtension()+" ; mime="+ds.getMimeType());
 			}
 		}
 	}

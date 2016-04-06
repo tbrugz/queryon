@@ -294,7 +294,6 @@ public class RequestSpec {
 		//	String key = en.nextElement();
 		//	String[] value = req.getParameterValues(key);
 		
-		@SuppressWarnings("unchecked")
 		Map<String,String[]> params = req.getParameterMap();
 		for(Map.Entry<String,String[]> entry: params.entrySet()) {
 			String key = entry.getKey();
@@ -429,7 +428,7 @@ public class RequestSpec {
 		return false;
 	}
 	
-	void setSyntaxProps(DumpSyntax ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
+	static void setSyntaxProps(DumpSyntax ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
 		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 		
 		List<String> pkeys = Utils.getStringListFromProp(syntaxProperties, ds.getSyntaxId()+".allowed-parameters", ",");
