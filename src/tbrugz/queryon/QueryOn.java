@@ -473,11 +473,13 @@ public class QueryOn extends HttpServlet {
 		catch(InternalServerException e) {
 			e.printStackTrace();
 			resp.setStatus(e.getCode());
+			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
 		}
 		catch(BadRequestException e) {
 			//e.printStackTrace();
 			resp.setStatus(e.getCode());
+			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
 			//log.warn("BRE: "+e.getMessage()+
 			//		(e.internalMessage!=null?" ; internal="+e.internalMessage:"")); 

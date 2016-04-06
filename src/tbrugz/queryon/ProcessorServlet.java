@@ -61,6 +61,7 @@ public class ProcessorServlet extends HttpServlet {
 		} catch(BadRequestException e) {
 			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
 			resp.setStatus(e.getCode());
+			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
 		} catch (ServletException e) {
 			//e.printStackTrace();
@@ -122,7 +123,6 @@ public class ProcessorServlet extends HttpServlet {
 		Properties prop = new ParametrizedProperties();
 		prop.putAll(appprop);
 		if(req!=null) {
-			@SuppressWarnings("unchecked")
 			Enumeration<String> en = req.getParameterNames();
 			while(en.hasMoreElements()) {
 				String s = en.nextElement();

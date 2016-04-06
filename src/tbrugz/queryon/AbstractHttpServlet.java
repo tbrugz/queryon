@@ -15,6 +15,8 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(AbstractHttpServlet.class);
 	
+	public static final String MIME_TEXT = "text/plain";
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -30,6 +32,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 		} catch(BadRequestException e) {
 			log.warn("BadRequestException: "+e.getMessage());
 			resp.setStatus(e.getCode());
+			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
 		} /*catch (ServletException e) {
 			//e.printStackTrace();

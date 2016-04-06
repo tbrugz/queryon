@@ -60,6 +60,7 @@ public class QueryOnSchema extends HttpServlet {
 		}
 		catch(BadRequestException e) {
 			resp.setStatus(e.getCode());
+			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
 		}
 		catch(ServletException e) {
