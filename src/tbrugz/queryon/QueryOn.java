@@ -444,6 +444,7 @@ public class QueryOn extends HttpServlet {
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
+		sm.setModelId(modelId);
 		//String dialect = prop.getProperty(prefix+SUFFIX_SQLDIALECT);
 		String dialect = prop.getProperty(PROP_SQLDIALECT);
 		if(dialect!=null) {

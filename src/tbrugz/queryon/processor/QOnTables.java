@@ -139,7 +139,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			}
 		}
 		
-		log.info("QOnTables processed [added/replaced "+count+" tables]");
+		log.info("QOnTables processed ["+
+				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
+				"added/replaced "+count+" tables]");
 		return count;
 	}
 
@@ -301,7 +303,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		}
 
 		//merge t's info with requestspec info
-		Map<String, String> uv = reqspec.getUpdateValues();
+		/*Map<String, String> uv = reqspec.getUpdateValues();
 		if(reqspec.getParams().size()==1 && uv.get("NAME")==null) {
 			uv.put("NAME", reqspec.getParams().get(0));
 		}
@@ -312,7 +314,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			if(uv.get("SCHEMA_NAME")==null) {
 				uv.put("SCHEMA_NAME", reqspec.getParams().get(0));
 			}
-		}
+		}*/
 		/*if(uv.get("SCHEMA_NAME")==null && t!=null) {
 			uv.put("SCHEMA_NAME", t.getSchemaName());
 		}

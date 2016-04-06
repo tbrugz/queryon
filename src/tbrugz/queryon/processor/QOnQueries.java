@@ -138,7 +138,9 @@ public class QOnQueries extends SQLQueries {
 			}
 		}
 		
-		log.info("QOn processed [added/replaced "+count+" queries]");
+		log.info("QOn processed ["+
+				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
+				"added/replaced "+count+" queries]");
 	}
 	
 	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr) {

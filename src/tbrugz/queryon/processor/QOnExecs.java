@@ -149,7 +149,9 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			}
 		}
 		
-		log.info("QOnExecs processed [added/replaced "+count+" executables]");
+		log.info("QOnExecs processed ["+
+				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
+				"added/replaced "+count+" executables]");
 		return count;
 	}
 	
