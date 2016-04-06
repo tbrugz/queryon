@@ -55,7 +55,7 @@ import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -1587,7 +1587,7 @@ public class QueryOn extends HttpServlet {
 			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
 		}
 		int count = 0;
-		DumpSyntax ds = reqspec.outputSyntax;
+		DumpSyntaxInt ds = reqspec.outputSyntax;
 		if(ds.usesImportedFKs()) {
 			ds.setImportedFKs(importedFKs);
 		}

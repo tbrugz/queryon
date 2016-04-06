@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
@@ -71,7 +71,7 @@ public class RequestSpec {
 	final List<String> columns = new ArrayList<String>();
 	final List<String> params = new ArrayList<String>();
 	final String outputTypeStr;
-	final DumpSyntax outputSyntax;
+	final DumpSyntaxInt outputSyntax;
 	final boolean distinct;
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
@@ -187,7 +187,7 @@ public class RequestSpec {
 			params.add(URIpartz.get(i));
 		}
 		
-		DumpSyntax outputSyntaxTmp = null;
+		DumpSyntaxInt outputSyntaxTmp = null;
 		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 		String acceptHeader = req.getHeader("Accept");
@@ -428,7 +428,7 @@ public class RequestSpec {
 		return false;
 	}
 	
-	static void setSyntaxProps(DumpSyntax ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
+	public static void setSyntaxProps(DumpSyntaxInt ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
 		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 		
 		List<String> pkeys = Utils.getStringListFromProp(syntaxProperties, ds.getSyntaxId()+".allowed-parameters", ",");
@@ -504,7 +504,7 @@ public class RequestSpec {
 		
 		int lastDotIndex = lastUriPart.lastIndexOf('.');
 		String outputTypeStrTmp = null;
-		DumpSyntax ds = null;
+		DumpSyntaxInt ds = null;
 		if(lastDotIndex > -1) {
 			int last2DotIndex = lastUriPart.lastIndexOf('.', lastDotIndex-1);
 			outputTypeStrTmp = lastUriPart.substring(lastDotIndex+1);

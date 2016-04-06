@@ -68,7 +68,7 @@ public class Diff2QServlet extends DataDiffServlet {
 			String sql = sqlParam;
 
 			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connSource.getMetaData());
-			DiffSyntax ds = getSyntax(obj, feat, prop);
+			DiffSyntax ds = getSyntax(obj, feat, prop, req);
 			
 			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, resp.getWriter());

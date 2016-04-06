@@ -24,6 +24,7 @@ import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.sqldiff.datadiff.DataDiff;
@@ -117,7 +118,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			
 			//XXX test if keycols are the same in both models ?
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
-			DiffSyntax ds = getSyntax(obj, feat, prop);
+			DiffSyntax ds = getSyntax(obj, feat, prop, req);
 			
 			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, resp.getWriter());
@@ -191,7 +192,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	}
 	
 	//XXX: get syntax based on URL or accept header
-	static DiffSyntax getSyntax(NamedTypedDBObject obj, DBMSFeatures feat, Properties prop) throws SQLException {
+	static DiffSyntax getSyntax(NamedTypedDBObject obj, DBMSFeatures feat, Properties prop, HttpServletRequest req) throws SQLException {
 		DiffSyntax ds = null;
 		if("sql".equals(obj.getMimeType())) {
 			ds = new SQLDataDiffSyntax();
@@ -202,8 +203,9 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		else {
 			throw new BadRequestException("unknown data type: "+obj.getMimeType());
 		}
-		ds.procProperties(prop);
-		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
+		RequestSpec.setSyntaxProps(ds, req, feat, prop);
+		//ds.procProperties(prop);
+		//if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 		
 		return ds;
 	}
