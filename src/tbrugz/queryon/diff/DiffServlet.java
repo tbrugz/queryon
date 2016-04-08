@@ -79,8 +79,8 @@ public class DiffServlet extends AbstractHttpServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());
 		
-		String modelIdSource = SchemaModelUtils.getModelId(req, PARAM_MODEL_SOURCE);
-		String modelIdTarget = SchemaModelUtils.getModelId(req, PARAM_MODEL_TARGET);
+		String modelIdSource = SchemaModelUtils.getModelId(req, PARAM_MODEL_SOURCE, false);
+		String modelIdTarget = SchemaModelUtils.getModelId(req, PARAM_MODEL_TARGET, false);
 		if(modelIdSource.equals(modelIdTarget)) {
 			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}

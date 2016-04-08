@@ -27,6 +27,7 @@ import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.sqldiff.SQLDiff;
+import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -77,7 +78,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		String action = req.getParameter(PARAM_ACTION);
 		if(action!=null) {
 			if(ACTION_DUMP_DEBUG.equals(action)) {
-				String modelId = SchemaModelUtils.getModelId(req);
+				String modelId = SchemaModelUtils.getModelId(req, SchemaModelUtils.PARAM_MODEL, false);
 				doDumpModelDebug(modelId, prop, schemas, types, syntax, resp);
 				return;
 			}
@@ -86,8 +87,8 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			}
 		}
 		
-		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE);
-		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET);
+		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE, false);
+		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET, false);
 		if(modelIdSource.equals(modelIdTarget)) {
 			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}
@@ -178,7 +179,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 				"PACKAGE", "PACKAGE_BODY", "PROCEDURE" };
 				
 		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, AbstractDBMSFeatures.PROP_GRAB_VIEWS, AbstractDBMSFeatures.PROP_GRAB_INDEXES, AbstractDBMSFeatures.PROP_GRAB_TRIGGERS,
-				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, "sqldump.schemagrab.grants", AbstractDBMSFeatures.PROP_GRAB_MATERIALIZED_VIEWS, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES,
+				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, JDBCSchemaGrabber.PROP_SCHEMAGRAB_GRANTS, AbstractDBMSFeatures.PROP_GRAB_MATERIALIZED_VIEWS, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES,
 				AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES };
 		/*
 		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks", "sqldump.dbspecificfeatures.grabviews", "sqldump.dbspecificfeatures.grabindexes", "sqldump.dbspecificfeatures.grabtriggers",

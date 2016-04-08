@@ -155,9 +155,13 @@ public class SchemaModelUtils {
 		return getModelId(req, PARAM_MODEL);
 	}
 	
-	public static String getModelId(HttpServletRequest req, String param) {
+	static String getModelId(HttpServletRequest req, String param) {
+		return getModelId(req, param, true);
+	}
+	
+	public static String getModelId(HttpServletRequest req, String param, boolean allowDefault) {
 		String modelReq = req.getParameter(param);
-		if(modelReq==null) {
+		if(modelReq==null && allowDefault) {
 			modelReq = (String) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 		}
 		else {
