@@ -443,8 +443,8 @@ diffedLineCount = function(opcodes) {
 			added += opcodes[i][4]-opcodes[i][3];
 		}
 	}
-	console.log("chunksReplace=", chunksReplace, "chunksInsert=", chunksInsert, "chunksDelete=", chunksDelete,
-			"deleted lines=", deleted, "added lines=", added);
+	//console.log("chunksReplace=", chunksReplace, "chunksInsert=", chunksInsert, "chunksDelete=", chunksDelete,
+	//		"deleted lines=", deleted, "added lines=", added);
 	
 	var statstext = '';
 	if(added > 0) { statstext += '<span class="added" title="'+added+' lines added">'+added+'</span>'; }
