@@ -50,6 +50,22 @@ mvn jetty:run
 navigate to `http://localhost:8888`
 
 
+usage examples
+--------------
+
+### map example
+
+1. login with root/root
+1. create a new (map) query:
+```
+select code as geom_id, count(*) as count
+from countries c
+inner join offices o on c.name = o.country
+group by code
+```
+1. Go to `menu > map` ; click on `load` (map) then `load data`
+
+
 data
 ----
 
