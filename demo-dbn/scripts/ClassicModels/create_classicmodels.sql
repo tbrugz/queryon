@@ -13,16 +13,6 @@
  *
  *******************************************************************************/
 
-/* DROP the existing tables. Comment this out if it is not needed. */
-
-DROP TABLE IF EXISTS Customers;
-DROP TABLE IF EXISTS Employees;
-DROP TABLE IF EXISTS Offices;
-DROP TABLE IF EXISTS OrderDetails;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS Payments;
-DROP TABLE IF EXISTS Products;
-
 /* Create the full set of Classic Models Tables */
 
 CREATE TABLE Customers (
@@ -32,13 +22,13 @@ CREATE TABLE Customers (
   contactFirstName VARCHAR(50) NOT NULL,
   phone VARCHAR(50) NOT NULL,
   addressLine1 VARCHAR(50) NOT NULL,
-  addressLine2 VARCHAR(50) NULL,
+  addressLine2 VARCHAR(50),
   city VARCHAR(50) NOT NULL,
-  state VARCHAR(50) NULL,
-  postalCode VARCHAR(15) NULL,
+  state VARCHAR(50),
+  postalCode VARCHAR(15),
   country VARCHAR(50) NOT NULL,
-  salesRepEmployeeNumber INTEGER NULL,
-  creditLimit DOUBLE PRECISION NULL,
+  salesRepEmployeeNumber INTEGER,
+  creditLimit DOUBLE PRECISION,
   PRIMARY KEY (customerNumber)
 );
 
@@ -49,7 +39,7 @@ CREATE TABLE Employees (
   extension VARCHAR(10) NOT NULL,
   email VARCHAR(100) NOT NULL,
   officeCode VARCHAR(20) NOT NULL,
-  reportsTo INTEGER NULL,
+  reportsTo INTEGER,
   jobTitle VARCHAR(50) NOT NULL,
   PRIMARY KEY (employeeNumber)
 );
@@ -59,8 +49,8 @@ CREATE TABLE Offices (
   city VARCHAR(50) NOT NULL,
   phone VARCHAR(50) NOT NULL,
   addressLine1 VARCHAR(50) NOT NULL,
-  addressLine2 VARCHAR(50) NULL,
-  state VARCHAR(50) NULL,
+  addressLine2 VARCHAR(50),
+  state VARCHAR(50),
   country VARCHAR(50) NOT NULL,
   postalCode VARCHAR(10) NOT NULL,
   territory VARCHAR(10) NOT NULL,
@@ -80,9 +70,9 @@ CREATE TABLE Orders (
   orderNumber INTEGER NOT NULL,
   orderDate TIMESTAMP NOT NULL,
   requiredDate TIMESTAMP NOT NULL,
-  shippedDate TIMESTAMP NULL,
+  shippedDate TIMESTAMP,
   status VARCHAR(15) NOT NULL,
-  comments TEXT NULL,
+  comments VARCHAR(4000),
   customerNumber INTEGER NOT NULL,
   PRIMARY KEY (orderNumber)
 );
@@ -101,7 +91,7 @@ CREATE TABLE Products (
   productLine VARCHAR(50) NOT NULL,
   productScale VARCHAR(10) NOT NULL,
   productVendor VARCHAR(50) NOT NULL,
-  productDescription TEXT NOT NULL,
+  productDescription VARCHAR(4000) NOT NULL,
   quantityInStock SMALLINT NOT NULL,
   buyPrice DOUBLE PRECISION NOT NULL,
   MSRP DOUBLE PRECISION NOT NULL,

@@ -3,6 +3,10 @@
 
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
 
+	<!--<property name="derby.version" value="10.12.1.1"/>-->
+	<!--<property name="derby.version" value="10.11.1.1"/>-->
+	<property name="derby.version" value="10.10.2.0"/>
+	
 	<artifact:dependencies pathId="sqlrun.classpath">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
 		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
@@ -10,10 +14,18 @@
 		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="1.1.7" scope="runtime"/>
 		<dependency groupId="org.postgresql" artifactId="postgresql" version="9.4.1208.jre6" scope="runtime"/>
 		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
 	</artifact:dependencies>
 
 	<artifact:dependencies pathId="h2.classpath">
 		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
+	</artifact:dependencies>
+
+	<artifact:dependencies pathId="derby.classpath">
+		<dependency groupId="org.apache.derby" artifactId="derby" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbynet" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbytools" version="${derby.version}" scope="runtime"/>
 	</artifact:dependencies>
 	
 	<!--
@@ -65,6 +77,12 @@
 		</java>
 	</target>
 	
+	<target name="run-sqlrun-derby">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.derby.properties"/>
+		</java>
+	</target>
+	
 	<!-- see: http://www.h2database.com/javadoc/org/h2/tools/Server.html -->
 	<target name="start-db-h2" description="start H2 database">
 		<java classpathref="h2.classpath" classname="org.h2.tools.Server" fork="true">
@@ -78,7 +96,7 @@
 			<arg value="./data/h2"/>
 		</java>
 	</target>
-	
+
 	<target name="stop-db-h2" description="stop H2 database">
 		<java classpathref="h2.classpath" classname="org.h2.tools.Server" fork="true">
 			<arg value="-tcpShutdown"/>
@@ -87,4 +105,26 @@
 		</java>
 	</target>
 
+	<!--
+	default port: 1527
+	see:
+	http://db.apache.org/derby/docs/10.0/manuals/admin/hubprnt14.html
+	https://ant.apache.org/manual/Types/permissions.html
+	-->
+	<target name="start-db-derby" description="start Derby database">
+		<java classname="org.apache.derby.drda.NetworkServerControl" classpathref="derby.classpath">
+			<!--<permissions>
+				<grant class="java.security.AllPermission"/>
+				<grant class="org.apache.derby.security.SystemPermission" name="engine" actions="usederbyinternals"/>
+			</permissions>-->
+			<arg line="start -p 1368"/>
+		</java>
+	</target>
+
+	<target name="stop-db-derby" description="stop Derby database">
+		<java classname="org.apache.derby.drda.NetworkServerControl" classpathref="derby.classpath">
+			<arg line="shutdown -p 1368"/>
+		</java>
+	</target>
+	
 </project>

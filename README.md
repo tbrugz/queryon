@@ -36,6 +36,8 @@ demo - running
 
 * minimal demo (using H2) - see [demo-minimal/README.md](demo-minimal/README.md)
 
+* demo with 4 databases (H2, Mysql/Mariadb, Postgresql & Derby) - see [demo-dbn/README.md](demo-dbn/README.md)
+
 
 license
 -------

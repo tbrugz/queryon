@@ -1,14 +1,4 @@
 
-/* First make sure all the tables are empty */
-
-DELETE FROM Customers;
-DELETE FROM Employees;
-DELETE FROM Offices;
-DELETE FROM OrderDetails;
-DELETE FROM Orders;
-DELETE FROM Payments;
-DELETE FROM Products;
-
 /* Load records into the tables. */
 
 COPY Customers FROM '${user.dir}/data/ClassicModels-MySQL/datafiles/Customers.txt' with csv NULL AS 'NULL' ENCODING 'LATIN1';
