@@ -55,7 +55,7 @@ usage examples
 
 ### map example
 
-1. login with root/root
+1. login with root/root (for more info about authc/authz, see [iniRealmRoles.ini](src/main/resources/iniRealmRoles.ini))
 1. create a new (map) query:
 ```
 select code as geom_id, count(*) as count

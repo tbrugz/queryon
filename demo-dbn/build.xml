@@ -82,6 +82,12 @@
 			<arg value="-propfile=scripts/sqlrun.derby.properties"/>
 		</java>
 	</target>
+
+	<target name="run-sqlrun-derby-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun-drop.derby.properties"/>
+		</java>
+	</target>
 	
 	<!-- see: http://www.h2database.com/javadoc/org/h2/tools/Server.html -->
 	<target name="start-db-h2" description="start H2 database">
