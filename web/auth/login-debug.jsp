@@ -41,8 +41,9 @@ if(username!=null) {
 	try {
 		//AuthenticationInfo ai = sm.authenticate(token);
 		//out.write("authenticated: "+username+" ;; "+ai);
+		//System.out.println("login.jsp: auth: "+username+" class: "+currentUser.getClass().getName());
 		currentUser.login(token);
-		System.out.println("login.jsp: auth: "+username);
+		//System.out.println("login.jsp: auth: "+username);
 	}
 	catch(UnknownAccountException e) {
 		out.write("<em class='warning'>Unknown account</em><br/>");

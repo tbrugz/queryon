@@ -26,6 +26,8 @@ var queryOnSchemaUrl = 'qos/';
 var queryOnDiffUrl = 'qdiff/';
 var queryOnDataDiffUrl = 'datadiff/';
 
+var doRemoveTrailingWhitespace = true;
+
 /*
  * TODO: get object types by database type (info/objtypes.jsp ?)
  * XXX: show hourglass (?) icon on 'select's & DDL divs
@@ -381,13 +383,28 @@ diffHasChanges = function(opcodes) {
 	return false;
 }
 
+removeTrailingWhitespace = function(txt) {
+	var pattern = /\s*$/g;
+	var newtxt = [];
+	for(var i=0;i<txt.length;i++) {
+		newtxt.push(txt[i].replace(pattern, ''));
+	}
+	return newtxt;
+}
+
 diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId, invertSides) {
 	"use strict";
 	//console.log("viewType=",viewType);
 	var byId = function (id) { return document.getElementById(id); },
 		base = difflib.stringAsLines(from),
-		newtxt = difflib.stringAsLines(to),
-		sm = new difflib.SequenceMatcher(base, newtxt),
+		newtxt = difflib.stringAsLines(to);
+
+	if(doRemoveTrailingWhitespace) {
+		base = removeTrailingWhitespace(base);
+		newtxt = removeTrailingWhitespace(newtxt);
+	}
+	
+	var sm = new difflib.SequenceMatcher(base, newtxt),
 		opcodes = sm.get_opcodes(),
 		diffoutputdiv = byId(outputId),
 		contextSize = 3; //null; //byId("contextSize").value;
