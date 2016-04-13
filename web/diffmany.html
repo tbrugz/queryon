@@ -167,8 +167,12 @@ getDDLdiff = function(apply) {
 	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
-	var syntax = "sql";
 	
+	//var syntax = "sql";
+	
+	var syntaxSelect = document.getElementById('syntax');
+	var syntax = syntaxSelect.options[syntaxSelect.selectedIndex].value;
+
 	var url = queryOnDiffManyUrl
 		+ schemas + '/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
@@ -207,6 +211,8 @@ getDDLdiff = function(apply) {
 				//applyBtn.value = 'apply DDL diff to '+document.getElementById('modelSource').value;
 			}
 			btnActionStop('go-button');
+			var prismSyntax = (syntax=='patch')?'language-diff':'language-sql';
+			block.setAttribute('class', prismSyntax);
 			Prism.highlightElement(block);
 		},
 		error: function(error) {
@@ -423,6 +429,13 @@ setSelectMultiOptions = function(select, values) {
 	</label>
 	<label>
 		type: <select id="type" onchange="onObjTypeChanged();" multiple="multiple" size="7"></select>
+	</label>
+	<label>
+		syntax:
+		<select id="syntax">
+			<option value="sql" selected="selected">SQL
+			<option value="patch">patch
+		</select>
 	</label>
 	
 	<span id="navbar-prop">
