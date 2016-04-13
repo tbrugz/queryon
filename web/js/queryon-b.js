@@ -103,13 +103,29 @@ function doRun(selectId, containerId, messagesId, callback) {
 	btnActionStart('go-button');
 	var startTimeMilis = Date.now();
 	var order = document.getElementById('order').value;
+	var container = document.getElementById(containerId);
+	
+	if(container.tagName=='IFRAME') {
+		// http://stackoverflow.com/questions/3142837/capture-iframe-load-complete-event
+		container.onload = function() {
+			btnActionStop('go-button');
+			var completedTimeMilis = Date.now();
+			closeMessages(messagesId);
+			//addSortHrefs(containerId, order);
+			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
+			if(callback) { callback(); }
+		};
+		container.src = finalUrl;
+	}
+	else {
+	
 	$.ajax({
 		url: finalUrl,
 		dataType: "html",
 		success: function(data, textStatus, request) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
-			$('#'+containerId).html(data); // XXX takes too long? use iframe?
+			container.innerHTML = data;
 			console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
 			closeMessages(messagesId);
 			addSortHrefs(containerId, order);
@@ -123,6 +139,8 @@ function doRun(selectId, containerId, messagesId, callback) {
 			//$('#'+messagesId).attr('class','error');
 		}
 	});
+	
+	}
 }
 
 function addSortHrefs(containerId, order) {
@@ -164,6 +182,7 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	//var renderedTimeMilis = Date.now();
 	
 	var content = document.getElementById(containerId);
+	if(content.tagName=='IFRAME') { content = content.contentDocument; }
 	var messages = document.getElementById(messagesId);
 	
 	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
