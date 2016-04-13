@@ -297,6 +297,8 @@ doClear = function() {
 	
 	document.getElementById('ddldiff-container').style.display = 'none';
 	doClearDdlOutput();
+	
+	document.getElementById('content-toggle').style.display = 'none';
 }
 
 doClearDdlOutput = function() {
@@ -324,6 +326,7 @@ doDiffUsingJS = function(viewType, inverse) {
 		&& (document.getElementById('modelSource').value != document.getElementById('modelTarget').value)
 		) {
 		
+		document.getElementById('content-toggle').style.display = '';
 		diffc.style.display = 'block';
 		
 		diffUsingJS(viewType, from, to,
@@ -679,8 +682,28 @@ domSwith2ElementsInternal = function(e1, e2) {
 	}
 }*/
 
+toggleCode = function() {
+	var f = document.getElementById('content-from');
+	var t = document.getElementById('content-to');
+	var btn = document.getElementById('content-toggle');
+	
+	if(f.style.display=='none') {
+		f.style.display='block';
+		t.style.display='block';
+		btn.innerHTML = '[-]';
+	}
+	else {
+		f.style.display='none';
+		t.style.display='none';
+		btn.innerHTML = '[+]';
+	}
+}
+
 	</script>
 	<style type="text/css">
+	body {
+		overflow-y: scroll;
+	}
 	#nav {
 		background-color: #222;
 		color: #ddd;
@@ -867,7 +890,7 @@ domSwith2ElementsInternal = function(e1, e2) {
 	<div id="messages"></div>
 </div>
 
-<div id="content-container" style="top: 33px; position: absolute; width: 98%;">
+<div id="content-container" style="top: 33px; position: absolute; width: 100%;">
 
 	<div id="code-panels">
 		<div class="code-container" style="float: left;" id="content-from-panel">
@@ -881,6 +904,9 @@ domSwith2ElementsInternal = function(e1, e2) {
 			<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
 		</div>
 	</div>
+	
+	<span id="content-toggle" onclick="toggleCode();" style="display: none;">[-]</span>
+
 	<!-- span style="position:relative; width: 49%; float:left;"><textarea id="content-from" class="code language-sql"></textarea></span>
 	<span style="position:relative; width: 49%; float:right;"><textarea id="content-to" class="code language-sql"></textarea></span-->
 	
