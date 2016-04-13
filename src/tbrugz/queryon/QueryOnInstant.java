@@ -115,19 +115,26 @@ public class QueryOnInstant extends QueryOn {
 			//feat.grabDBViews(model, schemaName, conn); //XXX: too much data?
 		}
 		case FUNCTION: {
-			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
-			List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
+			//List<ExecutableObject> func = new ArrayList<ExecutableObject>();
+			//feat.grabDBExecutables(func, schemaName, null, conn);
+			List<ExecutableObject> func = feat.grabExecutableNames(null, schemaName, null, null, conn);
+			//JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			//List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
 			removeExecsWithinPackages(func);
+			keepExecsByType(func, DBObjectType.FUNCTION); // XXX Oracle ok ; PgSQL? 
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, func, ExecutableObject.class);
 			//XXXdone: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
 		}
 		case PROCEDURE: {
 			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
-			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
-			List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
+			//List<ExecutableObject> proc = new ArrayList<ExecutableObject>();
+			//feat.grabDBExecutables(proc, schemaName, null, conn);
+			List<ExecutableObject> proc = feat.grabExecutableNames(null, schemaName, null, null, conn);
+			//JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			//List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
 			removeExecsWithinPackages(proc);
-			keepExecsByType(proc, DBObjectType.PROCEDURE);
+			keepExecsByType(proc, DBObjectType.PROCEDURE); // XXX Oracle needs, PgSQL must not have it?
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 			//XXXdone: filter by type 'PROCEDURE', filter by packageName == null ?
 			break;
@@ -135,10 +142,15 @@ public class QueryOnInstant extends QueryOn {
 		case PACKAGE_BODY:
 		case PACKAGE: {
 			//XXXxx: packages: get package names from procedures/functions catalog names
-			JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
-			List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
-			List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
-			proc.addAll(func);
+			//List<ExecutableObject> proc = new ArrayList<ExecutableObject>();
+			//feat.grabDBExecutables(proc, schemaName, null, conn);
+			List<ExecutableObject> proc = feat.grabExecutableNames(null, schemaName, null, null, conn);
+			//JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+			//List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
+			//List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
+			//proc.addAll(func);
+			//keepExecsByType(proc, statusType); 
+			//rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 
 			List<ExecutableObject> pkgs = new ArrayList<ExecutableObject>();
 			Set<String> pkgNames = new TreeSet<String>();
@@ -146,16 +158,19 @@ public class QueryOnInstant extends QueryOn {
 				if(eo.getPackageName()!=null) {
 					pkgNames.add(eo.getPackageName());
 				}
+				if(eo.getType().equals(statusType)) {
+					pkgNames.add(eo.getName());
+				}
 			}
 			for(String pkg: pkgNames) {
 				ExecutableObject eo = new ExecutableObject();
 				eo.setName(pkg);
 				eo.setSchemaName(schemaName);
-				eo.setType(DBObjectType.PACKAGE);
+				eo.setType(statusType);
 				pkgs.add(eo);
 			}
-
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, pkgs, ExecutableObject.class);
+			
 			break;
 		}
 		/*case INDEX: {
@@ -310,7 +325,7 @@ public class QueryOnInstant extends QueryOn {
 	}
 	*/
 	
-	static List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
+	/*static List<ExecutableObject> grabExecutables(JDBCSchemaGrabber jgrab, DatabaseMetaData dbmd, String schemaName, boolean grabFunctions) {
 		try {
 			if(grabFunctions) {
 				return jgrab.doGrabFunctions(dbmd, schemaName, false);
@@ -327,7 +342,7 @@ public class QueryOnInstant extends QueryOn {
 			log.warn("sql exception grabbing functions: "+e);
 		}
 		return new ArrayList<ExecutableObject>();
-	}
+	}*/
 	
 	static void removeExecsWithinPackages(List<ExecutableObject> execs) {
 		int initSize = execs.size();
