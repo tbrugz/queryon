@@ -318,7 +318,12 @@ doDiffUsingJS = function(viewType, inverse) {
 		var btnIn = document.getElementById('togglediffbtn-in');
 		viewType = (!btnIn||btnIn.checked) ? 1 : 0;
 	}
-	if(inverse === undefined) { inverse = 0; }
+	if(inverse === undefined) {
+		inverse = 0;
+		if(diffGetOrder()!="direct") {
+			inverse = 1;
+		}
+	}
 	var from = document.getElementById('content-from').innerHTML;
 	var to = document.getElementById('content-to').innerHTML;
 	var diffc = document.getElementById('diffoutput-container');
@@ -594,6 +599,14 @@ function refreshSelectsState() {
 		var object = document.getElementById('object');
 		object.value = parts[4];
 	}
+}
+
+diffGetOrder = function() {
+	var panels = [document.getElementById('content-from-panel'),document.getElementById('content-to-panel')];
+	if(panels[0].style.float=='left') {
+		return "direct";
+	}
+	return "inverse";
 }
 
 diffSwitchOrder = function() {
