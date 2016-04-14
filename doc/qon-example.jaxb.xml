@@ -304,6 +304,11 @@
             <type>VARCHAR</type>
         </columns>
         <columns>
+            <name>MIME</name>
+            <pk>false</pk>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
             <name>BODY</name>
             <pk>false</pk>
             <type>VARCHAR</type>

@@ -16,9 +16,30 @@
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
 <script type="text/javascript">
+// load url: http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY&mimefield=MIME
+
+//javascript, html, json, markdown, css, xml
+var extMap = {
+	".html": "html",
+	".css": "css",
+	".js": "javascript",
+	".json": "json",
+	".xml": "xml",
+	".md": "markdown", 
+	".markdown": "markdown" 
+};
+var mimeMap = {
+	"html": "text/html",
+	"css": "text/css",
+	"javascript": "application/javascript",
+	"json": "application/json",
+	"xml": "application/xml",
+	"markdown": "text/markdown" 
+};
+
+var qonUrl = 'q/QUERYON.QON_PAGES';
+
 onLoad = function() {
-	// http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY
-	
 	loadAuthInfo();
 	//loadSettings();
 	updateUI();
@@ -56,6 +77,7 @@ function doSaveError(evt) {
 function doSave() {
 	var id = byId('id').value;
 	var path = byId('path').value;
+	var mime = byId('mime').value;
 	//var remarks = byId('remarks').value;
 	//var roles = byId('roles').value;
 
@@ -65,10 +87,11 @@ function doSave() {
 		return;
 	}
 
-	var saveUrl = 'q/QUERYON.QON_PAGES?';
+	var saveUrl = qonUrl+'?';
 
-	var payload = "v:PATH=" + escape(path) + "&v:BODY=" + escape( editor.getValue() );
-	//(id?"v:ID=" + escape(id) + "&":"") + 
+	var payload = "v:PATH=" + escape(path) +
+		"&v:MIME=" + escape(mime) +
+		"&v:BODY=" + escape( editor.getValue() );
 	var method = "POST"; //post: insert ; put: update
 	if(id) {
 		saveUrl += "p1="+escape(id);
@@ -91,7 +114,7 @@ function doSave() {
 				byId('id').value = pkvals.trim();
 				history.replaceState(null, null, "?id="+byId('id').value);
 			}
-			console.log('doSave.ok', pkvals, evt);
+			console.log('doSave.ok, pkvals=', pkvals, '; evt=', evt);
 			//closeMessages('messages');
 			showInfoMessages('messages', 'query '+name+' sucessfully saved');
 		}
@@ -117,7 +140,7 @@ function doLoadPageError(evt) {
 }
 
 function doLoadPage(id) {
-	var loadUrl = 'q/QUERYON.QON_PAGES.json';
+	var loadUrl = qonUrl+'.json';
 
 	var payload = "p1=" + escape(id);
 	loadUrl += "?" + payload;
@@ -133,6 +156,9 @@ function doLoadPage(id) {
 			var data = getQonData(JSON.parse(req.responseText))[0];
 			//console.log('doLoadPage.ok2', data);
 			byId('path').value = data.PATH;
+			if(data.MIME) {
+				byId('mime').value = data.MIME;
+			}
 			editor.setValue(data.BODY);
 		}
 		else {
@@ -144,6 +170,26 @@ function doLoadPage(id) {
 	oReq.open("GET", loadUrl);
 	oReq.send(null);
 	//oReq.send(payload);
+}
+
+updateEditorMode = function() {
+	var modeParts = editor.getSession().getMode().$id.split("/");
+	var mode = modeParts[modeParts.length-1];
+	var path = byId('path').value;
+	if(path.endsWith(mode)) { return; }
+	
+	var keys = Object.keys(extMap);
+	for(var i=0;i<keys.length;i++) {
+		var type = extMap[keys[i]];
+		if(path.endsWith(keys[i])) {
+			if(mode!=type) {
+				editor.getSession().setMode("ace/mode/"+type);
+			}
+			byId('mime').value = mimeMap[type];
+			return;
+		}
+	}
+	
 }
 
 </script>
@@ -165,8 +211,11 @@ function doLoadPage(id) {
 
 <nav class="container" id="nav">
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
-	<label>id: <input type="text" id="id" name="id" onchange="makeHrefs()" size="10" readonly="readonly"/></label>
-	<label>path: <input type="text" id="path" name="path" onchange="makeHrefs()" size="40"/></label>
+	<label>id: <input type="text" id="id" name="id" size="6" readonly="readonly"/></label>
+	<label title="resource URL (known extensions: css, html, javascript, json, markdown, md, xml)">
+		path: <input type="text" id="path" name="path" onchange="updateEditorMode()" size="40"/>
+	</label>
+	<label>mime: <input type="text" id="mime" name="mime" size="10" readonly="readonly" value="text/html"/></label>
 	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60"/></label>
 	<label id="rolesLabel" style="display: none;">
 		<span id="rolesLabelText">roles:</span>
