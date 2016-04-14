@@ -10,15 +10,20 @@ var SqlHighlightRules = function() {
         "select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|" +
         "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant"
+            + "|set|distinct|with|then|between|like|is|into|values|alter|constraint|unique|in"
+            + "|all|exists|full"
     );
 
     var builtinConstants = (
         "true|false"
+            + "|$where_clause|$filter_clause|$projection_clause|$order_clause" //see: tbrugz.queryon.SQL class
+            + "|$schemas|$tables|$columns|$exportedkeys|$importedkeys|$metadata" //see: package tbrugz.queryon.sqlcmd
     );
 
     var builtinFunctions = (
         "avg|count|first|last|max|min|sum|ucase|lcase|mid|len|round|rank|now|format|" + 
         "coalesce|ifnull|isnull|nvl"
+            + "|cast"
     );
 
     var dataTypes = (
