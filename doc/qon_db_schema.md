@@ -48,6 +48,17 @@ create table qon_execs (
 	constraint qon_execs_pk primary key (name)
 )
 
+create table qon_pages (
+	id integer,
+	path varchar(400),
+	remarks varchar(400),
+	mime varchar(100),
+	body clob,
+	roles_filter varchar(1000),
+	constraint qon_pages_pk primary key (id),
+	constraint qon_pages_path_uk unique (path)
+)
+
 
 oracle
 ------

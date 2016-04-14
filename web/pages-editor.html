@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - pages editor</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-editor.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<style type="text/css">
+	</style>
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<!-- <script type="text/javascript" src="js/jquery.jkey.js"></script> -->
+	<script src="js/qon-util.js"></script>
+	<script src="js/auth.js"></script>
+<script type="text/javascript">
+onLoad = function() {
+	loadAuthInfo();
+	//loadSettings();
+	updateUI();
+}
+
+updateUI = function() {
+	var editor = byId('editor');
+	var btns = byId('action-btns');
+	var nav = byId('nav');
+	editor.style.height = (window.innerHeight - btns.offsetHeight - nav.offsetHeight - 7) + 'px';
+}
+
+window.onresize = updateUI;
+
+makeHrefs = function() {
+	refreshAuthInfo();
+}
+
+function doSaveError(evt) {
+	btnActionStop('btnSave');
+	console.log('error: ',evt);
+	var target = evt.target;
+	showErrorMessages('messages', 'error saving query: '+target.responseText+
+			(target.status==403?" (invalid session?)":"")
+			);
+}
+ 
+function doSave() {
+	var id = byId('id').value;
+	var path = byId('path').value;
+	//var remarks = byId('remarks').value;
+	//var roles = byId('roles').value;
+
+	if(path==null || path=="") {
+		showErrorMessages('messages', '<b>path</b> cannot be null...');
+		//updateUI();
+		return;
+	}
+
+	var saveUrl = 'q/QUERYON.QON_PAGES';
+
+	var payload = (id?"v:ID=" + escape(id) + "&":"") + "v:PATH=" + escape(path);
+	saveUrl += "?" + payload;
+	
+	//var payload = new FormData();
+	//payload.append('v:ID', id);
+	//payload.append('v:PATH', path);
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(evt) {
+		var status = evt.target.status;
+		if(status>=200 && status<300) {
+			btnActionStop('btnSave');
+			console.log('doSave.ok', evt);
+			//closeMessages('messages');
+			showInfoMessages('messages', 'query '+name+' sucessfully saved');
+			//history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
+		}
+		else {
+			doSaveError(evt);
+		}
+	};
+	//oReq.addEventListener("error", transferFailed);
+	oReq.onerror = doSaveError;
+	btnActionStart('btnSave');
+	oReq.open("post", saveUrl);
+	oReq.send(null);
+	//oReq.send(payload);
+}
+
+</script>
+	<style>
+#messages {
+	border: 1px solid #000;
+	display: none;
+	margin: 2px 4px 0 4px;
+	padding: 2px;
+}
+#authinfo {
+	float: right;
+	margin-top: 2px;
+}
+	</style>
+</head>
+<body onload="onLoad();">
+<div id="spec">
+
+<nav class="container" id="nav">
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
+	<label>id: <input type="text" id="id" name="id" onchange="makeHrefs()" size="10" readonly="readonly"/></label>
+	<label>path: <input type="text" id="path" name="path" onchange="makeHrefs()" size="40"/></label>
+	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60"/></label>
+	<label id="rolesLabel" style="display: none;">
+		<span id="rolesLabelText">roles:</span>
+		<input type="text" id="roles" name="roles"/>
+		<span id="rolesCount" title="# of current allowed roles"></span>
+		<input type="button" id="rolesBtn" value="+/- roles" title="Add/Remove roles" onclick="showRolesDialog()"/>
+	</label>
+	<label id="modelLabel" style="display: none;">model: <input type="text" id="model" name="model" readonly="readonly" value=""/></label>
+	
+	<span id="xtra-actions">
+		<span id="actions-container" style="display: none">
+			<a id="url-reload" href="" title="Reload query">reload</a>
+			<a id="url-permalink" href="" target="_blank">permalink</a>
+			<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+byId('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
+		</span>
+		<!-- <span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span> -->
+	</span>
+
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+	
+	<div id="messages"></div>
+</nav>
+
+<div id="editor" style="width: 100%"></div>
+
+<div class="container" id="action-btns">
+	<div id="sqlparams">
+	</div>
+	
+	<div id="button-container">
+		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Page (F10)">
+		<input type="button" id="btnOpen" value="open" title="Open in new window" style="display: none;">
+	</div>
+	
+</div>
+
+</div>
+
+<div id="rolesListDialogContainer" style="display: none;">
+	<div id="rolesListDialog">
+		<form id="rolesForm">
+		<div id="rolesListDialogContent"></div>
+		<div id="rolesListDialogBtns">
+			<input type="button" value="change roles" onclick="updateRoles();"/>
+			<input type="button" value="close" onclick="closeRolesDialog();"/>
+		</div>
+		</form>
+	</div>
+</div>
+
+<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+	var editor = ace.edit("editor");
+	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
+	editor.getSession().setMode("ace/mode/sql");
+	editor.getSelectedText = function() {
+		//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
+		return this.getSession().getTextRange(this.getSelectionRange());
+	};
+</script>
+
+</body>

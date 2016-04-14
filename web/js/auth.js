@@ -1,4 +1,8 @@
 
+/*
+ * requires: jquery
+ */
+
 var authInfo = {
 		// similar to 'auth/info.jsp'
 		authenticated: false,

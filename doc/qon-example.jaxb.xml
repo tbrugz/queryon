@@ -289,6 +289,33 @@
         <remarks>Executables (procedures/functions) available for executing on QueryOn</remarks>
         <type>TABLE</type>
     </table>
+
+    <table>
+        <name>QON_PAGES</name>
+        <schemaName>QUERYON</schemaName>
+        <columns>
+            <name>ID</name>
+            <pk>true</pk>
+            <type>INTEGER</type>
+        </columns>
+        <columns>
+            <name>PATH</name>
+            <pk>false</pk>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>BODY</name>
+            <pk>false</pk>
+            <type>VARCHAR</type>
+        </columns>
+        <constraints>
+            <name>QON_PAGES_PK</name>
+            <type>PK</type>
+            <uniqueColumns>ID</uniqueColumns>
+        </constraints>
+        <remarks>QueryOn Pages</remarks>
+        <type>TABLE</type>
+    </table>
     
     <!-- <sqlDialect>?</sqlDialect> -->
 </schemaModel>
