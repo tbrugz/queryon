@@ -130,9 +130,10 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, PIPE_SPLIT);
 				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, PIPE_SPLIT);
 				
-				count += addTable(schema, tableName, columnNames, pkColumnNames, columnRemarks, remarks,
+				Table t = addTable(schema, tableName, columnNames, pkColumnNames, columnRemarks, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
+				if(t!=null) { count++; }
 			}
 			catch(RuntimeException e) {
 				log.warn("error reading table '"+tableName+"': "+e);
@@ -145,7 +146,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		return count;
 	}
 
-	private int addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks,
+	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks,
 			String remarks, List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
 			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) {
 		Table t = new Table();
@@ -233,7 +234,11 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		if(model.getTables().contains(t)) {
 			model.getTables().remove(t);
 		}
-		return model.getTables().add(t)?1:0;
+		boolean added = model.getTables().add(t);
+		if(added) {
+			return t;
+		}
+		return null;
 	}
 	
 	void addGrants(List<Grant> grants, String owner, PrivilegeType pt, List<String> roles) {
@@ -282,8 +287,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		//XXXxx: validate new relation? createQonTable() + addTable() already does it
 		//XXXdone: read from DB? or reprocess RequestSpec? reprocessing ReqSpec...
 		//boolean added = model.getTables().add((Table) qonRelation);
-		boolean added = createQonTable(reqspec);
-		log.info("onInsert: added "+qonRelation+"? "+added);
+		Table t = createQonTable(reqspec);
+		boolean added = t!=null;
+		log.info("onInsert: added "+qonRelation+"? "+added+" [table="+t+"]");
 	}
 
 	@Override
@@ -324,8 +330,10 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			
 		//boolean added = model.getTables().add((Table) qonRelation);
 		boolean added = false;
+		Table tnew = null;
 		try {
-			added = createQonTable(reqspec);
+			tnew = createQonTable(reqspec);
+			added = tnew!=null;
 		}
 		catch(BadRequestException e) {
 			if(t!=null) {
@@ -334,7 +342,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			}
 			throw e;
 		}
-		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+qonRelation+"? "+added);
+		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+tnew+"? "+added+" [qonRelation="+qonRelation+";newT.remarks="+tnew.getRemarks()+"]");
 	}
 
 	@Override
@@ -350,12 +358,12 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		log.info("onDelete: removed "+t+"? "+removed);
 	}
 	
-	boolean createQonTable(RequestSpec reqspec) {
+	Table createQonTable(RequestSpec reqspec) {
 		Map<String,String> v = reqspec.getUpdateValues();
 		
 		return addTable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("COLUMN_NAMES"), Utils.getStringList(v.get("PK_COLUMN_NAMES"), ","), Utils.getStringList(v.get("COLUMN_REMARKS"), PIPE_SPLIT),
 				v.get("REMARKS"), Utils.getStringList(v.get("ROLES_SELECT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_INSERT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_UPDATE"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_DELETE"), PIPE_SPLIT),
-				v.get("ROLES_INSERT_COLUMNS"), v.get("ROLES_UPDATE_COLUMNS"))>0;
+				v.get("ROLES_INSERT_COLUMNS"), v.get("ROLES_UPDATE_COLUMNS"));
 	}
 	
 	boolean isQonTablesRelationUpdate(Relation relation) {

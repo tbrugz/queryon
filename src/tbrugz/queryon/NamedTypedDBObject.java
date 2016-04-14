@@ -3,9 +3,9 @@ package tbrugz.queryon;
 import java.util.List;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.dbmodel.TypedDBObject;
 
-public class NamedTypedDBObject implements NamedDBObject {
+public class NamedTypedDBObject implements TypedDBObject {
 
 	final DBObjectType type;
 	final String schemaName;
@@ -55,6 +55,10 @@ public class NamedTypedDBObject implements NamedDBObject {
 		return "["+type+":"+fullObjectName+(mimetype!=null?" ; mime="+mimetype:"")+"]";
 	}
 	
+	@Override
+	public DBObjectType getDBObjectType() {
+		return type;
+	}
 	public DBObjectType getType() {
 		return type;
 	}
@@ -70,6 +74,7 @@ public class NamedTypedDBObject implements NamedDBObject {
 	public String getMimeType() {
 		return mimetype;
 	}
+
 	
 	/*public void setType(DBObjectType type) {
 		this.type = type;
