@@ -89,12 +89,12 @@ function doSave() {
 
 	var saveUrl = qonUrl+'?';
 
-	var payload = "v:PATH=" + escape(path) +
-		"&v:MIME=" + escape(mime) +
-		"&v:BODY=" + escape( editor.getValue() );
+	var payload = "v:PATH=" + encodeURIComponent(path) +
+		"&v:MIME=" + encodeURIComponent(mime) +
+		"&v:BODY=" + encodeURIComponent( editor.getValue() );
 	var method = "POST"; //post: insert ; put: update
 	if(id) {
-		saveUrl += "p1="+escape(id);
+		saveUrl += "p1="+encodeURIComponent(id);
 		method = "PUT";
 	}
 	saveUrl += "&" + payload;
@@ -142,7 +142,7 @@ function doLoadPageError(evt) {
 function doLoadPage(id) {
 	var loadUrl = qonUrl+'.json';
 
-	var payload = "p1=" + escape(id);
+	var payload = "p1=" + encodeURIComponent(id);
 	loadUrl += "?" + payload;
 	
 	var oReq = new XMLHttpRequest();
@@ -189,7 +189,12 @@ updateEditorMode = function() {
 			return;
 		}
 	}
-	
+	//if not found...
+	type = "html";
+	if(mode!=type) {
+		editor.getSession().setMode("ace/mode/"+type);
+	}
+	byId('mime').value = mimeMap[type];
 }
 
 </script>
@@ -215,7 +220,7 @@ updateEditorMode = function() {
 	<label title="resource URL (known extensions: css, html, javascript, json, markdown, md, xml)">
 		path: <input type="text" id="path" name="path" onchange="updateEditorMode()" size="40"/>
 	</label>
-	<label>mime: <input type="text" id="mime" name="mime" size="10" readonly="readonly" value="text/html"/></label>
+	<label>mime: <input type="text" id="mime" name="mime" size="15" readonly="readonly" value="text/html"/></label>
 	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60"/></label>
 	<label id="rolesLabel" style="display: none;">
 		<span id="rolesLabelText">roles:</span>
