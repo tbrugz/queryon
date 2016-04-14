@@ -22,6 +22,21 @@ function escapeXML(str) {
 			.replace(/'/g, '&apos;');
 }
 
+/*function getQueryString() {
+	var href = location.search;
+	return href.indexOf("?")==-1?"":href.substr(href.indexOf("?"));
+}*/
+
+//see: http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+function getParameterByName(name, queryString) {
+	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		results = regex.exec(queryString);
+	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
+}
+
+// ---------- messages ----------
+
 function showInfoMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
 	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";

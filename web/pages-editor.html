@@ -12,20 +12,30 @@
 	</style>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- <script type="text/javascript" src="js/jquery.jkey.js"></script> -->
+	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
 <script type="text/javascript">
 onLoad = function() {
+	// http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY
+	
 	loadAuthInfo();
 	//loadSettings();
 	updateUI();
+	
+	var id = getParameterByName('id', location.search);
+	if(id) {
+		byId('id').value = id;
+		doLoadPage(id);
+	}
 }
 
 updateUI = function() {
-	var editor = byId('editor');
+	var editorDiv = byId('editor');
 	var btns = byId('action-btns');
 	var nav = byId('nav');
-	editor.style.height = (window.innerHeight - btns.offsetHeight - nav.offsetHeight - 7) + 'px';
+	editorDiv.style.height = (window.innerHeight - btns.offsetHeight - nav.offsetHeight - 7) + 'px';
+	if(editor) { editor.resize(); }
 }
 
 window.onresize = updateUI;
@@ -42,7 +52,7 @@ function doSaveError(evt) {
 			(target.status==403?" (invalid session?)":"")
 			);
 }
- 
+
 function doSave() {
 	var id = byId('id').value;
 	var path = byId('path').value;
@@ -55,10 +65,16 @@ function doSave() {
 		return;
 	}
 
-	var saveUrl = 'q/QUERYON.QON_PAGES';
+	var saveUrl = 'q/QUERYON.QON_PAGES?';
 
-	var payload = (id?"v:ID=" + escape(id) + "&":"") + "v:PATH=" + escape(path);
-	saveUrl += "?" + payload;
+	var payload = "v:PATH=" + escape(path) + "&v:BODY=" + escape( editor.getValue() );
+	//(id?"v:ID=" + escape(id) + "&":"") + 
+	var method = "POST"; //post: insert ; put: update
+	if(id) {
+		saveUrl += "p1="+escape(id);
+		method = "PUT";
+	}
+	saveUrl += "&" + payload;
 	
 	//var payload = new FormData();
 	//payload.append('v:ID', id);
@@ -66,13 +82,18 @@ function doSave() {
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function(evt) {
-		var status = evt.target.status;
+		var req = evt.target
+		var status = req.status;
 		if(status>=200 && status<300) {
 			btnActionStop('btnSave');
-			console.log('doSave.ok', evt);
+			var pkvals = req.getResponseHeader('X-Relation-PK-Values');
+			if(pkvals) {
+				byId('id').value = pkvals.trim();
+				history.replaceState(null, null, "?id="+byId('id').value);
+			}
+			console.log('doSave.ok', pkvals, evt);
 			//closeMessages('messages');
 			showInfoMessages('messages', 'query '+name+' sucessfully saved');
-			//history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
 		}
 		else {
 			doSaveError(evt);
@@ -81,7 +102,46 @@ function doSave() {
 	//oReq.addEventListener("error", transferFailed);
 	oReq.onerror = doSaveError;
 	btnActionStart('btnSave');
-	oReq.open("post", saveUrl);
+	oReq.open(method, saveUrl);
+	oReq.send(null);
+	//oReq.send(payload);
+}
+
+function doLoadPageError(evt) {
+	//btnActionStop('btnSave');
+	console.log('error: ',evt);
+	var target = evt.target;
+	showErrorMessages('messages', 'error loading query: '+target.responseText+
+			(target.status==403?" (invalid session?)":"")
+			);
+}
+
+function doLoadPage(id) {
+	var loadUrl = 'q/QUERYON.QON_PAGES.json';
+
+	var payload = "p1=" + escape(id);
+	loadUrl += "?" + payload;
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(evt) {
+		var req = evt.target
+		var status = req.status;
+		if(status>=200 && status<300) {
+			//btnActionStop('btnSave');
+			console.log('doLoadPage.ok', evt);
+			//showInfoMessages('messages', 'query '+name+' sucessfully loaded');
+			var data = getQonData(JSON.parse(req.responseText))[0];
+			//console.log('doLoadPage.ok2', data);
+			byId('path').value = data.PATH;
+			editor.setValue(data.BODY);
+		}
+		else {
+			doLoadPageError(evt);
+		}
+	};
+	oReq.onerror = doLoadPageError;
+	//btnActionStart('btnSave');
+	oReq.open("GET", loadUrl);
 	oReq.send(null);
 	//oReq.send(payload);
 }
@@ -164,11 +224,7 @@ function doSave() {
 <script>
 	var editor = ace.edit("editor");
 	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
-	editor.getSession().setMode("ace/mode/sql");
-	editor.getSelectedText = function() {
-		//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
-		return this.getSession().getTextRange(this.getSelectionRange());
-	};
+	editor.getSession().setMode("ace/mode/html"); //javascript, html, json, markdown, css, xml
 </script>
 
 </body>
