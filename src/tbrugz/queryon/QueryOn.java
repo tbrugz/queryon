@@ -1273,6 +1273,8 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("Update count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
 		}
 		
+		//XXX add ResultSet generatedKeys = st.getGeneratedKeys(); //?
+		
 		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
 		for(UpdatePlugin up: updatePlugins) {
 			up.setProperties(prop);
@@ -1312,6 +1314,7 @@ public class QueryOn extends HttpServlet {
 
 		//use url params to set PK cols values
 		Constraint pk = SchemaModelUtils.getPK(relation);
+		String[] pkcols = null;
 		if(pk!=null) {
 			for(int i=0;i<pk.getUniqueColumns().size() && i<reqspec.params.size();i++) {
 				String pkcol = pk.getUniqueColumns().get(i);
@@ -1324,6 +1327,7 @@ public class QueryOn extends HttpServlet {
 					reqspec.updateValues.put(pkcol, pkval);
 				}
 			}
+			pkcols = pk.getUniqueColumns().toArray(new String[]{});
 		}
 		
 		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
@@ -1356,7 +1360,9 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.applyInsert(sbCols.toString(), sbVals.toString());
 
-		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
+		PreparedStatement st = pkcols!=null? 
+			conn.prepareStatement(sql.getFinalSql(), pkcols):
+			conn.prepareStatement(sql.getFinalSql());
 		bindParameters(st, sql);
 
 		log.info("sql insert: "+sql);
@@ -1369,6 +1375,17 @@ public class QueryOn extends HttpServlet {
 		}
 		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
 			throw new BadRequestException("Insert count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+		
+		ResultSet generatedKeys = st.getGeneratedKeys();
+		if (generatedKeys.next()) {
+			int colCount = generatedKeys.getMetaData().getColumnCount();
+			List<String> colVals = new ArrayList<String>();
+			for(int i=0;i<colCount;i++) {
+				colVals.add(generatedKeys.getString(i+1));
+			}
+			resp.setHeader(ResponseSpec.HEADER_RELATION_PK_VALUES, Utils.join(colVals, ", "));
+			//log.info("generatedKeys[pk="+Arrays.toString(pkcols)+";#="+colCount+"]: "+ Utils.join(colVals, ", "));
 		}
 		
 		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
