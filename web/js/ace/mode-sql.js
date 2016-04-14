@@ -8,25 +8,29 @@ var SqlHighlightRules = function() {
 
     var keywords = (
         "select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|" +
-        "when|else|end|type|left|right|join|on|outer|desc|asc|not|distinct|with|then|between|inner|" +
-        "like|is|natural|into|set|values|alter|constraint|primary|unique|key|drop|table|in|union|" +
-        "all|exists|full"
+        "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
+        "foreign|not|references|default|null|inner|cross|natural|database|drop|grant"
     );
 
     var builtinConstants = (
-        "true|false|null"
-        + "|$where_clause|$filter_clause|$projection_clause|$order_clause" //see: tbrugz.queryon.SQL class
-        + "|$schemas|$tables|$columns|$exportedkeys|$importedkeys|$metadata" //see: package tbrugz.queryon.sqlcmd
+        "true|false"
     );
 
     var builtinFunctions = (
-        "count|min|max|avg|sum|rank|now|coalesce|cast"
+        "avg|count|first|last|max|min|sum|ucase|lcase|mid|len|round|rank|now|format|" + 
+        "coalesce|ifnull|isnull|nvl"
+    );
+
+    var dataTypes = (
+        "int|numeric|decimal|date|varchar|char|bigint|float|double|bit|binary|text|set|timestamp|" +
+        "money|real|number|integer"
     );
 
     var keywordMapper = this.createKeywordMapper({
         "support.function": builtinFunctions,
         "keyword": keywords,
-        "constant.language": builtinConstants
+        "constant.language": builtinConstants,
+        "storage.type": dataTypes
     }, "identifier", true);
 
     this.$rules = {
