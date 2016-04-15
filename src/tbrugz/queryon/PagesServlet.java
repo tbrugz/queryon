@@ -1,6 +1,7 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.IOUtil;
 
 /*
  * TODO: filter by ROLES_FILTER?
@@ -53,20 +55,15 @@ public class PagesServlet extends AbstractHttpServlet {
 			return;
 		}
 		
-		//XXX: optimize: just 1 query on
-		
-		// get id from QON_PAGES
+		// get and dump page
 		String modelId = SchemaModelUtils.getModelId(req);
 		Connection conn = DBUtil.initDBConn(prop, modelId);
 		try {
-			id = getId(conn, relation, pathInfo);
+			getAndDumpPage(conn, relation, pathInfo, resp);
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		} 
-		
-		// redirect
-		forward(req, resp, relation, id);
 	}
 	
 	String getId(Connection conn, String relation, String pathInfo) throws SQLException {
@@ -80,6 +77,46 @@ public class PagesServlet extends AbstractHttpServlet {
 			return id;
 		}
 		throw new NotFoundException("resource not found: "+pathInfo);
+	}
+
+	/*void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException {
+		PreparedStatement st = conn.prepareStatement("select id, mime, body from "+relation+" where path = ?");
+		st.setString(1, pathInfo);
+		
+		ResultSet rs = st.executeQuery();
+		
+		QueryOn.dumpBlob(rs,
+				reqspec,
+				queryName,
+				false, //mayApplyLimitOffset
+				resp);
+
+		rs.close();
+	}*/
+
+	void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException, IOException {
+		PreparedStatement st = conn.prepareStatement("select id, mime, body from "+relation+" where path = ?");
+		st.setString(1, pathInfo);
+		
+		ResultSet rs = st.executeQuery();
+		
+		if(!rs.next()) {
+			throw new NotFoundException("resource not found: "+pathInfo);
+		}
+		
+		//String id = rs.getString(1);
+		String mimeType = rs.getString(2);
+		//String body = rs.getString(3);
+		
+		resp.setContentType(mimeType);
+		//resp.setHeader(HEADER_PAGE_ID, id);
+		InputStream is = rs.getBinaryStream(3);
+		if(is!=null) {
+			IOUtil.pipeStreams(is, resp.getOutputStream());
+			is.close();
+		}
+		
+		rs.close();
 	}
 	
 	void forward(HttpServletRequest req, HttpServletResponse resp, String relation, String id) throws ServletException, IOException {
