@@ -17,6 +17,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.sqldump.util.ConnectionUtil;
 
+/*
+ * TODO: filter by ROLES_FILTER?
+ */
 public class PagesServlet extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -27,6 +30,8 @@ public class PagesServlet extends AbstractHttpServlet {
 	public static final String SUFFIX_TABLE = ".table";
 	
 	public static final String DEFAULT_PAGES_TABLE = "QON_PAGES";
+	
+	public static final String HEADER_PAGE_ID = "X-Page-Id";
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -47,6 +52,8 @@ public class PagesServlet extends AbstractHttpServlet {
 			forward(req, resp, relation, id);
 			return;
 		}
+		
+		//XXX: optimize: just 1 query on
 		
 		// get id from QON_PAGES
 		String modelId = SchemaModelUtils.getModelId(req);
@@ -78,6 +85,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	void forward(HttpServletRequest req, HttpServletResponse resp, String relation, String id) throws ServletException, IOException {
 		String redir = "/q/"+relation+"?p1="+id+"&valuefield=BODY&mimefield=MIME";
 		log.info("redir = "+redir);
+		//resp.setHeader(HEADER_PAGE_ID, id);
 		req.getRequestDispatcher(redir).forward(req, resp);
 	}
 
