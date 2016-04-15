@@ -8,10 +8,9 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
-	<style type="text/css">
-	</style>
+	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
-	<!-- <script type="text/javascript" src="js/jquery.jkey.js"></script> -->
+	<script type="text/javascript" src="js/jquery.jkey.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
@@ -38,6 +37,7 @@ var mimeMap = {
 	"markdown": "text/markdown" 
 };
 
+var pagesUrl = 'p/';
 var qonUrl = 'q/QON_PAGES';
 
 onLoad = function() {
@@ -85,6 +85,12 @@ function doSave() {
 	var id = byId('id').value;
 	var path = byId('path').value;
 	var mime = byId('mime').value;
+
+	// normalizing path
+	path = path.replace(/\/+/g, '\/').replace(/^\//, '');
+	//console.log('doSave', byId('path').value, path);
+	byId('path').value = path;
+	
 	//var remarks = byId('remarks').value;
 	//var roles = byId('roles').value;
 
@@ -124,6 +130,7 @@ function doSave() {
 			console.log('doSave.ok, pkvals=', pkvals, '; evt=', evt);
 			//closeMessages('messages');
 			showInfoMessages('messages', 'query '+name+' sucessfully saved');
+			refreshUI();
 		}
 		else {
 			doSaveError(evt);
@@ -167,6 +174,7 @@ function doLoadPage(id) {
 				byId('mime').value = data.MIME;
 			}
 			editor.setValue(data.BODY);
+			refreshUI();
 		}
 		else {
 			doLoadPageError(evt);
@@ -177,6 +185,22 @@ function doLoadPage(id) {
 	oReq.open("GET", loadUrl);
 	oReq.send(null);
 	//oReq.send(payload);
+}
+
+function refreshUI() {
+	var id = byId('id').value;
+	if(id) {
+		byId('pages-open').style.display = 'initial';
+		var url = (pagesUrl + byId('path').value).replace(/\/+/, '/');
+		byId('pages-open').href = url;
+	}
+	else {
+		byId('pages-open').style.display = 'none';
+	}
+}
+
+function onPathChange() {
+	updateEditorMode();
 }
 
 updateEditorMode = function() {
@@ -204,6 +228,11 @@ updateEditorMode = function() {
 	byId('mime').value = mimeMap[type];
 }
 
+$(document).jkey('f10',function(){
+	console.log('f10 pressed: doSave()');
+	doSave();
+});
+
 </script>
 	<style>
 #messages {
@@ -225,7 +254,7 @@ updateEditorMode = function() {
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
 	<label>id: <input type="text" id="id" name="id" size="6" readonly="readonly"/></label>
 	<label title="resource URL (known extensions: css, html, javascript, json, markdown, md, xml)">
-		path: <input type="text" id="path" name="path" onchange="updateEditorMode()" size="40"/>
+		path: <input type="text" id="path" name="path" onchange="onPathChange()" size="40"/>
 	</label>
 	<label>mime: <input type="text" id="mime" name="mime" size="15" readonly="readonly" value="text/html"/></label>
 	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60"/></label>
@@ -262,7 +291,8 @@ updateEditorMode = function() {
 	
 	<div id="button-container">
 		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Page (F10)">
-		<input type="button" id="btnOpen" value="open" title="Open in new window" style="display: none;">
+		<!-- <input type="button" id="btnOpen" value="open" title="Open in new window" style="display: none;"> -->
+		<a id="pages-open" href="" target="_blank" style="display: none" title="Open in new window"><i class="fa fa-external-link" aria-hidden="true"></i></a>
 	</div>
 	
 </div>
