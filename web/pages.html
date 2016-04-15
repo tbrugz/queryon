@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - Pages</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script src="js/qon-base.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script src="js/auth.js"></script>
+	<script src="js/settings.js"></script>
+	<script src="js/menu.js"></script>
+<script type="text/javascript">
+
+//javascript, html, json, markdown, css, xml
+var extMap = {
+	".html": "html",
+	".css": "css",
+	".js": "javascript",
+	".json": "json",
+	".xml": "xml",
+	".md": "markdown", 
+	".markdown": "markdown" 
+};
+var mimeMap = {
+	"html": "text/html",
+	"css": "text/css",
+	"javascript": "application/javascript",
+	"json": "application/json",
+	"xml": "application/xml",
+	"markdown": "text/markdown" 
+};
+
+var pagesUrl = 'p/';
+var qonUrl = 'q/QON_PAGES';
+var qonEditorUrl = 'pages-editor.html'
+
+onLoad = function() {
+	//var id = getParameterByName('id', location.search);
+	
+	loadAuthInfo();
+	loadSettings(function() {
+		var table = settings['queryon.qon-pages.table'];
+		if(table) {
+			qonUrl = 'q/'+table;
+		}
+		updateUI();
+		loadPagesList();
+	});
+}
+
+updateUI = function() {
+	document.getElementById('content').style.top = document.getElementById('nav').offsetHeight + 'px';
+}
+
+
+window.onresize = updateUI;
+
+makeHrefs = function() {
+	refreshAuthInfo();
+	byId('url-editor-new').style.display = authInfo.isDev?'inline':'none';
+}
+
+loadPagesList = function() {
+	var loadUrl = qonUrl+'.json';
+
+	var payload = "fields=ID,PATH,MIME&order=PATH";
+	loadUrl += "?" + payload;
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(evt) {
+		var req = evt.target
+		var status = req.status;
+		if(status>=200 && status<300) {
+			var content = byId('content');
+			
+			var pages = getQonData(JSON.parse(req.responseText));
+			for(var i=0;i<pages.length;i++) {
+				content.innerHTML += "\n<li><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
+					(authInfo.isDev?" <a href='pages-editor.html?id="+pages[i].ID+"'>[edit]</a>":"")+
+					//XXX add delete button
+					"</li><br/>";
+			}
+		}
+		else {
+			console.warn(evt);
+		}
+	};
+	oReq.onerror = function(evt) {
+		console.warn(evt);
+	}
+	oReq.open("GET", loadUrl);
+	oReq.send(null);
+}
+
+</script>
+	<style>
+#messages {
+	border: 1px solid #000;
+	display: none;
+	margin: 2px 4px 0 4px;
+	padding: 2px;
+}
+#content {
+	padding: 20px;
+}
+#content li {
+	list-style-type: none;
+}
+
+#content a, #content a:visited {
+	color: #000;
+	font-size: 11pt;
+	padding: 4px
+}
+#content a.ref {
+	background-color: #fff;
+}
+
+	</style>
+</head>
+<body onload="onLoad();">
+
+<nav class="navbar" id="nav">
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
+
+	<span id="navbar-links">
+		<span id="navbar-actions">
+			<a id="url-editor-new" class="edit-link" href="" target="_blank" style="display: none">new</a>
+		</span>
+	</span>
+	
+	<!-- <label id="modelLabel" style="display: none;">model: <input type="text" id="model" name="model" readonly="readonly" value=""/></label> -->
+	<!-- <span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span> -->
+
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+	
+	<div id="messages"></div>
+</nav>
+
+<div id="content" class="container">
+</div>
+
+</body>
