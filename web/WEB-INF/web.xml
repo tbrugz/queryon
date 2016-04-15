@@ -44,7 +44,7 @@
 		<servlet-name>DataDiffServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.DataDiffServlet</servlet-class>
 	</servlet>
-
+	
 	<servlet>
 		<servlet-name>Diff2QServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.Diff2QServlet</servlet-class>
@@ -64,6 +64,11 @@
 		</init-param>
 	</servlet>
 	
+	<servlet>
+		<servlet-name>PagesServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.PagesServlet</servlet-class>
+	</servlet>
+
 	<servlet>
 		<servlet-name>ProcessorServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
@@ -98,7 +103,7 @@
 		<servlet-name>Diff2QServlet</servlet-name>
 		<url-pattern>/diff2q/*</url-pattern>
 	</servlet-mapping>
-
+	
 	<servlet-mapping>
 		<servlet-name>DiffManyServlet</servlet-name>
 		<url-pattern>/diffmany/*</url-pattern>
@@ -112,6 +117,11 @@
 	<servlet-mapping>
 		<servlet-name>ProcessorServlet</servlet-name>
 		<url-pattern>/processor/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>PagesServlet</servlet-name>
+		<url-pattern>/p/*</url-pattern>
 	</servlet-mapping>
 
 	<filter>
