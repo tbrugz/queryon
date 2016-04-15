@@ -1,5 +1,9 @@
 package tbrugz.queryon;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,7 +61,7 @@ public class RequestSpec {
 	
 	public static final String SYNTAXES_INFO_RESOURCE = "/tbrugz/queryon/syntaxes/syntaxinfo.properties";
 	
-	final HttpServletRequest request;
+	final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
 	final String httpMethod;
 	final String modelId;
@@ -226,7 +230,7 @@ public class RequestSpec {
 		if(limitStr!=null) {
 			int propLimit = Integer.parseInt(limitStr);
 			if(maxLimit!=null && propLimit>maxLimit) {
-				limit = (int)(long) maxLimit;
+				limit = maxLimit.intValue();
 			}
 			else {
 				limit = propLimit;
@@ -235,10 +239,10 @@ public class RequestSpec {
 		else {
 			Long defaultLimit = Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT);
 			if(defaultLimit!=null) {
-				limit = (int)(long) defaultLimit;
+				limit = defaultLimit.intValue();;
 			}
 			else if(maxLimit!=null) {
-				limit = (int)(long) maxLimit;
+				limit = maxLimit.intValue();;
 			}
 			else {
 				//limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
@@ -294,6 +298,16 @@ public class RequestSpec {
 		//	String key = en.nextElement();
 		//	String[] value = req.getParameterValues(key);
 		
+		String bodyParamName = req.getParameter("bodyparamname");
+		if(bodyParamName!=null) {
+			try {
+				String value = getRequestBody(req);
+				updateValues.put(bodyParamName, value);
+			} catch (IOException e) {
+				log.warn("error decoding http message body [bodyparamname="+bodyParamName+"]: "+e);
+			}
+		}
+		
 		Map<String,String[]> params = req.getParameterMap();
 		for(Map.Entry<String,String[]> entry: params.entrySet()) {
 			String key = entry.getKey();
@@ -317,7 +331,7 @@ public class RequestSpec {
 			}
 			catch(RuntimeException e) {
 				//log.warn("encoding error [e: "+entry+"]: "+e);
-				log.warn("setParam exception [k:"+key+"; v:"+value+"]: "+e);
+				log.warn("setParam exception [k:"+key+"; v:"+Arrays.toString(value)+"]: "+e);
 			}
 		}
 			
@@ -412,6 +426,15 @@ public class RequestSpec {
 		return false;
 	}
 
+	boolean setUniParam(String prefix, String key, String value, Map<String, String> uniFilter) {
+		if(key.startsWith(prefix)) {
+			String col = key.substring(prefix.length());
+			uniFilter.put(col, value);
+			return true;
+		}
+		return false;
+	}
+	
 	boolean setMultiParam(String prefix, String key, String[] values, Map<String, String[]> multiFilter) {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
@@ -534,6 +557,25 @@ public class RequestSpec {
 			}
 		}
 		return outputTypeStr;
+	}
+
+	static String getRequestBody(HttpServletRequest req) throws IOException {
+		InputStream is = req.getInputStream();
+		return slurp(is, 8192);
+	}
+	
+	// http://stackoverflow.com/a/309718/616413
+	public static String slurp(final InputStream is, final int bufferSize) throws IOException {
+		final char[] buffer = new char[bufferSize];
+		final StringBuilder out = new StringBuilder();
+		Reader in = new InputStreamReader(is, "UTF-8");
+		for (;;) {
+			int rsz = in.read(buffer, 0, buffer.length);
+			if (rsz < 0)
+				break;
+			out.append(buffer, 0, rsz);
+		}
+		return out.toString();
 	}
 	
 }

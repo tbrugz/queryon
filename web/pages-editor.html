@@ -102,7 +102,9 @@ function doSave() {
 
 	var payload = "v:PATH=" + encodeURIComponent(path) +
 		"&v:MIME=" + encodeURIComponent(mime) +
-		"&v:BODY=" + encodeURIComponent( editor.getValue() );
+		"&bodyparamname=BODY";
+		//"&v:BODY=" + encodeURIComponent( editor.getValue() );
+	var messageBody = editor.getValue();
 	var method = "POST"; //post: insert ; put: update
 	if(id) {
 		saveUrl += "p1="+encodeURIComponent(id);
@@ -138,7 +140,7 @@ function doSave() {
 	oReq.onerror = doSaveError;
 	btnActionStart('btnSave');
 	oReq.open(method, saveUrl);
-	oReq.send(null);
+	oReq.send(messageBody);
 	//oReq.send(payload);
 }
 
