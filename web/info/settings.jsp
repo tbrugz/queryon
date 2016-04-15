@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.PagesServlet"%>
 <%@page import="tbrugz.queryon.processor.QOnExecs"%>
 <%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"%>
 <%@page import="tbrugz.queryon.processor.QOnTables"%>
@@ -5,9 +6,15 @@
 {
 <%
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
-	String[] exposedKeys = {"queryon.models","queryon.models.default","queryon.qon-tables.table","queryon.qon-execs.table"};
+	String[] exposedKeys = {
+			"queryon.models",
+			"queryon.models.default",
+			"queryon.qon-tables.table",
+			"queryon.qon-execs.table",
+			"queryon.qon-pages.table" //PagesServlet.PROP_PREFIX+PagesServlet.SUFFIX_TABLE
+		};
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
-	String[] defaultValues = {null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE};
+	String[] defaultValues = { null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE };
 	
 	int i = 0;
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
