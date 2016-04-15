@@ -15,8 +15,8 @@
 	<script src="js/settings.js"></script>
 <script type="text/javascript">
 // load url: http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY&mimefield=MIME
+//javascript, html, json, markdown, css, xml //XXX add sql?
 
-//javascript, html, json, markdown, css, xml
 var extMap = {
 	".html": "html",
 	".css": "css",
@@ -24,7 +24,9 @@ var extMap = {
 	".json": "json",
 	".xml": "xml",
 	".md": "markdown", 
-	".markdown": "markdown" 
+	".markdown": "markdown", 
+	".txt": "plain_text",
+	".text": "plain_text"
 };
 var mimeMap = {
 	"html": "text/html",
@@ -32,7 +34,8 @@ var mimeMap = {
 	"javascript": "application/javascript",
 	"json": "application/json",
 	"xml": "application/xml",
-	"markdown": "text/markdown" 
+	"markdown": "text/markdown",
+	"plain_text": "text/plain"
 };
 
 var pagesUrl = 'p/';
@@ -197,6 +200,7 @@ function refreshUI() {
 	else {
 		byId('pages-open').style.display = 'none';
 	}
+	updateEditorMode();
 }
 
 function onPathChange() {
