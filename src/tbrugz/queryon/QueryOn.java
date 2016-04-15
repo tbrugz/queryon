@@ -1377,6 +1377,7 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("Insert count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
 		}
 		
+		// http://stackoverflow.com/questions/1915166/how-to-get-the-insert-id-in-jdbc
 		ResultSet generatedKeys = st.getGeneratedKeys();
 		if (generatedKeys.next()) {
 			int colCount = generatedKeys.getMetaData().getColumnCount();
