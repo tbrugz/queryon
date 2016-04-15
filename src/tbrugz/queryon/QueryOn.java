@@ -510,7 +510,7 @@ public class QueryOn extends HttpServlet {
 		final String otype;
 		final ActionType atype;
 		DBIdentifiable dbobj = null;
-		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), reqspec.modelId);
+		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		
@@ -1420,7 +1420,7 @@ public class QueryOn extends HttpServlet {
 	void doManage(RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//TODO: only reloads model for now...
 		// - reload-config, reload-movel, rerun-processors
-		doInit(req.getSession().getServletContext());
+		doInit(req.getServletContext());
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write("queryon config reloaded");
 	}

@@ -112,12 +112,12 @@ public class QueryOnSchema extends HttpServlet {
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
 		
 		String modelId = SchemaModelUtils.getModelId(req);
-		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());
 		
-		SchemaModel model = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelId);
+		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
 		if(model==null) {
 			throw new BadRequestException("Unknown model: "+modelId);
 		}

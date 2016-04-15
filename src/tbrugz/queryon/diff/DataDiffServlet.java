@@ -61,7 +61,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		log.info("partz: "+partz);
 		
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
-		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		// shiro authorization - XXX use auth other than SELECT ?
 		Subject currentUser = ShiroUtils.getSubject(prop);

@@ -42,7 +42,7 @@ public class Diff2QServlet extends DataDiffServlet {
 		log.info("partz: "+partz);
 		
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
-		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), obj.getFullObjectName());

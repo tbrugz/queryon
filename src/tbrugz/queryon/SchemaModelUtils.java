@@ -162,10 +162,10 @@ public class SchemaModelUtils {
 	public static String getModelId(HttpServletRequest req, String param, boolean allowDefault) {
 		String modelReq = req.getParameter(param);
 		if(modelReq==null && allowDefault) {
-			modelReq = (String) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+			modelReq = (String) req.getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 		}
 		else {
-			Set<String> models = getModelIds(req.getSession().getServletContext());
+			Set<String> models = getModelIds(req.getServletContext());
 			if(!models.contains(modelReq)) {
 				throw new BadRequestException( "Model id '"+modelReq+"' undefined"
 						+(PARAM_MODEL.equals(param)?"":" [param="+param+"]") );

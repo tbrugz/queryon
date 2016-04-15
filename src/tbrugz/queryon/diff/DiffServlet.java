@@ -72,7 +72,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
 		
-		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		// TODOne: diff authorization
 		// XXX add <type>:DIFF authorization instead of <type>:SHOW ?
@@ -102,11 +102,11 @@ public class DiffServlet extends AbstractHttpServlet {
 			DBIdentifiableDiff.addComments = true;
 		}
 		
-		SchemaModel modelSource = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdSource);
+		SchemaModel modelSource = SchemaModelUtils.getModel(req.getServletContext(), modelIdSource);
 		if(modelSource==null) {
 			throw new BadRequestException("Unknown model (source): "+modelIdSource);
 		}
-		SchemaModel modelTarget = SchemaModelUtils.getModel(req.getSession().getServletContext(), modelIdTarget);
+		SchemaModel modelTarget = SchemaModelUtils.getModel(req.getServletContext(), modelIdTarget);
 		if(modelTarget==null) {
 			throw new BadRequestException("Unknown model (target): "+modelIdTarget);
 		}

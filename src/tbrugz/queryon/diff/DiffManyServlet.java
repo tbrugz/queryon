@@ -69,7 +69,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		String types = partz.get(1);   // comma separated types to diff
 		String syntax = partz.get(2);  // valid:: json, xml, patch, sql
 		
-		Properties prop = (Properties) req.getSession().getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		Subject currentUser = ShiroUtils.getSubject(prop);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), ActionType.SELECT_ANY.name());
