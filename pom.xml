@@ -311,6 +311,12 @@
       <version>2.2.2</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.pegdown</groupId>
+      <artifactId>pegdown</artifactId>
+      <version>1.6.0</version>
+      <scope>compile</scope>
+    </dependency>
     
     <dependency>
       <groupId>log4j</groupId>

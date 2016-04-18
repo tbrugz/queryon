@@ -80,7 +80,8 @@ loadPagesList = function() {
 			var pages = getQonData(JSON.parse(req.responseText));
 			for(var i=0;i<pages.length;i++) {
 				content.innerHTML += "\n<li><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
-					(authInfo.isDev?" <a href='pages-editor.html?id="+pages[i].ID+"'>[edit]</a>":"")+
+					(pages[i].MIME=="text/markdown"?" <a href='md/"+pages[i].PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
+					(authInfo.isDev?" <a href='pages-editor.html?id="+pages[i].ID+"' target='_blank'>[edit]</a>":"")+
 					//XXX add delete button
 					"</li><br/>";
 			}

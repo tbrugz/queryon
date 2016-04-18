@@ -66,7 +66,7 @@ public class PagesServlet extends AbstractHttpServlet {
 		} 
 	}
 	
-	String getId(Connection conn, String relation, String pathInfo) throws SQLException {
+	/*String getId(Connection conn, String relation, String pathInfo) throws SQLException {
 		PreparedStatement st = conn.prepareStatement("select id from "+relation+" where path = ?");
 		st.setString(1, pathInfo);
 		
@@ -77,7 +77,7 @@ public class PagesServlet extends AbstractHttpServlet {
 			return id;
 		}
 		throw new NotFoundException("resource not found: "+pathInfo);
-	}
+	}*/
 
 	/*void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException {
 		PreparedStatement st = conn.prepareStatement("select id, mime, body from "+relation+" where path = ?");
@@ -95,15 +95,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	}*/
 
 	void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException, IOException {
-		PreparedStatement st = conn.prepareStatement("select id, mime, body from "+relation+" where path = ?");
-		st.setString(1, pathInfo);
-		
-		ResultSet rs = st.executeQuery();
-		
-		if(!rs.next()) {
-			throw new NotFoundException("resource not found: "+pathInfo);
-		}
-		
+		ResultSet rs = getPage(conn, relation, pathInfo);
 		//String id = rs.getString(1);
 		String mimeType = rs.getString(2);
 		//String body = rs.getString(3);
@@ -117,6 +109,19 @@ public class PagesServlet extends AbstractHttpServlet {
 		}
 		
 		rs.close();
+	}
+	
+	ResultSet getPage(Connection conn, String relation, String pathInfo) throws SQLException, IOException {
+		PreparedStatement st = conn.prepareStatement("select id, mime, body from "+relation+" where path = ?");
+		st.setString(1, pathInfo);
+		
+		ResultSet rs = st.executeQuery();
+		
+		if(!rs.next()) {
+			rs.close();
+			throw new NotFoundException("resource not found: "+pathInfo);
+		}
+		return rs;
 	}
 	
 	void forward(HttpServletRequest req, HttpServletResponse resp, String relation, String id) throws ServletException, IOException {
