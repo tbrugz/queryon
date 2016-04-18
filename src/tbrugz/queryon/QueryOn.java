@@ -238,6 +238,7 @@ public class QueryOn extends HttpServlet {
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	boolean validateFilterColumnNames = true;
 	boolean xSetRequestUtf8 = false;
+	boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
 	
 	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
@@ -1231,7 +1232,7 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("[update] unknown column: "+col);
 			}
 			//TODOne: check UPDATE permission on each row, based on grants
-			if(!hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
+			if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
 				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
 			}
 			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
@@ -1344,7 +1345,7 @@ public class QueryOn extends HttpServlet {
 				log.warn("unknown 'value' column: "+col);
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
-			if(!hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
+			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
 				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles);
 				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
 			}
