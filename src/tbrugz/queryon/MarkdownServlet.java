@@ -1,10 +1,13 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.pegdown.PegDownProcessor;
@@ -20,6 +23,20 @@ public class MarkdownServlet extends PagesServlet {
 	
 	//public static final String MD_MIMETYPE = "text/markdown";
 	public static final String HTML_MIMETYPE = "text/html";
+	
+	public static final String PROP_PREPEND = "queryon.pages.markdown.prepend";
+	public static final String PROP_APPEND = "queryon.pages.markdown.append";
+	
+	String prepend = null;
+	String append = null;
+	
+	@Override
+	public void init() throws ServletException {
+		super.init();
+		Properties appprop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		prepend = appprop.getProperty(PROP_PREPEND);
+		append = appprop.getProperty(PROP_APPEND);
+	}
 
 	void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException, IOException {
 		ResultSet rs = getPage(conn, relation, pathInfo);
@@ -32,7 +49,15 @@ public class MarkdownServlet extends PagesServlet {
 		//resp.setHeader(HEADER_PAGE_ID, id);
 		PegDownProcessor pdp = new PegDownProcessor();
 		String md = pdp.markdownToHtml(body);
-		resp.getWriter().write(md);
+		Writer w = resp.getWriter();
+		
+		if(prepend!=null) {
+			w.write(prepend);
+		}
+		w.write(md);
+		if(append!=null) {
+			w.write(append);
+		}
 		
 		rs.close();
 	}
