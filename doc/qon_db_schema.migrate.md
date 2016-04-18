@@ -1,4 +1,19 @@
 
+2016-04 - add qon_pages
+-----------------------
+
+create table qon_pages (
+	id integer, -- serial, identity, auto_increment ...
+	path varchar(400),
+	remarks varchar(400),
+	mime varchar(100),
+	body clob,
+	roles_filter varchar(1000),
+	constraint qon_pages_pk primary key (id),
+	constraint qon_pages_path_uk unique (path)
+)
+
+
 2016-02 - disabled column
 -------------------------
 alter table qon_queries

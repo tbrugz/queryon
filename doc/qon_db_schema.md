@@ -49,11 +49,11 @@ create table qon_execs (
 )
 
 create table qon_pages (
-	id integer,
+	id integer, -- serial, identity, auto_increment ...
 	path varchar(400),
 	remarks varchar(400),
 	mime varchar(100),
-	body clob,
+	body clob, --text ...
 	roles_filter varchar(1000),
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
@@ -101,3 +101,25 @@ create table qon_execs (
 	parameter_inouts varchar2(1000),
 	constraint qon_execs_pk primary key (name)
 )
+
+create table qon_pages (
+	id integer,
+	path varchar2(400),
+	remarks varchar2(400),
+	mime varchar2(100),
+	body clob,
+	roles_filter varchar2(1000),
+	constraint qon_pages_pk primary key (id),
+	constraint qon_pages_path_uk unique (path)
+)
+
+(see: http://stackoverflow.com/questions/11296361/how-to-create-id-with-auto-increment-on-oracle)
+
+create sequence qon_pages_seq;
+
+create or replace trigger qon_pages_trg 
+before insert on qon_pages
+for each row
+begin
+  select qon_pages_seq.nextval into :new.id from dual;
+end;
