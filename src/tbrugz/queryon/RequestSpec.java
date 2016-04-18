@@ -28,15 +28,16 @@ import tbrugz.sqldump.util.Utils;
  * see: /web/doc/api.md
  */
 /*
- * XXX: order by? 3a,1d,2d?
- * TODO: Recspec: init new dumpsyntax if parameters are present
+ * TODOne: Recspec: init new dumpsyntax if parameters are present
  * 
- * XXX: add ResponseSpec? special-headers-coinvention??
- *  - X-ResultSet-Limit <n>
- *  - X-Execute-ReturnCount <n>
- *  - X-Warning-Execute TooManyReturnParams ReturnCount=<n>
- *  - X-Warning-UnknownColumn <message>
+ * XXXdone: add ResponseSpec? special-headers-coinvention??
+ *  x X-ResultSet-Limit <n>
+ *  x X-Execute-ReturnCount <n>
+ *  x X-Warning-Execute TooManyReturnParams ReturnCount=<n> -> X-Execute-ReturnCount
+ *  x X-Warning-UnknownColumn <message>
  * http://stackoverflow.com/questions/3561381/custom-http-headers-naming-conventions
+ * 
+ * XXXxx do a select on the inserted/updated row (req.getParameter("doselect"))? maybe use st.getGeneratedKeys() instead...
  */
 public class RequestSpec {
 	static final Log log = LogFactory.getLog(RequestSpec.class);

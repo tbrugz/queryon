@@ -125,7 +125,7 @@ function doSave() {
 		var status = req.status;
 		if(status>=200 && status<300) {
 			btnActionStop('btnSave');
-			var pkvals = req.getResponseHeader('X-Relation-PK-Values');
+			var pkvals = req.getResponseHeader('X-Relation-UK-Values');
 			if(pkvals) {
 				byId('id').value = pkvals.trim();
 				history.replaceState(null, null, "?id="+byId('id').value);

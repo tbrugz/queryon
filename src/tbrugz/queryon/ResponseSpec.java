@@ -14,7 +14,7 @@ public class ResponseSpec {
 	public static final String HEADER_WARNING = "X-Warning"; //XXX: remove the "X-"?
 	public static final String HEADER_WARNING_UNKNOWN_COLUMN = "X-Warning-UnknownColumn";
 	
-	public static final String HEADER_RELATION_PK_VALUES = "X-Relation-PK-Values";
+	public static final String HEADER_RELATION_UK_VALUES = "X-Relation-UK-Values";
 	public static final String HEADER_RELATION_UK = "X-Relation-UK";
 	
 	public static final String HEADER_RESULTSET_LIMIT = "X-ResultSet-Limit";

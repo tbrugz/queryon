@@ -1385,7 +1385,7 @@ public class QueryOn extends HttpServlet {
 			for(int i=0;i<colCount;i++) {
 				colVals.add(generatedKeys.getString(i+1));
 			}
-			resp.setHeader(ResponseSpec.HEADER_RELATION_PK_VALUES, Utils.join(colVals, ", "));
+			resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
 			//log.info("generatedKeys[pk="+Arrays.toString(pkcols)+";#="+colCount+"]: "+ Utils.join(colVals, ", "));
 		}
 		
