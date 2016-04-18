@@ -238,7 +238,7 @@ public class QueryOn extends HttpServlet {
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	boolean validateFilterColumnNames = true;
 	boolean xSetRequestUtf8 = false;
-	boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
+	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
 	
 	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	

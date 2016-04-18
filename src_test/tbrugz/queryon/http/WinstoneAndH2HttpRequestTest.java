@@ -567,7 +567,7 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
 		
-		Assert.assertEquals("Must be Forbidden (403)", 403, response1.getStatusLine().getStatusCode());
+		Assert.assertEquals(201, response1.getStatusLine().getStatusCode());
 		httpPost.releaseConnection();
 	}
 	
@@ -579,7 +579,7 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpResponse response1 = httpclient.execute(httpPut);
 		System.out.println("content: "+getContent(response1));
 
-		Assert.assertEquals("Must be Forbidden (403)", 403, response1.getStatusLine().getStatusCode());
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
 	}
 
