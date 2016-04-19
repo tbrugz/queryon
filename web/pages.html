@@ -23,7 +23,11 @@ var extMap = {
 	".json": "json",
 	".xml": "xml",
 	".md": "markdown", 
-	".markdown": "markdown" 
+	".markdown": "markdown", 
+	".txt": "plain_text",
+	".text": "plain_text",
+	".diff": "diff",
+	".patch": "diff"
 };
 var mimeMap = {
 	"html": "text/html",
@@ -31,7 +35,9 @@ var mimeMap = {
 	"javascript": "application/javascript",
 	"json": "application/json",
 	"xml": "application/xml",
-	"markdown": "text/markdown" 
+	"markdown": "text/markdown",
+	"plain_text": "text/plain",
+	"diff": "text/plain"
 };
 
 var pagesUrl = 'p/';

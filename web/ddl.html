@@ -140,9 +140,7 @@ onObjTypeChanged = function(updateFragment) {
 }
 
 onObjectChanged = function(updateFragment) {
-	loadObjectList(function() {
-		if(updateFragment) { updateURLFragment(); }
-	});
+	if(updateFragment) { updateURLFragment(); }
 }
 
 updateURLFragment = function() {
