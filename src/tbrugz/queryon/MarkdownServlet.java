@@ -8,14 +8,13 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.pegdown.PegDownProcessor;
 
 /*
  * see: https://github.com/sirthias/pegdown
- * 
- * XXX: add prepend & append html
  */
 public class MarkdownServlet extends PagesServlet {
 	
@@ -24,18 +23,34 @@ public class MarkdownServlet extends PagesServlet {
 	//public static final String MD_MIMETYPE = "text/markdown";
 	public static final String HTML_MIMETYPE = "text/html";
 	
+	//public static final String PROP_XPEND = "queryon.pages.markdown.xpend";
 	public static final String PROP_PREPEND = "queryon.pages.markdown.prepend";
 	public static final String PROP_APPEND = "queryon.pages.markdown.append";
 	
+	boolean doXpend = true;
+	boolean reqXpend = doXpend;
 	String prepend = null;
 	String append = null;
 	
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		Properties appprop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
-		prepend = appprop.getProperty(PROP_PREPEND);
-		append = appprop.getProperty(PROP_APPEND);
+		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		//doXpend = Utils.getPropBool(prop, PROP_XPEND, doXpend);
+		prepend = prop.getProperty(PROP_PREPEND);
+		append = prop.getProperty(PROP_APPEND);
+	}
+	
+	@Override
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		String xpendStr = req.getParameter("xpend");
+		if(xpendStr!=null) {
+			reqXpend = "true".equals(xpendStr);
+		}
+		else {
+			reqXpend = doXpend;
+		}
+		super.doProcess(req, resp);
 	}
 
 	void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException, IOException {
@@ -51,11 +66,11 @@ public class MarkdownServlet extends PagesServlet {
 		String md = pdp.markdownToHtml(body);
 		Writer w = resp.getWriter();
 		
-		if(prepend!=null) {
+		if(reqXpend && prepend!=null) {
 			w.write(prepend);
 		}
 		w.write(md);
-		if(append!=null) {
+		if(reqXpend && append!=null) {
 			w.write(append);
 		}
 		
