@@ -188,7 +188,9 @@ getDDLdiff = function(apply) {
 	var container = document.getElementById('content-container');
 	container.style.display = 'none';
 	var block = document.getElementById('content');
+	closeMessages('status-container');
 	//block.style.display = 'none';
+	var startTimeMilis = Date.now();
 	
 	closeMessages('messages');
 	//msg.style.display = 'none';
@@ -199,7 +201,9 @@ getDDLdiff = function(apply) {
 		success: function(data) {
 			var content = data;
 			if(content=='') {
-				content = '-- no changes';
+				content = (syntax=='patch')?
+					'# no changes':
+					'-- no changes';
 			}
 			block.innerHTML = safeTags(content);
 			block.style.display = 'block';
@@ -211,6 +215,10 @@ getDDLdiff = function(apply) {
 				//applyBtn.value = 'apply DDL diff to '+document.getElementById('modelSource').value;
 			}
 			btnActionStop('go-button');
+
+			var completedTimeMilis = Date.now();
+			showStatusInfo('status-container', startTimeMilis, completedTimeMilis);
+			
 			var prismSyntax = (syntax=='patch')?'language-diff':'language-sql';
 			block.setAttribute('class', prismSyntax);
 			Prism.highlightElement(block);
@@ -270,6 +278,13 @@ function refreshSelectsState() {
 
 updateUI = function() {
 	document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
+}
+
+function showStatusInfo(messagesId, startTimeMilis, completedTimeMilis) {
+	var messages = document.getElementById(messagesId);
+	messages.innerHTML = 'time = '+(completedTimeMilis-startTimeMilis)+'ms '
+		+"<input type='button' class='statusbutton' onclick=\"closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	messages.style.display = 'block';
 }
 
 // ----- utility functions
@@ -409,6 +424,15 @@ setSelectMultiOptions = function(select, values) {
 		border:1px solid #999;
 		background-color: whitesmoke;
 	}
+	
+	#status-container {
+		bottom: 6px;
+		padding: 2px;
+		right: 6px;
+		position: fixed;
+		border: 2px solid #999
+	}
+	
 	</style>
 </head>
 <body>
@@ -461,7 +485,7 @@ setSelectMultiOptions = function(select, values) {
 	</div>
 </div>
 
-<div id="status-container" class="status">
+<div id="status-container" class="status" style="display: none;">
 </div>
 
 </body>
