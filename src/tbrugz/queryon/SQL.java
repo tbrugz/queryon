@@ -356,7 +356,11 @@ public class SQL {
 	
 	@Override
 	public String toString() {
-		return "SQL[\n"+sql+"\n[bindpar="+bindParameterValues+"]]";
+		List<String> sl = new ArrayList<String>();
+		for(String s: bindParameterValues) {
+			sl.add(substring(s, 20));
+		}
+		return "SQL[\n"+sql+"\n[bindpar="+sl+"]]";
 	}
 	
 	protected static String quoteString() {
@@ -413,4 +417,9 @@ public class SQL {
 		return defaultValue;
 	}
 	
+	static String substring(String s, int maxlength) {
+		if(s==null) { return null; }
+		if(s.length()>maxlength) { return s.substring(0, maxlength-1)+" (...)"; }
+		return s;
+	}
 }
