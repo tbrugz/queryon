@@ -122,6 +122,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			dump(pp, syntax, resp);
 		}
 		finally {
+			resp.getWriter().flush();
 		}
 	}
 	

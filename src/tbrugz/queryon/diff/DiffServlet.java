@@ -201,6 +201,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		}
 		
 		DBIdentifiableDiff.addComments = previousDBIdDiffAddComments;
+		resp.getWriter().flush();
 	}
 	
 	List<Diff> newSingleElemList(Diff e) {

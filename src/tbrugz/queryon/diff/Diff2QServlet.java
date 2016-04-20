@@ -76,6 +76,7 @@ public class Diff2QServlet extends DataDiffServlet {
 		finally {
 			ConnectionUtil.closeConnection(connSource);
 			ConnectionUtil.closeConnection(connTarget);
+			resp.getWriter().flush();
 		}
 	}
 

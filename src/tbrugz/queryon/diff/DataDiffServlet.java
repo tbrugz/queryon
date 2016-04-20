@@ -126,6 +126,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		finally {
 			ConnectionUtil.closeConnection(connSource);
 			ConnectionUtil.closeConnection(connTarget);
+			resp.getWriter().flush();
 		}
 	}
 	
