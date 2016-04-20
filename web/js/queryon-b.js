@@ -232,6 +232,7 @@ function getParameters() {
 	return paramsStr;
 }
 
+/*
 function showInfoMessages(messagesId, text) {
 	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','info');
@@ -264,6 +265,7 @@ function closeMessages(messagesId) {
 	document.getElementById(messagesId).innerHTML = '';
 	updateUI();
 }
+*/
 
 // see: http://stackoverflow.com/questions/827368/using-the-get-parameter-of-a-url-in-javascript
 function getQueryVariable(variable) {

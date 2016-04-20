@@ -1,4 +1,5 @@
 
+/*
 function showInfoMessages(messagesId, text) {
 	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 	$('#'+messagesId).attr('class','info');
@@ -22,4 +23,4 @@ function closeMessages(messagesId) {
 	document.getElementById(messagesId).innerHTML = '';
 	updateUI();
 }
-
+*/
