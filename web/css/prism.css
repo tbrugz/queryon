@@ -75,6 +75,7 @@ code[class*="language-"]::selection, code[class*="language-"] ::selection {
 }
 
 .token.comment,
+.token.coord,
 .token.prolog,
 .token.doctype,
 .token.cdata {
