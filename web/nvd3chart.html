@@ -15,6 +15,7 @@
 	<script src="js/nv.d3.min.js"></script>
 	<script src="js/charts-nv.js"></script>
 	<script src="js/qon-base.js"></script>
+	<script src="js/qon-util.js"></script>
 	<script src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/queryon-b.js"></script>
 	<script src="js/queryon-b2.js"></script>
@@ -67,6 +68,7 @@ svg {
 			<label id="x-axis-label">x-axis: <input type="text" id="x-axis" onchange="onNavElementChanged();" class="onecol"/></label>
 			<label id="order-label">order: <input type="text" name="order" id="order" onchange="onNavElementChanged();" class="onecol"/></label>
 			<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRunNvD3();"/>
+			<span id="download-link" style="display: none;"></span>
 		</span>
 		
 		<span id="authinfo">
@@ -102,11 +104,12 @@ var doRunNvD3 = function() {
 	var columns = document.getElementById('columns').value.split(',');
 	var xaxis = document.getElementById('x-axis').value.trim();
 	document.getElementById('chartcontainer').innerHTML = '';
+	byId('download-link').innerHTML = '';
 	closeMessages('messages');
 	btnActionStart('go-button');
 	console.log('doRunNvD3: url=',url,' ; cols=',columns,' ; x-axis = ',xaxis);
 	runNvD3(url, columns, xaxis, nvD3LineChart, 'chartcontainer',
-			function() { btnActionStop('go-button'); },
+			function() { btnActionStop('go-button'); setTimeout( addDownloadLink, 1000); },
 			function(error) {
 				console.log('error', error);
 				showErrorMessages('messages', error.responseText?error.responseText:error);
@@ -139,6 +142,22 @@ function onNavElementChanged() {
 	updateState();
 	makeHrefs();
 }
+
+var addDownloadLink = function() {
+	var svg = document.querySelector('#chartcontainer svg');
+	console.log('svg',svg);
+	var link = svgDownloadLink(svg);
+	//var div = document.querySelector('#chartcontainer');
+	var div = document.getElementById('download-link');
+	var span = document.createElement('span');
+	span.innerHTML = link;
+	div.appendChild(span);
+	div.style.display = 'inline';
+	//div.innerHTML = link;
+}
+/*position: absolute;
+bottom: 4px;
+left: 10px;*/
 
 var onLoad = function() {
 	loadQueries();

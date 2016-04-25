@@ -26,9 +26,9 @@ function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, 
 			//console.log("ok...");
 		}
 		catch (e) {
-			if(callbackError) { callbackError(e); }
-			else {
-				console.log(e);
+			console.log(e);
+			if(callbackError) {
+				callbackError(e);
 			}
 		}
 	});
@@ -145,6 +145,23 @@ function nvD3LineChart(data, containerId, xlabelsData, xaxis) {
 }
 
 /* --------------------------------------- */
+
+// http://stackoverflow.com/questions/2483919/how-to-save-svg-canvas-to-local-filesystem
+// http://ggvis.rstudio.com/
+function svgDownloadLink(svg) {
+	// Add some critical information
+	svg.setAttribute("version", "1.1");
+	svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+	//$("svg").attr({ version: '1.1' , xmlns:"http://www.w3.org/2000/svg"});
+	
+	var b64 = btoa(svg.outerHTML);
+	
+	// Works in recent Webkit(Chrome)
+	//$("body").append($("<img src='data:image/svg+xml;base64,\n"+b64+"' alt='file.svg'/>"));
+	
+	// Works in Firefox 3.6 and Webit and possibly any browser which supports the data-uri
+	return "<a href-lang='image/svg+xml' href='data:image/octet-stream;base64,\n"+b64+"' download='plot.svg' title='plot.svg'>download SVG</a>";
+}
 
 /*function sinAndCos() {
   var sin = [],sin2 = [],
