@@ -143,6 +143,10 @@ onObjTypeChanged = function() {
 	updateState();
 }
 
+onSyntaxChanged = function() {
+	updateState();
+}
+
 doDiff = function() {
 	doClear();
 	getDDLdiff();
@@ -244,9 +248,12 @@ function updateState() {
 	//schemas & types
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
+
+	var select = document.getElementById('syntax');
+	var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	
 	if(modelSource && modelTarget && schema) {
-		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types);
+		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types+"/"+syntax);
 	}
 }
 
@@ -272,6 +279,11 @@ function refreshSelectsState() {
 			var tVals = parts[3].split(',');
 			//console.log('type', parts[3], '/', tVals);
 			setSelectMultiOptions(type, tVals);
+		}
+		//syntax
+		if(parts[4]) {
+			var syntax = document.getElementById('syntax');
+			syntax.value = parts[4];
 		}
 	}
 }
@@ -456,7 +468,7 @@ setSelectMultiOptions = function(select, values) {
 	</label>
 	<label>
 		syntax:
-		<select id="syntax">
+		<select id="syntax" onchange="onSyntaxChanged();">
 			<option value="sql" selected="selected">SQL
 			<option value="patch">patch
 		</select>
