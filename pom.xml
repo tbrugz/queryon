@@ -268,6 +268,7 @@
       <version>2.5</version>
       <scope>compile</scope>
     </dependency> -->
+    <!-- http://stackoverflow.com/questions/1979473/available-servlet-3-0-implementations -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>

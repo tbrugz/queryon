@@ -78,6 +78,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 /**
@@ -278,7 +279,7 @@ public class QueryOn extends HttpServlet {
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
-			log.info("syntaxes: "+getSimpleClassNames(DumpSyntaxRegistry.getSyntaxes()) );
+			log.info("syntaxes: "+StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );
 			
 			Map<String, SchemaModel> models = new LinkedHashMap<String, SchemaModel>();
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
@@ -1788,13 +1789,13 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
-	static <T> List<String> getSimpleClassNames(List<Class<? extends T>> classes) {
+	/*@SuppressWarnings("rawtypes")
+	static <T> List<String> getSimpleClassNames(List<Class<T>> classes) {
 		List<String> l = new ArrayList<String>();
 		for(Class c: classes) {
 			l.add(c.getSimpleName());
 		}
 		return l;
-	}
+	}*/
 	
 }
