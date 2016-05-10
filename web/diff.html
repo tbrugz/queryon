@@ -517,10 +517,14 @@ getDDLdiff = function(apply) {
 		+'&modelTarget='+document.getElementById('modelTarget').value
 		+(apply?"&doApply=true":"");
 	console.log("getDDLdiff: url=", url);
+	if(apply) {
+		btnActionStart('applyDdlDiffBtn');
+	}
 	btnActionStart('getDdlDiffBtn');
 	var block = document.getElementById('ddldiff-output');
 	block.style.display = 'none';
 	msg.style.display = 'none';
+	
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
@@ -533,18 +537,27 @@ getDDLdiff = function(apply) {
 			block.innerHTML = safeTags(content);
 			block.style.display = 'block';
 			var applyBtn = document.getElementById('applyDdlDiffBtn');
-			if(data) {
+			if(data && !apply) {
 				//TODO: test if user has APPLY permission in type/model/schema (ajax) ...
 				applyBtn.style.display = 'initial';
 				applyBtn.value = 'apply DDL diff to '+document.getElementById('modelSource').value;
 			}
 			btnActionStop('getDdlDiffBtn');
+			if(apply) {
+				btnActionStop('applyDdlDiffBtn');
+				showDialogMessage('Diff applyed to <strong>'+document.getElementById('modelSource').value+'</strong> with success!');
+				applyBtn.style.display = 'none';
+			}
 		},
 		error: function(error) {
 			console.log("getDDLdiff error=",error);
 			msg.style.display = 'block';
 			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
 			btnActionStop('getDdlDiffBtn');
+			if(apply) {
+				btnActionStop('applyDdlDiffBtn');
+				applyBtn.style.display = 'none';
+			}
 		}
 	});
 }
@@ -857,6 +870,10 @@ toggleCode = function() {
 		font-weight: bold;
 		font-style: italic;
 		margin: 0px 1px 0px 1px;
+	}
+	
+	#dialog {
+		right: 20%;
 	}
 	</style>
 </head>

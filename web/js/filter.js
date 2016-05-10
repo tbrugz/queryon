@@ -194,3 +194,8 @@ function closeDialogs() {
 	}
 	document.getElementById('dialog-container').style.display = 'none';
 }
+
+$(document).jkey('esc', function() {
+	//console.log('esc pressed: closeDialogs()');
+	closeDialogs();
+});

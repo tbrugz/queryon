@@ -79,3 +79,18 @@ function closeMessages(messagesId) {
 	m.style.display = 'none';
 	updateUI();
 }
+
+function showDialogMessage(text) {
+	var dialogCont = document.getElementById('dialog-container');
+	dialogCont.style.display = 'block';
+	var dialog = document.getElementById('dialog');
+	dialog.style.display = 'block';
+	dialog.innerHTML = "<div style='font-size: large'> " +
+		text +
+		"<input type='button' value='X' class='simplebutton' style='float: right;' onclick='closeDialogMessage();'/></div>";
+	updateUI();
+}
+
+function closeDialogMessage() {
+	document.getElementById('dialog-container').style.display = 'none';
+}
