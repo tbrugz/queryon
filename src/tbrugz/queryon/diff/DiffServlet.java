@@ -26,6 +26,7 @@ import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldiff.SQLDiff;
@@ -62,6 +63,11 @@ public class DiffServlet extends AbstractHttpServlet {
 	
 	public static final String MIME_SQL = "text/plain"; //"application/sql"; - browsers may "download"
 	
+	public static final String PROP_PRE_APPLY_HOOKS = "queryon.diff.apply.pre-hooks";
+	public static final String PROP_POST_APPLY_HOOKS = "queryon.diff.apply.post-hooks";
+
+	public static final String HOOKS_APPLY_MODELS_SUFFIX = ".applymodels";
+	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
@@ -88,6 +94,8 @@ public class DiffServlet extends AbstractHttpServlet {
 		boolean previousDBIdDiffAddComments = DBIdentifiableDiff.addComments;
 		
 		boolean doApply = getDoApply(req);
+		List<ApplyHook> preHooks = new ArrayList<ApplyHook>();
+		List<ApplyHook> postHooks = new ArrayList<ApplyHook>();
 		if(doApply) {
 			// XXX do NOT allow HTTP GET method...
 			String permissionPattern = obj.getType()+":"+QOnPrivilegeType.APPLYDIFF+":"+modelIdSource;
@@ -97,6 +105,9 @@ public class DiffServlet extends AbstractHttpServlet {
 				throw new BadRequestException("cannot apply diff to non-instant QOS");
 			}
 			DBIdentifiableDiff.addComments = false;
+			
+			preHooks = processHooks(prop, PROP_PRE_APPLY_HOOKS);
+			postHooks = processHooks(prop, PROP_POST_APPLY_HOOKS);
 		}
 		else {
 			DBIdentifiableDiff.addComments = true;
@@ -194,7 +205,31 @@ public class DiffServlet extends AbstractHttpServlet {
 		}
 		
 		if(doApply) {
+			String message = ":message: ? \" see '\" zzz";
+			// pre-hooks
+			for(ApplyHook ah: preHooks) {
+				ah.setProperties(prop);
+				List<String> hooksApplyModels = Utils.getStringListFromProp(prop, ah.getPropPrefix()+HOOKS_APPLY_MODELS_SUFFIX, ",");
+				if(hooksApplyModels.contains(modelIdSource)) {
+					String ret = ah.run(new ApplyHook.ApplyMessage(message, String.valueOf(currentUser.getPrincipal()),
+							String.valueOf(obj.getType()), obj.getSchemaName(), obj.getName(),
+							modelIdTarget, modelIdSource));
+					log.info("pre-hook: ret:\n"+ret);
+				}
+			}
 			applyDiffs(diffs, prop, modelIdSource, resp);
+			// post-hooks
+			// XXX use queue/async in post-hooks?
+			for(ApplyHook ah: postHooks) {
+				ah.setProperties(prop); 
+				List<String> hooksApplyModels = Utils.getStringListFromProp(prop, ah.getPropPrefix()+HOOKS_APPLY_MODELS_SUFFIX, ",");
+				if(hooksApplyModels.contains(modelIdSource)) {
+					String ret = ah.run(new ApplyHook.ApplyMessage(message, String.valueOf(currentUser.getPrincipal()),
+							String.valueOf(obj.getType()), obj.getSchemaName(), obj.getName(),
+							modelIdTarget, modelIdSource));
+					log.info("post-hook: ret:\n"+ret);
+				}
+			}
 		}
 		else {
 			dumpDiffs(diffs, resp);
@@ -286,4 +321,29 @@ public class DiffServlet extends AbstractHttpServlet {
 		return renames;
 	}
 	
+	List<ApplyHook> processHooks(Properties prop, String key) {
+		List<ApplyHook> hooks = new ArrayList<ApplyHook>();
+		List<String> hookclasses = Utils.getStringListFromProp(prop, key, ",");
+		if(hookclasses!=null) {
+			for(String s: hookclasses) {
+				ApplyHook ah = null;
+				if(s.contains(":")) {
+					String[] clazzpartz = s.split(":");
+					ah = (ApplyHook) Utils.getClassInstance(clazzpartz[1].trim(), "tbrugz.queryon.diff.hook");
+					if(ah==null) {
+						throw new InternalServerException("hook class not found: "+clazzpartz[1].trim());
+					}
+					ah.setId(clazzpartz[0].trim());
+				}
+				else {
+					ah = (ApplyHook) Utils.getClassInstance(s.trim(), "tbrugz.queryon.diff.hook");
+					if(ah==null) {
+						throw new InternalServerException("hook class not found: "+s.trim());
+					}
+				}
+				hooks.add(ah);
+			}
+		}
+		return hooks;
+	}
 }

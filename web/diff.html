@@ -524,6 +524,7 @@ getDDLdiff = function(apply) {
 	var block = document.getElementById('ddldiff-output');
 	block.style.display = 'none';
 	msg.style.display = 'none';
+	var applyBtn = document.getElementById('applyDdlDiffBtn');
 	
 	$.ajax({
 		//TODO: filter by schema?
@@ -536,7 +537,6 @@ getDDLdiff = function(apply) {
 			}
 			block.innerHTML = safeTags(content);
 			block.style.display = 'block';
-			var applyBtn = document.getElementById('applyDdlDiffBtn');
 			if(data && !apply) {
 				//TODOne: test if user has APPLY permission in type/model/schema (ajax) ...
 				applyBtn.style.display = 'initial';
