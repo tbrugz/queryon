@@ -538,9 +538,18 @@ getDDLdiff = function(apply) {
 			block.style.display = 'block';
 			var applyBtn = document.getElementById('applyDdlDiffBtn');
 			if(data && !apply) {
-				//TODO: test if user has APPLY permission in type/model/schema (ajax) ...
+				//TODOne: test if user has APPLY permission in type/model/schema (ajax) ...
 				applyBtn.style.display = 'initial';
 				applyBtn.value = 'apply DDL diff to '+document.getElementById('modelSource').value;
+				var perm = "TABLE:APPLYDIFF:"+document.getElementById('modelSource').value;
+				if(authHasPermission(perm)) {
+					applyBtn.disabled = false;
+					applyBtn.title = "";
+				}
+				else {
+					applyBtn.disabled = true;
+					applyBtn.title = "user has no APPLYDIFF permission: "+perm;
+				}
 			}
 			btnActionStop('getDdlDiffBtn');
 			if(apply) {

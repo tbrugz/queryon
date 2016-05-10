@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.SchemaModelUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.sqldump.util.StringDecorator"%>
 <%@page import="tbrugz.sqldump.util.Utils"%>
@@ -36,11 +37,19 @@
 		}
 		out.write("]");
 	
-	//permissions
-	//XXX: fixed list of permissions...
+	// permissions
+	// * fixed list of permissions
 	String[] permissionsArr = { "SELECT_ANY", "INSERT_ANY", "UPDATE_ANY", "DELETE_ANY", "MANAGE" };
+	List<String> permissionList = new ArrayList<String>();
+	permissionList.addAll(Arrays.asList(permissionsArr));
+	// * apply permissions
+	Set<String> mids = SchemaModelUtils.getModelIds(application);
+	for(String mid: mids) {
+		permissionList.add("TABLE:APPLYDIFF:"+mid);
+	}
+	
 	List<String> userPerms = new ArrayList<String>();
-	for(String perm: permissionsArr) {
+	for(String perm: permissionList) {
 		if(ShiroUtils.isPermitted(currentUser, perm)) {
 			userPerms.add(perm);
 		}
