@@ -509,13 +509,14 @@ getDDLdiff = function(apply) {
 	}
 	
 	apply = apply==='true'?'true':false;
+	var applyMessage = ""; //XXX: get message from dialog?
 	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
 	var url = queryOnDiffUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
 		+'?modelSource='+document.getElementById('modelSource').value
 		+'&modelTarget='+document.getElementById('modelTarget').value
-		+(apply?"&doApply=true":"");
+		+(apply?"&doApply=true&applyMessage="+applyMessage:"");
 	console.log("getDDLdiff: url=", url);
 	if(apply) {
 		btnActionStart('applyDdlDiffBtn');

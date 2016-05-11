@@ -60,6 +60,7 @@ public class DiffServlet extends AbstractHttpServlet {
 	static final String PARAM_MODEL_SOURCE = "modelSource";
 	static final String PARAM_MODEL_TARGET = "modelTarget";
 	static final String PARAM_DO_APPLY = "doApply";
+	static final String PARAM_APPLY_MESSAGE = "applyMessage";
 	
 	public static final String MIME_SQL = "text/plain"; //"application/sql"; - browsers may "download"
 	
@@ -205,7 +206,8 @@ public class DiffServlet extends AbstractHttpServlet {
 		}
 		
 		if(doApply) {
-			String message = ":message: ? \" see '\" zzz";
+			//String message = ":message: ? \" see '\" zzz";
+			String message = req.getParameter(PARAM_APPLY_MESSAGE);
 			// pre-hooks
 			for(ApplyHook ah: preHooks) {
 				ah.setProperties(prop);

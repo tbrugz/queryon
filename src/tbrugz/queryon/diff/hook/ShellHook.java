@@ -1,6 +1,7 @@
 package tbrugz.queryon.diff.hook;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +26,7 @@ public class ShellHook implements ApplyHook {
 	//Properties prop;
 	String cmd;
 	String id = DEFAULT_ID;
+	//XXX add List<Integer> okExitStatus ? not just '0' 
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -56,12 +58,16 @@ public class ShellHook implements ApplyHook {
 		try {
 			log.info("running: "+script);
 			Process p = Runtime.getRuntime().exec(script);
+			OutputStream os = p.getOutputStream();
+			//XXX pipe diff content into os ?
+			os.close();
 			int exitValue = p.waitFor();
 			String ret = StringUtils.readInputStream(p.getInputStream(), 8192);
 			if(exitValue>0) {
 				throw new InternalServerException("Error applying diff to '"+am.modelApply+"'"+
 						"\n<br/><pre>status="+exitValue+"\n"+DataDumpUtils.xmlEscapeText(ret)+"</pre>");
 			}
+			log.info("returning: "+exitValue);
 			return ret;
 		} catch (IOException e) {
 			e.printStackTrace();
