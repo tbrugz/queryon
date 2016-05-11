@@ -205,7 +205,7 @@ loadObjectList = function(callbackOk) {
 			if(callbackOk) { callbackOk(); }
 		},
 		error: function(error) {
-			console.log("loadObjectList error=",error);
+			console.log("loadObjectList: error=",error);
 			showErrorMessages('messages', error.responseText);
 			btnActionStop('object');
 		}
@@ -219,15 +219,19 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 		+ document.getElementById('object').value
 		+ (model ? '?model='+model : '');
 	console.log("getDDL: url=", url, 'modelId=', modelId, 'model=', model);
+
+	var block = document.getElementById(contentId);
+	var container = block.parentNode;
+	var mblock = document.getElementById(contentId+"-msg");
+	var divStatus = document.getElementById(contentId+"-status");
+	
 	$.ajax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "text",
 		success: function(data, textStatus, jqXHR) {
 			//console.log(data);
-			var block = document.getElementById(contentId);
-			var container = block.parentNode;
-			var mblock = document.getElementById(contentId+"-msg");
+			divStatus.innerHTML = '200';
 			var blocktitle = document.getElementById(contentTitleId);
 			var ukblock = document.getElementById(contentId+"-uk");
 			container.style.display = 'block';
@@ -243,12 +247,10 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 			if(callback) { callback(); }
 		},
 		error: function(err) {
-			//TODO: show error
-			console.log('error=',err.status,err);
-			var block = document.getElementById(contentId);
-			var container = block.parentNode;
-			var mblock = document.getElementById(contentId+"-msg");
+			console.log('getDDL: error=',err.status,err);
+			divStatus.innerHTML = err.status;
 			//if(err.status==404) {
+			//}
 			//var message = 'Object \''+document.getElementById('object').value+'\' not found on model \''+document.getElementById(modelId).value+'\'';
 			mblock.style.display = 'block';
 			mblock.innerHTML = '<b>'+document.getElementById(modelId).value+':</b> '+err.responseText;
@@ -326,8 +328,12 @@ doDiffUsingJS = function(viewType, inverse) {
 	}
 	var from = document.getElementById('content-from').innerHTML;
 	var to = document.getElementById('content-to').innerHTML;
+	var fromStatus = document.getElementById('content-from-status').innerHTML;
+	var toStatus = document.getElementById('content-to-status').innerHTML;
 	var diffc = document.getElementById('diffoutput-container');
-	if(from && to
+	
+	if( (from || fromStatus=='404') && (to || toStatus=='404')
+		&& ( ! (fromStatus=='404' && toStatus=='404') )
 		&& (document.getElementById('modelSource').value != document.getElementById('modelTarget').value)
 		) {
 		
@@ -560,7 +566,7 @@ getDDLdiff = function(apply) {
 			}
 		},
 		error: function(error) {
-			console.log("getDDLdiff error=",error);
+			console.log("getDDLdiff: error=",error);
 			msg.style.display = 'block';
 			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
 			btnActionStop('getDdlDiffBtn');
@@ -936,11 +942,13 @@ toggleCode = function() {
 		<div class="code-container" style="float: left;" id="content-from-panel">
 			<div id="content-from-msg" class="message" style="display: none;"></div>
 			<div id="content-from-uk" style="display: none;"></div>
+			<div id="content-from-status" style="display: none;"></div>
 			<pre style="display: none;"><span class="code-title" id="content-from-title"></span><code id="content-from" class="language-sql"></code></pre>
 		</div>
 		<div class="code-container" style="float: right;" id="content-to-panel">
 			<div id="content-to-msg" class="message" style="display: none;"></div>
 			<div id="content-to-uk" style="display: none;"></div>
+			<div id="content-to-status" style="display: none;"></div>
 			<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
 		</div>
 	</div>
