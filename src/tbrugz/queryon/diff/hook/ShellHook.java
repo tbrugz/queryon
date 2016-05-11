@@ -61,7 +61,7 @@ public class ShellHook implements ApplyHook {
 			OutputStream os = p.getOutputStream();
 			//XXX pipe diff content into os ?
 			os.close();
-			int exitValue = p.waitFor();
+			int exitValue = p.waitFor(); //XXX add timeout?
 			String ret = StringUtils.readInputStream(p.getInputStream(), 8192);
 			if(exitValue>0) {
 				throw new InternalServerException("Error applying diff to '"+am.modelApply+"'"+

@@ -54,6 +54,11 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	public static final String MIME_JSON = "application/json";
 	public static final String MIME_SQL = "text/plain"; // "application/sql"?; - browsers may "download"
 	public static final String MIME_PATCH = "text/plain"; // http://stackoverflow.com/questions/5160944/proper-mime-type-for-patch-files
+	
+	public static final String SYNTAX_XML = "xml";
+	public static final String SYNTAX_JSON = "json";
+	public static final String SYNTAX_SQL = "sql";
+	public static final String SYNTAX_PATCH = "patch";
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
@@ -144,21 +149,23 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		
 		//XXX: return SchemaDiff.logInfo()?
 		
+		//XXX: option to ignore, or not, trailing whitespaces?
+		
 		sqldiff.procProterties();
 		// using 'syntax' param
-		if("xml".equals(syntax)) {
+		if(SYNTAX_XML.equals(syntax)) {
 			sqldiff.setXmlWriter(resp.getWriter());
 			resp.setContentType(MIME_XML);
 		}
-		else if("json".equals(syntax)) {
+		else if(SYNTAX_JSON.equals(syntax)) {
 			sqldiff.setJsonWriter(resp.getWriter());
 			resp.setContentType(MIME_JSON);
 		}
-		else if("patch".equals(syntax)) {
+		else if(SYNTAX_PATCH.equals(syntax)) {
 			sqldiff.setPatchWriter(resp.getWriter());
 			resp.setContentType(MIME_PATCH);
 		}
-		else if("sql".equals(syntax)) {
+		else if(SYNTAX_SQL.equals(syntax)) {
 			// "sql": every DDL in plain text...
 			CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
 			sqldiff.setCategorizedOut(cout);
@@ -214,17 +221,17 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		pp.put("sqldump.grabclass", "JDBCSchemaGrabber");
 		
 		//SchemaModelDumper md = null;
-		if("xml".equals(syntax)) {
+		if(SYNTAX_XML.equals(syntax)) {
 			//md = new JAXBSchemaXMLSerializer();
 			pp.put("sqldump.processingclasses", "JAXBSchemaXMLSerializer");
 			resp.setContentType(MIME_XML);
 		}
-		else if("json".equals(syntax)) {
+		else if(SYNTAX_JSON.equals(syntax)) {
 			//md = new JSONSchemaSerializer();
 			pp.put("sqldump.processingclasses", "JSONSchemaSerializer");
 			resp.setContentType(MIME_JSON);
 		}
-		else if("sql".equals(syntax)) {
+		else if(SYNTAX_SQL.equals(syntax)) {
 			//md = new SchemaModelScriptDumper();
 			pp.put("sqldump.processingclasses", "SchemaModelScriptDumper");
 			resp.setContentType(MIME_SQL);

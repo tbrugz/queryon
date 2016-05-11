@@ -22,6 +22,7 @@ import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 /**
@@ -562,21 +563,7 @@ public class RequestSpec {
 
 	static String getRequestBody(HttpServletRequest req) throws IOException {
 		InputStream is = req.getInputStream();
-		return slurp(is, 8192);
-	}
-	
-	// http://stackoverflow.com/a/309718/616413
-	public static String slurp(final InputStream is, final int bufferSize) throws IOException {
-		final char[] buffer = new char[bufferSize];
-		final StringBuilder out = new StringBuilder();
-		Reader in = new InputStreamReader(is, "UTF-8");
-		for (;;) {
-			int rsz = in.read(buffer, 0, buffer.length);
-			if (rsz < 0)
-				break;
-			out.append(buffer, 0, rsz);
-		}
-		return out.toString();
+		return StringUtils.readInputStream(is, 8192);
 	}
 	
 }
