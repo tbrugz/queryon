@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +62,8 @@ public class RequestSpec {
 	
 	public static final String SYNTAXES_INFO_RESOURCE = "/tbrugz/queryon/syntaxes/syntaxinfo.properties";
 	
+	static final String MULTIPART = "multipart/form-data";
+	
 	final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
 	final String httpMethod;
@@ -68,6 +71,7 @@ public class RequestSpec {
 	final String object;
 	final int offset, limit;
 	final String loStrategy;
+	final String contentType;
 	
 	// data manipulation (DML) properties
 	final Integer minUpdates, maxUpdates;
@@ -98,6 +102,7 @@ public class RequestSpec {
 	//XXX: add filters: is null (fnull), is not null (fnn/fnnull), between (btwn)?
 	
 	final Map<String, String> updateValues = new HashMap<String, String>();
+	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
 
 	final List<String> orderCols = new ArrayList<String>();
 	final List<String> orderAscDesc = new ArrayList<String>();
@@ -121,13 +126,21 @@ public class RequestSpec {
 	final String uniValueFilenameCol;
 	
 	final static int DEFAULT_LIMIT = 100;
+	final static int DEFAULT_MAX_UPDATES = 1;
+	final static int DEFAULT_MIN_UPDATES = 1;
 	
 	// file extensions to be ignored by RequestSpec
 	final static String[] standardFileExt = { "blob" };
 	
-	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException {
+	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
 		this.request = req;
-		String method = req.getParameter("method");
+		/* 
+		 * http://stackoverflow.com/a/37125568/616413 - using-put-method-in-html-form
+		 * http://programmers.stackexchange.com/questions/114156/why-are-there-are-no-put-and-delete-methods-on-html-forms
+		 * http://laraveldaily.com/theres-no-putpatchdelete-method-or-how-to-build-a-laravel-form-manually/
+		 * http://symfony.com/doc/current/cookbook/routing/method_parameters.html
+		 */
+		String method = req.getParameter("method"); //XXX: _method
 		//XXX: may method be changed? property?
 		if(method!=null) {
 			httpMethod = method;
@@ -253,8 +266,8 @@ public class RequestSpec {
 		// max & min updates
 		String updateMaxStr = req.getParameter("updatemax");
 		String updateMinStr = req.getParameter("updatemin");
-		maxUpdates = (updateMaxStr!=null)?Integer.parseInt(updateMaxStr):null;
-		minUpdates = (updateMinStr!=null)?Integer.parseInt(updateMinStr):null;
+		maxUpdates = (updateMaxStr!=null)?Integer.parseInt(updateMaxStr):DEFAULT_MAX_UPDATES;
+		minUpdates = (updateMinStr!=null)?Integer.parseInt(updateMinStr):DEFAULT_MIN_UPDATES;
 		
 		String fields = req.getParameter("fields");
 		if(fields!=null) {
@@ -298,6 +311,22 @@ public class RequestSpec {
 		//	String key = en.nextElement();
 		//	String[] value = req.getParameterValues(key);
 		
+		// http://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
+		contentType = req.getContentType();
+		if(isContentTypeMultiPart()) {
+			int i=0;
+			for(Part p: req.getParts()) {
+				String name = p.getName();
+				String fileName = getSubmittedFileName(p);
+				//log.info("part["+i+"]: " + name + (fileName!=null?" / filename="+fileName:"") );
+				if(p.getContentType()!=null) {
+					boolean added = setUniParam("v:", name, p, updatePartValues);
+					log.info("part["+i+";added="+added+"]: " + name + "; content-type="+p.getContentType() + " ;  size=" + p.getSize() + " ; " + (fileName!=null?" / filename="+fileName:"") );
+				}
+				i++;
+			}
+		}
+		
 		String bodyParamName = req.getParameter("bodyparamname");
 		if(bodyParamName!=null) {
 			try {
@@ -314,7 +343,6 @@ public class RequestSpec {
 			String[] value = entry.getValue();
 			
 			try {
-				
 				setUniParam("feq:", key, value, filterEquals);
 				setUniParam("fne:", key, value, filterNotEquals);
 				setUniParam("fgt:", key, value, filterGreaterThan);
@@ -426,7 +454,7 @@ public class RequestSpec {
 		return false;
 	}
 
-	boolean setUniParam(String prefix, String key, String value, Map<String, String> uniFilter) {
+	<T> boolean setUniParam(String prefix, String key, T value, Map<String, T> uniFilter) {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
 			uniFilter.put(col, value);
@@ -562,6 +590,21 @@ public class RequestSpec {
 	static String getRequestBody(HttpServletRequest req) throws IOException {
 		InputStream is = req.getInputStream();
 		return StringUtils.readInputStream(is, 8192);
+	}
+	
+	boolean isContentTypeMultiPart() {
+		return contentType!=null && contentType.startsWith(MULTIPART);
+	}
+	
+	// http://stackoverflow.com/a/2424824/616413
+	static String getSubmittedFileName(Part part) {
+		for (String cd : part.getHeader("content-disposition").split(";")) {
+			if (cd.trim().startsWith("filename")) {
+				String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+				return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1);
+			}
+		}
+		return null;
 	}
 	
 }

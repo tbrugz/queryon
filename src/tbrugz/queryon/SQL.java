@@ -52,7 +52,7 @@ public class SQL {
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
 	boolean orderByApplyed = false;
-	List<String> bindParameterValues = new ArrayList<String>();
+	List<Object> bindParameterValues = new ArrayList<Object>();
 	//XXX add 'final String initialSql;'?
 	
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
@@ -357,8 +357,8 @@ public class SQL {
 	@Override
 	public String toString() {
 		List<String> sl = new ArrayList<String>();
-		for(String s: bindParameterValues) {
-			sl.add(substring(s, 20));
+		for(Object o: bindParameterValues) {
+			sl.add(substring(String.valueOf(o), 30));
 		}
 		return "SQL[\n"+sql+"\n[bindpar="+sl+"]]";
 	}

@@ -4,6 +4,8 @@ package tbrugz.queryon;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.sql.Blob;
@@ -30,9 +32,11 @@ import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,6 +91,7 @@ import tbrugz.sqldump.util.Utils;
 /*
  * TODO r2rml: option to understand URLs like: Department/name=accounting;city=Cambridge
  */
+@MultipartConfig
 public class QueryOn extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -493,7 +498,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
+	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 		
 		if(xSetRequestUtf8) {
@@ -552,6 +557,7 @@ public class QueryOn extends HttpServlet {
 					atype = ActionType.INSERT; //upsert?
 				}
 				else if(reqspec.httpMethod.equals(METHOD_PUT)) {
+					//XXX: PUT should be idempotent ... maybe should be used for INSERT?
 					atype = ActionType.UPDATE;
 				}
 				else if(reqspec.httpMethod.equals(METHOD_DELETE)) {
@@ -1225,8 +1231,10 @@ public class QueryOn extends HttpServlet {
 				|| ShiroUtils.isPermitted(currentUser, ActionType.UPDATE_ANY.name());
 		
 		StringBuilder sb = new StringBuilder();
+		int colsCount = 0;
+		{
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
-		for(int i=0; cols.hasNext(); i++) {
+		for(; cols.hasNext();) {
 			String col = cols.next();
 			if(! columns.contains(col)) {
 				log.warn("unknown column: "+col);
@@ -1237,13 +1245,45 @@ public class QueryOn extends HttpServlet {
 				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
 			}
 			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
-			sb.append((i!=0?", ":"")+col+" = ?");
+			sb.append((colsCount!=0?", ":"")+col+" = ?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+			colsCount++;
 		}
 		//log.debug("bindpars [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
+		}
+		// blobs
+		{
+			Iterator<String> pcols = reqspec.updatePartValues.keySet().iterator();
+			while(pcols.hasNext()) {
+				String col = pcols.next();
+				if(! columns.contains(col)) {
+					log.warn("unknown column: "+col);
+					throw new BadRequestException("[update] unknown column: "+col);
+				}
+				//TODOne: check UPDATE permission on each row, based on grants
+				if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
+					throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
+				}
+				//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
+				sb.append((colsCount!=0?", ":"")+col+" = ?");
+				
+				int colindex = relation.getColumnNames().indexOf(col);
+				String ctype = relation.getColumnTypes().get(colindex);
+				
+				boolean isBinary = DBUtil.BLOB_COL_TYPES_LIST.contains(ctype.toUpperCase());
+				if(isBinary) {
+					sql.bindParameterValues.add(reqspec.updatePartValues.get(col).getInputStream());
+				}
+				else {
+					sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream() ));
+				}
+				colsCount++;
+				log.info("col["+colindex+"] "+col+": "+ctype+" [isBinary="+isBinary+"]");
+			}
+		}
 
 		if("".equals(sb.toString())) {
-			throw new BadRequestException("No valid columns");
+			throw new BadRequestException("[update] No valid columns");
 		}
 		sql.applyUpdate(sb.toString());
 
@@ -1339,8 +1379,10 @@ public class QueryOn extends HttpServlet {
 		
 		StringBuilder sbCols = new StringBuilder();
 		StringBuilder sbVals = new StringBuilder();
+		int colsCount = 0;
+		{
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
-		for(int i=0; cols.hasNext(); i++) {
+		for(; cols.hasNext();) {
 			String col = cols.next();
 			if(! columns.contains(col)) {
 				log.warn("unknown 'value' column: "+col);
@@ -1351,14 +1393,50 @@ public class QueryOn extends HttpServlet {
 				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
 			}
 			//XXX timestamp '' ?
-			sbCols.append((i!=0?", ":"")+col);
-			sbVals.append((i!=0?", ":"")+"?");
+			sbCols.append((colsCount!=0?", ":"")+col);
+			sbVals.append((colsCount!=0?", ":"")+"?");
 			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+			colsCount++;
+		}
+		}
+
+		// blobs
+		{
+			Iterator<String> pcols = reqspec.updatePartValues.keySet().iterator();
+			while(pcols.hasNext()) {
+				String pcol = pcols.next();
+				if(! columns.contains(pcol)) {
+					log.warn("unknown 'value' column: "+pcol);
+					throw new BadRequestException("[insert] unknown column: "+pcol);
+				}
+				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, pcol)) {
+					throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+pcol);
+				}
+				int colindex = relation.getColumnNames().indexOf(pcol);
+				if(colindex>=0) {
+					sbCols.append((colsCount!=0?", ":"")+pcol);
+					sbVals.append((colsCount!=0?", ":"")+"?");
+					
+					String ctype = relation.getColumnTypes().get(colindex);
+					boolean isBinary = DBUtil.BLOB_COL_TYPES_LIST.contains(ctype.toUpperCase());
+					if(isBinary) {
+						sql.bindParameterValues.add(reqspec.updatePartValues.get(pcol).getInputStream());
+					}
+					else {
+						sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(pcol).getInputStream() ));
+					}
+					log.info("col["+colindex+"] "+pcol+": "+ctype+" [isBinary="+isBinary+"]");
+					colsCount++;
+				}
+				else {
+					log.warn("column "+pcol+" not found on relation "+relation);
+				}
+			}
 		}
 		
 		if("".equals(sbCols.toString())) {
 			//log.warn("no valid columns");
-			throw new BadRequestException("No valid columns");
+			throw new BadRequestException("[insert] No valid columns");
 		}
 		sql.applyInsert(sbCols.toString(), sbVals.toString());
 
@@ -1587,9 +1665,28 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	static void bindParameters(PreparedStatement st, SQL sql) throws SQLException {
+	//XXX: move to SQL class?
+	static void bindParameters(PreparedStatement st, SQL sql) throws SQLException, IOException {
 		for(int i=0;i<sql.bindParameterValues.size();i++) {
-			st.setString(i+1, sql.bindParameterValues.get(i));
+			Object value = sql.bindParameterValues.get(i);
+			if(value instanceof String) {
+				st.setString(i+1, (String) value);
+			}
+			else if(value instanceof InputStream) {
+				st.setBinaryStream(i+1, (InputStream) value);
+			}
+			else if(value instanceof Reader) {
+				st.setCharacterStream(i+1, (Reader) value);
+			}
+			else if(value instanceof Part) {
+				Part p = (Part) value;
+				//XXX guess if binary or character stream... based on p.getContentType() or column type??
+				//st.setBinaryStream(i+1, p.getInputStream());
+				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream()));
+			}
+			else {
+				log.warn("bindParameters: unknown value type: " + (value!=null?value.getClass().getName():value) );
+			}
 		}
 	}
 	
