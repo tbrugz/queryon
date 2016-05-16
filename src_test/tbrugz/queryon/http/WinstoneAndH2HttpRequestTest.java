@@ -294,7 +294,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testDelete_Emp_3rows() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//XXX: delete doesn't get parameters from querystring?
-		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&method=DELETE");
+		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&method=DELETE&updatemax=5");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		String content = getContent(response2);
 		System.out.println("content: "+content);
