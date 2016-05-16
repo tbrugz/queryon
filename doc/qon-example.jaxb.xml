@@ -313,6 +313,11 @@
             <pk>false</pk>
             <type>VARCHAR</type>
         </columns>
+        <columns>
+            <name>BINARY_DATA</name>
+            <pk>false</pk>
+            <type>BLOB</type>
+        </columns>
         <constraints>
             <name>QON_PAGES_PK</name>
             <type>PK</type>

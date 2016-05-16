@@ -2,6 +2,7 @@ package tbrugz.queryon;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -96,23 +97,42 @@ public class PagesServlet extends AbstractHttpServlet {
 
 	void getAndDumpPage(Connection conn, String relation, String pathInfo, HttpServletResponse resp) throws SQLException, IOException {
 		ResultSet rs = getPage(conn, relation, pathInfo);
-		//String id = rs.getString(1);
+		String id = rs.getString(1);
 		String mimeType = rs.getString(2);
 		//String body = rs.getString(3);
 		
 		resp.setContentType(mimeType);
 		//resp.setHeader(HEADER_PAGE_ID, id);
 		InputStream is = rs.getBinaryStream(3);
+		boolean wasNull = rs.wasNull();
+		if(wasNull) {
+			//log.info("col3 was null");
+			is = rs.getBinaryStream(4);
+			wasNull = rs.wasNull();
+		}
+		
 		if(is!=null) {
-			IOUtil.pipeStreams(is, resp.getOutputStream());
+			if(!wasNull) {
+				//log.info("col4 was not null");
+				OutputStream os = resp.getOutputStream();
+				IOUtil.pipeStreams(is, os);
+			}
+			else {
+				//log.warn("cols 3 and 4 were null");
+				sendNoContent(resp, pathInfo, id);
+			}
 			is.close();
+		}
+		else {
+			sendNoContent(resp, pathInfo, id);
 		}
 		
 		rs.close();
 	}
 	
 	ResultSet getPage(Connection conn, String relation, String pathInfo) throws SQLException, IOException {
-		PreparedStatement st = conn.prepareStatement("select id, mime, body from "+relation+" where path = ?");
+		PreparedStatement st = conn.prepareStatement("select id, mime, body, binary_data"+
+				"\nfrom "+relation+" where path = ?");
 		st.setString(1, pathInfo);
 		
 		ResultSet rs = st.executeQuery();
@@ -129,6 +149,11 @@ public class PagesServlet extends AbstractHttpServlet {
 		log.info("redir = "+redir);
 		//resp.setHeader(HEADER_PAGE_ID, id);
 		req.getRequestDispatcher(redir).forward(req, resp);
+	}
+	
+	void sendNoContent(HttpServletResponse resp, String pathInfo, String id) {
+		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+		log.info("page '"+pathInfo+"' has no content [id="+id+"]");
 	}
 
 }

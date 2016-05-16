@@ -54,6 +54,7 @@ create table qon_pages (
 	remarks varchar(400),
 	mime varchar(100),
 	body clob, --text ...
+	binary_data blob,
 	roles_filter varchar(1000),
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
@@ -108,6 +109,7 @@ create table qon_pages (
 	remarks varchar2(400),
 	mime varchar2(100),
 	body clob,
+	binary_data blob,
 	roles_filter varchar2(1000),
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
