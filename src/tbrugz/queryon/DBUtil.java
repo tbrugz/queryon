@@ -3,6 +3,8 @@ package tbrugz.queryon;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -18,6 +20,9 @@ import tbrugz.sqldump.util.ConnectionUtil;
 
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);
+	
+	public static final String[] BLOB_COL_TYPES = { "BLOB", "RAW", "LONG RAW", "BYTEA" };
+	public static final List<String> BLOB_COL_TYPES_LIST = Arrays.asList(BLOB_COL_TYPES);
 	
 	//XXX: getSQLTypeForColumnType(String colType): add dbid as parameter? 
 	public static int getSQLTypeForColumnType(String colType) {

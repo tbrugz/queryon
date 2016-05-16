@@ -50,3 +50,7 @@ http://stackoverflow.com/questions/4725668/how-to-deploy-snapshot-with-sources-a
 http://books.sonatype.com/nexus-book/reference/staging-deployment.html
 http://stackoverflow.com/questions/10533828/what-does-mvn-install-in-maven-exactly-do
 http://stackoverflow.com/questions/5102571/how-to-install-maven-artifact-with-sources-from-command-line
+
+mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0 -Dfile=target/queryon-0.6.0-sources.jar -Dpackaging=jar -Dclassifier=sources -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
+
+mvn buildnumber:hgchangeset

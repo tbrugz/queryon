@@ -359,7 +359,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	Table createQonTable(RequestSpec reqspec) {
-		Map<String,String> v = reqspec.getUpdateValues();
+		Map<String, String> v = reqspec.getUpdateValues();
 		
 		return addTable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("COLUMN_NAMES"), Utils.getStringList(v.get("PK_COLUMN_NAMES"), ","), Utils.getStringList(v.get("COLUMN_REMARKS"), PIPE_SPLIT),
 				v.get("REMARKS"), Utils.getStringList(v.get("ROLES_SELECT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_INSERT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_UPDATE"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_DELETE"), PIPE_SPLIT),
