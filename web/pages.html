@@ -68,6 +68,7 @@ window.onresize = updateUI;
 makeHrefs = function() {
 	refreshAuthInfo();
 	byId('url-editor-new').style.display = authInfo.isDev?'inline':'none';
+	byId('url-upload').style.display = authInfo.isDev?'inline':'none';
 }
 
 loadPagesList = function() {
@@ -85,9 +86,10 @@ loadPagesList = function() {
 			
 			var pages = getQonData(JSON.parse(req.responseText));
 			for(var i=0;i<pages.length;i++) {
-				content.innerHTML += "\n<li><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
+				content.innerHTML += "\n<li id='p"+pages[i].ID+"'><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
 					(pages[i].MIME=="text/markdown"?" <a href='md/"+pages[i].PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
 					(authInfo.isDev?" <a href='pages-editor.html?id="+pages[i].ID+"' target='_blank'>[edit]</a>":"")+
+					(authInfo.isDev?" <a href='#' onclick='removePage("+pages[i].ID+", \""+pages[i].PATH+"\");false;'>[remove]</a>":"")+
 					//XXX add delete button
 					"</li><br/>";
 			}
@@ -103,17 +105,97 @@ loadPagesList = function() {
 	oReq.send(null);
 }
 
+removePage = function(id, path) {
+	if(confirm("remove page "+path+"?")) {
+		var loadUrl = qonUrl+'/'+id+'.json';
+		
+		var request = new XMLHttpRequest();
+		request.open("DELETE", loadUrl, true);
+		request.onload = function(oEvent) {
+			var msg = null;
+			if (request.status >= 200 && request.status < 300) {
+				msg = "Resource "+path+" deleted";
+				//alert(msg);
+				byId("p"+id).classList.add("removed");
+			} else {
+				msg = "Error " + request.status + " occurred when trying to delete resource \""+path+"\":\n"+
+					oEvent.target.responseText.trim();
+				alert(msg);
+			}
+			console.log(msg, oEvent);
+		};
+		//console.log('FormData: ', fd, ' - formElement', formElement);
+		request.send();
+	}
+}
+
+openUploadDialog = function() {
+	var dialogCont = document.getElementById('dialog-container');
+	dialogCont.style.display = 'block';
+	
+	var dialog = byId('update-dialog');
+	dialog.style.display = 'block';
+	
+	var dialogHTML = '<div id="dialog-header">'
+		+ '<div class="dialog-title">Upload binary data</div>'
+		+ "<div id='dialog-messages'></div></div>";
+	dialogHTML += "<div><form name='upload-form' id='upload-form' enctype='multipart/form-data' method='post' >";
+	dialogHTML += "<label>path: <input type='text' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label> ";
+	dialogHTML += "<label>file: <input type='file' name='v:BINARY_DATA'/>"+" <span class='remarks'>binary content</span>"+"</label> ";
+	dialogHTML += "</form></div> ";
+
+	dialog.innerHTML = dialogHTML + "<div id='dialog-footer'>"
+		+ "<input type='button' value='upload' id='btnUpdate' class='simplebutton' onclick='doConfirmUpload();'/>"
+		//+ "<input type='button' value='upload & close' class='simplebutton' onclick='doConfirmUpload(true);'/>"
+		+ "<input type='button' value='X' class='simplebutton' onclick='closeUploadDialog();'/>"
+		+ "</div>";
+}
+
+closeUploadDialog = function() {
+	var dialogCont = document.getElementById('dialog-container');
+	dialogCont.style.display = 'none';
+	closeMessages("update-dialog");
+}
+
+doConfirmUpload = function() {
+	var loadUrl = qonUrl+'.json';
+	
+	var formElement = document.querySelector("#upload-form");
+	var request = new XMLHttpRequest();
+	var fd = new FormData(formElement);
+	if(! fd.get('v:PATH')) {
+		showWarnMessages('dialog-messages', "path cannot be null");
+		return;
+	}
+	request.open("POST", loadUrl, true);
+	request.onload = function(oEvent) {
+		var msg = null;
+		if (request.status >= 200 && request.status < 300) {
+			msg = "Uploaded!";
+			showInfoMessages('dialog-messages', msg)
+		} else {
+			msg = "Error " + request.status + " occurred when trying to upload your file: "+oEvent.target.responseText.trim();
+			showErrorMessages('dialog-messages', msg)
+		}
+		console.log(msg, oEvent);
+	};
+	console.log('FormData: ', fd, ' - formElement', formElement);
+	request.send(fd);
+}
+
 </script>
-	<style>
+<style>
 #messages {
 	border: 1px solid #000;
 	display: none;
 	margin: 2px 4px 0 4px;
 	padding: 2px;
 }
+
 #content {
 	padding: 20px;
 }
+
 #content li {
 	list-style-type: none;
 }
@@ -123,11 +205,33 @@ loadPagesList = function() {
 	font-size: 11pt;
 	padding: 4px
 }
+
+li.removed {
+	background-color: #f99;
+	text-decoration: line-through;
+}
+
+#dialog-messages {
+	padding: 3px;
+	display: none;
+}
+/*#dialog-messages span {
+	padding-left: 4px;
+}*/
+
 #content a.ref {
 	background-color: #fff;
 }
 
-	</style>
+.remarks {
+	font-style: italic;
+}
+
+input[type="file"] {
+	background-color: #ccc;
+}
+
+</style>
 </head>
 <body onload="onLoad();">
 
@@ -136,10 +240,10 @@ loadPagesList = function() {
 
 	<span id="navbar-links">
 		<span id="navbar-actions">
-			<a id="url-editor-new" class="edit-link" href="" target="_blank" style="display: none">new</a>
+			<a id="url-editor-new" class="edit-link" href="" target="_blank" style="display: none">new</a> <a id="url-upload" class="edit-link" href="#" onclick="openUploadDialog();false;" style="display: none">upload</a>
 		</span>
 	</span>
-	
+
 	<!-- <label id="modelLabel" style="display: none;">model: <input type="text" id="model" name="model" readonly="readonly" value=""/></label> -->
 	<!-- <span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span> -->
 
@@ -147,11 +251,14 @@ loadPagesList = function() {
 		<span id="username"></span>
 		<span id="authaction"></span>
 	</span>
-	
+
 	<div id="messages"></div>
 </nav>
 
-<div id="content" class="container">
+<div id="content" class="container"></div>
+
+<div id="dialog-container">
+	<div id="update-dialog"></div>
 </div>
 
 </body>
