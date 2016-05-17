@@ -1140,13 +1140,14 @@ public class QueryOn extends HttpServlet {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 		// roles permission
-		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
+		/*Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		List<Grant> deleteGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.DELETE);
 		boolean hasRelationDeletePermission = QOnModelUtils.hasPermissionWithoutColumn(deleteGrants, roles)
 				|| ShiroUtils.isPermitted(currentUser, ActionType.DELETE_ANY.name());
 		if(!hasRelationDeletePermission) {
+			log.info("delete grants: "+deleteGrants);
 			throw new ForbiddenException("no delete permission on relation: "+relation.getName());
-		}
+		}*/
 
 		SQL sql = SQL.createDeleteSQL(relation);
 
