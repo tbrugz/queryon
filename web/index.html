@@ -263,14 +263,17 @@
 				colTypeOrig=="Integer"?"number":
 				colTypeOrig=="Double"?"number":
 				colTypeOrig=="Date"?"text": //XXX "datetime-local": "text":
+				colTypeOrig=="Blob"?"file":
 				"text";
 			//console.log("col["+i+"]: ",cols[i],"--",allowUpdate,"---",relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
-			dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"' value='"+(vals?vals[i]:'')+"'"
+			dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"'"
+				+(colTypeOrig!="Blob"?" value='"+(vals?vals[i]:'')+"'":"")
 				+(disabled?" disabled='true'":"")
 				+">"
+				+(colTypeOrig=="Blob" ? ((vals?vals[i]:'')?' <strong>HAS CONTENT</strong>':' <em>&lt;empty&gt;</em>') : "")
 				+(colTypeOrig=="String"?"":" <em>("+colTypeOrig+")</em>")
 				+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
 				+"</label> "
@@ -294,22 +297,28 @@
 		return document.getElementById(elementId).querySelectorAll('tr').length-1;
 	}
 	
-	function getUpdateNewValues() {
+	function getUpdateNewValues(formData) {
 		// get values
 		var dialog = document.getElementById('update-dialog');
 		var inputs = dialog.querySelectorAll('input');
-		var postData = {};
 		var newVals = [];
 		for(var i=0;i<inputs.length;i++) {
 			if(inputs[i].name.indexOf("v:")==0) {
+				var type = inputs[i].getAttribute("type");
 				if(!inputs[i].disabled) {
-					postData[inputs[i].name] = inputs[i].value;
+					//postData[inputs[i].name] = inputs[i].value;
+					if(type=="file") {
+						formData.append(inputs[i].name, inputs[i].files[0]);
+					}
+					else {
+						formData.append(inputs[i].name, inputs[i].value);
+					}
 				}
 				newVals.push(inputs[i].value);
 			}
 		}
 		
-		return {newVals: newVals, postData: postData};
+		return {newVals: newVals, formData: formData};
 	}
 	
 	function doConfirmUpdate(rownum, closeDialog) {
@@ -317,7 +326,6 @@
 		var cols = getColumnsFromColgroup('content');
 		
 		//var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
-		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
 		
 		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
 				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
@@ -337,34 +345,37 @@
 		}
 		*/
 		
-		nv = getUpdateNewValues();
-		
+		var formData = new FormData();
+		var pkPath = ret.pkvals.join("/");
 		//adding update PK values to request body
-		for(var i=0;i<ret.pkvals.length;i++) {
-			nv.postData['p'+(i+1)] = ret.pkvals[i];
-		}
+		/*for(var i=0;i<ret.pkvals.length;i++) {
+			formData.append('p'+(i+1), ret.pkvals[i]);
+		}*/
+		nv = getUpdateNewValues(formData);
 		
-		nv.postData['method'] = 'PUT';
+		var method = "PUT";
+		nv.formData.append('method', method);
 
+		var finalUrl = getQueryUpdateUrl('objects', pkPath, 'updatemax=1&updatemin=1', 'json');
+		
 		//console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
 		
 		var messagesId = closeDialog?'messages':'dialog-messages';
-		doExecuteUpdateAjax(finalUrl, nv, rownum, cols, messagesId);
+		doExecuteUpdateAjax(finalUrl, method, nv, rownum, cols, messagesId);
 		if(closeDialog) { closeDialogs(); }
 	}
 	
-	function doExecuteUpdateAjax(finalUrl, nv, rownum, cols, messagesId) {
+	function doExecuteUpdateAjax(finalUrl, method, nv, rownum, cols, messagesId) {
 		//btnActionStart('go-button');
 		//console.log("nv",nv,"rownum",rownum);
 		var startTimeMilis = Date.now();
-		$.ajax({
-			url: finalUrl,
-			// -- PUT: update ; POST: insert --
-			//method: 'PUT', //XXX not working... [RequestSpec] req.getParameterMap() does not work for PUT & data (body) params
-			// http://stackoverflow.com/questions/855835/servlet-parameters-and-doput
-			data: nv.postData,
-			dataType: "text",
-			success: function(data, textStatus, jqXHR) {
+		
+		var request = new XMLHttpRequest();
+		request.open(method, finalUrl, true);
+		request.onload = function(oEvent) {
+			var jqXHR = oEvent.target;
+			console.log('request: ', request,' ; oEvent: ', oEvent);
+			if (request.status >= 200 && request.status < 300) {
 				//btnActionStop('go-button');
 				var completedTimeMilis = Date.now();
 				showInfoMessages(messagesId, jqXHR.responseText+" [please refresh page]");
@@ -407,14 +418,13 @@
 				/*if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
 					reloadExecs(messagesId, nv.postData["p1"]);
 				}*/
-				console.log("doExecuteUpdateAjax, rel.name:",rel.name.toUpperCase(),'qon-tables:',settings["queryon.qon-tables.table"].toUpperCase(),nv.postData["v:NAME"]);
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				//btnActionStop('go-button');
-				showErrorMessages(messagesId, jqXHR.responseText);
-				//if(callbackError) { callbackError(jqXHR); }
+				console.log("doExecuteUpdateAjax, rel.name:",rel.name.toUpperCase(),'qon-tables:',settings["queryon.qon-tables.table"].toUpperCase(),nv.formData.get("v:NAME"));
 			}
-		});
+			else {
+				showErrorMessages(messagesId, jqXHR.responseText);
+			}
+		}
+		request.send(nv.formData);
 	}
 	
 	function reloadTables(messagesId, tableName) {
@@ -495,14 +505,16 @@
 		var relation = getCurrentRelation('objects');
 		var cols = getColumnsFromColgroup('content');
 		
-		nv = getUpdateNewValues();
+		var formData = new FormData();
+		nv = getUpdateNewValues(formData);
 
 		//console.log("doConfirmInsert key",finalUrl,nv);
 		
-		nv.postData['method'] = 'POST';
+		var method = "POST";
+		nv.formData.append('method',method);
 		
 		var messagesId = closeDialog?'messages':'dialog-messages';
-		doExecuteUpdateAjax(finalUrl, nv, null, cols, messagesId);
+		doExecuteUpdateAjax(finalUrl, method, nv, null, cols, messagesId);
 		if(closeDialog) { closeDialogs(); }
 	}
 	

@@ -150,6 +150,10 @@
 	width: 20em;
 }
 
+#update-dialog input[type="file"] {
+	background-color: #ccc;
+}
+
 #update-dialog .dialog-title {
 	z-index: 35;
 	/* position: fixed;
