@@ -7,7 +7,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import tbrugz.queryon.ShiroUtils;
+import tbrugz.queryon.util.ShiroUtils;
 
 public class TestServlet extends HttpServlet {
 

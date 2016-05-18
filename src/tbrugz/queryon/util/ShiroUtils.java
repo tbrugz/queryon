@@ -1,4 +1,4 @@
-package tbrugz.queryon;
+package tbrugz.queryon.util;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +25,12 @@ public class ShiroUtils {
 
 	static final Log log = LogFactory.getLog(ShiroUtils.class);
 	
+	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
+	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
+	
+	static final String DEFAULT_AUTH_ANONUSER = "anonymous";
+	static final String DEFAULT_AUTH_ANONREALM = "anonRealm";
+	
 	// user for (unit) test (for now, at least)
 	static Map<Object, Set<String>> userRoles = new HashMap<Object, Set<String>>();
 	
@@ -32,8 +38,8 @@ public class ShiroUtils {
 		Subject currentUser = SecurityUtils.getSubject();
 		if(currentUser.getPrincipal()==null) {
 			//TODOne: get static info from properties...
-			Object userIdentity = prop.getProperty(QueryOn.PROP_AUTH_ANONUSER, QueryOn.DEFAULT_AUTH_ANONUSER);
-			String realmName = prop.getProperty(QueryOn.PROP_AUTH_ANONREALM, QueryOn.DEFAULT_AUTH_ANONREALM);
+			Object userIdentity = prop.getProperty(PROP_AUTH_ANONUSER, DEFAULT_AUTH_ANONUSER);
+			String realmName = prop.getProperty(PROP_AUTH_ANONREALM, DEFAULT_AUTH_ANONREALM);
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
 			currentUser = new Subject.Builder().principals(principals).buildSubject();
 		}

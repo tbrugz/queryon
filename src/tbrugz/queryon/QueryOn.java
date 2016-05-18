@@ -60,6 +60,7 @@ import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
@@ -207,12 +208,6 @@ public class QueryOn extends HttpServlet {
 	static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	
 	static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
-	
-	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
-	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
-	
-	static final String DEFAULT_AUTH_ANONUSER = "anonymous";
-	static final String DEFAULT_AUTH_ANONREALM = "anonRealm";
 	
 	static final String SUFFIX_GRABCLASS = ".grabclass";
 	//static final String SUFFIX_SQLDIALECT = ".sqldialect";

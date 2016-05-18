@@ -22,6 +22,7 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessComponent;
