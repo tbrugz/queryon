@@ -68,10 +68,15 @@ Some parameters are specific to a syntax. Below you can find more about them:
 ### HTML(X)
 
 * `title` - returns (or not) the table title/name (default is `false`)
+* `escape` - escapes (or not) the column's XML content (default is `true`)
 
 ### JSON
 
 * `callback` - padding to be used for [JSONP](https://en.wikipedia.org/wiki/JSONP) (*optional*)  
+
+### XML
+
+* `escape` - escapes (or not) the column's XML content (default is `true`)
 
 More info about syntax-based parameters may be found at
 [syntaxinfo.properties](https://bitbucket.org/tbrugz/queryon/src/default/src_resources/tbrugz/queryon/syntaxes/syntaxinfo.properties)
