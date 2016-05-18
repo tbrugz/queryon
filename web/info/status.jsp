@@ -1,4 +1,4 @@
-<%@page import="tbrugz.queryon.ShiroUtils"%>
+<%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="com.google.gson.*"%>
 <%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"%>

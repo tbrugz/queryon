@@ -1,9 +1,9 @@
-<%@page import="tbrugz.queryon.SchemaModelUtils"%>
+<%@page import="tbrugz.queryon.util.SchemaModelUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.sqldump.util.StringDecorator"%>
 <%@page import="tbrugz.sqldump.util.Utils"%>
 <%@page import="java.util.*"%>
-<%@page import="tbrugz.queryon.ShiroUtils"%>
+<%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="org.apache.shiro.SecurityUtils"
 %><%@page import="org.apache.shiro.subject.Subject"
 %>{<%

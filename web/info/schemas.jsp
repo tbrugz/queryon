@@ -5,7 +5,7 @@
 %><%@page import="tbrugz.sqldump.dbmodel.*"
 %><%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"
 %><%@page import="tbrugz.queryon.*"
-%><%@page import="tbrugz.queryon.SchemaModelUtils"
+%><%@page import="tbrugz.queryon.util.*"
 %><%!
 public String normalize(String s) {
 	if(s==null) return "";

@@ -1,5 +1,5 @@
 <%@page import="java.util.*"%>
-<%@page import="tbrugz.queryon.ShiroUtils"%>
+<%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
@@ -10,7 +10,7 @@
 <%@page import="tbrugz.sqldump.dbmodel.View"%>
 <%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
-<%@page import="tbrugz.queryon.SchemaModelUtils"%><%
+<%@page import="tbrugz.queryon.util.SchemaModelUtils"%><%
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 Subject currentUser = ShiroUtils.getSubject(prop);
 if(!currentUser.isPermitted("SELECT_ANY")) {

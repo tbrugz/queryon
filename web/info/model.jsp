@@ -3,7 +3,7 @@
 %><%@page import="tbrugz.sqldump.dbmodel.DBObjectType"
 %><%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"
 %><%@page import="tbrugz.sqldump.util.Utils"
-%><%@page import="tbrugz.queryon.SchemaModelUtils"
+%><%@page import="tbrugz.queryon.util.*"
 %><%!
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
 %><%
