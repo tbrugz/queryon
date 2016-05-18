@@ -19,7 +19,6 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.DBUtil;
 import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
@@ -27,6 +26,7 @@ import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.HTMLDiff;

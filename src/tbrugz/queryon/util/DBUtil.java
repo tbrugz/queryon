@@ -1,4 +1,4 @@
-package tbrugz.queryon;
+package tbrugz.queryon.util;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,7 +12,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.queryon.util.QOnModelUtils;
+import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.SQL;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;

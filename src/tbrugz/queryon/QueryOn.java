@@ -56,6 +56,7 @@ import tbrugz.queryon.sqlcmd.ShowImportedKeys;
 import tbrugz.queryon.sqlcmd.ShowMetadata;
 import tbrugz.queryon.sqlcmd.ShowSchemas;
 import tbrugz.queryon.sqlcmd.ShowTables;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DataDumpUtils;

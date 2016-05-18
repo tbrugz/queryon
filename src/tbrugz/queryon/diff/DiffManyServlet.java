@@ -20,12 +20,12 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.DBUtil;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.QueryOn.ActionType;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;

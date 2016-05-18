@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessComponent;

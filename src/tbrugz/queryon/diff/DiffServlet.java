@@ -18,7 +18,6 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.DBUtil;
 import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QOnPrivilegeType;
 import tbrugz.queryon.QueryOn;
@@ -28,6 +27,7 @@ import tbrugz.queryon.SchemaModelUtils;
 import tbrugz.queryon.ShiroUtils;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.ChangeType;
