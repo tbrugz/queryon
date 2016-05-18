@@ -21,6 +21,7 @@ import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -514,7 +515,7 @@ public class RequestSpec {
 			return;
 		}
 		
-		Properties modifiedProps = new Properties(); //XXX use ParametrizedProps?
+		Properties modifiedProps = new ParametrizedProperties();
 		modifiedProps.putAll(initProps);
 		//if(newProps.size()>0) {
 			log.debug("["+ds.getSyntaxId()+"] parameter props: "+newProps);

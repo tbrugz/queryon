@@ -46,7 +46,7 @@ license
 
 license - notable exceptions
 ----------------------------
-* `/web/css/font-awesome/*` - [SIL OFL 1.1](http://scripts.sil.org/OFL) - <https://fortawesome.github.io/Font-Awesome/>
+* `/web/css/font-awesome/*` - [SIL OFL 1.1](http://scripts.sil.org/OFL) - <http://fontawesome.io/>
 * `/web/map/js/jscolor/*` - GNU LGPL - <http://jscolor.com/>, <http://www.gnu.org/copyleft/lesser.html>
 * `/web/js/ace/*` - BSD license - <https://github.com/ajaxorg/ace/blob/master/LICENSE>
 * `/web/js/d3*` - BSD license - <https://github.com/mbostock/d3/blob/master/LICENSE>
