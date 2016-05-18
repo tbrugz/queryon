@@ -17,6 +17,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;

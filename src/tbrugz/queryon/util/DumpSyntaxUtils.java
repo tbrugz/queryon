@@ -1,4 +1,4 @@
-package tbrugz.queryon;
+package tbrugz.queryon.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +33,7 @@ public class DumpSyntaxUtils {
 		}
 	}
 	
-	DumpSyntax getDumpSyntax(String format, Properties prop) {
+	public DumpSyntax getDumpSyntax(String format, Properties prop) {
 		//XXX file format (id) preferred to file extension. which way is better?
 		DumpSyntax dsx = syntaxesByFormat.get(format);
 		if(dsx!=null) { return dsx; }
@@ -43,7 +43,7 @@ public class DumpSyntaxUtils {
 	/*
 	 * TODO: parse qvalue -- http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html ; parse type "/*"
 	 */
-	DumpSyntax getDumpSyntaxByAccept(String mimetype, Properties prop) {
+	public DumpSyntax getDumpSyntaxByAccept(String mimetype, Properties prop) {
 		if(mimetype==null) { return null; }
 		String[] mimes = mimetype.split(",");
 		if(mimes.length<1) return null;
