@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;

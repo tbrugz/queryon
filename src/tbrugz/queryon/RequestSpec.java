@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -70,7 +71,7 @@ public class RequestSpec {
 
 	final String httpMethod;
 	final String modelId;
-	final String object;
+	public final String object;
 	final int offset, limit;
 	final String loStrategy;
 	final String contentType;

@@ -1,4 +1,4 @@
-package tbrugz.queryon;
+package tbrugz.queryon.util;
 
 import java.util.List;
 import java.util.Map;
@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -26,7 +29,7 @@ public class SchemaModelUtils {
 	
 	public static final String PARAM_MODEL = "model";
 	
-	static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) {
+	public static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) {
 		//log.info("getRelation [provided '"+reqspec.object+"']");
 		Relation relation = null;
 		
@@ -137,6 +140,9 @@ public class SchemaModelUtils {
 		if(modelId==null) {
 			modelId = (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 		}
+		/*if(models.get(modelId)==null) {
+			modelId = QueryOn.DEFAULT_MODEL_KEY;
+		}*/
 		return models.get(modelId);
 	}
 	
@@ -168,7 +174,9 @@ public class SchemaModelUtils {
 			Set<String> models = getModelIds(req.getServletContext());
 			if(!models.contains(modelReq)) {
 				throw new BadRequestException( "Model id '"+modelReq+"' undefined"
-						+(PARAM_MODEL.equals(param)?"":" [param="+param+"]") );
+						+(PARAM_MODEL.equals(param)?"":" [param="+param+"]")
+						+(" [modelsIds: "+models+"]")
+						);
 			}
 		}
 		return modelReq;

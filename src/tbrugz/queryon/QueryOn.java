@@ -59,6 +59,7 @@ import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.QOnModelUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
@@ -184,7 +185,7 @@ public class QueryOn extends HttpServlet {
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String DEFAULT_PROPERTIES_VALUES_RESOURCE = "/queryon-defaults.properties";
 	
-	static final String CONN_PROPS_PREFIX = "queryon";
+	public static final String CONN_PROPS_PREFIX = "queryon";
 	
 	static final String PROP_MODELS = "queryon.models";
 	static final String PROP_MODELS_DEFAULT = "queryon.models.default";
