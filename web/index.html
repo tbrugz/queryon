@@ -268,15 +268,26 @@
 			//console.log("col["+i+"]: ",cols[i],"--",allowUpdate,"---",relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			
+			var value = (vals?vals[i]:'');
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
-			dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"'"
-				+(colTypeOrig!="Blob"?" value='"+(vals?vals[i]:'')+"'":"")
-				+(disabled?" disabled='true'":"")
-				+">"
-				+(colTypeOrig=="Blob" ? ((vals?vals[i]:'')?' <strong>HAS CONTENT</strong>':' <em>&lt;empty&gt;</em>') : "")
-				+(colTypeOrig=="String"?"":" <em>("+colTypeOrig+")</em>")
-				+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
-				+"</label> "
+			if(colTypeOrig=="String" && (value.indexOf('\n')>0 || value.length>100) ) {
+				dialogContent += "<label>"+cols[i]+": <textarea name='v:"+cols[i]+"'"
+					+(disabled?" disabled='true'":"")+">"
+					+value //.replace(/[<]/g, '&lt;').replace(/>/g, '&gt;')
+					+"</textarea>"
+					+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
+					+"</label> ";
+			}
+			else {
+				dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"'"
+					+(colTypeOrig!="Blob"?" value=\""+value.replace(/"/g, '&quot;')+"\"":"")
+					+(disabled?" disabled='true'":"")
+					+">"
+					+(colTypeOrig=="Blob" ? (value?' <strong>HAS CONTENT</strong>':' <em>&lt;empty&gt;</em>') : "")
+					+(colTypeOrig!="String"?" <em>("+colTypeOrig+")</em>":"")
+					+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
+					+"</label> ";
+			}
 		}
 		dialogContent += "</div>"
 
@@ -286,6 +297,20 @@
 			+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/>"
 			+ "</div>";
 			
+		/*for(var i=0;i<cols.length;i++) {
+			var col = document.getElementsByName("v:"+cols[i])[0];
+			var value = (vals?vals[i]:'');
+			var colTypeOrig = (colTypes && colTypes[i])?colTypes[i]:'String';
+			if(colTypeOrig!="Blob") {
+				if(col.tagName=="TEXTAREA") {
+					col.innerHTML = value;
+				}
+				else {
+					col.value = escapeXML(value);
+				}
+			}
+		}*/
+		
 		updateUI();
 		
 		// a bit hacky ;)
