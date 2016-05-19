@@ -132,8 +132,11 @@ public class PagesServlet extends AbstractHttpServlet {
 		rs.close();
 	}
 	
+	/*
+	 * XXX: add HAS_BODY, HAS_BINARY_DATA - populated by trigger? UpdatePlugin? - so that it can be shown in pages list
+	 */
 	ResultSet getPage(Connection conn, String relation, String pathInfo) throws SQLException, IOException {
-		PreparedStatement st = conn.prepareStatement("select id, mime, body, binary_data"+
+		PreparedStatement st = conn.prepareStatement("select id, mime, body, binary_data, has_body"+
 				"\nfrom "+relation+" where path = ?");
 		st.setString(1, pathInfo);
 		

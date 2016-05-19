@@ -43,6 +43,7 @@ var mimeMap = {
 var pagesUrl = 'p/';
 var qonUrl = 'q/QON_PAGES';
 var qonEditorUrl = 'pages-editor.html'
+var pages = [];
 
 onLoad = function() {
 	//var id = getParameterByName('id', location.search);
@@ -71,10 +72,15 @@ makeHrefs = function() {
 	byId('url-upload').style.display = authInfo.isDev?'inline':'none';
 }
 
+clearPagesList = function() {
+	var content = byId('content');
+	content.innerHTML = '';
+}
+
 loadPagesList = function() {
 	var loadUrl = qonUrl+'.json';
 
-	var payload = "fields=ID,PATH,MIME&order=PATH";
+	var payload = "fields=ID,PATH,MIME,HAS_BODY&order=PATH";
 	loadUrl += "?" + payload;
 	
 	var oReq = new XMLHttpRequest();
@@ -84,11 +90,15 @@ loadPagesList = function() {
 		if(status>=200 && status<300) {
 			var content = byId('content');
 			
-			var pages = getQonData(JSON.parse(req.responseText));
+			pages = getQonData(JSON.parse(req.responseText));
 			for(var i=0;i<pages.length;i++) {
 				content.innerHTML += "\n<li id='p"+pages[i].ID+"'><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
 					(pages[i].MIME=="text/markdown"?" <a href='md/"+pages[i].PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
-					(authInfo.isDev?" <a href='pages-editor.html?id="+pages[i].ID+"' target='_blank' class='action edit'>[edit]</a>":"")+
+					(authInfo.isDev?
+						(hasBody(pages[i].HAS_BODY)?
+							" <a href='pages-editor.html?id="+pages[i].ID+"' target='_blank' class='action edit'>[edit]</a>":
+							" <a href='#' onclick='updateBlob("+pages[i].ID+")' class='action editblob'>[update blob]</a>")
+						:"")+
 					(authInfo.isDev?" <a href='#' onclick='removePage("+pages[i].ID+", \""+pages[i].PATH+"\");false;' class='action remove'>[remove]</a>":"")+
 					//XXX add delete button
 					"</li><br/>";
@@ -103,6 +113,15 @@ loadPagesList = function() {
 	}
 	oReq.open("GET", loadUrl);
 	oReq.send(null);
+}
+
+hasBody = function(hasBodyVal) {
+	if(!hasBodyVal) return false;
+	return hasBodyVal.toUpperCase() === "T";
+}
+
+updateBlob = function(id) {
+	openUploadDialog(id);
 }
 
 removePage = function(id, path) {
@@ -129,7 +148,7 @@ removePage = function(id, path) {
 	}
 }
 
-openUploadDialog = function() {
+openUploadDialog = function(id) {
 	var dialogCont = document.getElementById('dialog-container');
 	dialogCont.style.display = 'block';
 	
@@ -137,18 +156,33 @@ openUploadDialog = function() {
 	dialog.style.display = 'block';
 	
 	var dialogHTML = '<div id="dialog-header">'
-		+ '<div class="dialog-title">Upload binary data</div>'
+		+ '<div class="dialog-title">'+(id?'Update':'Upload')+' binary data'
+		+ (id?" <em>[ID = "+id+"]</em>":"")
+		+ '</div>'
 		+ "<div id='dialog-messages'></div></div>";
 	dialogHTML += "<div><form name='upload-form' id='upload-form' enctype='multipart/form-data' method='post' >";
+	dialogHTML += (id?"<input type='hidden' name='method' value='PUT'/><input type='hidden' name='v:ID' value='"+id+"'/>":"")
 	dialogHTML += "<label>path: <input type='text' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label> ";
 	dialogHTML += "<label>file: <input type='file' name='v:BINARY_DATA'/>"+" <span class='remarks'>binary content</span>"+"</label> ";
 	dialogHTML += "</form></div> ";
 
 	dialog.innerHTML = dialogHTML + "<div id='dialog-footer'>"
-		+ "<input type='button' value='upload' id='btnUpdate' class='simplebutton' onclick='doConfirmUpload();'/>"
+		+ "<input type='button' value='"+(id?'update':'upload')+"' id='btnUpdate' class='simplebutton' onclick='doConfirmUpload();'/>"
 		//+ "<input type='button' value='upload & close' class='simplebutton' onclick='doConfirmUpload(true);'/>"
 		+ "<input type='button' value='X' class='simplebutton' onclick='closeUploadDialog();'/>"
 		+ "</div>";
+		
+	if(id) {
+		var page = findPage(id);
+		document.getElementsByName('v:PATH')[0].value = page.PATH;
+	}
+}
+
+findPage = function(id) {
+	for(var i=0;i<pages.length;i++) {
+		if(pages[i].ID==id) { return pages[i]; }
+	}
+	return null;
 }
 
 closeUploadDialog = function() {
@@ -158,7 +192,6 @@ closeUploadDialog = function() {
 }
 
 doConfirmUpload = function() {
-	var loadUrl = qonUrl+'.json';
 	
 	var formElement = document.querySelector("#upload-form");
 	var request = new XMLHttpRequest();
@@ -167,19 +200,26 @@ doConfirmUpload = function() {
 		showWarnMessages('dialog-messages', "path cannot be null");
 		return;
 	}
+	//console.log('v:BINARY_DATA:: ',fd.has('v:BINARY_DATA'),' - f.name: ',fd.get('v:BINARY_DATA').name, ' - f.size: ',fd.get('v:BINARY_DATA').size);
+	if(! fd.get('v:BINARY_DATA').name) {
+		fd.delete('v:BINARY_DATA');
+	}
+	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json';
+	
 	request.open("POST", loadUrl, true);
 	request.onload = function(oEvent) {
 		var msg = null;
 		if (request.status >= 200 && request.status < 300) {
 			msg = "Uploaded!";
-			showInfoMessages('dialog-messages', msg)
+			showInfoMessages('dialog-messages', msg);
+			//XXX append new url with ID
 		} else {
 			msg = "Error " + request.status + " occurred when trying to upload your file: "+oEvent.target.responseText.trim();
-			showErrorMessages('dialog-messages', msg)
+			showErrorMessages('dialog-messages', msg);
 		}
 		console.log(msg, oEvent);
 	};
-	console.log('FormData: ', fd, ' - formElement', formElement);
+	//console.log('FormData: ', fd, ' - formElement', formElement);
 	request.send(fd);
 }
 
@@ -250,7 +290,10 @@ li.removed {
 
 	<span id="navbar-links">
 		<span id="navbar-actions">
-			<a id="url-editor-new" class="edit-link" href="" target="_blank" style="display: none">new</a> <a id="url-upload" class="edit-link" href="#" onclick="openUploadDialog();false;" style="display: none">upload</a>
+			<i class="fa fa-refresh" id="url-refresh" onclick="clearPagesList();loadPagesList();false;" title="refresh pages list"></i>
+			<!-- <a id="url-refreshz" class="edit-link" href="#" onclick="clearPagesList();loadPagesList();false;" style="display:inline">refresh</a> -->
+			<a id="url-editor-new" class="edit-link" href="#" target="_blank" style="display: none">new page</a>
+			<a id="url-upload" class="edit-link" href="#" onclick="openUploadDialog();false;" style="display: none">upload</a>
 		</span>
 	</span>
 

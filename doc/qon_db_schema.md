@@ -55,6 +55,7 @@ create table qon_pages (
 	mime varchar(100),
 	body clob, --text ...
 	binary_data blob,
+	has_body char(1),
 	roles_filter varchar(1000),
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
@@ -111,6 +112,7 @@ create table qon_pages (
 	body clob,
 	binary_data blob,
 	roles_filter varchar2(1000),
+	has_body char(1),
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
 )
@@ -119,9 +121,21 @@ create table qon_pages (
 
 create sequence qon_pages_seq;
 
-create or replace trigger qon_pages_trg 
+create or replace trigger qon_pages_trg_ins
 before insert on qon_pages
 for each row
 begin
   select qon_pages_seq.nextval into :new.id from dual;
 end;
+
+create or replace trigger qon_pages_body_trg_iu
+before insert or update on qon_pages
+for each row
+begin
+  if :new.body is null then
+     :new.has_body := 'f';
+  else
+     :new.has_body := 't';
+  end if;
+end;
+

@@ -1,9 +1,12 @@
 
-2016-05 - qon_pages: add binary_data
+2016-05 - qon_pages: add binary_data, has_body
 -----------------------
 
 alter table qon_pages
 	add column binary_data blob;
+
+alter table qon_pages
+	add column has_body char(1);
 
 
 2016-04 - add qon_pages

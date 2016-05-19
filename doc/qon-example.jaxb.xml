@@ -318,11 +318,31 @@
             <pk>false</pk>
             <type>BLOB</type>
         </columns>
+        <columns>
+            <name>HAS_BODY</name>
+            <pk>false</pk>
+            <type>CHAR</type>
+        </columns>
         <constraints>
             <name>QON_PAGES_PK</name>
             <type>PK</type>
             <uniqueColumns>ID</uniqueColumns>
         </constraints>
+        <grants>
+            <grantee>dev</grantee>
+            <privilege>INSERT</privilege>
+            <table>QON_PAGES</table>
+        </grants>
+        <grants>
+            <grantee>dev</grantee>
+            <privilege>UPDATE</privilege>
+            <table>QON_PAGES</table>
+        </grants>
+        <grants>
+            <grantee>dev</grantee>
+            <privilege>DELETE</privilege>
+            <table>QON_PAGES</table>
+        </grants>
         <remarks>QueryOn Pages</remarks>
         <type>TABLE</type>
     </table>
