@@ -39,10 +39,16 @@
 		// http://stackoverflow.com/questions/15615552/get-div-height-with-plain-javascript
 		document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
 		
-		var dc = document.getElementById('dialog-content');
+		var dh = document.getElementById('dialog-header');
 		var dm = document.getElementById('dialog-messages');
-		if(dc) {
-			dc.style.top = dm.offsetTop + dm.offsetHeight + 10 + 'px';
+		var dc = document.getElementById('dialog-content');
+		if(dh && dm && dc) {
+			if(dm.offsetHeight>0) {
+				dc.style.top = dm.offsetTop + dm.offsetHeight + 10 + 'px';
+			}
+			else {
+				dc.style.top = dh.offsetTop + dh.offsetHeight + 10 + 'px';
+			}
 		}
 	}
 	
@@ -325,7 +331,7 @@
 	function getUpdateNewValues(formData) {
 		// get values
 		var dialog = document.getElementById('update-dialog');
-		var inputs = dialog.querySelectorAll('input');
+		var inputs = dialog.querySelectorAll('input,textarea');
 		var newVals = [];
 		for(var i=0;i<inputs.length;i++) {
 			if(inputs[i].name.indexOf("v:")==0) {
@@ -333,7 +339,12 @@
 				if(!inputs[i].disabled) {
 					//postData[inputs[i].name] = inputs[i].value;
 					if(type=="file") {
-						formData.append(inputs[i].name, inputs[i].files[0]);
+						if(inputs[i].files[0]) {
+							formData.append(inputs[i].name, inputs[i].files[0], inputs[i].value);
+						}
+						else {
+							console.log("["+i+"] no file informed on field "+inputs[i].name);
+						}
 					}
 					else {
 						formData.append(inputs[i].name, inputs[i].value);
