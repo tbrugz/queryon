@@ -27,6 +27,10 @@ function removeLimitOffset(queryString) {
 
 function createBlobLinks() {
 	var content = document.getElementsByTagName('table')[0];
+	if(!content) {
+		console.log('table.js: no table found...');
+		return;
+	}
 	var tableName = content.getAttribute("class");
 	if(!tableName) { tableName = "table"; }
 	var cols = content.querySelectorAll('colgroup > col');

@@ -21,6 +21,7 @@
 	<script src="js/menu.js"></script>
 	<script src="js/models.js"></script>
 	<script src="js/auth.js"></script>
+	<script src="js/table.js"></script>
 	<script type="text/javascript">
 	
 	var lastQueryThatRunned = null;
@@ -150,6 +151,8 @@
 			}
 		}
 		*/
+		
+		createBlobLinks();
 		
 		// scroll to top - only if query changed
 		if(lastQueryThatRunned==null || lastQueryThatRunned!=id) {
@@ -588,6 +591,7 @@
 			//alert("relation has no PK");
 			return;
 		}
+		
 		//console.log("doRunDelete: key",ret.key,"filter",ret.filter);
 		
 		//XXX create html confirm dialog, or show question in messages (warning style)
