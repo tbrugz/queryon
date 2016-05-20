@@ -128,11 +128,21 @@
 	margin-top: 4px;
 }
 
-#update-dialog label {
+#update-dialog .field {
 	background-color: #ddd;
 	padding: 3px;
-	display: block;
+	/* display: block; */
 	margin-bottom: 5px;
+}
+
+#update-dialog textarea {
+	width: 40em;
+	height: 4em;
+}
+
+#update-dialog .setnull {
+	float: right;
+	padding: 0 3em 0 3em;
 }
 
 #update-dialog select.operator {

@@ -276,6 +276,7 @@
 			
 			var value = (vals?vals[i]:'');
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
+			dialogContent += "<div class='field'>";
 			if(colTypeOrig=="String" && (value.indexOf('\n')>0 || value.length>100) ) {
 				dialogContent += "<label>"+cols[i]+": <textarea name='v:"+cols[i]+"'"
 					+(disabled?" disabled='true'":"")+">"
@@ -286,14 +287,16 @@
 			}
 			else {
 				dialogContent += "<label>"+cols[i]+": <input type='"+colT+"' name='v:"+cols[i]+"'"
-					+(colTypeOrig!="Blob"?" value=\""+value.replace(/"/g, '&quot;')+"\"":"")
+					+(colTypeOrig!="Blob"?" value=\""+value.replace(/"/g, '&quot;')+"\"":" onchange='onBlobChange(\""+cols[i]+"\");'")
 					+(disabled?" disabled='true'":"")
 					+">"
 					+(colTypeOrig=="Blob" ? (value?' <strong>HAS CONTENT</strong>':' <em>&lt;empty&gt;</em>') : "")
 					+(colTypeOrig!="String"?" <em>("+colTypeOrig+")</em>":"")
 					+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
 					+"</label> ";
+				dialogContent += (colTypeOrig=="Blob" ? ("<label class='setnull'><input type='checkbox' name='isnull:"+cols[i]+"' onchange='onSetNullChange(\""+cols[i]+"\");'/>set null</label>") : "")
 			}
+			dialogContent += "</div>";
 		}
 		dialogContent += "</div>"
 
@@ -324,6 +327,24 @@
 		updateState();
 	}
 	
+	function onBlobChange(colname) {
+		var blobi = document.getElementsByName('v:'+colname)[0];
+		var setnulli = document.getElementsByName('isnull:'+colname)[0];
+		//console.log('onBlobChange', colname, blobi.value);
+		if(blobi.value) {
+			setnulli.checked = false;
+		}
+	}
+	
+	function onSetNullChange(colname) {
+		var blobi = document.getElementsByName('v:'+colname)[0];
+		var setnulli = document.getElementsByName('isnull:'+colname)[0];
+		//console.log('onSetNullChange', colname, setnulli.checked);
+		if(setnulli.checked) {
+			blobi.value = null;
+		}
+	}
+	
 	function getRowCount(elementId) {
 		return document.getElementById(elementId).querySelectorAll('tr').length-1;
 	}
@@ -335,12 +356,18 @@
 		var newVals = [];
 		for(var i=0;i<inputs.length;i++) {
 			if(inputs[i].name.indexOf("v:")==0) {
-				var type = inputs[i].getAttribute("type");
 				if(!inputs[i].disabled) {
+					var type = inputs[i].getAttribute("type");
 					//postData[inputs[i].name] = inputs[i].value;
 					if(type=="file") {
+						var colname = inputs[i].name.substring(2);
+						var setnulli = document.getElementsByName('isnull:'+colname)[0];
 						if(inputs[i].files[0]) {
 							formData.append(inputs[i].name, inputs[i].files[0], inputs[i].value);
+						}
+						else if(setnulli && setnulli.checked) {
+							formData.append(inputs[i].name, null, null);
+							//console.log("["+i+"] setting null on file field "+inputs[i].name, ' ; colname=', colname);
 						}
 						else {
 							console.log("["+i+"] no file informed on field "+inputs[i].name);
