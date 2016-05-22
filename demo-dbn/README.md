@@ -39,6 +39,11 @@ ant start-db-derby
 
 * init mysql (mariadb) & postgresql
 
+credentials: copy `src/main/resources/credentials.template.properties` to
+`credentials.properties` & edit.
+
+postgresql: create database `classicmodels`
+
 * create & load databases
 ```
 ant run-sqlrun-mysql
