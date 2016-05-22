@@ -22,8 +22,8 @@ var extMap = {
 	".js": "javascript",
 	".json": "json",
 	".xml": "xml",
-	".md": "markdown", 
-	".markdown": "markdown", 
+	".md": "markdown",
+	".markdown": "markdown",
 	".txt": "plain_text",
 	".text": "plain_text",
 	".diff": "diff",
@@ -82,14 +82,14 @@ loadPagesList = function() {
 
 	var payload = "fields=ID,PATH,MIME,HAS_BODY&order=PATH";
 	loadUrl += "?" + payload;
-	
+
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function(evt) {
 		var req = evt.target
 		var status = req.status;
 		if(status>=200 && status<300) {
 			var content = byId('content');
-			
+
 			pages = getQonData(JSON.parse(req.responseText));
 			for(var i=0;i<pages.length;i++) {
 				content.innerHTML += "\n<li id='p"+pages[i].ID+"'><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
@@ -117,7 +117,7 @@ loadPagesList = function() {
 
 hasBody = function(hasBodyVal) {
 	if(!hasBodyVal) return false;
-	return hasBodyVal.toUpperCase() === "T";
+	return hasBodyVal.substring(0,1).toUpperCase() === "T";
 }
 
 updateBlob = function(id) {
@@ -127,7 +127,7 @@ updateBlob = function(id) {
 removePage = function(id, path) {
 	if(confirm("remove page "+path+"?")) {
 		var loadUrl = qonUrl+'/'+id+'.json';
-		
+
 		var request = new XMLHttpRequest();
 		request.open("DELETE", loadUrl, true);
 		request.onload = function(oEvent) {
@@ -151,10 +151,10 @@ removePage = function(id, path) {
 openUploadDialog = function(id) {
 	var dialogCont = document.getElementById('dialog-container');
 	dialogCont.style.display = 'block';
-	
+
 	var dialog = byId('update-dialog');
 	dialog.style.display = 'block';
-	
+
 	var dialogHTML = '<div id="dialog-header">'
 		+ '<div class="dialog-title">'+(id?'Update':'Upload')+' binary data'
 		+ (id?" <em>[ID = "+id+"]</em>":"")
@@ -162,8 +162,8 @@ openUploadDialog = function(id) {
 		+ "<div id='dialog-messages'></div></div>";
 	dialogHTML += "<div><form name='upload-form' id='upload-form' enctype='multipart/form-data' method='post' >";
 	dialogHTML += (id?"<input type='hidden' name='method' value='PUT'/><input type='hidden' name='v:ID' value='"+id+"'/>":"")
-	dialogHTML += "<label>path: <input type='text' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label> ";
-	dialogHTML += "<label>file: <input type='file' name='v:BINARY_DATA'/>"+" <span class='remarks'>binary content</span>"+"</label> ";
+	dialogHTML += "<div class='field'><label>path: <input type='text' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label></div> ";
+	dialogHTML += "<div class='field'><label>file: <input type='file' name='v:BINARY_DATA'/>"+" <span class='remarks'>binary content</span>"+"</label></div> ";
 	dialogHTML += "</form></div> ";
 
 	dialog.innerHTML = dialogHTML + "<div id='dialog-footer'>"
@@ -171,7 +171,7 @@ openUploadDialog = function(id) {
 		//+ "<input type='button' value='upload & close' class='simplebutton' onclick='doConfirmUpload(true);'/>"
 		+ "<input type='button' value='X' class='simplebutton' onclick='closeUploadDialog();'/>"
 		+ "</div>";
-		
+
 	if(id) {
 		var page = findPage(id);
 		document.getElementsByName('v:PATH')[0].value = page.PATH;
@@ -192,7 +192,7 @@ closeUploadDialog = function() {
 }
 
 doConfirmUpload = function() {
-	
+
 	var formElement = document.querySelector("#upload-form");
 	var request = new XMLHttpRequest();
 	var fd = new FormData(formElement);
@@ -205,7 +205,7 @@ doConfirmUpload = function() {
 		fd.delete('v:BINARY_DATA');
 	}
 	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json';
-	
+
 	request.open("POST", loadUrl, true);
 	request.onload = function(oEvent) {
 		var msg = null;
