@@ -5,7 +5,7 @@ queryon
 A REST-like API that follows the naked objects pattern. A bit like a 'naked database objects' API.
 Depends on [sqldump](https://bitbucket.org/tbrugz/sqldump)
 
-Database objects are defined by a properties file. See 
+Database objects are defined by a properties file. See
 [queryon.template.properties](https://bitbucket.org/tbrugz/queryon/src/tip/src/queryon.template.properties)
 for more info.
 
@@ -37,6 +37,8 @@ demo - running
 * minimal demo (using H2) - see [demo-minimal/README.md](demo-minimal/README.md)
 
 * demo with 4 databases (H2, Mysql/Mariadb, Postgresql & Derby) - see [demo-dbn/README.md](demo-dbn/README.md)
+
+Note: demos need maven ant tasks. Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
 
 
 license

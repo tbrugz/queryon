@@ -3,17 +3,26 @@
 
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
 
-	<artifact:dependencies pathId="sqlrun.classpath">
+	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
 		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
-		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime"/>
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime">
+			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
+		</dependency>
 		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
 	</artifact:dependencies>
 
+	<path id="sqlrun.classpath">
+		<path refid="sqlrun.deps"/>
+		<pathelement location="src/main/resources"/>
+	</path>
+
 	<target name="run-sqlrun">
-		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true" fork="true">
+			<!--jvmarg value="-Dlog4j.debug=true"/-->
+			<!--jvmarg value="-Dlog4j.configuration=src/main/resources/log4j.properties"/-->
 			<arg value="-propfile=src/main/resources/queryon.sqlrun.properties"/>
 		</java>
 	</target>
-	
+
 </project>
