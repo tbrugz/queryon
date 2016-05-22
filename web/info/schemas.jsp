@@ -5,7 +5,8 @@
 %><%@page import="tbrugz.sqldump.dbmodel.*"
 %><%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"
 %><%@page import="tbrugz.queryon.*"
-%><%@page import="tbrugz.queryon.util.*"
+%><%@page import="tbrugz.queryon.util.SchemaModelUtils"
+%><%@page import="tbrugz.queryon.util.DBUtil"
 %><%!
 public String normalize(String s) {
 	if(s==null) return "";
@@ -16,7 +17,7 @@ public String normalize(String s) {
 
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
 	String modelId = SchemaModelUtils.getModelId(request);
-	
+
 	SchemaModel sm = SchemaModelUtils.getModel(application, modelId);
 	Set<String> names = new TreeSet<String>();
 	if(sm!=null) {
@@ -28,15 +29,15 @@ public String normalize(String s) {
 	for(ExecutableObject eo: eos) { names.add(normalize(eo.getSchemaName())); }
 	//XXX: add FKs, indexes, sequences, synonyms, triggers ??
 	}
-	
+
 	Map<String, List<String>> schemasByModel = (Map<String, List<String>>) application.getAttribute(QueryOn.ATTR_SCHEMAS_MAP);
 	if(schemasByModel==null) {
 		schemasByModel = new HashMap<String, List<String>>();
 		application.setAttribute(QueryOn.ATTR_SCHEMAS_MAP, schemasByModel);
 	}
-	
+
 	List<String> schemas = schemasByModel.get(modelId);
-	
+
 	if(schemas==null) {
 		Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 		//out.write(DBUtil.getDBConnPrefix(prop, modelId));
