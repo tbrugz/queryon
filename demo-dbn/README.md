@@ -12,22 +12,29 @@ databases.
 building
 -------
 
-* install queryon: 
+* install queryon:
 ```
 cd ..
 mvn install -DskipTests
 ```
 
-* build demo-DBn: 
+* build demo-DBn:
 ```
 cd demo-dbn
 mvn package
 ```
 
+* download sample database
+
+```
+ant get-data
+ant unzip-data
+```
+
 * init h2 & derby databases:
 ```
-ant run-sqlrun-h2
-ant run-sqlrun-derby
+ant start-db-h2
+ant start-db-derby
 ```
 
 * init mysql (mariadb) & postgresql
@@ -40,6 +47,10 @@ ant run-sqlrun-h2
 ant run-sqlrun-derby
 ```
 
+**Note**: to run on less databases, edit the `queryon.models` property on the
+`src/main/resources/queryon.properties` file.
+
+
 running
 -------
 
@@ -48,6 +59,8 @@ mvn jetty:run
 ```
 
 navigate to `http://localhost:8888`
+
+login with `root/root` - see `src/main/resources/iniRealmRoles.ini`
 
 
 usage examples
@@ -80,4 +93,3 @@ map
 world (geojson) map from:
 [johan/world.geo.json](https://github.com/johan/world.geo.json), [unlicensed](https://github.com/johan/world.geo.json/blob/master/UNLICENSE)
 (without Antarctica)
-
