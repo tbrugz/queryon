@@ -17,7 +17,7 @@ var processorUrl = 'processor';
 		isAdmin: false,
 		isDev: false
 };*/
-var settings = {};
+//var settings = {};
 
 /* functions */
 
@@ -53,10 +53,6 @@ function onQueryChanged() {
 function onParameterChange(i) {
 	updateState();
 	makeHrefs();
-}
-
-function updateSelectedQueryState() {
-	updateSelectedQueryStateParameters();
 }
 
 function updateSelectedQueryStateParameters() {
@@ -107,18 +103,6 @@ function updateNavBar() {
 	refreshAuthInfo();
 }
 
-function updateState() {
-	//replace href
-	var select = document.getElementById('objects');
-	var id = select.options[select.selectedIndex].value;
-	//history.replaceState(null, null, "#"+id);
-	////var hash = id!="" ? "#"+id : "";
-	////history.replaceState(null, null, hash);
-	var state = id+getParameters();
-	console.log('updateState',state);
-	history.replaceState(null, null, "#"+state);
-}
-
 function makeHrefs() {
 	var urled = document.getElementById("url-editor");
 	var urlpl = document.getElementById("url-permalink");
@@ -165,7 +149,7 @@ function makeHrefs() {
 	}
 	
 	//var queryString = '';
-	
+	/*
 	var filters = document.querySelectorAll('.filter');
 	for (var i = 0; i < filters.length; ++i) {
 		var item = filters[i];
@@ -204,12 +188,47 @@ function makeHrefs() {
 			urldown.href = append2url(urldown.href, 'offset='+offset);
 		}
 	}
+	*/
+	
+	if(urlpl) {
+		urlpl.href = urlAddFilterOrderOffset(urlpl.href);
+	}
+	if(urldown) {
+		urldown.href = urlAddFilterOrderOffset(urldown.href);
+	}
 	
 	//console.log('urlpl.href: ',urlpl.href);
 	//console.log('urldown.href: ',urldown.href);
 	
 	updateUI();
 	refreshAuthInfo();
+}
+
+function urlAddFilterOrderOffset(urlz) {
+	var filters = document.querySelectorAll('.filter');
+	if(filters) {
+		for (var i = 0; i < filters.length; ++i) {
+			var item = filters[i];
+			urlz = append2url(urlz, item.name+"="+encodeURIComponent(item.value));
+		}
+	}
+	
+	var orderElem = document.getElementById('order');
+	if(orderElem) {
+		var order = orderElem.value;
+		if(order!=null && order!='') {
+			urlz = append2url(urlz, 'order='+order);
+		}
+	}
+
+	var offset = document.getElementById('offset');
+	if(offset) { offset = offset.value; };
+	if(offset!=null && offset>0) {
+		urlz = append2url(urlz, 'offset='+offset);
+	}
+	
+	if(urlz==null) { urlz = ''; }
+	return urlz;
 }
 
 /*function loadAuthInfo() {
@@ -227,7 +246,7 @@ function makeHrefs() {
 	});
 }*/
 
-function loadSettings(callbackOk) {
+/*function loadSettings(callbackOk) {
 	$.ajax({
 		url: 'info/settings.jsp',
 		dataType: "text",
@@ -238,7 +257,7 @@ function loadSettings(callbackOk) {
 			if(callbackOk) { callbackOk(); }
 		}
 	});
-}
+}*/
 
 /*function refreshAuthInfo() {
 	var user = document.getElementById('username');

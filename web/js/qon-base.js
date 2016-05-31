@@ -14,13 +14,14 @@ function append2url(url, append) {
 		return url;
 	}
 	
-	if(url!=null && url.indexOf("?") > -1) {
+	if(url && url.indexOf("?") > -1) {
 		return url+"&"+append;
 	}
 	/*else if(append!=null && append.indexOf("?")==0) {
 		return url+append;
 	}*/
 	else {
+		if(url==null) { url = ''; }
 		return url+"?"+append;
 	}
 }

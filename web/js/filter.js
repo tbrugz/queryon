@@ -136,10 +136,15 @@ function addFilterIn() {
 	var col = sel.value;
 	var operator = document.getElementById('fil-operator').value;
 	var value = document.getElementById('fin-value').value;
+	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
+	
+	addFilterWithValues(col, operator, value, colType);
+}
+
+function addFilterWithValues(col, operator, value, colType) {
 	var filters = document.getElementById('filters');
 	var finContainerId = "f"+operator+"_"+col;
 	var finContainer = document.getElementById(finContainerId);
-	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
 	var inputType = 'text';
 	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
 	

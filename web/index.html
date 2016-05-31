@@ -22,6 +22,7 @@
 	<script src="js/models.js"></script>
 	<script src="js/auth.js"></script>
 	<script src="js/table.js"></script>
+	<script src="js/settings.js"></script>
 	<script type="text/javascript">
 	
 	var lastQueryThatRunned = null;
@@ -54,6 +55,7 @@
 	}
 	
 	function updateFromFilters() {
+		updateState();
 		makeHrefs();
 	}
 	
@@ -83,7 +85,7 @@
 		console.log('relationType',relationType,'limit',rsLimit,'rownum',rownum,'offset',offset);
 		var limOffNav = document.getElementById('limoff-nav');
 		limOffNav.innerHTML = '';
-		
+
 		// offset, next/previous page
 		/* &#9658 rightwards filled triangle
 		   &#9668 leftwards filled triangle */
@@ -100,6 +102,8 @@
 			limOffNav.innerHTML += " <input type='button' value='&#9658;' onclick='document.getElementById(\"offset\").value="+nextOffset+";makeHrefs();doRun(\"objects\", \"content\", \"messages\", doRunCallback);' title='next page (offset = "+nextOffset+")' />";
 		}
 
+		updateState();
+		
 		var content = document.getElementById('content');
 		
 		/*
@@ -629,6 +633,51 @@
 		window.open(finalUrl);
 	}
 	*/
+	
+	function updateState() {
+		//replace href
+		var select = document.getElementById('objects');
+		var id = select.options[select.selectedIndex].value;
+		//history.replaceState(null, null, "#"+id);
+		////var hash = id!="" ? "#"+id : "";
+		////history.replaceState(null, null, hash);
+		var state = id+getParameters();
+		var foo = urlAddFilterOrderOffset(null);
+		if(foo) { state += '|'+foo; }
+		console.log('updateState', state); //, ' - urlAddFilterOrderOffset:', urlAddFilterOrderOffset(''));
+		history.replaceState(null, null, "#"+state);
+	}
+	
+	function updateSelectedQueryState() {
+		var bigParts = updateSelectedQueryStateParameters();
+		if(!bigParts) { return; }
+		var qs = bigParts[1];
+		//filters...
+		//var filters = getParameterNamesStartWith('f[in|nin|lk|nlk|gt|ge|lt|le]:', qs);
+		var opIds = Object.keys(operatorsInfo).join("|");
+		var filters = getParameterNamesStartWith('f('+opIds+'):', qs);
+		//console.log('updateSelectedQueryState: filters: ',filters);
+		for(var i=0;i<filters.length;i++) {
+			var filterVal = getParameterByName(filters[i], qs);
+			var idx = filters[i].indexOf(":");
+			var col = filters[i].substring(idx+1);
+			var operator = filters[i].substring(1, idx);
+			var colType = "varchar"; //XXX find column type??
+			//console.log('updateSelectedQueryState: filter['+i+']: ',col,operator,filterVal,colType);
+			addFilterWithValues(col, operator, filterVal, colType);
+		}
+		//order
+		var orderVal = getParameterByName('order', qs);
+		if(orderVal) {
+			document.getElementById('order').value = orderVal;
+		}
+		//offset
+		var offsetVal = getParameterByName('offset', qs);
+		if(offsetVal) {
+			document.getElementById('offset').value = offsetVal;
+		}
+		console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
+	}
 	
 	</script>
 	<style type="text/css">

@@ -35,6 +35,21 @@ function getParameterByName(name, queryString) {
 	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
 }
 
+function getParameterNamesStartWith(startWithRegex, queryString) {
+	startWithRegex = startWithRegex.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&](" + startWithRegex + ".*?)=([^&#]*)", "g");
+	//var results = regex.exec(queryString);
+	var ret = [];
+	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
+	while ((results = regex.exec(queryString)) !== null) {
+		//ret.push(results[1]);
+		ret.push( decodeURIComponent(results[1].replace(/\+/g," ")) );
+	}
+	//return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
+	return ret;
+	// test: getParameterNamesStartWith('',document.location.href)
+}
+
 // ---------- messages ----------
 
 function showInfoMessages(messagesId, text) {
