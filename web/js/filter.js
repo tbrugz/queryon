@@ -41,7 +41,10 @@ function addFilterDialog() {
 	dialogCont.style.display = 'block';
 	var dialog = document.getElementById('dialog');
 	dialog.style.display = 'block';
-	var cols = getColumnsFromRelation(relationsHash[id]);
+	var cols = getColumnsFromColgroup('content');
+	if(cols==null || cols.length==0) {
+		cols = getColumnsFromRelation(relationsHash[id]);
+	}
 	if(cols==null || cols.length==0) {
 		cols = getColumnsFromContainer('content');
 	}

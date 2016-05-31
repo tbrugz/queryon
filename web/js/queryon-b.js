@@ -371,7 +371,10 @@ function getColumnsTypesFromHash() {
 function getValuesFromColumn(containerId, columnName) {
 	//var cols = getColumnsFromContainer(containerId);
 	var relation = getCurrentRelation('objects');
-	var cols = getColumnsFromRelation(relation);
+	var cols = getColumnsFromColgroup(containerId);
+	if(cols==null || cols.length==0) {
+		cols = getColumnsFromRelation(relation);
+	}
 	var colPos = cols.indexOf(columnName);
 	if(colPos==-1) {
 		console.log("column "+columnName+" not found");
