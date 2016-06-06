@@ -148,7 +148,7 @@ public class RequestSpec {
 		 * http://laraveldaily.com/theres-no-putpatchdelete-method-or-how-to-build-a-laravel-form-manually/
 		 * http://symfony.com/doc/current/cookbook/routing/method_parameters.html
 		 */
-		String method = req.getParameter("method"); //XXX: _method
+		String method = req.getParameter("_method"); //XXXdone: _method
 		//XXX: may method be changed? property?
 		if(method!=null) {
 			httpMethod = method;
