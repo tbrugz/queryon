@@ -416,17 +416,21 @@
 		*/
 		
 		var formData = new FormData();
-		var pkPath = ret.pkvals.join("/");
+
+		//pk values in URL
+		//var urlPath = ret.pkvals.join("/");
 		//adding update PK values to request body
-		/*for(var i=0;i<ret.pkvals.length;i++) {
+		var urlPath = '';
+		for(var i=0;i<ret.pkvals.length;i++) {
 			formData.append('p'+(i+1), ret.pkvals[i]);
-		}*/
+		}
+		
 		nv = getUpdateNewValues(formData);
 		
 		var method = "PUT";
 		nv.formData.append('method', method);
 
-		var finalUrl = getQueryUpdateUrl('objects', pkPath, 'updatemax=1&updatemin=1', 'json');
+		var finalUrl = getQueryUpdateUrl('objects', urlPath, 'updatemax=1&updatemin=1', 'json');
 		
 		//console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
 		
@@ -441,7 +445,7 @@
 		var startTimeMilis = Date.now();
 		
 		var request = new XMLHttpRequest();
-		request.open(method, finalUrl, true);
+		request.open("POST", finalUrl, true); // jboss needs POST ?
 		request.onload = function(oEvent) {
 			var jqXHR = oEvent.target;
 			console.log('request: ', request,' ; oEvent: ', oEvent);

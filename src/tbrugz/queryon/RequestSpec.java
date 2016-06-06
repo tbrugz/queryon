@@ -109,6 +109,8 @@ public class RequestSpec {
 
 	final List<String> orderCols = new ArrayList<String>();
 	final List<String> orderAscDesc = new ArrayList<String>();
+	
+	final boolean showDebugInfo = false;
 
 	// syntax properties resource
 	static final Properties syntaxProperties = new Properties();
@@ -137,6 +139,9 @@ public class RequestSpec {
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
 		this.request = req;
+		
+		contentType = req.getContentType();
+		
 		/* 
 		 * http://stackoverflow.com/a/37125568/616413 - using-put-method-in-html-form
 		 * http://programmers.stackexchange.com/questions/114156/why-are-there-are-no-put-and-delete-methods-on-html-forms
@@ -315,7 +320,6 @@ public class RequestSpec {
 		//	String[] value = req.getParameterValues(key);
 		
 		// http://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
-		contentType = req.getContentType();
 		if(isContentTypeMultiPart()) {
 			int i=0;
 			for(Part p: req.getParts()) {
@@ -328,6 +332,7 @@ public class RequestSpec {
 				}
 				i++;
 			}
+			log.debug("multipart-content: length="+i);
 		}
 		
 		String bodyParamName = req.getParameter("bodyparamname");
@@ -340,8 +345,8 @@ public class RequestSpec {
 			}
 		}
 		
-		Map<String,String[]> params = req.getParameterMap();
-		for(Map.Entry<String,String[]> entry: params.entrySet()) {
+		Map<String,String[]> reqParams = req.getParameterMap();
+		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
 			
@@ -440,6 +445,10 @@ public class RequestSpec {
 			//XXX: warn unknown parameters
 		}
 		*/
+		
+		if(showDebugInfo) {
+			showDebugInfo(reqParams);
+		}
 	}
 	
 	boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
@@ -608,6 +617,20 @@ public class RequestSpec {
 			}
 		}
 		return null;
+	}
+	
+	void showDebugInfo(Map<String,String[]> reqParams) {
+		//log.info("debug: object: "+object+" / partz: "+URIpartz);
+		log.info("debug: limit/offset: "+limit+"/"+offset);
+		//final String loStrategy;
+		log.info("debug: contentType: "+contentType);
+		log.info("debug: minUpdates/maxUpdates: "+minUpdates+"/"+maxUpdates);
+		log.info("debug: params: "+params);
+		for(String par: reqParams.keySet()) {
+			log.info("debug: reqParams["+par+"]: "+Arrays.toString(reqParams.get(par)));
+		}
+		log.info("debug: updateValues: "+updateValues);
+		log.info("debug: updatePartValues: "+updatePartValues);
 	}
 	
 }
