@@ -92,7 +92,7 @@ loadPagesList = function() {
 
 			pages = getQonData(JSON.parse(req.responseText));
 			for(var i=0;i<pages.length;i++) {
-				content.innerHTML += "\n<li id='p"+pages[i].ID+"'><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+pages[i].PATH+"</a> "+
+				content.innerHTML += "\n<li id='p"+pages[i].ID+"'><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+prettyLink(pages[i].PATH)+"</a> "+
 					(pages[i].MIME=="text/markdown"?" <a href='md/"+pages[i].PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
 					(authInfo.isDev?
 						(hasBody(pages[i].HAS_BODY)?
@@ -122,6 +122,10 @@ hasBody = function(hasBodyVal) {
 
 updateBlob = function(id) {
 	openUploadDialog(id);
+}
+
+prettyLink = function(str) {
+	return str.replace("/", " / ");
 }
 
 removePage = function(id, path) {

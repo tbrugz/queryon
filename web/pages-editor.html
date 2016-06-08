@@ -80,7 +80,7 @@ function doSaveError(evt) {
 	btnActionStop('btnSave');
 	console.log('error: ',evt);
 	var target = evt.target;
-	showErrorMessages('messages', 'error saving query: '+target.responseText+
+	showErrorMessages('messages', 'error saving page: '+target.responseText+
 			(target.status==403?" (invalid session?)":"")
 			);
 }
@@ -135,7 +135,7 @@ function doSave() {
 			}
 			console.log('doSave.ok, pkvals=', pkvals, '; evt=', evt);
 			//closeMessages('messages');
-			showInfoMessages('messages', 'query '+name+' sucessfully saved');
+			showInfoMessages('messages', 'page '+name+' sucessfully saved');
 			refreshUI();
 		}
 		else {
@@ -154,7 +154,7 @@ function doLoadPageError(evt) {
 	//btnActionStop('btnSave');
 	console.log('error: ',evt);
 	var target = evt.target;
-	showErrorMessages('messages', 'error loading query: '+target.responseText+
+	showErrorMessages('messages', 'error loading page: '+target.responseText+
 			(target.status==403?" (invalid session?)":"")
 			);
 }
@@ -172,7 +172,7 @@ function doLoadPage(id) {
 		if(status>=200 && status<300) {
 			//btnActionStop('btnSave');
 			console.log('doLoadPage.ok', evt);
-			//showInfoMessages('messages', 'query '+name+' sucessfully loaded');
+			//showInfoMessages('messages', 'page '+name+' sucessfully loaded');
 			var data = getQonData(JSON.parse(req.responseText))[0];
 			//console.log('doLoadPage.ok2', data);
 			byId('path').value = data.PATH;
@@ -275,9 +275,9 @@ $(document).jkey('f10',function(){
 	
 	<span id="xtra-actions">
 		<span id="actions-container" style="display: none">
-			<a id="url-reload" href="" title="Reload query">reload</a>
+			<a id="url-reload" href="" title="Reload page">reload</a>
 			<a id="url-permalink" href="" target="_blank">permalink</a>
-			<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+byId('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
+			<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove page '+byId('name').value+'?')){doRemove();}" title="Remove Page">remove</a>
 		</span>
 		<!-- <span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span> -->
 	</span>
