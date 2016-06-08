@@ -232,7 +232,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testPut_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PUT");
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&method=PUT");
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PUT");
 		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1?v:NAME=newname&method=PUT");
 		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1");
 		//HttpPost httpPut = new HttpPost(baseUrl+"/EMP/1");
@@ -255,7 +255,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPut_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?method=PUT");
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?_method=PUT");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		
@@ -267,7 +267,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testDelete_Emp_Ok() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 
-		HttpGet httpGet = new HttpGet(baseUrl+"/EMP/5?method=DELETE");
+		HttpGet httpGet = new HttpGet(baseUrl+"/EMP/5?_method=DELETE");
 		HttpResponse response1 = httpclient.execute(httpGet);
 		System.out.println("content: "+getContent(response1));
 		Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
@@ -294,7 +294,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testDelete_Emp_3rows() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//XXX: delete doesn't get parameters from querystring?
-		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&method=DELETE&updatemax=5");
+		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&_method=DELETE&updatemax=5");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		String content = getContent(response2);
 		System.out.println("content: "+content);
@@ -574,7 +574,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPut_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&method=PUT");
+		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&_method=PUT");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		System.out.println("content: "+getContent(response1));
