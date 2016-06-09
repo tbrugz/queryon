@@ -11,6 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 
 /*
@@ -26,6 +27,8 @@ public class MarkdownServlet extends PagesServlet {
 	//public static final String PROP_XPEND = "queryon.pages.markdown.xpend";
 	public static final String PROP_PREPEND = "queryon.pages.markdown.prepend";
 	public static final String PROP_APPEND = "queryon.pages.markdown.append";
+	
+	public static final int DEFAULT_PEGDOWN_OPTIONS = Extensions.EXTANCHORLINKS | Extensions.TABLES | Extensions.STRIKETHROUGH | Extensions.TASKLISTITEMS;
 	
 	boolean doXpend = true;
 	boolean reqXpend = doXpend;
@@ -62,7 +65,8 @@ public class MarkdownServlet extends PagesServlet {
 		//resp.setContentType(mimeType);
 		resp.setContentType(HTML_MIMETYPE);
 		//resp.setHeader(HEADER_PAGE_ID, id);
-		PegDownProcessor pdp = new PegDownProcessor();
+		int pegDownOpts = DEFAULT_PEGDOWN_OPTIONS;
+		PegDownProcessor pdp = new PegDownProcessor(pegDownOpts);
 		String md = pdp.markdownToHtml(body);
 		Writer w = resp.getWriter();
 		
