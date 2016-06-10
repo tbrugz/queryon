@@ -13,6 +13,7 @@
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
 	<script src="js/settings.js"></script>
+	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 // load url: http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY&mimefield=MIME
 //javascript, html, json, markdown, css, xml //XXX add sql?
@@ -43,10 +44,12 @@ var mimeMap = {
 
 var pagesUrl = 'p/';
 var qonUrl = 'q/QON_PAGES';
+var editor = null;
 
 onLoad = function() {
 	var id = getParameterByName('id', location.search);
 	
+	loadAce();
 	loadAuthInfo();
 	loadSettings(function() {
 		var table = settings['queryon.qon-pages.table'];
@@ -58,6 +61,7 @@ onLoad = function() {
 			byId('id').value = id;
 			doLoadPage(id);
 		}
+		
 		updateUI();
 	});
 }
@@ -179,7 +183,8 @@ function doLoadPage(id) {
 			if(data.MIME) {
 				byId('mime').value = data.MIME;
 			}
-			editor.setValue(data.BODY);
+			// http://stackoverflow.com/questions/18614169/set-value-for-ace-editor-without-selecting-the-whole-editor
+			editor.setValue(data.BODY, -1);
 			refreshUI();
 		}
 		else {
@@ -208,6 +213,16 @@ function refreshUI() {
 
 function onPathChange() {
 	updateEditorMode();
+}
+
+function loadAce() {
+	editor = ace.edit("editor");
+	editor.$blockScrolling = true;
+	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
+	editor.getSession().setMode("ace/mode/html"); //javascript, html, json, markdown, css, xml
+	/*editor.getSelectedText = function() {
+		return this.getSession().getTextRange(this.getSelectionRange());
+	};*/
 }
 
 updateEditorMode = function() {
@@ -314,12 +329,5 @@ $(document).jkey('f10',function(){
 		</form>
 	</div>
 </div>
-
-<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-<script>
-	var editor = ace.edit("editor");
-	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
-	editor.getSession().setMode("ace/mode/html"); //javascript, html, json, markdown, css, xml
-</script>
 
 </body>

@@ -319,3 +319,8 @@ i[onclick] {
 #markdown-content h1:hover a:after, #markdown-content h2:hover a:after, #markdown-content h3:hover a:after, #markdown-content h4:hover a:after {
 	color: #555;
 }
+
+.task-list-item {
+	margin-left: -20px;
+	list-style-type: none;
+}
