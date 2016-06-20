@@ -24,6 +24,12 @@
 			<param-value>/queryon.properties</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
+		<!-- <multipart-config>
+			<location>/tmp</location>
+			<max-file-size>2097152</max-file-size> <!- 2mb ->
+			<max-request-size>5242880</max-request-size> <!- 5bm ->
+			<file-size-threshold>1048576</file-size-threshold> <!- 1mb ->
+		</multipart-config> -->
 	</servlet>
 
 	<servlet>
@@ -79,6 +85,16 @@
 		<servlet-name>ProcessorServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
 	</servlet>
+	
+	<!-- <servlet>
+		<servlet-name>QuartzInitializer</servlet-name>
+		<servlet-class>org.quartz.ee.servlet.QuartzInitializerServlet</servlet-class>
+		<init-param>
+			<param-name>shutdown-on-unload</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet> -->
 	
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
