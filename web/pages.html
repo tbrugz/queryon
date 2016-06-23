@@ -125,7 +125,7 @@ updateBlob = function(id) {
 }
 
 prettyLink = function(str) {
-	return str.replace("/", " / ");
+	return str.replace(/\//g, " / ");
 }
 
 removePage = function(id, path) {
@@ -211,6 +211,7 @@ doConfirmUpload = function() {
 	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json';
 
 	request.open("POST", loadUrl, true);
+	btnActionStart('btnUpdate');
 	request.onload = function(oEvent) {
 		var msg = null;
 		if (request.status >= 200 && request.status < 300) {
@@ -221,6 +222,7 @@ doConfirmUpload = function() {
 			msg = "Error " + request.status + " occurred when trying to upload your file: "+oEvent.target.responseText.trim();
 			showErrorMessages('dialog-messages', msg);
 		}
+		btnActionStop('btnUpdate');
 		console.log(msg, oEvent);
 	};
 	//console.log('FormData: ', fd, ' - formElement', formElement);

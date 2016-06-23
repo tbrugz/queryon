@@ -258,10 +258,11 @@ $(document).jkey('f10',function(){
 </script>
 	<style>
 #messages {
-	border: 1px solid #000;
+	/*border: 1px solid #000;*/
 	display: none;
 	margin: 2px 4px 0 4px;
-	padding: 2px;
+	padding: 0 2px 0 4px;
+	margin-top: 0;
 }
 #authinfo {
 	float: right;
@@ -302,7 +303,6 @@ $(document).jkey('f10',function(){
 		<span id="authaction"></span>
 	</span>
 	
-	<div id="messages"></div>
 </nav>
 
 <div id="editor" style="width: 100%"></div>
@@ -312,6 +312,7 @@ $(document).jkey('f10',function(){
 	<div id="button-container">
 		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Page (F10)">
 		<a id="pages-open" href="" target="_blank" style="display: none" title="Open in new window"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+		<span id="messages"></span>
 	</div>
 	
 </div>
