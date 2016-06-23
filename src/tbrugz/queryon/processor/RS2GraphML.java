@@ -3,6 +3,7 @@ package tbrugz.queryon.processor;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
@@ -93,16 +94,26 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 			
 			SQL sql = QueryOn.getSelectQuery(model, relation, reqspec, pk, loStrategy, resp);
 			finalSql = sql.getFinalSql();
+			List<Object> params = sql.getParameterValues();
+			log.info("params: "+params);
 			
 			String qname = "rs2graphml";
 			prop.setProperty("sqldump.graphmlqueries", qname);
 			prop.setProperty("sqldump.graphmlquery."+qname+".sql", finalSql);
+			for(int i=0;i<params.size();i++) {
+				prop.setProperty("sqldump.graphmlquery."+qname+".param."+(i+1), String.valueOf(params.get(i)) );
+			}
 			
 			super.process();
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	@Override
+	public boolean isIdempotent() {
+		return true;
 	}
 
 }
