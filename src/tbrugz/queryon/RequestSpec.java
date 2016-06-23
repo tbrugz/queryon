@@ -70,7 +70,7 @@ public class RequestSpec {
 	final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
 	final String httpMethod;
-	final String modelId;
+	public final String modelId;
 	public final String object;
 	final int offset, limit;
 	final String loStrategy;
@@ -138,6 +138,10 @@ public class RequestSpec {
 	final static String[] standardFileExt = { "blob" };
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
+		this(dsutils, req, prop, 0);
+	}
+	
+	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore) throws ServletException, IOException {
 		this.request = req;
 		
 		contentType = req.getContentType();
@@ -203,6 +207,9 @@ public class RequestSpec {
 		String objectTmp = URIpartz.remove(0);
 		if(objectTmp == null || objectTmp.equals("")) {
 			//first part may be empty
+			objectTmp = URIpartz.remove(0);
+		}
+		for(int i=0;i<prefixesToIgnore;i++) {
 			objectTmp = URIpartz.remove(0);
 		}
 		object = objectTmp;
@@ -631,6 +638,11 @@ public class RequestSpec {
 		}
 		log.info("debug: updateValues: "+updateValues);
 		log.info("debug: updatePartValues: "+updatePartValues);
+	}
+	
+	@Override
+	public String toString() {
+		return "RequestSpec[object="+object+";params="+params+";model="+modelId+"]";
 	}
 	
 }

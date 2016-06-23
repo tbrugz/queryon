@@ -21,8 +21,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessComponent;
@@ -40,7 +42,8 @@ public class ProcessorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(ProcessorServlet.class);
 	
-	static final String PROCESSOR_PERMISSION_PREFIX = "PROCESSOR:"; 
+	static final String PROCESSOR_PERMISSION_PREFIX = "PROCESSOR:";
+	static final int ERROR_STATUS = 500;
 	
 	ServletConfig config = null; //XXX: remove ServletConfig config
 	
@@ -68,9 +71,17 @@ public class ProcessorServlet extends HttpServlet {
 			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
 		} catch (ServletException e) {
+			resp.setStatus(ERROR_STATUS);
+			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
+			resp.getWriter().write(e.getMessage());
+			
 			//e.printStackTrace();
 			throw e;
 		} catch (Exception e) {
+			resp.setStatus(ERROR_STATUS);
+			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
+			resp.getWriter().write(e.getMessage());
+			
 			//e.printStackTrace();
 			throw new ServletException(e);
 		}
@@ -138,12 +149,13 @@ public class ProcessorServlet extends HttpServlet {
 		//SchemaModel model = SchemaModelUtils.getModel(context, modelId);
 		
 		if(procComponent instanceof Processor) {
+			
 			Processor proc = (Processor) procComponent;
 			// if not idempotent, only POST method allowed
 			if(!proc.isIdempotent() && req!=null && req.getMethod()!=null && !req.getMethod().equals("POST")) {
 				throw new BadRequestException("processor '"+procClass+"' only allowed with POST method");
 			}
-			doProcessProcessor(proc, prop, modelId, context, resp);
+			doProcessProcessor(proc, prop, modelId, context, req, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
 				resp.getWriter().write("processor '"+procClass+"' processed\n");
 			}
@@ -161,7 +173,7 @@ public class ProcessorServlet extends HttpServlet {
 		}
 	}
 	
-	static void doProcessProcessor(Processor pc, Properties prop, String modelId, ServletContext context, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
+	static void doProcessProcessor(Processor pc, Properties prop, String modelId, ServletContext context, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		SchemaModel sm = null;
 		if(pc.needsSchemaModel()) {
 			sm = SchemaModelUtils.getModel(context, modelId);
@@ -196,7 +208,29 @@ public class ProcessorServlet extends HttpServlet {
 				}
 			}
 			
-			pc.process();
+			if(pc instanceof WebProcessor) {
+				WebProcessor wp = (WebProcessor) pc;
+
+				DumpSyntaxUtils dsutils = (DumpSyntaxUtils) context.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+				RequestSpec reqspec = new RequestSpec(dsutils, req, prop, 1);
+				DBIdentifiable dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(sm, reqspec);
+				
+				Subject currentUser = ShiroUtils.getSubject(prop);
+				
+				try {
+					//wp.setRelation(r);
+					wp.setDBIdentifiable(dbobj);
+				}
+				catch(Exception e) {
+					log.warn("error setting DBIdentifiable: reqspec="+reqspec); //+" [modelId="+reqspec.modelId+"]");
+				}
+				wp.setSubject(currentUser);
+				
+				wp.process(reqspec, resp);
+			}
+			else {
+				pc.process();
+			}
 		}
 		finally {
 			if(w!=null) {

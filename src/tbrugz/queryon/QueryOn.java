@@ -161,7 +161,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		
-		static LimitOffsetStrategy getDefaultStrategy(String dbid) {
+		public static LimitOffsetStrategy getDefaultStrategy(String dbid) {
 			String strategyStr = prop.getProperty("dbid."+dbid+".limitoffsetstretegy", RESULTSET_CONTROL.toString());
 			log.debug("getLOStrategy["+dbid+"]: "+strategyStr);
 			LimitOffsetStrategy strat = LimitOffsetStrategy.valueOf(strategyStr);
@@ -222,6 +222,7 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
 	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	public static final String ATTR_INIT_ERROR = "initerror";
+	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
 	
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_POST = "POST";
@@ -240,7 +241,7 @@ public class QueryOn extends HttpServlet {
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
-	boolean validateFilterColumnNames = true;
+	static boolean validateFilterColumnNames = true;
 	boolean xSetRequestUtf8 = false;
 	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
 	
@@ -316,6 +317,7 @@ public class QueryOn extends HttpServlet {
 			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
 			
 			context.setAttribute(ATTR_PROP, prop);
+			context.setAttribute(ATTR_DUMP_SYNTAX_UTILS, dsutils);
 			
 			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();
 			context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
@@ -760,20 +762,12 @@ public class QueryOn extends HttpServlet {
 		return relation;
 	}
 	
-	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
-		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
-		String finalSql = null;
-		try {
+	public static SQL getSelectQuery(SchemaModel model, Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		
-		if(log.isDebugEnabled()) {
-			ConnectionUtil.showDBInfo(conn.getMetaData());
-		}
 		SQL sql = SQL.createSQL(relation, reqspec);
 		
 		// add parameters for Query
 		addOriginalParameters(reqspec, sql);
-		
-		Constraint pk = SchemaModelUtils.getPK(relation);
 		
 		filterByKey(relation, reqspec, pk, sql);
 
@@ -800,7 +794,6 @@ public class QueryOn extends HttpServlet {
 		//limit-offset
 		//how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
 		//query type (table, view, query), resultsetType? (not available at this point), database type
-		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		if(! sql.allowEncapsulation) {
 			loStrategy = LimitOffsetStrategy.RESULTSET_CONTROL;
 			log.debug("query '"+relation.getName()+"': allowEncapsulation == false - loStrategy = "+loStrategy);
@@ -817,9 +810,24 @@ public class QueryOn extends HttpServlet {
 		
 		//query finished!
 		
-		finalSql = sql.getFinalSql();
+		return sql;
 		//log.info("sql:\n"+sql);
+	}
 		
+	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		String finalSql = null;
+		try {
+			
+		if(log.isDebugEnabled()) {
+			ConnectionUtil.showDBInfo(conn.getMetaData());
+		}
+		
+		Constraint pk = SchemaModelUtils.getPK(relation);
+		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
+		
+		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, resp);
+		finalSql = sql.getFinalSql();
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		bindParameters(st, sql);
 		
@@ -1434,7 +1442,6 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		if("".equals(sbCols.toString())) {
-			//log.warn("no valid columns");
 			throw new BadRequestException("[insert] No valid columns");
 		}
 		sql.applyInsert(sbCols.toString(), sbVals.toString());
@@ -1513,7 +1520,7 @@ public class QueryOn extends HttpServlet {
 		return pk.getUniqueColumns().size() <= reqspec.params.size();
 	}
 	
-	void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
+	static void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
 		String filter = "";
 		// TODOxxx: what if parameters already defined in query?
 		if(reqspec.params.size()>0) {
@@ -1553,7 +1560,7 @@ public class QueryOn extends HttpServlet {
 	 * @param sql
 	 * @return List of warnings (filter columns not found) 
 	 */
-	List<String> filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
+	static List<String> filterByXtraParams(Relation relation, RequestSpec reqspec, SQL sql) {
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
 		
 		List<String> colNames = relation.getColumnNames();
@@ -1591,7 +1598,7 @@ public class QueryOn extends HttpServlet {
 		return warnings;
 	}
 	
-	void addUniqueFilter(final Map<String, String> valueMap, Set<String> columns, SQL sql, String compareSymbol, String relationName, List<String> warnings) {
+	static void addUniqueFilter(final Map<String, String> valueMap, Set<String> columns, SQL sql, String compareSymbol, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				sql.bindParameterValues.add(valueMap.get(col));
@@ -1605,7 +1612,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void addMultiFilter(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
+	static void addMultiFilter(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				String[] values = valueMap.get(col);
@@ -1622,7 +1629,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
+	static void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				StringBuilder sb = new StringBuilder();
