@@ -76,6 +76,7 @@ function showErrorMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
 	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	m.setAttribute('class', 'error');
+	//var display = 'initial';
 	var display = 'block';
 	if(m.tagName=='SPAN') { display = 'inline-block'; }
 	m.style.display = display;

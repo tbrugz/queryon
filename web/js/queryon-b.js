@@ -281,7 +281,7 @@ function getQueryVariable(variable) {
 }
 
 function getColumnsFromRelation(relation) {
-	console.log("getColumnsFromRelation",relation);
+	//console.log("getColumnsFromRelation",relation);
 	var colsStr = relation.columnNames;
 	if(! colsStr) { return null; }
 	var cols = colsStr.split(",");

@@ -113,6 +113,10 @@ body {
 		<input type="button" value="+" onclick="graphIncreaseSize();"/>
 		<input type="button" value="-" onclick="graphDecreaseSize();"/>
 	</span>
+
+	<span class="btn-container">
+		<a id="download" title="download GraphML file (experimental)" href="" style="display: none;">download</a>
+	</span>
 	
 	<span id="authinfo">
 		<span id="username"></span>
@@ -130,6 +134,8 @@ body {
 </div>
 
 <script>
+		var downloadUrl = 'processor/RS2GraphML';
+
 		function writeOptions(containerId, relations) {
 			if(!relations) { return; }
 			//console.log('write relations [#'+relations.length+'] to '+containerId);
@@ -142,7 +148,9 @@ body {
 			}
 		}
 		
-		function onParameterChange(i) {}
+		function onParameterChange(i) {
+			updateDownloadUrl();
+		}
 		
 		function validGraphRelation(relation) {
 			var cols = getColumnsFromRelation(relation);
@@ -156,6 +164,7 @@ body {
 			loadRelation('objects', 'parameters', 'content');
 			document.getElementById('navbar-prop').style.display = 'initial';
 			document.getElementById('buttons').style.display = 'initial';
+			updateDownloadUrl();
 		}
 		
 		function updateUI() {
@@ -163,6 +172,8 @@ body {
 		}
 		
 		function updateFromFilters() {
+			console.log('updateFromFilters...');
+			updateDownloadUrl();
 			updateUI();
 		}
 		
@@ -171,6 +182,15 @@ body {
 			init('q','objects', writeOptions);
 			loadAuthInfo();
 			updateUI();
+		}
+		
+		function updateDownloadUrl() {
+			var paramsStr = getUrlParams();
+			var filterStr = getUrlFilters();
+			byId('download').href = downloadUrl + '/' + objects.value + paramsStr + '?' + filterStr;
+			byId('download').style.display = 'initial';
+			byId('download').setAttribute('download', objects.value+'.graphml');
+			//title='plot.graphml'
 		}
 		
 		// ======================== sigma-related functions ========================
@@ -226,11 +246,8 @@ body {
 			});
 			//console.log("added node "+elem[prefix]);
 		}
-	
-		function loadGraph() {
-			var qid = document.getElementById('objects').options[document.getElementById('objects').selectedIndex].value;
-
-			//parameters
+		
+		function getUrlParams() {
 			var params = document.querySelectorAll('.parameter');
 			var paramsStr = '';
 			for (var i = 0; i < params.length; ++i) {
@@ -239,17 +256,31 @@ body {
 				if(str=='') { str = '-'; } 
 				paramsStr += '/'+str;
 			}
-
-			//filters
-			var queryString = '';
+			return paramsStr;
+		}
+		
+		function getUrlFilters() {
 			var filters = document.querySelectorAll('.filter');
+			var filterString = '';
 			for (var i = 0; i < filters.length; ++i) {
 				var item = filters[i];
 				//console.log(item);
-				queryString += '&'+item.name+"="+item.value;
+				filterString += '&'+item.name+"="+item.value;
 			}
+			return filterString;
+		}
+	
+		function loadGraph() {
+			var qid = document.getElementById('objects').options[document.getElementById('objects').selectedIndex].value;
+
+			//parameters
+			var paramsStr = getUrlParams();
+
+			//filters
+			var filterStr = getUrlFilters();
 
 			// ajax
+			var queryString = filterStr;
 			btnActionStart('go-button');
 			var url = 'q/'+qid+paramsStr+'.json?'+queryString;
 			console.log('url['+qid+']: '+url);
