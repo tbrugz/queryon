@@ -275,6 +275,16 @@ i[onclick] {
 	margin: 8px 4px 8px 4px;
 }
 
+/* css transitions */
+
+.fadeoutable {
+	transition: opacity 1s; 
+}
+
+.fadeoutable.fade {
+	opacity:0;
+}
+
 /* typeahead */
 
 .tt-dropdown-menu {

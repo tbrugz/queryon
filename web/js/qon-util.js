@@ -55,7 +55,10 @@ function getParameterNamesStartWith(startWithRegex, queryString) {
 function showInfoMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
 	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
-	m.setAttribute('class', 'info');
+	m.classList.add('info');
+	m.classList.remove('warn');
+	m.classList.remove('error');
+	//m.setAttribute('class', 'info');
 	var display = 'block';
 	if(m.tagName=='SPAN') { display = 'inline-block'; }
 	m.style.display = display;
@@ -65,7 +68,9 @@ function showInfoMessages(messagesId, text) {
 function showWarnMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
 	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
-	m.setAttribute('class', 'warn');
+	m.classList.remove('info');
+	m.classList.add('warn');
+	m.classList.remove('error');
 	var display = 'block';
 	if(m.tagName=='SPAN') { display = 'inline-block'; }
 	m.style.display = display;
@@ -75,7 +80,9 @@ function showWarnMessages(messagesId, text) {
 function showErrorMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
 	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
-	m.setAttribute('class', 'error');
+	m.classList.remove('info');
+	m.classList.remove('warn');
+	m.classList.add('error');
 	//var display = 'initial';
 	var display = 'block';
 	if(m.tagName=='SPAN') { display = 'inline-block'; }

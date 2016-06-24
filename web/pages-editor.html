@@ -126,6 +126,9 @@ function doSave() {
 	//payload.append('v:ID', id);
 	//payload.append('v:PATH', path);
 	
+	// http://stackoverflow.com/questions/6121203/how-to-do-fade-in-and-fade-out-with-javascript-and-css
+	byId('messages').classList.remove('fadeoutable');
+	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function(evt) {
 		var req = evt.target
@@ -139,8 +142,14 @@ function doSave() {
 			}
 			console.log('doSave.ok, pkvals=', pkvals, '; evt=', evt);
 			//closeMessages('messages');
+			byId('messages').classList.remove('fade');
+			byId('messages').classList.add('fadeoutable');
 			showInfoMessages('messages', 'page '+name+' sucessfully saved');
 			refreshUI();
+			setTimeout(
+					function() { byId('messages').classList.add('fade'); },
+					2000);
+			console.log("fading...");
 		}
 		else {
 			doSaveError(evt);
