@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -26,7 +27,6 @@ import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
@@ -69,20 +69,25 @@ public class ProcessorServlet extends HttpServlet {
 			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
 			resp.setStatus(e.getCode());
 			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
-			resp.getWriter().write(e.getMessage());
+			if(resp.isCommitted()) {
+				log.warn("response already committed...");
+			}
+			else {
+				resp.getWriter().write(e.getMessage());
+			}
 		} catch (ServletException e) {
-			resp.setStatus(ERROR_STATUS);
-			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
-			resp.getWriter().write(e.getMessage());
+			//resp.setStatus(ERROR_STATUS);
+			//resp.setContentType(AbstractHttpServlet.MIME_TEXT);
+			//resp.getWriter().write(e.getMessage());
 			
-			//e.printStackTrace();
+			log.warn(e.getClass().getSimpleName()+": "+e.getMessage(), e);
 			throw e;
 		} catch (Exception e) {
-			resp.setStatus(ERROR_STATUS);
-			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
-			resp.getWriter().write(e.getMessage());
+			//resp.setStatus(ERROR_STATUS);
+			//resp.setContentType(AbstractHttpServlet.MIME_TEXT);
+			//resp.getWriter().write(e.getMessage());
 			
-			//e.printStackTrace();
+			log.warn(e.getClass().getSimpleName()+": "+e.getMessage(), e);
 			throw new ServletException(e);
 		}
 	}
@@ -116,7 +121,7 @@ public class ProcessorServlet extends HttpServlet {
 
 	//TODOne: shiro: add permission check
 	static void doProcess(String procClass, ServletContext context, String modelId, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
-		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
+		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, QueryOn.DEFAULT_CLASSLOADING_PACKAGES);
 		if(procComponent==null) {
 			throw new BadRequestException("processor class not found: "+procClass);
 		}
@@ -189,25 +194,8 @@ public class ProcessorServlet extends HttpServlet {
 			pc.setConnection(conn);
 		}
 		
-		Writer w = null;
-		OutputStream os = null;
+		Flushable output = null;
 		try {
-			String mimeType = pc.getMimeType();
-			if(resp!=null) {
-				if(pc.acceptsOutputWriter()) {
-					w = resp.getWriter();
-					pc.setOutputWriter(w);
-				}
-				else if(pc.acceptsOutputStream()) {
-					os = resp.getOutputStream();
-					pc.setOutputStream(os);
-				}
-				
-				if(mimeType!=null) {
-					resp.setContentType(mimeType);
-				}
-			}
-			
 			if(pc instanceof WebProcessor) {
 				WebProcessor wp = (WebProcessor) pc;
 
@@ -229,15 +217,14 @@ public class ProcessorServlet extends HttpServlet {
 				wp.process(reqspec, resp);
 			}
 			else {
+				output = setOutput(pc, resp);
+				
 				pc.process();
 			}
 		}
 		finally {
-			if(w!=null) {
-				w.flush();
-			}
-			if(os!=null) {
-				os.flush();
+			if(output!=null) {
+				output.flush();
 			}
 			if(conn!=null) {
 				//QOnModelUtils.setModelMetadata(sm, conn);
@@ -280,5 +267,27 @@ public class ProcessorServlet extends HttpServlet {
 			os.flush();
 		}
 	}
-
+	
+	public static Flushable setOutput(Processor pc, HttpServletResponse resp) throws IOException {
+		Flushable ret = null;
+		String mimeType = pc.getMimeType();
+		if(resp!=null) {
+			if(pc.acceptsOutputWriter()) {
+				Writer w = resp.getWriter();
+				pc.setOutputWriter(w);
+				ret = w;
+			}
+			else if(pc.acceptsOutputStream()) {
+				OutputStream os = resp.getOutputStream();
+				pc.setOutputStream(os);
+				ret = os;
+			}
+			
+			if(mimeType!=null) {
+				resp.setContentType(mimeType);
+			}
+		}
+		return ret;
+	}
+	
 }

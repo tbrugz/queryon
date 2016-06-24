@@ -422,4 +422,8 @@ public class SQL {
 		if(s.length()>maxlength) { return s.substring(0, maxlength-1)+" (...)"; }
 		return s;
 	}
+	
+	public List<Object> getParameterValues() {
+		return bindParameterValues;
+	}
 }

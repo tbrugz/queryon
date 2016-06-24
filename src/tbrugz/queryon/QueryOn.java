@@ -245,7 +245,7 @@ public class QueryOn extends HttpServlet {
 	boolean xSetRequestUtf8 = false;
 	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
 	
-	static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
+	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
 	ServletContext servletContext = null;
 	
@@ -331,12 +331,12 @@ public class QueryOn extends HttpServlet {
 		} catch (Exception e) {
 			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
 			log.error(message);
-			//e.printStackTrace();
+			log.debug(message, e);
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw new ServletException(message, e);
 		} catch (Error e) {
 			log.error(e.toString());
-			e.printStackTrace();
+			log.debug(e.toString(), e);
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
 		}
@@ -567,18 +567,7 @@ public class QueryOn extends HttpServlet {
 					throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [obj="+reqspec.object+"]");
 				}
 				
-				if(dbobj instanceof Table) {
-					otype = DBObjectType.TABLE.name();
-				}
-				else if(dbobj instanceof Query) {
-					otype = CONST_QUERY;
-				}
-				else if(dbobj instanceof View) {
-					otype = DBObjectType.VIEW.name();
-				}
-				else {
-					otype = CONST_RELATION;
-				}
+				otype = QueryOn.getObjectType(dbobj);
 			}
 			else if(dbobj instanceof ExecutableObject) {
 				//XXX only if POST method?
@@ -697,21 +686,22 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, Relation rel) {
+	public static void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, Relation rel) {
 		boolean check = grantsAndRolesMatches(subject, privilege, rel.getGrants());
 		if(!check) {
-			throw new ForbiddenException("no "+privilege+" permission on "+rel.getName());
+			String schema = rel.getSchemaName();
+			throw new ForbiddenException("no "+privilege+" permission on "+(schema!=null?schema+".":"")+rel.getName());
 		}
 	}
 
-	void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, ExecutableObject eo) {
+	public static void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, ExecutableObject eo) {
 		boolean check = grantsAndRolesMatches(subject, privilege, eo.getGrants());
 		if(!check) {
 			throw new ForbiddenException("no "+privilege+" permission on "+eo.getQualifiedName());
 		}
 	}
 	
-	boolean grantsAndRolesMatches(Subject subject, PrivilegeType privilege, List<Grant> grants) {
+	public static boolean grantsAndRolesMatches(Subject subject, PrivilegeType privilege, List<Grant> grants) {
 		grants = QOnModelUtils.filterGrantsByPrivilegeType(grants, privilege);
 		if(grants==null || grants.size()==0) {
 			return true;
@@ -747,7 +737,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	// XXX should use RequestSpec for parameters?
-	Query getQuery(HttpServletRequest req) {
+	static Query getQuery(HttpServletRequest req) {
 		Query relation = new Query();
 		String name = req.getParameter("name");
 		/*if(name==null || name.equals("")) {
@@ -1512,7 +1502,7 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write("queryon config reloaded");
 	}
 	
-	boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
+	static boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
 		if(pk==null) {
 			return false;
 		}
@@ -1891,6 +1881,25 @@ public class QueryOn extends HttpServlet {
 			return null;
 		}
 	}
+	
+	public static String getObjectType(DBIdentifiable dbid) {
+		String ret = null;
+		if(dbid instanceof Table) {
+			ret = DBObjectType.TABLE.name();
+		}
+		else if(dbid instanceof Query) {
+			ret = QueryOn.CONST_QUERY;
+		}
+		else if(dbid instanceof View) {
+			ret = DBObjectType.VIEW.name();
+		}
+		else {
+			ret = QueryOn.CONST_RELATION;
+		}
+		return ret;
+	}
+	
+	
 	
 	/*@SuppressWarnings("rawtypes")
 	static <T> List<String> getSimpleClassNames(List<Class<T>> classes) {

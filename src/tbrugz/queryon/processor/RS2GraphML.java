@@ -1,5 +1,6 @@
 package tbrugz.queryon.processor;
 
+import java.io.Flushable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,12 +18,16 @@ import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.WebProcessor;
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.ProcessorServlet;
 import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.graph.ResultSet2GraphML;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -33,6 +38,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 	
 	//SchemaModel model = null;
 	Relation relation = null;
+	Subject currentUser = null;
 	
 	/*@Override
 	public void setModel(SchemaModel model) {
@@ -62,7 +68,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 
 	@Override
 	public void setSubject(Subject currentUser) {
-		// TODO Auto-generated method stub
+		this.currentUser = currentUser;
 	}
 
 	@Override
@@ -72,11 +78,33 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 	
 	@Override
 	public void process(RequestSpec reqspec, HttpServletResponse resp) {
+		// test for SELECT permission on object...
+		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
+		ActionType atype = ActionType.SELECT;
+		log.debug("user: "+currentUser+" ; otype="+otype+"; atype="+atype); 
+		ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
+		if(! ShiroUtils.isPermitted(currentUser, QueryOn.doNotCheckGrantsPermission)) {
+			QueryOn.checkGrantsAndRolesMatches(currentUser, PrivilegeType.SELECT, relation);
+		}
+		
+		Flushable output = null;
 		try {
+			output = ProcessorServlet.setOutput(this, resp);
 			processInternal(reqspec, resp);
+		} catch (BadRequestException e) {
+			log.warn(e);
+			throw e;
 		} catch (Exception e) {
 			log.warn(e);
 			throw new BadRequestException("Error processing RS2GraphML", e); 
+		} finally {
+			if(output!=null) {
+				try {
+					output.flush();
+				} catch (IOException e) {
+					log.warn("Error in flush? - "+e.getMessage(), e);
+				}
+			}
 		}
 	}
 	
