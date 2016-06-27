@@ -229,6 +229,9 @@ function loadAce() {
 	editor.$blockScrolling = true;
 	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
 	editor.getSession().setMode("ace/mode/html"); //javascript, html, json, markdown, css, xml
+	editor.setOptions({
+		fontSize: "11pt"
+	});
 	/*editor.getSelectedText = function() {
 		return this.getSession().getTextRange(this.getSelectionRange());
 	};*/

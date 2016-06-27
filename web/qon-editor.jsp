@@ -703,6 +703,9 @@ if(remarks==null) { remarks = ""; }
 		//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
 		return this.getSession().getTextRange(this.getSelectionRange());
 	};
+	editor.setOptions({
+		fontSize: "11pt"
+	});
 	
 	setParameters(<%= numOfParameters %>);
 </script>

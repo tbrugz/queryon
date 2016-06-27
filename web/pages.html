@@ -166,8 +166,8 @@ openUploadDialog = function(id) {
 		+ "<div id='dialog-messages'></div></div>";
 	dialogHTML += "<div><form name='upload-form' id='upload-form' enctype='multipart/form-data' method='post' >";
 	dialogHTML += (id?"<input type='hidden' name='_method' value='PUT'/><input type='hidden' name='v:ID' value='"+id+"'/>":"")
-	dialogHTML += "<div class='field'><label>path: <input type='text' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label></div> ";
-	dialogHTML += "<div class='field'><label>file: <input type='file' name='v:BINARY_DATA'/>"+" <span class='remarks'>binary content</span>"+"</label></div> ";
+	dialogHTML += "<div class='field'><label>file: <input type='file' id='v:BINARY_DATA' name='v:BINARY_DATA' onchange='onFileChange();'/>"+" <span class='remarks'>binary content</span>"+"</label></div> ";
+	dialogHTML += "<div class='field'><label>path: <input type='text' id='v:PATH' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label></div> ";
 	dialogHTML += "</form></div> ";
 
 	dialog.innerHTML = dialogHTML + "<div id='dialog-footer'>"
@@ -180,6 +180,14 @@ openUploadDialog = function(id) {
 		var page = findPage(id);
 		document.getElementsByName('v:PATH')[0].value = page.PATH;
 	}
+}
+
+onFileChange = function() {
+	var filename = byId('v:BINARY_DATA').files[0].name;
+	if(! byId('v:PATH').value) {
+		byId('v:PATH').value = filename;
+	}
+	//console.log(, byId('v:PATH'));
 }
 
 findPage = function(id) {
