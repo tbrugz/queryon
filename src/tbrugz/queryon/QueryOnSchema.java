@@ -1,6 +1,7 @@
 package tbrugz.queryon;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +25,7 @@ import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ModelUtils;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
 /*
@@ -162,7 +164,21 @@ public class QueryOnSchema extends HttpServlet {
 		
 		resp.setContentType(MIME_SQL);
 		resp.getWriter().write(dbid.getDefinition(true));
+		writeFooter(dbid, resp.getWriter());
 		lastDialect = model.getSqlDialect();
+	}
+	
+	void writeFooter(DBIdentifiable dbid, Writer w) throws IOException {
+		if(dbid instanceof Relation) {
+			w.write(";");
+			Relation r = (Relation) dbid;
+			String remarks = r.getRemarksSnippet(true);
+			
+			if(remarks!=null && !remarks.equals("")) {
+				w.write("\n\n");
+				w.write(remarks);
+			}
+		}
 	}
 	
 	DBObjectType type4filter(DBObjectType type) {

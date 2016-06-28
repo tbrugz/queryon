@@ -157,6 +157,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			}
 		}
 		resp.getWriter().write(dbid.getDefinition(true));
+		writeFooter(dbid, resp.getWriter());
 	}
 	
 	Table grabTable(String schemaName, String tableName, DatabaseMetaData dbmd, DBMSFeatures feat) throws SQLException {
