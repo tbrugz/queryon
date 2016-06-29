@@ -250,7 +250,8 @@ public class DiffServlet extends AbstractHttpServlet {
 		if(instant) {
 			return new QueryOnSchemaInstant(); // XXXxx use factory? new QueryOnSchema() / QueryOnSchemaInstant() ...
 		}
-		return new QueryOnSchema();
+		throw new IllegalStateException("getQOS: only 'true' instant allowed");
+		//return new QueryOnSchema();
 	}
 	
 	boolean getDoApply(HttpServletRequest req) {
