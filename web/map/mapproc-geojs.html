@@ -8,6 +8,7 @@
 <script async type="text/javascript" src="//maps.googleapis.com/maps/api/js?callback=loadGoogleMapsDefaultOnInit"></script>
 <script type="text/javascript" src="../js/qon-base.js"></script>
 <script type="text/javascript" src="../js/queryon-b.js"></script>
+<script type="text/javascript" src="../js/qon-util.js"></script>
 <script type="text/javascript" src="js/mapproc.js"></script>
 <script type="text/javascript" src="js/mapproc.sa.js"></script>
 <script type="text/javascript" src="js/jscolor/jscolor.js"></script>
@@ -158,10 +159,12 @@ function loadData(dataUrl) {
 	//     1st colname is object-label ; 2nd is value_label - what about measure-unit?
 	//var dataUrl = document.getElementById('dataUrl').value;
 	console.log("loadData:: dataurl=",dataUrl);
+	btnActionStart('btn-loaddata');
 	var jqxhrSeries = $.ajax({ url: dataUrl,
 		dataType: 'text',
 		success: function(data) {
 			//okNumber++;
+			btnActionStop('btn-loaddata');
 			seriesData = null;
 			try {
 				//parse JSON series
@@ -184,7 +187,10 @@ function loadData(dataUrl) {
 			if(seriesData) { loadDataCallback(); }
 			//if(okNumber==3) { doIt(); }
 		},
-		error: function() { alert("error Series ["+dataUrl+"]"); }
+		error: function() {
+			btnActionStop('btn-loaddata');
+			alert("error Series ["+dataUrl+"]");
+		}
 	});
 	//.error()
 }

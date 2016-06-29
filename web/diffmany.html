@@ -367,6 +367,12 @@ setSelectMultiOptions = function(select, values) {
 	#nav > label {
 		vertical-align: top;
 	}
+	#nav > label > span {
+		/*vertical-align: inherit;
+		padding-top: 5px;*/
+		display: block;
+		padding: 3px 3px 0 3px;
+	}
 	#navbar-prop {
 		display: inline;
 	}
@@ -461,10 +467,10 @@ setSelectMultiOptions = function(select, values) {
 		</label>
 	</span>
 	<label>
-		schema: <select id="schema" onchange="onSchemaChanged();" multiple="multiple" size="7"></select>
+		<span>schema:</span> <select id="schema" onchange="onSchemaChanged();" multiple="multiple" size="7"></select>
 	</label>
 	<label>
-		type: <select id="type" onchange="onObjTypeChanged();" multiple="multiple" size="7"></select>
+		<span>type:</span> <select id="type" onchange="onObjTypeChanged();" multiple="multiple" size="7"></select>
 	</label>
 	<label>
 		syntax:

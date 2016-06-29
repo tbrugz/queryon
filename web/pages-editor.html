@@ -127,7 +127,11 @@ function doSave() {
 	//payload.append('v:PATH', path);
 	
 	// http://stackoverflow.com/questions/6121203/how-to-do-fade-in-and-fade-out-with-javascript-and-css
+	byId('messages').innerHTML = '';
 	byId('messages').classList.remove('fadeoutable');
+	setTimeout(function() {
+		byId('messages').classList.remove('fade');
+	}, 10);
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function(evt) {
@@ -142,14 +146,17 @@ function doSave() {
 			}
 			console.log('doSave.ok, pkvals=', pkvals, '; evt=', evt);
 			//closeMessages('messages');
-			byId('messages').classList.remove('fade');
-			byId('messages').classList.add('fadeoutable');
-			showInfoMessages('messages', 'page '+name+' sucessfully saved');
-			refreshUI();
-			setTimeout(
-					function() { byId('messages').classList.add('fade'); },
-					2000);
-			console.log("fading...");
+			byId('messages').classList.remove('fadeoutable');
+			setTimeout(function() {
+				byId('messages').classList.remove('fade');
+				byId('messages').classList.add('fadeoutable');
+				showInfoMessages('messages', 'page '+name+' sucessfully saved');
+				refreshUI();
+				setTimeout(
+						function() { byId('messages').classList.add('fade'); },
+						2000);
+				console.log("fading...");
+			}, 10);
 		}
 		else {
 			doSaveError(evt);

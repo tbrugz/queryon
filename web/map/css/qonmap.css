@@ -36,3 +36,7 @@ input.parameter {
 	display: none;
 	margin: 2px;
 }
+
+input.onaction {
+	background-color: #f90 !important;
+}
