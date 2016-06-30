@@ -21,6 +21,11 @@
 		<servlet-name>QueryOnSchema</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOnSchema</servlet-class>
 	</servlet>
+
+	<servlet>
+		<servlet-name>QueryOnSchemaInstant</servlet-name>
+		<servlet-class>tbrugz.queryon.QueryOnSchemaInstant</servlet-class>
+	</servlet>
 	
 	<servlet>
 		<servlet-name>ProcessorServlet</servlet-name>
@@ -40,6 +45,11 @@
 
 	<servlet-mapping>
 		<servlet-name>QueryOnSchema</servlet-name>
+		<url-pattern>/qoschema/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>QueryOnSchemaInstant</servlet-name>
 		<url-pattern>/qos/*</url-pattern>
 	</servlet-mapping>
 	

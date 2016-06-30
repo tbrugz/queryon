@@ -619,7 +619,16 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------
 	
-	static int getReturnCodeQOS(String query) throws ClientProtocolException, IOException {
+	static int getReturnCodeQosInstant(String query) throws ClientProtocolException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(qonSchemaInstantBaseUrl+query);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		//String resp = getContent(response1);
+		return response1.getStatusLine().getStatusCode();
+	}
+
+	static int getReturnCodeQoSchema(String query) throws ClientProtocolException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(qonSchemaBaseUrl+query);
 		
@@ -651,21 +660,21 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testQosGetTableDept() throws IOException, ParserConfigurationException, SAXException {
-		Assert.assertEquals(200, getReturnCodeQOS("/table/PUBLIC.DEPT"));
+		Assert.assertEquals(200, getReturnCodeQosInstant("/table/PUBLIC.DEPT"));
 	}
 
 	@Test
 	public void testQosGetTableXxxError() throws IOException, ParserConfigurationException, SAXException {
-		Assert.assertEquals(404, getReturnCodeQOS("/TABLE/PUBLIC.XXX"));
+		Assert.assertEquals(404, getReturnCodeQosInstant("/TABLE/PUBLIC.XXX"));
 	}
 	
 	@Test
 	public void testQosGetFkEmpdept() throws IOException, ParserConfigurationException, SAXException {
-		Assert.assertEquals(200, getReturnCodeQOS("/FK/PUBLIC.EMP_DEPT_FK"));
+		Assert.assertEquals(200, getReturnCodeQoSchema("/FK/PUBLIC.EMP_DEPT_FK"));
 	}
 	
 	@Test
 	public void testQosGetFkEmpdeptError() throws IOException, ParserConfigurationException, SAXException {
-		Assert.assertEquals(404, getReturnCodeQOS("/FK/PUBLIC.EMP_XXX_FK"));
+		Assert.assertEquals(404, getReturnCodeQosInstant("/FK/PUBLIC.EMP_XXX_FK"));
 	}
 }

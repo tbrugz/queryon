@@ -28,7 +28,8 @@ public class JettySetup {
 	
 	public static String qonUrl = "http://localhost:"+port;
 	public static String baseUrl = "http://localhost:"+port+"/q";
-	public static String qonSchemaBaseUrl = "http://localhost:"+port+"/qos";
+	public static String qonSchemaInstantBaseUrl = "http://localhost:"+port+"/qos";
+	public static String qonSchemaBaseUrl = "http://localhost:"+port+"/qoschema";
 	
 	private static Server server = null;
 	
@@ -84,7 +85,7 @@ public class JettySetup {
 	public static void setupTestUrls() {
 		qonUrl = "http://localhost:"+port;
 		baseUrl = "http://localhost:"+port+"/q";
-		qonSchemaBaseUrl = "http://localhost:"+port+"/qos";
+		qonSchemaInstantBaseUrl = "http://localhost:"+port+"/qos";
 	}
 
 	/*

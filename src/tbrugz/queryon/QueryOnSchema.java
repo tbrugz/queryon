@@ -31,7 +31,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 /*
  * XXX: add POST method?
  */
-public abstract class QueryOnSchema extends HttpServlet {
+public class QueryOnSchema extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnSchema.class);
