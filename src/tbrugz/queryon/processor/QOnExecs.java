@@ -3,8 +3,10 @@ package tbrugz.queryon.processor;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.DatabaseMetaData;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +48,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	static final String PIPE_SPLIT = "\\|";
 	
 	public static final String DEFAULT_EXECS_TABLE = "QON_EXECS";
+	
+	public static final String TYPE_SCRIPT = "SCRIPT";
 
 	Writer writer;
 
@@ -119,7 +123,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			String parameter_names_str = rs.getString(8);
 			String parameter_types_str = rs.getString(9);
 			String parameter_inouts_str = rs.getString(10);
-			//String body = rs.getString(11);
+			String body = rs.getString(11);
+			if("".equals(body)) { body = null; }
 			
 			List<String> rolesFilter = Utils.getStringList(roles_filter_str, PIPE_SPLIT);
 			List<String> parameterNames = Utils.getStringList(parameter_names_str, PIPE_SPLIT);
@@ -136,7 +141,20 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 				if(containsExecutableWithName(execs, schema, name)) {
 					count += addExecutable(schema, name, remarks, rolesFilter, exec_type,
-							packageName, parameterCount, parameterNames, parameterTypes, parameterInouts);
+							packageName, parameterCount, parameterNames, parameterTypes, parameterInouts,
+							body);
+				}
+				if(body!=null) {
+					PreparedStatement stmt = conn.prepareStatement(body);
+					ResultSetMetaData rsmd = stmt.getMetaData();
+					int colcount = rsmd!=null ? rsmd.getColumnCount() : -1;
+					ParameterMetaData pmd = stmt.getParameterMetaData();
+					int pcount = pmd!=null ? pmd.getParameterCount() : -1;
+					log.info("excutable "+schema+"."+name+": column-count="+colcount+" ; parameter-count: "+pcount);
+					
+					count += addExecutable(schema, name, remarks, rolesFilter, exec_type,
+							packageName, parameterCount, parameterNames, parameterTypes, parameterInouts,
+							body);
 				}
 				else {
 					log.warn("executable '"+(schema!=null?schema+".":"")+(packageName!=null?packageName+".":"")+name+"' not found");
@@ -156,7 +174,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,
-			String packageName, int parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts) {
+			String packageName, int parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
+			String body) {
 		ExecutableObject e = new ExecutableObject();
 		e.setSchemaName(schema);
 		e.setName(execName);
@@ -165,6 +184,30 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		if(execType==null) {
 			throw new BadRequestException("Executable 'type' is mandatory");
 		}
+		
+		if(execType.equalsIgnoreCase(TYPE_SCRIPT)) {
+			//execType = TYPE_SCRIPT;
+			e.setType(DBObjectType.EXECUTABLE); //XXX: SCRIPT?
+			e.setBody(body);
+			if("".equals(e.getPackageName())) {
+				e.setPackageName(null);
+			}
+
+			try {
+				PreparedStatement stmt = conn.prepareStatement(body);
+				ParameterMetaData pmd = stmt.getParameterMetaData();
+				int pc = pmd.getParameterCount();
+				log.info("addExecutable: "+TYPE_SCRIPT+": parameter count = "+pc);
+				List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
+				for(int i=0;i<pc;i++) {
+					eps.add(new ExecutableParameter());
+				}
+				e.setParams(eps);
+			} catch (SQLException e1) {
+				throw new BadRequestException(e1.getMessage(), e1);
+			}
+		}
+		else {
 		//log.info("inouts: "+parameterInouts);
 		e.setType(DBObjectType.valueOf(execType)); // execType.toUpperCase()
 		List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
@@ -187,13 +230,14 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			ExecutableParameter ep = new ExecutableParameter();
 			e.setReturnParam(ep);
 		}
+		}
+
 		if(rolesFilter!=null) {
 			for(String g: rolesFilter) {
 				Grant gr = new Grant(schema, PrivilegeType.EXECUTE, g);
 				e.getGrants().add(gr);
 			}
 		}
-		
 		//e.setBody(body);
 		
 		//TODOne: validate executable! PreparedStatement, ResultSetMetadata ? see QueryOnInstant.grabExecutables()...
@@ -248,7 +292,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		//XXX: validate updated executable?
 		boolean removed = model.getExecutables().remove(eo);
 		boolean added = createQonExec(reqspec);
-		log.info("onUpdate: removed "+eo+"? "+removed+" ; added "+relation+"? "+added);
+		log.info("onUpdate: removed "+eo+"? "+removed+" ; added exec on "+relation+"? "+added);
 	}
 
 	@Override
@@ -266,7 +310,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		
 		try {
 			return addExecutable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("REMARKS"), Utils.getStringList(v.get("ROLES_FILTER"), PIPE_SPLIT), v.get("EXEC_TYPE"),
-					v.get("PACKAGE_NAME"), Integer.valueOf(v.get("PARAMETER_COUNT")), Utils.getStringList(v.get("PARAMETER_NAMES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_TYPES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_INOUTS"), PIPE_SPLIT))
+					v.get("PACKAGE_NAME"), Integer.valueOf(v.get("PARAMETER_COUNT")), Utils.getStringList(v.get("PARAMETER_NAMES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_TYPES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_INOUTS"), PIPE_SPLIT),
+					v.get("BODY"))
 					>0;
 		}
 		catch(IllegalArgumentException e) {

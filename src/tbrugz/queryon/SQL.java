@@ -152,6 +152,10 @@ public class SQL {
 		sql.append(" }"); //sql.append("; end;");
 		return sql.toString();
 	}
+
+	public static String createExecuteSqlFromBody(ExecutableObject eo) {
+		return eo.getBody();
+	}
 	
 	public void addFilter(String filter) {
 		if(filter==null || filter.length()==0) { return; }

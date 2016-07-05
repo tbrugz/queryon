@@ -112,6 +112,10 @@ public class SchemaModelUtils {
 			//log.warn("executable object must have 1, 2 or 3 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 		}
 		
+		if(exec==null) { //search for SCRIPT...
+			exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.EXECUTABLE, objectParts[0], objectParts[1]);
+		}
+		
 		//if(exec == null) { throw new NotFoundException("Object "+reqspec.object+" not found"); }
 		return exec;
 	}

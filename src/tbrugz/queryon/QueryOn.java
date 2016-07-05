@@ -664,6 +664,10 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("Unknown action type: "+atype); 
 			}
 		}
+		catch(InternalServerException e) {
+			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
+			throw e;
+		}
 		catch(BadRequestException e) {
 			//XXX: do not log exception!
 			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
@@ -959,11 +963,52 @@ public class QueryOn extends HttpServlet {
 		//XXXdone: test for Subject's permissions
 		try {
 		
-		String sql = SQL.createExecuteSQLstr(eo);
+		int outParamCount = 0;
+		Object retObject = null;
+		String sql = SQL.createExecuteSqlFromBody(eo);
+		if(eo.getType()==DBObjectType.EXECUTABLE && sql!=null && !sql.equals("")) {
+		
+			//log.info("executing BODY: "+sql);
+			PreparedStatement stmt = conn.prepareStatement(sql.toString());
+			ParameterMetaData pmd = stmt.getParameterMetaData();
+			int pc = pmd.getParameterCount();
+			if(reqspec.params.size() < pc) {
+				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [pc="+pc+"]");
+			}
+			for(int i=0;i<pc;i++) {
+				stmt.setObject(i+1, reqspec.params.get(i));
+			}
+			stmt.execute();
+
+			int updatecount = stmt.getUpdateCount();
+			//log.info("updateCount: "+updatecount);
+			resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, updatecount);
+
+			try {
+				ResultSet generatedKeys = stmt.getGeneratedKeys();
+				if(generatedKeys!=null && generatedKeys.next()) {
+					List<String> colVals = getGeneratedKeys(generatedKeys);
+					resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
+				}
+			}
+			catch(SQLException e) {
+				log.warn("getGeneratedKeys: "+e.getMessage());
+			}
+			
+			retObject = stmt.getResultSet();
+			/*if(result!=null) {
+				dumpResultSet(result, reqspec, eo.getSchemaName(), eo.getName(), null, null, null, false, resp, 1000);
+			}*/
+			/*if(updatecount>0) {
+				conn.commit();
+			}*/
+		}
+		else {
+		
+		sql = SQL.createExecuteSQLstr(eo);
 		CallableStatement stmt = conn.prepareCall(sql.toString());
 		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
 		int inParamCount = 0;
-		int outParamCount = 0;
 		if(reqspec.params.size() < eo.getParams().size()) {
 			throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters ["+eo.getParams().size()+"]");
 		}
@@ -992,7 +1037,6 @@ public class QueryOn extends HttpServlet {
 		}
 		log.info("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
 		stmt.execute();
-		Object retObject = null;
 		boolean gotReturn = false;
 		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
 			retObject = stmt.getObject(1);
@@ -1017,8 +1061,10 @@ public class QueryOn extends HttpServlet {
 				}
 			}
 		}
-
 		resp.addHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, String.valueOf(outParamCount));
+		
+		}
+		
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
 				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
@@ -1044,6 +1090,7 @@ public class QueryOn extends HttpServlet {
 			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
 		}
 		finally {
+			conn.commit();
 			ConnectionUtil.closeConnection(conn);
 		}
 	}
@@ -1194,6 +1241,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
 		conn.commit();
+		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" rows deleted");
 		
@@ -1314,6 +1362,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX add ResultSet generatedKeys = st.getGeneratedKeys(); //?
 		
+		//XXX plugin should be called before execute()/bindParameters()?
 		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
 		for(UpdatePlugin up: updatePlugins) {
 			up.setProperties(prop);
@@ -1324,6 +1373,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
+		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" rows updated");
 
@@ -1456,11 +1506,12 @@ public class QueryOn extends HttpServlet {
 		// http://stackoverflow.com/questions/1915166/how-to-get-the-insert-id-in-jdbc
 		ResultSet generatedKeys = st.getGeneratedKeys();
 		if (generatedKeys.next()) {
-			int colCount = generatedKeys.getMetaData().getColumnCount();
+			List<String> colVals = getGeneratedKeys(generatedKeys);
+			/*int colCount = generatedKeys.getMetaData().getColumnCount();
 			List<String> colVals = new ArrayList<String>();
 			for(int i=0;i<colCount;i++) {
 				colVals.add(generatedKeys.getString(i+1));
-			}
+			}*/
 			resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
 			//log.info("generatedKeys[pk="+Arrays.toString(pkcols)+";#="+colCount+"]: "+ Utils.join(colVals, ", "));
 		}
@@ -1475,6 +1526,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
+		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
 		resp.setStatus(HttpServletResponse.SC_CREATED);
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" rows inserted");
@@ -1508,6 +1560,15 @@ public class QueryOn extends HttpServlet {
 		}
 		//log.info("#cols: pk="+pk.getUniqueColumns().size()+", req="+reqspec.params.size());
 		return pk.getUniqueColumns().size() <= reqspec.params.size();
+	}
+	
+	List<String> getGeneratedKeys(ResultSet generatedKeys) throws SQLException {
+		int colCount = generatedKeys.getMetaData().getColumnCount();
+		List<String> colVals = new ArrayList<String>();
+		for(int i=0;i<colCount;i++) {
+			colVals.add(generatedKeys.getString(i+1));
+		}
+		return colVals;
 	}
 	
 	static void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {

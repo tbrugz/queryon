@@ -18,6 +18,8 @@ public class ResponseSpec {
 	public static final String HEADER_RELATION_UK = "X-Relation-UK";
 	
 	public static final String HEADER_RESULTSET_LIMIT = "X-ResultSet-Limit";
+
+	public static final String HEADER_UPDATECOUNT = "X-UpdateCount";
 	
 	public static final String HEADER_EXECUTE_RETURNCOUNT = "X-Execute-ReturnCount";
 	

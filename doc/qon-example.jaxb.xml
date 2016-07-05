@@ -197,7 +197,7 @@
             <nullable>true</nullable>
             <ordinalPosition>5</ordinalPosition>
             <pk>false</pk>
-            <remarks>Type of executable (PROCEDURE|FUNCTION)</remarks>
+            <remarks>Type of executable (PROCEDURE|FUNCTION|SCRIPT)</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
@@ -254,9 +254,17 @@
             <type>VARCHAR</type>
         </columns>
         <columns>
-            <name>DISABLED</name>
+            <name>BODY</name>
             <nullable>true</nullable>
             <ordinalPosition>12</ordinalPosition>
+            <pk>false</pk>
+            <remarks>Executable body</remarks>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>DISABLED</name>
+            <nullable>true</nullable>
+            <ordinalPosition>13</ordinalPosition>
             <pk>false</pk>
             <remarks>Enabled (null or 0) or disabled executable?</remarks>
             <type>TINYINT</type>
