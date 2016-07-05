@@ -43,6 +43,7 @@ public String normalize(String s) {
 		//out.write(DBUtil.getDBConnPrefix(prop, modelId));
 		if(prop!=null) {
 			try {
+				//add to SchemaUtils...
 				Connection conn = DBUtil.initDBConn(prop, modelId);
 				schemas = SQLUtils.getSchemaNames(conn.getMetaData());
 				conn.close();

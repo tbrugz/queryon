@@ -12,6 +12,7 @@ import tbrugz.queryon.SqlCommand;
  * sqlcmd: see
  *   https://github.com/julianhyde/sqlline/blob/master/doc/manual.xml
  *   https://github.com/julianhyde/sqlline ; https://github.com/mapr/sqlline ; beeline: https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients
+ * h2: http://www.h2database.com/html/tutorial.html#console_syntax ; http://www.h2database.com/html/tutorial.html#shell_tool
  */
 public abstract class AbstractTableCommand implements SqlCommand {
 

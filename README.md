@@ -25,7 +25,7 @@ Dependencies: java 1.6+ ; maven 2+
 
 Building:
 
-	`mvn install`
+	mvn install
 
 Important: QueryOn usually depends on the latest version of [sqldump](https://bitbucket.org/tbrugz/sqldump),
 so you may need to build it first - and publish it to your local maven repo
