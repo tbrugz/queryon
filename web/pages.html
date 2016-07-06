@@ -139,7 +139,10 @@ removePage = function(id, path) {
 			if (request.status >= 200 && request.status < 300) {
 				msg = "Resource "+path+" deleted";
 				//alert(msg);
-				byId("p"+id).classList.add("removed");
+				var page = byId("p"+id);
+				var childs = page.querySelectorAll(".action");
+				page.removeChild(childs[0]); page.removeChild(childs[1]);
+				page.classList.add("removed");
 			} else {
 				msg = "Error " + request.status + " occurred when trying to delete resource \""+path+"\":\n"+
 					oEvent.target.responseText.trim();
@@ -221,9 +224,11 @@ doConfirmUpload = function() {
 	request.open("POST", loadUrl, true);
 	btnActionStart('btnUpdate');
 	request.onload = function(oEvent) {
+		var req = oEvent.target
 		var msg = null;
 		if (request.status >= 200 && request.status < 300) {
-			msg = "Uploaded!";
+			var pkvals = req.getResponseHeader('X-Relation-UK-Values');
+			msg = "Uploaded! [id = "+pkvals.trim()+"]";
 			showInfoMessages('dialog-messages', msg);
 			//XXX append new url with ID
 		} else {
