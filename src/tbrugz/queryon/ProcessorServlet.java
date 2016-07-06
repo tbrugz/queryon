@@ -89,6 +89,9 @@ public class ProcessorServlet extends HttpServlet {
 			
 			log.warn(e.getClass().getSimpleName()+": "+e.getMessage(), e);
 			throw new ServletException(e);
+		} catch (Throwable e) {
+			log.warn(e.getClass().getSimpleName()+": "+e.getMessage(), e);
+			throw new ServletException(e);
 		}
 	}
 

@@ -86,6 +86,9 @@ public class SchemaModelUtils {
 			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[0]);
 			}
+			if(exec==null) { //search for SCRIPT...
+				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.EXECUTABLE, objectParts[0]);
+			}
 		}
 		else if(objectParts.length==3) { //SCHEMA.PACKAGE.PROCEDURE
 			exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, objectParts[0], objectParts[2]);
@@ -107,13 +110,12 @@ public class SchemaModelUtils {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[1]);
 				if(exec!=null && !objectParts[0].equals(exec.getPackageName())) { exec = null; }
 			}
+			if(exec==null) { //search for SCRIPT...
+				exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.EXECUTABLE, objectParts[0], objectParts[1]);
+			}
 		}
 		else {
 			//log.warn("executable object must have 1, 2 or 3 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
-		}
-		
-		if(exec==null) { //search for SCRIPT...
-			exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.EXECUTABLE, objectParts[0], objectParts[1]);
 		}
 		
 		//if(exec == null) { throw new NotFoundException("Object "+reqspec.object+" not found"); }

@@ -501,6 +501,8 @@ public class QueryOn extends HttpServlet {
 	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 		
+		try {
+
 		if(xSetRequestUtf8) {
 			try {
 				String origCharset = req.getCharacterEncoding();
@@ -579,7 +581,6 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		
-		try {
 			Subject currentUser = ShiroUtils.getSubject(prop);
 			
 			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
@@ -679,13 +680,16 @@ public class QueryOn extends HttpServlet {
 		catch(IOException e) {
 			throw new ServletException(e);
 		}
-		catch (ClassNotFoundException e) {
+		catch(ClassNotFoundException e) {
 			throw new ServletException(e);
 		}
-		catch (NamingException e) {
+		catch(NamingException e) {
 			throw new ServletException(e);
 		}
-		catch (IntrospectionException e) {
+		catch(IntrospectionException e) {
+			throw new ServletException(e);
+		}
+		catch(Throwable e) {
 			throw new ServletException(e);
 		}
 	}
