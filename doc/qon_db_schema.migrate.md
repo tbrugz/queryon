@@ -1,4 +1,11 @@
 
+2016-05 - qon_execs
+-------------------
+
+alter table qon_execs
+	alter column parameter_count null;
+
+
 2016-05 - qon_pages: add binary_data, has_body
 -----------------------
 

@@ -65,6 +65,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		} catch (IOException e) {
 			throw new BadRequestException("IO exception: "+e, e);
 		} catch (Exception e) {
+			log.warn("Exception: "+e, e);
 			throw new BadRequestException("Exception: "+e, e);
 		}
 	}
@@ -119,7 +120,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			String roles_filter_str = rs.getString(4);
 			String exec_type = rs.getString(5);
 			String packageName = rs.getString(6);
-			int parameterCount = rs.getInt(7);
+			String parameterCount = rs.getString(7);
 			String parameter_names_str = rs.getString(8);
 			String parameter_types_str = rs.getString(9);
 			String parameter_inouts_str = rs.getString(10);
@@ -174,7 +175,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,
-			String packageName, int parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
+			String packageName, String parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
 			String body) {
 		ExecutableObject e = new ExecutableObject();
 		e.setSchemaName(schema);
@@ -211,7 +212,17 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		//log.info("inouts: "+parameterInouts);
 		e.setType(DBObjectType.valueOf(execType)); // execType.toUpperCase()
 		List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
-		for(int i=0;i<parameterCount;i++) {
+		if(parameterCount==null) {
+			throw new BadRequestException("parameter_count must not be null");
+		}
+		int pc = 0;
+		try {
+			pc = Integer.valueOf(parameterCount);
+		}
+		catch(NumberFormatException nfe) {
+			throw new BadRequestException("parameter_count must be an integer [value="+parameterCount+"]");
+		}
+		for(int i=0;i<pc;i++) {
 			ExecutableParameter ep = new ExecutableParameter();
 			if(parameterNames!=null && parameterNames.size()>i) {
 				ep.setName(parameterNames.get(i));
@@ -310,7 +321,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		
 		try {
 			return addExecutable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("REMARKS"), Utils.getStringList(v.get("ROLES_FILTER"), PIPE_SPLIT), v.get("EXEC_TYPE"),
-					v.get("PACKAGE_NAME"), Integer.valueOf(v.get("PARAMETER_COUNT")), Utils.getStringList(v.get("PARAMETER_NAMES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_TYPES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_INOUTS"), PIPE_SPLIT),
+					v.get("PACKAGE_NAME"), v.get("PARAMETER_COUNT"), Utils.getStringList(v.get("PARAMETER_NAMES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_TYPES"), PIPE_SPLIT), Utils.getStringList(v.get("PARAMETER_INOUTS"), PIPE_SPLIT),
 					v.get("BODY"))
 					>0;
 		}

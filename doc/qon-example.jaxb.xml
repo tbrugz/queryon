@@ -220,10 +220,10 @@
         <columns>
             <name>PARAMETER_COUNT</name>
             <columSize>22</columSize>
-            <nullable>false</nullable>
+            <nullable>true</nullable>
             <ordinalPosition>8</ordinalPosition>
             <pk>false</pk>
-            <remarks>Number of parameters (MANDATORY)</remarks>
+            <remarks>Number of parameters</remarks>
             <type>NUMBER</type>
         </columns>
         <columns>

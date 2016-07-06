@@ -150,6 +150,7 @@ public class QOnQueries extends SQLQueries {
 		query.setQuery(sql);
 		query.setRemarks(remarks);
 		setQueryRoles(query, rolesFilterStr);
+		String queryFullName = query.getQualifiedName();
 
 		try {
 			// resultset metadata
@@ -160,7 +161,7 @@ public class QOnQueries extends SQLQueries {
 			query.setColumns(new ArrayList<Column>());
 			if(metadataAllowQueryExec) {
 				long initTime = System.currentTimeMillis();
-				log.debug("executing query '"+queryName+"' to grab metadata");
+				log.debug("executing query '"+queryFullName+"' to grab metadata");
 				try {
 					ParameterMetaData pmd = stmt.getParameterMetaData();
 					int params = pmd.getParameterCount();
@@ -170,16 +171,16 @@ public class QOnQueries extends SQLQueries {
 					}
 					ResultSet rs = stmt.executeQuery();
 					query.setColumns(DataDumpUtils.getColumns(rs.getMetaData()));
-					log.info("executed query '"+queryName+"' [elapsed: "+(System.currentTimeMillis()-initTime)+"ms]");
+					log.info("executed query '"+queryFullName+"' [elapsed: "+(System.currentTimeMillis()-initTime)+"ms]");
 				}
 				catch(SQLException e2) {
-					log.warn("resultset exec sqlexception: "+e2.toString().trim()+" [query='"+queryName+"']");
-					log.debug("resultset exec sqlexception: "+e2.getMessage().trim()+" [query='"+queryName+"']", e2);
+					log.warn("resultset exec sqlexception: "+e2.toString().trim()+" [query='"+queryFullName+"']");
+					log.debug("resultset exec sqlexception: "+e2.getMessage().trim()+" [query='"+queryFullName+"']", e2);
 				}
 			}
 			else {
-				log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");
-				log.debug("resultset metadata's sqlexception: "+e.getMessage().trim()+" [query='"+queryName+"']", e);
+				log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']");
+				log.debug("resultset metadata's sqlexception: "+e.getMessage().trim()+" [query='"+queryFullName+"']", e);
 			}
 		}
 		
@@ -198,14 +199,14 @@ public class QOnQueries extends SQLQueries {
 					pmode = pmd.getParameterMode(i);
 				}
 				catch(SQLException e) {
-					log.debug("Exception getting parameter mode ["+queryName+"/"+i+"]: "+e);
+					log.debug("Exception getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
 				}
 				
 				try {
 					ptype = pmd.getParameterTypeName(i);
 				}
 				catch(SQLException e) {
-					log.debug("Exception getting parameter type ["+queryName+"/"+i+"]: "+e);
+					log.debug("Exception getting parameter type ["+queryFullName+"/"+i+"]: "+e);
 				}
 				
 				if(pmode==ParameterMetaData.parameterModeIn) {
@@ -213,7 +214,7 @@ public class QOnQueries extends SQLQueries {
 					paramsTypes.add(ptype);
 				}
 				else {
-					log.warn("Parameter of mode '"+pmode+"' not understood for query '"+queryName+"/"+i+"'");
+					log.warn("Parameter of mode '"+pmode+"' not understood for query '"+queryFullName+"/"+i+"'");
 				}
 			}
 			query.setParameterCount(inParams);
@@ -221,7 +222,7 @@ public class QOnQueries extends SQLQueries {
 			//log.info("#params = "+inParams+" types = "+paramsTypes); 
 		} catch (SQLException e) {
 			query.setParameterCount(null);
-			log.warn("parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryName+"']");
+			log.warn("parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']");
 			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
 		}
 		
