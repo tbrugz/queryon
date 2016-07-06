@@ -33,6 +33,8 @@
 		loadSettings();
 	}
 	
+	var textareaDbTypes = ["CLOB", "TEXT"];
+	
 	function updateUI() {
 		// style changes
 		
@@ -213,10 +215,12 @@
 		//var rows = content.querySelectorAll('tr');
 		//var pk = getPkCols('objects');
 		var relation = getCurrentRelation('objects');
-		var cols = getColumnsFromColgroup('content');
+		var cols = getColumnNamesFromColgroup('content');
 		var colTypes = getColumnTypesFromColgroup('content');
+		var colElems = getColumnsFromColgroup('content');
+		var colDbTypes = getAttributeListFromObjectList(colElems, 'dbtype');
 		
-		doWriteUpdateDialog('Insert', null, null, null, cols, null, colTypes);
+		doWriteUpdateDialog('Insert', null, null, null, cols, null, colTypes, colDbTypes);
 		closeMessages('messages');
 	}
 	
@@ -226,18 +230,20 @@
 			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
 			return;
 		}
-		var cols = getColumnsFromColgroup('content');
+		var cols = getColumnNamesFromColgroup('content');
 		var colTypes = getColumnTypesFromColgroup('content');
+		var colElems = getColumnsFromColgroup('content');
+		var colDbTypes = getAttributeListFromObjectList(colElems, 'dbtype');
 		
 		//console.log("doOpenUpdateDialog key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals,"colTypes",ret.colTypes);
 		
 		var maxrownum = getRowCount('content');
 		
-		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, cols, ret.allvals, colTypes);
+		doWriteUpdateDialog('Update', rownum, maxrownum, ret.filter, cols, ret.allvals, colTypes, colDbTypes);
 		closeMessages('messages');
 	}
 	
-	function doWriteUpdateDialog(updateType, rownum, maxrownum, filter, cols, vals, colTypes) {
+	function doWriteUpdateDialog(updateType, rownum, maxrownum, filter, cols, vals, colTypes, colDbTypes) {
 		//console.log('doWriteUpdateDialog', updateType, rownum, maxrownum, filter, cols, vals);
 		//XXX: highlight current row...
 		//XXX: show/validate column types...
@@ -278,13 +284,15 @@
 				colTypeOrig=="Date"?"text": //XXX "datetime-local": "text":
 				colTypeOrig=="Blob"?"file":
 				"text";
+			//var colDbType = cols[i].getAttribute("dbtype");
+			console.log(">>>", cols[i], colTypes[i], colDbTypes[i]);
 			//console.log("col["+i+"]: ",cols[i],"--",allowUpdate,"---",relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			
 			var value = (vals?vals[i]:'');
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
 			dialogContent += "<div class='field'>";
-			if(colTypeOrig=="String" && (value.indexOf('\n')>0 || value.length>100) ) {
+			if( (colTypeOrig=="String" && (value.indexOf('\n')>0 || value.length>100)) || textareaDbTypes.indexOf(colDbTypes[i])>=0 ) {
 				dialogContent += "<label>"+cols[i]+": <textarea name='v:"+cols[i]+"'"
 					+(disabled?" disabled='true'":"")+">"
 					+value //.replace(/[<]/g, '&lt;').replace(/>/g, '&gt;')
@@ -393,7 +401,7 @@
 	
 	function doConfirmUpdate(rownum, closeDialog) {
 		var ret = getKeyValsForRow(rownum);
-		var cols = getColumnsFromColgroup('content');
+		var cols = getColumnNamesFromColgroup('content');
 		
 		//var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
 		
@@ -577,7 +585,7 @@
 	function doConfirmInsert(rownum, closeDialog) {
 		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
 		var relation = getCurrentRelation('objects');
-		var cols = getColumnsFromColgroup('content');
+		var cols = getColumnNamesFromColgroup('content');
 		
 		var formData = new FormData();
 		nv = getUpdateNewValues(formData);

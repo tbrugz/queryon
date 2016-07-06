@@ -315,7 +315,7 @@ function getColumnsFromContainer(containerId) {
 }
 
 /* returns only htmlx visible column names */
-function getColumnsFromColgroup(containerId) {
+function getColumnNamesFromColgroup(containerId) {
 	var colNames = [];
 	var content = document.getElementById(containerId);
 	if(!content) {
@@ -348,6 +348,25 @@ function getColumnTypesFromColgroup(containerId) {
 	return colTypes;
 }
 
+function getColumnsFromColgroup(containerId) {
+	var colTypes = [];
+	var content = document.getElementById(containerId);
+	if(!content) {
+		return colTypes;
+	}
+	return content.querySelectorAll('table > colgroup > col');
+}
+
+function getAttributeListFromObjectList(objs, attr) {
+	var ret = [];
+	for(var i=0;i<objs.length;i++) {
+		var elem = objs[i];
+		var atribute = elem.getAttribute(attr);
+		ret.push(atribute);
+	}
+	return ret;
+}
+
 function getColumnsRemarks() {
 	var rel = getCurrentRelation('objects');
 	var arr = rel.columnRemarks.substring(1, rel.columnRemarks.length-1).split(",");
@@ -371,7 +390,7 @@ function getColumnsTypesFromHash() {
 function getValuesFromColumn(containerId, columnName) {
 	//var cols = getColumnsFromContainer(containerId);
 	var relation = getCurrentRelation('objects');
-	var cols = getColumnsFromColgroup(containerId);
+	var cols = getColumnNamesFromColgroup(containerId);
 	if(cols==null || cols.length==0) {
 		cols = getColumnsFromRelation(relation);
 	}
