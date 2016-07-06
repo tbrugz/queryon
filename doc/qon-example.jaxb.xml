@@ -209,14 +209,6 @@
             <remarks>Package name (optional)</remarks>
             <type>VARCHAR</type>
         </columns>
-        <!-- <columns>
-            <name>BODY</name>
-            <columSize>4000</columSize>
-            <nullable>true</nullable>
-            <ordinalPosition>7</ordinalPosition>
-            <pk>false</pk>
-            <type>CLOB</type>
-        </columns> -->
         <columns>
             <name>PARAMETER_COUNT</name>
             <columSize>22</columSize>
@@ -255,11 +247,12 @@
         </columns>
         <columns>
             <name>BODY</name>
+            <columSize>4000</columSize>
             <nullable>true</nullable>
             <ordinalPosition>12</ordinalPosition>
             <pk>false</pk>
             <remarks>Executable body</remarks>
-            <type>VARCHAR</type>
+            <type>CLOB</type>
         </columns>
         <columns>
             <name>DISABLED</name>

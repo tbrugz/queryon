@@ -50,6 +50,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
 	
+	protected List<String> lsColDbTypes = new ArrayList<String>();
+	
 	public HTMLAttrSyntax(String padding, boolean innerTable) {
 		super(padding, innerTable);
 	}
@@ -85,6 +87,10 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				finalColNames.add(colname);
 			}
 		}
+		
+		for(int i=0;i<numCol;i++) {
+			lsColDbTypes.add(md.getColumnTypeName(i+1));
+		}
 	}
 	
 	//XXX
@@ -104,7 +110,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			sb.append("\n<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
 				if(finalColNames.contains(lsColNames.get(i))) {
-					sb.append("\n\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
+					sb.append("\n\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
 				}
 			}
 			sb.append("\n</colgroup>");
