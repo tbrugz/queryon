@@ -251,7 +251,7 @@
             <nullable>true</nullable>
             <ordinalPosition>12</ordinalPosition>
             <pk>false</pk>
-            <remarks>Executable body</remarks>
+            <remarks>Executable body (SCRIPTs only)</remarks>
             <type>CLOB</type>
         </columns>
         <columns>

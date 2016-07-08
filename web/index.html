@@ -27,13 +27,18 @@
 	
 	var lastQueryThatRunned = null;
 	
+	var schemaNameFilter = null;
+	
 	var onLoad = function() {
-		loadQueries();
+		var s = getParameterByName('s', location.search);
+		if(s) { schemaNameFilter = s; }
+		//console.log('schemaNameFilter',schemaNameFilter);
+		loadQueries(schemaNameFilter);
 		loadAuthInfo();
 		loadSettings();
 	}
 	
-	var textareaDbTypes = ["CLOB", "TEXT"];
+	var textareaDbColTypes = ["CLOB", "TEXT"];
 	
 	function updateUI() {
 		// style changes
@@ -292,7 +297,7 @@
 			var value = (vals?vals[i]:'');
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
 			dialogContent += "<div class='field'>";
-			if( (colTypeOrig=="String" && (value.indexOf('\n')>0 || value.length>100)) || textareaDbTypes.indexOf(colDbTypes[i])>=0 ) {
+			if( (colTypeOrig=="String" && (value.indexOf('\n')>0 || value.length>100)) || textareaDbColTypes.indexOf(colDbTypes[i])>=0 ) {
 				dialogContent += "<label>"+cols[i]+": <textarea name='v:"+cols[i]+"'"
 					+(disabled?" disabled='true'":"")+">"
 					+value //.replace(/[<]/g, '&lt;').replace(/>/g, '&gt;')
@@ -495,7 +500,7 @@
 				if(rel.name && (settings["queryon.qon-tables.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
 					//reloadTables(messagesId, nv.postData["v:NAME"]);
 					document.getElementById('objects').innerHTML = '';
-					loadQueries();
+					loadQueries(schemaNameFilter);
 				}
 				/*if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
 					reloadExecs(messagesId, nv.postData["p1"]);
@@ -532,7 +537,7 @@
 				appendMessages(messagesId, ' - table <code>'+tableName+'</code> reloaded');
 				// reloading updated queries
 				document.getElementById('objects').innerHTML = '';
-				loadQueries();
+				loadQueries(schemaNameFilter);
 			}
 			else {
 				appendMessages(messagesId, ' - error validating table <code>'+tableName+'</code>');
@@ -627,7 +632,7 @@
 				
 				if(settings["queryon.qon-tables.table"].toUpperCase().indexOf(selectId)>=0) {
 					select.innerHTML = '';
-					loadQueries();
+					loadQueries(schemaNameFilter);
 				}
 			});
 			

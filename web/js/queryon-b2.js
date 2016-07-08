@@ -21,8 +21,17 @@ var processorUrl = 'processor';
 
 /* functions */
 
-function loadQueries() {
+function loadQueries(filterSchema) {
 	init(queryOnUrl,'objects', function(containerId, rels) {
+		if(filterSchema) {
+			console.log('filtering rels', rels.length, 'filterSchema', filterSchema);
+			for(var i=rels.length-1;i>=0;i--) {
+				if(rels[i].schemaName!=filterSchema) {
+					var obj = rels.splice(i, 1);
+					//console.log('removing rel ',rels[i], 'filterSchema', filterSchema, 'obj', obj);
+				}
+			}
+		}
 		writeRelations(containerId, rels); updateSelectedQueryState(); makeHrefs();
 	});
 }
