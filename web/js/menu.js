@@ -67,6 +67,8 @@ function createMenuContent(addCloseBtn) {
 	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isDev != "undefined" && authInfo.isDev;
 	var hasLoginLink = document.getElementById('authaction') != null;
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
+	var path = location.pathname;
+	
 	for(var i=0;i<lis.length;i++) {
 		var li = lis[i];
 		//XXXdone: index, d3chart: do not show login, logout
@@ -75,16 +77,25 @@ function createMenuContent(addCloseBtn) {
 		if( (!li.classList.contains("dev") || isDeveloper)
 			&& (!li.classList.contains("auth") || !hasLoginLink)
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
+			
 			var href = li.getElementsByTagName("a")[0].getAttribute("href");
-			if(href.startsWith(".")) { href = href.substring(1); }
-			var hrefCurrentLike = "/"+href;
+			var hrefCurrentLike = href; //"/"+href;
+			if(hrefCurrentLike.startsWith(".")) { hrefCurrentLike = hrefCurrentLike.substring(1); }
 			hrefCurrentLike = hrefCurrentLike.replace(/\/\//g, '/');
-			console.log("menu["+i+"]: ",location.pathname," ; ",href,' ; ',hrefCurrentLike);
-			if(location.pathname.endsWith(hrefCurrentLike)) {
+			if(hrefCurrentLike.indexOf('?')>0) {
+				hrefCurrentLike = hrefCurrentLike.substring(0, hrefCurrentLike.indexOf('?'));
+			}
+			
+			console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
+			if(path.endsWith(hrefCurrentLike)) {
 				li.classList.add("current");
 			}
 			if(li.classList.contains("auth") && href.indexOf('?return')<0) {
 				href += '?return='+encodeURIComponent(window.location.href);
+				li.getElementsByTagName("a")[0].setAttribute("href", href);
+			}
+			if(!li.classList.contains("auth") && !li.getElementsByTagName("a")[0].getAttribute('target')) {
+				href += location.search;
 				li.getElementsByTagName("a")[0].setAttribute("href", href);
 			}
 			innerContent += li.outerHTML;

@@ -203,7 +203,12 @@ function closeDialogs() {
 	document.getElementById('dialog-container').style.display = 'none';
 }
 
-$(document).jkey('esc', function() {
-	//console.log('esc pressed: closeDialogs()');
-	closeDialogs();
-});
+document.onkeydown = function(evt) {
+	var evt = evt || window.event;
+	var key = evt.keyCode; // evt.key
+	if (key == 27) {
+		closeDialogs();
+	}
+	//console.log('document.onkeydown: ',key);
+};
+
