@@ -31,7 +31,10 @@
 	
 	var onLoad = function() {
 		var s = getParameterByName('s', location.search);
-		if(s) { schemaNameFilter = s; }
+		if(s) {
+			schemaNameFilter = s;
+			byId('schemaNameFilter').innerHTML = " "+schemaNameFilter;
+		}
 		//console.log('schemaNameFilter',schemaNameFilter);
 		loadQueries(schemaNameFilter);
 		loadAuthInfo();
@@ -755,6 +758,10 @@
 		right: 0;
 	}
 	
+	#schemaNameFilter {
+		font-style: italic;
+	}
+	
 	@media screen {
 		#nav {
 			position: fixed;
@@ -776,7 +783,7 @@
 <body onload="onLoad();" id="body">
 
 <nav id="nav" class="navbar">
-	<span id="logo">Query<span style="color: #ff8a47;">On</span></span>
+	<span id="logo">Query<span style="color: #ff8a47;">On</span><span id="schemaNameFilter"></span></span>
 
 	<label>
 		<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();">
