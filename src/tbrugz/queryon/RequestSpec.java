@@ -645,4 +645,12 @@ public class RequestSpec {
 		return "RequestSpec[object="+object+";params="+params+";model="+modelId+"]";
 	}
 	
+	public String getRemoteInfo() {
+		if(request!=null) {
+			return request.getRemoteUser() + "@" +
+				request.getRemoteHost()+"/"+request.getRemoteAddr();
+		}
+		return "?";
+	}
+	
 }

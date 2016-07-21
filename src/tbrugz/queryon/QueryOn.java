@@ -506,7 +506,7 @@ public class QueryOn extends HttpServlet {
 		if(xSetRequestUtf8) {
 			try {
 				String origCharset = req.getCharacterEncoding();
-				log.info("setting request encoding UTF-8 [was: "+origCharset+"]");
+				log.debug("setting request encoding UTF-8 [was: "+origCharset+"]");
 				req.setCharacterEncoding("UTF-8");
 			} catch (UnsupportedEncodingException e) {
 				log.warn("error setCharacterEncoding: "+e.getMessage(), e);
@@ -641,7 +641,7 @@ public class QueryOn extends HttpServlet {
 					//eo = SchemaModelUtils.getExecutable(model, reqspec);
 				}
 				checkGrantsAndRolesMatches(currentUser, PrivilegeType.EXECUTE, eo);
-				doExecute(eo, reqspec, resp);
+				doExecute(eo, reqspec, currentUser, resp);
 				break;
 			case INSERT: {
 				doInsert((Relation) dbobj, reqspec, currentUser, resp);
@@ -960,8 +960,8 @@ public class QueryOn extends HttpServlet {
 	 * http://stackoverflow.com/questions/4526273/what-does-enctype-multipart-form-data-mean
 	 * http://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 	 */
-	void doExecute(ExecutableObject eo, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		log.info("eo: "+eo);
+	void doExecute(ExecutableObject eo, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		log.info("eo: "+eo+" ; currentUser: "+currentUser.getPrincipal() + " ; remote: "+reqspec.getRemoteInfo());
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		
 		//XXXdone: test for Subject's permissions
