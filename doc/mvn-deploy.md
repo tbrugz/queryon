@@ -15,11 +15,21 @@ mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=pat
 
 * http://stackoverflow.com/a/22715898/616413
 
-```
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0 -Dfile=target/queryon-0.6.0.war -Dpackaging=war -DpomFile=pom.xml -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
 
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0 -Dfile=target/queryon-0.6.0-sources.jar -Dpackaging=jar -Dclassifier=sources -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
+**fast install:**
+
 ```
+export MVN_ARTIFACT_VERSION=0.6.1-SNAPSHOT
+
+mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dfile=target/queryon-$MVN_ARTIFACT_VERSION.war -Dpackaging=war -DpomFile=pom.xml -DlocalRepositoryPath=$HOME/Desktop/proj/mvn-repo -DcreateChecksum=true
+
+mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dfile=target/queryon-$MVN_ARTIFACT_VERSION-sources.jar -Dpackaging=jar -DpomFile=pom.xml -Dclassifier=sources -DlocalRepositoryPath=$HOME/Desktop/proj/mvn-repo -DcreateChecksum=true
+```
+
+deploy to sonatype
+---------
+
+http://central.sonatype.org/pages/apache-maven.html
 
 
 run jetty
@@ -51,6 +61,5 @@ http://books.sonatype.com/nexus-book/reference/staging-deployment.html
 http://stackoverflow.com/questions/10533828/what-does-mvn-install-in-maven-exactly-do
 http://stackoverflow.com/questions/5102571/how-to-install-maven-artifact-with-sources-from-command-line
 
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dversion=0.6.0 -Dfile=target/queryon-0.6.0-sources.jar -Dpackaging=jar -Dclassifier=sources -DlocalRepositoryPath=D:/proj/mvn-repo -DcreateChecksum=true
-
-mvn buildnumber:hgchangeset
+hg changeset id & date:
+`mvn buildnumber:hgchangeset`
