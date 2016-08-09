@@ -28,7 +28,14 @@ Building:
 	mvn install
 
 Important: QueryOn usually depends on the latest version of [sqldump](https://bitbucket.org/tbrugz/sqldump),
-so you may need to build it first - and publish it to your local maven repo
+so you may need to build it first - and publish it to your local maven repo (or you may get it from the
+[sonatype snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/))
+
+
+artifacts
+---------
+
+* snapshots repo: https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/
 
 
 demo - running
