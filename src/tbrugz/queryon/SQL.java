@@ -35,6 +35,10 @@ public class SQL {
 	public static final String PARAM_INSERT_COLUMNS_CLAUSE = "[insert-columns-clause]";
 	public static final String PARAM_INSERT_VALUES_CLAUSE = "[insert-values-clause]";
 	public static final String PARAM_ORDER_CLAUSE = "$order_clause";
+
+	public static final String VARIABLE_USERNAME = "$username";
+	//public static final String VARIABLE_USERROLES = "$userroles";
+	
 	//XXX add limit/offset-clause?
 
 	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
@@ -48,6 +52,8 @@ public class SQL {
 	final Integer originalBindParameterCount;
 	final Integer limitMax;
 	final Integer limit;
+	final String username;
+	//XXX final String userroles;
 	
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
@@ -55,7 +61,7 @@ public class SQL {
 	List<Object> bindParameterValues = new ArrayList<Object>();
 	//XXX add 'final String initialSql;'?
 	
-	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
+	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit, String username) {
 		//this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
@@ -65,8 +71,13 @@ public class SQL {
 		this.limit = (limitMax!=null && reqspecLimit!=null) ?
 				(limitMax < reqspecLimit ? limitMax : reqspecLimit) :
 				(limitMax!=null ? limitMax : reqspecLimit);
+		this.username = getFinalVariableValue(username);
 	}
 
+	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
+		this(sql, relation, originalBindParameterCount, reqspecLimit, null);
+	}
+	
 	protected SQL(String sql, Relation relation) {
 		this(sql, relation, null, null);
 	}
@@ -76,7 +87,9 @@ public class SQL {
 	}
 	
 	public String getFinalSql() {
-		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "");
+		//log.info("getFinalSql: "+username);
+		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
+				.replace(VARIABLE_USERNAME, username);
 	}
 	
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
@@ -87,11 +100,11 @@ public class SQL {
 		return sql;
 	}
 	
-	public static SQL createSQL(Relation relation, RequestSpec reqspec) {
+	public static SQL createSQL(Relation relation, RequestSpec reqspec, String username) {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), reqspec!=null?reqspec.limit:null);
+			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), reqspec!=null?reqspec.limit:null, username);
 			//processSqlXtraMetadata(sql);
 			//sql.originalBindParameterCount = q.getParameterCount();
 			return sql;
@@ -107,6 +120,10 @@ public class SQL {
 		//return new SQL(createSQLstr(relation, reqspec), relation);
 	}
 
+	public static SQL createSQL(Relation relation, RequestSpec reqspec) {
+		return createSQL(relation, reqspec, null);
+	}
+	
 	public static SQL createInsertSQL(Relation relation) {
 		String sql = "insert into "+
 				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
@@ -153,8 +170,13 @@ public class SQL {
 		return sql.toString();
 	}
 
-	public static String createExecuteSqlFromBody(ExecutableObject eo) {
-		return eo.getBody();
+	public static String createExecuteSqlFromBody(ExecutableObject eo, String username) {
+		//if(eo==null) { return null; }
+		String body = eo.getBody();
+		if(body==null) {
+			return null;
+		}
+		return body.replace(VARIABLE_USERNAME, getFinalVariableValue(username));
 	}
 	
 	public void addFilter(String filter) {
@@ -425,6 +447,10 @@ public class SQL {
 		if(s==null) { return null; }
 		if(s.length()>maxlength) { return s.substring(0, maxlength-1)+" (...)"; }
 		return s;
+	}
+	
+	static String getFinalVariableValue(String username) {
+		return username!=null ? "'"+username.replace("'", "")+"'" : "''";
 	}
 	
 	public List<Object> getParameterValues() {

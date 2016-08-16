@@ -120,7 +120,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 			Constraint pk = SchemaModelUtils.getPK(relation);
 			LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 			
-			SQL sql = QueryOn.getSelectQuery(model, relation, reqspec, pk, loStrategy, resp);
+			SQL sql = QueryOn.getSelectQuery(model, relation, reqspec, pk, loStrategy, QueryOn.getUsername(currentUser), resp);
 			finalSql = sql.getFinalSql();
 			List<Object> params = sql.getParameterValues();
 			log.info("params: "+params);

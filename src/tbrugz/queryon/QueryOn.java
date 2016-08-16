@@ -594,7 +594,7 @@ public class QueryOn extends HttpServlet {
 				if(! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) {
 					checkGrantsAndRolesMatches(currentUser, PrivilegeType.SELECT, rel);
 				}
-				doSelect(model, rel, reqspec, resp);
+				doSelect(model, rel, reqspec, currentUser, resp);
 				}
 				break;
 			case SELECT_ANY:
@@ -608,7 +608,7 @@ public class QueryOn extends HttpServlet {
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
 					if(!sqlCommandExecuted) {
-						doSelect(model, relation, reqspec, resp);
+						doSelect(model, relation, reqspec, currentUser, resp);
 					}
 				}
 				catch(SQLException e) {
@@ -618,7 +618,7 @@ public class QueryOn extends HttpServlet {
 			case VALIDATE_ANY:
 				try {
 					Query relation = getQuery(req);
-					doValidate(relation, reqspec, resp);
+					doValidate(relation, reqspec, currentUser, resp);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -627,7 +627,7 @@ public class QueryOn extends HttpServlet {
 			case EXPLAIN_ANY:
 				try {
 					Query relation = getQuery(req);
-					doExplain(relation, reqspec, resp);
+					doExplain(relation, reqspec, currentUser, resp);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -760,9 +760,9 @@ public class QueryOn extends HttpServlet {
 		return relation;
 	}
 	
-	public static SQL getSelectQuery(SchemaModel model, Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	public static SQL getSelectQuery(SchemaModel model, Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy, String username, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		
-		SQL sql = SQL.createSQL(relation, reqspec);
+		SQL sql = SQL.createSQL(relation, reqspec, username);
 		
 		// add parameters for Query
 		addOriginalParameters(reqspec, sql);
@@ -812,7 +812,7 @@ public class QueryOn extends HttpServlet {
 		//log.info("sql:\n"+sql);
 	}
 		
-	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		String finalSql = null;
 		try {
@@ -824,7 +824,7 @@ public class QueryOn extends HttpServlet {
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		
-		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, resp);
+		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), resp);
 		finalSql = sql.getFinalSql();
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		bindParameters(st, sql);
@@ -867,10 +867,10 @@ public class QueryOn extends HttpServlet {
 	 * - no stmt.getMetaData()
 	 * - run query with limit of 0 or 1? set parameters with what? null? random?
 	 */
-	void doValidate(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	void doValidate(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
-			SQL sql = SQL.createSQL(relation, reqspec);
+			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
 
 			ParameterMetaData pmd = stmt.getParameterMetaData();
@@ -919,7 +919,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	void doExplain(Relation relation, RequestSpec reqspec, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	void doExplain(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 			final DBMSResources res = DBMSResources.instance();
@@ -929,7 +929,7 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("Explain plan not available for database: "+feat.getClass().getSimpleName());
 			}
 			
-			SQL sql = SQL.createSQL(relation, reqspec);
+			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			ResultSet rs = feat.explainPlan(sql.getFinalSql(), conn);
 
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
@@ -969,11 +969,11 @@ public class QueryOn extends HttpServlet {
 		
 		int outParamCount = 0;
 		Object retObject = null;
-		String sql = SQL.createExecuteSqlFromBody(eo);
+		String sql = SQL.createExecuteSqlFromBody(eo, getUsername(currentUser) );
 		if(eo.getType()==DBObjectType.EXECUTABLE && sql!=null && !sql.equals("")) {
 		
 			//log.info("executing BODY: "+sql);
-			PreparedStatement stmt = conn.prepareStatement(sql.toString());
+			PreparedStatement stmt = conn.prepareStatement(sql);
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int pc = pmd.getParameterCount();
 			if(reqspec.params.size() < pc) {
@@ -1964,7 +1964,9 @@ public class QueryOn extends HttpServlet {
 		return ret;
 	}
 	
-	
+	public static String getUsername(Subject currentUser) {
+		return String.valueOf(currentUser.getPrincipal());
+	}
 	
 	/*@SuppressWarnings("rawtypes")
 	static <T> List<String> getSimpleClassNames(List<Class<T>> classes) {
