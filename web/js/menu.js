@@ -87,7 +87,7 @@ function createMenuContent(addCloseBtn) {
 				hrefCurrentLike = hrefCurrentLike.substring(0, hrefCurrentLike.indexOf('?'));
 			}
 			
-			console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
+			//console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
 			if(path.endsWith(hrefCurrentLike)) {
 				li.classList.add("current");
 			}

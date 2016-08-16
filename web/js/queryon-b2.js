@@ -144,6 +144,9 @@ function makeHrefs() {
 				else {
 					urled.href += "name="+parts[0];
 				}
+				if(getCurrentModelId()) {
+					urled.href += "&model="+getCurrentModelId();
+				}
 			}
 			else {
 				urled.style.display = 'none';

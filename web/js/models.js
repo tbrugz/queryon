@@ -33,11 +33,15 @@ function loadModelsContent(oEvent) {
 //--- ui functions
 
 function getCurrentModelId() {
-	var model = document.getElementById('model').value;
+	var elem = document.getElementById('model');
+	if(!elem) {
+		console.warn("getCurrentModelId: element 'model' undefined...");
+		return;
+	}
+	var model = elem.value;
 	return model=="null"?null:model;
 }
 
-getModel = function() {
-}
+getModel = function() {}
 
 //document.addEventListener("DOMContentLoaded", loadModels);

@@ -55,7 +55,7 @@ function refreshAuthInfo() {
 	var urlednew = document.getElementById("url-editor-new");
 	if(authInfo.isDev && urlednew) {
 		urlednew.style.display = 'inline';
-		urlednew.href = qonEditorUrl;
+		urlednew.href = qonEditorUrl + ( getCurrentModelId()?"?model="+getCurrentModelId():"" );
 	}
 	else if(urlednew){
 		urlednew.style.display = 'none';
