@@ -3,13 +3,13 @@ var baseUrl;
 
 var relationsHash = {};
 
-function init(url, containerId, callback) {
+function init(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
 	$('#'+containerId).append('<option value="" selected>select object</option>');
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
-		url: baseUrl+'/relation.json',
+		url: baseUrl+'/relation.json'+(modelId?'?model='+modelId:''),
 		dataType: "json",
 		success: function(data) {
 			var rels = data.relation;
@@ -65,6 +65,11 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	}
 	
 	var queryString = '';
+	
+	var modelId = document.getElementById('model').value;
+	if(modelId) {
+		queryString += 'model='+modelId;
+	}
 	
 	var filters = document.querySelectorAll('.filter');
 	for (var i = 0; i < filters.length; ++i) {

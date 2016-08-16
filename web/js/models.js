@@ -24,6 +24,20 @@ function loadModelsContent(oEvent) {
 		loadSchemas(json.models[i]);
 	}
 	updateSelectedQueryState();*/
+	
+	if(typeof loadModelsContentCallback === 'function') {
+		loadModelsContentCallback();
+	}
 }
 
-document.addEventListener("DOMContentLoaded", loadModels);
+//--- ui functions
+
+function getCurrentModelId() {
+	var model = document.getElementById('model').value;
+	return model=="null"?null:model;
+}
+
+getModel = function() {
+}
+
+//document.addEventListener("DOMContentLoaded", loadModels);

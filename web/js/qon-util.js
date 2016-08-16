@@ -123,3 +123,34 @@ function showDialogMessage(text) {
 function closeDialogMessage() {
 	document.getElementById('dialog-container').style.display = 'none';
 }
+
+// ---------- select's functions ----------
+
+loadSelect = function(data, selectId, callbackName, callbackValue) {
+	if(!callbackName) { callbackName = function(obj) { return obj; } }
+	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
+	var sel = document.getElementById(selectId);
+	var prevOptionValue = sel.value;
+	$('#'+selectId).empty();
+	if(data==null) { console.log('null data; selectId: ',selectId); return; }
+	for(var i=0;i<data.length;i++) {
+		var name = callbackName(data[i]);
+		if(name==null) { continue; }
+		var optionValue = callbackValue(data[i]);
+		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
+		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
+	}
+}
+
+updateSelectValue = function(select, value) {
+	//console.log("updateSelectValue", select, value, select.selectedIndex);
+	var prevIdx = select.selectedIndex;
+	for(var i=0;i<select.options.length;i++) {
+		if(select.options[i].value == value) {
+			select.selectedIndex = i;
+			if(prevIdx!=i) { return true; }
+			return false;
+		}
+	}
+	return false;
+}

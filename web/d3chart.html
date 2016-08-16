@@ -44,6 +44,10 @@
 			<!-- #CD644E -->
 		</span>
 		
+		<label style="display: none">
+			<select id="model" onchange="onModelChanged();"></select>
+		</label>
+		
 		<label>
 			<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();"></select>
 		</label>
@@ -125,9 +129,26 @@ function onNavElementChanged() {
 	makeHrefs();
 }
 
+function onModelChanged() {
+	byId('objects').innerHTML = '';
+	loadQueries(getCurrentModelId());
+}
+
+function loadModelsContentCallback() {
+	if(modelsInfo) {
+		loadSelect(modelsInfo, 'model');
+	}
+	if(modelsInfo.length>1) {
+		byId('model').parentNode.style.display = 'inline-block';
+	}
+
+	loadQueries(getCurrentModelId());
+}
+
 var onLoad = function() {
-	loadQueries();
+	//loadQueries();
 	loadAuthInfo();
+	loadModels();
 }
 </script>
 </body>

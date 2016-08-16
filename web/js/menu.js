@@ -68,6 +68,7 @@ function createMenuContent(addCloseBtn) {
 	var hasLoginLink = document.getElementById('authaction') != null;
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
 	var path = location.pathname;
+	//console.log('typeof authInfo =', (typeof authInfo) ," typeof modelsInfo =", (typeof modelsInfo));
 	
 	for(var i=0;i<lis.length;i++) {
 		var li = lis[i];

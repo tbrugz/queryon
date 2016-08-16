@@ -21,7 +21,7 @@ var processorUrl = 'processor';
 
 /* functions */
 
-function loadQueries(filterSchema) {
+function loadQueries(modelId, filterSchema) {
 	init(queryOnUrl,'objects', function(containerId, rels) {
 		if(filterSchema) {
 			console.log('filtering rels', rels.length, 'filterSchema', filterSchema);
@@ -32,8 +32,9 @@ function loadQueries(filterSchema) {
 				}
 			}
 		}
+		byId(containerId).innerHTML = '';
 		writeRelations(containerId, rels); updateSelectedQueryState(); makeHrefs();
-	});
+	}, modelId);
 }
 
 function onQueryChangedClean() {
@@ -118,7 +119,12 @@ function makeHrefs() {
 	var urldown = document.getElementById("url-down");
 
 	var select = document.getElementById('objects');
-	var id = select.options[select.selectedIndex].value;
+	//console.log("select.selectedIndex", select.selectedIndex);
+	
+	var id = null;
+	if(select.selectedIndex>=0) {
+		id = select.options[select.selectedIndex].value;
+	}
 	if(!id) {
 		urled && (urled.style.display = 'none');
 		urlpl && (urlpl.style.display = 'none');

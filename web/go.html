@@ -24,8 +24,13 @@ var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "N
 onLoad = function() {
 	loadSettings(makeHrefs);
 	loadAuthInfo();
+	loadModels();
+}
+
+doLoadExecs = function() {
+	var queryString = (getCurrentModelId()?'?model='+getCurrentModelId():'');
 	
-	var url = queryOnUrl + 'executable.json';
+	var url = queryOnUrl + 'executable.json' + queryString;
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", loadSelectContent);
 	oReq.open("GET", url);
@@ -46,6 +51,10 @@ loadSelectContent = function(oEvent) {
 		select.innerHTML += option;
 	}
 	onExecChanged();
+}
+
+onModelChanged = function() {
+	doLoadExecs();
 }
 
 onExecChanged = function() {
@@ -69,9 +78,7 @@ onExecChanged = function() {
 	console.log('onExecChanged: ', params, ' - ', pars, ' - ', pars.length);
 	//XXX: IN, OUT, INOUT...
 	//XXX: parameterTypes...
-	if(params) {
-		goSetParameters('parameters', pars);
-	}
+	goSetParameters('parameters', params?pars:null);
 	closeMessages('messages');
 }
 
@@ -104,10 +111,15 @@ doGo = function() {
 	
 	var params = document.querySelectorAll('.parameter');
 	var paramsStr = '';
+	
+	var modelId = getCurrentModelId();
+	if(modelId) {
+		paramsStr = '?model='+modelId;
+	}
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i].value;
 		//if(str=='') { str = '-'; } 
-		paramsStr += (i==0?"?":"&") + "p" + (i+1) + "=" + item;
+		paramsStr += (paramsStr.length==0?"?":"&") + "p" + (i+1) + "=" + item;
 	}
 	
 	var oReq = new XMLHttpRequest();
@@ -136,19 +148,35 @@ goSetParameters = function(parametersId, pars) {
 	var paramsContainer = document.getElementById('parameters');
 	paramsContainer.innerHTML = '';
 	var content = '';
-	var numparams = pars.length;
-	for(var i=1;i<=numparams;i++) {
-		console.log("i",i,"par",pars[i-1]);
-		var parts = pars[i-1].split(";");
-		var colType = parts[2];
-		var isOut = parts[3].indexOf("OUT")==0;
-		var inputType = "text";
-		if(numericSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'number'; }
-		content += "<label class='parameter-label'>p"+i+
-			": <input type='"+inputType+"' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'"+
-			(isOut?" value='(OUT)' readonly":"")+"/></label>";
+	console.log('goSetParameters: pars: ', pars);
+	if(pars) {
+		var numparams = pars.length;
+		for(var i=1;i<=numparams;i++) {
+			console.log("i",i,"par",pars[i-1]);
+			var parts = pars[i-1].split(";");
+			var colType = parts[2];
+			var isOut = parts[3].indexOf("OUT")==0;
+			var inputType = "text";
+			if(numericSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'number'; }
+			content += "<label class='parameter-label'>p"+i+
+				": <input type='"+inputType+"' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'"+
+				(isOut?" value='(OUT)' readonly":"")+"/></label>";
+		}
 	}
 	paramsContainer.innerHTML = content;
+}
+
+function loadModelsContentCallback() {
+	//loadModelsContent(oEvent);
+	
+	if(modelsInfo) {
+		loadSelect(modelsInfo, 'model');
+	}
+	if(modelsInfo.length>1) {
+		document.getElementById('model').parentNode.style.display = 'inline-block';
+	}
+
+	doLoadExecs();
 }
 
 	</script>
@@ -192,7 +220,7 @@ input[readonly] {
 	<span id="logo">Q<span style="color: #ff8a47">On</span> <span>Go!</span></span>
 
 	<label style="display: none">
-		model: <select id="model" onchange="onModelChanged();"></select>
+		<select id="model" onchange="onModelChanged();"></select>
 	</label>
 	
 	<label>

@@ -10,7 +10,8 @@ var authInfo = {
 		roles: [ ],
 		permissions: [ ],
 		isAdmin: false,
-		isDev: false
+		isDev: false,
+		loaded: false  // should be set to 'true' after loading from ajax
 };
 
 function loadAuthInfo() {
@@ -22,8 +23,18 @@ function loadAuthInfo() {
 			console.log('authInfo', info);
 			info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
 			info.isDev = info.isAdmin;
+			info.loaded = true;
 			authInfo = info;
-			makeHrefs();
+			
+			if(typeof loadAuthInfoCallback === 'function') {
+				loadAuthInfoCallback();
+			}
+			if(typeof makeHrefs === 'function') {
+				makeHrefs();
+			}
+			else {
+				console.log('auth.js: function makeHrefs() not present...');
+			}
 		}
 	});
 }

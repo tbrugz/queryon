@@ -14,26 +14,45 @@
 	<script>
 onLoad = function() {
 	//console.log("onload");
-	//loadAuthInfo();
+	loadAuthInfo();
+	loadModels();//function() { loadModelsContent(); loadMenuContentCallback("(from onLoad)"); });
+	//loadMenu();
 }
 
-makeHrefs = function() {
-	//console.log("makeHrefs");
-	loadModelsContentCallback();
+loadAuthInfoCallback = function() {
+	//console.log("loadAuthInfoCallback");
+	//loadModelsContentCallback("(from makeHrefs)");
 	refreshAuthInfo();
+	drawMenu();
 }
 
 loadMenuContentCallback = function () {
 	//console.log("loadMenuContentCallback");
-	loadAuthInfo();
+	//loadAuthInfo();
 	//loadModels(loadModelsContentCallback);
+	drawMenu();
 }
 
-loadModelsContentCallback = function() {
+loadModelsContentCallback = function () {
 	//console.log("loadModelsContentCallback");
+	drawMenu();
+}
+
+drawMenu = function () {
+	//console.log("drawMenu");
+	if(typeof authInfo == "undefined" || typeof modelsInfo == "undefined" || typeof menucontent == "undefined") {
+		console.warn("something is not right.. have auth.js, models.js & menu.js been loaded?");
+		return;
+	}
+	if(authInfo.loaded == false || modelsInfo == null || menucontent == null) {
+		console.log("drawMenu: cant draw yet...");
+		return;
+	}
+	
 	var menu = createMenuContent(false);
 	var content = document.getElementById('content');
 	content.appendChild(menu);
+	//loadMenuContentCallback("(from loadModelsContentCallback)");
 }
 	</script>
 	<style type="text/css">

@@ -30,6 +30,14 @@
 	var schemaNameFilter = null;
 	
 	var onLoad = function() {
+		loadModels(); //loadModelsCallback);
+		loadAuthInfo();
+		loadSettings();
+	}
+	
+	var textareaDbColTypes = ["CLOB", "TEXT"];
+	
+	var doLoadQueries = function() {
 		var s = getParameterByName('s', location.search);
 		if(s) {
 			schemaNameFilter = s;
@@ -37,12 +45,32 @@
 			document.title += " - "+schemaNameFilter;
 		}
 		//console.log('schemaNameFilter',schemaNameFilter);
-		loadQueries(schemaNameFilter);
-		loadAuthInfo();
-		loadSettings();
+		loadQueries(getCurrentModelId(), schemaNameFilter);
 	}
 	
-	var textareaDbColTypes = ["CLOB", "TEXT"];
+	function loadModelsContentCallback() {
+		//loadModelsContent(oEvent);
+		
+		if(modelsInfo) {
+			loadSelect(modelsInfo, 'model');
+		}
+		if(modelsInfo.length>1) {
+			document.getElementById('model').parentNode.style.display = 'inline-block';
+		}
+
+		doLoadQueries();
+	}
+	
+	onModelChanged = function(updateFragment) {
+		doLoadQueries();
+		/*var m = document.getElementById('model').value;
+		var schemas = schemasByModel[m];
+		
+		loadSelect(schemas, 'schema');
+		loadObjectList(function() {
+			if(updateFragment) { updateURLFragment(); }
+		});*/
+	}
 	
 	function updateUI() {
 		// style changes
@@ -412,8 +440,6 @@
 		var ret = getKeyValsForRow(rownum);
 		var cols = getColumnNamesFromColgroup('content');
 		
-		//var finalUrl = getQueryUpdateUrl('objects', ret.key, 'updatemax=1&updatemin=1', 'json');
-		
 		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
 				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		/*
@@ -437,7 +463,7 @@
 		//pk values in URL
 		//var urlPath = ret.pkvals.join("/");
 		//adding update PK values to request body
-		var urlPath = '';
+		//var urlPath = '';
 		for(var i=0;i<ret.pkvals.length;i++) {
 			formData.append('p'+(i+1), ret.pkvals[i]);
 		}
@@ -447,7 +473,12 @@
 		var method = "PUT";
 		nv.formData.append('_method', method);
 
-		var finalUrl = getQueryUpdateUrl('objects', urlPath, 'updatemax=1&updatemin=1', 'json');
+		var querystring = 'updatemax=1&updatemin=1';
+		var modelId = getCurrentModelId();
+		if(modelId) {
+			querystring = 'model=' + modelId + '&' + querystring;
+		}
+		var finalUrl = getQueryUpdateUrl('objects', null, querystring, 'json');
 		
 		//console.log("doConfirmUpdate finalUrl", finalUrl, "postData", nv.postData);
 		
@@ -504,7 +535,7 @@
 				if(rel.name && (settings["queryon.qon-tables.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
 					//reloadTables(messagesId, nv.postData["v:NAME"]);
 					document.getElementById('objects').innerHTML = '';
-					loadQueries(schemaNameFilter);
+					loadQueries(getCurrentModelId(), schemaNameFilter);
 				}
 				/*if(rel.name && (settings["queryon.qon-execs.table"].toUpperCase().indexOf(rel.name.toUpperCase())>=0) ) {
 					reloadExecs(messagesId, nv.postData["p1"]);
@@ -541,7 +572,7 @@
 				appendMessages(messagesId, ' - table <code>'+tableName+'</code> reloaded');
 				// reloading updated queries
 				document.getElementById('objects').innerHTML = '';
-				loadQueries(schemaNameFilter);
+				loadQueries(getCurrentModelId(), schemaNameFilter);
 			}
 			else {
 				appendMessages(messagesId, ' - error validating table <code>'+tableName+'</code>');
@@ -592,7 +623,13 @@
 	}
 	
 	function doConfirmInsert(rownum, closeDialog) {
-		var finalUrl = getQueryUpdateUrl('objects', null, 'updatemax=1&updatemin=1', 'json');
+		var querystring = 'updatemax=1&updatemin=1';
+		var modelId = getCurrentModelId();
+		if(modelId) {
+			querystring = 'model=' + modelId + '&' + querystring;
+		}
+		
+		var finalUrl = getQueryUpdateUrl('objects', null, querystring, 'json');
 		var relation = getCurrentRelation('objects');
 		var cols = getColumnNamesFromColgroup('content');
 		
@@ -636,24 +673,13 @@
 				
 				if(settings["queryon.qon-tables.table"].toUpperCase().indexOf(selectId)>=0) {
 					select.innerHTML = '';
-					loadQueries(schemaNameFilter);
+					loadQueries(getCurrentModelId(), schemaNameFilter);
 				}
 			});
 			
 			
 		}
 	}
-	
-	/*
-	function doDownloadBlob(rownum, col) {
-		var ret = getKeyValsForRow(rownum);
-		var finalUrl = getQueryUpdateUrl('objects', ret.key, 'valuefield='+col, 'blob');
-		
-		console.log("doDownloadBlob key",ret.key,"pk",ret.pk,"pkvals"
-				,ret.pkvals,"cols",ret.cols,"finalUrl",finalUrl);
-		window.open(finalUrl);
-	}
-	*/
 	
 	function updateState() {
 		//replace href
@@ -786,6 +812,10 @@
 <nav id="nav" class="navbar">
 	<span id="logo">Query<span style="color: #ff8a47;">On</span><span id="schemaNameFilter"></span></span>
 
+	<label style="display: none">
+		<select id="model" onchange="onModelChanged(true);"></select>
+	</label>
+	
 	<label>
 		<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();">
 		</select>

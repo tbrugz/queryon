@@ -56,14 +56,15 @@ $(document).ready(
 		}
 		loadSelect(tts, 'type');
 		loadAuthInfo();
+		loadModels();
 	}
 );
 
-makeHrefs = function() {
+loadAuthInfoCallback = function() {
 	refreshAuthInfo();
 }
 
-$.ajax({
+/*$.ajax({
 	url: 'info/model.jsp',
 	dataType: "text",
 	success: function(data) {
@@ -79,11 +80,25 @@ $.ajax({
 			loadSchemas(json.models[i]);
 		}
 		updateSelectedQueryState();
-		/*if(json.types) {
-			loadSelect(json.types, 'type');
-		}*/
 	}
-});
+});*/
+
+loadModelsContentCallback = function() {
+	//modelsInfo
+	if(modelsInfo) {
+		loadSelect(modelsInfo, 'model');
+	}
+	if(modelsInfo.length>1) {
+		document.getElementById('model').parentNode.style.display = 'inline-block';
+	}
+	for(var i=0;i<modelsInfo.length;i++) {
+		loadSchemas(modelsInfo[i]);
+	}
+	updateSelectedQueryState();
+	/*if(json.types) {
+		loadSelect(json.types, 'type');
+	}*/
+}
 
 //TODOne: schemas by model?
 loadSchemas = function(model) {
@@ -182,7 +197,7 @@ updateSelectedQueryState = function(doUpdateFragment) {
 loadObjectList = function(callback) {
 	var origType = document.getElementById('type').value;
 	var type = typemap[origType];
-	var model = getModel();
+	var model = getCurrentModelId();
 	var schema = document.getElementById('schema').value;
 	var url = queryOnUrl+type
 		+ (schema? '/'+schema:'')
@@ -221,7 +236,7 @@ loadObjectList = function(callback) {
 }
 
 getDDL = function() {
-	var model = getModel();
+	var model = getCurrentModelId();
 	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
@@ -252,43 +267,9 @@ getDDL = function() {
 	});
 }
 
-getModel = function() {
-	var model = document.getElementById('model').value;
-	return model=="null"?null:model;
-}
-
 updateUI = function() {}
 
 // ----- utility functions
-
-loadSelect = function(data, selectId, callbackName, callbackValue) {
-	if(!callbackName) { callbackName = function(obj) { return obj; } }
-	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
-	var sel = document.getElementById(selectId);
-	var prevOptionValue = sel.value;
-	$('#'+selectId).empty();
-	if(data==null) { console.log('null data; selectId: ',selectId); return; }
-	for(var i=0;i<data.length;i++) {
-		var name = callbackName(data[i]);
-		if(name==null) { continue; }
-		var optionValue = callbackValue(data[i]);
-		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
-	}
-}
-
-updateSelectValue = function(select, value) {
-	//console.log("updateSelectValue", select, value, select.selectedIndex);
-	var prevIdx = select.selectedIndex;
-	for(var i=0;i<select.options.length;i++) {
-		if(select.options[i].value == value) {
-			select.selectedIndex = i;
-			if(prevIdx!=i) { return true; }
-			return false;
-		}
-	}
-	return false;
-}
 
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {
 	if(!idCallback) { idCallback = function(obj) { return obj; } }

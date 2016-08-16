@@ -86,7 +86,7 @@ body {
 	padding: 5px;
 }
 
-#navbar-prop, #buttons, #graphbuttons {
+#navbar-prop, #buttons, #graphbuttons, #actionbuttons {
 	display: none;
 }
 
@@ -95,6 +95,10 @@ body {
 <body onload="javascript:onLoad();">
 <div id="nav" class="navbar">
 	<span id="logo">Q<span style="color: #ff8a47">On</span> + sigma<span style="color: #ec5148">js</span></span>
+
+	<label style="display: none">
+		<select id="model" onchange="onModelChanged();"></select>
+	</label>
 
 	<select id="objects" onchange="onQueryChanged();"></select>
 	
@@ -114,8 +118,8 @@ body {
 		<input type="button" value="-" onclick="graphDecreaseSize();"/>
 	</span>
 
-	<span class="btn-container">
-		<a id="download" title="download GraphML file (experimental)" href="" style="display: none;">download</a>
+	<span id="actionbuttons" class="btn-container">
+		<a id="download" title="download GraphML file (experimental)" href="">download</a>
 	</span>
 	
 	<span id="authinfo">
@@ -162,8 +166,17 @@ body {
 		
 		function onQueryChanged() {
 			loadRelation('objects', 'parameters', 'content');
-			document.getElementById('navbar-prop').style.display = 'initial';
-			document.getElementById('buttons').style.display = 'initial';
+			refreshUiComponents();
+		}
+		
+		function refreshUiComponents() {
+			var display = byId('objects').selectedIndex>0?'initial':'none';
+			
+			byId('navbar-prop').style.display = display;
+			byId('buttons').style.display = display;
+			byId('actionbuttons').style.display = display;
+			//byId('graphbuttons').style.display = display;
+			
 			updateDownloadUrl();
 		}
 		
@@ -179,7 +192,7 @@ body {
 		
 		var onLoad = function() {
 			//loadQueries();
-			init('q','objects', writeOptions);
+			loadModels();
 			loadAuthInfo();
 			updateUI();
 		}
@@ -188,9 +201,26 @@ body {
 			var paramsStr = getUrlParams();
 			var filterStr = getUrlFilters();
 			byId('download').href = downloadUrl + '/' + objects.value + paramsStr + '?' + filterStr;
-			byId('download').style.display = 'initial';
+			//byId('download').style.display = 'initial';
 			byId('download').setAttribute('download', objects.value+'.graphml');
 			//title='plot.graphml'
+		}
+		
+		function loadModelsContentCallback() {
+			if(modelsInfo) {
+				loadSelect(modelsInfo, 'model');
+			}
+			if(modelsInfo.length>1) {
+				byId('model').parentNode.style.display = 'inline-block';
+			}
+
+			//doLoadExecs();
+			init('q','objects', writeOptions, getCurrentModelId());
+		}
+		
+		function onModelChanged() {
+			byId('objects').innerHTML = '';
+			init('q','objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
 		}
 		
 		// ======================== sigma-related functions ========================
@@ -279,8 +309,11 @@ body {
 			//filters
 			var filterStr = getUrlFilters();
 
+			//model
+			var modelId = getCurrentModelId();
+			
 			// ajax
-			var queryString = filterStr;
+			var queryString = (modelId ? 'model='+modelId : '') + filterStr;
 			btnActionStart('go-button');
 			var url = 'q/'+qid+paramsStr+'.json?'+queryString;
 			console.log('url['+qid+']: '+url);

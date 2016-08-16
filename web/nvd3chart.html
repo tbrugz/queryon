@@ -55,6 +55,10 @@ svg {
 			<!-- rgb(31, 119, 180); ?? -->
 		</span>
 		
+		<label style="display: none">
+			<select id="model" onchange="onModelChanged();"></select>
+		</label>
+	
 		<label>
 			<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();"></select>
 		</label>
@@ -159,9 +163,26 @@ var addDownloadLink = function() {
 bottom: 4px;
 left: 10px;*/
 
+function onModelChanged() {
+	byId('objects').innerHTML = '';
+	loadQueries(getCurrentModelId());
+}
+
+function loadModelsContentCallback() {
+	if(modelsInfo) {
+		loadSelect(modelsInfo, 'model');
+	}
+	if(modelsInfo.length>1) {
+		byId('model').parentNode.style.display = 'inline-block';
+	}
+
+	loadQueries(getCurrentModelId());
+}
+
 var onLoad = function() {
-	loadQueries();
+	loadModels();
 	loadAuthInfo();
+	//loadQueries(getCurrentModelId());
 }
 </script>
 </body>
