@@ -87,6 +87,10 @@ public class SQL {
 	}
 	
 	public String getFinalSql() {
+		return getFinalSql(sql, username);
+	}
+	
+	public static String getFinalSql(String sql, String username) {
 		//log.info("getFinalSql: "+username);
 		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
 				.replace(VARIABLE_USERNAME, username);

@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.SQL;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.datadump.DataDumpUtils;
@@ -124,7 +125,7 @@ public class QOnQueries extends SQLQueries {
 			String rolesFilterStr = rs.getString(5);
 			
 			try {
-			PreparedStatement stinn = conn.prepareStatement(query);
+			PreparedStatement stinn = conn.prepareStatement( processQuery(query) );
 			//count += addQueryToModel(queryName, queryName, schema,
 			//		/*String colNames*/ null, /*boolean grabInfoFromMetadata*/ true, /*addAlsoAsTable*/ false,
 			//		stinn, query, /*List<String> keyCols*/ null,
@@ -243,6 +244,12 @@ public class QOnQueries extends SQLQueries {
 		prop.setProperty(SQLQueries.PROP_QUERIES_GRABCOLSINFOFROMMETADATA, "true");
 		super.process();
 		//------ end SQLQueries...
+	}
+	
+	//@Override //FIXME sqldump v0.9.15... 
+	protected String processQuery(String sql) {
+		//return sql.replace(SQL.VARIABLE_USERNAME, "''");
+		return SQL.getFinalSql(sql, "''");
 	}
 
 	/*
