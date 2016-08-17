@@ -295,7 +295,7 @@
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
-      <version>0.9.14</version>
+      <version>0.9.14</version> <!-- 0.9.15-SNAPSHOT -->
       <scope>compile</scope>
       <exclusions>
         <exclusion>

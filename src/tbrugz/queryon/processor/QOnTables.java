@@ -186,7 +186,8 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		catch(SQLException e) {
 			// XXX get conn info (closed, valid)
 			String message = "addTable ["+tableName+"]: exception: "+e.getMessage().trim();
-			log.warn(message+"\nsql: "+sql, e);
+			log.warn(message+"\nsql: "+sql);
+			log.debug(message+"\nsql: "+sql, e);
 			throw new BadRequestException(message, "\nsql: "+sql, e);
 		}
 		

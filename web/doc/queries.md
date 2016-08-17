@@ -12,6 +12,14 @@ QueryOn's editor also allows for special commands that are useful to query datab
 See also: [API documentation](api.md)
 
 
+Variables
+---------
+
+Queries may have variables (constants?) that will be replaced when the query is executed.
+
+* `$username` - replaces the token by the current logged user (with quotes, e.g.: `'root'`)
+
+
 Parameters
 ----------
 
