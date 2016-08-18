@@ -130,7 +130,7 @@ function onNavElementChanged() {
 }
 
 function onModelChanged() {
-	byId('objects').innerHTML = '';
+	byId('objects').innerHTML = defaultNullObjectOption;
 	loadQueries(getCurrentModelId());
 }
 

@@ -164,7 +164,7 @@ bottom: 4px;
 left: 10px;*/
 
 function onModelChanged() {
-	byId('objects').innerHTML = '';
+	byId('objects').innerHTML = defaultNullObjectOption;
 	loadQueries(getCurrentModelId());
 }
 

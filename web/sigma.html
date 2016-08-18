@@ -219,7 +219,7 @@ body {
 		}
 		
 		function onModelChanged() {
-			byId('objects').innerHTML = '';
+			byId('objects').innerHTML = defaultNullObjectOption;
 			init('q','objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
 		}
 		

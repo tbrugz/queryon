@@ -32,7 +32,6 @@ function loadQueries(modelId, filterSchema) {
 				}
 			}
 		}
-		byId(containerId).innerHTML = '';
 		writeRelations(containerId, rels); updateSelectedQueryState(); makeHrefs();
 	}, modelId);
 }

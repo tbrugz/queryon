@@ -3,10 +3,13 @@ var baseUrl;
 
 var relationsHash = {};
 
+var defaultNullObjectOption = '<option value="" selected>select object</option>';
+
 function init(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
-	$('#'+containerId).append('<option value="" selected>select object</option>');
+	byId(containerId).innerHTML = defaultNullObjectOption;
+	//$('#'+containerId).append('<option value="" selected>select object</option>');
 	//console.log('baseUrl: '+baseUrl);
 	$.ajax({
 		url: baseUrl+'/relation.json'+(modelId?'?model='+modelId:''),
