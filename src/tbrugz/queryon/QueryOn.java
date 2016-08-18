@@ -244,6 +244,8 @@ public class QueryOn extends HttpServlet {
 	static boolean validateFilterColumnNames = true;
 	boolean xSetRequestUtf8 = false;
 	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
+	Integer defaultLimit;
+	int maxLimit;
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
@@ -315,6 +317,9 @@ public class QueryOn extends HttpServlet {
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
 			
 			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
+			
+			defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
+			maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
 			
 			context.setAttribute(ATTR_PROP, prop);
 			context.setAttribute(ATTR_DUMP_SYNTAX_UTILS, dsutils);
@@ -1751,11 +1756,11 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
+	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
-		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, reqspec.limit);
+		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, getLimit(reqspec.limit));
 	}
 	
 	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
@@ -1823,11 +1828,11 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	static void dumpBlob(ResultSet rs, RequestSpec reqspec, String queryName,
+	void dumpBlob(ResultSet rs, RequestSpec reqspec, String queryName,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
-			rs = new ResultSetLimitOffsetDecorator(rs, reqspec.limit, reqspec.offset);
+			rs = new ResultSetLimitOffsetDecorator(rs, getLimit(reqspec.limit), reqspec.offset);
 		}
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -1966,6 +1971,13 @@ public class QueryOn extends HttpServlet {
 	
 	public static String getUsername(Subject currentUser) {
 		return String.valueOf(currentUser.getPrincipal());
+	}
+	
+	int getLimit(Integer requestSpecLimit) {
+		if(requestSpecLimit!=null) {
+			return Math.min(requestSpecLimit, maxLimit);
+		}
+		return Math.min(defaultLimit, maxLimit);
 	}
 	
 	/*@SuppressWarnings("rawtypes")

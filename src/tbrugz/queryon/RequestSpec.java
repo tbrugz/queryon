@@ -72,7 +72,8 @@ public class RequestSpec {
 	final String httpMethod;
 	public final String modelId;
 	public final String object;
-	final int offset, limit;
+	final int offset;
+	final Integer limit;
 	final String loStrategy;
 	final String contentType;
 	
@@ -253,30 +254,8 @@ public class RequestSpec {
 		if(offsetStr!=null) { offset = Integer.parseInt(offsetStr); }
 		else { offset = 0; }
 
-		Long maxLimit = Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT); //XXX: add DEFAULT_LIMIT_MAX ?
 		String limitStr = req.getParameter("limit");
-		if(limitStr!=null) {
-			int propLimit = Integer.parseInt(limitStr);
-			if(maxLimit!=null && propLimit>maxLimit) {
-				limit = maxLimit.intValue();
-			}
-			else {
-				limit = propLimit;
-			}
-		}
-		else {
-			Long defaultLimit = Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT);
-			if(defaultLimit!=null) {
-				limit = defaultLimit.intValue();;
-			}
-			else if(maxLimit!=null) {
-				limit = maxLimit.intValue();;
-			}
-			else {
-				//limit = (int)(long) Utils.getPropLong(prop, QueryOn.PROP_DEFAULT_LIMIT, 1000l);
-				limit = DEFAULT_LIMIT;
-			}
-		}
+		limit = limitStr!=null ? Integer.parseInt(limitStr) : null;
 		
 		// max & min updates
 		String updateMaxStr = req.getParameter("updatemax");
