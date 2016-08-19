@@ -6,9 +6,13 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
@@ -52,6 +56,8 @@ import com.google.gson.GsonBuilder;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.Utils;
+
 import static tbrugz.queryon.http.JettySetup.*;
 
 public class WinstoneAndH2HttpRequestTest {
@@ -59,6 +65,7 @@ public class WinstoneAndH2HttpRequestTest {
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;
 	static String workDir = "work/test/";
+	static String utf8 = "UTF-8";
 	
 	@BeforeClass
 	public static void setup() throws Exception {
@@ -521,7 +528,75 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetXmlEmpFilterNotIn2() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200&fnin:SALARY=1000", 2);
 	}
+	
+	//----- limit-related tests
 
+	String getSql30rows() throws UnsupportedEncodingException {
+		List<String> select = new ArrayList<String>();
+		for(int i=0;i<30;i++) {
+			select.add("select "+i+" as n");
+		}
+		String sql = Utils.join(select, " union all\n");
+		System.out.println("sql: "+sql);
+		return sql;
+	}
+	
+	@Test
+	public void testGetXmlSelectAny10() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "queryon.limit.default=10"
+		String sql = getSql30rows();
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar, 10);
+	}
+	
+	@Test
+	public void testGetXmlSelectAny20() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "queryon.limit.max=20"
+		String sql = getSql30rows();
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=25", 20);
+	}
+	
+	@Test
+	public void testGetXmlSelectAnyLimitDefault() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "limit-default=5"
+		String sql = getSql30rows() + "/* limit-default=5 */";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar, 5);
+	}
+	
+	@Test
+	public void testGetXmlSelectAnyLimitDefault9() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "&limit=9"
+		String sql = getSql30rows() + "/* limit-default=5 */";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=9", 9);
+	}
+	
+	@Test
+	public void testGetXmlSelectAnyLimitMax() throws IOException, ParserConfigurationException, SAXException {
+		String sql = getSql30rows() + "/* limit-max=5 */";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar, 5);
+	}
+	
+	@Test
+	public void testGetXmlSelectAnyLimitMax9() throws IOException, ParserConfigurationException, SAXException {
+		String sql = getSql30rows() + "/* limit-max=5 */";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=9", 5);
+	}
+	
+	@Test
+	public void testGetXmlSelectAnyLimitMax20() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "queryon.limit.max=20"
+		String sql = getSql30rows() + "/* limit-max=25 */";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=50", 20);
+	}
+
+	//----- limit-related tests - end
+	
 	@Test
 	public void testGetHtmlTitleEmp() throws IOException, ParserConfigurationException, SAXException, TransformerException {
 		Document doc = getXmlDocument("/EMP.html?fnin:SALARY=1200&fnin:SALARY=1000&title=true");

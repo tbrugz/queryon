@@ -131,7 +131,7 @@ public class RequestSpec {
 	final String uniValueFilename;
 	final String uniValueFilenameCol;
 	
-	final static int DEFAULT_LIMIT = 100;
+	public final static int DEFAULT_LIMIT = 100;
 	final static int DEFAULT_MAX_UPDATES = 1;
 	final static int DEFAULT_MIN_UPDATES = 1;
 	

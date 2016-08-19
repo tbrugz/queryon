@@ -191,8 +191,8 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_MODELS = "queryon.models";
 	static final String PROP_MODELS_DEFAULT = "queryon.models.default";
 	
-	static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
-	static final String PROP_MAX_LIMIT = "queryon.limit.max";
+	public static final String PROP_DEFAULT_LIMIT = "queryon.limit.default";
+	public static final String PROP_MAX_LIMIT = "queryon.limit.max";
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_CONTEXT_PATH = "queryon.context-path";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
@@ -765,7 +765,8 @@ public class QueryOn extends HttpServlet {
 		return relation;
 	}
 	
-	public static SQL getSelectQuery(SchemaModel model, Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy, String username, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	public static SQL getSelectQuery(SchemaModel model, Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy,
+			String username, Integer defaultLimit, int maxLimit, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		
 		SQL sql = SQL.createSQL(relation, reqspec, username);
 		
@@ -809,7 +810,11 @@ public class QueryOn extends HttpServlet {
 			log.debug("pre-sql:\n"+sql.getSql());
 		}
 		//int limit = (sql.limitMax!=null && sql.limitMax < reqspec.limit) ? sql.limitMax : reqspec.limit;
-		sql.addLimitOffset(loStrategy, reqspec.offset);
+		int finalMaxLimit = maxLimit;
+		if(sql.limitMax!=null) {
+			finalMaxLimit = Math.min(finalMaxLimit, sql.limitMax);
+		}
+		sql.addLimitOffset(loStrategy, getLimit(sql.limit, defaultLimit, finalMaxLimit), reqspec.offset);
 		
 		//query finished!
 		
@@ -818,6 +823,10 @@ public class QueryOn extends HttpServlet {
 	}
 		
 	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		if(relation.getName()==null) {
+			throw new BadRequestException("select: relation name must not be null");
+		}
+		
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		String finalSql = null;
 		try {
@@ -829,7 +838,7 @@ public class QueryOn extends HttpServlet {
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		
-		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), resp);
+		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		bindParameters(st, sql);
@@ -1765,7 +1774,7 @@ public class QueryOn extends HttpServlet {
 	
 	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
-			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
+			boolean mayApplyLimitOffset, HttpServletResponse resp, Integer limit) 
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
 			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
@@ -1974,6 +1983,10 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	int getLimit(Integer requestSpecLimit) {
+		return getLimit(requestSpecLimit, defaultLimit, maxLimit);
+	}
+	
+	static int getLimit(Integer requestSpecLimit, Integer defaultLimit, int maxLimit) {
 		if(requestSpecLimit!=null) {
 			return Math.min(requestSpecLimit, maxLimit);
 		}

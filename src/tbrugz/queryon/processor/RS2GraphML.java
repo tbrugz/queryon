@@ -31,6 +31,7 @@ import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.graph.ResultSet2GraphML;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 
@@ -120,7 +121,10 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 			Constraint pk = SchemaModelUtils.getPK(relation);
 			LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 			
-			SQL sql = QueryOn.getSelectQuery(model, relation, reqspec, pk, loStrategy, QueryOn.getUsername(currentUser), resp);
+			Integer defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
+			int maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
+			
+			SQL sql = QueryOn.getSelectQuery(model, relation, reqspec, pk, loStrategy, QueryOn.getUsername(currentUser), defaultLimit, maxLimit, resp);
 			finalSql = sql.getFinalSql();
 			List<Object> params = sql.getParameterValues();
 			log.info("params: "+params);

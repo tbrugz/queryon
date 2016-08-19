@@ -51,6 +51,7 @@ public class SQL {
 	final boolean allowEncapsulation;
 	final Integer originalBindParameterCount;
 	final Integer limit;
+	final Integer limitMax;
 	final String username;
 	//XXX final String userroles;
 	
@@ -66,17 +67,21 @@ public class SQL {
 		this.relation = relation;
 		this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationBooleanPattern, true);
 		Integer limitDefault = processPatternInteger(sql, limitDefaultIntPattern);
-		Integer limitMax = processPatternInteger(sql, limitMaxIntPattern);
+		this.limitMax = processPatternInteger(sql, limitMaxIntPattern);
 		this.originalBindParameterCount = originalBindParameterCount;
+		
 		Integer limit = limitDefault!=null ? limitDefault : null;
 		limit = reqspecLimit!=null ? reqspecLimit : limit;
-		limit = limitMax!=null ? (limit!=null ? Math.min(limitMax, limit) : limitMax) : limit;
+		//if(limitMax!=null && limit!=null) { limit = Math.min(limitMax, limit); }
+		//else if(limitMax!=null) { limit = limitMax; }
+		//limit = limitMax!=null ? (limit!=null ? Math.min(limitMax, limit) : limitMax) : limit;
 		/*		(limitMax!=null && reqspecLimit!=null) ?
 				(limitMax < reqspecLimit ? limitMax : reqspecLimit) :
 				(limitMax!=null ? limitMax : reqspecLimit);*/
 		this.limit = limit;
+		//log.info("limit="+limit+" ; limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
+		
 		this.username = getFinalVariableValue(username);
-		//log.info("limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
 	}
 
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
@@ -265,11 +270,12 @@ public class SQL {
 		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
 	
-	public void addLimitOffset(LimitOffsetStrategy strategy, int offset) throws ServletException {
+	/*public void addLimitOffset(LimitOffsetStrategy strategy, int offset) throws ServletException {
 		addLimitOffset(strategy, this.limit, offset);
-	}
+	}*/
 	
-	protected void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset) throws ServletException {
+	protected void addLimitOffset(LimitOffsetStrategy strategy, Integer limit, int offset) throws ServletException {
+		if(limit==null) { limit = 0; }
 		if(limit<=0 && offset<=0) { return; }
 		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return; }
 		
