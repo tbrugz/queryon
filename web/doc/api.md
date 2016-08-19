@@ -41,6 +41,8 @@ There are also a number of filters that may be applyed to a query:
 * `fnin:<column>` - `<column>`'s value must **not** be **in** the informed value
 * `flk:<column>` - `<column>`'s value must be **like** the informed value
 * `fnlk:<column>` - `<column>`'s value must be **not like** the informed value
+* `fnull:<column>` - `<column>` must be **NULL**
+* `fnotnull:<column>` - `<column>` must **not** be **NULL**
 
 There are also some parameters that may be used to return a unique value from a query (e.g.: a unique column from the first row returned).
 Useful for Blob types.
@@ -72,7 +74,7 @@ Some parameters are specific to a syntax. Below you can find more about them:
 
 ### JSON
 
-* `callback` - padding to be used for [JSONP](https://en.wikipedia.org/wiki/JSONP) (*optional*)  
+* `callback` - padding to be used for [JSONP](https://en.wikipedia.org/wiki/JSONP) (*optional*)
 
 ### XML
 

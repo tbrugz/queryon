@@ -1642,6 +1642,10 @@ public class QueryOn extends HttpServlet {
 			columns.addAll(colNames);
 			//XXX bind parameters: column type?
 			
+			// boolean filters
+			addBooleanFilter(reqspec.filterNull, columns, sql, "is null", relationName, warnings);
+			addBooleanFilter(reqspec.filterNotNull, columns, sql, "is not null", relationName, warnings);
+			
 			// uni-valued filters
 			addUniqueFilter(reqspec.filterEquals, columns, sql, "=", relationName, warnings);
 			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName, warnings); //XXXxx should be multi-valued? nah, there is already a 'not in'
@@ -1712,6 +1716,19 @@ public class QueryOn extends HttpServlet {
 				sb.append(")");
 				sql.addFilter(sb.toString());
 				logFilter.info("addMultiFilterSubexpression: values="+Arrays.asList(values));
+			}
+			else {
+				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
+				warnings.add("unknown filter column: "+col);
+			}
+		}
+	}
+	
+	static void addBooleanFilter(final Set<String> valueSet, Set<String> columns, SQL sql, String compareSymbol, String relationName, List<String> warnings) {
+		for(String col: valueSet) {
+			if(!validateFilterColumnNames || columns.contains(col)) {
+				sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareSymbol);
+				logFilter.info("addBooleanFilter: value="+col+" ; symbol="+compareSymbol);
 			}
 			else {
 				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");

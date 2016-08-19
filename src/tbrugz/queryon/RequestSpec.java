@@ -5,9 +5,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -102,8 +104,13 @@ public class RequestSpec {
 	final Map<String, String[]> filterNotIn = new HashMap<String, String[]>(); // not in (fnin)
 	final Map<String, String[]> filterLike = new HashMap<String, String[]>();
 	final Map<String, String[]> filterNotLike = new HashMap<String, String[]>();
+
+	// boolean valued filters
+	final Set<String> filterNull = new HashSet<String>();
+	final Set<String> filterNotNull = new HashSet<String>();
 	
-	//XXX: add filters: is null (fnull), is not null (fnn/fnnull), between (btwn)?
+	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 
+	//XXX: add filter: between (btwn)?
 	
 	final Map<String, String> updateValues = new HashMap<String, String>();
 	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
@@ -337,19 +344,22 @@ public class RequestSpec {
 			String[] value = entry.getValue();
 			
 			try {
-				setUniParam("feq:", key, value, filterEquals);
-				setUniParam("fne:", key, value, filterNotEquals);
-				setUniParam("fgt:", key, value, filterGreaterThan);
-				setUniParam("fge:", key, value, filterGreaterOrEqual);
-				setUniParam("flt:", key, value, filterLessThan);
-				setUniParam("fle:", key, value, filterLessOrEqual);
+				setUniParam("feq:", key, value[0], filterEquals);
+				setUniParam("fne:", key, value[0], filterNotEquals);
+				setUniParam("fgt:", key, value[0], filterGreaterThan);
+				setUniParam("fge:", key, value[0], filterGreaterOrEqual);
+				setUniParam("flt:", key, value[0], filterLessThan);
+				setUniParam("fle:", key, value[0], filterLessOrEqual);
 				
 				setMultiParam("fin:", key, value, filterIn);
 				setMultiParam("fnin:", key, value, filterNotIn);
 				setMultiParam("flk:", key, value, filterLike);
 				setMultiParam("fnlk:", key, value, filterNotLike);
 				
-				setUniParam("v:", key, value, updateValues);
+				setBooleanParam("fnull:", key, filterNull);
+				setBooleanParam("fnotnull:", key, filterNotNull);
+				
+				setUniParam("v:", key, value[0], updateValues);
 			}
 			catch(RuntimeException e) {
 				//log.warn("encoding error [e: "+entry+"]: "+e);
@@ -437,7 +447,7 @@ public class RequestSpec {
 		}
 	}
 	
-	boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
+	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
 		//String key = entry.getKey();
 		//String[] value = entry.getValue();
 		if(key.startsWith(prefix)) {
@@ -450,7 +460,7 @@ public class RequestSpec {
 			return true;
 		}
 		return false;
-	}
+	}*/
 
 	<T> boolean setUniParam(String prefix, String key, T value, Map<String, T> uniFilter) {
 		if(key.startsWith(prefix)) {
@@ -472,6 +482,15 @@ public class RequestSpec {
 				//values[i] = value2;
 			//}
 			multiFilter.put(col, values);
+			return true;
+		}
+		return false;
+	}
+
+	boolean setBooleanParam(String prefix, String key, Set<String> uniFilter) {
+		if(key.startsWith(prefix)) {
+			String col = key.substring(prefix.length());
+			uniFilter.add(col);
 			return true;
 		}
 		return false;

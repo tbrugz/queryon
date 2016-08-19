@@ -523,6 +523,16 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetXmlEmpFilterNotIn() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200", 4);
 	}
+	
+	@Test
+	public void testGetXmlEmpFilterNull() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fnull:NAME", 0);
+	}
+
+	@Test
+	public void testGetXmlEmpFilterNotNull() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/EMP.xml?fnotnull:NAME", 5);
+	}
 
 	@Test
 	public void testGetXmlEmpFilterNotIn2() throws IOException, ParserConfigurationException, SAXException {
