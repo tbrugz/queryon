@@ -11,7 +11,10 @@ var operatorsInfo = {
 	"gt": { "name":">", "multiple": false },
 	"ge": { "name":"&ge;", "multiple": false },
 	"lt": { "name":"<", "multiple": false },
-	"le": { "name":"&le;", "multiple": false }
+	"le": { "name":"&le;", "multiple": false },
+	
+	"null": { "name":"is null", "multiple": false, "has-no-argument": true },
+	"notnull": { "name":"is not null", "multiple": false, "has-no-argument": true }
 };
 
 var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
@@ -56,7 +59,7 @@ function addFilterDialog() {
 	}
 	selectHTML += '</select>';
 	
-	var operatorsHTML = "<select name='fil-operator' id='fil-operator' class='operator'>";
+	var operatorsHTML = "<select name='fil-operator' id='fil-operator' class='operator' onchange='onFilterOperatorChange()'>";
 	var keys = Object.keys(operatorsInfo);
 	for(var i=0; i<keys.length; i++) {
 		operatorsHTML += "<option value='"+keys[i]+"'>"+operatorsInfo[keys[i]].name+"</option>";
@@ -154,7 +157,10 @@ function addFilterWithValues(col, operator, value, colType) {
 		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> "
 			+ (operatorsInfo[operator].multiple?"(":"")
 			+ "<span>"
-			+ "<span><input type='"+inputType+"' class='filter' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'/>"
+			+ "<span><input type='"+inputType+"' class='filter"
+			+ (operatorsInfo[operator]["has-no-argument"]?" noargs":"")
+			+ "' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'"
+			+ "/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
 			+ "</span>"
 			+ (operatorsInfo[operator].multiple?")":"")
@@ -201,6 +207,19 @@ function closeDialogs() {
 		}
 	}
 	document.getElementById('dialog-container').style.display = 'none';
+}
+
+function onFilterOperatorChange() {
+	var operator = document.getElementById('fil-operator').value;
+	var valueInput = document.getElementById('fin-value');
+	
+	//console.log("onFilterOperatorChange: ",operatorsInfo[operator]);
+	if(operatorsInfo[operator]["has-no-argument"]) {
+		valueInput.parentNode.parentNode.style.display = 'none';
+	}
+	else {
+		valueInput.parentNode.parentNode.style.display = '';
+	}
 }
 
 document.onkeydown = function(evt) {
