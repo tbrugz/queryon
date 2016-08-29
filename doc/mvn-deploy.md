@@ -31,6 +31,10 @@ deploy to sonatype
 
 http://central.sonatype.org/pages/apache-maven.html
 
+snapshot:  
+`mvn clean deploy`  
+(https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/)
+
 
 run jetty
 ---------

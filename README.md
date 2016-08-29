@@ -38,8 +38,8 @@ artifacts
 * snapshots repo: https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/
 
 
-demo - running
---------------
+demos - running
+---------------
 
 * minimal demo (using H2) - see [demo-minimal/README.md](demo-minimal/README.md)
 

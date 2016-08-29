@@ -1,5 +1,5 @@
 
-queryon ng
+queryon 0.6.1
 ----------
 * build: added status.jsp & build.revisionNumber
 * web: blob dump ui
@@ -10,6 +10,23 @@ queryon ng
 * added qon-editor help doc & markdown parser
 * datadiff: added Diff2QServlet
 * diff: added DiffManyServlet (579)
+* added ExplainAny action (explain plan)
+* execute: added 'X-Execute-ReturnCount' & 'X-Warning' headers
+* added QOnExecs processor & go.html (624)
+* added UpdatePlugin
+* select: added 'X-Warning-UnknownColumn' header
+* added ResponseSpec
+* web: charts: added nvd3chart.html
+* demo: added qon-demo-minimal & qon-demo-dbn
+* added PagesServlet (788)
+* added MarkdownServlet
+* diff: added pre/post apply hooks, added ShellHook
+* allow multipart/formdata - file/blob uploads / servlet 3.0
+* added WebProcessor
+* added RS2GraphML (WebProcessor)
+* execute: allow 'script' execution
+* added $username variable to queries/executable scripts (887)
+* SQL: added 'limit-default' integer "special construct"
 
 
 queryon 0.6.0
