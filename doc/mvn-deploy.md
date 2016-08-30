@@ -19,7 +19,7 @@ mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=pat
 **fast install:**
 
 ```
-export MVN_ARTIFACT_VERSION=0.6.1-SNAPSHOT
+export MVN_ARTIFACT_VERSION=0.6.1
 
 mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dfile=target/queryon-$MVN_ARTIFACT_VERSION.war -Dpackaging=war -DpomFile=pom.xml -DlocalRepositoryPath=$HOME/Desktop/proj/mvn-repo -DcreateChecksum=true
 
@@ -35,7 +35,7 @@ snapshot:
 `mvn clean deploy`  
 (https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/)
 
-release:
+release:  
 `mvn clean deploy -P release`
 
 
