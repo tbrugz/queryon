@@ -35,6 +35,9 @@ snapshot:
 `mvn clean deploy`  
 (https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/)
 
+release:
+`mvn clean deploy -P release`
+
 
 run jetty
 ---------
