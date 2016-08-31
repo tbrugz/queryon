@@ -44,11 +44,11 @@ function refreshAuthInfo() {
 	user.innerHTML = authInfo.username || '';
 	var auth = document.getElementById('authaction');
 	if(! authInfo.authenticated) {
-		auth.innerHTML = '<a href="auth/login.jsp?return='+encodeURIComponent(window.location.href)+'">login</a>';
+		auth.innerHTML = '<a href="'+authGetLoginUrl()+'">login</a>';
 		user.style.display = 'none';
 	}
 	else {
-		auth.innerHTML = '<a href="auth/logout.jsp?return='+encodeURIComponent(window.location.href)+'">logout</a>';
+		auth.innerHTML = '<a href="'+authGetLogoutUrl()+'">logout</a>';
 		user.style.display = 'inline';
 	}
 
@@ -60,6 +60,14 @@ function refreshAuthInfo() {
 	else if(urlednew){
 		urlednew.style.display = 'none';
 	}
+}
+
+function authGetLoginUrl() {
+	return 'auth/login.jsp?return='+encodeURIComponent(window.location.href);
+}
+
+function authGetLogoutUrl() {
+	return 'auth/logout.jsp?return='+encodeURIComponent(window.location.href);
 }
 
 function authHasPermission(permission) {

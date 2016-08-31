@@ -1,3 +1,6 @@
+<%@page import="tbrugz.queryon.util.WebUtils"%>
+<%@page import="tbrugz.queryon.QueryOn"%>
+<%@page import="java.util.Properties"%>
 <%@page import="org.apache.shiro.authc.AuthenticationException"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="java.io.PrintWriter"%>
@@ -21,7 +24,9 @@
 <body>
 <%
 
-String appname = "QueryOn";
+String defaultAppname = "QueryOn";
+Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+String appname = prop.getProperty(WebUtils.PROP_WEB_APPNAME, defaultAppname);
 
 String username = request.getParameter("username");
 String password = request.getParameter("password");
