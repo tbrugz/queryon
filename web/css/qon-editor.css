@@ -7,8 +7,11 @@
 	left: 1ex;
 	margin: 2em;
 	*/
-	height: 20em;
+	height: 15em;
+	min-height: 5em;
 	border: 1px solid black;
+	resize: vertical;
+	overflow-y: scroll;	
 }
 /*#objectid-container {
 	background-color: #ddd;
@@ -37,10 +40,6 @@ label {
 	font-weight: bold;
 	border: 0;
 }
-/*#queryResult {
-	overflow-y: scroll;
-	bottom: 0px;
-}*/
 
 #status-container {
 	position: fixed;
@@ -100,9 +99,20 @@ input[type=button] {
 	padding: 1px 9px 1px 9px;
 }
 
-#queryResult {
-	position: absolute;
+#resultContainer {
+	position: fixed;
 	z-index: -1;
+	bottom: 0;
+	width: 100%;
+}
+
+#queryResult {
+	/* http://stackoverflow.com/questions/3837037/div-with-scrollbar-inside-div-with-positionfixed */
+	overflow-y: scroll;
+	/* bottom: 0px; */
+	position: absolute;
+	height: 100%;
+	width: 100%;
 }
 
 .message {
@@ -203,4 +213,12 @@ input[type=button] {
 	font-weight: bold;
 	background-color: #888;
 	margin-top: 0px;
+}
+
+#schema {
+	width: 8em;
+}
+
+#name {
+	width: 20em;
 }

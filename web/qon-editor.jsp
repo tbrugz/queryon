@@ -96,9 +96,9 @@ modelId = SchemaModelUtils.getModelId(request);
 			var completedTimeMilis = Date.now();
 			//XXX option to handle different response types (html, json, csv, xml)?
 			//'close' style:: position: relative, float: right?
-			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
-			$("#queryResult").append(data);
+			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
 			showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
+			
 			closeMessages('messages');
 			updateUI();
 		});
@@ -149,8 +149,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			setParameters(paramCount);
 			makeHrefs();
 			
-			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
-			$("#queryResult").append(data);
+			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
 			
 			if(usingSelected) {
 				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully validated');
@@ -206,8 +205,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			//setParameters(paramCount);
 			//makeHrefs();
 			
-			$("#queryResult").html("<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>");
-			$("#queryResult").append(data);
+			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
 			
 			if(usingSelected) {
 				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully explained');
@@ -441,7 +439,8 @@ modelId = SchemaModelUtils.getModelId(request);
 	}
 	
 	function updateUI() {
-		document.getElementById('queryResult').style.top = (document.getElementById('spec').offsetHeight + 0) + 'px';
+		document.getElementById('resultContainer').style.top = (document.getElementById('spec').offsetHeight - 2) + 'px';
+		if(editor) { editor.resize(); }
 	}
 	
 	function refreshRolesInfo() {
@@ -706,12 +705,24 @@ if(remarks==null) { remarks = ""; }
 	editor.setOptions({
 		fontSize: "11pt"
 	});
+	// http://stackoverflow.com/questions/27534263/making-ace-editor-resizable
+	// https://github.com/ajaxorg/ace/wiki/Configuring-Ace
+	editor.setAutoScrollEditorIntoView(true);
 	
 	setParameters(<%= numOfParameters %>);
 </script>
 <script type="text/javascript">
 	makeHrefs();
 	validateEditComponents(<%= queryLoaded %>);
+	
+	window.onresize = updateUI;
+	
+	// see: http://stackoverflow.com/questions/19329530/onresize-for-div-elements
+	//byId('editor').onresize = function() { console.log('editor.onresize..'); updateUI(); };
+	byId('editor').onclick = function() {
+		//console.log('editor.onclick'); 
+		updateUI();
+	};
 </script>
 
 </body>
