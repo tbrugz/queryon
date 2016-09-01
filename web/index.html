@@ -750,6 +750,9 @@
 	
 	</script>
 	<style type="text/css">
+	#objects {
+		max-width: 50em;
+	}
 	#content-container {
 		/*position: fixed;*/
 		position: relative;
@@ -811,6 +814,21 @@
 		font-style: italic;
 	}
 	
+	#filters:not(:empty) {
+		/* ':not(:empty)'? see http://stackoverflow.com/a/9063521/616413 */
+		display: block;
+		margin: 4px 16px 2px 16px;
+		/* padding: 1px 14px; */
+		background-color: #666;
+	}
+	
+	label.filter-label {
+		/*padding-top: 2px;
+		padding-bottom: 2px;*/
+		display: block;
+		padding: 2px 8px;
+	}
+	
 	@media screen {
 		#nav {
 			position: fixed;
@@ -846,7 +864,6 @@
 	
 	<span id="navbar-prop">
 		<span id="parameters"></span>
-		<span id="filters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilterDialog();" title="add filter"/>
 		<!-- TODOne limit/offset or page/pagesize -->
@@ -870,6 +887,7 @@
 		<span id="authaction"></span>
 	</span>
 	
+	<span id="filters"></span>
 	<div id="messages"></div>
 </nav>
 
