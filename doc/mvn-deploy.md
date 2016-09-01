@@ -31,12 +31,22 @@ deploy to sonatype
 
 http://central.sonatype.org/pages/apache-maven.html
 
+change `settings.xml`:
+```
+<server>
+    <id>ossrh</id>
+    <username>your-jira-id</username>
+    <password>your-jira-pwd</password>
+</server>
+```
+
 snapshot:  
 `mvn clean deploy`  
 (https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/)
 
-release:
-`mvn clean deploy -P release`
+release:  
+`mvn clean deploy -P release`  
+& go to `https://oss.sonatype.org/`
 
 
 run jetty

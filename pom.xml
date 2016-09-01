@@ -15,6 +15,7 @@
 
   <name>queryon</name>
   <description>Web application that creates a REST API based on database objects (tables, views, queries) from a RDBMS</description>
+  <url>https://bitbucket.org/tbrugz/queryon</url>
 
   <!--
   http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
@@ -53,7 +54,7 @@
       <email>tbrugz@gmail.com</email>
     </developer>
   </developers>
-  
+
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -63,7 +64,7 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
-  </distributionManagement>  
+  </distributionManagement>
 
   <build>
     <!-- directory>target</directory>
@@ -224,7 +225,7 @@
             </filesets>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -470,7 +471,7 @@
       <artifactId>diffutils</artifactId>
       <version>1.2.1</version>
     </dependency>
-    
+
     <!-- <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
@@ -486,11 +487,11 @@
       <artifactId>javax.ejb-api</artifactId>
       <version>3.2</version>
     </dependency> -->
-    
+
   </dependencies>
-  
+
   <profiles>
-    <profile> 
+    <profile>
       <id>release</id>
       <build>
       <plugins>
