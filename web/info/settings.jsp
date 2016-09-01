@@ -11,10 +11,14 @@
 			"queryon.models.default",
 			"queryon.qon-tables.table",
 			"queryon.qon-execs.table",
-			"queryon.qon-pages.table" //PagesServlet.PROP_PREFIX+PagesServlet.SUFFIX_TABLE
+			"queryon.qon-pages.table", //PagesServlet.PROP_PREFIX+PagesServlet.SUFFIX_TABLE
+			"queryon.web.auth-required",
+			"queryon.web.appname",
 		};
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
-	String[] defaultValues = { null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE };
+	String[] defaultValues = { null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
+			null, null
+			};
 	
 	int i = 0;
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);

@@ -32,7 +32,7 @@
 	var onLoad = function() {
 		loadModels(); //loadModelsCallback);
 		loadAuthInfo();
-		loadSettings();
+		loadSettings(loadSettingsCallback);
 	}
 	
 	var textareaDbColTypes = ["CLOB", "TEXT"];
@@ -59,6 +59,28 @@
 		}
 
 		doLoadQueries();
+	}
+	
+	function loadSettingsCallback() {
+		//console.log("loadSettingsCallback, ",settings);
+		testForAuthRequired();
+		if(settings["queryon.web.appname"]) {
+			document.title = settings["queryon.web.appname"];
+		}
+	}
+	
+	function loadAuthInfoCallback() {
+		//console.log("loadAuthInfoCallback, ",settings);
+		testForAuthRequired();
+	}
+	
+	function testForAuthRequired() {
+		//console.log("testForAuthRequired, ", settings["queryon.web.auth-required"], authInfo.loaded, authInfo.authenticated);
+		
+		if(settings["queryon.web.auth-required"]=="true" && authInfo.loaded && !authInfo.authenticated) {
+			var url = authGetLoginUrl();
+			window.location.href = url;
+		}
 	}
 	
 	onModelChanged = function(updateFragment) {

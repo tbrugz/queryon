@@ -11,6 +11,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.mgt.RealmSecurityManager;
 import org.apache.shiro.realm.Realm;
@@ -123,6 +125,11 @@ public class ShiroUtils {
 
 	public static void resetUserRoles(Object principal) {
 		userRoles.remove(principal);
+	}
+	
+	public static void authenticate(Subject currentUser, String username, String password) {
+		AuthenticationToken token = new UsernamePasswordToken(username, password);
+		currentUser.login(token);
 	}
 	
 }

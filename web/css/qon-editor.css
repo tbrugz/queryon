@@ -85,6 +85,10 @@ a, a:visited {
 	background-color: #ddd;
 }
 
+input[type=button] {
+	cursor: pointer;
+}
+
 #button-container input[type=button] {
 	border: 1px solid #999;
 	margin: 2px;

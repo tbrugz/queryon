@@ -127,6 +127,7 @@ public class QueryOnInstant extends QueryOn {
 			//XXXdone: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
 		}
+		case TYPE:
 		case PROCEDURE: {
 			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
 			//List<ExecutableObject> proc = new ArrayList<ExecutableObject>();
@@ -135,7 +136,7 @@ public class QueryOnInstant extends QueryOn {
 			//JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
 			//List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
 			removeExecsWithinPackages(proc);
-			keepExecsByType(proc, DBObjectType.PROCEDURE); // XXX Oracle needs, PgSQL must not have it?
+			keepExecsByType(proc, statusType); // XXX Oracle needs, PgSQL must not have it?
 			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
 			//XXXdone: filter by type 'PROCEDURE', filter by packageName == null ?
 			break;

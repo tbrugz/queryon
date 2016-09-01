@@ -3,11 +3,42 @@ body {
 	margin: 10px;
 }
 
+.title {
+	font-weight: bold;
+}
+
 .warning {
 	background-color: #f99;
 	font-style: normal;
+	padding: 3px;
+	display: block;
 }
 
 pre {
 	background-color: #eee;
+}
+
+hr {
+	/* see https://css-tricks.com/examples/hrs/ */
+	border: 0;
+	height: 1px;
+	background: #333;
+	background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+
+.container {
+	margin-top: 70px;
+	margin-right: auto;
+	margin-left: auto;
+	width: 500px;
+	background-color: #eee;
+	padding: 5px;
+}
+
+.container div,label {
+	padding: 3px;
+}
+
+.container label {
+	display: block;
 }
