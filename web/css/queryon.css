@@ -135,7 +135,7 @@ input.parameter {
 }
 
 input.filter {
-	width: 8em;
+	width: 10em;
 	border: 1px;
 	padding: 1px 1px;
 }
@@ -168,6 +168,21 @@ input[readonly="readonly"] {
 .orderbutton-container {
 	display: inline-block;
 	margin: 0 5px 0 5px;
+	/* color: #000; */
+}
+
+.filterbutton-container {
+	margin: 0 2px 0 2px;
+	background-color: buttonface;
+	/*color: rgb(76, 76, 76);*/
+	padding: 0 1px 0 1px;
+	font-family: FontAwesome;
+}
+
+.filterbutton-container input {
+	font-family: FontAwesome;
+	font-size: x-small;
+	padding: 0;
 }
 
 input[type=button].orderbutton {

@@ -33,7 +33,7 @@ if(typeof Bloodhound != 'undefined') {
 	bhvalues.initialize();
 }
 
-function addFilterDialog() {
+function addFilterDialog(selectedCol) {
 	var select = document.getElementById('objects');
 	var id = select.options[select.selectedIndex].value;
 	if(!id) {
@@ -55,7 +55,9 @@ function addFilterDialog() {
 	var selectHTML = "<select name='fin-column' id='fin-column' onchange='refreshAutocomplete()'>";
 	for(var i=0;i<cols.length;i++) {
 		var colz = cols[i];
-		selectHTML += "<option value='"+colz+"'>"+colz+"</option>";
+		selectHTML += "<option value='"+colz+"'"+
+			( colz==selectedCol ? " selected" : "")+
+			">"+colz+"</option>";
 	}
 	selectHTML += '</select>';
 	
