@@ -137,7 +137,11 @@ input.parameter {
 input.filter {
 	width: 10em;
 	border: 1px;
-	padding: 1px 1px;
+	padding: 1px 3px;
+}
+
+.filterspan {
+	padding: 0 2px 0 3px;
 }
 
 input.noargs {

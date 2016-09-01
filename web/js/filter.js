@@ -158,13 +158,13 @@ function addFilterWithValues(col, operator, value, colType) {
 	if(finContainer==null) {
 		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> "
 			+ (operatorsInfo[operator].multiple?"(":"")
-			+ "<span>"
-			+ "<span><input type='"+inputType+"' class='filter"
+			//+ "<span>"
+			+ "<span class='filterspan'><input type='"+inputType+"' class='filter"
 			+ (operatorsInfo[operator]["has-no-argument"]?" noargs":"")
 			+ "' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'"
 			+ "/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
-			+ "</span>"
+			//+ "</span>"
 			+ (operatorsInfo[operator].multiple?")":"")
 			+ "</label>";
 	}
