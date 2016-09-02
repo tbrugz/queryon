@@ -183,7 +183,7 @@ function addSortHrefs(containerId, order) {
 		elemValue += '</span>';
 		// see: http://stackoverflow.com/questions/15988373/how-do-i-add-a-font-awesome-icon-to-input-field
 		//elemValue += '<span class="filterbutton-container"><i class="fa fa-filter" aria-hidden="true"></i></span>';
-		elemValue += '<span class="filterbutton-container"><input type=button onclick="addFilterDialog(\''+colname+'\');" value="&#xf0b0;" title="filter by column"/></span>';
+		elemValue += '<span class="filterbutton-container"><input type=button class="filterbutton" id="filter_col_'+colname+'" onclick="addFilterDialog(\''+colname+'\');" value="&#xf0b0;" title="filter by column"/></span>';
 
 		elem.innerHTML = elemValue;
 	}

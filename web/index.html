@@ -118,6 +118,30 @@
 	function updateFromFilters() {
 		updateState();
 		makeHrefs();
+		//updateFilterButtonStyle(); // only after "go!"
+	}
+	
+	function updateFilterButtonStyle() {
+		var filterbutton = document.querySelectorAll('.filterbutton');
+		if(filterbutton) {
+			for (var i = 0; i < filterbutton.length; ++i) {
+				filterbutton[i].classList.remove('filter-selected');
+			}
+		}
+		
+		var filters = document.querySelectorAll('.filter');
+		if(filters) {
+			for (var i = 0; i < filters.length; ++i) {
+				var item = filters[i];
+				var itemname = item.getAttribute('name');
+				var colname = itemname.substring(itemname.indexOf(':')+1);
+				var filterColId = "filter_col_"+colname;
+				if(byId(filterColId)) {
+					byId(filterColId).classList.add('filter-selected');
+				}
+				console.log('updateFromFilters', item, colname);
+			}
+		}
 	}
 	
 	function sortBy(colName, direction) {
@@ -164,6 +188,8 @@
 		}
 
 		updateState();
+		
+		updateFilterButtonStyle();
 		
 		var content = document.getElementById('content');
 		

@@ -158,13 +158,13 @@ function addFilterWithValues(col, operator, value, colType) {
 	if(finContainer==null) {
 		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> "
 			+ (operatorsInfo[operator].multiple?"(":"")
-			//+ "<span>"
+			+ "<span>" // dont touch what you dont know (or remember)
 			+ "<span class='filterspan'><input type='"+inputType+"' class='filter"
 			+ (operatorsInfo[operator]["has-no-argument"]?" noargs":"")
 			+ "' name='f"+operator+":"+col+"' value='"+value+"' onchange='updateFromFilters();'"
 			+ "/>"
 			+ "<input type='button' value='X' class='simplebutton' onclick='removeFilter(this);updateFromFilters();'></span>"
-			//+ "</span>"
+			+ "</span>" // same as above
 			+ (operatorsInfo[operator].multiple?")":"")
 			+ "</label>";
 	}
@@ -189,8 +189,8 @@ function addFilterWithValues(col, operator, value, colType) {
 
 function removeFilter(element) {
 	var filter = element.parentNode.parentNode.parentNode;
+	console.log('removeFilter: el:', element, 'filter:', filter);
 	element.parentNode.parentNode.removeChild(element.parentNode);
-	console.log(filter);
 	if(filter.getElementsByTagName('input').length==0) {
 		filter.parentNode.removeChild(filter);
 	}
