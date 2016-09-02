@@ -9,7 +9,7 @@ h1,h2,h3 {
 	font-family: Helvetica, sans-serif;
 	background-color: #fff;*/
 }
- 
+
 #logo {
 	padding: 2px 9px 3px 9px;
 	display: inline-block;
@@ -177,16 +177,15 @@ input[readonly="readonly"] {
 
 .filterbutton-container {
 	margin: 0 2px 0 2px;
-	background-color: buttonface;
+	/*background-color: buttonface;*/
 	/*color: rgb(76, 76, 76);*/
-	padding: 0 1px 0 1px;
 	font-family: FontAwesome;
 }
 
 .filterbutton-container input {
 	font-family: FontAwesome;
 	font-size: x-small;
-	padding: 0;
+	padding: 1px;
 }
 
 input[type=button].orderbutton {
@@ -196,6 +195,10 @@ input[type=button].orderbutton {
 
 input[type=button].button-selected {
 	background-color: rgb(146, 218, 136);
+}
+
+input[type=button].filter-selected {
+	background-color: #f90;
 }
 
 input[type=button].btn-insert {
