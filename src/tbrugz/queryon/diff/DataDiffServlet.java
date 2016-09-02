@@ -64,7 +64,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		// shiro authorization - XXX use auth other than SELECT ?
-		Subject currentUser = ShiroUtils.getSubject(prop);
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
 		
 		String modelISource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE, false);

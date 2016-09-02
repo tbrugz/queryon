@@ -136,7 +136,7 @@ public class ProcessorServlet extends HttpServlet {
 
 		// check authorization
 		if(req!=null) {
-			Subject currentUser = ShiroUtils.getSubject(appprop);
+			Subject currentUser = ShiroUtils.getSubject(appprop, req);
 			ShiroUtils.checkPermissionAny(currentUser, new String[]{
 					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getCanonicalName(),
 					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getSimpleName(),
@@ -206,7 +206,7 @@ public class ProcessorServlet extends HttpServlet {
 				RequestSpec reqspec = new RequestSpec(dsutils, req, prop, 1);
 				DBIdentifiable dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(sm, reqspec);
 				
-				Subject currentUser = ShiroUtils.getSubject(prop);
+				Subject currentUser = ShiroUtils.getSubject(prop, req);
 				
 				try {
 					//wp.setRelation(r);

@@ -118,7 +118,7 @@ public class QueryOnSchema extends HttpServlet {
 		String modelId = SchemaModelUtils.getModelId(req);
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
-		Subject currentUser = ShiroUtils.getSubject(prop);
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());
 		
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);

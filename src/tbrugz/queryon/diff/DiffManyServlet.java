@@ -76,7 +76,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
-		Subject currentUser = ShiroUtils.getSubject(prop);
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), ActionType.SELECT_ANY.name());
 		
 		// debug mode

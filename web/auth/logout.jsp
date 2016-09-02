@@ -13,6 +13,7 @@
 String returnUrl = request.getParameter("return");
 
 SecurityUtils.getSubject().logout();
+//session.invalidate();
 
 if(returnUrl!=null) {
 	out.write("<script>window.location.href = '"+returnUrl+"';</script>");

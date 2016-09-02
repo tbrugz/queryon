@@ -9,14 +9,19 @@
 %>{<%
 	StringDecorator quoter = new StringDecorator.StringQuoterDecorator("\"");
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-	Subject currentUser = ShiroUtils.getSubject(prop);
+	Subject currentUser = ShiroUtils.getSubject(prop, request);
+	boolean responseWritten = false;
+	
 	boolean authenticated = currentUser.isAuthenticated();
-	out.write("\n\t\"authenticated\": "+authenticated);
+	out.write( (responseWritten?",":"") + "\n\t\"authenticated\": "+authenticated);
 	//if(authenticated) {
 		// username
 		Object principal = currentUser.getPrincipal();
 		out.write(",\n\t\"username\": "+ ( principal!=null?quoter.get(String.valueOf(principal)):null ) );
+		//out.write(",\n\t\"username\": "+ ( quoter.get(String.valueOf(principal)) ) );
 	//}
+	
+		//out.write(",\n\t\"session-id\": "+ ( quoter.get(session.getId()) ) );
 	
 	//XXX: anonymous user may have roles or permissions?
 			

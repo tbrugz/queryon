@@ -83,7 +83,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		
 		// TODOne: diff authorization
 		// XXX add <type>:DIFF authorization instead of <type>:SHOW ?
-		Subject currentUser = ShiroUtils.getSubject(prop);
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());
 		
 		String modelIdSource = SchemaModelUtils.getModelId(req, PARAM_MODEL_SOURCE, false);
