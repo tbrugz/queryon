@@ -586,7 +586,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		
-			Subject currentUser = ShiroUtils.getSubject(prop);
+			Subject currentUser = ShiroUtils.getSubject(prop, req);
 			
 			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
 			switch (atype) {
