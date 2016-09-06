@@ -12,7 +12,7 @@
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.queryon.util.SchemaModelUtils"%><%
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-Subject currentUser = ShiroUtils.getSubject(prop);
+Subject currentUser = ShiroUtils.getSubject(prop, request);
 if(!currentUser.isPermitted("SELECT_ANY")) {
 	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 	out.write("permission denied");
