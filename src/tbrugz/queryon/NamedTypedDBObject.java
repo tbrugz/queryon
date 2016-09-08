@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -48,6 +49,42 @@ public class NamedTypedDBObject implements TypedDBObject {
 		}
 		
 		return new NamedTypedDBObject(type, schemaName, objectName, fullObjectName, mimetype);
+	}
+
+	public static List<NamedTypedDBObject> getObjectList(List<String> partz) {
+		DBObjectType type = null;
+		String objType = partz.get(0).toUpperCase();
+		String fullObjectName = partz.get(1);
+		String schemaName = null;
+		String objectName = fullObjectName;
+		String mimetype = null;
+		
+		try {
+			type = DBObjectType.valueOf(objType);
+		}
+		catch(IllegalArgumentException e) {
+			throw new BadRequestException("Unknown object type: "+objType);
+		}
+		
+		List<NamedTypedDBObject> ret = new ArrayList<NamedTypedDBObject>();
+		String[] objectnames = objectName.split(",");
+		
+		for(String obj: objectnames) {
+			if(obj.contains(".")) {
+				String[] onPartz = obj.split("\\.");
+				if(onPartz.length<2 || onPartz.length>3) {
+					throw new BadRequestException("Malformed object name: "+obj);
+				}
+				schemaName = onPartz[0];
+				obj = onPartz[1];
+				if(onPartz.length==3) {
+					mimetype = onPartz[2];
+				}
+			}
+			ret.add(new NamedTypedDBObject(type, schemaName, obj, fullObjectName, mimetype));
+		}
+		
+		return ret;
 	}
 	
 	@Override

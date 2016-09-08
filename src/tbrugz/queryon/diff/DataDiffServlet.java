@@ -49,8 +49,11 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(DataDiffServlet.class);
 
+	static final String SYNTAX_HTML = "html";
+	static final String SYNTAX_SQL = "sql";
+	
 	//final boolean instant = true;
-	long loopLimit = 1000;
+	long loopLimit = 1000; //XXX add loopLimit property
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -60,18 +63,16 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		log.info("partz: "+partz);
 		
-		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
-		
-		// shiro authorization - XXX use auth other than SELECT ?
-		Subject currentUser = ShiroUtils.getSubject(prop, req);
-		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
 		
 		String modelISource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE, false);
 		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET, false);
 		if(modelISource.equals(modelIdTarget)) {
 			log.warn("equal models being compared [id="+modelISource+"], no diffs can be generated");
 		}
+		
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
+		List<NamedTypedDBObject> objs = NamedTypedDBObject.getObjectList(partz);
 		
 		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
 		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
@@ -93,6 +94,11 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		try {
 			connSource = DBUtil.initDBConn(prop, modelISource);
 			connTarget = DBUtil.initDBConn(prop, modelIdTarget);
+			
+			for(NamedTypedDBObject obj: objs) {
+				
+			// shiro authorization - XXX use auth other than SELECT ?
+			ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
 			
 			Table tSource = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connSource);
 			Table tTarget = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTarget);
@@ -122,6 +128,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			
 			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, resp.getWriter());
+			
+			}
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);
@@ -195,10 +203,10 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	//XXX: get syntax based on URL or accept header
 	static DiffSyntax getSyntax(NamedTypedDBObject obj, DBMSFeatures feat, Properties prop, HttpServletRequest req) throws SQLException {
 		DiffSyntax ds = null;
-		if("sql".equals(obj.getMimeType())) {
+		if(SYNTAX_SQL.equals(obj.getMimeType())) {
 			ds = new SQLDataDiffSyntax();
 		}
-		else if("html".equals(obj.getMimeType()) || obj.getMimeType()==null){
+		else if(SYNTAX_HTML.equals(obj.getMimeType()) || obj.getMimeType()==null){
 			ds = new HTMLDiff();
 		}
 		else {
