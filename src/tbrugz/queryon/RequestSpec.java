@@ -462,7 +462,7 @@ public class RequestSpec {
 		return false;
 	}*/
 
-	<T> boolean setUniParam(String prefix, String key, T value, Map<String, T> uniFilter) {
+	public static <T> boolean setUniParam(String prefix, String key, T value, Map<String, T> uniFilter) {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
 			uniFilter.put(col, value);
@@ -471,7 +471,7 @@ public class RequestSpec {
 		return false;
 	}
 	
-	boolean setMultiParam(String prefix, String key, String[] values, Map<String, String[]> multiFilter) {
+	public static boolean setMultiParam(String prefix, String key, String[] values, Map<String, String[]> multiFilter) {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
 			//String[] value1 = value;
@@ -487,7 +487,7 @@ public class RequestSpec {
 		return false;
 	}
 
-	boolean setBooleanParam(String prefix, String key, Set<String> uniFilter) {
+	public static boolean setBooleanParam(String prefix, String key, Set<String> uniFilter) {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
 			uniFilter.add(col);
@@ -567,7 +567,7 @@ public class RequestSpec {
 		return updateValues;
 	}
 	
-	String getSyntax(String lastUriPart, DumpSyntaxUtils dsutils, Properties prop) {
+	static String getSyntax(String lastUriPart, DumpSyntaxUtils dsutils, Properties prop) {
 		String outputTypeStr = null;
 		
 		int lastDotIndex = lastUriPart.lastIndexOf('.');

@@ -10,7 +10,7 @@
 {
 <%
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-Subject currentUser = ShiroUtils.getSubject(prop);
+Subject currentUser = ShiroUtils.getSubject(prop, request);
 Gson gson = new Gson();
 boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 
