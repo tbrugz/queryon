@@ -71,7 +71,7 @@ public class Diff2QServlet extends DataDiffServlet {
 			DiffSyntax ds = getSyntax(obj, feat, prop, req);
 			
 			resp.setContentType(ds.getMimeType());
-			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, resp.getWriter());
+			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, null, resp.getWriter());
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);

@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.DmlType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
@@ -61,6 +63,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	//XXXdone: add param columnsToIgnore - for each table: ignorecol:TABLE2=COL2&ignorecol:TABLE2=COL3
 	//XXXdone: add alternateUk - for each table: ?altuk:TABLE2=COL2&altuk:TABLE2=COL3
+	//XXXdone: add dml operations: INSERT,UPDATE,DELETE
+	//XXX: add filters?
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -118,6 +122,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				RequestSpec.setMultiParam("ignorecol:", key, value, cols2ignore);
 				RequestSpec.setMultiParam("altuk:", key, value, altUk);
 			}
+			String dmlOps = req.getParameter("dmlops");
+			List<DmlType> dmlTypes = getDmlTypes(dmlOps);
 			
 			for(NamedTypedDBObject obj: objs) {
 				
@@ -171,7 +177,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			DiffSyntax ds = getSyntax(obj, feat, prop, req);
 			
 			resp.setContentType(ds.getMimeType());
-			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, resp.getWriter());
+			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, resp.getWriter());
 			
 			}
 		}
@@ -185,7 +191,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 	
-	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols, String modelIdSource, String modelIdTarget, DiffSyntax ds, Writer writer) throws SQLException, IOException {
+	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols,
+			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DmlType> dmlTypes, Writer writer) throws SQLException, IOException {
 		ResultSet rsSource = runQuery(connSource, sql, modelIdSource, getQualifiedName(table));
 		ResultSet rsTarget = runQuery(connTarget, sql, modelIdTarget, getQualifiedName(table));
 		
@@ -199,6 +206,29 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
+		if(dmlTypes!=null) {
+			rsdiff.setDumpInserts(false);
+			rsdiff.setDumpUpdates(false);
+			rsdiff.setDumpDeletes(false);
+			for(DmlType dt: dmlTypes) { 
+				switch (dt) {
+				case INSERT:
+					rsdiff.setDumpInserts(true);
+					break;
+				case UPDATE:
+					rsdiff.setDumpUpdates(true);
+					break;
+				case DELETE:
+					rsdiff.setDumpDeletes(true);
+					break;
+				/*case SELECT:
+					rsdiff.setDumpEquals(true); // ???
+					break;*/
+				default:
+					break;
+				}
+			}
+		}
 		
 		//DBMSResources.instance().updateMetaData(connSource.getMetaData()); // SQLDataDiffSyntax needs DBMSFeatures setted
 		log.debug("diff for table '"+table+"'...");
@@ -268,6 +298,18 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	static String getQualifiedName(NamedDBObject obj) {
 		return (obj.getSchemaName()!=null?obj.getSchemaName()+".":"")+obj.getName();
+	}
+	
+	static List<DmlType> getDmlTypes(String dmlOps) {
+		List<DmlType> dmlTypes = null;
+		if(dmlOps!=null) {
+			dmlTypes = new ArrayList<DmlType>();
+			List<String> ops = Utils.getStringList(dmlOps, ",");
+			for(String s: ops) {
+				dmlTypes.add(DmlType.valueOf(s));
+			}
+		}
+		return dmlTypes;
 	}
 	
 }
