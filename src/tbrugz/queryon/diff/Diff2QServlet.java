@@ -47,6 +47,8 @@ public class Diff2QServlet extends DataDiffServlet {
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), obj.getFullObjectName());
 		
+		setupProperties(prop);
+		
 		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE, false);
 		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET, false);
 		if(modelIdSource.equals(modelIdTarget)) {

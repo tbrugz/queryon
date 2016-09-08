@@ -58,8 +58,12 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	static final String SYNTAX_HTML = "html";
 	static final String SYNTAX_SQL = "sql";
 	
+	static final long DEFAULT_LOOP_LIMIT = 1000L;
+	
+	static final String PROP_LIMIT_MAX = "queryon.datadiff.limit.max";
+	
 	//final boolean instant = true;
-	long loopLimit = 1000; //XXX add loopLimit property
+	long loopLimit = DEFAULT_LOOP_LIMIT;
 	
 	//XXXdone: add param columnsToIgnore - for each table: ignorecol:TABLE2=COL2&ignorecol:TABLE2=COL3
 	//XXXdone: add alternateUk - for each table: ?altuk:TABLE2=COL2&altuk:TABLE2=COL3
@@ -89,6 +93,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			// shiro authorization - XXX use auth other than SELECT ?
 			ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
 		}
+		
+		setupProperties(prop);
 		
 		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
 		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
@@ -310,6 +316,11 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			}
 		}
 		return dmlTypes;
+	}
+	
+	void setupProperties(Properties prop) {
+		loopLimit = Utils.getPropLong(prop, PROP_LIMIT_MAX, Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT, DEFAULT_LOOP_LIMIT));
+		log.info("loopLimit = "+loopLimit);
 	}
 	
 }
