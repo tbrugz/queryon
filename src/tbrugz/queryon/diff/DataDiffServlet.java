@@ -6,7 +6,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -43,6 +46,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 public class DataDiffServlet extends AbstractHttpServlet {
 
@@ -54,6 +58,9 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	//final boolean instant = true;
 	long loopLimit = 1000; //XXX add loopLimit property
+	
+	//XXXdone: add param columnsToIgnore - for each table: ignorecol:TABLE2=COL2&ignorecol:TABLE2=COL3
+	//XXXdone: add alternateUk - for each table: ?altuk:TABLE2=COL2&altuk:TABLE2=COL3
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -71,8 +78,13 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			log.warn("equal models being compared [id="+modelISource+"], no diffs can be generated");
 		}
 		
-		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		List<NamedTypedDBObject> objs = NamedTypedDBObject.getObjectList(partz);
+		
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
+		for(NamedTypedDBObject obj: objs) {
+			// shiro authorization - XXX use auth other than SELECT ?
+			ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
+		}
 		
 		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
 		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
@@ -94,12 +106,21 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		try {
 			connSource = DBUtil.initDBConn(prop, modelISource);
 			connTarget = DBUtil.initDBConn(prop, modelIdTarget);
+
+			Map<String,String[]> reqParams = req.getParameterMap();
+			final Map<String, String[]> cols2ignore = new HashMap<String, String[]>();
+			final Map<String, String[]> altUk = new HashMap<String, String[]>();
+			for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
+				String key = entry.getKey();
+				String[] value = entry.getValue();
+				
+				//setUniParam("ignorecols:", key, value[0], );
+				RequestSpec.setMultiParam("ignorecol:", key, value, cols2ignore);
+				RequestSpec.setMultiParam("altuk:", key, value, altUk);
+			}
 			
 			for(NamedTypedDBObject obj: objs) {
 				
-			// shiro authorization - XXX use auth other than SELECT ?
-			ShiroUtils.checkPermission(currentUser, obj.getType()+":"+PrivilegeType.SELECT, obj.getFullObjectName());
-			
 			Table tSource = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connSource);
 			Table tTarget = (Table) qos.getObject(DBObjectType.TABLE, obj.getSchemaName(), obj.getName(), connTarget);
 			
@@ -111,25 +132,51 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			}
 
 			List<Column> cols = DataDiff.getCommonColumns(tSource, tTarget);
+			String[] colarr = cols2ignore.get(obj.getName());
+			if(colarr!=null) {
+				List<String> ignoreCols = Arrays.asList( colarr );
+				for(int i=cols.size()-1;i>=0;i--) {
+					if(ignoreCols.contains( cols.get(i).getName() )) {
+						cols.remove(i);
+					}
+				}
+			}
 			String columnsForSelect = DataDiff.getColumnsForSelect(cols);
 			List<String> keyColsSource = getKeyCols(tSource);
 			List<String> keyColsTarget = getKeyCols(tTarget);
 			log.debug("keyCols: s="+keyColsSource+" t="+keyColsTarget+" / equals?="+keyColsSource.equals(keyColsTarget));
+			if(! keyColsSource.equals(keyColsTarget)) {
+				String message = "source key cols ["+keyColsSource+"] differ from target key cols ["+keyColsTarget+"]";
+				log.warn(message);
+			}
 			
+			//XXX test if keycols are the same in both models ?
 			List<String> keyCols = keyColsSource;
+			String[] tableAltUk = altUk.get(obj.getName());
+			if(tableAltUk!=null) {
+				keyCols = Arrays.asList(tableAltUk);
+			}
 			Table table = tSource;
 			
 			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connSource.getMetaData());
 			String quote = feat.getIdentifierQuoteString();
 			
-			//XXX test if keycols are the same in both models ?
-			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
+			String sql = null;
+			if(tableAltUk!=null) {
+				sql = DataDump.getQuery(table, columnsForSelect, null, Utils.join(keyCols, ", "), false, quote);
+			}
+			else {
+				sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
+			}
 			DiffSyntax ds = getSyntax(obj, feat, prop, req);
 			
 			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, resp.getWriter());
 			
 			}
+		}
+		catch(RuntimeException e) {
+			throw new BadRequestException(e.getMessage(), e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);

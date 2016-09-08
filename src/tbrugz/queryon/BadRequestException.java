@@ -19,7 +19,7 @@ public class BadRequestException extends RuntimeException {
 	}
 
 	public BadRequestException(String message, Throwable t) {
-		this(message,  HttpServletResponse.SC_BAD_REQUEST, t);
+		this(message, HttpServletResponse.SC_BAD_REQUEST, t);
 	}
 
 	public BadRequestException(String message, String internalMessage, Throwable t) {
