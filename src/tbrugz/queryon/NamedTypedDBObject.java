@@ -54,9 +54,9 @@ public class NamedTypedDBObject implements TypedDBObject {
 	public static List<NamedTypedDBObject> getObjectList(List<String> partz) {
 		DBObjectType type = null;
 		String objType = partz.get(0).toUpperCase();
-		String fullObjectName = partz.get(1);
+		String originalObjectName = partz.get(1);
 		String schemaName = null;
-		String objectName = fullObjectName;
+		//String objectName = fullObjectName;
 		String mimetype = null;
 		
 		try {
@@ -67,7 +67,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 		}
 		
 		List<NamedTypedDBObject> ret = new ArrayList<NamedTypedDBObject>();
-		String[] objectnames = objectName.split(",");
+		String[] objectnames = originalObjectName.split(",");
 		
 		for(String obj: objectnames) {
 			if(obj.contains(".")) {
@@ -81,7 +81,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 					mimetype = onPartz[2];
 				}
 			}
-			ret.add(new NamedTypedDBObject(type, schemaName, obj, fullObjectName, mimetype));
+			ret.add(new NamedTypedDBObject(type, schemaName, obj, (schemaName!=null?schemaName+".":"")+obj, mimetype));
 		}
 		
 		return ret;

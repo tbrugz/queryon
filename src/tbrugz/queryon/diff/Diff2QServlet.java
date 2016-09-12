@@ -18,6 +18,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -36,7 +37,7 @@ public class Diff2QServlet extends DataDiffServlet {
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
-		if(partz.size()<2) {
+		if(partz.size()<2 || partz.size()>3) {
 			throw new BadRequestException("Malformed URL");
 		}
 		log.info("partz: "+partz);
@@ -70,7 +71,8 @@ public class Diff2QServlet extends DataDiffServlet {
 			String sql = sqlParam;
 
 			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connSource.getMetaData());
-			DiffSyntax ds = getSyntax(obj, feat, prop, req);
+			DiffSyntax ds = getSyntax(obj, (partz.size()>2 ? partz.get(2):null));
+			RequestSpec.setSyntaxProps(ds, req, feat, prop);
 			
 			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, null, resp.getWriter());

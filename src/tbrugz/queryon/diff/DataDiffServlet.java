@@ -41,7 +41,6 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.DmlType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
@@ -62,6 +61,9 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	static final String PROP_LIMIT_MAX = "queryon.datadiff.limit.max";
 	
+	static final String PARAM_MIMETYPE = "mimetype";
+	static final String PARAM_DATADIFFTYPES = "dmlops";
+	
 	//final boolean instant = true;
 	long loopLimit = DEFAULT_LOOP_LIMIT;
 	
@@ -73,7 +75,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
-		if(partz.size()<2) {
+		if(partz.size()<2 || partz.size()>3) {
 			throw new BadRequestException("Malformed URL");
 		}
 		log.info("partz: "+partz);
@@ -95,6 +97,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		
 		setupProperties(prop);
+		
+		String mimeType = req.getParameter(PARAM_MIMETYPE);
 		
 		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
 		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
@@ -128,8 +132,11 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				RequestSpec.setMultiParam("ignorecol:", key, value, cols2ignore);
 				RequestSpec.setMultiParam("altuk:", key, value, altUk);
 			}
-			String dmlOps = req.getParameter("dmlops");
-			List<DmlType> dmlTypes = getDmlTypes(dmlOps);
+			String dmlOps = req.getParameter(PARAM_DATADIFFTYPES);
+			List<DataDiffType> dmlTypes = getDataDiffTypes(dmlOps);
+			
+			boolean firstObject = true;
+			DiffSyntax ds = null;
 			
 			for(NamedTypedDBObject obj: objs) {
 				
@@ -180,9 +187,20 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			else {
 				sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
 			}
-			DiffSyntax ds = getSyntax(obj, feat, prop, req);
 			
-			resp.setContentType(ds.getMimeType());
+			if(firstObject) {
+				ds = getSyntax(obj, (partz.size()>2 ? partz.get(2):null) );
+				RequestSpec.setSyntaxProps(ds, req, feat, prop);
+				if(mimeType==null) {
+					mimeType = ds.getMimeType();
+				}
+				resp.setContentType(mimeType);
+				//resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "inline");
+				String filename = partz.get(1)+"."+ds.getDefaultFileExtension();
+				//resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
+				log.info(">> filename: "+filename+" mimetype: "+ds.getMimeType());
+				firstObject = false;
+			}
 			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, resp.getWriter());
 			
 			}
@@ -198,7 +216,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	}
 	
 	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols,
-			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DmlType> dmlTypes, Writer writer) throws SQLException, IOException {
+			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Writer writer) throws SQLException, IOException {
 		ResultSet rsSource = runQuery(connSource, sql, modelIdSource, getQualifiedName(table));
 		ResultSet rsTarget = runQuery(connTarget, sql, modelIdTarget, getQualifiedName(table));
 		
@@ -212,11 +230,12 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
-		if(dmlTypes!=null) {
+		if(ddTypes!=null) {
 			rsdiff.setDumpInserts(false);
 			rsdiff.setDumpUpdates(false);
 			rsdiff.setDumpDeletes(false);
-			for(DmlType dt: dmlTypes) { 
+			rsdiff.setDumpEquals(false);
+			for(DataDiffType dt: ddTypes) { 
 				switch (dt) {
 				case INSERT:
 					rsdiff.setDumpInserts(true);
@@ -227,9 +246,9 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				case DELETE:
 					rsdiff.setDumpDeletes(true);
 					break;
-				/*case SELECT:
-					rsdiff.setDumpEquals(true); // ???
-					break;*/
+				case EQUALS:
+					rsdiff.setDumpEquals(true);
+					break;
 				default:
 					break;
 				}
@@ -284,20 +303,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	}
 	
 	//XXX: get syntax based on URL or accept header
-	static DiffSyntax getSyntax(NamedTypedDBObject obj, DBMSFeatures feat, Properties prop, HttpServletRequest req) throws SQLException {
+	static DiffSyntax getSyntax(NamedTypedDBObject obj, String lastUrlPart) throws SQLException {
 		DiffSyntax ds = null;
-		if(SYNTAX_SQL.equals(obj.getMimeType())) {
+		String syntax = lastUrlPart;
+		if(syntax==null) { syntax = obj.getMimeType(); }
+		if(SYNTAX_SQL.equals(syntax)) {
 			ds = new SQLDataDiffSyntax();
 		}
-		else if(SYNTAX_HTML.equals(obj.getMimeType()) || obj.getMimeType()==null){
+		else if(SYNTAX_HTML.equals(syntax) || obj.getMimeType()==null) {
 			ds = new HTMLDiff();
 		}
 		else {
 			throw new BadRequestException("unknown data type: "+obj.getMimeType());
 		}
-		RequestSpec.setSyntaxProps(ds, req, feat, prop);
-		//ds.procProperties(prop);
-		//if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 		
 		return ds;
 	}
@@ -306,13 +324,13 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		return (obj.getSchemaName()!=null?obj.getSchemaName()+".":"")+obj.getName();
 	}
 	
-	static List<DmlType> getDmlTypes(String dmlOps) {
-		List<DmlType> dmlTypes = null;
+	static List<DataDiffType> getDataDiffTypes(String dmlOps) {
+		List<DataDiffType> dmlTypes = null;
 		if(dmlOps!=null) {
-			dmlTypes = new ArrayList<DmlType>();
+			dmlTypes = new ArrayList<DataDiffType>();
 			List<String> ops = Utils.getStringList(dmlOps, ",");
 			for(String s: ops) {
-				dmlTypes.add(DmlType.valueOf(s));
+				dmlTypes.add(DataDiffType.valueOf(s));
 			}
 		}
 		return dmlTypes;
@@ -320,7 +338,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	void setupProperties(Properties prop) {
 		loopLimit = Utils.getPropLong(prop, PROP_LIMIT_MAX, Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT, DEFAULT_LOOP_LIMIT));
-		log.info("loopLimit = "+loopLimit);
+		//log.info("loopLimit = "+loopLimit);
 	}
 	
 }
