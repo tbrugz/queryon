@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,6 +32,8 @@ public class ShiroUtils {
 	static final Log log = LogFactory.getLog(ShiroUtils.class);
 	
 	static final String PROP_AUTH_HTTPREALM = "queryon.auth.http-realm";
+
+	static final String PROP_AUTH_USERNAME_PATTERN = "queryon.auth.http-username-pattern";
 	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
@@ -53,6 +57,21 @@ public class ShiroUtils {
 			boolean authenticated = false;
 			if(request!=null && request.getRemoteUser()!=null) {
 				userIdentity = request.getRemoteUser();
+				String usernamePattern = prop.getProperty(PROP_AUTH_USERNAME_PATTERN);
+				if(usernamePattern!=null) {
+					Matcher m = Pattern.compile(usernamePattern).matcher(String.valueOf(userIdentity));
+					if(m.find()) {
+						try {
+							userIdentity = m.group(1);
+						}
+						catch(IndexOutOfBoundsException e) {
+							log.warn("getSubject: Exception: "+e+" [pattern: "+usernamePattern+"]");
+						}
+					}
+					/*else {
+						log.debug("userIdentity ["+userIdentity+"] does not match http pattern [pattern: "+usernamePattern+"]");
+					}*/
+				}
 				realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
 				authenticated = true;
 			}
