@@ -28,36 +28,36 @@
 
 /* Load records into the tables. There should be no warnings. */
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/customers.txt' INTO TABLE Customers
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Customers.txt' INTO TABLE Customers
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/employees.txt' INTO TABLE Employees
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Employees.txt' INTO TABLE Employees
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/offices.txt' INTO TABLE Offices
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Offices.txt' INTO TABLE Offices
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/orderdetails.txt' INTO TABLE OrderDetails
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/OrderDetails.txt' INTO TABLE OrderDetails
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/orders.txt' INTO TABLE Orders
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Orders.txt' INTO TABLE Orders
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/payments.txt' INTO TABLE Payments
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Payments.txt' INTO TABLE Payments
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
 
-LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/products.txt' INTO TABLE Products
+LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Products.txt' INTO TABLE Products
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
