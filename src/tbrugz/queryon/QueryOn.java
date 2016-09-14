@@ -2007,7 +2007,10 @@ public class QueryOn extends HttpServlet {
 		if(requestSpecLimit!=null) {
 			return Math.min(requestSpecLimit, maxLimit);
 		}
-		return Math.min(defaultLimit, maxLimit);
+		if(defaultLimit!=null) {
+			return Math.min(defaultLimit, maxLimit);
+		}
+		return maxLimit;
 	}
 	
 	/*@SuppressWarnings("rawtypes")
