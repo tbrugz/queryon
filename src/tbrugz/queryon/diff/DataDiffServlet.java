@@ -178,14 +178,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			Table table = tSource;
 			
 			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(connSource.getMetaData());
+			DBMSFeatures featTarget = DBMSResources.instance().getSpecificFeatures(connTarget.getMetaData());
 			String quote = feat.getIdentifierQuoteString();
+			String quoteTarget = featTarget.getIdentifierQuoteString();
 			
-			String sql = null;
+			String sqlSource = null;
+			String sqlTarget = null;
 			if(tableAltUk!=null) {
-				sql = DataDump.getQuery(table, columnsForSelect, null, Utils.join(keyCols, ", "), false, quote);
+				sqlSource = DataDump.getQuery(table, columnsForSelect, null, Utils.join(keyCols, ", "), false, quote);
+				sqlTarget = DataDump.getQuery(table, columnsForSelect, null, Utils.join(keyCols, ", "), false, quoteTarget);
 			}
 			else {
-				sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
+				sqlSource = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
+				sqlTarget = DataDump.getQuery(table, columnsForSelect, null, null, true, quoteTarget);
 			}
 			
 			if(firstObject) {
@@ -201,7 +206,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				log.info(">> filename: "+filename+" mimetype: "+ds.getMimeType());
 				firstObject = false;
 			}
-			runDiff(connSource, connTarget, sql, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, resp.getWriter());
+			runDiff(connSource, connTarget, sqlSource, sqlTarget, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, resp.getWriter());
 			
 			}
 		}
@@ -214,11 +219,16 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			resp.getWriter().flush();
 		}
 	}
-	
+
 	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols,
 			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Writer writer) throws SQLException, IOException {
-		ResultSet rsSource = runQuery(connSource, sql, modelIdSource, getQualifiedName(table));
-		ResultSet rsTarget = runQuery(connTarget, sql, modelIdTarget, getQualifiedName(table));
+		runDiff(connSource, connTarget, sql, sql, table, keyCols, modelIdSource, modelIdTarget, ds, ddTypes, writer);
+	}
+	
+	void runDiff(Connection connSource, Connection connTarget, String sqlSource, String sqlTarget, NamedDBObject table, List<String> keyCols,
+			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Writer writer) throws SQLException, IOException {
+		ResultSet rsSource = runQuery(connSource, sqlSource, modelIdSource, getQualifiedName(table));
+		ResultSet rsTarget = runQuery(connTarget, sqlTarget, modelIdTarget, getQualifiedName(table));
 		
 		// testing column types equality
 		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData());
