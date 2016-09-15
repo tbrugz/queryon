@@ -128,8 +128,11 @@ public class DiffServlet extends AbstractHttpServlet {
 		DBIdentifiable dbidSource = null;
 		DBIdentifiable dbidTarget = null;
 		
+		String diffDialect = null;
+		
 		try {
 			dbidSource = qos.getObject(obj.getType(), obj.getSchemaName(), obj.getName(), modelSource, prop, modelIdSource);
+			diffDialect = qos.getLastDialect();
 		}
 		catch(NotFoundException e) {
 			log.info("not found: "+e);
@@ -141,12 +144,6 @@ public class DiffServlet extends AbstractHttpServlet {
 			log.info("not found: "+e);
 		}
 		
-		final DBMSResources res = DBMSResources.instance();
-		final DBMSFeatures feat = res.getSpecificFeatures(qos.getLastDialect());
-		log.debug("dialect: "+qos.getLastDialect()+" feat: "+feat);
-		ColumnDiff.updateFeatures(feat);
-		//res.updateDbId(qos.getLastDialect());
-		
 		/*if(dbidSource==null) {
 			throw new NotFoundException("Object "+obj+" not found on model "+modelIdSource);
 		}
@@ -157,6 +154,11 @@ public class DiffServlet extends AbstractHttpServlet {
 		if(dbidSource==null && dbidTarget==null) {
 			throw new NotFoundException("Object "+obj+" not found on both '"+modelIdSource+"' and '"+modelIdTarget+"' models");
 		}
+
+		final DBMSResources res = DBMSResources.instance();
+		final DBMSFeatures feat = res.getSpecificFeatures(diffDialect);
+		log.debug("dialect: "+diffDialect+" feat: "+feat);
+		ColumnDiff.updateFeatures(feat);
 		
 		List<Diff> diffs = null;
 		
@@ -288,6 +290,7 @@ public class DiffServlet extends AbstractHttpServlet {
 					resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
 				}
 			}
+			conn.commit(); //XXX: commit after postHooks have run?
 		}
 		catch(SQLException e) {
 			throw new BadRequestException("Error: ["+e+"] ; sql =\n"+sql);
