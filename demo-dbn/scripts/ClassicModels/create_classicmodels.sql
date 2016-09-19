@@ -15,7 +15,7 @@
 
 /* Create the full set of Classic Models Tables */
 
-CREATE TABLE Customers (
+CREATE TABLE customers (
   customerNumber INTEGER NOT NULL,
   customerName VARCHAR(50) NOT NULL,
   contactLastName VARCHAR(50) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE Customers (
   PRIMARY KEY (customerNumber)
 );
 
-CREATE TABLE Employees (
+CREATE TABLE employees (
   employeeNumber INTEGER NOT NULL,
   lastName VARCHAR(50) NOT NULL,
   firstName VARCHAR(50) NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE Employees (
   PRIMARY KEY (employeeNumber)
 );
 
-CREATE TABLE Offices (
+CREATE TABLE offices (
   officeCode VARCHAR(50) NOT NULL,
   city VARCHAR(50) NOT NULL,
   phone VARCHAR(50) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE Offices (
   PRIMARY KEY (officeCode)
 );
 
-CREATE TABLE OrderDetails (
+CREATE TABLE orderdetails (
   orderNumber INTEGER NOT NULL,
   productCode VARCHAR(50) NOT NULL,
   quantityOrdered INTEGER NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE OrderDetails (
   PRIMARY KEY (orderNumber, productCode)
 );
 
-CREATE TABLE Orders (
+CREATE TABLE orders (
   orderNumber INTEGER NOT NULL,
   orderDate TIMESTAMP NOT NULL,
   requiredDate TIMESTAMP NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE Orders (
   PRIMARY KEY (orderNumber)
 );
 
-CREATE TABLE Payments (
+CREATE TABLE payments (
   customerNumber INTEGER NOT NULL,
   checkNumber VARCHAR(50) NOT NULL,
   paymentDate TIMESTAMP NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE Payments (
   PRIMARY KEY (customerNumber, checkNumber)
 );
 
-CREATE TABLE Products (
+CREATE TABLE products (
   productCode VARCHAR(50) NOT NULL,
   productName VARCHAR(70) NOT NULL,
   productLine VARCHAR(50) NOT NULL,

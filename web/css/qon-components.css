@@ -214,6 +214,11 @@
 
 /***** diff *****/
 
+.texttitle {
+	font-family: monospace;
+	padding: .4em;
+}
+
 #modelTargetLabel, #content-to-title, #diffoutput th.texttitle.new /*, #diffoutput tr th.texttitle:nth-child(4)*/ {
 	background-color: #188859;
 	color: #ddd;
