@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
@@ -94,6 +95,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		
 		switch(type) {
 		case TABLE:
+			ColumnDiff.updateFeatures(feat);
 			Table t = grabTable(schemaName, objectName, dbmd, feat); // grab table & update model
 			//dump(t, resp);
 			//XXX: grab (& dump) triggers & FKs?
@@ -190,7 +192,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			while(cols.next()) {
 				Column c = JDBCSchemaGrabber.retrieveColumn(cols);
 				newt.getColumns().add(c);
-				//feat.addColumnSpecificFeatures(c, cols);
+				feat.addColumnSpecificFeatures(c, cols);
 				numCol++;
 				//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 			}

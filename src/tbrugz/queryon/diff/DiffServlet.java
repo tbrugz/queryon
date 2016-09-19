@@ -191,6 +191,7 @@ public class DiffServlet extends AbstractHttpServlet {
 				//XXX: return 404? maybe not...
 			}
 			else {
+				log.info(diffs.size()+" diffs found");
 				//XXXxx: option to do column & constraint rename detection?
 				boolean doRenameDetection = Utils.getPropBool(prop, SQLDiff.PROP_DO_RENAMEDETECTION, SQLDiff.DEFAULT_DO_RENAME_DETECTION);
 				if(doRenameDetection) {
@@ -263,21 +264,30 @@ public class DiffServlet extends AbstractHttpServlet {
 
 	void dumpDiffs(List<Diff> diffs, HttpServletResponse resp) throws IOException {
 		resp.setContentType(MIME_SQL);
+		int count = 0;
 		for(Diff d: diffs) {
-			resp.getWriter().write(d.getDiff());
-			resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
+			String diff = d.getDiff();
+			if(diff!=null && !diff.equals("")) {
+				resp.getWriter().write(diff);
+				resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
+				count++;
+			}
 		}
+		log.info(count+" diffs dumped");
 	}
 	
 	void applyDiffs(List<Diff> diffs, Properties prop, String modelId, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		Connection conn = null;
 		String sql = null;
 		try {
+			int executeCount = 0;
 			conn = DBUtil.initDBConn(prop, modelId);
 			resp.setContentType(MIME_SQL);
 			for(Diff d: diffs) {
 				List<String> sqls = d.getDiffList();
 				for(String s: sqls) {
+					if(s==null || s.equals("")) { continue; }
+					
 					Statement st = conn.createStatement();
 					sql = s;
 					//sql = d.getDiff();
@@ -288,9 +298,11 @@ public class DiffServlet extends AbstractHttpServlet {
 						resp.getWriter().write(" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] */");
 					}
 					resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
+					executeCount++;
 				}
 			}
 			conn.commit(); //XXX: commit after postHooks have run?
+			log.info(executeCount+" diffs applyed");
 		}
 		catch(SQLException e) {
 			throw new BadRequestException("Error: ["+e+"] ; sql =\n"+sql);
