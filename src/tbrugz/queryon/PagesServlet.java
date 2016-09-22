@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
@@ -37,6 +39,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	public static final String SUFFIX_URL_404 = ".url-404";
 	
 	public static final String DEFAULT_PAGES_TABLE = "QON_PAGES";
+	public static final String DEFAULT_INDEX = "index.html";
 	
 	public static final String HEADER_PAGE_ID = "X-Page-Id";
 	
@@ -44,6 +47,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	
 	String relation = null;
 	String notFoundUrl = null;
+	String indexFile = DEFAULT_INDEX; //XXX: add prop for index(.html) ?
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -164,9 +168,20 @@ public class PagesServlet extends AbstractHttpServlet {
 	 * XXX: add HAS_BODY, HAS_BINARY_DATA - populated by trigger? UpdatePlugin? - so that it can be shown in pages list
 	 */
 	ResultSet getPage(Connection conn, String relation, String pathInfo) throws SQLException, IOException {
-		PreparedStatement st = conn.prepareStatement("select id, mime, body, binary_data, has_body"+
-				"\nfrom "+relation+" where path = ?");
-		st.setString(1, pathInfo);
+		String sql = "select id, mime, body, binary_data, has_body"+
+				"\nfrom "+relation+" where path = ?";
+		List<String> params = new ArrayList<String>();
+		params.add(pathInfo);
+		
+		if(pathInfo.endsWith("/") && indexFile!=null) {
+			sql += " or path = ?";
+			params.add(pathInfo+indexFile);
+		}
+		
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
 		
 		ResultSet rs = st.executeQuery();
 		
