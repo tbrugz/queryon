@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,11 +34,33 @@ public class PagesServlet extends AbstractHttpServlet {
 	
 	public static final String PROP_PREFIX = "queryon.qon-pages";
 	public static final String SUFFIX_TABLE = ".table";
+	public static final String SUFFIX_URL_404 = ".url-404";
 	
 	public static final String DEFAULT_PAGES_TABLE = "QON_PAGES";
 	
 	public static final String HEADER_PAGE_ID = "X-Page-Id";
-
+	
+	public static final String ATTR_REQ_FORWARDED = "req.forwarded";
+	
+	String relation = null;
+	String notFoundUrl = null;
+	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		
+		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		
+		// get qon_pages table
+		relation = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_PAGES_TABLE);
+		
+		// get not found (404) url
+		notFoundUrl = prop.getProperty(PROP_PREFIX+SUFFIX_URL_404);
+		if(notFoundUrl!=null) {
+			log.info("init: not found [404] url = "+notFoundUrl);
+		}
+	}
+	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		// get path
@@ -47,9 +70,6 @@ public class PagesServlet extends AbstractHttpServlet {
 		log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo());
 		
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
-		
-		// get qon_pages table
-		String relation = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_PAGES_TABLE);
 
 		// get id from URL parameter
 		String id = req.getParameter("id");
@@ -63,6 +83,14 @@ public class PagesServlet extends AbstractHttpServlet {
 		Connection conn = DBUtil.initDBConn(prop, modelId);
 		try {
 			getAndDumpPage(conn, relation, pathInfo, resp);
+		}
+		catch(NotFoundException e) {
+			if(notFoundUrl!=null) {
+				forwardNotFound(req, resp, pathInfo, e);
+			}
+			else {
+				throw e;
+			}
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
@@ -157,8 +185,25 @@ public class PagesServlet extends AbstractHttpServlet {
 	}
 	
 	void sendNoContent(HttpServletResponse resp, String pathInfo, String id) {
-		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 		log.info("page '"+pathInfo+"' has no content [id="+id+"]");
+		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 	}
 
+	void forwardNotFound(HttpServletRequest req, HttpServletResponse resp, String pathInfo, NotFoundException e) throws ServletException, IOException {
+		log.info("redir [404] = "+notFoundUrl+" ; "+req.getPathInfo());
+		Boolean isForwarded = (Boolean) req.getAttribute(ATTR_REQ_FORWARDED);
+		if(isForwarded!=null && isForwarded) {
+			log.warn("redir [404]: already forwarded... infinite loop? ["+notFoundUrl+"]");
+			throw e;
+		}
+		if(req.getPathInfo().contains(notFoundUrl)) {
+			log.warn("redir [404]: notFoundUrl ["+notFoundUrl+"] not found itself!");
+			throw e;
+		}
+		resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		req.setAttribute(ATTR_REQ_FORWARDED, true);
+		//req.setAttribute(RequestDispatcher.ERROR_EXCEPTION, e);
+		req.getRequestDispatcher(notFoundUrl).forward(req, resp);
+	}
+	
 }
