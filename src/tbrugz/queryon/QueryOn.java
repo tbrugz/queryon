@@ -843,10 +843,14 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		bindParameters(st, sql);
 		
-		ResultSet rs = st.executeQuery();
-		
 		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
 
+		/*if(applyLimitOffsetInResultSet) {
+			//XXX only if (offset == 0)? or should also use ResultSet.relative(offset)?
+			st.setMaxRows(sql.limit);
+		}*/
+		ResultSet rs = st.executeQuery();
+		
 		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
 		List<Constraint> uks = ModelUtils.getUKs(relation);
 		
@@ -860,7 +864,8 @@ public class QueryOn extends HttpServlet {
 			dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
 		}
 		else {
-			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null, fks, uks, applyLimitOffsetInResultSet, resp, sql.limit);
+			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
+					fks, uks, applyLimitOffsetInResultSet, resp, getLimit(sql.limit));
 		}
 		
 		}
