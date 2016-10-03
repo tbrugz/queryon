@@ -944,7 +944,11 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
-			ResultSet rs = feat.explainPlan(sql.getFinalSql(), conn);
+			for(int i=0;i<reqspec.params.size();i++) {
+				sql.bindParameterValues.add(reqspec.params.get(i));
+			}
+			//log.info("doExplain: params: "+sql.bindParameterValues);
+			ResultSet rs = feat.explainPlan(sql.getFinalSql(), sql.bindParameterValues, conn);
 
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
 					null, //pk!=null?pk.getUniqueColumns():null,

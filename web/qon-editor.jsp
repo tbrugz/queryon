@@ -189,6 +189,13 @@ modelId = SchemaModelUtils.getModelId(request);
 			reqData.model = document.getElementById('model').value; // or modelId
 		}
 		
+		var params = document.querySelectorAll('.parameter');
+		console.log(params);
+		for (var i = 0; i < params.length; ++i) {
+			var item = params[i];
+			reqData[item.name] = item.value;
+		}
+		
 		var request = $.ajax({
 			url : queryOnUrl+"/ExplainAny",
 			type : "POST",
