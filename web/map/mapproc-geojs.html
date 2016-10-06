@@ -486,8 +486,12 @@ function transformQonData(qonData, column) {
 			}
 		};
 	qonData = getQonData(qonData);
+	
+	var geomIdKey = "GEOM_ID";
+	if(qonData[0]["geom_id"]) { geomIdKey = "geom_id"; }
+	
 	for(var i=0;i<qonData.length;i++) {
-		data.series[qonData[i]["GEOM_ID"]] = qonData[i][column];
+		data.series[qonData[i][geomIdKey]] = qonData[i][column];
 	}
 	return data;
 }
@@ -555,10 +559,10 @@ $.ajax({
 	success: function(data) {
 		var seriesData = JSON.parse(data);
 		var sources = seriesData.relation;
-		//console.log(sources);
+		//console.log('sources',sources);
 		var select = document.getElementById('dataUrl');
 		for(var i=0;i<sources.length;i++) {
-			if(sources[i].columnNames.indexOf("GEOM_ID")>0) {
+			if(sources[i].columnNames.toUpperCase().indexOf("GEOM_ID")>0) {
 				var elname = (sources[i].schemaName?sources[i].schemaName+".":"")+sources[i].name;
 				addElement2Select(select,
 					{
@@ -576,7 +580,7 @@ $.ajax({
 		refreshDataUrlColumns();
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-		console.log('datasources.json', jqXHR, textStatus, errorThrown);
+		console.log('Error: relation.json', jqXHR, textStatus, errorThrown);
 	}
 });
 
@@ -600,7 +604,7 @@ $.ajax({
 		}
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-		console.log('maps.json', jqXHR, textStatus, errorThrown);
+		console.log('Error: maps.json', jqXHR, textStatus, errorThrown);
 	}
 });
 }

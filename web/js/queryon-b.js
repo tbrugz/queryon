@@ -69,9 +69,12 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	
 	var queryString = '';
 	
-	var modelId = document.getElementById('model').value;
-	if(modelId) {
-		queryString += 'model='+modelId;
+	var modelElem = document.getElementById('model');
+	if(modelElem) {
+		var modelId = document.getElementById('model').value;
+		if(modelId) {
+			queryString += 'model='+modelId;
+		}
 	}
 	
 	var filters = document.querySelectorAll('.filter');

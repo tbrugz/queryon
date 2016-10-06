@@ -397,6 +397,10 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 function removeSeriesDataWhenPlacemarkNotFound(gPlaceMarks, seriesData) {
 	var count = 0;
 	console.log('removeSeriesDataWhen... before: '+Object.keys(seriesData.series).length+" / "+Object.keys(gPlaceMarks).length);
+	
+	//console.log('seriesData.series', Object.keys(seriesData.series));
+	//console.log('gPlaceMarks', gPlaceMarks);
+	
 	for(var id in seriesData.series) {
 		//console.log(gPlaceMarks[id]);
 		if(gPlaceMarks[id]==undefined) { delete seriesData.series[id]; }
