@@ -3,5 +3,6 @@
 	{ "id":"XX", "name": "Map XX", "url": "geojson/XX.json", "default": true }
 ],
 "mapcenter": [-16, -48],
-"showOptionsIfUnique": false
+"showOptionsIfUnique": false,
+"gmapsKey": "change it"
 }

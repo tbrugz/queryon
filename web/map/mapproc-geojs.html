@@ -5,7 +5,6 @@
 <link rel="stylesheet" type="text/css" href="css/qonmap.css" />
 <link rel="icon" type="image/png" href="../favicon.png" />
 <script src="../js/jquery-2.1.0.min.js"></script>
-<script async type="text/javascript" src="//maps.googleapis.com/maps/api/js?callback=loadGoogleMapsDefaultOnInit"></script>
 <script type="text/javascript" src="../js/qon-base.js"></script>
 <script type="text/javascript" src="../js/queryon-b.js"></script>
 <script type="text/javascript" src="../js/qon-util.js"></script>
@@ -394,8 +393,8 @@ function loadDataCategoricalSeries() {
 }
 
 function loadGoogleMapsDefaultOnInit() {
+	console.log('loadGoogleMapsDefaultOnInit');
 	loadGoogleMaps('map_canvas');
-	ajaxCallsOnLoad();
 }
 
 function loadGoogleMaps(map_canvas_id) {
@@ -586,6 +585,8 @@ $.ajax({
 	dataType: 'text',
 	success: function(data) {
 		var mapsData = JSON.parse(data);
+		//console.log('loaded maps.json', mapsData);
+		loadGmapsJs(mapsData);
 		var sources = mapsData.maps;
 		//console.log('sources', sources,'mapsData.showOptionsIfUnique',mapsData.showOptionsIfUnique);
 		var select = document.getElementById('mapUrl');
@@ -597,15 +598,6 @@ $.ajax({
 					"name": sources[i].name,
 				});
 		}
-
-		if(mapsData.showOptionsIfUnique===false && sources.length==1) {
-			document.getElementById('mapbox').style.display = 'none';
-			// http://stackoverflow.com/a/8678038/616413
-			google.maps.event.addListenerOnce(map, 'idle', function(){
-				//loaded fully
-				loadMap();
-			});
-		}
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 		console.log('maps.json', jqXHR, textStatus, errorThrown);
@@ -613,12 +605,30 @@ $.ajax({
 });
 }
 
+function loadGmapsJs(mapsData) {
+	console.log('loadGmapsJs, key=',mapsData.gmapsKey);
+	var script = document.createElement('script');
+	var keyStr = mapsData.gmapsKey?'key='+mapsData.gmapsKey+'&':'';
+	script.src = '//maps.googleapis.com/maps/api/js?'+keyStr+'callback=loadGoogleMapsDefaultOnInit';
+	script.onload = function () {
+		if(mapsData.showOptionsIfUnique===false && mapsData.maps.length==1) {
+			document.getElementById('mapbox').style.display = 'none';
+			// http://stackoverflow.com/a/8678038/616413
+			google.maps.event.addListenerOnce(map, 'idle', function(){
+				//loaded fully
+				loadMap();
+			});
+		}
+	}
+	document.head.appendChild(script);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 	//alert("Ready!");
 	changeColor('colorFromRGB', 'colorFrom');
 	changeColor('colorToRGB', 'colorTo');
 	//loadGoogleMaps('map_canvas');
-	//ajaxCallsOnLoad();
+	ajaxCallsOnLoad();
 }, false);
 
 </script>
