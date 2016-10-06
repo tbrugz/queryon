@@ -74,7 +74,7 @@ usage examples
 ### map example
 
 1. login with root/root (for more info about authc/authz, see [iniRealmRoles.ini](src/main/resources/iniRealmRoles.ini))
-1. create a new (map) query:
+1. create a new (map) query (suggested name: `offices_by_country`):
 ```
 select code as geom_id, count(*) as count
 from countries c
