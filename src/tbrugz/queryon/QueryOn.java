@@ -289,19 +289,22 @@ public class QueryOn extends HttpServlet {
 			
 			Map<String, SchemaModel> models = new LinkedHashMap<String, SchemaModel>();
 			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
-			log.debug("modelIds="+modelIds);
 			if(modelIds!=null) {
+				log.info("modelIds="+modelIds);
+				List<String> modelsGrabbed = new ArrayList<String>();
 				for(String id: modelIds) {
-					models.put(id, modelGrabber(prop, id));
+					if( grabModel(models, id) ) { modelsGrabbed.add(id); }
 				}
 				String defaultModel = prop.getProperty(PROP_MODELS_DEFAULT);
-				if(defaultModel==null && models.size()>0) {
-					defaultModel = modelIds.get(0);
+				if(!modelsGrabbed.contains(defaultModel)) { defaultModel = null; }
+				if(defaultModel==null && modelsGrabbed.size()>0) {
+					defaultModel = modelsGrabbed.get(0);
 				}
 				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
+				log.info("defaultmodel="+defaultModel+" [grabbed: "+modelsGrabbed+"]");
 			}
 			else {
-				models.put(null, modelGrabber(prop, null));
+				grabModel(models, null);
 				context.setAttribute(ATTR_DEFAULT_MODEL, null);
 			}
 			//log.debug("charset: "+Charset.defaultCharset());
@@ -345,6 +348,18 @@ public class QueryOn extends HttpServlet {
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
 		}
+	}
+	
+	boolean grabModel(Map<String, SchemaModel> models, String id) {
+		try {
+			models.put(id, modelGrabber(prop, id));
+			return true;
+		}
+		catch(Exception e) {
+			log.warn("Error initting model '"+id+"': "+e);
+			log.debug("Error initting model '"+id+"': "+e.getMessage(), e);
+		}
+		return false;
 	}
 	
 	void initModelsMetadata(Map<String, SchemaModel> models) throws ClassNotFoundException, SQLException, NamingException {
@@ -525,6 +540,9 @@ public class QueryOn extends HttpServlet {
 		final ActionType atype;
 		DBIdentifiable dbobj = null;
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
+		if(model==null) {
+			throw new InternalServerException("null model [modelId="+reqspec.modelId+"]");
+		}
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		

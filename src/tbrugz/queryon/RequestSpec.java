@@ -252,8 +252,13 @@ public class RequestSpec {
 		outputSyntax = outputSyntaxTmp;
 		
 		SchemaModel sm = SchemaModelUtils.getModel(req.getServletContext(), this.modelId);
-		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
-		setSyntaxProps(outputSyntax, req, feat, prop);
+		if(sm==null) {
+			log.warn("null SchemaModel [modelId="+this.modelId+"]");
+		}
+		else {
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
+			setSyntaxProps(outputSyntax, req, feat, prop);
+		}
 		
 		//---------------------
 		
