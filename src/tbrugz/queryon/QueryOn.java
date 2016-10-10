@@ -552,15 +552,24 @@ public class QueryOn extends HttpServlet {
 			atype = ActionType.STATUS;
 			otype = statusType.name();
 		}
-		else if(ACTION_QUERY_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
+		else if(ACTION_QUERY_ANY.equals(reqspec.object)) {
+			if(! METHOD_POST.equals(reqspec.httpMethod)) {
+				throw new BadRequestException(reqspec.object+": method must be POST");
+			}
 			atype = ActionType.SELECT_ANY;
 			otype = ActionType.SELECT_ANY.name();
 		}
-		else if(ACTION_VALIDATE_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
+		else if(ACTION_VALIDATE_ANY.equals(reqspec.object)) {
+			if(! METHOD_POST.equals(reqspec.httpMethod)) {
+				throw new BadRequestException(reqspec.object+": method must be POST");
+			}
 			atype = ActionType.VALIDATE_ANY;
 			otype = ActionType.VALIDATE_ANY.name();
 		}
-		else if(ACTION_EXPLAIN_ANY.equals(reqspec.object) && METHOD_POST.equals(reqspec.httpMethod)) {
+		else if(ACTION_EXPLAIN_ANY.equals(reqspec.object)) {
+			if(! METHOD_POST.equals(reqspec.httpMethod)) {
+				throw new BadRequestException(reqspec.object+": method must be POST");
+			}
 			atype = ActionType.EXPLAIN_ANY;
 			otype = ActionType.EXPLAIN_ANY.name();
 		}
