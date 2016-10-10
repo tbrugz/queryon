@@ -431,11 +431,23 @@ public class WinstoneAndH2HttpRequestTest {
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
 		NodeList nl = doc.getElementsByTagName("row");
-		//System.out.println("nrows: "+nl.getLength());
-		Assert.assertEquals(expectedReturnRows, nl.getLength());
 		
+		int length = nl.getLength();
+		//System.out.println("nrows: "+nl.getLength());
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
+		Assert.assertEquals(expectedReturnRows, length);
+	}
+
+	static void baseReturnCodeTest(String url, int expectedStatusCode) throws IOException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+url);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		int code = response1.getStatusLine().getStatusCode();
+		httpGet.releaseConnection();
+		
+		Assert.assertEquals(expectedStatusCode, code);
 	}
 	
 	static Document getXmlDocument(String url) throws IOException, SAXException {
@@ -606,6 +618,27 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	//----- limit-related tests - end
+
+	@Test
+	public void testQueryAnyWrongMethod() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select * from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCodeTest("/QueryAny.xml?name=test&sql="+sqlpar, 400);
+	}
+
+	@Test
+	public void testExplainPlan() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select * from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/ExplainAny.xml?_method=POST&name=test&sql="+sqlpar, 1);
+	}
+	
+	@Test
+	public void testExplainPlanWithParam() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select * from emp where id = ?";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseReturnCountTest("/ExplainAny.xml?_method=POST&name=test&sql="+sqlpar+"&p1=1", 1);
+	}
 	
 	@Test
 	public void testGetHtmlTitleEmp() throws IOException, ParserConfigurationException, SAXException, TransformerException {
