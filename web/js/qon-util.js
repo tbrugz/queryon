@@ -35,6 +35,20 @@ function getParameterByName(name, queryString) {
 	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
 }
 
+function getParametersByName(name, queryString) {
+	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)", "g");
+	var results = regex.exec(queryString);
+	if(results === null) { return ""; }
+	var ret = [];
+	while(results !== null) {
+		ret.push( decodeURIComponent(results[1].replace(/\+/g," ")) );
+		results = regex.exec(queryString);
+	}
+	//console.log("getParametersByName", ret);
+	return ret;
+}
+
 function getParameterNamesStartWith(startWithRegex, queryString) {
 	startWithRegex = startWithRegex.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&](" + startWithRegex + ".*?)=([^&#]*)", "g");

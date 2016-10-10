@@ -740,7 +740,7 @@
 		var state = id+getParameters();
 		var foo = urlAddFilterOrderOffset(null);
 		if(foo) { state += '|'+foo; }
-		console.log('updateState', state); //, ' - urlAddFilterOrderOffset:', urlAddFilterOrderOffset(''));
+		//console.log('updateState', state); //, ' - urlAddFilterOrderOffset:', urlAddFilterOrderOffset(''));
 		history.replaceState(null, null, "#"+state);
 	}
 	
@@ -753,14 +753,19 @@
 		var opIds = Object.keys(operatorsInfo).join("|");
 		var filters = getParameterNamesStartWith('f('+opIds+'):', qs);
 		//console.log('updateSelectedQueryState: filters: ',filters);
-		for(var i=0;i<filters.length;i++) {
-			var filterVal = getParameterByName(filters[i], qs);
+		var filtersAdded = [];
+		for(var i=0; i<filters.length; i++) {
+			if(filtersAdded.indexOf(filters[i])>=0) { continue; }
+			var filterVals = getParametersByName(filters[i], qs);
 			var idx = filters[i].indexOf(":");
 			var col = filters[i].substring(idx+1);
 			var operator = filters[i].substring(1, idx);
 			var colType = "varchar"; //XXX find column type??
-			//console.log('updateSelectedQueryState: filter['+i+']: ',col,operator,filterVal,colType);
-			addFilterWithValues(col, operator, filterVal, colType);
+			for(var j=0; j<filterVals.length; j++) {
+				//console.log('updateSelectedQueryState: filter['+i+']: ', col, operator, filterVals[j], colType);
+				addFilterWithValues(col, operator, filterVals[j], colType);
+			}
+			filtersAdded.push(filters[i]);
 		}
 		//order
 		var orderVal = getParameterByName('order', qs);
