@@ -734,6 +734,41 @@ public class WinstoneAndH2HttpRequestTest {
 		httpPut.releaseConnection();
 	}
 
+	@Test
+	public void testGetJsonValues() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select emp.*, cast(salary as char) as salary_char from emp where id = 1";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/QueryAny.json?_method=POST&name=emp&sql="+sqlpar);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String jsonStr = getContent(response1);
+		//System.out.println("json:\n"+jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		obj = jobj.get("emp");
+		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
+
+		JSONArray jarr = (JSONArray) obj;
+		Assert.assertEquals("Should have 2 (data) rows", 1, jarr.size());
+		
+		Object row = jarr.get(0);
+		Assert.assertTrue("Should be a JSONObject", row instanceof JSONObject);
+
+		JSONObject jRow = (JSONObject) row;
+		Object salary = jRow.get("SALARY");
+		Object salaryChar = jRow.get("SALARY_CHAR");
+
+		//System.out.println("salary: "+salary+" / "+salary.getClass());
+		Assert.assertTrue("Salary should be a Number", salary instanceof Number);
+		Assert.assertTrue("SalaryChar should be a String", salaryChar instanceof String);
+		
+		httpGet.releaseConnection();
+	}
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------
 	
