@@ -171,7 +171,15 @@ function loadData(dataUrl) {
 				//TODO: create seriesData from qonData
 				var selc = document.getElementById('dataColumn');
 				var col = selc.options[selc.selectedIndex].value;
-				seriesData = transformQonData(qonData, col);
+				qonData = getQonData(qonData);
+				//console.log("col: ",col, qonData);
+				if(qonData.length>0) {
+					seriesData = transformQonData(qonData, col);
+					//console.log("seriesData: ",seriesData);
+				}
+				else {
+					alert("Series with no data");
+				}
 			}
 			catch(e) {
 				//try CSV parse
@@ -485,7 +493,6 @@ function transformQonData(qonData, column) {
 			"series": {
 			}
 		};
-	qonData = getQonData(qonData);
 	
 	var geomIdKey = "GEOM_ID";
 	if(qonData[0]["geom_id"]) { geomIdKey = "geom_id"; }

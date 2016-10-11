@@ -65,7 +65,8 @@ function getQuantileCategoriesLimits(values, numCategories) {
 		console.log(">> prev list.length="+list.length+" / numCategories="+numCategories);
 		list.push(sorted[sorted.length-1]);
 	}
-	console.log("min=",min(values),"max=",max(values),"#values=",sorted.length,"#categories=",numCategories,"valuesPerQuantile=",valuesPerQuantile,"valuesFloat=",(sorted.length/numCategories),"list.length=",list.length);
+	console.log("min=",min(values),"max=",max(values),"#values=",sorted.length,"#categories=",numCategories,
+			"valuesPerQuantile=",valuesPerQuantile,"valuesFloat=",(sorted.length/numCategories),"list.length=",list.length);
 	console.log("list=",list);
 	return list;
 }
@@ -91,7 +92,9 @@ function isNumericArray(series) {
 function max(series) {
 	var max = -Number.MAX_VALUE;
 	for(var i in series) {
-		if(series[i]>max) { max = series[i]; }
+		var val = series[i];
+		//var val = parseFloat(series[i]);
+		if(val>max) { max = val; }
 	}
 	return Number(max);
 }
@@ -99,8 +102,9 @@ function max(series) {
 function min(series) {
 	var min = Number.MAX_VALUE;
 	for(var i in series) {
-		//console.log("i:"+i+" / "+series[i]);
-		if(series[i]<min) { min = series[i]; }
+		var val = series[i];
+		//var val = parseFloat(series[i]);
+		if(val<min) { min = val; }
 	}
 	return Number(min);
 }
@@ -258,7 +262,8 @@ function procStylesFromCategories(cats, colorFrom, colorTo, valueLabel) {
 
 	var i=0;
 	for(var c in cats) {
-		cats[c].kmlcolor = hexString(Math.round(colorsA[i])) + hexString(Math.round(colorsB[i])) + hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsR[i]));
+		cats[c].kmlcolor = hexString(Math.round(colorsA[i])) + hexString(Math.round(colorsB[i])) +
+			hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsR[i]));
 		//XXX: color -> rgbcolor?
 		cats[c].color = hexString(Math.round(colorsR[i])) + hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsB[i]));
 		//TODO: format numbers! integer, float, ...
@@ -295,14 +300,17 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 
 	var i=0;
 	for(var c in cats) {
-		cats[c].kmlcolor = hexString(Math.round(colorsA[i])) + hexString(Math.round(colorsB[i])) + hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsR[i]));
+		cats[c].kmlcolor = hexString(Math.round(colorsA[i])) + hexString(Math.round(colorsB[i])) +
+			hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsR[i]));
 		//XXX: color -> rgbcolor?
 		cats[c].color = hexString(Math.round(colorsR[i])) + hexString(Math.round(colorsG[i])) + hexString(Math.round(colorsB[i]));
 		//TODO: format numbers! integer, float, ...
 		//cats[c].description = cats[c].startval + " &lt; # " + valueLabel + " &lt; " + cats[c].endval;
 		if(isNumericData) {
+			var comp2nd = ((i+1)==numCat)?" &le; ":" &lt; ";
+			console.log('zz',(i+1),cats.length);
 			//XXX: last category's 2nd comparator should have &le; - others &lt; ?
-			cats[c].description = formatFloat(cats[c].startval) + " &le; # " + valueLabel + " &le; " + formatFloat(cats[c].endval);
+			cats[c].description = formatFloat(cats[c].startval) + " &le; # " + valueLabel + comp2nd + formatFloat(cats[c].endval);
 		}
 		else {
 			cats[c].description = valueLabel + " = " + cats[c].startval;
@@ -493,7 +501,8 @@ function selectFromCategory(selectCatId) {
 	//console.log('selectFromCategory.count: '+countIn+' / '+countOut+' // in+out = '+(countIn+countOut)+' / all = '+Object.keys(gmapsPlaces).length);
 
 	var container = document.getElementById('category_info_button_container');
-	container.innerHTML = getCategoryInfoNavigation(selectCatId) + "[ <a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a> ] [#elements = "+countIn+"]";
+	container.innerHTML = getCategoryInfoNavigation(selectCatId) +
+		"[ <a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a> ] [#elements = "+countIn+"]";
 	
 	global_selectCatIdElements = selectCatId;
 }
@@ -517,7 +526,8 @@ function selectFromAllCategories(oldSelectCatId) {
 	
 	if(oldSelectCatId) {
 		var container = document.getElementById('category_info_button_container');
-		container.innerHTML = getCategoryInfoNavigation(oldSelectCatId) + "[ <a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a> ]";
+		container.innerHTML = getCategoryInfoNavigation(oldSelectCatId) +
+			"[ <a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a> ]";
 	}
 	
 	global_selectCatIdElements = 0;
