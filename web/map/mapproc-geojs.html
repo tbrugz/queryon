@@ -24,6 +24,8 @@ var map;
 var mapCenter = [-16, -48]; //XXX get from maps.json
 //var baseurl = '../q';
 
+var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
+
 function loadNakedMap(map_canvas_id, mapUrl) {
 	//var dataPlaces = mapUrl;
 	console.log("loadNakedMap:: mapUrl=",mapUrl);
@@ -448,7 +450,11 @@ function addElement2Select(select, element) {
 		select.innerHTML += "<option disabled>"+element.div+"</option>\n";
 	}
 	else {
-		select.innerHTML += "<option value='"+element.value+"'"+(element['default']?" selected":"")+" parameterCount='"+element.parameterCount+"' columnNames='"+element.columnNames+"' remarks='"+element.remarks+"'>"+element.name+"</option>\n";
+		//console.log('element', element);
+		select.innerHTML += "<option value='"+element.value+"'"+(element['default']?" selected":"")+
+			" parameterCount='"+element.parameterCount+"' columnNames='"+element.columnNames+"'"+
+			"columnTypes='"+element.columnTypes+"'"+
+			"remarks='"+element.remarks+"'>"+element.name+"</option>\n";
 	}
 }
 
@@ -473,13 +479,29 @@ function refreshDataUrlColumns() {
 		dataRemarks.style.display = 'none';
 	}
 	setParameters('parameters', selOption.getAttribute('parameterCount'));
+	
 	var collist = selOption.getAttribute('columnnames');
+	//console.log('collist', collist);
 	var cols = collist.split(",");
+	var coltypesStr = selOption.getAttribute('columntypes');
+	//console.log('coltypesStr', coltypesStr);
+	var coltypes = coltypesStr.split(",");
+
 	var selCols = document.getElementById('dataColumn');
 	selCols.innerHTML = '';
+	var selectedDefined = false;
 	for(var i=0;i<cols.length;i++) {
 		var cc = cols[i].trim();
-		selCols.innerHTML += "<option value="+cc+">"+cc+"</option>\n";
+		var ct = coltypes[i].trim();
+		var selectedStr = "";
+		if( !selectedDefined) {
+			if( (! (cc.toUpperCase()=="GEOM_ID")) && (numericSqlTypes.indexOf(ct)>=0) ) {
+				selectedStr = " selected='true'";
+				selectedDefined = true;
+			}
+		}
+		//console.log(selectedDefined, selectedStr, cc, ct, cc.toUpperCase(), "GEOM_ID", (! (cc.toUpperCase()=="GEOM_ID")), numericSqlTypes.indexOf(ct), (numericSqlTypes.indexOf(ct)>=0) );
+		selCols.innerHTML += "<option value='"+cc+"'"+selectedStr+">"+cc+"</option>\n";
 	}
 }
 
@@ -579,6 +601,7 @@ $.ajax({
 						"name": elname,
 						"parameterCount": sources[i].parameterCount,
 						"columnNames": sources[i].columnNames.substring(1,sources[i].columnNames.length-1),
+						"columnTypes": sources[i].columnTypes.substring(1,sources[i].columnTypes.length-1),
 						"remarks": sources[i].remarks ? sources[i].remarks.replace(/['"]/gi, "") : ''
 					}
 				);
