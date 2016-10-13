@@ -4,5 +4,7 @@
 ],
 "mapcenter": [-16, -48],
 "showOptionsIfUnique": false,
-"gmapsKey": "change it"
+"gmapsKey": "change it",
+"showGeomIdAsValueColumn": true,
+"showNonNumericColumnAsValueColumn": true
 }

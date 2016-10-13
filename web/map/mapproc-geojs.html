@@ -22,6 +22,7 @@ var places, catData, seriesData;
 var gmapsPlaces = {};
 var map;
 var mapCenter = [-16, -48]; //XXX get from maps.json
+var mapsData = {}; //loaded from maps.json
 //var baseurl = '../q';
 
 var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
@@ -493,6 +494,13 @@ function refreshDataUrlColumns() {
 	for(var i=0;i<cols.length;i++) {
 		var cc = cols[i].trim();
 		var ct = coltypes[i].trim();
+		if(cc.toUpperCase()=="GEOM_ID" && !mapsData.showGeomIdAsValueColumn) {
+			continue;
+		}
+		if((numericSqlTypes.indexOf(ct)<0) && !mapsData.showNonNumericColumnAsValueColumn) {
+			continue;
+		}
+		
 		var selectedStr = "";
 		if( !selectedDefined) {
 			if( (! (cc.toUpperCase()=="GEOM_ID")) && (numericSqlTypes.indexOf(ct)>=0) ) {
@@ -618,7 +626,7 @@ $.ajax({
 	url: 'maps.json',
 	dataType: 'text',
 	success: function(data) {
-		var mapsData = JSON.parse(data);
+		mapsData = JSON.parse(data);
 		//console.log('loaded maps.json', mapsData);
 		loadGmapsJs(mapsData);
 		var sources = mapsData.maps;
