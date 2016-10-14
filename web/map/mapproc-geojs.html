@@ -298,7 +298,20 @@ function resetMapData() {
 	global_selectCatIdElements = 0;
 	closeCatInfo();
 }
-	
+
+function getColorsArray() {
+	var colorFrom = document.getElementById('colorFrom').value;
+	var colorTo = document.getElementById('colorTo').value;
+	var colors = [colorFrom];
+	var xtracol = document.getElementById('xtraColorsContainer');
+	var colorElements = xtracol.querySelectorAll('input.color');
+	for(var i=colorElements.length-1;i>=0;i--) {
+		colors.push(rgbColor2kmlColor(colorElements[i].value));
+	}
+	colors.push(colorTo);
+	return colors;
+}
+
 function loadDataCallback() {
 	//console.log(seriesData.series);
 	//TODOne: remove (or not) data elements not present in map
@@ -334,15 +347,7 @@ function loadDataCallback() {
 
 	changeColor('colorFromRGB', 'colorFrom');changeColor('colorToRGB', 'colorTo');
 	
-	var colorFrom = document.getElementById('colorFrom').value;
-	var colorTo = document.getElementById('colorTo').value;
-	var colors = [colorFrom];
-	var xtracol = document.getElementById('xtraColorsContainer');
-	var colorElements = xtracol.querySelectorAll('input.color');
-	for(var i=colorElements.length-1;i>=0;i--) {
-		colors.push(rgbColor2kmlColor(colorElements[i].value));
-	}
-	colors.push(colorTo);
+	var colors = getColorsArray();
 
 	//console.log('color: from='+colorFrom+'; to='+ colorTo+" ; all="+colors);
 	//procStylesFromCategories(cats, colorFrom, colorTo, seriesData.valueLabel);
@@ -429,9 +434,10 @@ function addColorButton() {
 	//console.log(cont);
 	var span = document.createElement('span');
 	span.setAttribute('style','display: inline-block');
-	span.innerHTML += 'Color: <input type="text" class="color small"/><input type="button" value="-" onclick="this.parentElement.parentElement.removeChild(this.parentElement);" class="symbol">';
+	span.innerHTML += 'Color: <input type="text" class="color small" onchange="onUiComponentChange()"/><input type="button" value="-" onclick="this.parentElement.parentElement.removeChild(this.parentElement);" class="symbol">';
 	cont.appendChild(span);
 	jscolor.bind();
+	updateFragment();
 }
 
 function addDataSeriesDialog() {
@@ -535,6 +541,7 @@ function transformQonData(qonData, column) {
 
 function dataColumnChanged() {
 	// XXX set isCategoricalData
+	updateFragment();
 }
 
 function qonLoadData() {
@@ -552,7 +559,17 @@ function qonLoadData() {
 	loadData(url);
 }
 
+function onDataUrlChange() {
+	refreshDataUrlColumns();
+	updateFragment();
+}
+
 function onParameterChange() {
+	updateFragment();
+}
+
+function onUiComponentChange() {
+	updateFragment();
 }
 
 /* function createCategoriesFromDataSeries() {
@@ -573,6 +590,7 @@ function isCategoricalDataChanged() {
 		document.getElementById('categoriesCounterContainer').style.display = 'none';
 		//document.getElementById('shouldCreateCategoriesFromDataSeries').disabled = false;
 	}
+	updateFragment();
 }
 
 function loadMap() {
@@ -616,6 +634,7 @@ $.ajax({
 			}
 		}
 		refreshDataUrlColumns();
+		onLoadUpdateUiComponents();
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 		console.log('Error: relation.json', jqXHR, textStatus, errorThrown);
@@ -665,6 +684,51 @@ function loadGmapsJs(mapsData) {
 	document.head.appendChild(script);
 }
 
+function updateFragment() { // updateState() ?
+	var state = byId('dataUrl').value + '/' + byId('dataColumn').value + getParameters(); // + "|";
+	var categorical = byId('isCategoricalData').checked;
+	state += "?iscategorical=" + categorical;
+	if(!categorical) {
+		state += "&cats="+byId('numOfCategories').value;
+		state += "&scale="+byId('scaleType').value;
+		state += "&normalize="+byId('genCatLimitsFromExistingPlacemarks').checked;
+	}
+	state += "&colors="+getColorsArray();
+	//console.log("updateFragment", state);
+	history.replaceState(null, null, "#"+state);
+}
+
+function onLoadUpdateUiComponents() {
+	var hash = window.location.hash;
+	if(hash.length<2) { return }
+	var idx = hash.indexOf('?');
+	if(idx<0) { idx = hash.lenght; }
+	var id = hash.substring(1, idx);
+	var partz = id.split('/');
+	if(! partz[0]) { return; }
+	byId('dataUrl').value = partz[0];
+	onDataUrlChange();
+	if(! partz[1]) { return; }
+	byId('dataColumn').value = partz[1];
+	
+	// parameters...
+	var params = partz.slice(2);
+	setParametersValues(params);
+	
+	var categorical = getParameterByName('iscategorical', hash)=='true';
+	byId('isCategoricalData').checked = categorical;
+	isCategoricalDataChanged();
+	if(!categorical) {
+		var cats = getParameterByName('cats', hash);
+		if(cats) { byId('numOfCategories').value = cats };
+		var scale = getParameterByName('scale', hash);
+		if(scale) { byId('scaleType').value = scale; }
+		byId('genCatLimitsFromExistingPlacemarks').checked = getParameterByName('normalize', hash)!='false';
+	}
+	
+	// TODO colors...
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 	//alert("Ready!");
 	changeColor('colorFromRGB', 'colorFrom');
@@ -697,7 +761,7 @@ Map<span id="mapbox2">:
 
 <div class="boxsmall">
 Data:
-<select name="dataUrl" id="dataUrl" onchange="refreshDataUrlColumns()" style="width: 10em;">
+<select name="dataUrl" id="dataUrl" onchange="onDataUrlChange()" style="width: 10em;">
 </select>
 <div id="dataRemarks"></div>
 <span id="parameters"></span>
@@ -720,7 +784,7 @@ Create categories from series' data?
 </label><br/>
  -->
 #Cat: 
-<select name="numOfCategories" id="numOfCategories">
+<select name="numOfCategories" id="numOfCategories" onchange="onUiComponentChange()">
 <option value="2">2</option>
 <option value="3">3</option>
 <option value="4">4</option>
@@ -736,13 +800,13 @@ Create categories from series' data?
 <option value="25">25</option>
 </select><br/>
 Scale: 
-<select name="scaleType" id="scaleType">
+<select name="scaleType" id="scaleType" onchange="onUiComponentChange()">
 	<option value="LINEAR">LINEAR</option>
 	<option value="LOG">LOG</option>
 	<option value="QUANTILE" selected>QUANTILE</option>
 </select><br/>
 <label>
-<input type="checkbox" class="smaller" name="genCatLimitsFromExistingPlacemarks" id="genCatLimitsFromExistingPlacemarks" value="1" checked/>
+<input type="checkbox" class="smaller" name="genCatLimitsFromExistingPlacemarks" id="genCatLimitsFromExistingPlacemarks" value="1" checked onchange="onUiComponentChange()"/>
 Normalize Limits?
 </label>
 <br/>
@@ -754,11 +818,11 @@ Normalize Limits?
 </div>
 
 <div id="colorsContainer" class="boxsmall">
-Color Max: <input type="text" class="color small" id="colorToRGB" name="colorToRGB" value="FF0000" onchange="changeColor('colorToRGB', 'colorTo')"/> <input type="hidden" id="colorTo" name="colorTo"/>
+Color Max: <input type="text" class="color small" id="colorToRGB" name="colorToRGB" value="FF0000" onchange="changeColor('colorToRGB', 'colorTo');onUiComponentChange()"/> <input type="hidden" id="colorTo" name="colorTo"/>
 <div id="xtraColorsContainer" style="display: inline;">
 </div>
 <input type="button" value="+" onclick="addColorButton()" class="symbol"><br/>
-Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorFromRGB" value="FFFF00" onchange="changeColor('colorFromRGB', 'colorFrom')"/> <input type="hidden" id="colorFrom" name="colorFrom"/><br/>
+Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorFromRGB" value="FFFF00" onchange="changeColor('colorFromRGB', 'colorFrom');onUiComponentChange()"/> <input type="hidden" id="colorFrom" name="colorFrom"/><br/>
 <input type=button id="setColorsFromCats" style="font-size: 7pt;" class="small" value="Update" onclick="setColorsFromCategories();" title="update colors from categories" disabled/>
 <input type=button id="resetColors" style="font-size: 7pt;" class="small" value="Reset" onclick="resetColorsDiv('FF0000','FFFF00');" title="reset colors"/>
 </div>
