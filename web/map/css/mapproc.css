@@ -55,6 +55,10 @@ input.symbol {
 .smalltext {
 	font-size: 10px;
 }
+span.link {
+	cursor: pointer;
+	color: #0000EE;
+}
 
 .canvas {
 	margin: 2px;
@@ -93,7 +97,7 @@ input.symbol {
 	padding: 1px;
 }
 #category_info_contents {
-	font-size: 10px; 
+	font-size: 10pt; 
 }
 #position {
 	background-color: #ccc;

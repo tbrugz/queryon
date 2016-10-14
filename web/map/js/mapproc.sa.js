@@ -459,10 +459,10 @@ function showCategoryInfo(id) {
 	container.appendChild(catbutton);*/
 	if(global_selectCatIdElements>0) {
 		selectFromCategory(id);
-		//container.innerHTML = "[<a href='#' onClick='selectFromAllCategories("+id+");'>show all elements</a>] [#elements = "+countIn+"];
+		//container.innerHTML = "[<span class='link' onClick='selectFromAllCategories("+id+");'>show all elements</span>] [#elements = "+countIn+"];
 	}
 	else {
-		container.innerHTML = getCategoryInfoNavigation(id) + "[ <a href='#' onClick='selectFromCategory("+id+");'>show elements from cat #"+id+"</a> ]";
+		container.innerHTML = getCategoryInfoNavigation(id) + "[ <span class='link' onclick='selectFromCategory("+id+");'>show elements from cat #"+id+"</span> ]";
 	}
 }
 
@@ -502,7 +502,7 @@ function selectFromCategory(selectCatId) {
 
 	var container = document.getElementById('category_info_button_container');
 	container.innerHTML = getCategoryInfoNavigation(selectCatId) +
-		"[ <a href='#' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</a> ] [#elements = "+countIn+"]";
+		"[ <span class='link' onClick='selectFromAllCategories("+selectCatId+");'>show all elements</span> ] [#elements = "+countIn+"]";
 	
 	global_selectCatIdElements = selectCatId;
 }
@@ -527,7 +527,7 @@ function selectFromAllCategories(oldSelectCatId) {
 	if(oldSelectCatId) {
 		var container = document.getElementById('category_info_button_container');
 		container.innerHTML = getCategoryInfoNavigation(oldSelectCatId) +
-			"[ <a href='#' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</a> ]";
+			"[ <span class='link' onClick='selectFromCategory("+oldSelectCatId+");'>show elements from cat #"+oldSelectCatId+"</span> ]";
 	}
 	
 	global_selectCatIdElements = 0;
@@ -538,10 +538,10 @@ function getCategoryInfoNavigation(currentCatId) {
 	currentCatId = parseInt(currentCatId);
 	var str = "";
 	if(currentCatId > 1) {
-		str = " <a href='#' onclick='showCategoryInfo("+(-1+currentCatId)+")'>&lt;</a> ";
+		str = " <span class='link' onclick='showCategoryInfo("+(-1+currentCatId)+")'>&lt;</span> ";
 	}
 	if(currentCatId < catlen) {
-		str += " <a href='#' onclick='showCategoryInfo("+(1+currentCatId)+")'>&gt;</a> ";
+		str += " <span class='link' onclick='showCategoryInfo("+(1+currentCatId)+")'>&gt;</span> ";
 	}
 	//console.log("getCategoryInfoNavigation: "+currentCatId+" / "+catlen);
 	return "[ "+str+" ]";

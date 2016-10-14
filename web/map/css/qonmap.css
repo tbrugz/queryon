@@ -40,3 +40,13 @@ input.parameter {
 input.onaction {
 	background-color: #f90 !important;
 }
+
+input.mainaction {
+	background-color: rgb(146, 218, 136);
+}
+
+input[type=button] {
+	border: 1px solid #999;
+	font-weight: bold;
+	margin: 1px;
+}

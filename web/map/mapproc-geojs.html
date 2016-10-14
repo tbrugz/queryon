@@ -824,15 +824,18 @@ Color Max: <input type="text" class="color small" id="colorToRGB" name="colorToR
 <input type="button" value="+" onclick="addColorButton()" class="symbol"><br/>
 Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorFromRGB" value="FFFF00" onchange="changeColor('colorFromRGB', 'colorFrom');onUiComponentChange()"/> <input type="hidden" id="colorFrom" name="colorFrom"/><br/>
 <input type=button id="setColorsFromCats" style="font-size: 7pt;" class="small" value="Update" onclick="setColorsFromCategories();" title="update colors from categories" disabled/>
-<input type=button id="resetColors" style="font-size: 7pt;" class="small" value="Reset" onclick="resetColorsDiv('FF0000','FFFF00');" title="reset colors"/>
+<input type=button id="resetColors" style="font-size: 7pt;" class="small" value="Reset" onclick="resetColorsDiv('FF0000','FFFF00');" title="reset colors to initial value"/>
 </div>
 
 <!-- 
 Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound" value="1"/><br/ -->
-<br/>
-<input type="button" id="btn-loaddata" value="Load Data" class="medium" onClick="qonLoadData();" disabled/><br/>
+<div style="margin-left: 2px">
+
+<input type="button" id="btn-loaddata" value="Load Data" class="mainaction" onClick="qonLoadData();" disabled/><br/>
 <input type="button" id="btn-resetdata" value="Reset Data" class="medium" onClick="resetMapData();" disabled/><br/>
-<br/>
+
+</div>
+
 <!-- input type="button" value="Open in GMaps" class="medium" onClick="openInGoogleMaps('theform');"/><br/ -->
 <!-- 
 <input type="submit" value="Download" class="small"/><br/>
@@ -852,16 +855,16 @@ Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound"
 <div id="map_location" style="width: 800px; height: 60px; border: 1px solid black; background-color: #ddd; display: none;"></div>
 
 <div id="place_info" style="position: absolute; height: 11em; bottom: 4px; width: 15em; left: 4px; border: 1px solid black; display: none;">
-	<div id="place_info_close" style="float: right; top: 0px; right: 0px;"><a href="#" onclick="document.getElementById('place_info').style.display='none';">[x]</a></div>
+	<div id="place_info_close" style="float: right; top: 0px; right: 0px;"><span class="link" onclick="document.getElementById('place_info').style.display='none';">[x]</span></div>
 	<span class="label debug" id="placeIdLabel">id: </span><span id="placeId" class="placeInfo debug"></span>
 	<span class="label debug">cat: </span><span id="placeCat" class="placeInfo debug"></span><br/>
 	<span class="label" id="placeNameLabel">name: </span><div id="placeName" class="placeInfo"></div>
 	<span class="label">desc: <br/></span><div id="placeDesc" class="placeInfo"></div>
 </div>
 
-<div id="category_info" style="position: absolute; bottom: 0; height: 1em; left: 16em; right: 4.3em; border: 1px solid black; display: none;">
+<div id="category_info" style="position: absolute; bottom: 0; height: 1.1em; left: 16em; right: 4.3em; border: 1px solid black; display: none;">
 	<div id="category_info_contents">
-		<div id="category_info_close" style="float: right; top: 0px; right: 0px;"><a href="#" onclick="closeCatInfo();">[x]</a></div>
+		<div id="category_info_close" style="float: right; top: 0px; right: 0px;"><span class="link" onclick="closeCatInfo();">[x]</span></div>
 		<span>cat #</span><span id="category_info_id"></span>
 		<span id="category_info_button_container"></span>
 		<span> info: </span><span id="category_info_text"></span>
