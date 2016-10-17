@@ -1,4 +1,6 @@
 
+/* depends on: qon-base.js */
+
 var bhvalues = null;
 
 var operatorsInfo = {
@@ -12,12 +14,10 @@ var operatorsInfo = {
 	"ge": { "name":"&ge;", "multiple": false },
 	"lt": { "name":"<", "multiple": false },
 	"le": { "name":"&le;", "multiple": false },
-	
+
 	"null": { "name":"is null", "multiple": false, "has-no-argument": true },
 	"notnull": { "name":"is not null", "multiple": false, "has-no-argument": true }
 };
-
-var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
 
 if(typeof Bloodhound != 'undefined') {
 	bhvalues = new Bloodhound({
@@ -60,14 +60,14 @@ function addFilterDialog(selectedCol) {
 			">"+colz+"</option>";
 	}
 	selectHTML += '</select>';
-	
+
 	var operatorsHTML = "<select name='fil-operator' id='fil-operator' class='operator' onchange='onFilterOperatorChange()'>";
 	var keys = Object.keys(operatorsInfo);
 	for(var i=0; i<keys.length; i++) {
 		operatorsHTML += "<option value='"+keys[i]+"'>"+operatorsInfo[keys[i]].name+"</option>";
 	}
 	operatorsHTML += "</select>";
-	
+
 	dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
 		+ operatorsHTML
 		+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
@@ -76,7 +76,7 @@ function addFilterDialog(selectedCol) {
 		+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/></div>";
 	//dialog.style.display = 'none';
 	refreshAutocomplete();
-	
+
 	updateUI();
 }
 
@@ -86,13 +86,13 @@ function refreshAutocomplete() {
 	var columnName = sel.options[sel.selectedIndex].value;
 	var input = document.getElementById('fin-value');
 	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
-	
+
 	console.log('autocomplete: col='+columnName+' ; type= ['+colType+']');
-	
+
 	var inputType = 'text';
 	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
 	input.setAttribute('type', inputType);
-	
+
 	// constructs the suggestion engine
 	/*var bhvalues = new Bloodhound({
 		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
@@ -104,7 +104,7 @@ function refreshAutocomplete() {
 			};
 		})
 	});*/
-	
+
 	bhvalues.local = $.map(getValuesFromColumn('content', columnName), function(str) {
 		return {
 			value : str
@@ -142,7 +142,7 @@ function addFilterIn() {
 	var operator = document.getElementById('fil-operator').value;
 	var value = document.getElementById('fin-value').value;
 	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
-	
+
 	addFilterWithValues(col, operator, value, colType);
 }
 
@@ -152,9 +152,9 @@ function addFilterWithValues(col, operator, value, colType) {
 	var finContainer = document.getElementById(finContainerId);
 	var inputType = 'text';
 	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
-	
+
 	//console.log("operator: "+operator);
-	
+
 	if(finContainer==null) {
 		filters.innerHTML += "<label class='filter-label' id='"+finContainerId+"'>"+col+" <em>"+operatorsInfo[operator].name+"</em> "
 			+ (operatorsInfo[operator].multiple?"(":"")
@@ -214,7 +214,7 @@ function closeDialogs() {
 function onFilterOperatorChange() {
 	var operator = document.getElementById('fil-operator').value;
 	var valueInput = document.getElementById('fin-value');
-	
+
 	//console.log("onFilterOperatorChange: ",operatorsInfo[operator]);
 	if(operatorsInfo[operator]["has-no-argument"]) {
 		valueInput.parentNode.parentNode.style.display = 'none';
@@ -232,4 +232,3 @@ document.onkeydown = function(evt) {
 	}
 	//console.log('document.onkeydown: ',key);
 };
-

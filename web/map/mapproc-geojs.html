@@ -25,8 +25,6 @@ var mapCenter = [-16, -48]; //XXX get from maps.json
 var mapsData = {}; //loaded from maps.json
 //var baseurl = '../q';
 
-var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
-
 function loadNakedMap(map_canvas_id, mapUrl) {
 	//var dataPlaces = mapUrl;
 	console.log("loadNakedMap:: mapUrl=",mapUrl);
@@ -40,7 +38,7 @@ function loadNakedMap(map_canvas_id, mapUrl) {
 			places = data.features;
 			var mymap = loadNakedMapCallback(map_canvas_id);
 			//if(okNumber==3) { doIt(); }
-			
+
 			//http://stackoverflow.com/questions/11029948/enabling-event-propogation-effectively-in-google-maps-api-v3
 			//addMapMouseListeners(mymap, document.getElementById('position'));
 		},
@@ -58,9 +56,9 @@ function addMapMouseListeners(map, element) {
 	});
 	google.maps.event.addListener(map, 'mouseout', function(event) {
 		element.style.display = 'none';
-	});	
+	});
 }
-	
+
 function updatePosition(event, element) {
 	element.innerHTML = (''+event.latLng.lat()).substr(0,8)+"; "+(''+event.latLng.lng()).substr(0,8);
 }
@@ -91,7 +89,7 @@ function loadNakedMapCallback(map_canvas_id) {
 			countError++;
 			continue;
 		}
-		
+
 		var polygon = new Array();
 		if(thisplace.geometry.type=="Polygon") {
 			for(polyid in thisplace.geometry.coordinates) {
@@ -119,7 +117,7 @@ function loadNakedMapCallback(map_canvas_id) {
 			}
 			//console.log(thisplace.geometry.type+" type [id = "+id+" / "+thisplace.id+" ; name = "+thisplace.properties.name+"] - ",polygon);
 		}
-		
+
 		var theplace = new google.maps.Polygon({
 			paths: polygon,
 			strokeColor: "#444444",
@@ -253,7 +251,7 @@ function createCatElements() {
 		catInt.setAttribute('style', 'background-color: #'+catData[id].color+
 				'; height: 100%; width: 100%;'+
 				'color: #'+(hexColorIsDark(catData[id].color)?'ffffff':'000000')+';');
-		
+
 		//catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'", null, "'+catData[id].description+'")'); //catData[id].description
 		catInt.setAttribute('onclick', 'showCategoryInfo("'+id+'")');
 		if(ncats <= 25) {
@@ -273,7 +271,7 @@ function createCatElements() {
 
 function resetMapData() {
 	document.getElementById('place_info').style.display='none';
-	
+
 	for(var id in gmapsPlaces) {
 		var placemark = gmapsPlaces[id];
 		placemark.fillColor = DEFAULT_FILL_COLOR;
@@ -284,7 +282,7 @@ function resetMapData() {
 		//TODO: removeListener
 		//google.maps.event.removeListener(placemark.listener);
 	}
-	
+
 	//console.log('reset');
 	var container = document.getElementById('categories_canvas');
 	container.style.display = 'none';
@@ -294,7 +292,7 @@ function resetMapData() {
 	categoriesCounter.value = '';
 
 	document.getElementById('setColorsFromCats').disabled = true;
-	
+
 	global_selectCatIdElements = 0;
 	closeCatInfo();
 }
@@ -324,7 +322,7 @@ function loadDataCallback() {
 	var catLimits = null;
 	var isNumericData = true;
 	var isCategoricalDataChk = document.getElementById('isCategoricalData').checked;
-	
+
 	if(isNumericArray(seriesData.series) && !isCategoricalDataChk) {
 	//if(isNumericArray(seriesData.series) || !isCategoricalDataChk) {
 		console.log('is numeric series!');
@@ -339,29 +337,29 @@ function loadDataCallback() {
 	}
 
 	console.log("catLimits=",catLimits);
-	
+
 	var cats = genCategoriesFromLimits(catLimits);
 	catData = cats;
 
 	console.log('cats=', cats);
 
 	changeColor('colorFromRGB', 'colorFrom');changeColor('colorToRGB', 'colorTo');
-	
+
 	var colors = getColorsArray();
 
 	//console.log('color: from='+colorFrom+'; to='+ colorTo+" ; all="+colors);
 	//procStylesFromCategories(cats, colorFrom, colorTo, seriesData.valueLabel);
 	procStylesFromCategoriesMultipleColors(cats, colors, seriesData.valueLabel, isNumericData);
-	
+
 	//console.log("hex:: "+hexString(2)+"; "+hexString(9)+"; "+hexString(10)+"; "+hexString(11)+"; "+hexString(250)+"; "+hexString(255));
-	
+
 	applySeriesDataAndStyle(gmapsPlaces, seriesData, cats, map, isNumericData);
 	//applySeriesData(gmapsPlaces, seriesData, cats);
 	//applyStyleColor(gmapsPlaces, cats);
 	createCatElements();
 
 	document.getElementById('setColorsFromCats').disabled = false;
-	
+
 	closeCatInfo();
 	//TODO: option to select (show only) placemarks from given category
 	//TODO: remove placemark not found? nah... add all not found to 'unknown' category
@@ -404,7 +402,7 @@ function loadDataCategoricalSeries() {
 	var skeys = dvarr.sort(); // null becomes 'null' ?
 	console.log('series sorted keys:',skeys);
 	skeys.push(null);
-	
+
 	return skeys;
 }
 
@@ -486,7 +484,7 @@ function refreshDataUrlColumns() {
 		dataRemarks.style.display = 'none';
 	}
 	setParameters('parameters', selOption.getAttribute('parameterCount'));
-	
+
 	var collist = selOption.getAttribute('columnnames');
 	//console.log('collist', collist);
 	var cols = collist.split(",");
@@ -499,14 +497,14 @@ function refreshDataUrlColumns() {
 	var selectedDefined = false;
 	for(var i=0;i<cols.length;i++) {
 		var cc = cols[i].trim();
-		var ct = coltypes[i].trim();
+		var ct = coltypes[i].trim().toUpperCase();
 		if(cc.toUpperCase()=="GEOM_ID" && !mapsData.showGeomIdAsValueColumn) {
 			continue;
 		}
 		if((numericSqlTypes.indexOf(ct)<0) && !mapsData.showNonNumericColumnAsValueColumn) {
 			continue;
 		}
-		
+
 		var selectedStr = "";
 		if( !selectedDefined) {
 			if( (! (cc.toUpperCase()=="GEOM_ID")) && (numericSqlTypes.indexOf(ct)>=0) ) {
@@ -520,7 +518,7 @@ function refreshDataUrlColumns() {
 }
 
 function transformQonData(qonData, column) {
-	// GEOM_ID, GEOM_NAME, 
+	// GEOM_ID, GEOM_NAME,
 	var data = {
 			"objectLabel": "GEOM_ID",
 			"valueLabel": column,
@@ -529,10 +527,10 @@ function transformQonData(qonData, column) {
 			"series": {
 			}
 		};
-	
+
 	var geomIdKey = "GEOM_ID";
 	if(qonData[0]["geom_id"]) { geomIdKey = "geom_id"; }
-	
+
 	for(var i=0;i<qonData.length;i++) {
 		data.series[qonData[i][geomIdKey]] = qonData[i][column];
 	}
@@ -553,7 +551,7 @@ function qonLoadData() {
 		console.warn('select '+selectId+' has no options');
 		return;
 	}
-	
+
 	var url = getQueryUrl(selectId, 'json', baseurl);
 	console.log('baseurl',baseurl,'url',url);
 	loadData(url);
@@ -651,7 +649,7 @@ $.ajax({
 		var sources = mapsData.maps;
 		//console.log('sources', sources,'mapsData.showOptionsIfUnique',mapsData.showOptionsIfUnique);
 		var select = document.getElementById('mapUrl');
-		
+
 		for(var i=0;i<sources.length;i++) {
 			addElement2Select(select,
 				{
@@ -710,11 +708,11 @@ function onLoadUpdateUiComponents() {
 	onDataUrlChange();
 	if(! partz[1]) { return; }
 	byId('dataColumn').value = partz[1];
-	
+
 	// parameters...
 	var params = partz.slice(2);
 	setParametersValues(params);
-	
+
 	var categorical = getParameterByName('iscategorical', hash)=='true';
 	byId('isCategoricalData').checked = categorical;
 	isCategoricalDataChanged();
@@ -725,7 +723,7 @@ function onLoadUpdateUiComponents() {
 		if(scale) { byId('scaleType').value = scale; }
 		byId('genCatLimitsFromExistingPlacemarks').checked = getParameterByName('normalize', hash)!='false';
 	}
-	
+
 	// TODO colors...
 }
 
@@ -783,7 +781,7 @@ Column:
 Create categories from series' data?
 </label><br/>
  -->
-#Cat: 
+#Cat:
 <select name="numOfCategories" id="numOfCategories" onchange="onUiComponentChange()">
 <option value="2">2</option>
 <option value="3">3</option>
@@ -799,7 +797,7 @@ Create categories from series' data?
 <option value="20">20</option>
 <option value="25">25</option>
 </select><br/>
-Scale: 
+Scale:
 <select name="scaleType" id="scaleType" onchange="onUiComponentChange()">
 	<option value="LINEAR">LINEAR</option>
 	<option value="LOG">LOG</option>
@@ -813,7 +811,7 @@ Normalize Limits?
 </div>
 
 <div id="categoriesCounterContainer" class="boxsmall" style="display: none;">
-#Cat: 
+#Cat:
 <input type="text" name="categoriesCounter" id="categoriesCounter" style="width: 5em" readonly disabled />
 </div>
 
@@ -827,7 +825,7 @@ Color Min: <input type="text" class="color small" id="colorFromRGB" name="colorF
 <input type=button id="resetColors" style="font-size: 7pt;" class="small" value="Reset" onclick="resetColorsDiv('FF0000','FFFF00');" title="reset colors to initial value"/>
 </div>
 
-<!-- 
+<!--
 Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound" value="1"/><br/ -->
 <div style="margin-left: 2px">
 
@@ -837,7 +835,7 @@ Remove not found? <input type="checkbox" class="smaller" name="removeIfNotFound"
 </div>
 
 <!-- input type="button" value="Open in GMaps" class="medium" onClick="openInGoogleMaps('theform');"/><br/ -->
-<!-- 
+<!--
 <input type="submit" value="Download" class="small"/><br/>
  -->
 </form>

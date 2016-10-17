@@ -19,8 +19,6 @@
 	<script>
 var queryOnUrl = 'q/';
 
-var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE"];
-
 onLoad = function() {
 	loadSettings(makeHrefs);
 	loadAuthInfo();
@@ -29,7 +27,7 @@ onLoad = function() {
 
 doLoadExecs = function() {
 	var queryString = (getCurrentModelId()?'?model='+getCurrentModelId():'');
-	
+
 	var url = queryOnUrl + 'executable.json' + queryString;
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", loadSelectContent);
@@ -68,13 +66,13 @@ onExecChanged = function() {
 		document.getElementById('parameters').innerHTML = '';
 		return;
 	}
-	
+
 	btnGo.disabled = false;
 	var params = option.getAttribute("params");
 	params = params.substring(1, params.length-1);
 	var pars = params.split(",");
 	//var npar = pars.length;
-	
+
 	console.log('onExecChanged: ', params, ' - ', pars, ' - ', pars.length);
 	//XXX: IN, OUT, INOUT...
 	//XXX: parameterTypes...
@@ -106,22 +104,22 @@ doGo = function() {
 	var select = document.getElementById('objects');
 	var idx = select.selectedIndex;
 	var option = select.options[idx];
-	
+
 	var url = queryOnUrl + option.getAttribute("value");
-	
+
 	var params = document.querySelectorAll('.parameter');
 	var paramsStr = '';
-	
+
 	var modelId = getCurrentModelId();
 	if(modelId) {
 		paramsStr = '?model='+modelId;
 	}
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i].value;
-		//if(str=='') { str = '-'; } 
+		//if(str=='') { str = '-'; }
 		paramsStr += (paramsStr.length==0?"?":"&") + "p" + (i+1) + "=" + item;
 	}
-	
+
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", doGoCallback);
 	oReq.open("GET", url+paramsStr);
@@ -154,7 +152,7 @@ goSetParameters = function(parametersId, pars) {
 		for(var i=1;i<=numparams;i++) {
 			console.log("i",i,"par",pars[i-1]);
 			var parts = pars[i-1].split(";");
-			var colType = parts[2];
+			var colType = parts[2].toUpperCase();
 			var isOut = parts[3].indexOf("OUT")==0;
 			var inputType = "text";
 			if(numericSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'number'; }
@@ -168,7 +166,7 @@ goSetParameters = function(parametersId, pars) {
 
 function loadModelsContentCallback() {
 	//loadModelsContent(oEvent);
-	
+
 	if(modelsInfo) {
 		loadSelect(modelsInfo, 'model');
 	}
@@ -222,12 +220,12 @@ input[readonly] {
 	<label style="display: none">
 		<select id="model" onchange="onModelChanged();"></select>
 	</label>
-	
+
 	<label>
 		<select id="objects" onchange="onExecChanged();">
 		</select>
 	</label>
-	
+
 	<span id="navbar-prop">
 		<span id="parameters"></span>
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doGo();"/>
@@ -236,12 +234,12 @@ input[readonly] {
 
 	<span id="navbar-links">
 	</span>
-	
+
 	<span id="authinfo">
 		<span id="username"></span>
 		<span id="authaction"></span>
 	</span>
-	
+
 	<div id="messages"></div>
 </nav>
 
