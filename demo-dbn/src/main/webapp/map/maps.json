@@ -2,9 +2,9 @@
 "maps": [
 	{ "id":"World", "name": "World map", "url": "countries.geo.json", "default": true }
 ],
-"mapcenter": [ 0, 0],
+"mapcenter": [ 0, 0 ],
 "showOptionsIfUnique": true,
 "gmapsKey": "AIzaSyBEPDT0O-gWQQknb5DKNlFAXcW-Ep9zbNs",
-"showGeomIdAsValueColumn": true,
-"showNonNumericColumnAsValueColumn": false
+"showGeomIdAsValueColumn": false,
+"showNonNumericColumnAsValueColumn": true
 }

@@ -498,10 +498,12 @@ function refreshDataUrlColumns() {
 	for(var i=0;i<cols.length;i++) {
 		var cc = cols[i].trim();
 		var ct = coltypes[i].trim().toUpperCase();
-		if(cc.toUpperCase()=="GEOM_ID" && !mapsData.showGeomIdAsValueColumn) {
+		if((cc.toUpperCase()=="GEOM_ID") && (!(mapsData.showGeomIdAsValueColumn)) ) {
+			console.log("not showing GEOM_ID:", cc, (cc.toUpperCase()=="GEOM_ID") && (!(mapsData.showGeomIdAsValueColumn)), mapsData.showGeomIdAsValueColumn );
 			continue;
 		}
-		if((numericSqlTypes.indexOf(ct)<0) && !mapsData.showNonNumericColumnAsValueColumn) {
+		if((cc.toUpperCase()!="GEOM_ID") && (numericSqlTypes.indexOf(ct)<0) && ( mapsData.showNonNumericColumnAsValueColumn === false) ) {
+			console.log("not showing non-numeric:", cc, (numericSqlTypes.indexOf(ct)<0) && (!(mapsData.showNonNumericColumnAsValueColumn)), mapsData.showNonNumericColumnAsValueColumn );
 			continue;
 		}
 
