@@ -56,11 +56,13 @@ import tbrugz.queryon.sqlcmd.ShowImportedKeys;
 import tbrugz.queryon.sqlcmd.ShowMetadata;
 import tbrugz.queryon.sqlcmd.ShowSchemas;
 import tbrugz.queryon.sqlcmd.ShowTables;
+import tbrugz.queryon.syntaxes.WebSyntax;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
@@ -1827,7 +1829,7 @@ public class QueryOn extends HttpServlet {
 	
 	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
-			boolean mayApplyLimitOffset, HttpServletResponse resp, Integer limit) 
+			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
 			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
@@ -1843,6 +1845,14 @@ public class QueryOn extends HttpServlet {
 		
 		if(log.isDebugEnabled()) {
 			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
+		}
+		
+		if(ds instanceof WebSyntax) {
+			WebSyntax ws = (WebSyntax) ds;
+			ws.setLimit(limit);
+			ws.setOffset(reqspec.offset);
+			String url = WebUtils.getRequestFullContext(reqspec.request) + "/q/" + (schemaName!=null?schemaName+".":"") + queryName;
+			ws.setBaseHref(url);
 		}
 		
 		ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
