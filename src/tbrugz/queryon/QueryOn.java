@@ -207,7 +207,8 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
 	public static final String PROP_SCHEMAS_TO_IGNORE = "queryon.schemas-to-ignore";
 	
-	static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
+	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
+	static final String DEFAULT_XTRA_SYNTAXES = null;
 	
 	static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
 	
