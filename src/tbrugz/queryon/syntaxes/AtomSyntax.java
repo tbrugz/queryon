@@ -29,6 +29,7 @@ import tbrugz.sqldump.util.SQLUtils;
  * see: https://en.wikipedia.org/wiki/Atom_(standard)
  *      https://tools.ietf.org/html/rfc4287
  *      https://validator.w3.org/feed/docs/atom.html
+ *      https://tools.ietf.org/html/rfc5005#section-3 - Feed Paging and Archiving
  */
 public class AtomSyntax extends XMLDataDump implements WebSyntax {
 
@@ -100,7 +101,8 @@ public class AtomSyntax extends XMLDataDump implements WebSyntax {
 		String urlSelf = DataDumpUtils.xmlEscapeText(baseHref + ".atom" + (offset>0?"?offset="+offset:""));
 		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + ".atom" + ("?offset="+(offset+limit)));
 		out("\t<link rel=\"self\" href=\"" + urlSelf + "\"/>\n", w);
-		out("\t<link rel=\"next\" href=\"" + urlNext + "\"/>\n", w);
+		//XXX add "previous"?
+		out("\t<link rel=\"next\" href=\"" + urlNext + "\"/>\n", w); //XXX: only if rowcount == limit? add at footer?
 		out("\t<generator>"+ATOM_GENERATOR+"</generator>\n", w);
 		out("\t<id>"+getUrnId(null)+"</id>\n", w);
 		Date updated = new Date(); //XXX: how to know? first row??
@@ -141,6 +143,8 @@ public class AtomSyntax extends XMLDataDump implements WebSyntax {
 		String urlHtml = DataDumpUtils.xmlEscapeText( baseHref + ".html" + "?limit=1&offset="+ (offset+count) );
 		sb.append("\t\t<link href=\"" + url + "\"/>\n");
 		sb.append("\t\t<link href=\"" + urlHtml + "\" rel=\"alternate\" type=\"text/html\"/>");
+
+		//XXX: add xtra columns? another namespace?
 		
 		dumpAndClearBuffer(sb, w);
 

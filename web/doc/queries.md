@@ -42,6 +42,12 @@ Special columns
 
 * blob columns have download link
 * `_FILEEXT` suffix: blob download link uses it's value as file extension
+* **Warning**: query should be totally ordered for correct blob download (e.g.: *order by <primary key>*)
+
+**atom** dump syntax (permalinks ending with `.atom`):
+
+* columns: `TITLE`, `ID`, `SUMMARY`, `CONTENT`, `AUTHOR_NAME`, `UPDATED` - information needed by the
+  [Atom Feed Standard](https://en.wikipedia.org/wiki/Atom_(standard))
 
 
 Special query constructs inside SQL comments (`/* ... */`)
