@@ -69,6 +69,10 @@ public class RequestSpec {
 	
 	static final String MULTIPART = "multipart/form-data";
 	
+	public static final String PARAM_METHOD = "_method";
+	public static final String PARAM_LIMIT = "limit";
+	public static final String PARAM_OFFSET = "offset";
+	
 	final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
 	final String httpMethod;
@@ -160,7 +164,7 @@ public class RequestSpec {
 		 * http://laraveldaily.com/theres-no-putpatchdelete-method-or-how-to-build-a-laravel-form-manually/
 		 * http://symfony.com/doc/current/cookbook/routing/method_parameters.html
 		 */
-		String method = req.getParameter("_method"); //XXXdone: _method
+		String method = req.getParameter(PARAM_METHOD);
 		//XXX: may method be changed? property?
 		if(method!=null) {
 			httpMethod = method;
@@ -262,11 +266,11 @@ public class RequestSpec {
 		
 		//---------------------
 		
-		String offsetStr = req.getParameter("offset");
+		String offsetStr = req.getParameter(PARAM_OFFSET);
 		if(offsetStr!=null) { offset = Integer.parseInt(offsetStr); }
 		else { offset = 0; }
 
-		String limitStr = req.getParameter("limit");
+		String limitStr = req.getParameter(PARAM_LIMIT);
 		limit = limitStr!=null ? Integer.parseInt(limitStr) : null;
 		
 		// max & min updates
@@ -550,7 +554,7 @@ public class RequestSpec {
 	}
 	
 	/*
-	 * reconstructs URL pased on RequestSpec
+	 * reconstructs URL passed on RequestSpec
 	 * 
 	 * will not use: output syntax, method?, updateValues
 	 * XXX may use: columns, offset, limit, filters, order??

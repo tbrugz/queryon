@@ -31,6 +31,7 @@ import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.HTMLDiff;
@@ -99,6 +100,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		setupProperties(prop);
 		
 		String mimeType = req.getParameter(PARAM_MIMETYPE);
+		Integer limit = WebUtils.getIntegerParameter(req, RequestSpec.PARAM_LIMIT);
 		
 		//String metadataId = SchemaModelUtils.getModelId(req, "metadata");
 		//log.debug("metadataId: "+metadataId+" / req="+req.getParameter("metadata"));
@@ -206,7 +208,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				log.info(">> filename: "+filename+" mimetype: "+ds.getMimeType());
 				firstObject = false;
 			}
-			runDiff(connSource, connTarget, sqlSource, sqlTarget, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, resp.getWriter());
+			runDiff(connSource, connTarget, sqlSource, sqlTarget, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, limit, resp.getWriter());
 			
 			}
 		}
@@ -220,13 +222,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 
-	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols,
-			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Writer writer) throws SQLException, IOException {
-		runDiff(connSource, connTarget, sql, sql, table, keyCols, modelIdSource, modelIdTarget, ds, ddTypes, writer);
-	}
-	
 	void runDiff(Connection connSource, Connection connTarget, String sqlSource, String sqlTarget, NamedDBObject table, List<String> keyCols,
-			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Writer writer) throws SQLException, IOException {
+			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Integer limit, Writer writer) throws SQLException, IOException {
 		ResultSet rsSource = runQuery(connSource, sqlSource, modelIdSource, getQualifiedName(table));
 		ResultSet rsTarget = runQuery(connTarget, sqlTarget, modelIdTarget, getQualifiedName(table));
 		
@@ -239,7 +236,12 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
-		rsdiff.setLimit(loopLimit);
+		if(limit!=null) {
+			rsdiff.setLimit(limit);
+		}
+		else {
+			rsdiff.setLimit(loopLimit);
+		}
 		if(ddTypes!=null) {
 			rsdiff.setDumpInserts(false);
 			rsdiff.setDumpUpdates(false);

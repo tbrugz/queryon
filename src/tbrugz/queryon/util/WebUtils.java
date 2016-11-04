@@ -12,4 +12,17 @@ public class WebUtils {
 				req.getContextPath();
 		return ret;
 	}
+	
+	public static Integer getIntegerParameter(HttpServletRequest req, String param) {
+		return getIntegerParameter(req, param, null);
+	}
+	
+	public static Integer getIntegerParameter(HttpServletRequest req, String param, Integer defaultValue) {
+		String value = req.getParameter(param);
+		if (value!=null) {
+			return Integer.parseInt(value);
+		}
+		return defaultValue;
+	}
+	
 }

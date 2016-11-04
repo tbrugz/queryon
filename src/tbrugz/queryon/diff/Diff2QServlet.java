@@ -1,6 +1,7 @@
 package tbrugz.queryon.diff;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,8 +24,10 @@ import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
@@ -63,10 +66,15 @@ public class Diff2QServlet extends DataDiffServlet {
 			connSource = DBUtil.initDBConn(prop, modelIdSource);
 			connTarget = DBUtil.initDBConn(prop, modelIdTarget);
 			
+			//XXX: add many sqls
+			
 			String sqlParam = req.getParameter("sql");
-			//XXX req.getParameterValues("keycols"); ??
 			String keyColsParam = req.getParameter("keycols");
 			List<String> keyCols = Utils.getStringList(keyColsParam, ",");
+			
+			String dmlOps = req.getParameter(PARAM_DATADIFFTYPES);
+			List<DataDiffType> dmlTypes = getDataDiffTypes(dmlOps);
+			Integer limit = WebUtils.getIntegerParameter(req, RequestSpec.PARAM_LIMIT);
 			
 			String sql = sqlParam;
 
@@ -75,13 +83,18 @@ public class Diff2QServlet extends DataDiffServlet {
 			RequestSpec.setSyntaxProps(ds, req, feat, prop);
 			
 			resp.setContentType(ds.getMimeType());
-			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, null, resp.getWriter());
+			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, dmlTypes, limit, resp.getWriter());
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);
 			ConnectionUtil.closeConnection(connTarget);
 			resp.getWriter().flush();
 		}
+	}
+	
+	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols,
+			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Integer limit, Writer writer) throws SQLException, IOException {
+		runDiff(connSource, connTarget, sql, sql, table, keyCols, modelIdSource, modelIdTarget, ds, ddTypes, limit, writer);
 	}
 
 }
