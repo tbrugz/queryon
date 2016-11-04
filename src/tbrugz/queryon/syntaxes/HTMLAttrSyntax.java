@@ -167,7 +167,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 							attrs = new HashMap<String, String>();
 							attrsVals.put(fullCol, attrs);
 						}
-						attrs.put(attr, DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, null, escape));
+						attrs.put(attr, DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, null, doEscape(i)));
 						//System.out.println("fullCol="+fullCol+" ; attrs="+attrs);
 					}
 				}
@@ -198,7 +198,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				}
 				else {
 				
-				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, escape);
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, doEscape(i));
 				Map<String,String> attrs = attrsVals.get(colName);
 				String attrsStr = "";
 				if(attrs!=null) {

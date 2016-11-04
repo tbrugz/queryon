@@ -87,6 +87,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
@@ -894,8 +895,9 @@ public class QueryOn extends HttpServlet {
 			dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
 		}
 		else {
+			Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
-					fks, uks, applyLimitOffsetInResultSet, resp, getLimit(sql.limit));
+					fks, uks, applyLimitOffsetInResultSet, resp, getLimit(lim));
 		}
 		
 		}
