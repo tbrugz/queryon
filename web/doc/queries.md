@@ -44,6 +44,10 @@ Special columns
 * `_FILEEXT` suffix: blob download link uses it's value as file extension
 * **Warning**: query should be totally ordered for correct blob download (e.g.: *order by <primary key>*)
 
+**xml**, **html** & **htmlx** dump syntax:
+
+* suffix: `_RAW`: do not parse column contents (outputs *RAW* content)
+
 **atom** dump syntax (permalinks ending with `.atom`):
 
 * columns: `TITLE`, `ID`, `SUMMARY`, `CONTENT`, `AUTHOR_NAME`, `UPDATED` - information needed by the
