@@ -533,8 +533,25 @@ function transformQonData(qonData, column) {
 	var geomIdKey = "GEOM_ID";
 	if(qonData[0]["geom_id"]) { geomIdKey = "geom_id"; }
 
+	var idhash = {}
+	var duplicates = 0;
+	var keysWithDuplicateValues = 0;
+	
 	for(var i=0;i<qonData.length;i++) {
-		data.series[qonData[i][geomIdKey]] = qonData[i][column];
+		var id = qonData[i][geomIdKey];
+		data.series[id] = qonData[i][column];
+		
+		if(idhash[id]) {
+			//console.log("transformQonData: duplicate data key: ",id);
+			duplicates++;
+		}
+		idhash[id] = idhash[id] ? idhash[id] + 1 : 1;
+		if(idhash[id]==2) {
+			keysWithDuplicateValues++;
+		}
+	}
+	if(duplicates>0) {
+		console.warn("transformQonData: duplicate data keys: rowCount=", qonData.length, "keysWithDuplicateValues=", keysWithDuplicateValues, "duplicateValues=", duplicates);
 	}
 	return data;
 }

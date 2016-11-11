@@ -349,7 +349,7 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 
 function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumericData) {
 	var countOk = 0, countUndef = 0;
-	//console.log("applySeriesDataAndStyle:: isNumericData=",isNumericData,"seriesData=",seriesData,"catData=",catData);
+	//console.log("applySeriesDataAndStyle:: isNumericData=",isNumericData,"seriesData[",Object.keys(seriesData.series).length,"]=",seriesData,"catData=",catData);
 	for(var id in gPlaceMarks) {
 		var placemark = gPlaceMarks[id];
 		
@@ -367,6 +367,12 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 		placemark.description = seriesData.valueLabel + ': '
 			+ (isNumeric(seriesData.series[id]) ? formatFloat(seriesData.series[id]) : seriesData.series[id])
 			+ (seriesData.measureUnit?' ' + seriesData.measureUnit:"");
+		
+		placemark.listener = google.maps.event.addListener(placemark, 'click', function(event) {
+			//console.log('applySeriesDataAndStyle: click!', placemark, this);
+			showPlaceInfo(this.id, this.name, this.description, this.catId);
+		});
+		
 		if(placemark.catId==undefined || placemark.catId==null) {
 			//console.warn('undefined cat: '+id+' / '+placemark.name); //+' / '+placemark.catId);
 			placemark.fillColor = ERROR_FILL_COLOR;
@@ -376,7 +382,7 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 			//TODO: option to remove element from map
 			continue;
 		}
-		
+
 		//set style & map
 		placemark.kmlColor = catData[placemark.catId].kmlcolor;
 		placemark.rgbColor = '#'+catData[placemark.catId].color;
@@ -389,13 +395,6 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 		//atualiza placemark no mapa - 'null' retira elemento do mapa
 		placemark.setMap(null);
 		placemark.setMap(map);
-		
-		placemark.listener = google.maps.event.addListener(placemark, 'click', function(event) {
-			//console.log('click!');
-			//console.log(placemark);
-			//console.log(this);
-			showPlaceInfo(this.id, this.name, this.description, this.catId);
-		});
 		
 		countOk++;
 	}
@@ -418,12 +417,11 @@ function removeSeriesDataWhenPlacemarkNotFound(gPlaceMarks, seriesData) {
 
 function showPlaceInfo(id, name, description, catId) {
 	//TODO: do not show id (?); do not show name if null
-	//console.log(id+" / "+name);
-	//console.log(placemark);
+	console.log("showPlaceInfo: ",id," / ",name," / ",description);
 	document.getElementById('placeId').innerHTML = id;
 	document.getElementById('placeName').innerHTML = name;
 	document.getElementById('placeDesc').innerHTML = description;
-	document.getElementById('placeCat').innerHTML = catId;
+	document.getElementById('placeCat').innerHTML = catId ? catId : "?";
 	if(name==null) {
 		document.getElementById('placeName').style.display = 'none';
 		document.getElementById('placeNameLabel').style.display = 'none';
