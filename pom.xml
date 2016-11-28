@@ -26,6 +26,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+    <shiro.version>1.3.2</shiro.version>
+
     <findbugs.version>2.5.2</findbugs.version>
     <checkstyle.version>2.10</checkstyle.version>
     <cobertura.version>2.5.2</cobertura.version>
@@ -339,21 +341,21 @@
     <dependency>
       <groupId>org.apache.shiro</groupId>
       <artifactId>shiro-core</artifactId>
-      <version>1.2.6</version>
+      <version>${shiro.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.shiro</groupId>
       <artifactId>shiro-web</artifactId>
-      <version>1.2.6</version>
+      <version>${shiro.version}</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.6.6</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -366,13 +368,20 @@
       <version>1.6.0</version>
       <scope>compile</scope>
     </dependency>
-
+    <!-- used by PatchDumper -->
     <dependency>
+      <groupId>com.googlecode.java-diff-utils</groupId>
+      <artifactId>diffutils</artifactId>
+      <version>1.2.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.6.6</version>
       <optional>true</optional>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
@@ -394,7 +403,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <!-- <dependency>
@@ -465,11 +474,6 @@
       <artifactId>kmlutils</artifactId>
       <version>0.5.4</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.java-diff-utils</groupId>
-      <artifactId>diffutils</artifactId>
-      <version>1.2.1</version>
     </dependency>
 
     <!-- <dependency>

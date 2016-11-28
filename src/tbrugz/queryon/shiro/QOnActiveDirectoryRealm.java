@@ -18,17 +18,17 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.activedirectory.ActiveDirectoryRealm;
 import org.apache.shiro.realm.ldap.LdapContextFactory;
 import org.apache.shiro.realm.ldap.LdapUtils;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements AuthorizationInfoInformer {
 
-    private static final Logger log = LoggerFactory.getLogger(QOnActiveDirectoryRealm.class);
+    private static final Log log = LogFactory.getLog(QOnActiveDirectoryRealm.class);
     
     private String searchFilter = "(&(objectClass=*)(userPrincipalName={0}))";
     
