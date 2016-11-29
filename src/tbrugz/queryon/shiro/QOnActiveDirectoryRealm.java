@@ -26,18 +26,35 @@ import org.apache.shiro.realm.ldap.LdapContextFactory;
 import org.apache.shiro.realm.ldap.LdapUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 
+/*
+ * User Naming Attributes
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms677605(v=vs.85).aspx
+ * 
+ * SAM-Account-Name attribute
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms679635(v=vs.85).aspx
+ * 
+ * https://github.com/apache/shiro/search?utf8=%E2%9C%93&q=DefaultLdapContextFactory&type=Code
+ * https://github.com/apache/shiro/blob/b74c1a7aa8df8323533d2fc9ab80273f860b6b14/core/src/main/java/org/apache/shiro/realm/ldap/DefaultLdapContextFactory.java
+ * https://github.com/apache/shiro/blob/b74c1a7aa8df8323533d2fc9ab80273f860b6b14/core/src/main/java/org/apache/shiro/realm/ldap/AbstractLdapRealm.java
+ * https://github.com/apache/shiro/blob/b74c1a7aa8df8323533d2fc9ab80273f860b6b14/core/src/main/java/org/apache/shiro/realm/activedirectory/ActiveDirectoryRealm.java
+ */
 public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements AuthorizationInfoInformer {
 
     private static final Log log = LogFactory.getLog(QOnActiveDirectoryRealm.class);
     
-    private String searchFilter = "(&(objectClass=*)(userPrincipalName={0}))";
+    private static final String DEFAULT_SEARCH_FILTER = "(&(objectClass=*)(userPrincipalName={0}))";
+    
+    private String searchFilter = DEFAULT_SEARCH_FILTER;
     
     private String groupRolesRegexMapper;
 
-    private String regexMapperRolePrefix;
+    /*private String regexMapperRolePrefix;
     
-    private String regexMapperRoleSuffix;
-	
+    private String regexMapperRoleSuffix;*/
+
+	/*
+	 * used in 'getRoleNamesForUser'
+	 */
 	public String getSearchFilter() {
 		return searchFilter;
 	}
@@ -54,7 +71,7 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
 		this.groupRolesRegexMapper = groupRolesRegexMapper;
 	}
 	
-	public String getRegexMapperRolePrefix() {
+	/*public String getRegexMapperRolePrefix() {
 		return regexMapperRolePrefix;
 	}
 
@@ -68,7 +85,7 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
 
 	public void setRegexMapperRoleSuffix(String regexMapperRoleSuffix) {
 		this.regexMapperRoleSuffix = regexMapperRoleSuffix;
-	}
+	}*/
 
     protected AuthorizationInfo queryForAuthorizationInfo(PrincipalCollection principals, LdapContextFactory ldapContextFactory) throws NamingException {
 
@@ -107,7 +124,19 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
         //String searchFilter = "(&(objectClass=*)(mail={0}))";
         Object[] searchArguments = new Object[]{userPrincipalName};
 
-        NamingEnumeration<SearchResult> answer = ldapContext.search(searchBase, searchFilter, searchArguments, searchCtls);
+        //log.info("searchBase: "+searchBase+" searchFilter: "+searchFilter+" userPrincipalName: "+userPrincipalName);
+        NamingEnumeration<SearchResult> answer = null;
+        try {
+            answer = ldapContext.search(searchBase, searchFilter, searchArguments, searchCtls);
+        }
+        catch(RuntimeException e) {
+            log.warn("[runtime-exception] ldapContext.search: "+e,e);
+            throw e;
+        }
+        catch(NamingException e) {
+            log.warn("[naming-exception] ldapContext.search: "+e,e);
+            throw e;
+        }
         
         Pattern groupRolesRegexPattern = null;
         // "CN=(.+?),CN=Users,DC=example,DC=com"
@@ -153,6 +182,9 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
         return roleNames;
     }
     
+    /**
+     * Making 'getAuthorizationInfo' public ;)
+     */
     public AuthorizationInfo getAuthorizationInfo(PrincipalCollection principals) {
         return super.getAuthorizationInfo(principals);
     }
@@ -165,13 +197,34 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
             if(matcher.matches()) {
                 int matchGroup = matcher.groupCount()>0?1:0;
                 String match = matcher.group(matchGroup);
-                roleNames.add( (regexMapperRolePrefix!=null?regexMapperRolePrefix:"")
-                        +match
-                        +(regexMapperRoleSuffix!=null?regexMapperRolePrefix:"") );
+                roleNames.add( //(regexMapperRolePrefix!=null?regexMapperRolePrefix:"")+
+                        match
+                        //+(regexMapperRoleSuffix!=null?regexMapperRolePrefix:"")
+                        );
             }
         }
         return roleNames;
     }
     
+    /*
+    @Override
+    protected AuthenticationInfo queryForAuthenticationInfo(
+    		AuthenticationToken token, LdapContextFactory ldapContextFactory)
+    		throws NamingException {
+    	try {
+    		UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+    		log.info("user: "+upToken.getUsername()+" rememberMe:"+upToken.isRememberMe());
+    		return super.queryForAuthenticationInfo(token, ldapContextFactory);
+    	}
+        catch(RuntimeException e) {
+            log.warn("[runtime-exception] queryForAuthenticationInfo: "+e,e);
+            throw e;
+        }
+        catch(NamingException e) {
+            log.warn("[naming-exception] queryForAuthenticationInfo: "+e,e);
+            throw e;
+        }
+    }
+    */
 
 }
