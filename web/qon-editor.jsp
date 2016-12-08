@@ -45,6 +45,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	var isQuerySaved = false;
 	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;
 	var rolesInfo = {};
+	var queryAltered = false;
 	
 	$.ajax({
 		dataType: 'text',
@@ -286,6 +287,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			//XXX: reload query after save?
 			validateEditComponents(true);
 			history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
+			queryAltered = false;
 			updateUI();
 		});
 
@@ -417,6 +419,10 @@ modelId = SchemaModelUtils.getModelId(request);
 		updateUI();
 	}
 	
+	function onTextFieldChange() {
+		queryAltered = true;
+	}
+	
 	function makeHrefs() {
 		var schema = document.getElementById('schema').value;
 		var name = document.getElementById('name').value;
@@ -542,6 +548,16 @@ modelId = SchemaModelUtils.getModelId(request);
 		//rdc.innerHTML = '';
 	}
 	
+	// http://stackoverflow.com/questions/2229942/how-to-block-users-from-closing-a-window-in-javascript
+	// https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+	function confirmExit(event) {
+		if (queryAltered) {
+			var dialogText = "Current query has been altered. Are you sure you want to close?";
+			event.returnValue = dialogText;
+			return dialogText;
+		}
+	}	
+	
 	window.addEventListener('load', function() {
 		if(modelId==null) {
 			//document.getElementById('modelLabel').style.display = 'none';
@@ -551,6 +567,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		}
 		
 	});
+	
+	window.addEventListener("beforeunload", confirmExit);
+	
 </script>
 <script type="text/javascript">
 	$(document).jkey('f8',function(){
@@ -639,9 +658,9 @@ if(remarks==null) { remarks = ""; }
 <div id="spec">
 <div class="container" id="objectid-container">
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Editor</code></span>
-	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="makeHrefs()"/></label>
-	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="makeHrefs()"/></label>
-	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60"/></label>
+	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="onTextFieldChange();makeHrefs()"/></label>
+	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="onTextFieldChange();makeHrefs()"/></label>
+	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60" onchange="onTextFieldChange();"/></label>
 	<label id="rolesLabel">
 		<span id="rolesLabelText">roles:</span>
 		<input type="text" id="roles" name="roles" value="<%= roles %>"/>
@@ -716,6 +735,7 @@ if(remarks==null) { remarks = ""; }
 	// http://stackoverflow.com/questions/27534263/making-ace-editor-resizable
 	// https://github.com/ajaxorg/ace/wiki/Configuring-Ace
 	editor.setAutoScrollEditorIntoView(true);
+	editor.getSession().on('change', onTextFieldChange);
 	
 	setParameters(<%= numOfParameters %>);
 </script>
