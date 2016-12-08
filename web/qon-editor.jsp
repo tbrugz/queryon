@@ -496,6 +496,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		//console.log(rolesInfo);
 		
 		var rdc=document.getElementById('rolesListDialogContent');
+		rdc.innerHTML = '';
 		for(var i=0;i<rolesInfo.roles.length;i++) {
 			var checked = false;
 			var indexOf = rolesValues.indexOf(rolesInfo.roles[i]);
@@ -537,8 +538,8 @@ modelId = SchemaModelUtils.getModelId(request);
 		var rcont=document.getElementById('rolesListDialogContainer');
 		rcont.style.display='none';
 
-		var rdc=document.getElementById('rolesListDialogContent');
-		rdc.innerHTML = '';
+		//var rdc=document.getElementById('rolesListDialogContent');
+		//rdc.innerHTML = '';
 	}
 	
 	window.addEventListener('load', function() {
