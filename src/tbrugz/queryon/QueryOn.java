@@ -89,6 +89,7 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -207,6 +208,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_VALIDATE_ORDERCOLNAME = "queryon.validate.x-ordercolumnname";
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
 	public static final String PROP_SCHEMAS_TO_IGNORE = "queryon.schemas-to-ignore";
+	static final String PROP_SQL_USEIDDECORATOR = "queryon.sql.use-id-decorator";
 	
 	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	static final String DEFAULT_XTRA_SYNTAXES = null;
@@ -320,8 +322,13 @@ public class QueryOn extends HttpServlet {
 			//log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 			validateFilterColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_FILTERCOLNAME, validateFilterColumnNames);
 			
-			//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
+			
+			//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
+			boolean useIdDecorator = Utils.getPropBool(prop, PROP_SQL_USEIDDECORATOR, true);
+			if(!useIdDecorator) {
+				SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator("");
+			}
 			
 			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
 			
