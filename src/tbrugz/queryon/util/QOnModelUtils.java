@@ -73,6 +73,9 @@ public class QOnModelUtils {
 		model.getMetadata().put("db-metadata", dbmd.getClass().getName());
 		
 		//log.info("metadata["+id+"]: "+model.getMetadata());
+		
+		//feat.getExecutableObjectTypes()
+		//feat.getKnownObjectTypes()
 	}
 
 	public static void setModelExceptionMetadata(SchemaModel model, Throwable t) throws SQLException {

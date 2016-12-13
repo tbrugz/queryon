@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.action.QOnManage;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
@@ -702,7 +703,7 @@ public class QueryOn extends HttpServlet {
 				doStatus(model, statusType, reqspec, currentUser, resp);
 				break;
 			case MANAGE:
-				doManage(reqspec, req, resp);
+				doManage(model, reqspec, req, resp);
 				break;
 			default:
 				throw new BadRequestException("Unknown action type: "+atype); 
@@ -1612,12 +1613,43 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void doManage(RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	void doManage(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {
 		//TODO: only reloads model for now...
-		// - reload-config, reload-movel, rerun-processors
-		doInit(req.getServletContext());
+		// - reload-config, reload-model, rerun-processors
+		
+		if(reqspec.params.size()<1) {
+			throw new BadRequestException("parameters needed");
+		}
+		
 		resp.setContentType(MIME_TEXT);
+		//log.info("doManage: params: "+reqspec.params);
+		
+		String action = reqspec.params.get(0);
+		if("reload".equals(action)) {
+		doInit(req.getServletContext());
 		resp.getWriter().write("queryon config reloaded");
+			return;
+		}
+		/*
+		 * validate? diff? - generate diff script between (memory) model & database
+		 * for each table, grab table's metadata from database & compare
+		 */
+		if("diffmodel".equals(action)) {
+			Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+			QOnManage qm = new QOnManage();
+			try {
+				qm.diffModel(model, conn, resp);
+			}
+			catch(Exception e) {
+				throw new InternalServerException("Error diffing model", e);
+			}
+			finally {
+				ConnectionUtil.closeConnection(conn);
+			}
+			return;
+		}
+		
+		throw new BadRequestException("unknown action: "+action);
 	}
 	
 	static boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
