@@ -86,7 +86,7 @@ th {
 	margin-top: 3px;
 }
 
-.statusbutton {
+input[type=button].statusbutton, .statusbutton {
 	background-color: #666;
 	font-weight: bold;
 	border: 0;
@@ -165,6 +165,8 @@ input[readonly="readonly"] {
 
 .external {
 	background-image: url(../image/external-link-ltr-icon.png);
+	/* background-image: url(../image/external-link-ltr-icon.svg);
+	background-size: 10px; */
 	background-position: right 3px center;
 	background-repeat: no-repeat;
 	padding-right: 18px !important;

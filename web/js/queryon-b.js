@@ -203,6 +203,7 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	//messages.innerHTML = 'rows = '+numOfRows+' ; time in millis: server = '+(completedTimeMilis-startTimeMilis)+' ; render = '+(renderedTimeMilis-completedTimeMilis)
 	messages.innerHTML = 'rows = '+numOfRows+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
 		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	messages.style.display = '';
 }
 
 function setParameters(parametersId, numparams) {
