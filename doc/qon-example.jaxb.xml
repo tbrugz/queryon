@@ -123,7 +123,7 @@
             <ordinalPosition>13</ordinalPosition>
             <pk>false</pk>
             <remarks>Enabled (null or 0) or disabled table?</remarks>
-            <type>TINYINT</type>
+            <type>SMALLINT</type>
         </columns>
         <constraints>
             <name>QON_TABLES_PK</name>
@@ -216,7 +216,7 @@
             <ordinalPosition>8</ordinalPosition>
             <pk>false</pk>
             <remarks>Number of parameters</remarks>
-            <type>NUMBER</type>
+            <type>INTEGER</type>
         </columns>
         <columns>
             <name>PARAMETER_NAMES</name>
@@ -260,7 +260,7 @@
             <ordinalPosition>13</ordinalPosition>
             <pk>false</pk>
             <remarks>Enabled (null or 0) or disabled executable?</remarks>
-            <type>TINYINT</type>
+            <type>SMALLINT</type>
         </columns>
         <constraints>
             <name>QON_EXECS_PK</name>
@@ -298,21 +298,24 @@
             <name>ID</name>
             <pk>true</pk>
             <type>INTEGER</type>
+            <nullable>false</nullable>
         </columns>
         <columns>
             <name>PATH</name>
+            <columSize>200</columSize>
             <pk>false</pk>
             <type>VARCHAR</type>
         </columns>
         <columns>
             <name>MIME</name>
+            <columSize>200</columSize>
             <pk>false</pk>
             <type>VARCHAR</type>
         </columns>
         <columns>
             <name>BODY</name>
             <pk>false</pk>
-            <type>VARCHAR</type>
+            <type>CLOB</type>
         </columns>
         <columns>
             <name>BINARY_DATA</name>
@@ -321,6 +324,7 @@
         </columns>
         <columns>
             <name>HAS_BODY</name>
+            <columSize>1</columSize>
             <pk>false</pk>
             <type>CHAR</type>
         </columns>
@@ -344,7 +348,7 @@
             <privilege>DELETE</privilege>
             <table>QON_PAGES</table>
         </grants>
-        <remarks>QueryOn Pages</remarks>
+        <remarks>QueryOn Pages - DO NOT EDIT BY HAND</remarks>
         <type>TABLE</type>
     </table>
     
