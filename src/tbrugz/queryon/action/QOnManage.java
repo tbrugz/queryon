@@ -87,7 +87,7 @@ public class QOnManage {
 		SchemaDiff.logInfo(diff);
 		diff.compact();
 		SchemaDiff.logInfo(diff);
-		int diffcount = diff.getChildren().size();
+		int diffcount = diff.getDiffListSize();
 		resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
 		/*if(diffcount==0) {
 			resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

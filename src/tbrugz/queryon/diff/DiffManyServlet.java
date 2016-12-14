@@ -179,7 +179,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		log.info("diff count: "+lastDiffCount);
 	}
 	
-	void setPropForTypes(Properties prop, List<String> typesToGrab) {
+	public static void setPropForTypes(Properties prop, List<String> typesToGrab) {
 		Set<String> trueProps = new HashSet<String>();
 		
 		String[] types = { "TABLE", "FK", "VIEW", "INDEX", "TRIGGER",
