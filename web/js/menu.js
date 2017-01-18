@@ -25,6 +25,12 @@ function loadMenuContent(oEvent) {
 	var oParser = new DOMParser();
 	var oDOM = oParser.parseFromString(txt, "text/xml");
 	menucontent = oDOM.getElementById("content");
+	var hrefs = menucontent.getElementsByTagName('a');
+	for(var i=0;i<hrefs.length;i++) {
+		var a = hrefs[i];
+		a.setAttribute("href-orig", a.getAttribute("href"));
+	}
+
 	//console.log(typeof loadMenuContentCallback === 'function');
 	if(typeof loadMenuContentCallback === 'function') {
 		loadMenuContentCallback();
@@ -79,7 +85,7 @@ function createMenuContent(addCloseBtn) {
 			&& (!li.classList.contains("auth") || !hasLoginLink)
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
 			
-			var href = li.getElementsByTagName("a")[0].getAttribute("href");
+			var href = li.getElementsByTagName("a")[0].getAttribute("href-orig");
 			var hrefCurrentLike = href; //"/"+href;
 			if(hrefCurrentLike.startsWith(".")) { hrefCurrentLike = hrefCurrentLike.substring(1); }
 			hrefCurrentLike = hrefCurrentLike.replace(/\/\//g, '/');
