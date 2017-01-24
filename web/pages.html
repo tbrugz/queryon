@@ -93,14 +93,18 @@ loadPagesList = function() {
 
 			pages = getQonData(JSON.parse(req.responseText));
 			for(var i=0;i<pages.length;i++) {
-				content.innerHTML += "\n<li id='p"+pages[i].ID+"'><a href='p/"+pages[i].PATH+"' target='_blank' class='ref'>"+prettyLink(pages[i].PATH)+"</a> "+
-					(pages[i].MIME=="text/markdown"?" <a href='md/"+pages[i].PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
+				var ID = pages[i].ID || pages[i].id;
+				var PATH = pages[i].PATH || pages[i].path;
+				var MIME = pages[i].MIME || pages[i].mime;
+				var HAS_BODY = pages[i].HAS_BODY || pages[i].has_body;
+				content.innerHTML += "\n<li id='p"+ ID +"'><a href='p/"+ PATH +"' target='_blank' class='ref'>"+prettyLink( PATH )+"</a> "+
+					(MIME=="text/markdown"?" <a href='md/"+PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
 					(authInfo.isDev?
-						(hasBody(pages[i].HAS_BODY)?
-							" <a href='pages-editor.html?id="+pages[i].ID+"' target='_blank' class='action edit'>[edit]</a>":
-							" <a href='#' onclick='updateBlob("+pages[i].ID+")' class='action editblob'>[update blob]</a>")
+						(hasBody(HAS_BODY)?
+							" <a href='pages-editor.html?id="+ID+"' target='_blank' class='action edit'>[edit]</a>":
+							" <a href='#' onclick='updateBlob("+ID+")' class='action editblob'>[update blob]</a>")
 						:"")+
-					(authInfo.isDev?" <a href='#' onclick='removePage("+pages[i].ID+", \""+pages[i].PATH+"\");false;' class='action remove'>[remove]</a>":"")+
+					(authInfo.isDev?" <a href='#' onclick='removePage("+ID+", \""+PATH+"\");false;' class='action remove'>[remove]</a>":"")+
 					//XXX add delete button
 					"</li><br/>";
 			}
@@ -126,6 +130,7 @@ updateBlob = function(id) {
 }
 
 prettyLink = function(str) {
+	if(str==null) return null;
 	return str.replace(/\//g, " / ");
 }
 

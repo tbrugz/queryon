@@ -195,13 +195,16 @@ function doLoadPage(id) {
 			console.log('doLoadPage.ok', evt);
 			//showInfoMessages('messages', 'page '+name+' sucessfully loaded');
 			var data = getQonData(JSON.parse(req.responseText))[0];
+			var PATH = data.PATH || data.path;
+			var MIME = data.MIME || data.mime;
+			var BODY = data.MIME || data.body;
 			//console.log('doLoadPage.ok2', data);
-			byId('path').value = data.PATH;
-			if(data.MIME) {
-				byId('mime').value = data.MIME;
+			byId('path').value = PATH;
+			if(MIME) {
+				byId('mime').value = MIME;
 			}
 			// http://stackoverflow.com/questions/18614169/set-value-for-ace-editor-without-selecting-the-whole-editor
-			editor.setValue(data.BODY, -1);
+			editor.setValue(BODY, -1);
 			refreshUI();
 		}
 		else {
