@@ -5,7 +5,6 @@ import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.sql.Blob;
@@ -36,7 +35,6 @@ import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -880,7 +878,7 @@ public class QueryOn extends HttpServlet {
 		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
 		PreparedStatement st = conn.prepareStatement(finalSql);
-		bindParameters(st, sql);
+		sql.bindParameters(st);
 		
 		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
 
@@ -1273,7 +1271,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
-		bindParameters(st, sql);
+		sql.bindParameters(st);
 		
 		log.info("sql delete: "+sql);
 		
@@ -1413,7 +1411,7 @@ public class QueryOn extends HttpServlet {
 		//log.info("pre-sql update: "+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
-		bindParameters(st, sql);
+		sql.bindParameters(st);
 
 		log.debug("sql update: "+sql);
 		
@@ -1556,9 +1554,9 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = pkcols!=null? 
 			conn.prepareStatement(sql.getFinalSql(), pkcols):
 			conn.prepareStatement(sql.getFinalSql());
-		bindParameters(st, sql);
+		sql.bindParameters(st);
 
-		log.info("sql insert: "+sql);
+		log.info("sql insert: " + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
 		
 		int count = st.executeUpdate();
 		
@@ -1840,37 +1838,6 @@ public class QueryOn extends HttpServlet {
 		}
 		for(int i=0;i<bindParamsLoop;i++) {
 			sql.bindParameterValues.add(reqspec.params.get(i));
-		}
-	}
-	
-	//XXX: move to SQL class?
-	static void bindParameters(PreparedStatement st, SQL sql) throws SQLException, IOException {
-		for(int i=0;i<sql.bindParameterValues.size();i++) {
-			Object value = sql.bindParameterValues.get(i);
-			if(value instanceof Long) {
-				st.setLong(i+1, (Long) value);
-			}
-			else if(value instanceof Double) {
-				st.setDouble(i+1, (Double) value);
-			}
-			else if(value instanceof String) {
-				st.setString(i+1, (String) value);
-			}
-			else if(value instanceof InputStream) {
-				st.setBinaryStream(i+1, (InputStream) value);
-			}
-			else if(value instanceof Reader) {
-				st.setCharacterStream(i+1, (Reader) value);
-			}
-			else if(value instanceof Part) {
-				Part p = (Part) value;
-				//XXX guess if binary or character stream... based on p.getContentType() or column type??
-				//st.setBinaryStream(i+1, p.getInputStream());
-				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream()));
-			}
-			else {
-				log.warn("bindParameters: unknown value type: " + (value!=null?value.getClass().getName():value) );
-			}
 		}
 	}
 	

@@ -1,5 +1,11 @@
 package tbrugz.queryon;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -491,4 +498,35 @@ public class SQL {
 			bindParameterValues.add(value);
 		}
 	}
+	
+	void bindParameters(PreparedStatement st) throws SQLException, IOException {
+		for(int i=0 ; i<bindParameterValues.size() ; i++) {
+			Object value = bindParameterValues.get(i);
+			if(value instanceof Long) {
+				st.setLong(i+1, (Long) value);
+			}
+			else if(value instanceof Double) {
+				st.setDouble(i+1, (Double) value);
+			}
+			else if(value instanceof String) {
+				st.setString(i+1, (String) value);
+			}
+			else if(value instanceof InputStream) {
+				st.setBinaryStream(i+1, (InputStream) value);
+			}
+			else if(value instanceof Reader) {
+				st.setCharacterStream(i+1, (Reader) value);
+			}
+			else if(value instanceof Part) {
+				Part p = (Part) value;
+				//XXX guess if binary or character stream... based on p.getContentType() or column type??
+				//st.setBinaryStream(i+1, p.getInputStream());
+				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream()));
+			}
+			else {
+				log.warn("bindParameters: unknown value type: " + (value!=null?value.getClass().getName():value) );
+			}
+		}
+	}
+
 }

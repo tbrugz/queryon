@@ -235,7 +235,7 @@ public class RequestSpec {
 		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 		String acceptHeader = req.getHeader("Accept");
-		log.debug("accept: "+acceptHeader);
+		log.debug("accept: "+acceptHeader+" ; modelId: "+this.modelId);
 		
 		if(outputTypeStr != null) {
 			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr, prop);
