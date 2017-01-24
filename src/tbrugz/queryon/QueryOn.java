@@ -1694,8 +1694,9 @@ public class QueryOn extends HttpServlet {
 				for(int i=0;i<pk.getUniqueColumns().size();i++) {
 					if(reqspec.params.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
-					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(pk.getUniqueColumns().get(i))+" = ?"; //+reqspec.params.get(i)
-					sql.bindParameterValues.add(reqspec.params.get(i));
+					String column = pk.getUniqueColumns().get(i);
+					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(column)+" = ?";
+					sql.addParameter(reqspec.params.get(i), DBUtil.getColumnTypeFromColName(relation, column));
 					logFilter.info("filterByKey: value["+i+"]="+reqspec.params.get(i));
 				}
 			}
@@ -1713,6 +1714,7 @@ public class QueryOn extends HttpServlet {
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
 		
 		List<String> colNames = relation.getColumnNames();
+		List<String> colTypes = relation.getColumnTypes();
 		String relationName = relation.getName();
 		
 		final List<String> warnings = new ArrayList<String>();
@@ -1720,27 +1722,28 @@ public class QueryOn extends HttpServlet {
 		if(colNames!=null) {
 			Set<String> columns = new HashSet<String>();
 			columns.addAll(colNames);
-			//XXX bind parameters: column type?
+
+			//XXXdone bind parameters with column type: only 'addUniqueFilter' & 'addMultiFilterSubexpression'
 			
 			// boolean filters
 			addBooleanFilter(reqspec.filterNull, columns, sql, "is null", relationName, warnings);
 			addBooleanFilter(reqspec.filterNotNull, columns, sql, "is not null", relationName, warnings);
 			
 			// uni-valued filters
-			addUniqueFilter(reqspec.filterEquals, columns, sql, "=", relationName, warnings);
-			addUniqueFilter(reqspec.filterNotEquals, columns, sql, "<>", relationName, warnings); //XXXxx should be multi-valued? nah, there is already a 'not in'
-			addUniqueFilter(reqspec.filterGreaterThan, columns, sql, ">", relationName, warnings);
-			addUniqueFilter(reqspec.filterGreaterOrEqual, columns, sql, ">=", relationName, warnings);
-			addUniqueFilter(reqspec.filterLessThan, columns, sql, "<", relationName, warnings);
-			addUniqueFilter(reqspec.filterLessOrEqual, columns, sql, "<=", relationName, warnings);
+			addUniqueFilter(reqspec.filterEquals, colNames, colTypes, sql, "=", relationName, warnings);
+			addUniqueFilter(reqspec.filterNotEquals, colNames, colTypes, sql, "<>", relationName, warnings); //XXXxx should be multi-valued? nah, there is already a 'not in'
+			addUniqueFilter(reqspec.filterGreaterThan, colNames, colTypes, sql, ">", relationName, warnings);
+			addUniqueFilter(reqspec.filterGreaterOrEqual, colNames, colTypes, sql, ">=", relationName, warnings);
+			addUniqueFilter(reqspec.filterLessThan, colNames, colTypes, sql, "<", relationName, warnings);
+			addUniqueFilter(reqspec.filterLessOrEqual, colNames, colTypes, sql, "<=", relationName, warnings);
 
 			// multi-valued filters
 			addMultiFilter(reqspec.filterLike, columns, sql, "like ?", relationName, warnings);
 			addMultiFilter(reqspec.filterNotLike, columns, sql, "not like ?", relationName, warnings);
 
 			// multi-valued with subexpression filters
-			addMultiFilterSubexpression(reqspec.filterIn, columns, sql, "in", relationName, warnings);
-			addMultiFilterSubexpression(reqspec.filterNotIn, columns, sql, "not in", relationName, warnings);
+			addMultiFilterSubexpression(reqspec.filterIn, colNames, colTypes, sql, "in", relationName, warnings);
+			addMultiFilterSubexpression(reqspec.filterNotIn, colNames, colTypes, sql, "not in", relationName, warnings);
 		}
 		else {
 			if(reqspec.filterEquals.size()>0) {
@@ -1751,10 +1754,11 @@ public class QueryOn extends HttpServlet {
 		return warnings;
 	}
 	
-	static void addUniqueFilter(final Map<String, String> valueMap, Set<String> columns, SQL sql, String compareSymbol, String relationName, List<String> warnings) {
+	static void addUniqueFilter(final Map<String, String> valueMap, List<String> colNames, List<String> colTypes, SQL sql, String compareSymbol, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
-			if(!validateFilterColumnNames || columns.contains(col)) {
-				sql.bindParameterValues.add(valueMap.get(col));
+			if(!validateFilterColumnNames || colNames.contains(col)) {
+				int idx = colNames.indexOf(col);
+				sql.addParameter( valueMap.get(col), idx>=0?colTypes.get(idx):null );
 				sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareSymbol+" ?");
 				logFilter.info("addUniqueFilter: values="+valueMap.get(col));
 			}
@@ -1782,16 +1786,18 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	static void addMultiFilterSubexpression(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
+	static void addMultiFilterSubexpression(final Map<String, String[]> valueMap, List<String> colNames, List<String> colTypes, SQL sql, String compareExpression, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
-			if(!validateFilterColumnNames || columns.contains(col)) {
+			if(!validateFilterColumnNames || colNames.contains(col)) {
+				int idx = colNames.indexOf(col);
+				String ctype = idx>=0?colTypes.get(idx):null;
 				StringBuilder sb = new StringBuilder();
 				sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" (");
 				String[] values = valueMap.get(col);
 				for(int i=0;i<values.length;i++) {
 					String value = values[i];
 					sb.append((i>0?", ":"")+"?");
-					sql.bindParameterValues.add(value);
+					sql.addParameter(value, ctype);
 				}
 				sb.append(")");
 				sql.addFilter(sb.toString());
@@ -1841,7 +1847,13 @@ public class QueryOn extends HttpServlet {
 	static void bindParameters(PreparedStatement st, SQL sql) throws SQLException, IOException {
 		for(int i=0;i<sql.bindParameterValues.size();i++) {
 			Object value = sql.bindParameterValues.get(i);
-			if(value instanceof String) {
+			if(value instanceof Long) {
+				st.setLong(i+1, (Long) value);
+			}
+			else if(value instanceof Double) {
+				st.setDouble(i+1, (Double) value);
+			}
+			else if(value instanceof String) {
 				st.setString(i+1, (String) value);
 			}
 			else if(value instanceof InputStream) {

@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.SQL;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -24,6 +25,12 @@ public class DBUtil {
 	
 	public static final String[] BLOB_COL_TYPES = { "BLOB", "RAW", "LONG RAW", "BYTEA" };
 	public static final List<String> BLOB_COL_TYPES_LIST = Arrays.asList(BLOB_COL_TYPES);
+
+	public static final String[] INT_COL_TYPES = { "INT", "INTEGER", "SMALLINT", "TINYINT", "BIGINT", "INT2", "INT4", "INT8", "SERIAL", "BIGSERIAL" };
+	public static final List<String> INT_COL_TYPES_LIST = Arrays.asList(INT_COL_TYPES);
+	
+	public static final String[] FLOAT_COL_TYPES = { "NUMERIC", "DECIMAL", "FLOAT", "DOUBLE", "REAL", "DOUBLE PRECISION", "NUMBER" };
+	public static final List<String> FLOAT_COL_TYPES_LIST = Arrays.asList(FLOAT_COL_TYPES);
 	
 	//XXX: getSQLTypeForColumnType(String colType): add dbid as parameter? 
 	public static int getSQLTypeForColumnType(String colType) {
@@ -127,6 +134,12 @@ public class DBUtil {
 			SQL.setDBMSFeatures(feat);
 			staticsInited = true;
 		}
+	}
+	
+	public static String getColumnTypeFromColName(Relation relation, String colname) {
+		int idx = relation.getColumnNames().indexOf(colname.toUpperCase());
+		if(idx<0) { return null; }
+		return relation.getColumnTypes().get(idx);
 	}
 	
 }

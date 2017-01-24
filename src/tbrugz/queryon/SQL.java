@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -472,5 +473,22 @@ public class SQL {
 	
 	public List<Object> getParameterValues() {
 		return bindParameterValues;
+	}
+	
+	public void addParameter(Object value, String type) {
+		if(value instanceof String) {
+			if(DBUtil.INT_COL_TYPES_LIST.contains(type.toUpperCase())) {
+				bindParameterValues.add(Long.parseLong((String) value));
+			}
+			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type.toUpperCase())) {
+				bindParameterValues.add(Double.parseDouble((String) value));
+			}
+			else {
+				bindParameterValues.add(value);
+			}
+		}
+		else {
+			bindParameterValues.add(value);
+		}
 	}
 }
