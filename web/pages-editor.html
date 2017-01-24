@@ -46,6 +46,7 @@ var mimeMap = {
 var pagesUrl = 'p/';
 var qonUrl = 'q/QON_PAGES';
 var editor = null;
+var pageAltered = false;
 
 onLoad = function() {
 	var id = getParameterByName('id', location.search);
@@ -140,6 +141,7 @@ function doSave() {
 		var status = req.status;
 		if(status>=200 && status<300) {
 			btnActionStop('btnSave');
+			pageAltered = false;
 			var pkvals = req.getResponseHeader('X-Relation-UK-Values');
 			if(pkvals) {
 				byId('id').value = pkvals.trim();
@@ -235,6 +237,22 @@ function onPathChange() {
 	updateEditorMode();
 }
 
+function onTextFieldChange() {
+	pageAltered = true;
+}
+
+// http://stackoverflow.com/questions/2229942/how-to-block-users-from-closing-a-window-in-javascript
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+function confirmExit(event) {
+	if (pageAltered) {
+		var dialogText = "Current page has been altered. Are you sure you want to close?";
+		event.returnValue = dialogText;
+		return dialogText;
+	}
+}
+
+window.addEventListener("beforeunload", confirmExit);
+
 function loadAce() {
 	editor = ace.edit("editor");
 	editor.$blockScrolling = true;
@@ -243,6 +261,7 @@ function loadAce() {
 	editor.setOptions({
 		fontSize: "11pt"
 	});
+	editor.getSession().on('change', onTextFieldChange);
 	/*editor.getSelectedText = function() {
 		return this.getSession().getTextRange(this.getSelectionRange());
 	};*/
@@ -300,10 +319,10 @@ $(document).jkey('f10',function(){
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
 	<label>id: <input type="text" id="id" name="id" size="6" readonly="readonly"/></label>
 	<label title="resource URL (known extensions: css, html, javascript, json, markdown, md, xml)">
-		path: <input type="text" id="path" name="path" onchange="onPathChange()" size="40"/>
+		path: <input type="text" id="path" name="path" onchange="onPathChange();onTextFieldChange();" size="40"/>
 	</label>
 	<label>mime: <input type="text" id="mime" name="mime" size="15" readonly="readonly" value="text/html"/></label>
-	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60"/></label>
+	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60" onchange="onTextFieldChange();"/></label>
 	<label id="rolesLabel" style="display: none;">
 		<span id="rolesLabelText">roles:</span>
 		<input type="text" id="roles" name="roles"/>
