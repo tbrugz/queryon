@@ -141,7 +141,6 @@ function doSave() {
 		var status = req.status;
 		if(status>=200 && status<300) {
 			btnActionStop('btnSave');
-			pageAltered = false;
 			var pkvals = req.getResponseHeader('X-Relation-UK-Values');
 			if(pkvals) {
 				byId('id').value = pkvals.trim();
@@ -160,6 +159,7 @@ function doSave() {
 						2000);
 				console.log("fading...");
 			}, 10);
+			pageAltered = false;
 		}
 		else {
 			doSaveError(evt);
@@ -207,7 +207,10 @@ function doLoadPage(id) {
 			}
 			// http://stackoverflow.com/questions/18614169/set-value-for-ace-editor-without-selecting-the-whole-editor
 			editor.setValue(BODY, -1);
+			// http://stackoverflow.com/questions/30986732/reset-the-undo-stack-in-ace-editor
+			editor.getSession().setUndoManager(new ace.UndoManager());
 			refreshUI();
+			pageAltered = false;
 		}
 		else {
 			doLoadPageError(evt);
