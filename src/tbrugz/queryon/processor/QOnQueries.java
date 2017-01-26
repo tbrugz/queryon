@@ -1,21 +1,31 @@
 package tbrugz.queryon.processor;
 
+import java.io.IOException;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.ProcessorServlet;
+import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
+import tbrugz.queryon.WebProcessor;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.datadump.DataDumpUtils;
@@ -34,7 +44,7 @@ import tbrugz.sqldump.util.Utils;
  * TODO: saving with 'SQLQueries+QOnQueries' may create inconsistencies when exception occurs in 2nd (QOnQueries) processor (can't rollback 1st processor actions)
  * TODO: should implement UpdatePlugin
  */
-public class QOnQueries extends SQLQueries {
+public class QOnQueries extends SQLQueries implements WebProcessor {
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
 	
@@ -54,6 +64,7 @@ public class QOnQueries extends SQLQueries {
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";
 	
 	boolean metadataAllowQueryExec = false;
+	Subject currentUser;
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -259,8 +270,8 @@ public class QOnQueries extends SQLQueries {
 	 */
 	void writeToDatabase() throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
-		String updateSql = "update "+qonQueriesTable+" set schema_name = ?, query = ?, remarks = ?, roles_filter = ? where name = ?";
-		String insertSql = "insert into "+qonQueriesTable+" (schema_name, query, remarks, roles_filter, name) values (?, ?, ?, ?, ?)";
+		String updateSql = "update "+qonQueriesTable+" set schema_name = ?, query = ?, remarks = ?, roles_filter = ?, updated_at = ?, updated_by = ? where name = ?";
+		String insertSql = "insert into "+qonQueriesTable+" (schema_name, query, remarks, roles_filter, name, created_at, created_by) values (?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement updateSt = conn.prepareStatement(updateSql);
 		PreparedStatement insertSt = conn.prepareStatement(insertSql);
 
@@ -272,6 +283,12 @@ public class QOnQueries extends SQLQueries {
 		if(queriesToUpdate==null) {
 			throw new ProcessingException("prop '"+PROP_PREFIX+SUFFIX_QUERY_NAMES+"' must be set");
 		}
+		
+		String username = QueryOn.getUsername(currentUser);
+		Date now = new Date();
+		Timestamp ts = new Timestamp(now.getTime());
+		//log.info("ts: "+ts+" ; now: "+now);
+		
 		Set<View> vs = model.getViews();
 		int countUpdates = 0;
 		int countInserts = 0;
@@ -279,20 +296,28 @@ public class QOnQueries extends SQLQueries {
 			if(v instanceof Query) {
 				if(queriesToUpdate.contains(v.getName())) {
 					try {
-					//schema, query, name
+					// schema, query, name
 					updateSt.setString(1, v.getSchemaName());
 					updateSt.setString(2, v.getQuery());
 					updateSt.setString(3, v.getRemarks());
 					updateSt.setString(4, getGrantsStr(v.getGrants()));
-					updateSt.setString(5, v.getName());
+					updateSt.setTimestamp(5, ts);
+					updateSt.setString(6, username);
+					// update key
+					updateSt.setString(7, v.getName());
 					int countU = updateSt.executeUpdate();
 					countUpdates += countU;
+					
+					// if no updates, try insert
 					if(countU==0) {
 						insertSt.setString(1, v.getSchemaName());
 						insertSt.setString(2, v.getQuery());
 						insertSt.setString(3, v.getRemarks());
 						insertSt.setString(4, getGrantsStr(v.getGrants()));
 						insertSt.setString(5, v.getName());
+						insertSt.setTimestamp(6, ts);
+						insertSt.setString(7, username);
+						
 						int countI = insertSt.executeUpdate();
 						countInserts += countI;
 						if(countI==0) {
@@ -370,6 +395,26 @@ public class QOnQueries extends SQLQueries {
 			grantees.add(g.getGrantee());
 		}
 		return Utils.join(grantees, ROLES_DELIMITER_STR);
+	}
+
+	@Override
+	public void setDBIdentifiable(DBIdentifiable dbid) {
+	}
+
+	@Override
+	public void setSubject(Subject currentUser) {
+		this.currentUser = currentUser;
+	}
+
+	@Override
+	public void process(RequestSpec reqspec, HttpServletResponse resp) {
+		try {
+			ProcessorServlet.setOutput(this, resp);
+		}
+		catch(IOException e) {
+			throw new InternalServerException(e.getMessage(), e);
+		}
+		process();
 	}
 	
 }

@@ -1,4 +1,20 @@
 
+2017-01 - qon_queries & qon_pages
+---------------------------------
+
+alter table qon_queries
+	add column created_at timestamp,
+	add column created_by varchar(200),
+	add column updated_at timestamp,
+	add column updated_by varchar(200);
+
+alter table qon_pages
+	add column created_at timestamp,
+	add column created_by varchar(200),
+	add column updated_at timestamp,
+	add column updated_by varchar(200);
+
+
 2016-05 - qon_execs
 -------------------
 

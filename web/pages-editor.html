@@ -95,6 +95,9 @@ function doSave() {
 	var id = byId('id').value;
 	var path = byId('path').value;
 	var mime = byId('mime').value;
+	var username = byId('username').innerHTML;
+	//var now = new Date();
+	//console.log("now:",now,now.toISOString());
 
 	// normalizing path
 	path = path.replace(/\/+/g, '\/').replace(/^\//, '');
@@ -118,9 +121,14 @@ function doSave() {
 		//"&v:BODY=" + encodeURIComponent( editor.getValue() );
 	var messageBody = editor.getValue();
 	var method = "POST"; //post: insert ; put: update
-	if(id) {
+	// TODO: add "now"
+	if(id) { // update
 		saveUrl += "p1="+encodeURIComponent(id);
 		method = "PUT";
+		payload += "&v:UPDATED_BY="+encodeURIComponent(username);
+	}
+	else {
+		payload += "&v:CREATED_BY="+encodeURIComponent(username);
 	}
 	saveUrl += "&" + payload;
 	

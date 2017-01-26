@@ -10,6 +10,10 @@ create table qon_queries (
 	--query varchar(4000),
 	roles_filter varchar(1000),
 	disabled tinyint,
+	created_at timestamp,
+	created_by varchar(200),
+	updated_at timestamp,
+	updated_by varchar(200),
 	constraint qon_queries_pk primary key (name)
 	--constraint qon_queries_pk primary key (schema,name)
 )
@@ -57,6 +61,10 @@ create table qon_pages (
 	binary_data blob,
 	has_body char(1),
 	roles_filter varchar(1000),
+	created_at timestamp,
+	created_by varchar(200),
+	updated_at timestamp,
+	updated_by varchar(200),
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
 )

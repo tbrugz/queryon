@@ -328,6 +328,24 @@
             <pk>false</pk>
             <type>CHAR</type>
         </columns>
+        <columns>
+            <name>CREATED_AT</name>
+            <type>TIMESTAMP</type>
+        </columns>
+        <columns>
+            <name>CREATED_BY</name>
+            <columSize>200</columSize>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>UPDATED_AT</name>
+            <type>TIMESTAMP</type>
+        </columns>
+        <columns>
+            <name>UPDATED_BY</name>
+            <columSize>200</columSize>
+            <type>VARCHAR</type>
+        </columns>
         <constraints>
             <name>QON_PAGES_PK</name>
             <type>PK</type>
