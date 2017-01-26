@@ -437,7 +437,7 @@ public class QueryOn extends HttpServlet {
 						}
 						catch(Exception e) {
 							log.warn("Exception executing processor on startup [proc="+p+"; model="+entry.getKey()+"]: "+e);
-							log.debug("Exception executing processor on startup [proc="+p+"; model="+entry.getKey()+"]: "+e.getMessage(), e);
+							log.info("Exception executing processor on startup [proc="+p+"; model="+entry.getKey()+"]: "+e.getMessage(), e);
 							//XXX: fail on error?
 						}
 					}
@@ -448,7 +448,7 @@ public class QueryOn extends HttpServlet {
 					}
 					catch(Exception e) {
 						log.warn("Exception executing processor on startup [proc="+p+"]: "+e);
-						log.debug("Exception executing processor on startup [proc="+p+"]: "+e.getMessage(), e);
+						log.info("Exception executing processor on startup [proc="+p+"]: "+e.getMessage(), e);
 						//XXX: fail on error?
 					}
 				}

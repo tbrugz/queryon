@@ -203,10 +203,14 @@ public class ProcessorServlet extends HttpServlet {
 				WebProcessor wp = (WebProcessor) pc;
 
 				DumpSyntaxUtils dsutils = (DumpSyntaxUtils) context.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
-				RequestSpec reqspec = new RequestSpec(dsutils, req, prop, 1);
-				DBIdentifiable dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(sm, reqspec);
-				
-				Subject currentUser = ShiroUtils.getSubject(prop, req);
+				RequestSpec reqspec = null;
+				DBIdentifiable dbobj = null;
+				Subject currentUser = null;
+				if(req!=null) {
+					reqspec = new RequestSpec(dsutils, req, prop, 1);
+					dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(sm, reqspec);
+					currentUser = ShiroUtils.getSubject(prop, req);
+				}
 				
 				try {
 					//wp.setRelation(r);
