@@ -199,7 +199,7 @@ function doLoadPage(id) {
 			var data = getQonData(JSON.parse(req.responseText))[0];
 			var PATH = data.PATH || data.path;
 			var MIME = data.MIME || data.mime;
-			var BODY = data.MIME || data.body;
+			var BODY = data.BODY || data.body;
 			//console.log('doLoadPage.ok2', data);
 			byId('path').value = PATH;
 			if(MIME) {
