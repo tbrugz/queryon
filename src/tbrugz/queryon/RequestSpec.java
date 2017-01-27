@@ -242,16 +242,16 @@ public class RequestSpec {
 		log.debug("accept: "+acceptHeader+" ; modelId: "+this.modelId);
 		
 		if(outputTypeStr != null) {
-			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr, prop);
+			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr);
 			if(outputSyntaxTmp==null) {
 				// will never happen?
 				throw new BadRequestException("Unknown output syntax: "+outputTypeStr);
 			}
 		}
 		else {
-			outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader, prop);
+			outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
 			if(outputSyntaxTmp==null) {
-				outputSyntaxTmp = dsutils.getDumpSyntax(QueryOn.DEFAULT_OUTPUT_SYNTAX, prop);
+				outputSyntaxTmp = dsutils.getDumpSyntax(QueryOn.DEFAULT_OUTPUT_SYNTAX);
 			}
 			else {
 				log.debug("syntax defined by accept! syntax: "+outputSyntaxTmp.getSyntaxId()+" // "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
@@ -595,14 +595,14 @@ public class RequestSpec {
 			if(last2DotIndex > -1) {
 				String output2TypeStrTmp = lastUriPart.substring(last2DotIndex+1);
 				//log.debug("output2TypeStrTmp: "+output2TypeStrTmp);
-				ds = dsutils.getDumpSyntax(output2TypeStrTmp, prop);
+				ds = dsutils.getDumpSyntax(output2TypeStrTmp);
 				if(ds != null) {
 					outputTypeStr = output2TypeStrTmp;
 				}
 			}
 			
 			if(ds==null) {
-				ds = dsutils.getDumpSyntax(outputTypeStrTmp, prop);
+				ds = dsutils.getDumpSyntax(outputTypeStrTmp);
 				if(ds != null) {
 					outputTypeStr = outputTypeStrTmp;
 				}

@@ -519,10 +519,14 @@ public class SQL {
 	}
 	
 	static void initDateFormats(DumpSyntaxUtils dsutils) {
-		DumpSyntax dsHtml = dsutils.getDumpSyntax("html", null);
+		DumpSyntax dsHtmlx = dsutils.getDumpSyntax("htmlx");
+		DumpSyntax dsHtml = dsutils.getDumpSyntax("html");
 		
 		dateFormats = new ArrayList<DateFormat>();
 		dateFormats.add(DBUtil.isoDateFormat);
+		if(dsHtmlx!=null) {
+			dateFormats.add(dsHtmlx.dateFormatter);
+		}
 		if(dsHtml!=null) {
 			dateFormats.add(dsHtml.dateFormatter);
 		}
