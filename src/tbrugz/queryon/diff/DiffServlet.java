@@ -92,6 +92,7 @@ public class DiffServlet extends AbstractHttpServlet {
 			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}
 
+		boolean previousColumnAddComments = ColumnDiff.addComments;
 		boolean previousDBIdDiffAddComments = DBIdentifiableDiff.addComments;
 		
 		boolean doApply = getDoApply(req);
@@ -105,12 +106,14 @@ public class DiffServlet extends AbstractHttpServlet {
 			if(!instant) {
 				throw new BadRequestException("cannot apply diff to non-instant QOS");
 			}
+			ColumnDiff.addComments = false;
 			DBIdentifiableDiff.addComments = false;
 			
 			preHooks = processHooks(prop, PROP_PRE_APPLY_HOOKS);
 			postHooks = processHooks(prop, PROP_POST_APPLY_HOOKS);
 		}
 		else {
+			ColumnDiff.addComments = true;
 			DBIdentifiableDiff.addComments = true;
 		}
 		
@@ -159,6 +162,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		final DBMSFeatures feat = res.getSpecificFeatures(diffDialect);
 		log.debug("dialect: "+diffDialect+" feat: "+feat);
 		ColumnDiff.updateFeatures(feat);
+		initProperties(prop);
 		
 		List<Diff> diffs = null;
 		
@@ -240,10 +244,28 @@ public class DiffServlet extends AbstractHttpServlet {
 			dumpDiffs(diffs, resp);
 		}
 		
+		ColumnDiff.addComments = previousColumnAddComments;
 		DBIdentifiableDiff.addComments = previousDBIdDiffAddComments;
 		resp.getWriter().flush();
 	}
 	
+	/*
+	 *  see: SQLDiff.procProterties
+	 *  XXX reuse code from SQLDiff.procProterties ?
+	 */
+	void initProperties(Properties prop) {
+		String colDiffTempStrategy = prop.getProperty(SQLDiff.PROP_COLUMNDIFF_TEMPCOLSTRATEGY);
+		if(colDiffTempStrategy!=null) {
+			try {
+				ColumnDiff.useTempColumnStrategy = ColumnDiff.TempColumnAlterStrategy.valueOf(colDiffTempStrategy.toUpperCase());
+			}
+			catch(IllegalArgumentException e) {
+				String message = "illegal value '"+colDiffTempStrategy+"' to prop '"+SQLDiff.PROP_COLUMNDIFF_TEMPCOLSTRATEGY+"' [default is '"+ColumnDiff.useTempColumnStrategy+"']";
+				log.warn(message);
+			}
+		}
+	}
+
 	List<Diff> newSingleElemList(Diff e) {
 		List<Diff> l = new ArrayList<Diff>(); l.add(e);
 		return l;
