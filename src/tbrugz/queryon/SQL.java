@@ -6,7 +6,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -50,6 +56,8 @@ public class SQL {
 	//XXX add limit/offset-clause?
 
 	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
+	
+	public static List<DateFormat> dateFormats = new ArrayList<DateFormat>();
 	
 	static boolean validateOrderColumnNames = true;
 	
@@ -490,6 +498,17 @@ public class SQL {
 			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type.toUpperCase())) {
 				bindParameterValues.add(Double.parseDouble((String) value));
 			}
+			else if(startsWithAny(type.toUpperCase(), DBUtil.DATE_COL_TYPES_LIST)) {
+				try {
+					Date dt = DBUtil.parseDateMultiFormat((String) value, dateFormats);
+					bindParameterValues.add(dt);
+					//log.info(">> value: "+value+" ctype: "+type+" dt: "+dt);
+				}
+				catch(ParseException e) {
+					log.warn("Error parsing date '"+value+"', trying as String");
+					bindParameterValues.add(value);
+				}
+			}
 			else {
 				bindParameterValues.add(value);
 			}
@@ -497,6 +516,23 @@ public class SQL {
 		else {
 			bindParameterValues.add(value);
 		}
+	}
+	
+	static void initDateFormats(DumpSyntaxUtils dsutils) {
+		DumpSyntax dsHtml = dsutils.getDumpSyntax("html", null);
+		
+		dateFormats = new ArrayList<DateFormat>();
+		dateFormats.add(DBUtil.isoDateFormat);
+		if(dsHtml!=null) {
+			dateFormats.add(dsHtml.dateFormatter);
+		}
+	}
+	
+	static boolean startsWithAny(String str, List<String> list) {
+		for(String s: list) {
+			if(s.startsWith(str)) { return true; }
+		}
+		return false;
 	}
 	
 	void bindParameters(PreparedStatement st) throws SQLException, IOException {
@@ -510,6 +546,9 @@ public class SQL {
 			}
 			else if(value instanceof String) {
 				st.setString(i+1, (String) value);
+			}
+			else if(value instanceof Date) {
+				st.setTimestamp(i+1, new Timestamp(((Date) value).getTime()));
 			}
 			else if(value instanceof InputStream) {
 				st.setBinaryStream(i+1, (InputStream) value);

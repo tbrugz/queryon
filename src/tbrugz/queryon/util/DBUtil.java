@@ -3,9 +3,14 @@ package tbrugz.queryon.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import javax.naming.NamingException;
 
@@ -23,6 +28,8 @@ import tbrugz.sqldump.util.ConnectionUtil;
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);
 	
+	public static DateFormat isoDateFormat;
+	
 	public static final String[] BLOB_COL_TYPES = { "BLOB", "RAW", "LONG RAW", "BYTEA" };
 	public static final List<String> BLOB_COL_TYPES_LIST = Arrays.asList(BLOB_COL_TYPES);
 
@@ -31,6 +38,19 @@ public class DBUtil {
 	
 	public static final String[] FLOAT_COL_TYPES = { "NUMERIC", "DECIMAL", "FLOAT", "DOUBLE", "REAL", "DOUBLE PRECISION", "NUMBER" };
 	public static final List<String> FLOAT_COL_TYPES_LIST = Arrays.asList(FLOAT_COL_TYPES);
+	
+	public static final String[] DATE_COL_TYPES = { "TIMESTAMP", "DATE" };
+	public static final List<String> DATE_COL_TYPES_LIST = Arrays.asList(DATE_COL_TYPES);
+	
+	static {
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		/*
+		see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+		http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html
+		 */
+		isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		isoDateFormat.setTimeZone(tz);
+	}
 	
 	//XXX: getSQLTypeForColumnType(String colType): add dbid as parameter? 
 	public static int getSQLTypeForColumnType(String colType) {
@@ -140,6 +160,23 @@ public class DBUtil {
 		int idx = relation.getColumnNames().indexOf(colname.toUpperCase());
 		if(idx<0) { return null; }
 		return relation.getColumnTypes().get(idx);
+	}
+	
+	// http://stackoverflow.com/questions/3914404/how-to-get-current-moment-in-iso-8601-format
+	public static DateFormat getIsoDateFormat() {
+		return isoDateFormat;
+	}
+	
+	public static Date parseDateMultiFormat(String date, List<DateFormat> formats) throws ParseException {
+		for(DateFormat format: formats) {
+			try {
+				Date dt = format.parse(date);
+				//log.info("date '"+date+"'; date parsed '"+dt+"' ; format: "+((SimpleDateFormat)format).toPattern());
+				return dt;
+			}
+			catch(ParseException e) {}
+		}
+		throw new ParseException("Unparseable date: "+date, 0);
 	}
 	
 }

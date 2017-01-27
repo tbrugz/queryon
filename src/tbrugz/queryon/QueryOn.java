@@ -329,6 +329,9 @@ public class QueryOn extends HttpServlet {
 				SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator("");
 			}
 			
+			// init date formats
+			SQL.initDateFormats(dsutils);
+			
 			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
 			
 			defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
@@ -1356,7 +1359,8 @@ public class QueryOn extends HttpServlet {
 			}
 			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
 			sb.append((colsCount!=0?", ":"")+col+" = ?");
-			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+			String ctype = DBUtil.getColumnTypeFromColName(relation, col);
+			sql.addParameter(reqspec.updateValues.get(col), ctype);
 			colsCount++;
 		}
 		//log.debug("bindpars [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
@@ -1507,7 +1511,8 @@ public class QueryOn extends HttpServlet {
 			//XXX timestamp '' ?
 			sbCols.append((colsCount!=0?", ":"")+col);
 			sbVals.append((colsCount!=0?", ":"")+"?");
-			sql.bindParameterValues.add(reqspec.updateValues.get(col));
+			String ctype = DBUtil.getColumnTypeFromColName(relation, col);
+			sql.addParameter(reqspec.updateValues.get(col), ctype);
 			colsCount++;
 		}
 		}
