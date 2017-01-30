@@ -530,15 +530,22 @@ function transformQonData(qonData, column) {
 			}
 		};
 
-	var geomIdKey = "GEOM_ID";
-	if(qonData[0]["geom_id"]) { geomIdKey = "geom_id"; }
+	var geomIdKey = findArrayMatchUpper(Object.keys(qonData[0]), mapsData.geomIdColumns);
+	//var geomIdKey = "GEOM_ID";
+	//if(qonData[0]["geom_id"]) { geomIdKey = "geom_id"; }
+	//console.log("transformQonData", geomIdKey, Object.keys(qonData[0]));
 
 	var idhash = {}
 	var duplicates = 0;
 	var keysWithDuplicateValues = 0;
+	var nullKeys = 0;
 	
 	for(var i=0;i<qonData.length;i++) {
 		var id = qonData[i][geomIdKey];
+		if(id==null) {
+			nullKeys++;
+			continue;
+		}
 		data.series[id] = qonData[i][column];
 		
 		if(idhash[id]) {
@@ -549,6 +556,9 @@ function transformQonData(qonData, column) {
 		if(idhash[id]==2) {
 			keysWithDuplicateValues++;
 		}
+	}
+	if(nullKeys>0) {
+		console.warn("transformQonData: null data keys: rowCount=", qonData.length, "nullKeys=", nullKeys);
 	}
 	if(duplicates>0) {
 		console.warn("transformQonData: duplicate data keys: rowCount=", qonData.length, "keysWithDuplicateValues=", keysWithDuplicateValues, "duplicateValues=", duplicates);
@@ -624,17 +634,20 @@ function resetMap() {
 	document.getElementById('btn-resetdata').disabled = true;
 }
 
-function ajaxCallsOnLoad() {
+function ajaxCallsOnLoadRelation() {
 $.ajax({
 	url: '../q/relation.json',
 	dataType: 'text',
 	success: function(data) {
 		var seriesData = JSON.parse(data);
 		var sources = seriesData.relation;
-		//console.log('sources',sources);
+		//console.log('sources', sources, 'geomIdColumns', mapsData.geomIdColumns);
 		var select = document.getElementById('dataUrl');
+		var matches = 0;
 		for(var i=0;i<sources.length;i++) {
-			if(sources[i].columnNames.toUpperCase().indexOf("GEOM_ID")>0) {
+			//if(sources[i].columnNames.toUpperCase().indexOf("GEOM_ID")>0) {
+			if(colsMatchAnyUpper(sources[i].columnNames, mapsData.geomIdColumns)) {
+				//console.log(">> match",i,sources[i].columnNames, mapsData.geomIdColumns);
 				var elname = (sources[i].schemaName?sources[i].schemaName+".":"")+sources[i].name;
 				addElement2Select(select,
 					{
@@ -648,7 +661,11 @@ $.ajax({
 						"remarks": sources[i].remarks ? sources[i].remarks.replace(/['"]/gi, "") : ''
 					}
 				);
+				matches++;
 			}
+		}
+		if(matches==0) {
+			console.warn("No matches found, match columns: "+mapsData.geomIdColumns);
 		}
 		refreshDataUrlColumns();
 		onLoadUpdateUiComponents();
@@ -657,7 +674,9 @@ $.ajax({
 		console.log('Error: relation.json', jqXHR, textStatus, errorThrown);
 	}
 });
+}
 
+function ajaxCallsOnLoad() {
 $.ajax({
 	url: 'maps.json',
 	dataType: 'text',
@@ -676,11 +695,32 @@ $.ajax({
 					"name": sources[i].name,
 				});
 		}
+		if(! mapsData.geomIdColumns) {
+			mapsData.geomIdColumns = ["GEOM_ID"];
+		}
+		ajaxCallsOnLoadRelation();
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-		console.log('Error: maps.json', jqXHR, textStatus, errorThrown);
+		console.warn('Error: maps.json', jqXHR, textStatus, errorThrown);
 	}
 });
+}
+
+function colsMatchAnyUpper(cols, array) {
+	for(var j=0;j<array.length;j++) {
+		if( cols.toUpperCase().indexOf(array[j].toUpperCase())>=0 ) { return true; }
+	}
+	return false;
+}
+
+function findArrayMatchUpper(array1, array2) {
+	for(var i=0;i<array1.length;i++) {
+		for(var j=0;j<array2.length;j++) {
+			if( array1[i].toUpperCase()==array2[j].toUpperCase() ) { return array1[i]; }
+		}
+	}
+	//console.warn("No matches: ", array1, array2);
+	return null;
 }
 
 function loadGmapsJs(mapsData) {

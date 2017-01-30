@@ -4,6 +4,7 @@
 ],
 "mapcenter": [-16, -48],
 "showOptionsIfUnique": false,
+"geomIdColumns": ["GEOM_ID"],
 "gmapsKey": "change it",
 "showGeomIdAsValueColumn": true,
 "showNonNumericColumnAsValueColumn": true
