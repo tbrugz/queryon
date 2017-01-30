@@ -30,14 +30,12 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 		try {
 			doProcess(req, resp);
 		} catch(BadRequestException e) {
-			log.warn("BadRequestException: "+e.getMessage());
+			log.warn("BadRequestException ["+this.getClass().getSimpleName()+"]: "+e.getMessage());
+			log.debug("BadRequestException ["+this.getClass().getSimpleName()+"][committed? "+resp.isCommitted()+"]: "+e.getMessage(), e);
 			resp.setStatus(e.getCode());
 			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
-		} /*catch (ServletException e) {
-			//e.printStackTrace();
-			throw e;
-		} */ catch (Exception e) {
+		} catch (Exception e) {
 			//e.printStackTrace();
 			throw new ServletException(e);
 		}

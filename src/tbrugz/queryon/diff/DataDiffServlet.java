@@ -212,13 +212,15 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			
 			}
 		}
+		catch(BadRequestException e) {
+			throw e;
+		}
 		catch(RuntimeException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);
 			ConnectionUtil.closeConnection(connTarget);
-			resp.getWriter().flush();
 		}
 	}
 
