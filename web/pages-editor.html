@@ -117,6 +117,7 @@ function doSave() {
 
 	var payload = "v:PATH=" + encodeURIComponent(path) +
 		"&v:MIME=" + encodeURIComponent(mime) +
+		"&v:HAS_BODY=t" +
 		"&bodyparamname=BODY";
 		//"&v:BODY=" + encodeURIComponent( editor.getValue() );
 	var messageBody = editor.getValue();

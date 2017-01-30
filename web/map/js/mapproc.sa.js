@@ -308,7 +308,7 @@ function procStylesFromCategoriesMultipleColors(cats, colors, valueLabel, isNume
 		//cats[c].description = cats[c].startval + " &lt; # " + valueLabel + " &lt; " + cats[c].endval;
 		if(isNumericData) {
 			var comp2nd = ((i+1)==numCat)?" &le; ":" &lt; ";
-			console.log('zz',(i+1),cats.length);
+			console.log('cat',(i+1),cats.length);
 			//XXX: last category's 2nd comparator should have &le; - others &lt; ?
 			cats[c].description = formatFloat(cats[c].startval) + " &le; # " + valueLabel + comp2nd + formatFloat(cats[c].endval);
 		}
