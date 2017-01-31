@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,6 +34,7 @@ import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
+import tbrugz.sqldiff.model.ColumnDiff.TempColumnAlterStrategy;
 import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.TableDiff;
@@ -61,6 +64,7 @@ public class DiffServlet extends AbstractHttpServlet {
 	static final String PARAM_MODEL_TARGET = "modelTarget";
 	static final String PARAM_DO_APPLY = "doApply";
 	static final String PARAM_APPLY_MESSAGE = "applyMessage";
+	static final String PARAM_COL_DIFFSTRATEGY = "colDiffStrategy";
 	
 	public static final String MIME_SQL = "text/plain"; //"application/sql"; - browsers may "download"
 	
@@ -68,6 +72,14 @@ public class DiffServlet extends AbstractHttpServlet {
 	public static final String PROP_POST_APPLY_HOOKS = "queryon.diff.apply.post-hooks";
 
 	public static final String HOOKS_APPLY_MODELS_SUFFIX = ".applymodels";
+	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+
+		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		initProperties(prop);
+	}
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -94,6 +106,7 @@ public class DiffServlet extends AbstractHttpServlet {
 
 		boolean previousColumnAddComments = ColumnDiff.addComments;
 		boolean previousDBIdDiffAddComments = DBIdentifiableDiff.addComments;
+		TempColumnAlterStrategy previousColDiffStrategy = ColumnDiff.useTempColumnStrategy;
 		
 		boolean doApply = getDoApply(req);
 		List<ApplyHook> preHooks = new ArrayList<ApplyHook>();
@@ -162,7 +175,15 @@ public class DiffServlet extends AbstractHttpServlet {
 		final DBMSFeatures feat = res.getSpecificFeatures(diffDialect);
 		log.debug("dialect: "+diffDialect+" feat: "+feat);
 		ColumnDiff.updateFeatures(feat);
-		initProperties(prop);
+		String paramColDiffStrategy = req.getParameter(PARAM_COL_DIFFSTRATEGY);
+		if(paramColDiffStrategy!=null) {
+			try {
+				ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.valueOf(paramColDiffStrategy);
+			}
+			catch(IllegalArgumentException e) {
+				throw new BadRequestException("Unknown column diff strategy: "+paramColDiffStrategy, e);
+			}
+		}
 		
 		List<Diff> diffs = null;
 		
@@ -246,6 +267,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		
 		ColumnDiff.addComments = previousColumnAddComments;
 		DBIdentifiableDiff.addComments = previousDBIdDiffAddComments;
+		ColumnDiff.useTempColumnStrategy = previousColDiffStrategy;
 		resp.getWriter().flush();
 	}
 	
