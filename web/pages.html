@@ -88,6 +88,7 @@ loadPagesList = function() {
 	oReq.onload = function(evt) {
 		var req = evt.target
 		var status = req.status;
+		btnActionStop('url-refresh');
 		if(status>=200 && status<300) {
 			var content = byId('content');
 
@@ -118,6 +119,7 @@ loadPagesList = function() {
 	}
 	oReq.open("GET", loadUrl);
 	oReq.send(null);
+	btnActionStart('url-refresh');
 }
 
 hasBody = function(hasBodyVal) {
@@ -307,7 +309,11 @@ li.removed {
 }
 
 #url-refresh {
-	padding-right: 3px;
+	padding: 0 3px;
+}
+
+.onaction {
+	background-color: #f90;
 }
 
 </style>

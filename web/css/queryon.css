@@ -131,6 +131,10 @@ select.onaction {
 	background-color: #f90;
 }
 
+.onaction {
+	background-color: #f90;
+}
+
 input.parameter {
 	width: 8em;
 }
