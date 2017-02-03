@@ -883,7 +883,9 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		sql.bindParameters(st);
 		
-		boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
+		//boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
+		//boolean applyLimitOffsetInResultSet = !sql.allowEncapsulation;
+		boolean applyLimitOffsetInResultSet = !sql.sqlLoEncapsulated;
 
 		/*if(applyLimitOffsetInResultSet) {
 			//XXX only if (offset == 0)? or should also use ResultSet.relative(offset)?
@@ -1968,6 +1970,10 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		if(rs.next()) {
+			if(rs.next()) {
+				throw new BadRequestException("ResultSet has more than 1 row ["+queryName+"]");
+			}
+			
 			if(reqspec.uniValueMimetypeCol!=null) {
 				mimeType = rs.getString(reqspec.uniValueMimetypeCol);
 			}
@@ -1993,10 +1999,10 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("ResultSet has no rows ["+queryName+"]");
 		}
 		
-		if(rs.next()) {
+		/*if(rs.next()) {
 			log.warn("more than 1 row, response may already be committed [query="+queryName+"]");
 			throw new BadRequestException("ResultSet has more than 1 row ["+queryName+"]");
-		}
+		}*/
 	}
 	
 	/*

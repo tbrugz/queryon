@@ -63,6 +63,8 @@ public class SQL {
 	
 	//final String initialSql;
 	String sql;
+	boolean sqlLoEncapsulated = false;
+	
 	final Relation relation;
 	final boolean allowEncapsulation;
 	final Integer originalBindParameterCount;
@@ -357,6 +359,7 @@ public class SQL {
 		else {
 			throw new InternalServerException("Unknown Limit/Offset strategy: "+strategy);
 		}
+		sqlLoEncapsulated = true;
 		
 		return;
 	}
