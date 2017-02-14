@@ -101,7 +101,8 @@
 		// http://stackoverflow.com/questions/526347/css-javascript-how-do-you-get-the-rendered-height-of-an-element
 		//document.getElementById('content-container').style.top = ($('#nav').height()+6)+'px';
 		// http://stackoverflow.com/questions/15615552/get-div-height-with-plain-javascript
-		document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
+		var navHeight = document.getElementById('nav').offsetHeight + 'px';
+		document.getElementById('content-container').style.top = navHeight;
 		
 		var dh = document.getElementById('dialog-header');
 		var dm = document.getElementById('dialog-messages');
@@ -113,6 +114,11 @@
 			else {
 				dc.style.top = dh.offsetTop + dh.offsetHeight + 10 + 'px';
 			}
+		}
+		
+		var tableHeader = document.querySelector("#content > table > tbody > tr:nth-child(1)");
+		if(tableHeader) {
+			tableHeader.style.top = navHeight; /* nav height */
 		}
 	}
 	
@@ -814,6 +820,7 @@
 		/*padding-left: 10px;
 		padding-right: 10px;*/
 		margin-top: 3px;
+		margin-bottom: 2px;
 		font-weight: bolder;
 		background-color: #555;
 	}
@@ -826,7 +833,7 @@
 		position: -ms-sticky;
 		position: -o-sticky;
 		position: sticky;
-		top: 0px;
+		/* top: 33px; - nav height */
 	}
 	
 	#order-label {
@@ -847,7 +854,7 @@
 	}
 	
 	#authinfo {
-		background-color: #222;
+		background-color: #222; /* fix heigth!! */
 	}
 	
 	#filters:not(:empty) {

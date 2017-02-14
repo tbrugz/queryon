@@ -41,6 +41,19 @@ th {
 caption {
 	font-weight: bold;
 	font-size: 14pt;
+	text-align: left;
+	background-color: #aaa;
+	border: 1px solid #ccc;
+	padding: 2px;
+}
+
+table > tbody > tr:nth-child(1) {
+	position: -webkit-sticky;
+	position: -moz-sticky;
+	position: -ms-sticky;
+	position: -o-sticky;
+	position: sticky;
+	top: 0px;
 }
 
 /*
