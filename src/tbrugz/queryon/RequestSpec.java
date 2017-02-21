@@ -70,8 +70,15 @@ public class RequestSpec {
 	static final String MULTIPART = "multipart/form-data";
 	
 	public static final String PARAM_METHOD = "_method";
+	
+	public static final String PARAM_FIELDS = "fields";
+	public static final String PARAM_DISTINCT = "distinct";
+	public static final String PARAM_ORDER = "order";
 	public static final String PARAM_LIMIT = "limit";
 	public static final String PARAM_OFFSET = "offset";
+	
+	public static final String ORDER_ASC = "ASC";
+	public static final String ORDER_DESC = "DESC";
 	
 	final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
@@ -288,24 +295,24 @@ public class RequestSpec {
 		maxUpdates = (updateMaxStr!=null)?Integer.parseInt(updateMaxStr):DEFAULT_MAX_UPDATES;
 		minUpdates = (updateMinStr!=null)?Integer.parseInt(updateMinStr):DEFAULT_MIN_UPDATES;
 		
-		String fields = req.getParameter("fields");
+		String fields = req.getParameter(PARAM_FIELDS);
 		if(fields!=null) {
 			columns.addAll(Arrays.asList(fields.split(",")));
 		}
 		
-		distinct = req.getParameter("distinct")!=null;
+		distinct = req.getParameter(PARAM_DISTINCT)!=null;
 		
-		String order = req.getParameter("order");
+		String order = req.getParameter(PARAM_ORDER);
 		if(order!=null) {
 			List<String> orderColz = Arrays.asList(order.split(","));
 			for(String ocol: orderColz) {
 				ocol = ocol.trim();
 				if(ocol.startsWith("-")) {
 					ocol = ocol.substring(1);
-					orderAscDesc.add("DESC");
+					orderAscDesc.add(ORDER_DESC);
 				}
 				else {
-					orderAscDesc.add("ASC");
+					orderAscDesc.add(ORDER_ASC);
 				}
 				orderCols.add(ocol);
 			}
