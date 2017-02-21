@@ -225,6 +225,11 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 					inParams++;
 					paramsTypes.add(ptype);
 				}
+				else if(pmode==ParameterMetaData.parameterModeInOut) {
+					inParams++;
+					paramsTypes.add(ptype);
+					log.debug("INOUT parameter type in Query ["+queryFullName+"/"+i+"/"+pmode+"]");
+				}
 				else {
 					log.warn("Parameter of mode '"+pmode+"' not understood for query '"+queryFullName+"/"+i+"'");
 				}
