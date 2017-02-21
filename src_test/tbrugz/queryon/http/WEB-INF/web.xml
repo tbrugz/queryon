@@ -31,7 +31,12 @@
 		<servlet-name>ProcessorServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
 	</servlet>
-
+	
+	<servlet>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.SwaggerServlet</servlet-class>
+	</servlet>
+	
 	<servlet>
 		<servlet-name>TestServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.http.TestServlet</servlet-class>
@@ -58,4 +63,8 @@
 		<url-pattern>/processor/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet-mapping>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<url-pattern>/swagger/*</url-pattern>
+	</servlet-mapping>
 </web-app>

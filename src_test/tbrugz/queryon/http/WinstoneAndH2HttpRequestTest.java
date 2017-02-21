@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
@@ -53,6 +55,9 @@ import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
@@ -101,6 +106,14 @@ public class WinstoneAndH2HttpRequestTest {
 		InputStream instream = entity.getContent();
 		return IOUtil.readFile(new InputStreamReader(instream));
 	}
+
+	public static String getContentFromUrl(String url) throws ClientProtocolException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(url);
+		HttpResponse response1 = httpclient.execute(httpGet);
+		return getContent(response1);
+	}
+	
 
 	/*
 	 * see: http://hc.apache.org/httpcomponents-client-ga/quickstart.html
@@ -830,4 +843,43 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testQosGetFkEmpdeptError() throws IOException, ParserConfigurationException, SAXException {
 		Assert.assertEquals(404, getReturnCodeQosInstant("/FK/PUBLIC.EMP_XXX_FK"));
 	}
+	
+	/*@Test
+	public void swaggerJsonSimple() throws IOException, ParserConfigurationException, SAXException {
+		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
+		JSONValue.parse(jsonStr);
+	}*/
+
+	@Test
+	public void swaggerGsonParse() throws IOException, ParserConfigurationException, SAXException {
+		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
+		JsonParser parser = new JsonParser();
+		//System.out.println(jsonStr);
+		JsonElement json = parser.parse(jsonStr);
+		Assert.assertTrue(json.isJsonObject());
+		
+		JsonObject jsonObject = json.getAsJsonObject();
+		JsonElement swagger = jsonObject.get("swagger");
+		Assert.assertEquals("2.0", swagger.getAsString());
+
+		JsonObject paths = jsonObject.get("paths").getAsJsonObject();
+		/*for(Entry<String, JsonElement> e: paths.entrySet()) {
+			String key = e.getKey();
+			JsonObject operation = e.getValue().getAsJsonObject();
+			System.out.println(key+" >>> "+operation);
+		}*/
+		Set<Entry<String, JsonElement>> set = paths.entrySet();
+		Iterator<Entry<String, JsonElement>> it = set.iterator();
+		
+		Entry<String, JsonElement> e = it.next();
+		String key = e.getKey();
+		//JsonObject operation = e.getValue().getAsJsonObject();
+		Assert.assertEquals("/PUBLIC.DEPT.{syntax}", key);
+		
+		e = it.next();
+		key = e.getKey();
+		//operation = e.getValue().getAsJsonObject();
+		Assert.assertEquals("/PUBLIC.EMP.{syntax}", key);
+	}
+	
 }

@@ -26,6 +26,7 @@ import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -111,7 +112,13 @@ public class SwaggerServlet extends AbstractHttpServlet {
 
 		swagger.put("paths", paths);
 		
-		//XXX add definitions?
+		// definitions
+		Map<String, Object> definitions = new LinkedHashMap<String, Object>();
+		swagger.put("definitions", definitions);
+		//Table
+		for(Table t: model.getTables()) {
+			definitions.put(getQualifiedName(t), createDefinition(t));
+		}
 		
 		resp.getWriter().write( gson.toJson(swagger) );
 	}
@@ -328,9 +335,40 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			parameters.add(pOffset);
 		}
 		
-		//XXX add 'responses'
+		//XXX add 'responses', possibly with schema (schema is json-only?)
 		oper.put("parameters", parameters);
 		return oper;
+	}
+	
+	Map<String, Object> createDefinition(Relation r) {
+		//type, required, properties
+		Map<String, Object> def = new LinkedHashMap<String, Object>();
+		def.put("type", "object");
+		if(r instanceof Table) {
+			Table t = (Table) r;
+			Constraint pk = t.getPKConstraint();
+			if(pk!=null) {
+				def.put("required", pk.getUniqueColumns());
+			}
+		}
+		Map<String, Object> properties = new LinkedHashMap<String, Object>();
+		List<String> colNames = r.getColumnNames();
+		List<String> colTypes = r.getColumnTypes();
+		List<String> colRemarks = r.getColumnRemarks();
+		for(int i=0;i<colNames.size();i++) {
+			Map<String, Object> col = new LinkedHashMap<String, Object>();
+			String name = colNames.get(i);
+			String type = getType(colTypes.get(i));
+			String remarks = colRemarks.get(i);
+			
+			col.put("type", type);
+			if(remarks!=null && !remarks.equals("")) {
+				col.put("description", remarks);
+			}
+			properties.put(name, col);
+		}
+		def.put("properties", properties);
+		return def;
 	}
 	
 	String getQualifiedName(Relation t) {
