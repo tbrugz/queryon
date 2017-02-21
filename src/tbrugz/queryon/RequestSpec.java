@@ -115,6 +115,7 @@ public class RequestSpec {
 	
 	public static final String[] FILTERS_UNIPARAM = { "feq", "fne", "fgt", "fge", "flt", "fle" };
 	public static final String[] FILTERS_MULTIPARAM = { "fin", "fnin", "flk", "fnlk" };
+	public static final String[] FILTERS_MULTIPARAM_STRONLY = { "flk", "fnlk" };
 	public static final String[] FILTERS_BOOL = { "fnull", "fnotnull" };
 	
 	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 

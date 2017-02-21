@@ -41,7 +41,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-		log.info("request: query="+req.getQueryString());
+		log.info("request: path="+req.getPathInfo()+" ; query="+req.getQueryString());
 		Gson gson = new Gson();
 
 		// http://swagger.io/specification/
@@ -111,6 +111,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 
 		swagger.put("paths", paths);
 		
+		//XXX add definitions?
+		
 		resp.getWriter().write( gson.toJson(swagger) );
 	}
 	
@@ -137,6 +139,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		if(t instanceof View) {
 			View v = (View) t;
+			//XXXdone "p"+i - retrieve (query)
 			Integer paramCount = v.getParameterCount();
 			if(paramCount!=null) {
 				for(int i=1;i<=paramCount;i++) {
@@ -160,44 +163,150 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		 * or both and the parameter MUST be in "formData".
 		 */
 		List<String> colNames = t.getColumnNames();
-		List<String> colRemarks = t.getColumnRemarks();
+		//List<String> colRemarks = t.getColumnRemarks();
 		List<String> colTypes = t.getColumnTypes();
+
+		// parameter: fields
+		// http://stackoverflow.com/questions/36888626/defining-enum-for-array-in-swagger-2-0
+		{
+			Map<String, Object> pFields = new LinkedHashMap<String, Object>();
+			pFields.put("name", "fields");
+			pFields.put("in", "query");
+			pFields.put("description", "fields (columns) to be returned");
+			pFields.put("type", "array");
+			
+			Map<String, Object> pFieldsItems = new LinkedHashMap<String, Object>();
+			pFieldsItems.put("type", "string");
+			// fields separated by commas? https://github.com/swagger-api/swagger-ui/issues/713
+			pFieldsItems.put("enum", colNames);
+			pFields.put("items", pFieldsItems);
+			pFields.put("collectionFormat", "csv");
+			
+			parameters.add(pFields);
+		}
+		
+		// parameter: distinct
+		{
+			Map<String, Object> pDistinct = new LinkedHashMap<String, Object>();
+			pDistinct.put("name", "distinct");
+			pDistinct.put("in", "query");
+			pDistinct.put("description", "return only distinct tuples/records");
+			pDistinct.put("type", "boolean");
+			parameters.add(pDistinct);
+		}
+
+		// parameter: order
+		{
+			Map<String, Object> pOrder = new LinkedHashMap<String, Object>();
+			pOrder.put("name", "order");
+			pOrder.put("in", "query");
+			pOrder.put("description", "fields (columns) to order records by (append '-' to desc)");
+			pOrder.put("type", "array");
+			Map<String, Object> pFieldsItems = new LinkedHashMap<String, Object>();
+			pFieldsItems.put("type", "string");
+			//~XXX: fields separated by commas? https://github.com/swagger-api/swagger-ui/issues/713
+			List<String> colsOrder = new ArrayList<String>();
+			for(String c: colNames) {
+				colsOrder.add(c);
+				colsOrder.add("-"+c);
+			}
+			pFieldsItems.put("enum", colsOrder);
+			
+			pOrder.put("items", pFieldsItems);
+			pOrder.put("collectionFormat", "csv");
+			parameters.add(pOrder);
+		}
+
+		// parameters: lostrategy?
 		
 		//XXX: filters: allowedColumns? CLOB, ...
 		
-		List<String> fUni = Arrays.asList(RequestSpec.FILTERS_UNIPARAM);
-		for(int i=0;i<colNames.size();i++) {
-			String colName = colNames.get(i);
-			String remark = colRemarks.get(i);
-			String type = getType(colTypes.get(i));
-			if("file".equals(type)) {
-				continue;
-			}
-			
-			for(String f: fUni) {
-				Map<String, Object> param = new LinkedHashMap<String, Object>();
-				param.put("name", f+":"+colName);
-				param.put("in", "query");
-				if(remark!=null && !remark.equals("")) {
-					param.put("description", remark);
+		// parameter: filter: uniparam
+		{
+			List<String> fUni = Arrays.asList(RequestSpec.FILTERS_UNIPARAM);
+			for(int i=0;i<colNames.size();i++) {
+				String colName = colNames.get(i);
+				//String remark = colRemarks.get(i);
+				String type = getType(colTypes.get(i));
+				if("file".equals(type)) {
+					continue;
 				}
-				param.put("type", type);
 				
-				//param.put("required", false);
-				parameters.add(param);
+				for(String f: fUni) {
+					Map<String, Object> param = new LinkedHashMap<String, Object>();
+					param.put("name", f+":"+colName);
+					param.put("in", "query");
+					param.put("description", "filter '"+f+"' on field '"+colName+"'");
+					/*if(remark!=null && !remark.equals("")) {
+						param.put("description", remark);
+					}*/
+					param.put("type", type);
+					
+					//param.put("required", false);
+					parameters.add(param);
+				}
 			}
 		}
-		//XXX List<String> fMulti = Arrays.asList(RequestSpec.FILTERS_MULTIPARAM);
-		//XXX List<String> fBool = Arrays.asList(RequestSpec.FILTERS_BOOL);
-		
-		//XXX parameters: fields, distinct, order, (? lostrategy)
-		//XXXdone "p"+i - retrieve (query)
+
+		// parameter: filter: multiparam
+		{
+			List<String> fMulti = Arrays.asList(RequestSpec.FILTERS_MULTIPARAM);
+			List<String> fMultiStrOnly = Arrays.asList(RequestSpec.FILTERS_MULTIPARAM_STRONLY);
+			for(int i=0;i<colNames.size();i++) {
+				String colName = colNames.get(i);
+				//String remark = colRemarks.get(i);
+				String type = getType(colTypes.get(i));
+				if("file".equals(type)) {
+					continue;
+				}
+				
+				for(String f: fMulti) {
+					Map<String, Object> param = new LinkedHashMap<String, Object>();
+					param.put("name", f+":"+colName);
+					param.put("in", "query");
+					param.put("description", "filter '"+f+"' on field '"+colName+"'");
+					/*if(remark!=null && !remark.equals("")) {
+						param.put("description", remark);
+					}*/
+					param.put("type", "array");
+					Map<String, Object> items = new LinkedHashMap<String, Object>();
+					items.put("type", fMultiStrOnly.contains(f)?"string":type);
+					param.put("items", items);
+					param.put("collectionFormat", "multi");
+					parameters.add(param);
+				}
+			}
+		}
+
+		// parameter: filter: bool
+		{
+			List<String> fBool = Arrays.asList(RequestSpec.FILTERS_BOOL);
+			for(int i=0;i<colNames.size();i++) {
+				String colName = colNames.get(i);
+				String type = getType(colTypes.get(i));
+				if("file".equals(type)) {
+					continue;
+				}
+				
+				for(String f: fBool) {
+					Map<String, Object> param = new LinkedHashMap<String, Object>();
+					param.put("name", f+":"+colName);
+					param.put("in", "query");
+					param.put("description", "filter '"+f+"' on field '"+colName+"'");
+					param.put("type", "boolean");
+					
+					//param.put("required", false);
+					parameters.add(param);
+				}
+			}
+		}
 		
 		//blob: valuefield, mimetype, mimefield, filename, filenamefield
 		//updateparams: updatemax, updatemin, v:<xxx>
 		//"p"+i -update (uk)
 		//bodyparamname?
 
+		// parameter: limit
 		{
 			Map<String, Object> pLimit = new LinkedHashMap<String, Object>();
 			pLimit.put("name", "limit");
@@ -208,6 +317,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			parameters.add(pLimit);
 		}
 
+		// parameter: offset
 		{
 			Map<String, Object> pOffset = new LinkedHashMap<String, Object>();
 			pOffset.put("name", "offset");
@@ -218,6 +328,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			parameters.add(pOffset);
 		}
 		
+		//XXX add 'responses'
 		oper.put("parameters", parameters);
 		return oper;
 	}
