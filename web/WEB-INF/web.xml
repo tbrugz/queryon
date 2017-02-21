@@ -86,6 +86,11 @@
 		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
 	</servlet>
 	
+	<servlet>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.SwaggerServlet</servlet-class>
+	</servlet>
+	
 	<!-- <servlet>
 		<servlet-name>QuartzInitializer</servlet-name>
 		<servlet-class>org.quartz.ee.servlet.QuartzInitializerServlet</servlet-class>
@@ -149,6 +154,11 @@
 	<servlet-mapping>
 		<servlet-name>MarkdownServlet</servlet-name>
 		<url-pattern>/md/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<url-pattern>/swagger/*</url-pattern>
 	</servlet-mapping>
 
 	<filter>

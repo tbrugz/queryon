@@ -113,6 +113,10 @@ public class RequestSpec {
 	final Set<String> filterNull = new HashSet<String>();
 	final Set<String> filterNotNull = new HashSet<String>();
 	
+	public static final String[] FILTERS_UNIPARAM = { "feq", "fne", "fgt", "fge", "flt", "fle" };
+	public static final String[] FILTERS_MULTIPARAM = { "fin", "fnin", "flk", "fnlk" };
+	public static final String[] FILTERS_BOOL = { "fnull", "fnotnull" };
+	
 	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 
 	//XXX: add filter: between (btwn)?
 	

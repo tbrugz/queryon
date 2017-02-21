@@ -188,6 +188,10 @@ public class SchemaModelUtils {
 		return modelReq;
 	}
 	
+	public static String getDefaultModelId(ServletContext context) {
+		return (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+	}
+	
 	public static Constraint getPK(Relation relation) {
 		Constraint pk = null;
 		List<Constraint> conss = relation.getConstraints();

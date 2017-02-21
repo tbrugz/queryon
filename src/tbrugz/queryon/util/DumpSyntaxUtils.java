@@ -57,4 +57,8 @@ public class DumpSyntaxUtils {
 		return null;
 	}
 
+	public Map<String, DumpSyntax> getSyntaxesByFormat() {
+		return syntaxesByFormat;
+	}
+
 }
