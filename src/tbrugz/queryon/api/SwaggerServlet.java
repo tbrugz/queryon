@@ -56,8 +56,20 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		swagger.put("info", info);
 		
-		String host = InetAddress.getLocalHost().getHostName().toLowerCase();
+		String scheme = req.getScheme();
+		String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+		int port = req.getServerPort();
 		String contextPath = getServletContext().getContextPath();
+		//log.info("request: scheme="+scheme+" ; hostname="+hostname+" ; port="+port+" ; contextPath="+contextPath);
+		
+		String host = hostname;
+		if( ("http".equals(scheme) && port==80) ||
+			("https".equals(scheme) && port==443)) {
+			// nothing to do yet
+		}
+		else {
+			host += ":"+port;
+		}
 		
 		swagger.put("host", host);
 		swagger.put("basePath", contextPath + "/q");

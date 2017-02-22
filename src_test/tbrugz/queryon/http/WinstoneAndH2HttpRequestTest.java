@@ -881,5 +881,27 @@ public class WinstoneAndH2HttpRequestTest {
 		//operation = e.getValue().getAsJsonObject();
 		Assert.assertEquals("/PUBLIC.EMP.{syntax}", key);
 	}
+
+	@SuppressWarnings("unused")
+	@Test
+	public void swaggerGsonCall() throws IOException, ParserConfigurationException, SAXException {
+		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
+		JsonParser parser = new JsonParser();
+		//System.out.println(jsonStr);
+		JsonElement json = parser.parse(jsonStr);
+		JsonObject jsonObject = json.getAsJsonObject();
+		JsonObject paths = jsonObject.get("paths").getAsJsonObject();
+		for(Entry<String, JsonElement> e: paths.entrySet()) {
+			String key = e.getKey();
+			//JsonObject operation = e.getValue().getAsJsonObject();
+			//System.out.println(key+" >>> "+operation);
+			String path = key.replaceFirst("\\{syntax\\}", "json");
+			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path;
+			//System.out.println("swaggerGsonCall: "+url);
+			JsonElement resp = parser.parse(getContentFromUrl(url));
+			//String resp = getContentFromUrl(url);
+			//System.out.println("swaggerGsonCall: resp = "+resp);
+		}
+	}
 	
 }
