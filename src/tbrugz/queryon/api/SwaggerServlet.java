@@ -27,6 +27,7 @@ import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -37,6 +38,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(SwaggerServlet.class);
+	
+	static final String PARAM_FILTERS = "filters";
+	static final String PARAM_FILTERS_EXCEPT = "filters-except"; //XXX: add 'filters-except'
 	
 	List<String> syntaxes;
 
@@ -57,7 +61,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("info", info);
 		
 		String scheme = req.getScheme();
-		String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+		//String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+		String hostname = InetAddress.getLocalHost().getCanonicalHostName().toLowerCase();
 		int port = req.getServerPort();
 		String contextPath = getServletContext().getContextPath();
 		//log.info("request: scheme="+scheme+" ; hostname="+hostname+" ; port="+port+" ; contextPath="+contextPath);
@@ -94,6 +99,17 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		String modelId = SchemaModelUtils.getModelId(req);
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
 		String defaultModelId = SchemaModelUtils.getDefaultModelId(context);
+
+		//tags
+		generateTags(swagger, model);
+		
+		//filters
+		List<String> filters = null;
+		String filtersParam = req.getParameter(PARAM_FILTERS);
+		if(filtersParam!=null) {
+			filters = new ArrayList<String>();
+			filters.addAll(Arrays.asList(filtersParam.split(",")));
+		}
 		
 		String urlAppend = "";
 		if( !StringUtils.equalsNullsAllowed(modelId, defaultModelId)) {
@@ -105,7 +121,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		//Table
 		for(Table t: model.getTables()) {
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			operations.put("get", createGetOper(t));
+			operations.put("get", createGetOper(t, filters));
 			
 			//XXX: add insert/update/delete
 			
@@ -115,7 +131,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		//View
 		for(View v: model.getViews()) {
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			operations.put("get", createGetOper(v));
+			operations.put("get", createGetOper(v, filters));
 			
 			paths.put("/"+getQualifiedName(v)+".{syntax}"+urlAppend, operations);
 		}
@@ -132,13 +148,48 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			definitions.put(getQualifiedName(t), createDefinition(t));
 		}
 		
+		//XXX security
+		// http://swagger.io/specification/#securityDefinitionsObject
+		// http://swagger.io/specification/#securityRequirementObject
+		// type: "basic", "apiKey" or "oauth2"
+		
 		resp.getWriter().write( gson.toJson(swagger) );
 	}
 	
-	Map<String, Object> createGetOper(Relation t) {
+	void generateTags(Map<String, Object> swagger, SchemaModel model) {
+		Set<String> strTags = new TreeSet<String>();
+		for(DBObject dbo: model.getTables()) {
+			strTags.add(dbo.getSchemaName());
+			/*if(strTags.contains(dbo.getSchemaName())) { continue; }
+			Map<String, Object> tag = new LinkedHashMap<String, Object>();
+			tag.put("name", dbo.getSchemaName());
+			tags.add(tag);*/
+		}
+		for(DBObject dbo: model.getViews()) {
+			strTags.add(dbo.getSchemaName());
+		}
+		//XXX executables
+		
+		strTags.remove("");
+		List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
+		for(String st: strTags) {
+			Map<String, Object> tag = new LinkedHashMap<String, Object>();
+			tag.put("name", st);
+			tags.add(tag);
+		}
+		swagger.put("tags", tags);
+	}
+	
+	Map<String, Object> createGetOper(Relation t, List<String> filters) {
 		Map<String, Object> oper = new LinkedHashMap<String, Object>();
 		//oper.put("summary", "retrieve values from "+t.getQualifiedName());
 		String fullName = getQualifiedName(t);
+		String schema = t.getSchemaName();
+		if(schema!=null && !schema.equals("")) {
+			List<String> tags = new ArrayList<String>();
+			tags.add(schema);
+			oper.put("tags", tags);
+		}
 		oper.put("summary", "retrieve values from " + fullName );
 		oper.put("description", "");
 		oper.put("operationId", "get."+fullName);
@@ -223,7 +274,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			pOrder.put("type", "array");
 			Map<String, Object> pFieldsItems = new LinkedHashMap<String, Object>();
 			pFieldsItems.put("type", "string");
-			//~XXX: fields separated by commas? https://github.com/swagger-api/swagger-ui/issues/713
+			// fields separated by commas, see: https://github.com/swagger-api/swagger-ui/issues/713
 			List<String> colsOrder = new ArrayList<String>();
 			for(String c: colNames) {
 				colsOrder.add(c);
@@ -252,6 +303,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 				}
 				
 				for(String f: fUni) {
+					if(filters!=null && !filters.contains(f)) { continue; }
 					Map<String, Object> param = new LinkedHashMap<String, Object>();
 					param.put("name", f+":"+colName);
 					param.put("in", "query");
@@ -280,6 +332,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 				}
 				
 				for(String f: fMulti) {
+					if(filters!=null && !filters.contains(f)) { continue; }
 					Map<String, Object> param = new LinkedHashMap<String, Object>();
 					param.put("name", f+":"+colName);
 					param.put("in", "query");
@@ -308,6 +361,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 				}
 				
 				for(String f: fBool) {
+					if(filters!=null && !filters.contains(f)) { continue; }
 					Map<String, Object> param = new LinkedHashMap<String, Object>();
 					param.put("name", f+":"+colName);
 					param.put("in", "query");
