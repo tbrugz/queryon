@@ -34,6 +34,18 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.StringUtils;
 
+/*
+ * Servlet mappings:
+ * 
+ * QueryOn: /q/*
+ * QueryOnSchema: /qos/*
+ * QueryOnInstant: /qoi/* (same api as QueryOn)
+ * 
+ * DiffServlet: /qdiff/*
+ * DataDiffServlet: /datadiff/*
+ * Diff2QServlet: /diff2q/*
+ * DiffManyServlet: /diffmany/*
+ */
 public class SwaggerServlet extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
