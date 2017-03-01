@@ -303,7 +303,7 @@
 		<copy todir="web/swagger-ui">
 			<fileset dir="${download.dir}/swagger-ui/unzipped/swagger-ui-${version.swagger}/dist" includes="**/*"/>
 		</copy>
-		
+		<copy tofile="web/swagger-ui/index.html" file="web/swagger-ui-index.html" />
 	</target>
 	
 </project>
