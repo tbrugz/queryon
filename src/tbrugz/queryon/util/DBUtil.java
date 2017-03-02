@@ -157,7 +157,8 @@ public class DBUtil {
 	}
 	
 	public static String getColumnTypeFromColName(Relation relation, String colname) {
-		int idx = relation.getColumnNames().indexOf(colname.toUpperCase());
+		int idx = relation.getColumnNames().indexOf(colname);
+		if(idx<0) { idx = relation.getColumnNames().indexOf(colname.toUpperCase()); }
 		if(idx<0) { return null; }
 		return relation.getColumnTypes().get(idx);
 	}
