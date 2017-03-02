@@ -132,12 +132,21 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		//Table
 		for(Table t: model.getTables()) {
+			{
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
 			operations.put("get", createGetOper(t, filters));
-			
-			//XXX: add insert/update/delete
-			
 			paths.put("/"+getQualifiedName(t)+".{syntax}"+urlAppend, operations);
+			}
+			
+			{
+			Map<String, Object> operations = new LinkedHashMap<String, Object>();
+			//insert:POST
+			operations.put("post", createInsertOper(t));
+			
+			//XXX: add update:PATCH/delete:DELETE
+			
+			paths.put("/"+getQualifiedName(t)+urlAppend, operations);
+			}
 		}
 		
 		//View
@@ -415,6 +424,62 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		//XXX add 'responses', possibly with schema (schema is json-only?)
 		oper.put("parameters", parameters);
+		return oper;
+	}
+	
+	Map<String, Object> createInsertOper(Relation r) {
+		Map<String, Object> oper = new LinkedHashMap<String, Object>();
+		String fullName = getQualifiedName(r);
+		String schema = r.getSchemaName();
+		if(schema!=null && !schema.equals("")) {
+			List<String> tags = new ArrayList<String>();
+			tags.add(schema);
+			oper.put("tags", tags);
+		}
+		oper.put("summary", "insert values into " + fullName );
+		oper.put("description", "");
+		oper.put("operationId", "insert."+fullName);
+		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
+		
+		if(r instanceof Table) {
+			Table t = (Table) r;
+			Constraint cpk = t.getPKConstraint();
+			if(cpk!=null) {
+				List<String> cols = cpk.getUniqueColumns();
+				for(int i=1;i<=cols.size();i++) {
+					Map<String, Object> pPk = new LinkedHashMap<String, Object>();
+					String colName = cols.get(i-1);
+					pPk.put("name", "p"+i);
+					pPk.put("in", "formData");
+					pPk.put("description", "parameter number "+i+" - value for field "+colName);
+					String ctype = DBUtil.getColumnTypeFromColName(r, colName);
+					String type = getType(ctype);
+					//pPk.put("type", "string");
+					pPk.put("type", type);
+					parameters.add(pPk);
+				}
+			}
+		}
+		
+		List<String> colNames = r.getColumnNames();
+		List<String> colTypes = r.getColumnTypes();
+		
+		for(int i=0;i<colNames.size();i++) {
+			Map<String, Object> pValue = new LinkedHashMap<String, Object>();
+			String colName = colNames.get(i);
+			pValue.put("name", "v:"+colNames.get(i));
+			pValue.put("in", "formData");
+			pValue.put("description", "value for field "+colName); //+" of type "+colTypes.get(i));
+			//String ctype = DBUtil.getColumnTypeFromColName(r, colName);
+			String type = getType(colTypes.get(i));
+			pValue.put("type", type);
+			parameters.add(pValue);
+		}
+		
+		//XXX reqspec.updatePartValues? maxUpdates/minUpdates?
+		
+		oper.put("parameters", parameters);
+		// responses: 201- created ; 500- error
 		return oper;
 	}
 	
