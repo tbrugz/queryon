@@ -121,11 +121,11 @@ function doSave() {
 		"&bodyparamname=BODY";
 		//"&v:BODY=" + encodeURIComponent( editor.getValue() );
 	var messageBody = editor.getValue();
-	var method = "POST"; //post: insert ; put: update
+	var method = "POST"; //post: insert ; patch: update
 	// TODO: add "now"
 	if(id) { // update
 		saveUrl += "p1="+encodeURIComponent(id);
-		method = "PUT";
+		method = "PATCH";
 		payload += "&v:UPDATED_BY="+encodeURIComponent(username);
 		payload += "&v:UPDATED_AT="+encodeURIComponent(now.toISOString());
 	}

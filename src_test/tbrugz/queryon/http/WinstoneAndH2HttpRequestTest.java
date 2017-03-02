@@ -251,18 +251,18 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPut_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PUT");
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PUT");
-		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1?v:NAME=newname&method=PUT");
+		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PATCH");
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PATCH");
+		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1?v:NAME=newname&method=PATCH");
 		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1");
 		//HttpPost httpPut = new HttpPost(baseUrl+"/EMP/1");
 
 		//List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-		//nvps.add(new BasicNameValuePair("method", "PUT"));
+		//nvps.add(new BasicNameValuePair("method", "PATCH"));
 		//nvps.add(new BasicNameValuePair("v:NAME", "newname"));
 		//httpPut.setEntity(new UrlEncodedFormEntity(nvps));
 		
-		System.out.println("PUT-uri: "+httpPut.getRequestLine());
+		System.out.println("PATCH-uri: "+httpPut.getRequestLine());
 		//System.out.println(EntityUtils.toString(new UrlEncodedFormEntity(nvps)));		
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -275,7 +275,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPut_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?_method=PUT");
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?_method=PATCH");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		
@@ -705,7 +705,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPut_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&_method=PUT");
+		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&_method=PATCH");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		System.out.println("content: "+getContent(response1));

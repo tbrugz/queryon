@@ -176,7 +176,7 @@ openUploadDialog = function(id) {
 		+ '</div>'
 		+ "<div id='dialog-messages'></div></div>";
 	dialogHTML += "<div><form name='upload-form' id='upload-form' enctype='multipart/form-data' method='post' >";
-	dialogHTML += (id?"<input type='hidden' name='_method' value='PUT'/><input type='hidden' name='v:ID' value='"+id+"'/>":"")
+	dialogHTML += (id?"<input type='hidden' name='_method' value='PATCH'/><input type='hidden' name='v:ID' value='"+id+"'/>":"")
 	dialogHTML += "<div class='field'><label>file: <input type='file' id='v:BINARY_DATA' name='v:BINARY_DATA' onchange='onFileChange();'/>"+" <span class='remarks'>binary content</span>"+"</label></div> ";
 	dialogHTML += "<div class='field'><label>path: <input type='text' id='v:PATH' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label></div> ";
 	dialogHTML += "</form></div> ";

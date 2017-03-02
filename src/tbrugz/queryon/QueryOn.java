@@ -230,8 +230,9 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
 	
 	public static final String METHOD_GET = "GET";
+	public static final String METHOD_PATCH = "PATCH";
 	public static final String METHOD_POST = "POST";
-	public static final String METHOD_PUT = "PUT";
+	//public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	
 	final Properties prop = new ParametrizedProperties();
@@ -603,8 +604,8 @@ public class QueryOn extends HttpServlet {
 				else if(reqspec.httpMethod.equals(METHOD_POST)) {
 					atype = ActionType.INSERT; //upsert?
 				}
-				else if(reqspec.httpMethod.equals(METHOD_PUT)) {
-					//XXX: PUT should be idempotent ... maybe should be used for INSERT?
+				else if(reqspec.httpMethod.equals(METHOD_PATCH)) {
+					//XXXdone: PUT should be idempotent ... maybe should be used for INSERT? use PATCH instead of PUT?
 					atype = ActionType.UPDATE;
 				}
 				else if(reqspec.httpMethod.equals(METHOD_DELETE)) {
