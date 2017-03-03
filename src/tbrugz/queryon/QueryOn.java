@@ -520,11 +520,11 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(BadRequestException e) {
 			//e.printStackTrace();
+			//log.warn("BRE: "+e.getMessage()+
+			//		(e.internalMessage!=null?" ; internal="+e.internalMessage:"")); 
 			resp.setStatus(e.getCode());
 			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
-			//log.warn("BRE: "+e.getMessage()+
-			//		(e.internalMessage!=null?" ; internal="+e.internalMessage:"")); 
 		}
 		catch(ServletException e) {
 			//e.printStackTrace();
@@ -568,6 +568,7 @@ public class QueryOn extends HttpServlet {
 		}
 		else if(ACTION_QUERY_ANY.equals(reqspec.object)) {
 			if(! METHOD_POST.equals(reqspec.httpMethod)) {
+				// XXX use 405: SC_METHOD_NOT_ALLOWED?
 				throw new BadRequestException(reqspec.object+": method must be POST");
 			}
 			atype = ActionType.SELECT_ANY;

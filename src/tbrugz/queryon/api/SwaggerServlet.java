@@ -425,7 +425,13 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			parameters.add(pOffset);
 		}
 		
-		//XXX add 'responses', possibly with schema (schema is json-only?)
+		/*
+		 * XXX add 'responses', possibly with schema (schema is json-only?)
+		 * errors: 400 client error, 403 forbidden, 500 internal error
+		 * ok: 200 ok
+		 * insert: 201 created
+		 * delete: 404 not found
+		 */
 		oper.put("parameters", parameters);
 		return oper;
 	}
