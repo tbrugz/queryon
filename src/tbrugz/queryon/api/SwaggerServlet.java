@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.QueryOn;
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
@@ -140,10 +141,12 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			
 			{
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			//insert:POST
-			operations.put("post", createInsertOper(t));
+			// insert:POST
+			operations.put("post", createUpdateOper(t, ActionType.INSERT));
+			// update:PATCH (was PUT)
+			operations.put("patch", createUpdateOper(t, ActionType.UPDATE));
 			
-			//XXX: add update:PATCH/delete:DELETE
+			//XXX: delete:DELETE
 			
 			paths.put("/"+getQualifiedName(t)+urlAppend, operations);
 			}
@@ -427,7 +430,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		return oper;
 	}
 	
-	Map<String, Object> createInsertOper(Relation r) {
+	Map<String, Object> createUpdateOper(Relation r, ActionType action) {
 		Map<String, Object> oper = new LinkedHashMap<String, Object>();
 		String fullName = getQualifiedName(r);
 		String schema = r.getSchemaName();
@@ -436,28 +439,32 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			tags.add(schema);
 			oper.put("tags", tags);
 		}
-		oper.put("summary", "insert values into " + fullName );
+		oper.put("summary", ( ActionType.INSERT.equals(action)?"insert values into ":"update values from " ) + fullName );
 		oper.put("description", "");
-		oper.put("operationId", "insert."+fullName);
+		oper.put("operationId", action + "."+fullName);
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
 		
-		if(r instanceof Table) {
-			Table t = (Table) r;
-			Constraint cpk = t.getPKConstraint();
-			if(cpk!=null) {
-				List<String> cols = cpk.getUniqueColumns();
-				for(int i=1;i<=cols.size();i++) {
-					Map<String, Object> pPk = new LinkedHashMap<String, Object>();
-					String colName = cols.get(i-1);
-					pPk.put("name", "p"+i);
-					pPk.put("in", "formData");
-					pPk.put("description", "parameter number "+i+" - value for field "+colName);
-					String ctype = DBUtil.getColumnTypeFromColName(r, colName);
-					String type = getType(ctype);
-					//pPk.put("type", "string");
-					pPk.put("type", type);
-					parameters.add(pPk);
-				}
+		/*
+		 * insert & update would be better to use formData - but in non-POST methods 'application/x-www-form-urlencoded' body is not processed
+		 * see at org.apache.catalina.connector: Connector & Request
+		 */
+		String inParam = ActionType.INSERT.equals(action) ? "formData" : "query";
+		
+		Constraint cpk = SchemaModelUtils.getPK(r);
+		//Constraint cpk = t.getPKConstraint();
+		if(cpk!=null) {
+			List<String> cols = cpk.getUniqueColumns();
+			for(int i=1;i<=cols.size();i++) {
+				Map<String, Object> pPk = new LinkedHashMap<String, Object>();
+				String colName = cols.get(i-1);
+				pPk.put("name", "p"+i);
+				pPk.put("in", inParam);
+				pPk.put("description", "parameter number "+i+" - value for field "+colName);
+				String ctype = DBUtil.getColumnTypeFromColName(r, colName);
+				String type = getType(ctype);
+				//pPk.put("type", "string");
+				pPk.put("type", type);
+				parameters.add(pPk);
 			}
 		}
 		
@@ -468,7 +475,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			Map<String, Object> pValue = new LinkedHashMap<String, Object>();
 			String colName = colNames.get(i);
 			pValue.put("name", "v:"+colNames.get(i));
-			pValue.put("in", "formData");
+			pValue.put("in", inParam);
 			pValue.put("description", "value for field "+colName); //+" of type "+colTypes.get(i));
 			//String ctype = DBUtil.getColumnTypeFromColName(r, colName);
 			String type = getType(colTypes.get(i));
@@ -477,6 +484,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 		
 		//XXX reqspec.updatePartValues? maxUpdates/minUpdates?
+		
+		//XXX ActionType==update/PATCH: add "filterByXtraParams"
 		
 		oper.put("parameters", parameters);
 		// responses: 201- created ; 500- error
