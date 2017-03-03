@@ -145,8 +145,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			operations.put("post", createUpdateOper(t, ActionType.INSERT));
 			// update:PATCH (was PUT)
 			operations.put("patch", createUpdateOper(t, ActionType.UPDATE));
-			
-			//XXX: delete:DELETE
+			// delete:DELETE
+			operations.put("delete", createUpdateOper(t, ActionType.DELETE));
 			
 			paths.put("/"+getQualifiedName(t)+urlAppend, operations);
 			}
@@ -439,7 +439,11 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			tags.add(schema);
 			oper.put("tags", tags);
 		}
-		oper.put("summary", ( ActionType.INSERT.equals(action)?"insert values into ":"update values from " ) + fullName );
+		String summary = ActionType.INSERT.equals(action)?"insert values into ":
+			ActionType.UPDATE.equals(action)?"update values from ":
+			ActionType.DELETE.equals(action)?"delete values from ":
+			"unknown operation with ";
+		oper.put("summary", summary + fullName );
 		oper.put("description", "");
 		oper.put("operationId", action + "."+fullName);
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
@@ -468,24 +472,26 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			}
 		}
 		
-		List<String> colNames = r.getColumnNames();
-		List<String> colTypes = r.getColumnTypes();
-		
-		for(int i=0;i<colNames.size();i++) {
-			Map<String, Object> pValue = new LinkedHashMap<String, Object>();
-			String colName = colNames.get(i);
-			pValue.put("name", "v:"+colNames.get(i));
-			pValue.put("in", inParam);
-			pValue.put("description", "value for field "+colName); //+" of type "+colTypes.get(i));
-			//String ctype = DBUtil.getColumnTypeFromColName(r, colName);
-			String type = getType(colTypes.get(i));
-			pValue.put("type", type);
-			parameters.add(pValue);
+		if(ActionType.INSERT.equals(action) || ActionType.UPDATE.equals(action)) {
+			List<String> colNames = r.getColumnNames();
+			List<String> colTypes = r.getColumnTypes();
+			
+			for(int i=0;i<colNames.size();i++) {
+				Map<String, Object> pValue = new LinkedHashMap<String, Object>();
+				String colName = colNames.get(i);
+				pValue.put("name", "v:"+colNames.get(i));
+				pValue.put("in", inParam);
+				pValue.put("description", "value for field "+colName); //+" of type "+colTypes.get(i));
+				//String ctype = DBUtil.getColumnTypeFromColName(r, colName);
+				String type = getType(colTypes.get(i));
+				pValue.put("type", type);
+				parameters.add(pValue);
+			}
 		}
 		
 		//XXX reqspec.updatePartValues? maxUpdates/minUpdates?
 		
-		//XXX ActionType==update/PATCH: add "filterByXtraParams"
+		//XXX ActionType==update/PATCH | delete: add "filterByXtraParams"
 		
 		oper.put("parameters", parameters);
 		// responses: 201- created ; 500- error
