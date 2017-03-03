@@ -232,7 +232,7 @@ public class QueryOn extends HttpServlet {
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_PATCH = "PATCH";
 	public static final String METHOD_POST = "POST";
-	//public static final String METHOD_PUT = "PUT";
+	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	
 	final Properties prop = new ParametrizedProperties();
@@ -608,6 +608,10 @@ public class QueryOn extends HttpServlet {
 					//XXXdone: PUT should be idempotent ... maybe should be used for INSERT? use PATCH instead of PUT?
 					atype = ActionType.UPDATE;
 				}
+				else if(reqspec.httpMethod.equals(METHOD_PUT)) {
+					// for backward compatibility
+					atype = ActionType.UPDATE;
+				}
 				else if(reqspec.httpMethod.equals(METHOD_DELETE)) {
 					atype = ActionType.DELETE;
 				}
@@ -778,6 +782,12 @@ public class QueryOn extends HttpServlet {
 		doGet(req, resp);
 	}
 
+	//@Override
+	protected void doPatch(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doGet(req, resp);
+	}
+
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -788,6 +798,17 @@ public class QueryOn extends HttpServlet {
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		doGet(req, resp);
+	}
+	
+	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String method = req.getMethod();
+		if (method.equals(METHOD_PATCH)) {
+			doPatch(req, resp);
+		}
+		else {
+			super.service(req, resp);
+		}
 	}
 	
 	// XXX should use RequestSpec for parameters?
