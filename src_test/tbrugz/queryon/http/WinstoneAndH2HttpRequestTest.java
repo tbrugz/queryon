@@ -875,11 +875,23 @@ public class WinstoneAndH2HttpRequestTest {
 		String key = e.getKey();
 		//JsonObject operation = e.getValue().getAsJsonObject();
 		Assert.assertEquals("/PUBLIC.DEPT.{syntax}", key);
+		Assert.assertTrue(e.getValue().getAsJsonObject().get("get")!=null);
 		
 		e = it.next();
 		key = e.getKey();
 		//operation = e.getValue().getAsJsonObject();
+		Assert.assertEquals("/PUBLIC.DEPT", key);
+		Assert.assertTrue(e.getValue().getAsJsonObject().get("post")!=null);
+
+		e = it.next();
+		key = e.getKey();
 		Assert.assertEquals("/PUBLIC.EMP.{syntax}", key);
+		Assert.assertTrue(e.getValue().getAsJsonObject().get("get")!=null);
+
+		e = it.next();
+		key = e.getKey();
+		Assert.assertEquals("/PUBLIC.EMP", key);
+		Assert.assertTrue(e.getValue().getAsJsonObject().get("post")!=null);
 	}
 
 	@SuppressWarnings("unused")
@@ -893,8 +905,12 @@ public class WinstoneAndH2HttpRequestTest {
 		JsonObject paths = jsonObject.get("paths").getAsJsonObject();
 		for(Entry<String, JsonElement> e: paths.entrySet()) {
 			String key = e.getKey();
-			//JsonObject operation = e.getValue().getAsJsonObject();
+			JsonObject operation = e.getValue().getAsJsonObject();
 			//System.out.println(key+" >>> "+operation);
+			if(operation.get("get")==null) {
+				// testing get (retrieve) operations only
+				continue;
+			}
 			String path = key.replaceFirst("\\{syntax\\}", "json");
 			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path;
 			//System.out.println("swaggerGsonCall: "+url);
