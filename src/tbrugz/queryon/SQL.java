@@ -495,11 +495,24 @@ public class SQL {
 	
 	public void addParameter(Object value, String type) {
 		if(value instanceof String) {
+			// XXX test for empty string ("")? 
 			if(DBUtil.INT_COL_TYPES_LIST.contains(type.toUpperCase())) {
-				bindParameterValues.add(Long.parseLong((String) value));
+				try {
+					bindParameterValues.add(Long.parseLong((String) value));
+				}
+				catch(NumberFormatException e) {
+					log.warn("Error parsing long '"+value+"', trying as String");
+					bindParameterValues.add(value);
+				}
 			}
 			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type.toUpperCase())) {
-				bindParameterValues.add(Double.parseDouble((String) value));
+				try {
+					bindParameterValues.add(Double.parseDouble((String) value));
+				}
+				catch(NumberFormatException e) {
+					log.warn("Error parsing double '"+value+"', trying as String");
+					bindParameterValues.add(value);
+				}
 			}
 			else if(startsWithAny(type.toUpperCase(), DBUtil.DATE_COL_TYPES_LIST)) {
 				try {
