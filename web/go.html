@@ -45,7 +45,7 @@ loadSelectContent = function(oEvent) {
 		//XXX: packageName...
 		var e = execs.executable[i];
 		var option = '<option value="'+e.qualifiedName+'" params="'+e.params+'" grants="'+e.grants+'">'+
-			e.qualifiedName+(e.remarks!=null?" - "+e.remarks:"")+'</option>';
+			e.qualifiedName+(e.remarks?" - "+e.remarks:"")+'</option>';
 		select.innerHTML += option;
 	}
 	onExecChanged();

@@ -42,7 +42,7 @@ var mimeMap = {
 };
 
 var pagesUrl = 'p/';
-var qonUrl = 'q/QON_PAGES';
+var qonUrl = 'q/QON_PAGES'; //XXX: ignore-case?
 var qonEditorUrl = 'pages-editor.html'
 var pages = [];
 
@@ -189,7 +189,7 @@ openUploadDialog = function(id) {
 
 	if(id) {
 		var page = findPage(id);
-		document.getElementsByName('v:PATH')[0].value = page.PATH;
+		document.getElementsByName('v:PATH')[0].value = page.PATH;// || page.path; // ???
 	}
 }
 
