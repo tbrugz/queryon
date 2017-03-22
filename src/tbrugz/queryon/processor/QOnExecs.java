@@ -198,7 +198,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 				PreparedStatement stmt = conn.prepareStatement(body);
 				ParameterMetaData pmd = stmt.getParameterMetaData();
 				int pc = pmd.getParameterCount();
-				log.info("addExecutable: "+TYPE_SCRIPT+": parameter count = "+pc);
+				log.info("addExecutable: "+e.getQualifiedName()+" ["+TYPE_SCRIPT+"]: parameter count = "+pc);
 				List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
 				for(int i=0;i<pc;i++) {
 					eps.add(new ExecutableParameter());

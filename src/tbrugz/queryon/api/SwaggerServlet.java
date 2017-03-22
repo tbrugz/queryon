@@ -537,10 +537,14 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
 		
 		List<ExecutableParameter> params = eo.getParams();
-		//int i=1;
+		int i=1;
 		for(ExecutableParameter ep: params) {
 			Map<String, Object> pPk = new LinkedHashMap<String, Object>();
+			//XXX: Executable parameters: use position or counter?
 			int position = ep.getPosition();
+			if(position<=0) {
+				position = i;
+			}
 			pPk.put("name", "p"+position);
 			pPk.put("in", "formData");
 			pPk.put("description", "parameter #"+position+
@@ -551,7 +555,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			//pPk.put("type", "string");
 			pPk.put("type", type);
 			parameters.add(pPk);
-			//i++;
+			i++;
 		}
 		
 		oper.put("parameters", parameters);
