@@ -1059,7 +1059,8 @@ public class QueryOn extends HttpServlet {
 		int outParamCount = 0;
 		Object retObject = null;
 		String sql = SQL.createExecuteSqlFromBody(eo, getUsername(currentUser) );
-		if(eo.getType()==DBObjectType.EXECUTABLE && sql!=null && !sql.equals("")) {
+		if((eo.getType()==DBObjectType.EXECUTABLE || eo.getType()==DBObjectType.SCRIPT)
+				&& sql!=null && !sql.equals("")) {
 		
 			//log.info("executing BODY: "+sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
@@ -1654,8 +1655,8 @@ public class QueryOn extends HttpServlet {
 		
 		String action = reqspec.params.get(0);
 		if("reload".equals(action)) {
-		doInit(req.getServletContext());
-		resp.getWriter().write("queryon config reloaded");
+			doInit(req.getServletContext());
+			resp.getWriter().write("queryon config reloaded");
 			return;
 		}
 		/*

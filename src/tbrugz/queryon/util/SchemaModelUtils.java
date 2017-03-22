@@ -86,7 +86,11 @@ public class SchemaModelUtils {
 			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[0]);
 			}
-			if(exec==null) { //search for SCRIPT...
+			//search for SCRIPT...
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.SCRIPT, objectParts[0]);
+			}
+			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.EXECUTABLE, objectParts[0]);
 			}
 		}
@@ -110,7 +114,11 @@ public class SchemaModelUtils {
 				exec = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getExecutables(), DBObjectType.FUNCTION, objectParts[1]);
 				if(exec!=null && !objectParts[0].equals(exec.getPackageName())) { exec = null; }
 			}
-			if(exec==null) { //search for SCRIPT...
+			//search for SCRIPT...
+			if(exec==null) {
+				exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.SCRIPT, objectParts[0], objectParts[1]);
+			}
+			if(exec==null) {
 				exec = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.EXECUTABLE, objectParts[0], objectParts[1]);
 			}
 		}

@@ -187,8 +187,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		}
 		
 		if(execType.equalsIgnoreCase(TYPE_SCRIPT)) {
-			//execType = TYPE_SCRIPT;
-			e.setType(DBObjectType.EXECUTABLE); //XXX: SCRIPT?
+			//e.setType(DBObjectType.EXECUTABLE); //XXXdone: SCRIPT
+			e.setType(DBObjectType.SCRIPT);
 			e.setBody(body);
 			if("".equals(e.getPackageName())) {
 				e.setPackageName(null);

@@ -232,13 +232,13 @@ public class RequestSpec {
 		if(objectTmp == null || objectTmp.equals("")) {
 			//first part may be empty
 			if(URIpartz.size()>0) {
-			objectTmp = URIpartz.remove(0);
-		}
+				objectTmp = URIpartz.remove(0);
+			}
 		}
 		for(int i=0;i<prefixesToIgnore;i++) {
 			if(URIpartz.size()>0) {
-			objectTmp = URIpartz.remove(0);
-		}
+				objectTmp = URIpartz.remove(0);
+			}
 		}
 		object = objectTmp;
 		log.info("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
