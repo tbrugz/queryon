@@ -8,6 +8,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<queryon.version>0.6.2-SNAPSHOT</queryon.version>
+		<sqldump.version>0.9.15</sqldump.version>
 	</properties>
 	
 	<build>
@@ -63,7 +65,7 @@
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>queryon</artifactId>
-			<version>0.6.1-SNAPSHOT</version>
+			<version>${queryon.version}</version>
 			<type>war</type>
 		</dependency>
 
@@ -71,7 +73,7 @@
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>sqldump</artifactId>
-			<version>0.9.14-SNAPSHOT</version>
+			<version>${sqldump.version}</version>
 			<scope>runtime</scope>
 			<exclusions>
 				<exclusion>
