@@ -57,6 +57,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	static final String PARAM_FILTERS = "filters";
 	static final String PARAM_FILTERS_EXCEPT = "filters-except"; //XXX: add 'filters-except'
 	
+	boolean useCanonicalHost = false; //XXX: hostname: add property
+	
 	List<String> syntaxes;
 
 	@Override
@@ -76,8 +78,17 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("info", info);
 		
 		String scheme = req.getScheme();
-		//String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
-		String hostname = InetAddress.getLocalHost().getCanonicalHostName().toLowerCase();
+		
+		String serverName = req.getServerName();
+		//String localHostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+		String canonicalLocalHostname = InetAddress.getLocalHost().getCanonicalHostName().toLowerCase();
+		
+		String hostname = serverName;
+		if(useCanonicalHost) {
+			hostname = canonicalLocalHostname;
+		}
+		//log.info("serverName: "+serverName+" ; localHostname: "+localHostname+" ; canonicalLocalHostname: "+canonicalLocalHostname+" ; -> hostname: "+hostname);
+		
 		int port = req.getServerPort();
 		String contextPath = getServletContext().getContextPath();
 		//log.info("request: scheme="+scheme+" ; hostname="+hostname+" ; port="+port+" ; contextPath="+contextPath);
