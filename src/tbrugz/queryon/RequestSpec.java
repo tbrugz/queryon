@@ -191,7 +191,7 @@ public class RequestSpec {
 		String varUrl = req.getPathInfo();
 		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }
 		
-		String[] URIparts = varUrl.split("/");
+		String[] URIparts = varUrl!=null ? varUrl.split("/") : new String[]{} ;
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
 		log.debug("urlparts: "+URIpartz);
 		if(URIpartz.size()<2) { throw new BadRequestException("URL must have at least 1 part"); }
@@ -218,7 +218,7 @@ public class RequestSpec {
 			outputTypeStr = null;
 		}
 		*/
-		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
+		String lastURIPart = URIpartz.size()>0 ? URIpartz.remove(URIpartz.size()-1) : null;
 		outputTypeStr = getSyntax(lastURIPart, dsutils, prop);
 		
 		if(outputTypeStr!=null) {
@@ -595,7 +595,7 @@ public class RequestSpec {
 	static String getSyntax(String lastUriPart, DumpSyntaxUtils dsutils, Properties prop) {
 		String outputTypeStr = null;
 		
-		int lastDotIndex = lastUriPart.lastIndexOf('.');
+		int lastDotIndex = lastUriPart!=null ? lastUriPart.lastIndexOf('.') : -1;
 		String outputTypeStrTmp = null;
 		DumpSyntaxInt ds = null;
 		if(lastDotIndex > -1) {
