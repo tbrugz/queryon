@@ -192,17 +192,23 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	void generateTags(Map<String, Object> swagger, SchemaModel model) {
 		Set<String> strTags = new TreeSet<String>();
 		for(DBObject dbo: model.getTables()) {
-			strTags.add(dbo.getSchemaName());
+			if(dbo.getSchemaName()!=null) {
+				strTags.add(dbo.getSchemaName());
+			}
 			/*if(strTags.contains(dbo.getSchemaName())) { continue; }
 			Map<String, Object> tag = new LinkedHashMap<String, Object>();
 			tag.put("name", dbo.getSchemaName());
 			tags.add(tag);*/
 		}
 		for(DBObject dbo: model.getViews()) {
-			strTags.add(dbo.getSchemaName());
+			if(dbo.getSchemaName()!=null) {
+				strTags.add(dbo.getSchemaName());
+			}
 		}
 		for(DBObject dbo: model.getExecutables()) {
-			strTags.add(dbo.getSchemaName());
+			if(dbo.getSchemaName()!=null) {
+				strTags.add(dbo.getSchemaName());
+			}
 		}
 		
 		strTags.remove("");
