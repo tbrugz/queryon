@@ -29,6 +29,8 @@ import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -160,7 +162,14 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			paths.put("/"+getQualifiedName(v)+".{syntax}"+urlAppend, operations);
 		}
 		
-		//XXX Executable
+		//Executable
+		for(ExecutableObject eo: model.getExecutables()) {
+			Map<String, Object> operations = new LinkedHashMap<String, Object>();
+			operations.put("post", createExecuteOper(eo));
+			
+			//paths.put("/"+getQualifiedName(eo)+urlAppend, operations);
+			paths.put("/"+eo.getQualifiedName()+urlAppend, operations);
+		}
 
 		swagger.put("paths", paths);
 		
@@ -192,7 +201,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		for(DBObject dbo: model.getViews()) {
 			strTags.add(dbo.getSchemaName());
 		}
-		//XXX executables
+		for(DBObject dbo: model.getExecutables()) {
+			strTags.add(dbo.getSchemaName());
+		}
 		
 		strTags.remove("");
 		List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
@@ -504,6 +515,45 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		return oper;
 	}
 	
+	Map<String, Object> createExecuteOper(ExecutableObject eo) {
+		Map<String, Object> oper = new LinkedHashMap<String, Object>();
+		String fullName = eo.getQualifiedName();
+		String schema = eo.getSchemaName();
+		if(schema!=null && !schema.equals("")) {
+			List<String> tags = new ArrayList<String>();
+			tags.add(schema);
+			oper.put("tags", tags);
+		}
+		String summary = "execute "+eo.getDBObjectType().toString().toLowerCase()+" ";
+		oper.put("summary", summary + fullName );
+		oper.put("description", "");
+		oper.put("operationId", "execute."+fullName);
+		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
+		
+		List<ExecutableParameter> params = eo.getParams();
+		//int i=1;
+		for(ExecutableParameter ep: params) {
+			Map<String, Object> pPk = new LinkedHashMap<String, Object>();
+			int position = ep.getPosition();
+			pPk.put("name", "p"+position);
+			pPk.put("in", "formData");
+			pPk.put("description", "parameter #"+position+
+				( ep.getName()!=null?", named "+ep.getName():"" )+
+				( ep.getDataType()!=null?", with type "+ep.getDataType():"" )
+				);
+			String type = getType(ep.getDataType());
+			//pPk.put("type", "string");
+			pPk.put("type", type);
+			parameters.add(pPk);
+			//i++;
+		}
+		
+		oper.put("parameters", parameters);
+		
+		return oper;
+	}
+	
+	
 	Map<String, Object> createDefinition(Relation r) {
 		//type, required, properties
 		Map<String, Object> def = new LinkedHashMap<String, Object>();
@@ -541,7 +591,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	}
 	
 	String getType(String colType) {
+		if(colType==null) { return "string"; }
 		String upper = colType.toUpperCase();
+		
 		boolean isInt = DBUtil.INT_COL_TYPES_LIST.contains(upper);
 		if(isInt) {
 			return "integer";
