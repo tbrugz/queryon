@@ -149,7 +149,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			{
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
 			operations.put("get", createGetOper(t, filters));
-			paths.put("/"+getQualifiedName(t)+".{syntax}"+urlAppend, operations);
+			paths.put("/"+t.getQualifiedName()+".{syntax}"+urlAppend, operations);
 			}
 			
 			{
@@ -161,7 +161,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			// delete:DELETE
 			operations.put("delete", createUpdateOper(t, ActionType.DELETE));
 			
-			paths.put("/"+getQualifiedName(t)+urlAppend, operations);
+			paths.put("/"+t.getQualifiedName()+urlAppend, operations);
 			}
 		}
 		
@@ -170,7 +170,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
 			operations.put("get", createGetOper(v, filters));
 			
-			paths.put("/"+getQualifiedName(v)+".{syntax}"+urlAppend, operations);
+			paths.put("/"+v.getQualifiedName()+".{syntax}"+urlAppend, operations);
 		}
 		
 		//Executable
@@ -189,7 +189,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("definitions", definitions);
 		//Table
 		for(Table t: model.getTables()) {
-			definitions.put(getQualifiedName(t), createDefinition(t));
+			definitions.put(t.getQualifiedName(), createDefinition(t));
 		}
 		
 		//XXX security
@@ -235,7 +235,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	Map<String, Object> createGetOper(Relation t, List<String> filters) {
 		Map<String, Object> oper = new LinkedHashMap<String, Object>();
 		//oper.put("summary", "retrieve values from "+t.getQualifiedName());
-		String fullName = getQualifiedName(t);
+		String fullName = t.getQualifiedName();
 		String schema = t.getSchemaName();
 		if(schema!=null && !schema.equals("")) {
 			List<String> tags = new ArrayList<String>();
@@ -466,7 +466,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	
 	Map<String, Object> createUpdateOper(Relation r, ActionType action) {
 		Map<String, Object> oper = new LinkedHashMap<String, Object>();
-		String fullName = getQualifiedName(r);
+		String fullName = r.getQualifiedName();
 		String schema = r.getSchemaName();
 		if(schema!=null && !schema.equals("")) {
 			List<String> tags = new ArrayList<String>();
@@ -606,10 +606,10 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		return def;
 	}
 	
-	String getQualifiedName(Relation t) {
+	/*String getQualifiedName(Relation t) {
 		return ( t.getSchemaName()!=null && !"".equals(t.getSchemaName()) ? t.getSchemaName()+"." : "" )
 				+ t.getName();
-	}
+	}*/
 	
 	String getType(String colType) {
 		if(colType==null) { return "string"; }

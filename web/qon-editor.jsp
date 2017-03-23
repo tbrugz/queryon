@@ -622,7 +622,7 @@ if(queryName!=null) {
 			query = q.getQuery();
 		}
 		else {
-			query = "select * from "+v.getFinalName(true);
+			query = "select * from "+v.getFinalQualifiedName();
 		}
 		
 		schemaName = v.getSchemaName();
@@ -637,7 +637,7 @@ if(queryName!=null) {
 	else {
 		Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, queryName);
 		if(t != null) {
-			query = "select * from "+t.getFinalName(true);
+			query = "select * from "+t.getFinalQualifiedName();
 			schemaName = t.getSchemaName();
 			remarks = t.getRemarks();
 		}
