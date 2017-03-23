@@ -71,8 +71,8 @@ function addFilterDialog(selectedCol) {
 	dialog.innerHTML = "<div><label>Filter: "+selectHTML+"</label> "
 		+ operatorsHTML
 		+ "<label>Value: <input type='text' name='value' id='fin-value'></label> "
-		+ "<input type='button' value='add & close' onclick='addFilterIn();closeDialogs();'/>"
 		+ "<input type='button' value='add' onclick='addFilterIn();'/>"
+		+ "<input type='button' value='add & close' onclick='addFilterIn();closeDialogs();'/>"
 		+ "<input type='button' value='X' class='simplebutton' onclick='closeDialogs();'/></div>";
 	//dialog.style.display = 'none';
 	refreshAutocomplete();
