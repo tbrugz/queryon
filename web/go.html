@@ -48,14 +48,16 @@ loadSelectContent = function(oEvent) {
 			e.qualifiedName+(e.remarks?" - "+e.remarks:"")+'</option>';
 		select.innerHTML += option;
 	}
+	updateUIFromFragmentSelect();
 	onExecChanged();
+	updateUIFromFragmentParams();
 }
 
 onModelChanged = function() {
 	doLoadExecs();
 }
 
-onExecChanged = function() {
+onExecChanged = function(doUpdateFragment) {
 	var select = document.getElementById('objects');
 	var idx = select.selectedIndex;
 	var option = select.options[idx];
@@ -64,6 +66,7 @@ onExecChanged = function() {
 	if(option.getAttribute("invalid")) {
 		btnGo.disabled = true;
 		document.getElementById('parameters').innerHTML = '';
+		if(doUpdateFragment) { updateURLFragment(); }
 		return;
 	}
 
@@ -73,14 +76,16 @@ onExecChanged = function() {
 	var pars = params.split(",");
 	//var npar = pars.length;
 
-	console.log('onExecChanged: ', params, ' - ', pars, ' - ', pars.length);
+	//console.log('onExecChanged: ', params, ' - ', pars, ' - ', pars.length);
 	//XXX: IN, OUT, INOUT...
 	//XXX: parameterTypes...
 	goSetParameters('parameters', params?pars:null);
 	closeMessages('messages');
+	if(doUpdateFragment) { updateURLFragment(); }
 }
 
 onParameterChange = function() {
+	updateURLFragment();
 }
 
 makeHrefs = function() {
@@ -146,11 +151,11 @@ goSetParameters = function(parametersId, pars) {
 	var paramsContainer = document.getElementById('parameters');
 	paramsContainer.innerHTML = '';
 	var content = '';
-	console.log('goSetParameters: pars: ', pars);
+	//console.log('goSetParameters: pars: ', pars);
 	if(pars) {
 		var numparams = pars.length;
 		for(var i=1;i<=numparams;i++) {
-			console.log("i",i,"par",pars[i-1]);
+			//console.log("i",i,"par",pars[i-1]);
 			var parts = pars[i-1].split(";");
 			var colType = parts[2].toUpperCase();
 			var isOut = parts[3].indexOf("OUT")==0;
@@ -175,6 +180,57 @@ function loadModelsContentCallback() {
 	}
 
 	doLoadExecs();
+}
+
+updateURLFragment = function() {
+	//var model = document.getElementById('model').value;
+	var select = document.getElementById('objects');
+	var idx = select.selectedIndex;
+	var option = select.options[idx];
+	//console.log("updateURLFragment: ", option);
+	if(option.getAttribute("invalid")) {
+		history.replaceState(null, null, "#");
+		return;
+	}
+	
+	var parameters = getParameters();
+	
+	var state = select.value + parameters;
+	history.replaceState(null, null, "#"+state);
+}
+
+updateUIFromFragmentSelect = function() {
+	var hash = window.location.hash;
+	if(hash.indexOf('#')==0) {
+		hash = hash.substring(1);
+		var parts = hash.split('/');
+		//console.log("updateUIFromFragment", parts)
+		
+		//var model = document.getElementById('model');
+		var object = document.getElementById('objects');
+		//var params = document.querySelectorAll('.parameter');
+		
+		updateSelectValue(object, parts[0]);
+	}
+}
+
+updateUIFromFragmentParams = function() {
+	var hash = window.location.hash;
+	if(hash.indexOf('#')==0) {
+		hash = hash.substring(1);
+		var parts = hash.split('/');
+		//console.log("updateUIFromFragment", parts)
+		
+		//var model = document.getElementById('model');
+		//var object = document.getElementById('objects');
+		var params = document.querySelectorAll('.parameter');
+		
+		for (var i = 0; i < params.length; ++i) {
+			if(parts[i+1]) {
+				params[i].value = parts[i+1];
+			}
+		}
+	}
 }
 
 	</script>
@@ -222,7 +278,7 @@ input[readonly] {
 	</label>
 
 	<label>
-		<select id="objects" onchange="onExecChanged();">
+		<select id="objects" onchange="onExecChanged(true);">
 		</select>
 	</label>
 
