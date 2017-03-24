@@ -236,8 +236,12 @@ input[type=button].btn-delete {
 }
 
 input[type=button] {
-/* input[type=button].content-btn { */
+	/* input[type=button].content-btn { */
 	cursor: pointer;
+}
+
+option.unavaiable {
+	color: #bbb;
 }
 
 /* filters */

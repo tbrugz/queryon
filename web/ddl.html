@@ -34,31 +34,43 @@ var typemap = {
 		"GRANT": null,
 		"MATERIALIZED_VIEW": "materialized_view",
 		"FUNCTION": "function",
-		"JAVA_SOURCE": null,
+		"JAVA_SOURCE": "java_source",
 		"PACKAGE": "package",
 		"PACKAGE_BODY": "package_body",
 		"PROCEDURE": "procedure",
 		"TYPE": "type",
-		"TYPE_BODY": null,
+		"TYPE_BODY": "type_body",
 		"CONSTRAINT": null,
 		"COLUMN": null
 };
 
 var schemasByModel = {};
+var typesByModel = {};
 
 $(document).ready(
 	function() {
-		var tts = [];
-		var keys = Object.keys(typemap);
-		//console.log(keys.length);
-		for(var i=0;i<keys.length;i++) {
-			if(typemap[keys[i]]) { tts.push(keys[i]); }
-		}
-		loadSelect(tts, 'type');
+		loadTypesSelect();
 		loadAuthInfo();
 		loadModels();
 	}
 );
+
+loadTypesSelect = function(filter) {
+	var tts = [];
+	var keys = Object.keys(typemap);
+	var keyClasses = null;
+	//console.log("loadTypesSelect", keys.length, "::", keys);
+	for(var i=0;i<keys.length;i++) {
+		if(typemap[keys[i]]) { tts.push(keys[i]); }
+	}
+	if(filter) {
+		//tts = arrayIntersect(tts, filter);
+		keyClasses = arrayContainsRetLabels(tts, filter, "", "unavaiable");
+		//console.log("loadTypesSelect:filtered", tts.length, "; filter=", filter, "; tts=", tts);
+	}
+	//console.log(keys.length);
+	loadSelect(tts, 'type', null, null, keyClasses);
+}
 
 loadAuthInfoCallback = function() {
 	refreshAuthInfo();
@@ -116,6 +128,11 @@ loadSchemas = function(model) {
 				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
 				joinSchemas();
 			}
+			if(json.objecttypes) {
+				typesByModel[model?model:""] = json.objecttypes;
+				//loadTypesSelect(json.objecttypes);
+				onModelChanged(false);
+			}
 			updateSelectedQueryState();
 		}
 	});
@@ -135,8 +152,10 @@ joinSchemas = function() {
 onModelChanged = function(updateFragment) {
 	var m = document.getElementById('model').value;
 	var schemas = schemasByModel[m];
+	var types = typesByModel[m];
 	
 	loadSelect(schemas, 'schema');
+	loadTypesSelect(types);
 	loadObjectList(function() {
 		if(updateFragment) { updateURLFragment(); }
 	});

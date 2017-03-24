@@ -1,3 +1,5 @@
+<%@page import="tbrugz.sqldump.dbmd.DBMSFeatures"%>
+<%@page import="tbrugz.sqldump.def.DBMSResources"%>
 <%@page import="org.apache.commons.logging.*"
 %><%@page import="java.sql.*"
 %><%@page import="java.util.*"
@@ -63,7 +65,25 @@ public String normalize(String s) {
 			}
 		}
 	}
+
+	List<DBObjectType> objtypes = new ArrayList<DBObjectType>();
+	{
+		/*Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+		Connection conn = DBUtil.initDBConn(prop, modelId);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		feat.get
+		conn.close();*/
+		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
+		//System.out.println("feat: "+feat+" dialect: "+sm.getSqlDialect());
+		List<DBObjectType> ots = feat.getSupportedObjectTypes();
+		if(ots!=null) { objtypes.addAll( ots ); }
+		List<DBObjectType> eots = feat.getExecutableObjectTypes(); 
+		if(eots!=null) { objtypes.addAll( eots ); }
+	}
+	
 %>{
 	"modelschemas": [<%= String.valueOf(Utils.join(names, ", ", sqd)) %>],
-	"schemas": [<%= String.valueOf(Utils.join(schemas, ", ", sqd)) %>]
+	"schemas": [<%= String.valueOf(Utils.join(schemas, ", ", sqd)) %>],
+	"objecttypes": [<%= String.valueOf(Utils.join(objtypes, ", ", sqd)) %>]
 }

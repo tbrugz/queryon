@@ -64,6 +64,31 @@ function getParameterNamesStartWith(startWithRegex, queryString) {
 	// test: getParameterNamesStartWith('',document.location.href)
 }
 
+// intersect 2 arrays: keey order of 1st array
+function arrayIntersect(a, b) {
+	var ret = [];
+	for(var i=0;i<a.length;i++) {
+		if(b.indexOf(a[i])>=0) { ret.push(a[i]); }
+	}
+	return ret;
+}
+
+function arrayContainsRetLabels(a, b, lContains, lNoContains) {
+	var ret = [];
+	if(typeof lContains == 'undefined') { lContains = true; }
+	if(typeof lNoContains == 'undefined') { lNoContains = false; }
+	
+	for(var i=0;i<a.length;i++) {
+		if(b.indexOf(a[i])>=0) {
+			ret.push(lContains);
+		}
+		else {
+			ret.push(lNoContains);
+		}
+	}
+	return ret;
+}
+
 // ---------- messages ----------
 
 function showInfoMessages(messagesId, text) {
@@ -140,7 +165,7 @@ function closeDialogMessage() {
 
 // ---------- select's functions ----------
 
-loadSelect = function(data, selectId, callbackName, callbackValue) {
+loadSelect = function(data, selectId, callbackName, callbackValue, dataClasses) {
 	if(!callbackName) { callbackName = function(obj) { return obj; } }
 	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
 	var sel = document.getElementById(selectId);
@@ -151,8 +176,12 @@ loadSelect = function(data, selectId, callbackName, callbackValue) {
 		var name = callbackName(data[i]);
 		if(name==null) { continue; }
 		var optionValue = callbackValue(data[i]);
+		var optionClass = dataClasses&&dataClasses[i]?dataClasses[i]:null;
 		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
+		$('#'+selectId).append("<option value='"+optionValue+"'"+
+				(optionClass?" class='"+optionClass+"'":"")+
+				(optionValue==prevOptionValue?" selected":"")+
+				">"+name+"</option>");
 	}
 }
 
