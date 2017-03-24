@@ -127,7 +127,9 @@ public class QueryOnInstant extends QueryOn {
 			//XXXdone: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
 		}
+		case JAVA_SOURCE:
 		case TYPE:
+		case TYPE_BODY:
 		case PROCEDURE: {
 			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
 			//List<ExecutableObject> proc = new ArrayList<ExecutableObject>();
