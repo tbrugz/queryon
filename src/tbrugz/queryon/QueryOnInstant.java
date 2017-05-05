@@ -263,6 +263,7 @@ public class QueryOnInstant extends QueryOn {
 		//taking too long? monitor generated SQL? jdbc connection proxy?
 		log.debug("grabRelationNames: schema = "+schemaName+" ; types = "+Arrays.toString(ttypes)+" ; dbmd = "+dbmd.getClass().getSimpleName()+" ; elapsed = "+elapsed);
 		int count = 0, countAll = 0;
+
 		while(rs.next()) {
 			countAll++;
 			Table newt = newTable(rs, schemaName);
@@ -274,6 +275,8 @@ public class QueryOnInstant extends QueryOn {
 			ret.add(newt);
 			count++;
 		}
+		ret.sort(null);
+		
 		log.info(count+" [of "+countAll+"] relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;
 	}
