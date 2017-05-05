@@ -1,5 +1,6 @@
 package tbrugz.queryon.util;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,15 @@ public class SchemaModelUtils {
 	private static final Log log = LogFactory.getLog(SchemaModelUtils.class);
 	
 	public static final String PARAM_MODEL = "model";
+	
+	public static class ByNameComparator implements Comparator<Relation> {
+		@Override
+		public int compare(Relation o1, Relation o2) {
+			int compare = 0;
+			compare = o1.getName().compareTo(o2.getName());
+			return compare;
+		}
+	}
 	
 	public static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) {
 		//log.info("getRelation [provided '"+reqspec.object+"']");

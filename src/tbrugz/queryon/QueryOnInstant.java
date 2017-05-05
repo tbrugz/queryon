@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -275,7 +277,8 @@ public class QueryOnInstant extends QueryOn {
 			ret.add(newt);
 			count++;
 		}
-		ret.sort(null);
+		Collections.sort(ret, new SchemaModelUtils.ByNameComparator());
+		//ret.sort(null); //1.8+ only
 		
 		log.info(count+" [of "+countAll+"] relations retrieved [elapsed="+elapsed+"ms]");
 		return ret;
