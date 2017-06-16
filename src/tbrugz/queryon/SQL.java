@@ -247,6 +247,10 @@ public class SQL {
 		sql = "select "+columns+" from (\n"+sql+"\n) qon_projection "+sqlFilter+sqlOrder;
 	}
 	
+	protected void addCount() {
+		sql = "select count(*) from (\n"+sql+"\n) qon_count ";
+	}
+	
 	public void applyOrder(RequestSpec reqspec) {
 		//TODOne: validate columns
 		if(reqspec.orderCols.size()==0) return;

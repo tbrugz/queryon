@@ -76,6 +76,7 @@ public class RequestSpec {
 	public static final String PARAM_ORDER = "order";
 	public static final String PARAM_LIMIT = "limit";
 	public static final String PARAM_OFFSET = "offset";
+	public static final String PARAM_COUNT = "count";
 	
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";
@@ -98,6 +99,7 @@ public class RequestSpec {
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
 	final boolean distinct;
+	final boolean count;
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
 	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
@@ -301,6 +303,7 @@ public class RequestSpec {
 		}
 		
 		distinct = req.getParameter(PARAM_DISTINCT)!=null;
+		count = req.getParameter(PARAM_COUNT)!=null;
 		
 		String order = req.getParameter(PARAM_ORDER);
 		if(order!=null) {

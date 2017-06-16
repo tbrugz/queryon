@@ -849,6 +849,20 @@ public class WinstoneAndH2HttpRequestTest {
 		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
 		JSONValue.parse(jsonStr);
 	}*/
+	
+	@Test
+	public void testGetCountFromCsv() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/PUBLIC.EMP.csv?count=true&header=false");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String cntnt = getContent(response1);
+		int count = Integer.parseInt(cntnt.substring(0, cntnt.length()-2));
+
+		Assert.assertEquals("Should have count==5", 5, count);
+		
+		httpGet.releaseConnection();
+	}
 
 	@Test
 	public void swaggerGsonParse() throws IOException, ParserConfigurationException, SAXException {

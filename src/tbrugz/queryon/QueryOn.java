@@ -879,6 +879,10 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.addLimitOffset(loStrategy, getLimit(sql.limit, defaultLimit, finalMaxLimit), reqspec.offset);
 		
+		if(reqspec.count) {
+			sql.addCount();
+		}
+		
 		//query finished!
 		
 		return sql;
