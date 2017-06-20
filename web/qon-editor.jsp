@@ -213,7 +213,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			//setParameters(paramCount);
 			//makeHrefs();
 			
-			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
+			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/><div class='explain'>"+data+"</div>";
 			
 			if(usingSelected) {
 				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully explained');
