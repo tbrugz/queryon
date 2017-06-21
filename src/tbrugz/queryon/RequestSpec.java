@@ -2,6 +2,7 @@ package tbrugz.queryon;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,6 +72,11 @@ public class RequestSpec {
 	
 	public static final String PARAM_METHOD = "_method";
 	
+	public static final String HEADER_ACCEPT = "Accept";
+	public static final String HEADER_CONTENT_DISPOSITION = "content-disposition";
+	public static final String HEADER_PARAM_ENCODING = "X-ParamEncoding";
+	public static final String PARAM_ENCODING_URLENCODE = "url";
+	
 	public static final String PARAM_FIELDS = "fields";
 	public static final String PARAM_DISTINCT = "distinct";
 	public static final String PARAM_ORDER = "order";
@@ -100,6 +106,7 @@ public class RequestSpec {
 	final DumpSyntaxInt outputSyntax;
 	final boolean distinct;
 	final boolean count;
+	final String headerParamEncoding;
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
 	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
@@ -252,7 +259,7 @@ public class RequestSpec {
 		DumpSyntaxInt outputSyntaxTmp = null;
 		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-		String acceptHeader = req.getHeader("Accept");
+		String acceptHeader = req.getHeader(HEADER_ACCEPT);
 		log.debug("accept: "+acceptHeader+" ; modelId: "+this.modelId);
 		
 		if(outputTypeStr != null) {
@@ -304,6 +311,7 @@ public class RequestSpec {
 		
 		distinct = req.getParameter(PARAM_DISTINCT)!=null;
 		count = req.getParameter(PARAM_COUNT)!=null;
+		headerParamEncoding = req.getHeader(HEADER_PARAM_ENCODING);
 		
 		String order = req.getParameter(PARAM_ORDER);
 		if(order!=null) {
@@ -370,6 +378,16 @@ public class RequestSpec {
 		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
+			
+			if( PARAM_ENCODING_URLENCODE.equals(headerParamEncoding) ) {
+				for(int i=0;i<value.length;i++) {
+					value[i] = URLDecoder.decode(value[i], QueryOn.UTF8);
+					//value[i] = new String(value[i].getBytes("iso-8859-1"), QueryOn.UTF8);
+				}
+			}
+			else if(headerParamEncoding!=null) {
+				log.warn("unknown "+PARAM_ENCODING_URLENCODE+":"+headerParamEncoding);
+			}
 			
 			try {
 				setUniParam("feq:", key, value[0], filterEquals);
@@ -643,7 +661,7 @@ public class RequestSpec {
 	
 	// http://stackoverflow.com/a/2424824/616413
 	static String getSubmittedFileName(Part part) {
-		for (String cd : part.getHeader("content-disposition").split(";")) {
+		for (String cd : part.getHeader(HEADER_CONTENT_DISPOSITION).split(";")) {
 			if (cd.trim().startsWith("filename")) {
 				String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
 				return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1);

@@ -235,6 +235,8 @@ public class QueryOn extends HttpServlet {
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	
+	public static final String UTF8 = "UTF-8";
+	
 	final Properties prop = new ParametrizedProperties();
 	DumpSyntaxUtils dsutils;
 	//SchemaModel model;
@@ -540,8 +542,9 @@ public class QueryOn extends HttpServlet {
 		if(xSetRequestUtf8) {
 			try {
 				String origCharset = req.getCharacterEncoding();
-				log.debug("setting request encoding UTF-8 [was: "+origCharset+"]");
-				req.setCharacterEncoding("UTF-8");
+				log.debug("setting request encoding to UTF-8 [was: "+origCharset+"]");
+				req.setCharacterEncoding(UTF8);
+				//resp.setCharacterEncoding(UTF8);
 			} catch (UnsupportedEncodingException e) {
 				log.warn("error setCharacterEncoding: "+e.getMessage(), e);
 			}
@@ -1414,15 +1417,8 @@ public class QueryOn extends HttpServlet {
 				int colindex = relation.getColumnNames().indexOf(col);
 				String ctype = relation.getColumnTypes().get(colindex);
 				
-				boolean isBinary = DBUtil.BLOB_COL_TYPES_LIST.contains(ctype.toUpperCase());
-				if(isBinary) {
-					sql.bindParameterValues.add(reqspec.updatePartValues.get(col).getInputStream());
-				}
-				else {
-					sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream() ));
-				}
+				addPartParameter(reqspec, sql, ctype, col, colindex);
 				colsCount++;
-				log.info("col["+colindex+"] "+col+": "+ctype+" [isBinary="+isBinary+"]");
 			}
 		}
 
@@ -1565,14 +1561,7 @@ public class QueryOn extends HttpServlet {
 					sbVals.append((colsCount!=0?", ":"")+"?");
 					
 					String ctype = relation.getColumnTypes().get(colindex);
-					boolean isBinary = DBUtil.BLOB_COL_TYPES_LIST.contains(ctype.toUpperCase());
-					if(isBinary) {
-						sql.bindParameterValues.add(reqspec.updatePartValues.get(pcol).getInputStream());
-					}
-					else {
-						sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(pcol).getInputStream() ));
-					}
-					log.info("col["+colindex+"] "+pcol+": "+ctype+" [isBinary="+isBinary+"]");
+					addPartParameter(reqspec, sql, ctype, pcol, colindex);
 					colsCount++;
 				}
 				else {
@@ -1644,6 +1633,25 @@ public class QueryOn extends HttpServlet {
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	void addPartParameter(RequestSpec reqspec, SQL sql, String ctype, String col, int colindex) throws IOException {
+		boolean isBinary = DBUtil.BLOB_COL_TYPES_LIST.contains(ctype.toUpperCase());
+		if(isBinary) {
+			sql.bindParameterValues.add(reqspec.updatePartValues.get(col).getInputStream());
+		}
+		else {
+			//log.info("addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
+			/*if(xSetRequestUtf8) {
+				sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream(), UTF8 ));
+				//log.info("1.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
+			}
+			else {*/
+				sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream() ));
+				//log.info("2.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
+			//}
+		}
+		log.info("col["+colindex+"] "+col+": "+ctype+" [isBinary="+isBinary+"]");
 	}
 	
 	void doManage(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {

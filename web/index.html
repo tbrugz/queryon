@@ -9,6 +9,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
+	<meta charset="utf-8">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script src="js/jquery-2.1.0.min.js"></script>
 	<script src="js/jquery.jkey.js"></script>
@@ -481,7 +482,9 @@
 						}
 					}
 					else {
-						formData.append(inputs[i].name, inputs[i].value);
+						var value = encodeURIComponent( inputs[i].value );
+						formData.append(inputs[i].name, value);
+						//console.log("formdata: ", inputs[i].name, inputs[i].value, value);
 					}
 				}
 				newVals.push(inputs[i].value);
@@ -601,6 +604,9 @@
 				showErrorMessages(messagesId, jqXHR.responseText);
 			}
 		}
+		//console.log("grh: ",request.getRequestHeader("Content-Type"));
+		//request.setRequestHeader("Accept-Charset", "utf-8");
+		request.setRequestHeader("X-ParamEncoding", "url");
 		request.send(nv.formData);
 	}
 	
