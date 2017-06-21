@@ -56,6 +56,11 @@ table > tbody > tr:nth-child(1) {
 	top: 0px;
 }
 
+table th {
+	position: sticky;
+	top: 0px;
+}
+
 /*
 col & colgroup see:
 https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col

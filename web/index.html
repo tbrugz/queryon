@@ -121,6 +121,13 @@
 		if(tableHeader) {
 			tableHeader.style.top = navHeight; /* nav height */
 		}
+
+		var tableHeaders = document.querySelectorAll("#content > table th");
+		if(tableHeaders) {
+			for(var i=0;i<tableHeaders.length;i++) {
+				tableHeaders[i].style.top = navHeight; /* nav height */
+			}
+		}
 	}
 	
 	function updateFromFilters() {
