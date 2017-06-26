@@ -118,7 +118,14 @@ public class SQL {
 		return getFinalSql(sql, username);
 	}
 	
-	public static String getFinalSql(String sql, String username) {
+	public static String getFinalSqlNoUsername(String sql) {
+		return getFinalSql(sql, null);
+	}
+	
+	private static String getFinalSql(String sql, String username) {
+		if(username==null) {
+			username = "''";
+		}
 		//log.info("getFinalSql: "+username);
 		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
 				.replace(VARIABLE_USERNAME, username);

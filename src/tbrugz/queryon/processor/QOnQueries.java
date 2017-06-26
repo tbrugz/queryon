@@ -262,10 +262,8 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 		//------ end SQLQueries...
 	}
 	
-	//@Override //FIXME sqldump v0.9.15... 
 	protected String processQuery(String sql) {
-		//return sql.replace(SQL.VARIABLE_USERNAME, "''");
-		return SQL.getFinalSql(sql, "''");
+		return SQL.getFinalSqlNoUsername(sql);
 	}
 
 	/*
