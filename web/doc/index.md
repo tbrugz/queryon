@@ -13,6 +13,7 @@ Help pages index
 
 * [API documentation](api.md)
 * [Queries Features / Special columns](queries.md)
+* [Swagger API docs](swagger-ui/) & [Swagger Spec](swagger/)
 
 
 Misc info
