@@ -11,7 +11,7 @@ var SqlHighlightRules = function() {
         "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant"
             + "|set|distinct|with|then|between|like|is|into|values|alter|constraint|unique|in"
-            + "|all|exists|full"
+            + "|all|exists|full|partition|any|some"
     );
 
     var builtinConstants = (
@@ -23,7 +23,8 @@ var SqlHighlightRules = function() {
     var builtinFunctions = (
         "avg|count|first|last|max|min|sum|ucase|lcase|mid|len|round|rank|now|format|" + 
         "coalesce|ifnull|isnull|nvl"
-            + "|cast"
+            + "|cast|row_number|upper|lower|lead|lag|first_value|last_value|extract"
+            + "|dense_rank|to_char|to_date|to_number"
     );
 
     var dataTypes = (
