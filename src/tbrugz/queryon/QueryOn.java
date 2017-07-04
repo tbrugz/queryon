@@ -2,10 +2,12 @@ package tbrugz.queryon;
 
 //import java.nio.charset.Charset;
 import java.beans.IntrospectionException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -184,7 +186,11 @@ public class QueryOn extends HttpServlet {
 	private static final Log log = LogFactory.getLog(QueryOn.class);
 	private static final Log logFilter = LogFactory.getLog(QueryOn.class.getName()+".filter");
 	
-	static final String INITP_PROPERTIES_PATH = "properties-resource";
+	static final String INITP_PROPERTIES_RESOURCE = "properties-resource";
+	static final String INITP_PROPERTIES_FILE = "properties-file";
+	static final String SYSPROP_PROPERTIES_PATH = "queryon.properties-path";
+	static final String ENV_PROPERTIES_PATH = "QON_PROPERTIES_PATH";
+
 	//static final String INITP_MODEL_ID = "model-id";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String DEFAULT_PROPERTIES_VALUES_RESOURCE = "/queryon-defaults.properties";
@@ -243,6 +249,7 @@ public class QueryOn extends HttpServlet {
 	//final Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 	
 	String propertiesResource = null;
+	String propertiesFile = null;
 	
 	final List<UpdatePlugin> updatePlugins = new ArrayList<UpdatePlugin>();
 	//String modelId;
@@ -262,15 +269,65 @@ public class QueryOn extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		propertiesResource = config.getInitParameter(INITP_PROPERTIES_PATH);
-		if(propertiesResource==null) { propertiesResource = DEFAULT_PROPERTIES_RESOURCE; }
+		//log4jInit();
+		propertiesResource = config.getInitParameter(INITP_PROPERTIES_RESOURCE);
+		propertiesFile = null;
+
+		if(propertiesResource==null) {
+			propertiesFile = config.getInitParameter(INITP_PROPERTIES_FILE);
+			if(propertiesFile==null) {
+				propertiesFile = System.getProperty(SYSPROP_PROPERTIES_PATH);
+				if(propertiesFile==null) {
+					propertiesFile = System.getenv(ENV_PROPERTIES_PATH);
+					if(propertiesFile==null) {
+						propertiesResource = DEFAULT_PROPERTIES_RESOURCE;
+						log.info("queryon resource config: "+propertiesResource+" [using DEFAULT_PROPERTIES_RESOURCE]");
+					}
+					else {
+						log.info("queryon file config: "+propertiesFile+" [using env '"+ENV_PROPERTIES_PATH+"']");
+					}
+				}
+				else {
+					log.info("queryon file config: "+propertiesFile+" [using sysprop '"+SYSPROP_PROPERTIES_PATH+"']");
+				}
+			}
+			else {
+				log.info("queryon file config: "+propertiesFile+" [using "+INITP_PROPERTIES_FILE+"]");
+			}
+		}
+		else {
+			log.info("queryon resource config: "+propertiesResource+" [using "+INITP_PROPERTIES_RESOURCE+"]");
+		}
 
 		//modelId = config.getInitParameter(INITP_MODEL_ID);
 		
 		doInit(config.getServletContext());
 	}
 	
-	void doInit(ServletContext context) throws ServletException {
+	void log4jInit() {
+		String log4jres = "/log4j.properties";
+		InputStream is = QueryOn.class.getResourceAsStream(log4jres);
+		if(is!=null) {
+			try {
+				Class<?> c = Class.forName("org.apache.log4j.PropertyConfigurator");
+				Method m = c.getMethod("configure", InputStream.class);
+				m.invoke(null, is);
+				log.info("log4j configured with '"+log4jres+"'");
+			}
+			catch(ClassNotFoundException e) {
+				log.warn("Log4j not found: "+e);
+			}
+			catch(Exception e) {
+				log.warn("Error initing log4j: "+e);
+			}
+			//PropertyConfigurator.configure(log4jProp);
+		}
+		else {
+			log.info("log4j not configured ['"+log4jres+"' not found]");
+		}
+	}
+	
+	void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
 		try {
 			prop.clear();
 			//XXX: protocol: add from ServletRequest?
@@ -285,12 +342,21 @@ public class QueryOn extends HttpServlet {
 			//String path = "http://"+InetAddress.getLocalHost().getHostName()+"/"+getServletContext().getContextPath();
 			prop.setProperty(PROP_CONTEXT_PATH, contextPath);
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, rdfBase);
-			log.info(PROP_CONTEXT_PATH+": "+contextPath+" ; "+RDFAbstractSyntax.PROP_RDF_BASE+": "+rdfBase);
+			log.info("path= ["+path+"] "+PROP_CONTEXT_PATH+"= ["+contextPath+"] ; "+RDFAbstractSyntax.PROP_RDF_BASE+"= ["+rdfBase+"]");
 			
 			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
 			
+			if(propertiesResource!=null) {
 			log.info("loading properties: "+propertiesResource);
 			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
+			}
+			else if(propertiesFile!=null) {
+				log.info("loading properties file: "+propertiesFile);
+				prop.load(new FileInputStream(propertiesFile));
+			}
+			else {
+				log.warn("no properties config loaded");
+			}
 
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
 			log.info("syntaxes: "+StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );

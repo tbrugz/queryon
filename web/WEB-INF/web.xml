@@ -19,10 +19,10 @@
 	<servlet>
 		<servlet-name>QueryOn</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOn</servlet-class>
-		<init-param>
+		<!-- <init-param>
 			<param-name>properties-resource</param-name>
 			<param-value>/queryon.properties</param-value>
-		</init-param>
+		</init-param> -->
 		<load-on-startup>1</load-on-startup>
 		<!-- <multipart-config>
 			<location>/tmp</location>
