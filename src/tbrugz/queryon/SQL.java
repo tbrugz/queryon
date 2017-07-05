@@ -255,7 +255,7 @@ public class SQL {
 	}
 	
 	protected void addCount() {
-		sql = "select count(*) from (\n"+sql+"\n) qon_count ";
+		sql = "select count(*) as count from (\n"+sql+"\n) qon_count ";
 	}
 	
 	public void applyOrder(RequestSpec reqspec) {
