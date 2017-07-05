@@ -65,6 +65,7 @@ import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
+import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
@@ -988,6 +989,15 @@ public class QueryOn extends HttpServlet {
 			st.setMaxRows(sql.limit);
 		}*/
 		ResultSet rs = st.executeQuery();
+		
+		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
+			@SuppressWarnings("resource")
+			PivotResultSet prs = new PivotResultSet(rs, reqspec.oncols, reqspec.onrows);
+			rs = prs;
+			String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
+			log.info("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
+			log.info("PivotResultSet: rowcount: "+prs.getRowCount()+" ; originalRowcount: "+prs.getOriginalRowCount());
+		}
 		
 		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
 		List<Constraint> uks = ModelUtils.getUKs(relation);

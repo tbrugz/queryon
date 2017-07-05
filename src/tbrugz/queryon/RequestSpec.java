@@ -84,6 +84,9 @@ public class RequestSpec {
 	public static final String PARAM_OFFSET = "offset";
 	public static final String PARAM_COUNT = "count";
 	
+	public static final String PARAM_ONCOLS = "oncols";
+	public static final String PARAM_ONROWS = "onrows";
+	
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";
 	
@@ -107,6 +110,9 @@ public class RequestSpec {
 	final boolean distinct;
 	final boolean count;
 	final String headerParamEncoding;
+	
+	final List<String> oncols = new ArrayList<String>();
+	final List<String> onrows = new ArrayList<String>();
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
 	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
@@ -307,6 +313,15 @@ public class RequestSpec {
 		String fields = req.getParameter(PARAM_FIELDS);
 		if(fields!=null) {
 			columns.addAll(Arrays.asList(fields.split(",")));
+		}
+		
+		String onColsPar = req.getParameter(PARAM_ONCOLS);
+		if(onColsPar!=null) {
+			oncols.addAll(Arrays.asList(onColsPar.split(",")));
+		}
+		String onRowsPar = req.getParameter(PARAM_ONROWS);
+		if(onRowsPar!=null) {
+			onrows.addAll(Arrays.asList(onRowsPar.split(",")));
 		}
 		
 		distinct = req.getParameter(PARAM_DISTINCT)!=null;
