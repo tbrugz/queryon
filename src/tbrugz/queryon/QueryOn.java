@@ -992,7 +992,7 @@ public class QueryOn extends HttpServlet {
 		
 		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
 			@SuppressWarnings("resource")
-			PivotResultSet prs = new PivotResultSet(rs, reqspec.oncols, reqspec.onrows);
+			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, 4);
 			rs = prs;
 			String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
 			log.info("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
@@ -1021,7 +1021,7 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
-			//XXX: create new SQLException including the query string?
+			//XXX: create new SQLException including the query string? throw BadRequestException? InternalServerException?
 			throw e;
 		}
 		finally {

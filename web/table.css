@@ -97,6 +97,27 @@ td.header {
 	background-color: #eee;
 }
 
+th.blank, td.blank {
+	border: 0;
+	background-color: #ddd;
+}
+
+th[dimoncol], td[dimoncol] {
+	position: sticky;
+	left: 0px;
+	z-index: 2;
+}
+
+th[dimoncol] {
+	z-index: 4;
+	top: 0px;
+}
+
+td[dimoncol] {
+	font-weight: bold;
+	background-color: #fff;
+}
+
 /* datadiff */
 
 tr.equal td {

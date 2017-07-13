@@ -13,6 +13,7 @@ import java.util.Map;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.HTMLDataDump;
+import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -51,6 +52,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
 	
 	protected List<String> lsColDbTypes = new ArrayList<String>();
+	
+	protected int onColsColCount = 0;
+	protected int onRowsColCount = 0;
 	
 	public HTMLAttrSyntax(String padding, boolean innerTable) {
 		super(padding, innerTable);
@@ -107,21 +111,100 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			sb.append("\n\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
 		}
 		if(dumpColElement) {
-			sb.append("\n<colgroup>");
+			sb.append("\n\t<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
 				if(finalColNames.contains(lsColNames.get(i))) {
-					sb.append("\n\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
+					sb.append("\n\t\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
 				}
 			}
-			sb.append("\n</colgroup>");
+			sb.append("\n\t</colgroup>");
 		}
-		sb.append("\n\t<tr>");
-		for(int i=0;i<lsColNames.size();i++) {
-			if(finalColNames.contains(lsColNames.get(i))) {
-				sb.append("<th>"+lsColNames.get(i)+"</th>");
+		
+		guessPivotCols();
+		//System.out.println("onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		if(onColsColCount>0 || onRowsColCount>0) {
+			for(int cc=0;cc<onColsColCount;cc++) {
+				sb.append("\n\t<tr>");
+				for(int i=0;i<lsColNames.size();i++) {
+					if(finalColNames.contains(lsColNames.get(i))) {
+						String[] parts = lsColNames.get(i).split(PivotResultSet.COLS_SEP_PATTERN);
+						
+						if(parts.length>cc) {
+							//split...
+							String[] p2 = parts[cc].split(PivotResultSet.COLVAL_SEP_PATTERN);
+							if(p2.length>1) {
+								sb.append("<th>"+p2[1]+"</th>");
+							}
+							else {
+								if(i<onRowsColCount) {
+									sb.append("<th class='blank'"+
+											(i<onRowsColCount?" dimoncol=\"true\"":"")+
+											"/>");
+								}
+								else {
+									sb.append("<th>"+parts[cc]+"</th>");
+								}
+							}
+						}
+						else if(cc+1==onColsColCount) {
+							if(i<onRowsColCount) {
+								sb.append("<th dimoncol=\"true\">"+lsColNames.get(i)+"</th>");
+							}
+							else {
+								sb.append("<th>"+lsColNames.get(i)+"</th>");
+							}
+						}
+						else {
+							sb.append("<th class='blank'"+
+									(i<onRowsColCount?" dimoncol=\"true\"":"")+
+									"/>");
+						}
+					}
+				}
+				sb.append("</tr>");
 			}
 		}
-		out(sb.toString()+"</tr>\n", fos);
+		else {
+			sb.append("\n\t<tr>");
+			for(int i=0;i<lsColNames.size();i++) {
+				if(finalColNames.contains(lsColNames.get(i))) {
+					sb.append("<th>"+lsColNames.get(i)+"</th>");
+				}
+			}
+			sb.append("</tr>");
+		}
+		sb.append("\n");
+		out(sb.toString(), fos);
+	}
+	
+	void guessPivotCols() {
+		onColsColCount = 0;
+		onRowsColCount = 0;
+		for(int i=0;i<lsColNames.size();i++) {
+			if(finalColNames.contains(lsColNames.get(i))) {
+				int l = lsColNames.get(i).split(PivotResultSet.COLS_SEP_PATTERN).length;
+				if(l>1) {
+					if(l>onColsColCount) {
+						onColsColCount = l;
+						onRowsColCount = i;
+						break;
+					}
+				}
+			}
+		}
+		
+		if(onColsColCount==0 && onRowsColCount==0) {
+			for(int i=0;i<lsColNames.size();i++) {
+				if(finalColNames.contains(lsColNames.get(i))) {
+					int l2 = lsColNames.get(i).split(PivotResultSet.COLVAL_SEP_PATTERN).length;
+					if(l2>1) {
+						onColsColCount = 1;
+						onRowsColCount = i;
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	protected void appendStyleNumericAlignRight(StringBuilder sb) {
@@ -214,7 +297,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 				}
 				sb.append( "<td"
 						+(origVal==null?" null=\"true\"":"")
-						+attrsStr+">"+ value +"</td>");
+						+attrsStr
+						+(i<onRowsColCount?" dimoncol=\"true\"":"")
+						+">"+ value +"</td>");
 				
 				}
 			}
