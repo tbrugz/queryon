@@ -59,6 +59,7 @@ table > tbody > tr:nth-child(1) {
 table th {
 	position: sticky;
 	top: 0px;
+	z-index: 3;
 }
 
 /*
@@ -116,6 +117,10 @@ th[dimoncol] {
 td[dimoncol] {
 	font-weight: bold;
 	background-color: #fff;
+}
+
+th[measure] {
+	background-color: #eee;
 }
 
 /* datadiff */
