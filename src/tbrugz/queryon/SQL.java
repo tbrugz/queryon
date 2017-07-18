@@ -403,7 +403,9 @@ public class SQL {
 					sqlCols.add(reqColumn);
 				}
 				else {
-					log.warn("column not found: "+reqColumn+" [table:"+table.getName()+"]");
+					String message = "column not found: "+reqColumn+" [table:"+table.getName()+"]";
+					log.warn(message);
+					throw new BadRequestException(message);
 				}
 			}
 			if(sqlCols.size()>0) {
