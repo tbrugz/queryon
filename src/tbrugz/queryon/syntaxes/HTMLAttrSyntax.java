@@ -16,6 +16,9 @@ import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * XXX: pivot: know limitation: attributes doesn't work with measures in rows
+ */
 public class HTMLAttrSyntax extends HTMLDataDump {
 	
 	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_TITLE", "_HREF"}; //XXX: change to enum!

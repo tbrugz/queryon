@@ -86,6 +86,8 @@ public class RequestSpec {
 	
 	public static final String PARAM_ONCOLS = "oncols";
 	public static final String PARAM_ONROWS = "onrows";
+	public static final String PARAM_PIVOTFLAGS = "pivotflags";
+	public static final int DEFAULT_PIVOTFLAGS = 4;
 	
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";
@@ -113,6 +115,7 @@ public class RequestSpec {
 	
 	final List<String> oncols = new ArrayList<String>();
 	final List<String> onrows = new ArrayList<String>();
+	final int pivotflags;
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
 	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
@@ -295,6 +298,8 @@ public class RequestSpec {
 			setSyntaxProps(outputSyntax, req, feat, prop);
 		}
 		
+		log.debug("outputSyntax: "+outputSyntax);
+		
 		//---------------------
 		
 		String offsetStr = req.getParameter(PARAM_OFFSET);
@@ -323,6 +328,9 @@ public class RequestSpec {
 		if(onRowsPar!=null) {
 			onrows.addAll(Arrays.asList(onRowsPar.split(",")));
 		}
+		String pivotStr = req.getParameter(PARAM_PIVOTFLAGS);
+		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
+		else { pivotflags = DEFAULT_PIVOTFLAGS; }
 		
 		distinct = req.getParameter(PARAM_DISTINCT)!=null;
 		count = req.getParameter(PARAM_COUNT)!=null;
