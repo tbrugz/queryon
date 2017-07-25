@@ -276,12 +276,12 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			}
 		}
 		
-		for(int i=0;i<finalColNames.size();i++) {
-			String colName = finalColNames.get(i);
-			//if(finalColNames.contains(colName)) {
+		for(int i=0;i<lsColNames.size();i++) {
+			String colName = lsColNames.get(i);
+			if(finalColNames.contains(colName)) {
 				Object origVal = vals.get(i);
 				
-				if(ResultSet.class.isAssignableFrom(finalColTypes.get(i))) {
+				if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 					if(origVal==null) {
 						sb.append("<td></td>");
 						continue;
@@ -295,12 +295,12 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 					//htmldd.padding = this.padding+"\t\t";
 					//log.info(":: "+rsInt+" / "+lsColNames);
 					htmldd.procProperties(prop);
-					DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, finalColNames.get(i), fos, true);
+					DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 					sb.append("\n\t</td>");
 				}
 				else {
 				
-				String value = DataDumpUtils.getFormattedXMLValue(origVal, finalColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, doEscape(i));
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, doEscape(i));
 				Map<String,String> attrs = attrsVals.get(colName);
 				String attrsStr = "";
 				if(attrs!=null) {
@@ -320,8 +320,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 						+(i<onRowsColCount?" dimoncol=\"true\"":"")
 						+">"+ value +"</td>");
 				
+				//System.out.println("[i="+i+"] origVal=["+origVal+"] colName=["+colName+"] attr=["+attrs+"]");
 				}
-			//}
+			}
 		}
 		sb.append("</tr>");
 		out(sb.toString()+"\n", fos);
