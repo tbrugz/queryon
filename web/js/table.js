@@ -53,7 +53,7 @@ function createBlobLinks() {
 	//XXX add blobNames[i]+"_MIMETYPE" ? blobNames[i]+"_FILENAME" ?
 	//XXX style: 'display: none' to blobNames[i]+"_FILEEXT" columns?
 
-	console.log("table.js: tableName",tableName,"cols",cols,"blobNames",blobNames,"blobIndexes",blobIndexes,"blobFileExtIndex",blobFileExtIndex);
+	//console.log("table.js: tableName",tableName,"cols",cols,"blobNames",blobNames,"blobIndexes",blobIndexes,"blobFileExtIndex",blobFileExtIndex);
 	
 	if(blobIndexes.length>0) {
 		//XXX get current offset!!!
@@ -94,13 +94,45 @@ function createBlobLinks() {
 			}
 		}
 	}
+}
 
-};
+function mergeDimensions() {
+	var content = document.getElementsByTagName('table')[0];
+	if(!content) {
+		//console.log('table.js: mergeDimensions: no table found...');
+		return;
+	}
+	var trs = content.querySelectorAll("tr");
+	var colNameFound = false;
+	for(var i=0;i<trs.length;i++) {
+		var colname = trs[i].getAttribute("colname");
+		if(!colname && colNameFound) { break; }
+		if(colname) { colNameFound = true; }
+		//console.log(i,"colname:",colname);
+		var ths = trs[i].querySelectorAll("th");
+		for(var j=ths.length-1;j>=0;j--) {
+			if( ths[j].innerText && ths[j-1] && (ths[j].innerText===ths[j-1].innerText) ) {
+				//XXX do not merge if upper row columns are not equally merged
+				var cspan = ths[j].getAttribute("colspan");
+				//console.log(j, cspan, ths[j-1]);
+				if(!cspan) { cspan = "2"; }
+				else { cspan = ""+(parseInt(cspan)+1); }
+				ths[j-1].setAttribute("colspan", cspan);
+				ths[j].remove();
+			}
+		}
+	}
+}
+
+function doTableOnLoad() {
+	createBlobLinks();
+	mergeDimensions();
+}
 
 // http://stackoverflow.com/questions/9457891/how-to-detect-if-domcontentloaded-was-fired
 if (document.readyState == "complete" || document.readyState == "loaded") {
-	createBlobLinks();
+	doTableOnLoad();
 }
 else {
-	document.addEventListener("DOMContentLoaded", createBlobLinks);
+	document.addEventListener("DOMContentLoaded", doTableOnLoad);
 }
