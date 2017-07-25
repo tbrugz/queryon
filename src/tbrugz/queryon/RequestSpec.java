@@ -86,6 +86,7 @@ public class RequestSpec {
 	
 	public static final String PARAM_ONCOLS = "oncols";
 	public static final String PARAM_ONROWS = "onrows";
+	public static final String PARAM_MEASURES = "measures";
 	public static final String PARAM_PIVOTFLAGS = "pivotflags";
 	public static final int DEFAULT_PIVOTFLAGS = 4;
 	
@@ -327,6 +328,18 @@ public class RequestSpec {
 		String onRowsPar = req.getParameter(PARAM_ONROWS);
 		if(onRowsPar!=null) {
 			onrows.addAll(Arrays.asList(onRowsPar.split(",")));
+		}
+		String measuresPar = req.getParameter(PARAM_MEASURES);
+		if(measuresPar!=null) {
+			if(fields!=null) {
+				throw new BadRequestException("can't define both 'fields' & 'measures' parameters");
+			}
+			if(onrows.size()==0 && oncols.size()==0) {
+				throw new BadRequestException("can't define 'measures' without 'onrows' or 'oncols' parameters");
+			}
+			columns.addAll(onrows);
+			columns.addAll(oncols);
+			columns.addAll(Arrays.asList(measuresPar.split(",")));
 		}
 		String pivotStr = req.getParameter(PARAM_PIVOTFLAGS);
 		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
