@@ -97,22 +97,41 @@ function createBlobLinks() {
 }
 
 function mergeDimensions() {
+	var iniTime = +new Date();
 	var content = document.getElementsByTagName('table')[0];
 	if(!content) {
 		//console.log('table.js: mergeDimensions: no table found...');
 		return;
 	}
 	var trs = content.querySelectorAll("tr");
-	var colNameFound = false;
+	var lastDimRow = -1;
 	for(var i=0;i<trs.length;i++) {
 		var colname = trs[i].getAttribute("colname");
-		if(!colname && colNameFound) { break; }
-		if(colname) { colNameFound = true; }
-		//console.log(i,"colname:",colname);
+		var measuresrow = trs[i].getAttribute("measuresrow");
+		if(!colname && !measuresrow) { lastDimRow = i; break; }
+	}
+	//console.log("mergeDimensions: lastDimRow=",lastDimRow);
+	
+	for(var i=lastDimRow ; i>=0 ; i--) {
+		var colname = trs[i].getAttribute("colname");
+		var measuresrow = trs[i].getAttribute("measuresrow");
+		if(!colname && !measuresrow) { break; }
 		var ths = trs[i].querySelectorAll("th");
+		//console.log(i,"colname:",colname,"ths",ths);
+		loop1:
 		for(var j=ths.length-1;j>=0;j--) {
 			if( ths[j].innerText && ths[j-1] && (ths[j].innerText===ths[j-1].innerText) ) {
-				//XXX do not merge if upper row columns are not equally merged
+				//XXXdone do not merge if upper row columns are not equally merged
+				for(var z=i-1; z>=0 ; z--) {
+					//console.log("test row ",z);
+					var zhs =trs[z].querySelectorAll("th");
+					if( zhs[j].innerText && zhs[j-1] && (zhs[j].innerText===zhs[j-1].innerText) ) {}
+					else {
+						//console.log("parent is not equal: ", zhs[j], zhs[j-1]);
+						continue loop1;
+					}
+				}
+				
 				var cspan = ths[j].getAttribute("colspan");
 				//console.log(j, cspan, ths[j-1]);
 				if(!cspan) { cspan = "2"; }
@@ -122,6 +141,7 @@ function mergeDimensions() {
 			}
 		}
 	}
+	//console.log("mergeDimensions: lastDimRow=",lastDimRow," ; elapsed="+((+new Date())-iniTime));
 }
 
 function doTableOnLoad() {
