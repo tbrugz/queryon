@@ -582,7 +582,7 @@ public class QueryOn extends HttpServlet {
 			doService(req, resp);
 		}
 		catch(InternalServerException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			resp.setStatus(e.getCode());
 			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
@@ -787,6 +787,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		catch(InternalServerException e) {
+			//log.warn(e, e);
 			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			throw e;
 		}
@@ -796,6 +797,8 @@ public class QueryOn extends HttpServlet {
 			throw e;
 		}
 		catch(SQLException e) {
+			//log.warn(e, e);
+			log.warn(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage(), e);
 			throw new ServletException(e);
 		}
 		catch(IOException e) {
@@ -1022,7 +1025,8 @@ public class QueryOn extends HttpServlet {
 			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
 			//XXX: create new SQLException including the query string? throw BadRequestException? InternalServerException?
-			throw e;
+			throw new InternalServerException("Exception in 'doSelect': "+e, e);
+			//throw e;
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
@@ -2095,8 +2099,9 @@ public class QueryOn extends HttpServlet {
 				filename = rs.getString(reqspec.uniValueFilenameCol);
 			}
 			if(filename!=null) {
-				resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
+				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
 			}
+			try {
 			InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
 			if(is!=null) {
 				IOUtil.pipeStreams(is, resp.getOutputStream());
@@ -2105,6 +2110,12 @@ public class QueryOn extends HttpServlet {
 			else {
 				// null return: null
 				//throw new BadRequestException("Null stream [column="+reqspec.uniValueCol+"]");
+			}
+		}
+			catch(SQLException e) {
+				resp.setContentType(MIME_TEXT);
+				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, ResponseSpec.HEADERVALUE_CONTENT_DISPOSITION_INLINE);
+				throw e;
 			}
 		}
 		else {
