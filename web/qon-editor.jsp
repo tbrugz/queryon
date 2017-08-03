@@ -38,6 +38,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
 	<script type="text/javascript" src="js/http-post.js"></script>
 	<script type="text/javascript" src="js/qon-util.js"></script>
+	<script type="text/javascript" src="js/table.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
@@ -46,6 +47,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;
 	var rolesInfo = {};
 	var queryAltered = false;
+	var lastExecutedQuery = null;
 	
 	$.ajax({
 		dataType: 'text',
@@ -72,7 +74,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		
 		var params = document.querySelectorAll('.parameter');
 		//var paramsStr = '';
-		console.log(params);
+		console.log("params:", params);
 		
 		for (var i = 0; i < params.length; ++i) {
 			var item = params[i];
@@ -101,6 +103,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
 			
 			closeMessages('messages');
+			lastExecutedQuery = reqData;
+			doTableOnLoad();
 			updateUI();
 		});
 
@@ -556,7 +560,23 @@ modelId = SchemaModelUtils.getModelId(request);
 			event.returnValue = dialogText;
 			return dialogText;
 		}
-	}	
+	}
+	
+	function downloadBlob(qs) {
+		var params = document.querySelectorAll('.parameter');
+		
+		for (var i = 0; i < params.length; ++i) {
+			var item = params[i];
+			lastExecutedQuery[item.name] = item.value;
+		}
+		console.log("downloadBlob", qs, lastExecutedQuery, params);
+		
+		btnActionStart('btnDownload');
+		post(queryOnUrl+"/QueryAny?"+qs, lastExecutedQuery, function () {
+			console.log('blob-downloading...'); 
+			btnActionStop('btnDownload');
+		}, "_blank");
+	}
 	
 	window.addEventListener('load', function() {
 		if(modelId==null) {

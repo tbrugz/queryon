@@ -227,8 +227,20 @@ doConfirmUpload = function() {
 	if(! fd.get('v:BINARY_DATA').name) {
 		fd.delete('v:BINARY_DATA');
 	}
-	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json';
 
+	var username = byId('username').innerHTML;
+	var now = new Date();
+	var qs = "";
+	if(fd.get('v:ID')) {
+		qs += "?v:UPDATED_BY="+encodeURIComponent(username);
+		qs += "&v:UPDATED_AT="+encodeURIComponent(now.toISOString());
+	}
+	else {
+		qs += "?v:CREATED_BY="+encodeURIComponent(username);
+		qs += "&v:CREATED_AT="+encodeURIComponent(now.toISOString());
+	}
+	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json' + qs;
+	
 	request.open("POST", loadUrl, true);
 	btnActionStart('btnUpdate');
 	request.onload = function(oEvent) {
@@ -236,7 +248,7 @@ doConfirmUpload = function() {
 		var msg = null;
 		if (request.status >= 200 && request.status < 300) {
 			var pkvals = req.getResponseHeader('X-Relation-UK-Values');
-			msg = "Uploaded! [id = "+pkvals.trim()+"]";
+			msg = "Uploaded! [id = "+(pkvals?pkvals.trim():fd.get('v:ID'))+"]";
 			showInfoMessages('dialog-messages', msg);
 			//XXX append new url with ID
 		} else {

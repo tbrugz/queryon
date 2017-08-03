@@ -1,6 +1,6 @@
 
 // from: http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
-function post(path, params, callback) {
+function post(path, params, callback, target) {
 	//method = method || "POST"; // Set method to post by default if not specified.
 	var method = "POST";
 
@@ -9,8 +9,10 @@ function post(path, params, callback) {
 	var form = document.createElement("form");
 	form.setAttribute("method", method);
 	form.setAttribute("action", path);
-	//form.setAttribute("target", "_blank");
-	console.log('post: '+method+' :: '+path);
+	if(typeof target == "string") {
+		form.setAttribute("target", target);
+	}
+	console.log('post: method=',method,' path= ',path," target= ",target);
 	//console.log(params);
 
 	for ( var key in params) {

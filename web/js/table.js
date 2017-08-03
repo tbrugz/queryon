@@ -82,11 +82,18 @@ function createBlobLinks() {
 					var currval = row.children[blobIndexes[ci]].innerHTML;
 					var fileExt = blobFileExtIndex[ci]>=0 ? row.children[blobFileExtIndex[ci]].innerHTML : "blob" ;
 					var offset = (rownum+currentOffset);
-					row.children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend
-						+ (queryString?"&":"?")
-						+"limit=1&offset="+offset+"&valuefield="+blobNames[ci]
-						+"&filename=queryon_"+tableName+"_"+blobNames[ci]+"_"+(offset+1)+"."+fileExt
-						+"\">"+currval+"</a>";
+					var qs = "limit=1&offset="+offset+"&valuefield="+blobNames[ci] +
+						"&filename=queryon_"+tableName+"_"+blobNames[ci]+"_"+(offset+1)+"."+fileExt;
+
+					if(typeof downloadBlob == "function") {
+						row.children[blobIndexes[ci]].innerHTML = "<a href=\"javascript:downloadBlob('" +
+							qs + "');\">"+currval+"</a>";
+					}
+					else {
+						row.children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend +
+							(queryString?"&":"?") + qs +
+							"\" target=\"_blank\">"+currval+"</a>";
+					}
 					
 					}
 				}
