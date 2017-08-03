@@ -26,6 +26,7 @@ import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
@@ -88,7 +89,7 @@ public class RequestSpec {
 	public static final String PARAM_ONROWS = "onrows";
 	public static final String PARAM_MEASURES = "measures";
 	public static final String PARAM_PIVOTFLAGS = "pivotflags";
-	public static final int DEFAULT_PIVOTFLAGS = 4;
+	public static final int DEFAULT_PIVOTFLAGS = PivotResultSet.SHOW_MEASURES_ALLWAYS;
 	
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";

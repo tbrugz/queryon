@@ -994,12 +994,15 @@ public class QueryOn extends HttpServlet {
 		ResultSet rs = st.executeQuery();
 		
 		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
+			int originalColCount = rs.getMetaData().getColumnCount();
 			@SuppressWarnings("resource")
 			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, reqspec.pivotflags);
 			rs = prs;
 			String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
 			log.info("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
-			log.info("PivotResultSet: rowcount: "+prs.getRowCount()+" ; originalRowcount: "+prs.getOriginalRowCount()+" ; flags: "+reqspec.pivotflags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
+			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" colCount: "+prs.getMetaData().getColumnCount()+"; "+
+					"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
+					"flags: "+reqspec.pivotflags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
 		}
 		
 		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
