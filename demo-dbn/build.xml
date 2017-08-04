@@ -10,7 +10,7 @@
 	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
 		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
-		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime">
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.16-SNAPSHOT" scope="runtime">
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
 		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="1.5.2" scope="runtime"/>
