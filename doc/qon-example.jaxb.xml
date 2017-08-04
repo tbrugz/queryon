@@ -299,6 +299,7 @@
             <pk>true</pk>
             <type>INTEGER</type>
             <nullable>false</nullable>
+            <autoIncrement>true</autoIncrement>
         </columns>
         <columns>
             <name>PATH</name>

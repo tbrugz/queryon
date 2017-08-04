@@ -2,11 +2,13 @@
 	xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
+	<property name="sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
+	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
 
 	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
 		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
-		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.14-SNAPSHOT" scope="runtime">
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.16-SNAPSHOT" scope="runtime">
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
 		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
@@ -25,4 +27,10 @@
 		</java>
 	</target>
 
+	<target name="run-sqldiff">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=src/main/resources/queryon.sqldiff.properties"/>
+		</java>
+	</target>
+	
 </project>
