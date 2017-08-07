@@ -2,6 +2,7 @@
 	xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
+	<property name="sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 
 	<!--<property name="derby.version" value="10.12.1.1"/>-->
 	<!--<property name="derby.version" value="10.11.1.1"/>-->
@@ -71,6 +72,12 @@
 		</java>
 	</target>
 
+	<target name="run-sqldiff-mysql">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=scripts/sqldiff.mysql.properties"/>
+		</java>
+	</target>
+	
 	<!-- you must create database 'classicmodels' first -->
 	<target name="run-sqlrun-pgsql">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
@@ -78,15 +85,33 @@
 		</java>
 	</target>
 
+	<target name="run-sqldiff-pgsql">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=scripts/sqldiff.pgsql.properties"/>
+		</java>
+	</target>
+	
 	<target name="run-sqlrun-h2">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.h2.properties"/>
 		</java>
 	</target>
 
+	<target name="run-sqldiff-h2">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=scripts/sqldiff.h2.properties"/>
+		</java>
+	</target>
+
 	<target name="run-sqlrun-derby">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.derby.properties"/>
+		</java>
+	</target>
+	
+	<target name="run-sqldiff-derby">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=scripts/sqldiff.derby.properties"/>
 		</java>
 	</target>
 
