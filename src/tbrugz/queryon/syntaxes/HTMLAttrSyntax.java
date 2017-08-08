@@ -27,7 +27,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	static final List<String> ATTRIBS = Arrays.asList("style", "class", "title");
 
 	static final String[] ROWWIDE_COLS = {"ROW_STYLE", "ROW_CLASS"};
-	transient final List<String> ROWWIDE_COLS_LIST = Arrays.asList(ROWWIDE_COLS);
+	transient static final List<String> ROWWIDE_COLS_LIST = Arrays.asList(ROWWIDE_COLS);
 	static final List<String> ROWWIDE_ATTRIBS = Arrays.asList("style", "class");
 	
 	/*static final Map<String, StringDecorator> decorators = new HashMap<String, StringDecorator>();
@@ -251,7 +251,7 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 			String attrib = ROWWIDE_ATTRIBS.get(rowIdx);
 			Object val = vals.get(idx);
 			if(val!=null) {
-				sb.append(" "+attrib+"=\""+val+"\"");
+				sb.append(" "+attrib+"=\""+DataDumpUtils.xmlEscapeTextFull(val.toString())+"\"");
 			}
 		}
 		sb.append(">");
@@ -272,7 +272,11 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 							attrs = new HashMap<String, String>();
 							attrsVals.put(fullCol, attrs);
 						}
-						attrs.put(attr, DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, null, doEscape(i)));
+						Object val = vals.get(i);
+						if(val!=null) {
+							String v = DataDumpUtils.getFormattedXMLValue(val, lsColTypes.get(i), floatFormatter, dateFormatter, null, false);
+							attrs.put(attr, DataDumpUtils.xmlEscapeTextFull(v));
+						}
 						//System.out.println("fullCol="+fullCol+" ; attrs="+attrs);
 					}
 				}
