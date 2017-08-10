@@ -55,7 +55,8 @@ function refreshAuthInfo() {
 	var urlednew = document.getElementById("url-editor-new");
 	if(authInfo.isDev && urlednew) {
 		urlednew.style.display = 'inline';
-		urlednew.href = qonEditorUrl + ( getCurrentModelId()?"?model="+getCurrentModelId():"" );
+		//urlednew.href = qonEditorUrl + ( getCurrentModelId()?"?model="+getCurrentModelId():"" );
+		urlednew.href = qonEditorUrl + ( isMultiModel()?"?model="+getCurrentModelId():"" );
 	}
 	else if(urlednew){
 		urlednew.style.display = 'none';

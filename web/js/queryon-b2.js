@@ -121,6 +121,7 @@ function makeHrefs() {
 	//console.log("select.selectedIndex", select.selectedIndex);
 	
 	var id = null;
+	var modelId = getCurrentModelId();
 	if(select.selectedIndex>=0) {
 		id = select.options[select.selectedIndex].value;
 	}
@@ -143,8 +144,8 @@ function makeHrefs() {
 				else {
 					urled.href += "name="+parts[0];
 				}
-				if(getCurrentModelId()) {
-					urled.href += "&model="+getCurrentModelId();
+				if(modelId) {
+					urled.href += "&model="+modelId;
 				}
 			}
 			else {
@@ -156,12 +157,18 @@ function makeHrefs() {
 			urlpl.style.display = 'initial';
 			urlpl.href = queryOnUrl+"/"+id;
 			urlpl.href += getParameters()+".htmlx";
+			if(modelId) {
+				urlpl.href += "?model="+modelId;
+			}
 		}
 	
 		if(urldown) {
 			urldown.style.display = 'initial';
 			urldown.href = queryOnUrl+"/"+id;
 			urldown.href += getParameters()+".csv";
+			if(modelId) {
+				urldown.href += "?model="+modelId;
+			}
 		}
 	}
 	

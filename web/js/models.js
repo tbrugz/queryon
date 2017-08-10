@@ -42,6 +42,14 @@ function getCurrentModelId() {
 	return model=="null"?null:model;
 }
 
+function getModelCount() {
+	return modelsInfo.length;
+}
+
+function isMultiModel() {
+	return getModelCount()>1;
+}
+
 getModel = function() {}
 
 //document.addEventListener("DOMContentLoaded", loadModels);

@@ -85,7 +85,8 @@ function createMenuContent(addCloseBtn) {
 			&& (!li.classList.contains("auth") || !hasLoginLink)
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
 			
-			var href = li.getElementsByTagName("a")[0].getAttribute("href-orig");
+			var hrefElem = li.getElementsByTagName("a")[0];
+			var href = hrefElem.getAttribute("href-orig");
 			var hrefCurrentLike = href; //"/"+href;
 			if(hrefCurrentLike.startsWith(".")) { hrefCurrentLike = hrefCurrentLike.substring(1); }
 			hrefCurrentLike = hrefCurrentLike.replace(/\/\//g, '/');
@@ -99,11 +100,15 @@ function createMenuContent(addCloseBtn) {
 			}
 			if(li.classList.contains("auth") && href.indexOf('?return')<0) {
 				href += '?return='+encodeURIComponent(window.location.href);
-				li.getElementsByTagName("a")[0].setAttribute("href", href);
+				hrefElem.setAttribute("href", href);
 			}
 			if(!li.classList.contains("auth") && !li.getElementsByTagName("a")[0].getAttribute('target')) {
 				href += location.search;
-				li.getElementsByTagName("a")[0].setAttribute("href", href);
+				hrefElem.setAttribute("href", href);
+			}
+			if(li.classList.contains("addmodel")) {
+				href += "?model="+getCurrentModelId();
+				hrefElem.setAttribute("href", href);
 			}
 			innerContent += li.outerHTML;
 		}

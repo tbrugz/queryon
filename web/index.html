@@ -276,7 +276,7 @@
 		}
 
 		// insert/update/delete
-		if(relationType == 'table') {
+		if(relationType != 'query') {
 			var rel = relationsHash[id];
 			var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
 			var match = re.exec(rel.constraints);
@@ -860,6 +860,7 @@
 		bottom: 0;
 		padding: 2px;
 		right: 0;
+		z-index: 5;
 	}
 	
 	#schemaNameFilter {

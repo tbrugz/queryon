@@ -290,7 +290,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			infoMessage('query '+name+' sucessfully saved');
 			//XXX: reload query after save?
 			validateEditComponents(true);
-			history.replaceState(null, null, "?name="+name+(schema!=''?"&schema="+schema:""));
+			history.replaceState(null, null, "?name="+name +(schema!=''?"&schema="+schema:"") +(modelId!=''?"&model="+modelId:""));
 			queryAltered = false;
 			updateUI();
 		});
@@ -322,7 +322,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			closeMessages('messages');
 			infoMessage('query '+document.getElementById('name').value+' sucessfully removed');
 			validateEditComponents(false);
-			history.replaceState(null, null, "qon-editor.jsp");
+			history.replaceState(null, null, "qon-editor.jsp" +(modelId!=''?"?model="+modelId:""));
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {

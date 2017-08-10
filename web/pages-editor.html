@@ -12,6 +12,7 @@
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
+	<script src="js/models.js"></script>
 	<script src="js/settings.js"></script>
 	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
@@ -59,6 +60,12 @@ onLoad = function() {
 			qonUrl = 'q/'+table;
 		}
 		console.log("qonUrl: ", qonUrl);
+		var modelId = getParameterByName('model', location.search);
+		if(modelId) {
+			byId('modelLabel').style.display = 'inline-block';
+			byId('model').value = modelId;
+		}
+
 		if(id) {
 			byId('id').value = id;
 			doLoadPage(id);
@@ -118,8 +125,10 @@ function doSave() {
 	var payload = "v:PATH=" + encodeURIComponent(path) +
 		"&v:MIME=" + encodeURIComponent(mime) +
 		"&v:HAS_BODY=t" +
-		"&bodyparamname=BODY";
+		"&bodyparamname=BODY" +
+		(getCurrentModelId()?'&model='+getCurrentModelId():'');
 		//"&v:BODY=" + encodeURIComponent( editor.getValue() );
+		
 	var messageBody = editor.getValue();
 	var method = "POST"; //post: insert ; patch: update
 	// TODO: add "now"
@@ -184,6 +193,7 @@ function doSave() {
 	//oReq.send(payload);
 }
 
+/*
 function doRun() {
 	var url = byId('pages-open').getAttribute("href"); //.href;
 	var output = editor.getValue();
@@ -201,6 +211,7 @@ function doRun() {
 	}, 100);
 	//w.document.write(output);
 }
+*/
 
 function doLoadPageError(evt) {
 	//btnActionStop('btnSave');
@@ -214,7 +225,8 @@ function doLoadPageError(evt) {
 function doLoadPage(id) {
 	var loadUrl = qonUrl+'.json';
 
-	var payload = "p1=" + encodeURIComponent(id);
+	var payload = "p1=" + encodeURIComponent(id) +
+		(getCurrentModelId()?'&model='+getCurrentModelId():'');
 	loadUrl += "?" + payload;
 	
 	var oReq = new XMLHttpRequest();

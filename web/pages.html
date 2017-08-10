@@ -50,14 +50,48 @@ onLoad = function() {
 	//var id = getParameterByName('id', location.search);
 	updateUI();
 	loadAuthInfo();
-	loadSettings(function() {
-		var table = settings['queryon.qon-pages.table'];
-		if(table) {
-			qonUrl = 'q/'+table;
-		}
-		updateUI();
-		loadPagesList();
-	});
+	loadModels();
+	loadSettings(onLoadAfter);
+};
+
+onLoadAfter = function() {
+	//console.log("onLoadAfter", authInfo.loaded, settings['queryon.project.version'], modelsInfo);
+	if(! authInfo.loaded) return;
+	if(! settings['queryon.project.version']) return;
+	if(! modelsInfo) return;
+	//console.log("onLoadAfter2");
+	
+	var table = settings['queryon.qon-pages.table'];
+	if(table) {
+		qonUrl = 'q/'+table;
+	}
+	updateUI();
+	refreshAuthInfo();
+	updatePagesList();
+};
+
+loadAuthInfoCallback = onLoadAfter;
+//loadModelsContentCallback = onLoadAfter;
+
+onModelChanged = function() {
+	refreshAuthInfo();
+	updatePagesList();
+}
+
+function loadModelsContentCallback() {
+	//loadModelsContent(oEvent);
+
+	if(modelsInfo) {
+		loadSelect(modelsInfo, 'model');
+	}
+	if(modelsInfo.length>1) {
+		document.getElementById('model').parentNode.style.display = 'inline-block';
+	}
+
+	byId('url-editor-new').style.display = authInfo.isDev?'inline':'none';
+	
+	//updatePagesList();
+	onLoadAfter();
 }
 
 updateUI = function() {
@@ -78,10 +112,19 @@ clearPagesList = function() {
 	content.innerHTML = '';
 }
 
+updatePagesList = function() {
+	clearPagesList();
+	loadPagesList();
+}
+
 loadPagesList = function() {
+	closeMessages('messages');
+
 	var loadUrl = qonUrl+'.json';
 
-	var payload = "fields=ID,PATH,MIME,HAS_BODY&order=PATH";
+	var modelQs = (getCurrentModelId()?'model='+getCurrentModelId():'');
+	var payload = "fields=ID,PATH,MIME,HAS_BODY&order=PATH&" + modelQs;
+
 	loadUrl += "?" + payload;
 
 	var oReq = new XMLHttpRequest();
@@ -98,11 +141,12 @@ loadPagesList = function() {
 				var PATH = pages[i].PATH || pages[i].path;
 				var MIME = pages[i].MIME || pages[i].mime;
 				var HAS_BODY = pages[i].HAS_BODY || pages[i].has_body;
+				PATH += "?"+modelQs;
 				content.innerHTML += "\n<li id='p"+ ID +"'><a href='p/"+ PATH +"' target='_blank' class='ref'>"+prettyLink( PATH )+"</a> "+
 					(MIME=="text/markdown"?" <a href='md/"+PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
 					(authInfo.isDev?
 						(hasBody(HAS_BODY)?
-							" <a href='pages-editor.html?id="+ID+"' target='_blank' class='action edit'>[edit]</a>":
+							" <a href='pages-editor.html?id=" + ID + "&" + modelQs + "' target='_blank' class='action edit'>[edit]</a>":
 							" <a href='#' onclick='updateBlob("+ID+")' class='action editblob'>[update blob]</a>")
 						:"")+
 					(authInfo.isDev?" <a href='#' onclick='removePage("+ID+", \""+PATH+"\");false;' class='action remove'>[remove]</a>":"")+
@@ -112,6 +156,7 @@ loadPagesList = function() {
 		}
 		else {
 			console.warn(evt);
+			showErrorMessages('messages', evt.target.responseText);
 		}
 	};
 	oReq.onerror = function(evt) {
@@ -133,6 +178,10 @@ updateBlob = function(id) {
 
 prettyLink = function(str) {
 	if(str==null) return null;
+	var idx = str.indexOf("?");
+	if(idx>0) {
+		str = str.substring(0, idx);
+	}
 	return str.replace(/\//g, " / ");
 }
 
@@ -239,6 +288,11 @@ doConfirmUpload = function() {
 		qs += "?v:CREATED_BY="+encodeURIComponent(username);
 		qs += "&v:CREATED_AT="+encodeURIComponent(now.toISOString());
 	}
+	
+	if(getCurrentModelId()) {
+		qs += '&model='+getCurrentModelId();
+	}
+	
 	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json' + qs;
 	
 	request.open("POST", loadUrl, true);
@@ -335,9 +389,13 @@ li.removed {
 <nav class="navbar" id="nav">
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
 
+	<label style="display: none">
+		<select id="model" onchange="onModelChanged();"></select>
+	</label>
+
 	<span id="navbar-links">
 		<span id="navbar-actions">
-			<i class="fa fa-refresh" id="url-refresh" onclick="clearPagesList();loadPagesList();false;" title="refresh pages list"></i>
+			<i class="fa fa-refresh" id="url-refresh" onclick="updatePagesList();false;" title="refresh pages list"></i>
 			<!-- <a id="url-refreshz" class="edit-link" href="#" onclick="clearPagesList();loadPagesList();false;" style="display:inline">refresh</a> -->
 			<a id="url-editor-new" class="edit-link" href="#" target="_blank" style="display: none">new page</a>
 			<a id="url-upload" class="edit-link" href="#" onclick="openUploadDialog();false;" style="display: none">upload</a>
