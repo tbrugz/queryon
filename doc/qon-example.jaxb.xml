@@ -292,6 +292,65 @@
     </table>
 
     <table>
+        <name>QON_QUERIES</name>
+        <schemaName>QUERYON</schemaName>
+        <columns>
+            <name>SCHEMA_NAME</name>
+            <columSize>100</columSize>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>NAME</name>
+            <columSize>100</columSize>
+            <nullable>false</nullable>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>REMARKS</name>
+            <columSize>400</columSize>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>QUERY</name>
+            <type>CLOB</type>
+        </columns>
+        <columns>
+            <name>ROLES_FILTER</name>
+            <columSize>1000</columSize>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>DISABLED</name>
+            <type>SMALLINT</type>
+        </columns>
+        <columns>
+            <name>CREATED_AT</name>
+            <type>TIMESTAMP</type>
+        </columns>
+        <columns>
+            <name>CREATED_BY</name>
+            <columSize>200</columSize>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>UPDATED_AT</name>
+            <type>TIMESTAMP</type>
+        </columns>
+        <columns>
+            <name>UPDATED_BY</name>
+            <columSize>200</columSize>
+            <type>VARCHAR</type>
+        </columns>
+        <constraints>
+            <name>QON_QUERIES_PK</name>
+            <type>PK</type>
+            <uniqueColumns>NAME</uniqueColumns>
+        </constraints>
+        <remarks>QueryOn Queries - DO NOT EDIT BY HAND</remarks>
+        <type>TABLE</type>
+    </table>
+
+    <table>
         <name>QON_PAGES</name>
         <schemaName>QUERYON</schemaName>
         <columns>
