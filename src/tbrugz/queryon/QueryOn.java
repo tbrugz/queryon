@@ -2106,8 +2106,15 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		if(rs.next()) {
-			if(rs.next()) {
+			//log.debug("rs: "+rs.getClass());
+			try {
+				if(!rs.isLast()) { // works better with h2, but not with oracle (so: try/catch)
+				//if(rs.next()) { // not working ok with h2, oracle
 				throw new BadRequestException("ResultSet has more than 1 row ["+queryName+"]");
+			}
+			}
+			catch(SQLException e) { // oracle?
+				log.warn("Error at 'isLast()/next()': "+e);
 			}
 			
 			if(reqspec.uniValueMimetypeCol!=null) {
