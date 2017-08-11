@@ -90,6 +90,12 @@
 			<arg value="-propfile=scripts/sqldiff.pgsql.properties"/>
 		</java>
 	</target>
+
+	<target name="run-sqlrun-pgsql-afterdiff">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.pgsql-afterdiff.properties"/>
+		</java>
+	</target>
 	
 	<target name="run-sqlrun-h2">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
@@ -115,6 +121,12 @@
 		</java>
 	</target>
 
+	<target name="run-sqlrun-derby-afterdiff">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.derby-afterdiff.properties"/>
+		</java>
+	</target>
+	
 	<target name="run-sqlrun-derby-dropdatabase">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun-drop.derby.properties"/>
