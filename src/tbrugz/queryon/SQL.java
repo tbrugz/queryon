@@ -27,6 +27,7 @@ import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -275,7 +276,7 @@ public class SQL {
 			if(col==null || col.equals("")) { continue; }
 			//log.debug("order by '"+col+"': cols: "+relationCols);
 			//XXXdone option to ignore unknown columns? or to not validate?
-			if(validateOrderColumnNames && relationCols!=null && !relationCols.contains(col)) {
+			if(validateOrderColumnNames && relationCols!=null && !MiscUtils.containsIgnoreCase(relationCols, col)) {
 				throw new BadRequestException("can't order by '"+col+"' (unknown column)");
 			}
 			
@@ -399,7 +400,7 @@ public class SQL {
 			Set<String> tabCols = new HashSet<String>(table.getColumnNames()); 
 			List<String> sqlCols = new ArrayList<String>(); 
 			for(String reqColumn: reqspec.columns) {
-				if(tabCols.contains(reqColumn)) {
+				if(MiscUtils.containsIgnoreCase(tabCols, reqColumn)) {
 					sqlCols.add(reqColumn);
 				}
 				else {
@@ -507,36 +508,53 @@ public class SQL {
 	}
 	
 	public void addParameter(Object value, String type) {
+		//log.debug("addParameter:: bind value "+value+" ; type="+type);
 		if(value instanceof String) {
-			// XXX test for empty string ("")? 
+			String str = (String) value;
+			// XXXdone test for empty string ("")
 			if(DBUtil.INT_COL_TYPES_LIST.contains(type.toUpperCase())) {
 				try {
-					bindParameterValues.add(Long.parseLong((String) value));
+					bindParameterValues.add(Long.parseLong(str));
 				}
 				catch(NumberFormatException e) {
+					if(str.isEmpty()) {
+						bindParameterValues.add(null);
+					}
+					else {
 					log.warn("Error parsing long '"+value+"', trying as String");
 					bindParameterValues.add(value);
 				}
 			}
+			}
 			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type.toUpperCase())) {
 				try {
-					bindParameterValues.add(Double.parseDouble((String) value));
+					bindParameterValues.add(Double.parseDouble(str));
 				}
 				catch(NumberFormatException e) {
+					if(str.isEmpty()) {
+						bindParameterValues.add(null);
+					}
+					else {
 					log.warn("Error parsing double '"+value+"', trying as String");
 					bindParameterValues.add(value);
 				}
 			}
+			}
 			else if(startsWithAny(type.toUpperCase(), DBUtil.DATE_COL_TYPES_LIST)) {
 				try {
-					Date dt = DBUtil.parseDateMultiFormat((String) value, dateFormats);
+					Date dt = DBUtil.parseDateMultiFormat(str, dateFormats);
 					bindParameterValues.add(dt);
 					//log.info(">> value: "+value+" ctype: "+type+" dt: "+dt);
 				}
 				catch(ParseException e) {
+					if(str.isEmpty()) {
+						bindParameterValues.add(null);
+					}
+					else {
 					log.warn("Error parsing date '"+value+"', trying as String");
 					bindParameterValues.add(value);
 				}
+			}
 			}
 			else {
 				bindParameterValues.add(value);
@@ -579,6 +597,13 @@ public class SQL {
 			}
 			else if(value instanceof String) {
 				st.setString(i+1, (String) value);
+				/*
+				log.debug("param["+i+"] setString: "+value);
+				if(((String) value).length()>0) {
+					String s = (String) value;
+					log.debug("param["+i+"] setString[0]: "+s.getBytes("UTF-8")[0] + " / to-utf8: "+new String(s.getBytes("iso-8859-1"), QueryOn.UTF8));
+				}
+				*/
 			}
 			else if(value instanceof Date) {
 				st.setTimestamp(i+1, new Timestamp(((Date) value).getTime()));
@@ -588,15 +613,20 @@ public class SQL {
 			}
 			else if(value instanceof Reader) {
 				st.setCharacterStream(i+1, (Reader) value);
+				//log.debug("param["+i+"] setReader...");
 			}
 			else if(value instanceof Part) {
 				Part p = (Part) value;
 				//XXX guess if binary or character stream... based on p.getContentType() or column type??
 				//st.setBinaryStream(i+1, p.getInputStream());
 				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream()));
+				//log.debug("param["+i+"] setPart...");
+			}
+			else if(value==null) {
+				st.setObject(i+1, null);
 			}
 			else {
-				log.warn("bindParameters: unknown value type: " + (value!=null?value.getClass().getName():value) );
+				log.warn("bindParameters: unknown value type: " + value.getClass().getName() );
 			}
 		}
 	}

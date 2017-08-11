@@ -60,6 +60,7 @@ import tbrugz.queryon.sqlcmd.ShowTables;
 import tbrugz.queryon.syntaxes.WebSyntax;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -371,9 +372,20 @@ public class QueryOn extends HttpServlet {
 					if( grabModel(models, id) ) { modelsGrabbed.add(id); }
 				}
 				String defaultModel = prop.getProperty(PROP_MODELS_DEFAULT);
-				if(!modelsGrabbed.contains(defaultModel)) { defaultModel = null; }
+				if(defaultModel==null) {
+					String msg = "multi-model instance must define a default model [prop '"+PROP_MODELS_DEFAULT+"']";
+					log.warn(msg);
+					//throw new ServletException(msg);
+				}
+				if(!modelsGrabbed.contains(defaultModel)) {
+					String msg = "unknown model '"+defaultModel+"'";
+					log.warn(msg);
+					defaultModel = null;
+					//throw new ServletException(msg);
+				}
 				if(defaultModel==null && modelsGrabbed.size()>0) {
 					defaultModel = modelsGrabbed.get(0);
+					log.warn("null default model [prop '"+PROP_MODELS_DEFAULT+"'], defaultModel set to '"+defaultModel+"'");
 				}
 				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [grabbed: "+modelsGrabbed+"]");
@@ -1465,8 +1477,8 @@ public class QueryOn extends HttpServlet {
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		for(; cols.hasNext();) {
 			String col = cols.next();
-			if(! columns.contains(col)) {
-				log.warn("unknown column: "+col);
+			if(! MiscUtils.containsIgnoreCase(columns, col)) {
+				log.warn("[update] unknown column: "+col);
 				throw new BadRequestException("[update] unknown column: "+col);
 			}
 			//TODOne: check UPDATE permission on each row, based on grants
@@ -1486,8 +1498,8 @@ public class QueryOn extends HttpServlet {
 			Iterator<String> pcols = reqspec.updatePartValues.keySet().iterator();
 			while(pcols.hasNext()) {
 				String col = pcols.next();
-				if(! columns.contains(col)) {
-					log.warn("unknown column: "+col);
+				if(! MiscUtils.containsIgnoreCase(columns, col)) {
+					log.warn("[update] unknown column: "+col);
 					throw new BadRequestException("[update] unknown column: "+col);
 				}
 				//TODOne: check UPDATE permission on each row, based on grants
@@ -1585,7 +1597,7 @@ public class QueryOn extends HttpServlet {
 		if(pk!=null) {
 			for(int i=0;i<pk.getUniqueColumns().size() && i<reqspec.params.size();i++) {
 				String pkcol = pk.getUniqueColumns().get(i);
-				if(! columns.contains(pkcol)) {
+				if(! MiscUtils.containsIgnoreCase(columns, pkcol)) {
 					log.warn("unknown PK column: "+pkcol);
 					continue;
 				}
@@ -1606,10 +1618,12 @@ public class QueryOn extends HttpServlet {
 		StringBuilder sbVals = new StringBuilder();
 		int colsCount = 0;
 		{
-		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
+			Iterator<Map.Entry<String, String>> cols = reqspec.updateValues.entrySet().iterator();
+			
 		for(; cols.hasNext();) {
-			String col = cols.next();
-			if(! columns.contains(col)) {
+				Map.Entry<String, String> colmap = cols.next();
+				String col = colmap.getKey();
+				if(! MiscUtils.containsIgnoreCase(columns, col)) {
 				log.warn("unknown 'value' column: "+col);
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
@@ -1621,7 +1635,8 @@ public class QueryOn extends HttpServlet {
 			sbCols.append((colsCount!=0?", ":"")+col);
 			sbVals.append((colsCount!=0?", ":"")+"?");
 			String ctype = DBUtil.getColumnTypeFromColName(relation, col);
-			sql.addParameter(reqspec.updateValues.get(col), ctype);
+				//log.debug("col: "+col+" ; ctype: "+ctype);
+				sql.addParameter(colmap.getValue(), ctype);
 			colsCount++;
 		}
 		}
@@ -1631,14 +1646,14 @@ public class QueryOn extends HttpServlet {
 			Iterator<String> pcols = reqspec.updatePartValues.keySet().iterator();
 			while(pcols.hasNext()) {
 				String pcol = pcols.next();
-				if(! columns.contains(pcol)) {
+				if(! MiscUtils.containsIgnoreCase(columns, pcol)) {
 					log.warn("unknown 'value' column: "+pcol);
 					throw new BadRequestException("[insert] unknown column: "+pcol);
 				}
 				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, pcol)) {
 					throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+pcol);
 				}
-				int colindex = relation.getColumnNames().indexOf(pcol);
+				int colindex = MiscUtils.indexOfIgnoreCase(relation.getColumnNames(), pcol);
 				if(colindex>=0) {
 					sbCols.append((colsCount!=0?", ":"")+pcol);
 					sbVals.append((colsCount!=0?", ":"")+"?");
@@ -1648,7 +1663,9 @@ public class QueryOn extends HttpServlet {
 					colsCount++;
 				}
 				else {
-					log.warn("column "+pcol+" not found on relation "+relation);
+					String msg = "column "+pcol+" not found on relation "+relation;
+					log.warn(msg);
+					throw new BadRequestException(msg);
 				}
 			}
 		}

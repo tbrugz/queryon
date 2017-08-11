@@ -33,10 +33,15 @@ public class DBUtil {
 	public static final String[] BLOB_COL_TYPES = { "BLOB", "RAW", "LONG RAW", "BYTEA" };
 	public static final List<String> BLOB_COL_TYPES_LIST = Arrays.asList(BLOB_COL_TYPES);
 
-	public static final String[] INT_COL_TYPES = { "INT", "INTEGER", "SMALLINT", "TINYINT", "BIGINT", "INT2", "INT4", "INT8", "SERIAL", "BIGSERIAL" };
+	public static final String[] INT_COL_TYPES = { "INT", "INTEGER", "SMALLINT", "BIGINT",
+			"TINYINT", // mysql, sql server
+			"INT2", "INT4", "INT8", "SERIAL", "SMALLSERIAL", "BIGSERIAL" //postgresql // add serial2, serial4, serial8? 
+	};
 	public static final List<String> INT_COL_TYPES_LIST = Arrays.asList(INT_COL_TYPES);
 	
-	public static final String[] FLOAT_COL_TYPES = { "NUMERIC", "DECIMAL", "FLOAT", "DOUBLE", "REAL", "DOUBLE PRECISION", "NUMBER" };
+	public static final String[] FLOAT_COL_TYPES = { "NUMERIC", "DECIMAL", "FLOAT", "DOUBLE", "REAL", "DOUBLE PRECISION", "NUMBER",
+			"FLOAT4", "FLOAT8" //postgresql
+	};
 	public static final List<String> FLOAT_COL_TYPES_LIST = Arrays.asList(FLOAT_COL_TYPES);
 	
 	public static final String[] DATE_COL_TYPES = { "TIMESTAMP", "DATE" };
@@ -157,8 +162,10 @@ public class DBUtil {
 	}
 	
 	public static String getColumnTypeFromColName(Relation relation, String colname) {
-		int idx = relation.getColumnNames().indexOf(colname);
+		int idx = MiscUtils.indexOfIgnoreCase(relation.getColumnNames(), colname);
+		/*int idx = relation.getColumnNames().indexOf(colname);
 		if(idx<0) { idx = relation.getColumnNames().indexOf(colname.toUpperCase()); }
+		if(idx<0) { idx = relation.getColumnNames().indexOf(colname.toLowerCase()); }*/
 		if(idx<0) { return null; }
 		return relation.getColumnTypes().get(idx);
 	}
