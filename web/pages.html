@@ -141,7 +141,7 @@ loadPagesList = function() {
 				var PATH = pages[i].PATH || pages[i].path;
 				var MIME = pages[i].MIME || pages[i].mime;
 				var HAS_BODY = pages[i].HAS_BODY || pages[i].has_body;
-				PATH += "?"+modelQs;
+				PATH += modelQs ? "?"+modelQs : "";
 				content.innerHTML += "\n<li id='p"+ ID +"'><a href='p/"+ PATH +"' target='_blank' class='ref'>"+prettyLink( PATH )+"</a> "+
 					(MIME=="text/markdown"?" <a href='md/"+PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
 					(authInfo.isDev?
