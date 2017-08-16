@@ -1394,6 +1394,26 @@ public class QueryOn extends HttpServlet {
 		return true;
 	}
 	
+	void checkOptimisticLock(Relation relation, RequestSpec reqspec, Constraint pk, Connection conn) throws SQLException, IOException {
+		SQL sqlLock = SQL.createSQL(relation, reqspec);
+		filterByKey(relation, reqspec, pk, sqlLock);
+		sqlLock.addCount();
+		PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
+		sqlLock.bindParameters(stmt);
+		log.debug("sql lock: "+sqlLock.getFinalSql());
+		ResultSet rs = stmt.executeQuery();
+		/*if(rs.next()) {
+			log.debug("no rows updated but optimisticLock active... query without lock has rows, so probably row has been changed");
+			throw new BadRequestException("Row has been changed [update-count="+count+"]", HttpServletResponse.SC_CONFLICT);
+		}*/
+		rs.next();
+		int sqlLockCount = rs.getInt(1);
+		if(sqlLockCount>=1) {
+			log.debug("no rows updated but optimisticLock active... query without lock has rows [#"+sqlLockCount+"], so probably row has been changed");
+			throw new BadRequestException("Row has been changed", HttpServletResponse.SC_CONFLICT);
+		}
+	}
+	
 	void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
@@ -1420,6 +1440,9 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("Filter error: "+warns);
 		}
 		
+		//XXX optimistic lock on delete?
+		//boolean willTryLock = tryOptimisticLock(relation, reqspec, sql);
+		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		sql.bindParameters(st);
 		
@@ -1429,6 +1452,9 @@ public class QueryOn extends HttpServlet {
 		
 		if(fullKeyDefined(reqspec, pk)) {
 			if(count==0) {
+				//if(willTryLock) {
+				//	checkOptimisticLock(relation, reqspec, pk, conn);
+				//}
 				throw new NotFoundException("Element not found");
 			}
 			if(count>1) {
@@ -1566,16 +1592,7 @@ public class QueryOn extends HttpServlet {
 		int count = st.executeUpdate();
 		
 		if(count==0 && willTryLock) {
-			SQL sqlLock = SQL.createSQL(relation, reqspec);
-			filterByKey(relation, reqspec, pk, sqlLock);
-			PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
-			sqlLock.bindParameters(stmt);
-			log.debug("sql lock: "+sqlLock.getFinalSql());
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()) {
-				log.debug("no rows updated but optimisticLock active... query without lock has rows, so probably row has been changed");
-				throw new BadRequestException("Row has been changed [update-count="+count+"]", HttpServletResponse.SC_CONFLICT);
-			}
+			checkOptimisticLock(relation, reqspec, pk, conn);
 		}
 		
 		//XXXdone: boundaries for # of updated rows?
