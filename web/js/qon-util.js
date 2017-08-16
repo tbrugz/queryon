@@ -89,6 +89,23 @@ function arrayContainsRetLabels(a, b, lContains, lNoContains) {
 	return ret;
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+function formatDate(date) {
+	function pad(number) {
+		if (number < 10) {
+			return '0' + number;
+		}
+		return number;
+	}
+	
+	return date.getFullYear() +
+		'-' + pad(date.getMonth() + 1) +
+		'-' + pad(date.getDate()) +
+		' ' + pad(date.getHours()) +
+		':' + pad(date.getMinutes()) +
+		':' + pad(date.getSeconds());
+}
+
 // ---------- messages ----------
 
 function showInfoMessages(messagesId, text) {
