@@ -84,6 +84,7 @@ public class RequestSpec {
 	public static final String PARAM_LIMIT = "limit";
 	public static final String PARAM_OFFSET = "offset";
 	public static final String PARAM_COUNT = "count";
+	public static final String PARAM_OPTIMISTICLOCK = "optimisticlock";
 	
 	public static final String PARAM_ONCOLS = "oncols";
 	public static final String PARAM_ONROWS = "onrows";
@@ -150,6 +151,7 @@ public class RequestSpec {
 	
 	final Map<String, String> updateValues = new HashMap<String, String>();
 	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
+	final String optimisticLock;
 
 	final List<String> orderCols = new ArrayList<String>();
 	final List<String> orderAscDesc = new ArrayList<String>();
@@ -384,6 +386,8 @@ public class RequestSpec {
 		//while(en.hasMoreElements()) {
 		//	String key = en.nextElement();
 		//	String[] value = req.getParameterValues(key);
+		
+		optimisticLock = request.getParameter(PARAM_OPTIMISTICLOCK);
 		
 		// http://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
 		if(isContentTypeMultiPart()) {

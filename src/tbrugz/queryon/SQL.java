@@ -58,7 +58,7 @@ public class SQL {
 
 	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
 	
-	public static List<DateFormat> dateFormats = new ArrayList<DateFormat>();
+	public static final List<DateFormat> dateFormats = new ArrayList<DateFormat>();
 	
 	static boolean validateOrderColumnNames = true;
 	
@@ -128,7 +128,8 @@ public class SQL {
 			username = "''";
 		}
 		//log.info("getFinalSql: "+username);
-		return sql.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
+		return sql.replace(PARAM_PROJECTION_CLAUSE, "*")
+				.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
 				.replace(VARIABLE_USERNAME, username);
 	}
 	
@@ -569,7 +570,7 @@ public class SQL {
 		DumpSyntax dsHtmlx = dsutils.getDumpSyntax("htmlx");
 		DumpSyntax dsHtml = dsutils.getDumpSyntax("html");
 		
-		dateFormats = new ArrayList<DateFormat>();
+		dateFormats.clear();
 		dateFormats.add(DBUtil.isoDateFormat);
 		if(dsHtmlx!=null) {
 			dateFormats.add(dsHtmlx.dateFormatter);

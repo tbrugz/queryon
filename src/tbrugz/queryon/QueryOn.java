@@ -1375,6 +1375,37 @@ public class QueryOn extends HttpServlet {
 		return rs;
 	}
 	
+	/*String optimisticLockField(Relation relation, RequestSpec reqspec) {
+		String lockField = prop.getProperty("queryon.optimisticlock@"+relation.getName()+".field");
+		if(lockField==null) {
+			return null;
+		}
+		int idx = relation.getColumnNames().indexOf(lockField);
+		if(idx<0) {
+			throw new BadRequestException("Lock field '"+lockField+"' not found in relation '"+relation.getQualifiedName()+"'");
+		}
+		//String type = relation.getColumnTypes().get(idx);
+		return lockField;
+	}*/
+
+	boolean tryOptimisticLock(Relation relation, RequestSpec reqspec, SQL sql) {
+		String lockField = prop.getProperty("queryon.optimisticlock@"+relation.getName()+".field");
+		if(lockField==null) {
+			return false;
+		}
+		int idx = relation.getColumnNames().indexOf(lockField);
+		if(idx<0) {
+			throw new BadRequestException("Lock field '"+lockField+"' not found in relation '"+relation.getQualifiedName()+"'");
+		}
+		
+		String type = relation.getColumnTypes().get(idx);
+		sql.addFilter("("+lockField+" = ? or "+lockField+" is null)");
+		sql.addParameter(reqspec.optimisticLock, type);
+		log.debug("tryOptimisticLock: "+reqspec.optimisticLock+" ; "+type);
+		
+		return true;
+	}
+	
 	void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
@@ -1533,14 +1564,43 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("Filter error: "+warns);
 		}
 
+		//optimistic lock
+		/*String lockField = optimisticLockField(relation, reqspec);
+		if(lockField!=null) {
+			int idx = relation.getColumnNames().indexOf(lockField);
+			String type = relation.getColumnTypes().get(idx);
+			sql.addFilter(lockField+" = ?");
+			sql.addParameter(reqspec.optimisticLock, type);
+		}
+		*/
+		boolean willTryLock = tryOptimisticLock(relation, reqspec, sql);
+
 		//log.info("pre-sql update: "+sql);
 		
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		sql.bindParameters(st);
 
-		log.debug("sql update: "+sql);
+		log.debug("sql update: "+sql+
+				(willTryLock?" [willTryLock]":""));
 		
 		int count = st.executeUpdate();
+		
+		if(count==0 && willTryLock) {
+			// maybe concurrency problem...
+			//log.warn("no rows updated but optimisticLock active...");
+			//st.close();
+
+			SQL sqlLock = SQL.createSQL(relation, reqspec);
+			filterByKey(relation, reqspec, pk, sqlLock);
+			PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
+			sqlLock.bindParameters(stmt);
+			log.debug("sql lock: "+sqlLock.getFinalSql());
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()) {
+				log.debug("no rows updated but optimisticLock active... query without lock has rows, so probably row has been changed");
+				throw new BadRequestException("Row has been changed [update-count="+count+"]", HttpServletResponse.SC_CONFLICT);
+			}
+		}
 		
 		//XXXdone: boundaries for # of updated rows?
 		if(reqspec.maxUpdates!=null && count > reqspec.maxUpdates) {
