@@ -89,6 +89,10 @@ function arrayContainsRetLabels(a, b, lContains, lNoContains) {
 	return ret;
 }
 
+function isInteger(x) {
+	return x % 1 === 0;
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
 function formatDate(date) {
 	function pad(number) {
