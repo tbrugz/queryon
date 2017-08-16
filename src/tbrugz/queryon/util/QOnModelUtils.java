@@ -39,9 +39,11 @@ public class QOnModelUtils {
 	}
 
 	public static boolean hasPermissionWithoutColumn(List<Grant> grants, Set<String> roles) {
-		for(Grant g: grants) {
-			if(g!=null && g.getColumn()==null && roles.contains(g.getGrantee())) {
-				return true;
+		if(grants!=null) {
+			for(Grant g: grants) {
+				if(g!=null && g.getColumn()==null && roles.contains(g.getGrantee())) {
+					return true;
+				}
 			}
 		}
 		return false;

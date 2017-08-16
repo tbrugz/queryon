@@ -1375,21 +1375,9 @@ public class QueryOn extends HttpServlet {
 		return rs;
 	}
 	
-	/*String optimisticLockField(Relation relation, RequestSpec reqspec) {
-		String lockField = prop.getProperty("queryon.optimisticlock@"+relation.getName()+".field");
-		if(lockField==null) {
-			return null;
-		}
-		int idx = relation.getColumnNames().indexOf(lockField);
-		if(idx<0) {
-			throw new BadRequestException("Lock field '"+lockField+"' not found in relation '"+relation.getQualifiedName()+"'");
-		}
-		//String type = relation.getColumnTypes().get(idx);
-		return lockField;
-	}*/
-
+	// TODO: get lock field from relation's metadata
 	boolean tryOptimisticLock(Relation relation, RequestSpec reqspec, SQL sql) {
-		String lockField = prop.getProperty("queryon.optimisticlock@"+relation.getName()+".field");
+		String lockField = prop.getProperty("queryon.optimisticlock@"+relation.getQualifiedName()+".field");
 		if(lockField==null) {
 			return false;
 		}
@@ -1401,7 +1389,7 @@ public class QueryOn extends HttpServlet {
 		String type = relation.getColumnTypes().get(idx);
 		sql.addFilter("("+lockField+" = ? or "+lockField+" is null)");
 		sql.addParameter(reqspec.optimisticLock, type);
-		log.debug("tryOptimisticLock: "+reqspec.optimisticLock+" ; "+type);
+		log.info("tryOptimisticLock: "+reqspec.optimisticLock+" ; "+type);
 		
 		return true;
 	}
@@ -1565,14 +1553,6 @@ public class QueryOn extends HttpServlet {
 		}
 
 		//optimistic lock
-		/*String lockField = optimisticLockField(relation, reqspec);
-		if(lockField!=null) {
-			int idx = relation.getColumnNames().indexOf(lockField);
-			String type = relation.getColumnTypes().get(idx);
-			sql.addFilter(lockField+" = ?");
-			sql.addParameter(reqspec.optimisticLock, type);
-		}
-		*/
 		boolean willTryLock = tryOptimisticLock(relation, reqspec, sql);
 
 		//log.info("pre-sql update: "+sql);
@@ -1586,10 +1566,6 @@ public class QueryOn extends HttpServlet {
 		int count = st.executeUpdate();
 		
 		if(count==0 && willTryLock) {
-			// maybe concurrency problem...
-			//log.warn("no rows updated but optimisticLock active...");
-			//st.close();
-
 			SQL sqlLock = SQL.createSQL(relation, reqspec);
 			filterByKey(relation, reqspec, pk, sqlLock);
 			PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
