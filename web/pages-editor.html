@@ -106,7 +106,7 @@ function doSave() {
 	var now = new Date();
 	var optimisticlock = byId('optimisticlock').value;
 	var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
-	//console.log("now:",now,now.toISOString());
+	//console.log("now:",now,now.toISOString(),'optimisticlock',optimisticlock,'version_seq',version_seq,'isInteger(optimisticlock)',isInteger(optimisticlock));
 
 	// normalizing path
 	path = path.replace(/\/+/g, '\/').replace(/^\//, '');

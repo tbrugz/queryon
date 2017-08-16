@@ -89,8 +89,12 @@ function arrayContainsRetLabels(a, b, lContains, lNoContains) {
 	return ret;
 }
 
-function isInteger(x) {
-	return x % 1 === 0;
+// https://stackoverflow.com/a/14794066/616413
+function isInteger(value) {
+	//return x % 1 === 0;
+	return !isNaN(value) && 
+		parseInt(Number(value)) == value && 
+		!isNaN(parseInt(value, 10));	
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
