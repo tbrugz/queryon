@@ -43,7 +43,7 @@ function getCurrentModelId() {
 }
 
 function getModelCount() {
-	return modelsInfo.length;
+	return modelsInfo? modelsInfo.length: 1;
 }
 
 function isMultiModel() {

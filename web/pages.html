@@ -141,6 +141,7 @@ loadPagesList = function() {
 				var PATH = pages[i].PATH || pages[i].path;
 				var MIME = pages[i].MIME || pages[i].mime;
 				var HAS_BODY = pages[i].HAS_BODY || pages[i].has_body;
+				var removePagePath = PATH;
 				PATH += modelQs ? "?"+modelQs : "";
 				content.innerHTML += "\n<li id='p"+ ID +"'><a href='p/"+ PATH +"' target='_blank' class='ref'>"+prettyLink( PATH )+"</a> "+
 					(MIME=="text/markdown"?" <a href='md/"+PATH+"' target='_blank' class='ref'>[as html]</a>":"")+
@@ -149,8 +150,7 @@ loadPagesList = function() {
 							" <a href='pages-editor.html?id=" + ID + "&" + modelQs + "' target='_blank' class='action edit'>[edit]</a>":
 							" <a href='#' onclick='updateBlob("+ID+")' class='action editblob'>[update blob]</a>")
 						:"")+
-					(authInfo.isDev?" <a href='#' onclick='removePage("+ID+", \""+PATH+"\");false;' class='action remove'>[remove]</a>":"")+
-					//XXX add delete button
+					(authInfo.isDev?" <a href='#' onclick='removePage("+ID+", \""+removePagePath+"\");false;' class='action remove'>[remove]</a>":"")+
 					"</li><br/>";
 			}
 		}
@@ -186,8 +186,12 @@ prettyLink = function(str) {
 }
 
 removePage = function(id, path) {
+	
 	if(confirm("remove page "+path+"?")) {
 		var loadUrl = qonUrl+'/'+id+'.json';
+		if(getCurrentModelId()) {
+			loadUrl += '?model='+getCurrentModelId();
+		}
 
 		var request = new XMLHttpRequest();
 		request.open("DELETE", loadUrl, true);
@@ -195,7 +199,6 @@ removePage = function(id, path) {
 			var msg = null;
 			if (request.status >= 200 && request.status < 300) {
 				msg = "Resource "+path+" deleted";
-				//alert(msg);
 				var page = byId("p"+id);
 				var childs = page.querySelectorAll(".action");
 				page.removeChild(childs[0]); page.removeChild(childs[1]);
@@ -228,6 +231,7 @@ openUploadDialog = function(id) {
 	dialogHTML += (id?"<input type='hidden' name='_method' value='PATCH'/><input type='hidden' name='v:ID' value='"+id+"'/>":"")
 	dialogHTML += "<div class='field'><label>file: <input type='file' id='v:BINARY_DATA' name='v:BINARY_DATA' onchange='onFileChange();'/>"+" <span class='remarks'>binary content</span>"+"</label></div> ";
 	dialogHTML += "<div class='field'><label>path: <input type='text' id='v:PATH' name='v:PATH'/>"+" <span class='remarks'>resource path</span>"+"</label></div> ";
+	dialogHTML += "<div class='field'><label>upload as text? <input type='checkbox' id='uploadAsText'/>"+" <span class='remarks'>uploading as text allows to edit the uploaded text</span>"+"</label></div> ";
 	dialogHTML += "</form></div> ";
 
 	dialog.innerHTML = dialogHTML + "<div id='dialog-footer'>"
@@ -238,7 +242,8 @@ openUploadDialog = function(id) {
 
 	if(id) {
 		var page = findPage(id);
-		document.getElementsByName('v:PATH')[0].value = page.PATH;// || page.path; // ???
+		console.log(page);
+		document.getElementsByName('v:PATH')[0].value = page.PATH || page.path;
 	}
 }
 
@@ -252,7 +257,7 @@ onFileChange = function() {
 
 findPage = function(id) {
 	for(var i=0;i<pages.length;i++) {
-		if(pages[i].ID==id) { return pages[i]; }
+		if(pages[i].ID==id || pages[i].id==id) { return pages[i]; }
 	}
 	return null;
 }
@@ -275,6 +280,13 @@ doConfirmUpload = function() {
 	//console.log('v:BINARY_DATA:: ',fd.has('v:BINARY_DATA'),' - f.name: ',fd.get('v:BINARY_DATA').name, ' - f.size: ',fd.get('v:BINARY_DATA').size);
 	if(! fd.get('v:BINARY_DATA').name) {
 		fd.delete('v:BINARY_DATA');
+	}
+	if(byId('uploadAsText').checked) {
+		//console.log("upload as text!");
+		fd.set('v:BODY', fd.get('v:BINARY_DATA'));
+		fd.set('v:HAS_BODY', "t");
+		fd.delete('v:BINARY_DATA');
+		//console.warn('body', fd.get('v:BODY'), 'binary', fd.get('v:BINARY_DATA'));
 	}
 
 	var username = byId('username').innerHTML;
