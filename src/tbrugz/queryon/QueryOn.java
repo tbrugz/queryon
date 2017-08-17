@@ -101,6 +101,7 @@ import tbrugz.sqldump.util.Utils;
  */
 /*
  * TODO r2rml: option to understand URLs like: Department/name=accounting;city=Cambridge
+ * ?TODO: prevent sql injection
  */
 @MultipartConfig
 public class QueryOn extends HttpServlet {
@@ -586,9 +587,7 @@ public class QueryOn extends HttpServlet {
 		return sm;
 	}
 
-	//TODO?: prevent sql injection
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+	protected void doFacade(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
 			doService(req, resp);
@@ -863,27 +862,32 @@ public class QueryOn extends HttpServlet {
 	}
 
 	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		doFacade(req, resp);
+	}
+	
+	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doGet(req, resp);
+		doFacade(req, resp);
 	}
 
 	//@Override
 	protected void doPatch(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doGet(req, resp);
+		doFacade(req, resp);
 	}
 
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doGet(req, resp);
+		doFacade(req, resp);
 	}
 
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doGet(req, resp);
+		doFacade(req, resp);
 	}
 	
 	@Override
