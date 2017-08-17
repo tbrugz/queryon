@@ -419,6 +419,11 @@
             <type>PK</type>
             <uniqueColumns>ID</uniqueColumns>
         </constraints>
+        <constraints>
+            <name>QON_PAGES_PATH_UK</name>
+            <type>UNIQUE</type>
+            <uniqueColumns>PATH</uniqueColumns>
+        </constraints>
         <grants>
             <grantee>dev</grantee>
             <privilege>INSERT</privilege>
