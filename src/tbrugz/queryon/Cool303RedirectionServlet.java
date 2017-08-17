@@ -38,7 +38,7 @@ public class Cool303RedirectionServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		//TODO: test if resource (& id?) exists
-		resp.setStatus(303);
+		resp.setStatus(HttpServletResponse.SC_SEE_OTHER); // 303!
 		String redirTo = (urlPrepend!=null?urlPrepend:"") +
 				req.getPathInfo();
 		

@@ -362,11 +362,12 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 		
 		int countAllDeletes = 0;
 		for(String qname: queriesToRemove) {
-			qname = qname.trim();
+			//String prettyQname = qname.trim();
 			deleteSt.setString(1, qname);
 			int countDeletes = deleteSt.executeUpdate();
 			if(countDeletes!=1) {
 				//XXX "client/user error" - throw BadRequest or Processing Exception?
+				log.warn("Error deleting query '"+qname+"' [#deletes = "+countDeletes+"]\nsql="+deleteSql);
 				throw new BadRequestException("error deleting query '"+qname+"' [#deletes = "+countDeletes+"]");
 			}
 			

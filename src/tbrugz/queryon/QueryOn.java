@@ -1,6 +1,5 @@
 package tbrugz.queryon;
 
-//import java.nio.charset.Charset;
 import java.beans.IntrospectionException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -128,9 +127,9 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	// 'status objects' (SO)
-	public static final DBObjectType[] STATUS_OBJECTS = {
+	/*public static final DBObjectType[] STATUS_OBJECTS = {
 		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.RELATION, DBObjectType.EXECUTABLE, DBObjectType.FK
-	};
+	};*/
 
 	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.queryon", "tbrugz.queryon.processor", "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors", "tbrugz", "" };
 	
@@ -264,6 +263,7 @@ public class QueryOn extends HttpServlet {
 	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
 	Integer defaultLimit;
 	int maxLimit;
+	boolean debugMode = false; //XXX add prop for debugMode
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
@@ -593,18 +593,10 @@ public class QueryOn extends HttpServlet {
 			doService(req, resp);
 		}
 		catch(InternalServerException e) {
-			//e.printStackTrace();
-			resp.setStatus(e.getCode());
-			resp.setContentType(MIME_TEXT);
-			resp.getWriter().write(e.getMessage());
+			WebUtils.writeException(resp, e, debugMode);
 		}
 		catch(BadRequestException e) {
-			//e.printStackTrace();
-			//log.warn("BRE: "+e.getMessage()+
-			//		(e.internalMessage!=null?" ; internal="+e.internalMessage:"")); 
-			resp.setStatus(e.getCode());
-			resp.setContentType(MIME_TEXT);
-			resp.getWriter().write(e.getMessage());
+			WebUtils.writeException(resp, e, debugMode);
 		}
 		catch(ServletException e) {
 			//e.printStackTrace();
