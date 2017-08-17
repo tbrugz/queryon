@@ -116,9 +116,15 @@ function formatDate(date) {
 
 // ---------- messages ----------
 
+function getTextHeader(text) {
+	var idx = text.indexOf("\n\n");
+	if(idx>0) { return text.substring(0, idx); }
+	return text;
+}
+
 function showInfoMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	m.classList.add('info');
 	m.classList.remove('warn');
 	m.classList.remove('error');
@@ -131,7 +137,7 @@ function showInfoMessages(messagesId, text) {
 
 function showWarnMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	m.classList.remove('info');
 	m.classList.add('warn');
 	m.classList.remove('error');
@@ -143,7 +149,7 @@ function showWarnMessages(messagesId, text) {
 
 function showErrorMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	m.classList.remove('info');
 	m.classList.remove('warn');
 	m.classList.add('error');

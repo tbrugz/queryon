@@ -157,10 +157,10 @@ modelId = SchemaModelUtils.getModelId(request);
 			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
 			
 			if(usingSelected) {
-				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully validated');
+				infoMessage('selected text from query <b>'+document.getElementById('name').value+'</b> successfully validated');
 			}
 			else {
-				infoMessage('query '+document.getElementById('name').value+' sucessfully validated');
+				infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully validated');
 			}
 			updateUI();
 		});
@@ -220,10 +220,10 @@ modelId = SchemaModelUtils.getModelId(request);
 			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/><div class='explain'>"+data+"</div>";
 			
 			if(usingSelected) {
-				infoMessage('selected text from query '+document.getElementById('name').value+' sucessfully explained');
+				infoMessage('selected text from query <b>'+document.getElementById('name').value+'</b> successfully explained');
 			}
 			else {
-				infoMessage('query '+document.getElementById('name').value+' sucessfully explained');
+				infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully explained');
 			}
 			updateUI();
 		});
@@ -287,7 +287,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			btnActionStop('btnSave');
 			console.log(data);
 			closeMessages('messages');
-			infoMessage('query '+name+' sucessfully saved');
+			infoMessage('query <b>'+name+'</b> successfully saved');
 			//XXX: reload query after save?
 			validateEditComponents(true);
 			history.replaceState(null, null, "?name="+name +(schema!=''?"&schema="+schema:"") +(modelId!=''?"&model="+modelId:""));
@@ -307,20 +307,25 @@ modelId = SchemaModelUtils.getModelId(request);
 	}
 
 	function doRemove() {
+		var data = {
+			"queryon.qon-queries.action": "remove",
+			"queryon.qon-queries.querynames": document.getElementById('name').value,
+		};
+		if(modelId!='') {
+			data["model"] = modelId;
+		}
+		
 		var request = $.ajax({
 			url : processorUrl+"/queryon.processor.QOnQueries",
 			type : "POST",
-			data : {
-				"queryon.qon-queries.action": "remove",
-				"queryon.qon-queries.querynames": document.getElementById('name').value,
-			},
+			data : data,
 			dataType : "html"
 		});
 
 		request.done(function(data) {
 			console.log(data);
 			closeMessages('messages');
-			infoMessage('query '+document.getElementById('name').value+' sucessfully removed');
+			infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully removed');
 			validateEditComponents(false);
 			history.replaceState(null, null, "qon-editor.jsp" +(modelId!=''?"?model="+modelId:""));
 		});

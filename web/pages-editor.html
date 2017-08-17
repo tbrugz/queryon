@@ -177,7 +177,7 @@ function doSave() {
 			setTimeout(function() {
 				byId('messages').classList.remove('fade');
 				byId('messages').classList.add('fadeoutable');
-				showInfoMessages('messages', 'page '+name+' sucessfully saved');
+				showInfoMessages('messages', 'page <b>'+name+'</b> successfully saved');
 				refreshUI();
 				setTimeout(
 						function() { byId('messages').classList.add('fade'); },
@@ -245,7 +245,7 @@ function doLoadPage(id) {
 		if(status>=200 && status<300) {
 			//btnActionStop('btnSave');
 			console.log('doLoadPage.ok', evt);
-			//showInfoMessages('messages', 'page '+name+' sucessfully loaded');
+			//showInfoMessages('messages', 'page '+name+' successfully loaded');
 			var data = getQonData(JSON.parse(req.responseText))[0];
 			var PATH = data.PATH || data.path;
 			var MIME = data.MIME || data.mime;
