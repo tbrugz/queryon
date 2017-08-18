@@ -21,7 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -104,6 +106,7 @@ public class RequestSpec {
 	final Integer limit;
 	final String loStrategy;
 	final String contentType;
+	final String utf8;
 	
 	// data manipulation (DML) properties
 	final Integer minUpdates, maxUpdates;
@@ -207,6 +210,23 @@ public class RequestSpec {
 			httpMethod = req.getMethod();
 		}
 		
+		this.utf8 = req.getParameter(WebUtils.PARAM_UTF8);
+		boolean convertLatin1ToUtf8 = false;
+		if(utf8!=null) {
+			if(utf8.equals(WebUtils.UTF8_CHECK)) {
+				log.info("[ok] utf8: "+utf8);
+			}
+			else {
+				// assume url encoding as latin1 (iso-8859-1)
+				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] [expected="+WebUtils.UTF8_CHECK+"]");
+				convertLatin1ToUtf8 = true;
+				//req.setCharacterEncoding("xxx");
+				// 226 156 147 ? http://www.utf8-chartable.de/unicode-utf8-table.pl?start=9984&number=128&names=-&utf8=dec
+				// https://stackoverflow.com/questions/10517268/how-to-pass-unicode-characters-as-jsp-servlet-request-getparameter
+				// https://stackoverflow.com/questions/27338154/why-do-some-websites-have-utf8-in-their-title
+			}
+		}
+		
 		this.modelId = SchemaModelUtils.getModelId(req);
 		//TODO test if model with this id exists
 		
@@ -261,6 +281,9 @@ public class RequestSpec {
 			if(URIpartz.size()>0) {
 				objectTmp = URIpartz.remove(0);
 			}
+		}
+		if(convertLatin1ToUtf8) {
+			objectTmp = MiscUtils.latin1ToUtf8(objectTmp);
 		}
 		object = objectTmp;
 		log.info("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
