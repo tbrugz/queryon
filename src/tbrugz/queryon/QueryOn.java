@@ -370,8 +370,18 @@ public class QueryOn extends HttpServlet {
 				log.info("modelIds="+modelIds);
 				List<String> modelsGrabbed = new ArrayList<String>();
 				for(String id: modelIds) {
-					if( grabModel(models, id) ) { modelsGrabbed.add(id); }
+					if(id==null || id.isEmpty() || id.equals("null")) {
+						String msg = "invalid model id: '"+id+"'";
+						log.warn(msg);
+						//throw new ServletException(msg); 
 				}
+					else {
+						if( grabModel(models, id) ) {
+							modelsGrabbed.add(id);
+						}
+					}
+				}
+				//log.info("modelsGrabbed="+modelsGrabbed);
 				String defaultModel = prop.getProperty(PROP_MODELS_DEFAULT);
 				if(defaultModel==null) {
 					String msg = "multi-model instance must define a default model [prop '"+PROP_MODELS_DEFAULT+"']";
@@ -392,8 +402,10 @@ public class QueryOn extends HttpServlet {
 				log.info("defaultmodel="+defaultModel+" [grabbed: "+modelsGrabbed+"]");
 			}
 			else {
-				grabModel(models, null);
-				context.setAttribute(ATTR_DEFAULT_MODEL, null);
+				String defaultModel = null;
+				grabModel(models, defaultModel);
+				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
+				log.info("defaultmodel="+defaultModel+" [single-model]");
 			}
 			//log.debug("charset: "+Charset.defaultCharset());
 			context.setAttribute(ATTR_MODEL_MAP, models);
