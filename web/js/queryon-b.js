@@ -5,6 +5,8 @@ var relationsHash = {};
 
 var defaultNullObjectOption = '<option value="" selected>select object</option>';
 
+var utf8par = "utf8=✓";
+
 function init(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
@@ -97,6 +99,7 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	if(offset!=null && offset>0) {
 		queryString += '&offset='+offset;
 	}
+	queryString += "&" + utf8par;
 	
 	//console.log('query-string: '+queryString);
 	var returl = (baseUrlParam?baseUrlParam:baseUrl)

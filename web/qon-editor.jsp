@@ -1,3 +1,6 @@
+<%@page import="tbrugz.queryon.util.MiscUtils"%>
+<%@page import="tbrugz.queryon.util.WebUtils"%>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="java.util.*"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
@@ -48,6 +51,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	var rolesInfo = {};
 	var queryAltered = false;
 	var lastExecutedQuery = null;
+	var utf8par = "utf8=✓";
 	
 	$.ajax({
 		dataType: 'text',
@@ -290,7 +294,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			infoMessage('query <b>'+name+'</b> successfully saved');
 			//XXX: reload query after save?
 			validateEditComponents(true);
-			history.replaceState(null, null, "?name="+name +(schema!=''?"&schema="+schema:"") +(modelId!=null?"&model="+modelId:""));
+			history.replaceState(null, null, "?" + (schema!=''?"schema="+schema+"&":"") + "name=" + name + (modelId!=null?"&model="+modelId:"") + ("&" + utf8par) );
 			queryAltered = false;
 			updateUI();
 		});
@@ -626,11 +630,17 @@ boolean queryLoaded = false;
 
 <%
 model = SchemaModelUtils.getModel(application, modelId);
+boolean convert2utf8 = WebUtils.convertParametersToUtf8(request);
 schemaName = request.getParameter("schema");
 queryName = request.getParameter("name");
 query = "";
 remarks = "";
 roles = "";
+
+if(convert2utf8) {
+	schemaName = MiscUtils.latin1ToUtf8(schemaName);
+	queryName = MiscUtils.latin1ToUtf8(queryName);
+}
 
 numOfParameters = 0;
 queryLoaded = false;

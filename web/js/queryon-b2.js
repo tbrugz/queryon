@@ -119,6 +119,7 @@ function makeHrefs() {
 
 	var select = document.getElementById('objects');
 	//console.log("select.selectedIndex", select.selectedIndex);
+	var utf8par = "utf8=✓";
 	
 	var id = null;
 	var modelId = getCurrentModelId();
@@ -139,10 +140,10 @@ function makeHrefs() {
 				urled.href = qonEditorUrl+"?";
 				var parts = id.split('.');
 				if(parts.length>1) {
-					urled.href += "schema="+parts[0]+"&name="+parts[1];
+					urled.href += "schema="+encodeURIComponent(parts[0])+"&name="+encodeURIComponent(parts[1])+"&"+utf8par;
 				}
 				else {
-					urled.href += "name="+parts[0];
+					urled.href += "name="+encodeURIComponent(parts[0])+"&"+utf8par;
 				}
 				if(modelId) {
 					urled.href += "&model="+modelId;
@@ -155,64 +156,22 @@ function makeHrefs() {
 
 		if(urlpl) {
 			urlpl.style.display = 'initial';
-			urlpl.href = queryOnUrl+"/"+id;
-			urlpl.href += getParameters()+".htmlx";
+			urlpl.href = queryOnUrl+"/"+encodeURIComponent(id);
+			urlpl.href += getParameters()+".htmlx"+"?"+utf8par;
 			if(modelId) {
-				urlpl.href += "?model="+modelId;
+				urlpl.href += "&model="+modelId;
 			}
 		}
 	
 		if(urldown) {
 			urldown.style.display = 'initial';
-			urldown.href = queryOnUrl+"/"+id;
-			urldown.href += getParameters()+".csv";
+			urldown.href = queryOnUrl+"/"+encodeURIComponent(id);
+			urldown.href += getParameters()+".csv"+"?"+utf8par;
 			if(modelId) {
-				urldown.href += "?model="+modelId;
+				urldown.href += "&model="+modelId;
 			}
 		}
 	}
-	
-	//var queryString = '';
-	/*
-	var filters = document.querySelectorAll('.filter');
-	for (var i = 0; i < filters.length; ++i) {
-		var item = filters[i];
-		//queryString += '&'+item.name+"="+item.value;
-		//queryString = append2url(queryString, item.name+"="+item.value);
-		if(urlpl) {
-			urlpl.href = append2url(urlpl.href, item.name+"="+encodeURIComponent(item.value));
-		}
-		if(urldown) {
-			urldown.href = append2url(urldown.href, item.name+"="+encodeURIComponent(item.value));
-		}
-	}
-	
-	var orderElem = document.getElementById('order');
-	if(orderElem) {
-	var order = orderElem.value;
-	if(order!=null && order!='') {
-		//queryString += '&order='+order;
-		//queryString = append2url(queryString, 'order='+order);
-		if(urlpl) {
-			urlpl.href = append2url(urlpl.href, 'order='+order);
-		}
-		if(urldown) {
-			urldown.href = append2url(urldown.href, 'order='+order);
-		}
-	}
-	}
-
-	var offset = document.getElementById('offset');
-	if(offset) { offset = offset.value; };
-	if(offset!=null && offset>0) {
-		if(urlpl) {
-			urlpl.href = append2url(urlpl.href, 'offset='+offset);
-		}
-		if(urldown) {
-			urldown.href = append2url(urldown.href, 'offset='+offset);
-		}
-	}
-	*/
 	
 	if(urlpl) {
 		urlpl.href = urlAddFilterOrderOffset(urlpl.href);
@@ -221,6 +180,7 @@ function makeHrefs() {
 		urldown.href = urlAddFilterOrderOffset(urldown.href);
 	}
 	
+	//console.log('urled.href: ',urled.href);
 	//console.log('urlpl.href: ',urlpl.href);
 	//console.log('urldown.href: ',urldown.href);
 	
