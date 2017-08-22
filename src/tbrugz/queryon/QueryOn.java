@@ -372,11 +372,11 @@ public class QueryOn extends HttpServlet {
 				log.info("modelIds="+modelIds);
 				List<String> modelsGrabbed = new ArrayList<String>();
 				for(String id: modelIds) {
-					if(id==null || id.isEmpty() || id.equals("null")) {
+					if(id==null || id.trim().isEmpty() || id.equals("null")) {
 						String msg = "invalid model id: '"+id+"'";
 						log.warn(msg);
-						//throw new ServletException(msg); 
-				}
+						//throw new ServletException(msg);
+					}
 					else {
 						if( grabModel(models, id) ) {
 							modelsGrabbed.add(id);
@@ -1866,6 +1866,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
+		resp.setStatus(HttpServletResponse.SC_CREATED);
 		writeUpdateCount(resp, count, "inserted");
 		
 		}
