@@ -14,29 +14,30 @@ var authInfo = {
 		loaded: false  // should be set to 'true' after loading from ajax
 };
 
-function loadAuthInfo() {
-	$.ajax({
-		url: 'auth/info.jsp',
-		dataType: "text",
-		success: function(data) {
-			var info = JSON.parse(data);
-			console.log('authInfo', info);
-			info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
-			info.isDev = info.isAdmin;
-			info.loaded = true;
-			authInfo = info;
-			
-			if(typeof loadAuthInfoCallback === 'function') {
-				loadAuthInfoCallback();
-			}
-			if(typeof makeHrefs === 'function') {
-				makeHrefs();
-			}
-			else {
-				console.log('auth.js: function makeHrefs() not present...');
-			}
+function loadAuthInfo() { //callback?
+	var url = "auth/info.jsp";
+	
+	var request = new XMLHttpRequest();
+	request.open("POST", url, true);
+	request.onload = function(oEvent) {
+		var info = JSON.parse(oEvent.target.responseText);
+		console.log('authInfo', info);
+		info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
+		info.isDev = info.isAdmin;
+		info.loaded = true;
+		authInfo = info;
+		
+		if(typeof loadAuthInfoCallback === 'function') {
+			loadAuthInfoCallback();
 		}
-	});
+		if(typeof makeHrefs === 'function') {
+			makeHrefs();
+		}
+		else {
+			console.log('auth.js: function makeHrefs() not present...');
+		}
+	}
+	request.send();
 }
 
 function refreshAuthInfo() {

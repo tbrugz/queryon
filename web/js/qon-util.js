@@ -4,12 +4,18 @@
 var byId = function (id) { return document.getElementById(id); }
 
 function btnActionStart(btnId) {
-	document.getElementById(btnId).classList.add("onaction");
+	var elem = byId(btnId);
+	if(elem) {
+		elem.classList.add("onaction");
+	}
 	//XXX add hourglass-like icon? css transitions?
 }
 
 function btnActionStop(btnId) {
-	document.getElementById(btnId).classList.remove("onaction");
+	var elem = byId(btnId);
+	if(elem) {
+		elem.classList.remove("onaction");
+	}
 }
 
 // http://stackoverflow.com/a/7918944/616413
@@ -124,7 +130,7 @@ function getTextHeader(text) {
 
 function showInfoMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
 	m.classList.add('info');
 	m.classList.remove('warn');
 	m.classList.remove('error');
@@ -137,7 +143,7 @@ function showInfoMessages(messagesId, text) {
 
 function showWarnMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
 	m.classList.remove('info');
 	m.classList.add('warn');
 	m.classList.remove('error');
@@ -149,7 +155,7 @@ function showWarnMessages(messagesId, text) {
 
 function showErrorMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
 	m.classList.remove('info');
 	m.classList.remove('warn');
 	m.classList.add('error');

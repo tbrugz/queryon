@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - query editor</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-editor.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<script src="js/qon-base.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script src="js/auth.js"></script>
+	<script src="js/models.js"></script>
+	<!-- <script src="js/settings.js"></script> -->
+	<script src="js/http-post.js"></script>
+	<script src="js/table.js"></script>
+	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<style>
+#logo {
+	margin: 2px;
+	margin-left: 4px;
+}
+#queryResult {
+	font-family: monospace;
+}
+#queryResultControls input {
+	position: fixed;
+	background-color: #bbb;
+	z-index: 10;
+}
+.message {
+	white-space: pre;
+	min-height: 22px;
+	font-family: monospace;
+}
+#authinfo {
+	float: right;
+	margin-top: 4px;
+}
+.closebutton {
+	/*float: right;
+	top: 2px;*/
+	display: inline-block;
+	vertical-align: top;
+}
+</style>
+<script type="text/javascript">
+
+var responseType = "htmlx";
+var queryOnUrl = 'q';
+
+var editor = null;
+var pageAltered = false;
+
+function onLoad() {
+	loadAce();
+	updateUI();
+	loadAuthInfo();
+	loadModels();
+	registerKeybindings();
+}
+
+function loadAuthInfoCallback() { onLoadAfter(); }
+
+function loadModelsContentCallback() {
+	//if(modelsInfo.length>1) {
+	//	byId('model').parentNode.style.display = 'inline-block';
+	//}
+	onLoadAfter();
+}
+
+function onLoadAfter() {
+	if(! authInfo.loaded) return;
+	//if(! settings['queryon.project.version']) return;
+	if(! modelsInfo) return;
+	
+	var modelId = getParameterByName('model', location.search);
+	
+	if(modelsInfo.length>1) {
+		byId('modelLabel').style.display = 'inline-block';
+		byId('model').parentNode.style.display = 'inline-block';
+		if(! modelId) {
+			modelId = modelsInfo[0];
+		}
+		byId('model').value = modelId;
+	}
+	refreshAuthInfo();
+}
+
+function updateUI() {
+	byId('resultContainer').style.top = (byId('controls').offsetHeight) + 'px';
+	if(editor) { editor.resize(); }
+}
+
+function loadAce() {
+	//console.log('loadAce...');
+	
+	editor = ace.edit("editor");
+	editor.$blockScrolling = true;
+	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
+	editor.getSession().setMode("ace/mode/sql"); //javascript, html, json, markdown, css, xml
+	editor.setOptions({
+		fontSize: "11pt"
+	});
+	editor.getSession().on('change', onTextFieldChange);
+	editor.getSelectedText = function() {
+		return this.getSession().getTextRange(this.getSelectionRange());
+	};
+	// http://stackoverflow.com/questions/27534263/making-ace-editor-resizable
+	// https://github.com/ajaxorg/ace/wiki/Configuring-Ace
+	editor.setAutoScrollEditorIntoView(true);
+	//editor.onclick = updateUI;
+	byId('editor').onclick = function() {
+		console.log('editor.onclick'); 
+		updateUI();
+	};
+}
+
+function onTextFieldChange() {
+	pageAltered = true;
+}
+
+function doValidate() {
+	var url = queryOnUrl+"/ValidateAny";
+	doRequest(url, 'btnValidate', doValidateCallback);
+}
+
+function doValidateCallback(request) {
+	var paramCount = 0;
+	if(request.status >= 200 && request.status < 300) {
+		paramCount = request.getResponseHeader('X-Validate-ParameterCount');
+	}
+	console.log('#params = '+paramCount);
+	//var container = document.getElementById('sqlparams');
+	setParameters(paramCount);
+	updateUI();
+}
+
+function doExplain() {
+	var url = queryOnUrl+"/ExplainAny";
+	doRequest(url);
+}
+
+function doRun() {
+	var url = queryOnUrl+"/SqlAny."+responseType;
+	doRequest(url, 'btnRun');
+}
+
+function doRequest(url, btnId, callback) {
+	closeMessages("messages");
+	closeResults();
+	
+	var sqlString = editor.getSelectedText();
+	if(!sqlString) { sqlString = editor.getValue(); }
+	if(!sqlString) {
+		showErrorMessages("messages", "query cannot be null...");
+	}
+	var modelId = getCurrentModelId();
+	
+	var reqData = new FormData();
+	reqData.set("sql", sqlString);
+	reqData.set("schema", "workspace-schema");
+	reqData.set("name", "workspace-name");
+	reqData.set("lostrategy", "RESULTSET_CONTROL");
+	
+	if(modelId) {
+		//console.log("modelId", modelId);
+		reqData.set("model", modelId);
+		//reqData.model = modelId;
+	}
+	
+	var params = document.querySelectorAll('.parameter');
+	//var paramsStr = '';
+	console.log("modelId:", modelId, "params:", params);
+	
+	for (var i = 0; i < params.length; ++i) {
+		var item = params[i];
+		//console.log(item);
+		reqData.set(item.name, item.value);
+		//reqData[item.name] = item.value;
+		//paramsStr += '/'+item.value;
+	}
+	
+	var startTimeMilis = Date.now();
+	
+	var request = new XMLHttpRequest();
+	request.open("POST", url, true);
+	request.onload = function(oEvent) {
+		var completedTimeMilis = Date.now();
+		console.log('request.status: ', request.status); //, ' ; request: ', request,' ; oEvent: ', oEvent);
+		if (request.status >= 200 && request.status < 300) {
+			byId('resultContainer').style.display = 'block';
+			//console.log("Ok", oEvent);
+			var updateCount = request.getResponseHeader("X-UpdateCount");
+			if(updateCount) {
+				//showInfoMessages("messages", updateCount+" rows updated");
+				showInfoMessages("messages", oEvent.target.responseText);
+			}
+			else {
+				byId('queryResult').innerHTML = oEvent.target.responseText;
+				showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
+			}
+		}
+		else {
+			console.log("Err", oEvent);
+			showErrorMessages("messages", oEvent.target.responseText
+					+(request.status==403?" (invalid session?)":"")
+					);
+		}
+		btnActionStop(btnId);
+		if(callback) {
+			callback(request);
+		}
+	}
+	request.send(reqData);
+	btnActionStart(btnId);
+}
+
+function setParameters(numparams) {
+	var params = document.querySelectorAll('.parameter');
+	console.log('numparams: '+numparams+' ; params.length: '+params.length);
+	if(numparams > params.length) {
+		var paramsStr = '';
+		for(var i=params.length+1;i<=numparams;i++) {
+			paramsStr += "<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>";
+		}
+		byId('sqlparams').innerHTML = paramsStr;
+	}
+	else if(numparams < params.length) {
+		for (var i = params.length; i > numparams; --i) {
+			var item = params[i-1];
+			console.log(item);
+			item = item.parentNode;
+			item.parentNode.removeChild(item);
+		}
+	}
+}
+
+function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTimeMilis) {
+	var content = document.getElementById(containerId);
+	var messages = document.getElementById(messagesId);
+	
+	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
+	messages.innerHTML = 'rows = '+numOfRows+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
+		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	messages.style.display = 'initial';
+}
+
+function closeResults() {
+	byId('queryResult').innerHTML = '';
+	byId('resultContainer').style.display = 'none';
+}
+
+function registerKeybindings() {
+	document.onkeydown = function(evt) {
+		var evt = evt || window.event;
+		var key = evt.keyCode; // evt.key
+		var keyname = "";
+		
+		if(key == 27) { //esc
+			closeDialogs();
+			keyname = "ESC";
+		}
+		if(key==119) { //f8
+			doValidate();
+			keyname = "F8";
+		}
+		if(key==120) { //f9
+			//console.log('document.onkeydown: F10?');
+			//evt.stopPropagation();
+			//evt.preventDefault();
+			doRun();
+			keyname = "F9";
+		}
+		if(key==121) { //f10
+		}
+		
+		if(keyname) {
+			console.log('document.onkeydown: ',key,keyname);
+		}
+	}
+}
+
+function confirmExit(event) {
+	if (pageAltered) {
+		var dialogText = "Current page has been altered. Are you sure you want to close?";
+		event.returnValue = dialogText;
+		return dialogText;
+	}
+}
+
+window.addEventListener("beforeunload", confirmExit);
+
+window.onresize = updateUI;
+
+</script>
+</head>
+<body onload="onLoad();" id="body">
+
+<div id="controls">
+<nav class="container" id="nav">
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Workspace</code></span>
+
+	<!-- <label style="display: none">
+		<select id="model" onchange="onModelChanged(true);"></select>
+	</label> -->
+	<label id="modelLabel" style="display: none;">model: <input type="text" id="model" name="model" readonly="readonly" value=""/></label>
+	
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+</nav>
+
+<div id="editor"></div>
+
+<div class="container">
+	<div id="sqlparams">
+	</div>
+	
+	<div id="button-container">
+		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate SQL (F8)">
+		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain SQL Plan">
+		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run SQL (F9)">
+		<!-- <input type="button" id="btnDownload" value="download" onclick="doDownload();" title="Download CSV" style="float: right;"/> -->
+	</div>
+</div>
+
+<div id="messages" class="message" style="display: none;"></div>
+</div>
+
+<div class="container" id="resultContainer" style="display: none;">
+	<div id="queryResultControls"><input type='button' class='closebutton' onclick='closeResults()' value='X'/></div>
+	<div id="queryResult"></div>
+</div>
+
+<div id="status-container" class="status">
+</div>
+
+</body>
