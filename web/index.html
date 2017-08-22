@@ -55,6 +55,10 @@
 		
 		if(modelsInfo) {
 			loadSelect(modelsInfo, 'model');
+			/* var modelId = getParameterByName('model', location.search);
+			if(modelId) {
+				byId('model').value = modelId;
+			} */
 		}
 		if(modelsInfo.length>1) {
 			document.getElementById('model').parentNode.style.display = 'inline-block';
@@ -753,12 +757,15 @@
 		//replace href
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
+		var modelId = getCurrentModelId();
 		//history.replaceState(null, null, "#"+id);
 		////var hash = id!="" ? "#"+id : "";
 		////history.replaceState(null, null, hash);
 		var state = id+getParameters();
 		var foo = urlAddFilterOrderOffset(null);
-		if(foo) { state += '|'+foo; }
+		if(foo || modelId) { state += '|'+foo; }
+		if(modelId) { state += "|"+modelId; }
+		
 		//console.log('updateState', state); //, ' - urlAddFilterOrderOffset:', urlAddFilterOrderOffset(''));
 		history.replaceState(null, null, "#"+state);
 	}
@@ -773,6 +780,7 @@
 		var filters = getParameterNamesStartWith('f('+opIds+'):', qs);
 		//console.log('updateSelectedQueryState: filters: ',filters);
 		var filtersAdded = [];
+		removeAllFilters();
 		for(var i=0; i<filters.length; i++) {
 			if(filtersAdded.indexOf(filters[i])>=0) { continue; }
 			var filterVals = getParametersByName(filters[i], qs);
@@ -797,6 +805,7 @@
 			document.getElementById('offset').value = offsetVal;
 		}
 		console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
+		updateState();
 	}
 	
 	</script>

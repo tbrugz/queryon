@@ -196,6 +196,11 @@ function removeFilter(element) {
 	}
 }
 
+function removeAllFilters() {
+	var filters = document.getElementById('filters');
+	filters.innerHTML = '';
+}
+
 function closeDialogs() {
 	if(bhvalues!=null) {
 		$('#fin-value').typeahead('destroy');
