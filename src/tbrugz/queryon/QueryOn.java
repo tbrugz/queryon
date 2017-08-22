@@ -1081,62 +1081,51 @@ public class QueryOn extends HttpServlet {
 	
 	void doSql(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		if(relation.getName()==null) {
-			throw new BadRequestException("select: relation name must not be null");
+			throw new BadRequestException("sql: relation name must not be null");
 		}
 		
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		String finalSql = null;
 		try {
+			if(log.isDebugEnabled()) {
+				ConnectionUtil.showDBInfo(conn.getMetaData());
+			}
 			
-		if(log.isDebugEnabled()) {
-			ConnectionUtil.showDBInfo(conn.getMetaData());
-		}
-		
-		Constraint pk = SchemaModelUtils.getPK(relation);
-		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
-
-		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
-		finalSql = sql.getFinalSql();
-		PreparedStatement st = conn.prepareStatement(finalSql);
-		sql.bindParameters(st);
-		
-		boolean applyLimitOffsetInResultSet = !sql.sqlLoEncapsulated;
-
-		ResultSet rs = null;
-		boolean hasResultSet = st.execute();
-		if(hasResultSet) {
-			rs = st.getResultSet();
-		}
-
-		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
-		List<Constraint> uks = ModelUtils.getUKs(relation);
-		
-		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
-			String contentLocation = reqspec.getCanonicalUrl(prop);
-			reqspec.request.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
-		}
-		
-		if(hasResultSet) {
-			if(reqspec.uniValueCol!=null) {
-				dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
+			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			addOriginalParameters(reqspec, sql);
+	
+			finalSql = sql.getFinalSql();
+			PreparedStatement st = conn.prepareStatement(finalSql);
+			sql.bindParameters(st);
+			
+			boolean applyLimitOffsetInResultSet = true; //!sql.sqlLoEncapsulated;
+	
+			ResultSet rs = null;
+			boolean hasResultSet = st.execute();
+			if(hasResultSet) {
+				rs = st.getResultSet();
+			}
+	
+			if(hasResultSet) {
+				if(reqspec.uniValueCol!=null) {
+					dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
+				}
+				else {
+					Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
+					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), null,
+							null, null, applyLimitOffsetInResultSet, resp, getLimit(lim));
+				}
 			}
 			else {
-				Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
-				dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
-						fks, uks, applyLimitOffsetInResultSet, resp, getLimit(lim));
+				int updateCount = st.getUpdateCount();
+				//XXX validate commit?
+				if(reqspec.maxUpdates!=null && updateCount > reqspec.maxUpdates) {
+					throw new BadRequestException("Update count ["+updateCount+"] greater than update-max ["+reqspec.maxUpdates+"]");
+				}
+				
+				conn.commit();
+				writeUpdateCount(resp, updateCount, "updated");
 			}
-		}
-		else {
-			int updateCount = st.getUpdateCount();
-			//XXX validate commit?
-			if(reqspec.maxUpdates!=null && updateCount > reqspec.maxUpdates) {
-				throw new BadRequestException("Update count ["+updateCount+"] greater than update-max ["+reqspec.maxUpdates+"]");
-			}
-			
-			conn.commit();
-			writeUpdateCount(resp, updateCount, "updated");
-		}
-		
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
