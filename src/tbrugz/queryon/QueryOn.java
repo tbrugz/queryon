@@ -116,7 +116,8 @@ public class QueryOn extends HttpServlet {
 		//QUERY,   //TODOne: SQLQueries action!
 		STATUS,   //~TODOne: or CONFIG? show model, user, vars...
 		//XXXxx: FINDBYKEY action? return only the first result
-		SELECT_ANY,
+		SQL_ANY, // any SQL (select, insert, ...)
+		SELECT_ANY, // any query (select ...)
 		VALIDATE_ANY,
 		EXPLAIN_ANY,
 		MANAGE,
@@ -136,6 +137,7 @@ public class QueryOn extends HttpServlet {
 	public static final String ACTION_QUERY_ANY = "QueryAny";
 	public static final String ACTION_VALIDATE_ANY = "ValidateAny";
 	public static final String ACTION_EXPLAIN_ANY = "ExplainAny";
+	public static final String ACTION_SQL_ANY = "SqlAny";
 	
 	public static final String CONST_QUERY = "QUERY";
 	public static final String CONST_RELATION = "RELATION";
@@ -673,6 +675,13 @@ public class QueryOn extends HttpServlet {
 			atype = ActionType.EXPLAIN_ANY;
 			otype = ActionType.EXPLAIN_ANY.name();
 		}
+		else if(ACTION_SQL_ANY.equals(reqspec.object)) {
+			if(! METHOD_POST.equals(reqspec.httpMethod)) {
+				throw new BadRequestException(reqspec.object+": method must be POST");
+			}
+			atype = ActionType.SQL_ANY;
+			otype = ActionType.SQL_ANY.name();
+		}
 		else if(ActionType.MANAGE.name().equals(reqspec.object)) {
 			atype = ActionType.MANAGE;
 			otype = ActionType.MANAGE.name();
@@ -764,6 +773,20 @@ public class QueryOn extends HttpServlet {
 				try {
 					Query relation = getQuery(req);
 					doExplain(relation, reqspec, currentUser, resp);
+				}
+				catch(SQLException e) {
+					throw new BadRequestException(e.getMessage(), e);
+				}
+				break;
+			case SQL_ANY:
+				try {
+					Query relation = getQuery(req);
+					relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway
+					
+					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
+					if(!sqlCommandExecuted) {
+						doSql(model, relation, reqspec, currentUser, resp);
+					}
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -1050,6 +1073,75 @@ public class QueryOn extends HttpServlet {
 			//XXX: create new SQLException including the query string? throw BadRequestException? InternalServerException?
 			throw new InternalServerException("Exception in 'doSelect': "+e, e);
 			//throw e;
+		}
+		finally {
+			ConnectionUtil.closeConnection(conn);
+		}
+	}
+	
+	void doSql(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		if(relation.getName()==null) {
+			throw new BadRequestException("select: relation name must not be null");
+		}
+		
+		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		String finalSql = null;
+		try {
+			
+		if(log.isDebugEnabled()) {
+			ConnectionUtil.showDBInfo(conn.getMetaData());
+		}
+		
+		Constraint pk = SchemaModelUtils.getPK(relation);
+		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
+
+		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
+		finalSql = sql.getFinalSql();
+		PreparedStatement st = conn.prepareStatement(finalSql);
+		sql.bindParameters(st);
+		
+		boolean applyLimitOffsetInResultSet = !sql.sqlLoEncapsulated;
+
+		ResultSet rs = null;
+		boolean hasResultSet = st.execute();
+		if(hasResultSet) {
+			rs = st.getResultSet();
+		}
+
+		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
+		List<Constraint> uks = ModelUtils.getUKs(relation);
+		
+		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
+			String contentLocation = reqspec.getCanonicalUrl(prop);
+			reqspec.request.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
+		}
+		
+		if(hasResultSet) {
+			if(reqspec.uniValueCol!=null) {
+				dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
+			}
+			else {
+				Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
+				dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
+						fks, uks, applyLimitOffsetInResultSet, resp, getLimit(lim));
+			}
+		}
+		else {
+			int updateCount = st.getUpdateCount();
+			//XXX validate commit?
+			if(reqspec.maxUpdates!=null && updateCount > reqspec.maxUpdates) {
+				throw new BadRequestException("Update count ["+updateCount+"] greater than update-max ["+reqspec.maxUpdates+"]");
+			}
+			
+			conn.commit();
+			writeUpdateCount(resp, updateCount, "updated");
+		}
+		
+		}
+		catch(SQLException e) {
+			DBUtil.doRollback(conn);
+			log.warn("exception in 'doSql': "+e+" ; sql:\n"+finalSql);
+			throw e;
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
