@@ -1624,9 +1624,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
-		resp.setContentType(MIME_TEXT);
-		resp.getWriter().write(count+" rows updated");
+		writeUpdateCount(resp, count, "updated");
 
 		}
 		catch(BadRequestException e) {
@@ -1776,10 +1774,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
-		resp.setStatus(HttpServletResponse.SC_CREATED);
-		resp.setContentType(MIME_TEXT);
-		resp.getWriter().write(count+" rows inserted");
+		writeUpdateCount(resp, count, "inserted");
 		
 		}
 		catch(BadRequestException e) {
@@ -1794,6 +1789,12 @@ public class QueryOn extends HttpServlet {
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	void writeUpdateCount(HttpServletResponse resp, int count, String action) throws IOException {
+		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
+		resp.setContentType(MIME_TEXT);
+		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
 	}
 	
 	void addPartParameter(RequestSpec reqspec, SQL sql, String ctype, String col, int colindex) throws IOException {
