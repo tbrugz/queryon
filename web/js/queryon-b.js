@@ -469,7 +469,7 @@ function getQueryUrlById(id, key, queryString, syntax) {
 function doDelete(selectId, key, containerId, messagesId, callback, callbackError) {
 	var modelStr = getCurrentModelId()?"&model="+getCurrentModelId():"";
 	var finalUrl = getQueryUpdateUrl(selectId, key, 'updatemax=1&updatemin=1'+modelStr, 'json');
-	
+
 	btnActionStart('go-button');
 	var startTimeMilis = Date.now();
 	$.ajax({

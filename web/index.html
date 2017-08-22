@@ -40,7 +40,7 @@
 	var textareaDbColTypes = ["CLOB", "TEXT"];
 	
 	var doLoadQueries = function() {
-		var s = getParameterByName('s', location.search);
+		var s = getParametersByName('s', location.search);
 		if(s) {
 			schemaNameFilter = s;
 			byId('schemaNameFilter').innerHTML = " "+schemaNameFilter;

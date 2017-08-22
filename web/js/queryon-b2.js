@@ -25,10 +25,14 @@ function loadQueries(modelId, filterSchema) {
 	init(queryOnUrl,'objects', function(containerId, rels) {
 		if(filterSchema) {
 			console.log('filtering rels', rels.length, 'filterSchema', filterSchema);
+			if(!Array.isArray(filterSchema)) {
+				filterSchema = [filterSchema];
+			}
 			for(var i=rels.length-1;i>=0;i--) {
-				if(rels[i].schemaName!=filterSchema) {
-					var obj = rels.splice(i, 1);
+				if(filterSchema.indexOf(rels[i].schemaName)<0) {
+					//console.log('removing rel:', rels[i].schemaName, rels[i].name);
 					//console.log('removing rel ',rels[i], 'filterSchema', filterSchema, 'obj', obj);
+					var obj = rels.splice(i, 1);
 				}
 			}
 		}
