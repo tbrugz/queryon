@@ -71,7 +71,7 @@ public class PagesServlet extends AbstractHttpServlet {
 		String pathInfo = req.getPathInfo();
 		if(pathInfo==null) { throw new BadRequestException("URL (path-info) must not be null"); }
 		pathInfo = pathInfo.substring(1);
-		log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo());
+		log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo()+" ; req.getQueryString() = "+req.getQueryString());
 		
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 

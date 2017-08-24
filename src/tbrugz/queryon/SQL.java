@@ -522,10 +522,10 @@ public class SQL {
 						bindParameterValues.add(null);
 					}
 					else {
-					log.warn("Error parsing long '"+value+"', trying as String");
-					bindParameterValues.add(value);
+						log.warn("Error parsing long '"+value+"', trying as String");
+						bindParameterValues.add(value);
+					}
 				}
-			}
 			}
 			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type.toUpperCase())) {
 				try {
@@ -536,10 +536,10 @@ public class SQL {
 						bindParameterValues.add(null);
 					}
 					else {
-					log.warn("Error parsing double '"+value+"', trying as String");
-					bindParameterValues.add(value);
+						log.warn("Error parsing double '"+value+"', trying as String");
+						bindParameterValues.add(value);
+					}
 				}
-			}
 			}
 			else if(startsWithAny(type.toUpperCase(), DBUtil.DATE_COL_TYPES_LIST)) {
 				try {
@@ -552,10 +552,10 @@ public class SQL {
 						bindParameterValues.add(null);
 					}
 					else {
-					log.warn("Error parsing date '"+value+"', trying as String");
-					bindParameterValues.add(value);
+						log.warn("Error parsing date '"+value+"', trying as String");
+						bindParameterValues.add(value);
+					}
 				}
-			}
 			}
 			else {
 				bindParameterValues.add(value);

@@ -87,7 +87,7 @@ public class RequestSpec {
 	public static final String PARAM_OFFSET = "offset";
 	public static final String PARAM_COUNT = "count";
 	public static final String PARAM_OPTIMISTICLOCK = "optimisticlock";
-	
+
 	public static final String PARAM_ONCOLS = "oncols";
 	public static final String PARAM_ONROWS = "onrows";
 	public static final String PARAM_MEASURES = "measures";
@@ -324,7 +324,7 @@ public class RequestSpec {
 			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
 			setSyntaxProps(outputSyntax, req, feat, prop);
 		}
-		
+
 		log.debug("outputSyntax: "+outputSyntax);
 		
 		//---------------------
@@ -346,7 +346,7 @@ public class RequestSpec {
 		if(fields!=null) {
 			columns.addAll(Arrays.asList(fields.split(",")));
 		}
-		
+
 		String onColsPar = req.getParameter(PARAM_ONCOLS);
 		if(onColsPar!=null) {
 			oncols.addAll(Arrays.asList(onColsPar.split(",")));
@@ -760,5 +760,5 @@ public class RequestSpec {
 		}
 		return "?";
 	}
-	
+
 }

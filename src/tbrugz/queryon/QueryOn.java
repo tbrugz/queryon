@@ -391,7 +391,7 @@ public class QueryOn extends HttpServlet {
 					//throw new ServletException(msg);
 				}
 				if(!modelsGrabbed.contains(defaultModel)) {
-					String msg = "unknown model '"+defaultModel+"'";
+					String msg = "unknown default model '"+defaultModel+"'";
 					log.warn(msg);
 					defaultModel = null;
 					//throw new ServletException(msg);
@@ -630,7 +630,7 @@ public class QueryOn extends HttpServlet {
 				req.setCharacterEncoding(UTF8);
 				//resp.setCharacterEncoding(UTF8);
 			} catch (UnsupportedEncodingException e) {
-				log.warn("error setCharacterEncoding: "+e.getMessage(), e);
+				log.warn("Exception on setCharacterEncoding: "+e.getMessage(), e);
 			}
 		}
 		
