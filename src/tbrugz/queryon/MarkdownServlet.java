@@ -27,6 +27,8 @@ public class MarkdownServlet extends PagesServlet {
 	//public static final String PROP_XPEND = "queryon.pages.markdown.xpend";
 	public static final String PROP_PREPEND = "queryon.pages.markdown.prepend";
 	public static final String PROP_APPEND = "queryon.pages.markdown.append";
+
+	public static final String DEFAULT_INDEX = "index.md";
 	
 	public static final int DEFAULT_PEGDOWN_OPTIONS = Extensions.EXTANCHORLINKS | Extensions.TABLES | Extensions.STRIKETHROUGH | Extensions.TASKLISTITEMS;
 	
@@ -42,6 +44,7 @@ public class MarkdownServlet extends PagesServlet {
 		//doXpend = Utils.getPropBool(prop, PROP_XPEND, doXpend);
 		prepend = prop.getProperty(PROP_PREPEND);
 		append = prop.getProperty(PROP_APPEND);
+		indexFile = DEFAULT_INDEX;
 	}
 	
 	@Override
