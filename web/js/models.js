@@ -35,8 +35,11 @@ function loadModelsContent(oEvent) {
 function getCurrentModelId() {
 	var elem = document.getElementById('model');
 	if(!elem) {
-		console.warn("getCurrentModelId: element 'model' undefined...");
-		return;
+		elem = document.getElementById('modelTarget'); // diff<*>.html
+		if(!elem) {
+			console.warn("getCurrentModelId: element 'model' undefined...");
+			return;
+		}
 	}
 	var model = elem.value;
 	return model=="null"?null:model;

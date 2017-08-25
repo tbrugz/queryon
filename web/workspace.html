@@ -74,13 +74,19 @@ function onLoadAfter() {
 	
 	var modelId = getParameterByName('model', location.search);
 	
-	if(modelsInfo.length>1) {
-		byId('modelLabel').style.display = 'inline-block';
-		byId('model').parentNode.style.display = 'inline-block';
-		if(! modelId) {
-			modelId = modelsInfo[0];
+	if(modelsInfo!=null) {
+		if(modelsInfo.indexOf(modelId)<0) {
+			console.warn("model not found: ",modelId," models:",modelsInfo);
+			showErrorMessages("messages", "model not found: <b>"+modelId+"</b> [models: "+modelsInfo+"]");
 		}
-		byId('model').value = modelId;
+		if(modelsInfo.length>1) {
+			byId('modelLabel').style.display = 'inline-block';
+			byId('model').parentNode.style.display = 'inline-block';
+			if(! modelId) {
+				modelId = modelsInfo[0];
+			}
+			byId('model').value = modelId;
+		}
 	}
 	refreshAuthInfo();
 }
@@ -266,7 +272,7 @@ function registerKeybindings() {
 		if(key==120) { //f9
 			//console.log('document.onkeydown: F10?');
 			//evt.stopPropagation();
-			//evt.preventDefault();
+			evt.preventDefault();
 			doRun();
 			keyname = "F9";
 		}
