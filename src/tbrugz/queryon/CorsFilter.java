@@ -15,12 +15,15 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class CorsFilter implements Filter {
 
+	@Override
 	public void init(FilterConfig arg0) throws ServletException {
 	}
 	
+	@Override
 	public void destroy() {
 	}
 	
+	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 		if(resp instanceof HttpServletResponse) {
 			HttpServletResponse hresp = (HttpServletResponse) resp;
