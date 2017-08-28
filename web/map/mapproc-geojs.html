@@ -640,7 +640,7 @@ $.ajax({
 	dataType: 'text',
 	success: function(data) {
 		var seriesData = JSON.parse(data);
-		var sources = seriesData.relation;
+		var sources = getQonData(seriesData); //seriesData.relation;
 		//console.log('sources', sources, 'geomIdColumns', mapsData.geomIdColumns);
 		var select = document.getElementById('dataUrl');
 		var matches = 0;

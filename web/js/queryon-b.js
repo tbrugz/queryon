@@ -3,7 +3,7 @@ var baseUrl;
 
 var relationsHash = {};
 
-var defaultNullObjectOption = '<option value="" selected>select object</option>';
+var defaultNullObjectOption = '<option value="" selected disabled>select object</option>';
 
 var utf8par = "utf8=✓";
 
@@ -12,13 +12,19 @@ function init(url, containerId, callback, modelId) {
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
 	byId(containerId).innerHTML = defaultNullObjectOption;
 	//$('#'+containerId).append('<option value="" selected>select object</option>');
-	//console.log('baseUrl: '+baseUrl);
+	var url = baseUrl+'/relation.json'+(modelId?'?model='+modelId:'');
+	//console.log('url: ', url, 'baseUrl: ', baseUrl);
 	$.ajax({
-		url: baseUrl+'/relation.json'+(modelId?'?model='+modelId:''),
+		url: url,
 		dataType: "json",
 		success: function(data) {
-			var rels = data.relation;
-			if(rels) { console.log('Load was performed. '+rels.length+' relations loaded'); }
+			var rels = getQonData(data); //data.relation;
+			if(rels) {
+				console.log('Load was performed. ', rels.length,' relations loaded');
+			}
+			else {
+				console.log('Error loading relations', data);
+			}
 			callback(containerId, rels);
 		}
 	});
