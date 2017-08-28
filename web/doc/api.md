@@ -75,7 +75,9 @@ Some parameters are specific to a syntax. Below you can find more about them:
 ### JSON
 
 * `callback` - padding to be used for [JSONP](https://en.wikipedia.org/wiki/JSONP) (*optional*)
-* `metadata` - returns (or not) the `$metadata` element (default is `false`)
+* `data-element` - element for data (default is `data`)
+* `metadata` - returns (or not) the `$metadata` element (default is `true`)
+* `table-as-data-element` - use table name as data element (default is `false`)
 
 ### XML
 
