@@ -54,6 +54,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(SwaggerServlet.class);
 	
+	static final String MIME_TYPE_JSON = "application/json";
+	
 	static final String PARAM_FILTERS = "filters";
 	static final String PARAM_FILTERS_EXCEPT = "filters-except"; //XXX: add 'filters-except'
 	
@@ -196,6 +198,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		// http://swagger.io/specification/#securityDefinitionsObject
 		// http://swagger.io/specification/#securityRequirementObject
 		// type: "basic", "apiKey" or "oauth2"
+		
+		resp.setContentType(MIME_TYPE_JSON);
+		//resp.setCharacterEncoding(QueryOn.UTF8);
 		
 		resp.getWriter().write( gson.toJson(swagger) );
 	}

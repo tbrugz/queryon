@@ -308,10 +308,11 @@ public class RequestSpec {
 		else {
 			outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
 			if(outputSyntaxTmp==null) {
+				log.debug("no syntax match, using default: "+QueryOn.DEFAULT_OUTPUT_SYNTAX);
 				outputSyntaxTmp = dsutils.getDumpSyntax(QueryOn.DEFAULT_OUTPUT_SYNTAX);
 			}
 			else {
-				log.debug("syntax defined by accept! syntax: "+outputSyntaxTmp.getSyntaxId()+" // "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
+				log.debug("syntax defined by accept: syntax: "+outputSyntaxTmp.getSyntaxId()+" ; mime: "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
 			}
 		}
 		outputSyntax = outputSyntaxTmp;
