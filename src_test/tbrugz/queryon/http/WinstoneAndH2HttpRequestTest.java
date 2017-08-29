@@ -354,7 +354,7 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
 		
 		JSONObject jobj = (JSONObject) obj;
-		obj = jobj.get("table");
+		obj = jobj.get("data");
 		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
 
 		JSONArray jarr = (JSONArray) obj;
@@ -753,7 +753,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String sqlpar = URLEncoder.encode(sql, utf8);
 
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpGet = new HttpGet(baseUrl+"/QueryAny.json?_method=POST&name=emp&sql="+sqlpar);
+		HttpGet httpGet = new HttpGet(baseUrl+"/QueryAny.json?_method=POST&name=emp&sql="+sqlpar+"&table-as-data-element=true");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String jsonStr = getContent(response1);
@@ -779,6 +779,27 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("salary: "+salary+" / "+salary.getClass());
 		Assert.assertTrue("Salary should be a Number", salary instanceof Number);
 		Assert.assertTrue("SalaryChar should be a String", salaryChar instanceof String);
+		
+		httpGet.releaseConnection();
+	}
+
+	@Test
+	public void testGetJsonValuesAsData() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select emp.*, cast(salary as char) as salary_char from emp where id = 1";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/QueryAny.json?_method=POST&name=emp&sql="+sqlpar);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String jsonStr = getContent(response1);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		obj = jobj.get("data");
+		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
 		
 		httpGet.releaseConnection();
 	}
