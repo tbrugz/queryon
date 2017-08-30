@@ -1,6 +1,7 @@
 package tbrugz.queryon.cache;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -20,6 +21,10 @@ public class CacheControlFilter implements Filter {
 	
 	public static final String CACHE_MAX_AGE = "cache-max-age";
 	
+	boolean privateCache = false;
+	boolean addLastModifiedNow = false;
+	boolean addNowAsETag = true;
+	
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
@@ -38,8 +43,19 @@ public class CacheControlFilter implements Filter {
 				if(maxAge!=null) {
 					if(isInt(maxAge)) {
 						HttpServletResponse resp = (HttpServletResponse) response;
-						String value = "private, max-age="+maxAge;
+						String value = (privateCache?"private, ":"") + "max-age="+maxAge;
 						resp.setHeader("Cache-Control", value);
+						
+						if(addLastModifiedNow) {
+							Date now = new Date();
+							resp.setDateHeader("Last-Modified", now.getTime());
+						}
+						
+						if(addNowAsETag) {
+							Date now = new Date();
+							resp.setHeader("ETag", "\""+String.valueOf(now.getTime())+"\"");
+						}
+						
 						log.debug("header: Cache-Control: "+value);
 					}
 					else {

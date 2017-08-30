@@ -11,6 +11,8 @@ import javax.servlet.ServletResponse;
 
 /*
  * see: https://stackoverflow.com/questions/23312950/how-to-set-character-encoding-and-content-type-globally-in-a-java-web-app
+ * XXX: initParameters: [ ] use in request? [ ] use response? [ ] different encoding (iso-98859-1)?
+ * 
  */
 public class EncodingFilter implements Filter {
 
