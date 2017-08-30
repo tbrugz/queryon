@@ -214,7 +214,7 @@ public class RequestSpec {
 		boolean convertLatin1ToUtf8 = false;
 		if(utf8!=null) {
 			if(utf8.equals(WebUtils.UTF8_CHECK)) {
-				log.info("[ok] utf8: "+utf8);
+				log.debug("[ok] utf8: "+utf8);
 			}
 			else {
 				// assume url encoding as latin1 (iso-8859-1)

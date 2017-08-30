@@ -2,6 +2,9 @@ package tbrugz.queryon;
 
 public class ResponseSpec {
 
+	public static final String MIME_TYPE_TEXT_PLAIN = "text/plain";
+	public static final String MIME_TYPE_JSON = "application/json";
+	
 	// --- standard HTTP response headers ---
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";

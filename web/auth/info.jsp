@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.util.JsonDecorator"%>
 <%@page import="tbrugz.queryon.util.SchemaModelUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
@@ -60,6 +61,7 @@
 			userPerms.add(perm);
 		}
 	}
+	response.setContentType(ResponseSpec.MIME_TYPE_JSON);
 	out.write(",\n\t\"permissions\": ["+Utils.join(userPerms, ",", quoter)+"]");
 %>
 }

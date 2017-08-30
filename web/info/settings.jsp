@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.PagesServlet"%>
 <%@page import="tbrugz.queryon.processor.QOnExecs"%>
 <%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"%>
@@ -5,6 +6,8 @@
 <%@page import="java.util.*, tbrugz.queryon.QueryOn"%>
 {
 <%
+	response.setContentType(ResponseSpec.MIME_TYPE_JSON);
+
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
 	String[] exposedKeys = {
 			"queryon.models",

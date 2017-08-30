@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="com.google.gson.*"%>
@@ -9,6 +10,7 @@
 %>
 {
 <%
+response.setContentType(ResponseSpec.MIME_TYPE_JSON);
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 Gson gson = new Gson();

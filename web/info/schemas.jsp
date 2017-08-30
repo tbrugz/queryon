@@ -81,6 +81,7 @@ public String normalize(String s) {
 		List<DBObjectType> eots = feat.getExecutableObjectTypes(); 
 		if(eots!=null) { objtypes.addAll( eots ); }
 	}
+	response.setContentType(ResponseSpec.MIME_TYPE_JSON);
 	
 %>{
 	"modelschemas": [<%= String.valueOf(Utils.join(names, ", ", sqd)) %>],
