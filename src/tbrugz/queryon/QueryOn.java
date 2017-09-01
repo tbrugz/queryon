@@ -247,8 +247,8 @@ public class QueryOn extends HttpServlet {
 	
 	public static final String UTF8 = "UTF-8";
 	
-	final Properties prop = new ParametrizedProperties();
-	DumpSyntaxUtils dsutils;
+	protected final Properties prop = new ParametrizedProperties();
+	protected DumpSyntaxUtils dsutils;
 	//SchemaModel model;
 	//final Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 	
@@ -274,6 +274,12 @@ public class QueryOn extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		doInitProperties(config);
+		//modelId = config.getInitParameter(INITP_MODEL_ID);
+		doInit(config.getServletContext());
+	}
+	
+	protected void doInitProperties(ServletConfig config) {
 		//log4jInit();
 		propertiesResource = config.getInitParameter(INITP_PROPERTIES_RESOURCE);
 		propertiesFile = null;
@@ -303,10 +309,6 @@ public class QueryOn extends HttpServlet {
 		else {
 			log.info("queryon resource config: "+propertiesResource+" [using "+INITP_PROPERTIES_RESOURCE+"]");
 		}
-
-		//modelId = config.getInitParameter(INITP_MODEL_ID);
-		
-		doInit(config.getServletContext());
 	}
 	
 	void log4jInit() {
@@ -332,7 +334,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
+	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
 		try {
 			prop.clear();
 			//XXX: protocol: add from ServletRequest?
@@ -618,7 +620,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 		
 		try {
@@ -1399,7 +1401,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	@SuppressWarnings("resource")
-	void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
@@ -1448,7 +1450,7 @@ public class QueryOn extends HttpServlet {
 		if(rs!=null) { rs.close(); }
 	}
 	
-	ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser, PrivilegeType privilege) throws SQLException {
+	protected ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser, PrivilegeType privilege) throws SQLException {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
 		}
@@ -2128,7 +2130,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
+	protected void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {

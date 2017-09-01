@@ -11,10 +11,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.naming.NamingException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -64,9 +68,19 @@ public class QueryOnInstant extends QueryOn {
 		//statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
 	}
 	
+	@Override
+	protected void doInit(ServletContext context) throws ServletException {
+		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
+		dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
+	}
+	
+	@Override
+	protected void doInitProperties(ServletConfig config) {
+	}
+	
 	@SuppressWarnings("resource")
 	@Override
-	void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		if(reqspec.params==null || reqspec.params.size()<1) {
 			throw new BadRequestException("no schema informed");
 		}
