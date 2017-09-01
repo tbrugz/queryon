@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.sql.Blob;
@@ -262,7 +261,7 @@ public class QueryOn extends HttpServlet {
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	static boolean validateFilterColumnNames = true;
-	boolean xSetRequestUtf8 = false;
+	//boolean xSetRequestUtf8 = false;
 	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
 	Integer defaultLimit;
 	int maxLimit;
@@ -430,7 +429,7 @@ public class QueryOn extends HttpServlet {
 			// init date formats
 			SQL.initDateFormats(dsutils);
 			
-			xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
+			//xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
 			
 			defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
 			maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
@@ -624,7 +623,7 @@ public class QueryOn extends HttpServlet {
 		
 		try {
 
-		if(xSetRequestUtf8) {
+		/*if(xSetRequestUtf8) {
 			try {
 				String origCharset = req.getCharacterEncoding();
 				log.debug("setting request encoding to UTF-8 [was: "+origCharset+"]");
@@ -633,7 +632,7 @@ public class QueryOn extends HttpServlet {
 			} catch (UnsupportedEncodingException e) {
 				log.warn("Exception on setCharacterEncoding: "+e.getMessage(), e);
 			}
-		}
+		}*/
 		
 		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
