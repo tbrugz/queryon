@@ -67,6 +67,7 @@ import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.datadump.DumpSyntaxBuilder;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.datadump.RDFAbstractSyntax;
@@ -2142,8 +2143,14 @@ public class QueryOn extends HttpServlet {
 		if(mayApplyLimitOffset) {
 			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
 		}
-		int count = 0;
 		DumpSyntaxInt ds = reqspec.outputSyntax;
+		if(ds instanceof DumpSyntaxBuilder) {
+			ds = ((DumpSyntaxBuilder) ds).build(schemaName, queryName, uniqueColumns, rs.getMetaData());
+		}
+		else {
+			ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
+		}
+
 		if(ds.usesImportedFKs()) {
 			ds.setImportedFKs(importedFKs);
 		}
@@ -2163,8 +2170,6 @@ public class QueryOn extends HttpServlet {
 			ws.setBaseHref(url);
 		}
 		
-		ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
-
 		resp.setContentType(ds.getMimeType());
 		//resp.addHeader(ResponseSpec.HEADER_CONTENT_TYPE, ds.getMimeType());
 		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
@@ -2175,6 +2180,7 @@ public class QueryOn extends HttpServlet {
 		}
 		resp.addHeader(ResponseSpec.HEADER_RESULTSET_LIMIT, String.valueOf(limit));
 		
+		int count = 0;
 		if(ds.acceptsOutputStream()) {
 			ds.dumpHeader(resp.getOutputStream());
 			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();

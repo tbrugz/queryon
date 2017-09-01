@@ -12,14 +12,16 @@ import java.util.List;
 import java.util.Map;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.datadump.DumpSyntaxBuilder;
 import tbrugz.sqldump.datadump.HTMLDataDump;
+import tbrugz.sqldump.datadump.HierarchicalDumpSyntax;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: pivot: know limitation: attributes doesn't work with measures in rows
  */
-public class HTMLAttrSyntax extends HTMLDataDump {
+public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, Cloneable, HierarchicalDumpSyntax {
 	
 	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_TITLE", "_HREF"}; //XXX: change to enum!
 	
@@ -58,9 +60,9 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	//protected int onColsColCount = 0;
 	//protected int onRowsColCount = 0;
 	
-	public HTMLAttrSyntax(String padding, boolean innerTable) {
+	/*public HTMLAttrSyntax(String padding, boolean innerTable) {
 		super(padding, innerTable);
-	}
+	}*/
 	
 	public HTMLAttrSyntax() {
 		super();
@@ -298,10 +300,8 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 					out(sb.toString()+"<td>\n", fos);
 					sb = new StringBuilder();
 					
-					HTMLDataDump htmldd = new HTMLAttrSyntax(this.padding+"\t\t", true);
-					//htmldd.padding = this.padding+"\t\t";
-					//log.info(":: "+rsInt+" / "+lsColNames);
-					htmldd.procProperties(prop);
+					HTMLAttrSyntax htmldd = innerClone();
+					//htmldd.procProperties(prop);
 					DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 					sb.append("\n\t</td>");
 				}
@@ -349,4 +349,31 @@ public class HTMLAttrSyntax extends HTMLDataDump {
 	public String getSyntaxId() {
 		return "htmlx";
 	}
+
+	/*
+	@Override
+	public void updateProperties(DumpSyntax ds) {
+		if(! (ds instanceof HTMLAttrSyntax)) {
+			throw new RuntimeException(ds.getClass()+" must be instance of "+this.getClass());
+		}
+		HTMLAttrSyntax dd = (HTMLAttrSyntax) ds;
+		super.updateProperties(dd);
+	}
+	
+	@Override
+	public HTMLAttrSyntax clone() {
+		HTMLAttrSyntax dd = new HTMLAttrSyntax();
+		updateProperties(dd);
+		return dd;
+	}
+	*/
+	
+	@Override
+	public HTMLAttrSyntax innerClone() {
+		HTMLAttrSyntax dd = (HTMLAttrSyntax) clone();
+		dd.padding += "\t\t";
+		dd.innerTable = true;
+		return dd;
+	}
+
 }
