@@ -370,10 +370,14 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 	
 	@Override
 	public HTMLAttrSyntax innerClone() {
-		HTMLAttrSyntax dd = (HTMLAttrSyntax) clone();
-		dd.padding += "\t\t";
-		dd.innerTable = true;
-		return dd;
+		try {
+			HTMLAttrSyntax dd = (HTMLAttrSyntax) clone();
+			dd.padding += "\t\t";
+			dd.innerTable = true;
+			return dd;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

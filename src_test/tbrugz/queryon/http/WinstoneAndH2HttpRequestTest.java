@@ -50,6 +50,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -802,6 +803,33 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
 		
 		httpGet.releaseConnection();
+	}
+	
+	@Test
+	public void getHtmlxValues() throws Exception {
+		String sql = "select id, name, 'black' as name_CLASS from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+
+		String url = "/QueryAny.htmlx?_method=POST&name=emp&sql="+sqlpar;
+		//String html = httpGetContent(url);
+		//System.out.println(html);
+		
+		Document doc = getXmlDocument(url);
+		NodeList nl = doc.getElementsByTagName("tr");
+		Assert.assertEquals("Should be 6 rows (5 data rows (db tables) + 1 header)", 6, nl.getLength());
+		
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			String tag = i==0?"th":"td";
+			if(n instanceof Element) {
+				Element e = (Element) n;
+				NodeList nl2 = e.getElementsByTagName(tag);
+				Assert.assertEquals("Should be 2 cols '"+tag+"' (*_CLASS cols are attributes)", 2, nl2.getLength());
+			}
+			else {
+				Assert.fail("all nodes should be elements");
+			}
+		}
 	}
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------
