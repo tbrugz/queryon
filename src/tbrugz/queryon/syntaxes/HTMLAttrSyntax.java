@@ -2,6 +2,7 @@ package tbrugz.queryon.syntaxes;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -11,10 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxBuilder;
 import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.datadump.HierarchicalDumpSyntax;
+import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -22,6 +27,8 @@ import tbrugz.sqldump.util.Utils;
  * XXX: pivot: know limitation: attributes doesn't work with measures in rows
  */
 public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, Cloneable, HierarchicalDumpSyntax {
+
+	static final Log log = LogFactory.getLog(HTMLAttrSyntax.class);
 	
 	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_TITLE", "_HREF"}; //XXX: change to enum!
 	
@@ -289,13 +296,22 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			String colName = lsColNames.get(i);
 			if(finalColNames.contains(colName)) {
 				Object origVal = vals.get(i);
-				
-				if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+				Class<?> ctype = finalColTypes.get(i);
+				boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
+				boolean isArray = Array.class.isAssignableFrom(ctype);
+				if(isResultSet || isArray) {
+					ResultSet rsInt = null;
+					if(isArray) {
+						Object[] objArr = (Object[]) origVal;
+						rsInt = new ResultSetArrayAdapter(objArr, false, finalColNames.get(i));
+					}
+					else {
+						rsInt = (ResultSet) origVal;
+					}
 					if(origVal==null) {
 						sb.append("<td></td>");
 						continue;
 					}
-					ResultSet rsInt = (ResultSet) origVal;
 					
 					out(sb.toString()+"<td>\n", fos);
 					sb = new StringBuilder();
@@ -307,7 +323,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				}
 				else {
 				
-				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, doEscape(i));
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, nullValueStr, doEscape(i));
 				Map<String,String> attrs = attrsVals.get(colName);
 				String attrsStr = "";
 				if(attrs!=null) {
