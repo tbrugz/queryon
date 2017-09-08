@@ -169,8 +169,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 							body);
 				}
 				else {
-					String execName = (schema!=null?schema+".":"")+(packageName!=null?packageName+".":"")+name;
-					String message = "executable '"+execName+"' not found";
+					String execName = (packageName!=null?packageName+".":"")+name;
+					String message = "executable '"+(schema!=null?schema+".":"")+execName+"' not found";
 					log.warn(message);
 					putWarning(context, model.getModelId(), schema, execName, message);
 					//XXX: throw exception?
