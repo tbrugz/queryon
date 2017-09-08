@@ -3,6 +3,8 @@ package tbrugz.queryon;
 import java.sql.Connection;
 import java.util.Properties;
 
+import javax.servlet.ServletContext;
+
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
@@ -14,7 +16,7 @@ public interface UpdatePlugin {
 	
 	public void setConnection(Connection conn); // equals to AbstractSQLProc's
 	
-	public void onInit();
+	public void onInit(ServletContext context);
 	
 	/**
 	 * Inserts relation on model

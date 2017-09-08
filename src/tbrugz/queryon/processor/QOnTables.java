@@ -6,9 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,6 +53,8 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 			return str==null?null:quote+str.replaceAll(quotePtrn, "")+quote;
 		}
 	}
+
+	public static final String ATTR_TABLES_WARNINGS_PREFIX = "qon-tables-warnings";
 	
 	static final String PROP_PREFIX = "queryon.qon-tables";
 	
@@ -67,11 +72,16 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 
 	Writer writer;
 	
+	@Override
 	public void process() {
+		throw new RuntimeException("process() should not be called");
+	}
+	
+	public void process(ServletContext context) {
 		try {
 			String action = prop.getProperty(PROP_PREFIX+SUFFIX_ACTION, ACTION_READ);
 			if(ACTION_READ.equals(action)) {
-				int count = readFromDatabase();
+				int count = readFromDatabase(context);
 				if(writer!=null) {
 					writer.write(String.valueOf(count));
 				}
@@ -85,7 +95,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		}
 	}
 	
-	int readFromDatabase() throws SQLException {
+	int readFromDatabase(ServletContext context) throws SQLException {
 		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
 		List<String> tables = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_TABLE_NAMES, ",");
 		String sql = "select schema_name, name, column_names, pk_column_names, column_remarks, remarks"
@@ -103,6 +113,8 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 		catch(SQLException e) {
 			throw new SQLException("Error fetching tables, sql: "+sql, e);
 		}
+		
+		clearWarnings(context, model.getModelId());
 
 		int count = 0;
 		while(rs.next()) {
@@ -136,7 +148,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				if(t!=null) { count++; }
 			}
 			catch(RuntimeException e) {
-				log.warn("error reading table '"+tableName+"': "+e);
+				String message = "error reading table '"+tableName+"': "+e;
+				log.warn(message);
+				putWarning(context, model.getModelId(), schema, tableName, message);
 			}
 		}
 		
@@ -144,6 +158,19 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
 				"added/replaced "+count+" tables]");
 		return count;
+	}
+	
+	void clearWarnings(ServletContext context, String modelId) {
+		String warnKey = ATTR_TABLES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = new LinkedHashMap<String, String>();
+		context.setAttribute(warnKey, warnings);
+	}
+	
+	@SuppressWarnings("unchecked")
+	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
+		String warnKey = ATTR_TABLES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
 	}
 
 	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks,
@@ -278,8 +305,8 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 
 	@Override
-	public void onInit() {
-		process();
+	public void onInit(ServletContext context) {
+		process(context);
 	}
 
 	@Override

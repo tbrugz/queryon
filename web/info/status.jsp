@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.processor.QOnTables"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
@@ -37,14 +38,22 @@ if(models!=null && models.entrySet()!=null) {
 			//XXX: filter properties if user not logged...
 			out.write(sqd.get(modelId)+": "+gson.toJson(entry.getValue().getMetadata()));
 			
-			//qon-queries-warnings
-			Map<String, String> warnings = (Map<String, String>) application.getAttribute(QOnQueries.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId);
-			if(warnings!=null && warnings.size()>0) {
+			//qon-tables-warnings
+			Map<String, String> tWarnings = (Map<String, String>) application.getAttribute(QOnTables.ATTR_TABLES_WARNINGS_PREFIX+"."+modelId);
+			if(tWarnings!=null && tWarnings.size()>0) {
 				out.write(",\n");
-				out.write(sqd.get(modelId+".queries-warnings")+": "+gson.toJson(warnings));
+				out.write(sqd.get(modelId+".tables-warnings")+": "+gson.toJson(tWarnings));
 				i++;
 			}
 			
+			//qon-queries-warnings
+			Map<String, String> qWarnings = (Map<String, String>) application.getAttribute(QOnQueries.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId);
+			if(qWarnings!=null && qWarnings.size()>0) {
+				out.write(",\n");
+				out.write(sqd.get(modelId+".queries-warnings")+": "+gson.toJson(qWarnings));
+				i++;
+			}
+
 			i++;
 		}
 	}

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,8 +57,12 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 	@Override
 	public void process() {
+		throw new RuntimeException("process() should not be called");
+	}
+	
+	public void process(ServletContext context) {
 		try {
-			int count = readFromDatabase();
+			int count = readFromDatabase(context);
 			if(writer!=null) {
 				writer.write(String.valueOf(count));
 			}
@@ -70,7 +76,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		}
 	}
 
-	int readFromDatabase() throws SQLException {
+	int readFromDatabase(ServletContext context) throws SQLException {
 		String qonExecsTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
 		List<String> names = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_EXECS_NAMES, ",");
 		String sql = "select schema_name, name, remarks, roles_filter, exec_type"
@@ -282,8 +288,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	}
 
 	@Override
-	public void onInit() {
-		process();
+	public void onInit(ServletContext context) {
+		process(context);
 	}
 
 	@Override

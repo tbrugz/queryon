@@ -337,6 +337,8 @@ public class QueryOn extends HttpServlet {
 	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
 		try {
 			prop.clear();
+			context.removeAttribute(ATTR_INIT_ERROR);
+			
 			//XXX: protocol: add from ServletRequest?
 			String protocol = "http://";
 			//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
@@ -513,7 +515,7 @@ public class QueryOn extends HttpServlet {
 				for(UpdatePlugin up: updatePlugins) {
 					up.setConnection(conn);
 					up.setSchemaModel(sm);
-					up.onInit();
+					up.onInit(context);
 				}
 				
 				ConnectionUtil.closeConnection(conn);
