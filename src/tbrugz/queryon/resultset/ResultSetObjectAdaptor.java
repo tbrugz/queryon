@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import tbrugz.sqldump.resultset.AbstractNavigationalResultSet;
 import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 
 public class ResultSetObjectAdaptor extends AbstractNavigationalResultSet {
@@ -31,21 +32,21 @@ public class ResultSetObjectAdaptor extends AbstractNavigationalResultSet {
 	}
 	
 	@Override
-	void updateCurrentElement() {
+	protected void updateCurrentElement() {
 	}
 	
 	@Override
-	int getPosition() {
+	protected int getPosition() {
 		return position;
 	}
 	
 	@Override
-	int getRowCount() {
+	protected int getRowCount() {
 		return rowCount;
 	}
 	
 	@Override
-	void setPosition(int position) {
+	protected void setPosition(int position) {
 		this.position = position;
 	}
 
