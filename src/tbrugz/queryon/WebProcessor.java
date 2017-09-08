@@ -1,5 +1,6 @@
 package tbrugz.queryon;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.subject.Subject;
@@ -15,6 +16,6 @@ public interface WebProcessor {
 	
 	void setSubject(Subject currentUser);
 
-	void process(RequestSpec reqspec, HttpServletResponse resp);
+	void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp);
 
 }

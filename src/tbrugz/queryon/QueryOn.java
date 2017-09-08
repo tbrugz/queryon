@@ -534,27 +534,24 @@ public class QueryOn extends HttpServlet {
 				if(run4EveryModel) {
 					Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
 					for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
-						try {
-							ProcessorServlet.doProcess(p, context, entry.getKey());
-						}
-						catch(Exception e) {
-							log.warn("Exception executing processor on startup [proc="+p+"; model="+entry.getKey()+"]: "+e);
-							log.info("Exception executing processor on startup [proc="+p+"; model="+entry.getKey()+"]: "+e.getMessage(), e);
-							//XXX: fail on error?
-						}
+						runProcessor(p, context, entry.getKey());
 					}
 				}
 				else {
-					try {
-						ProcessorServlet.doProcess(p, context, null);
-					}
-					catch(Exception e) {
-						log.warn("Exception executing processor on startup [proc="+p+"]: "+e);
-						log.info("Exception executing processor on startup [proc="+p+"]: "+e.getMessage(), e);
-						//XXX: fail on error?
-					}
+					runProcessor(p, context, null);
 				}
 			}
+		}
+	}
+	
+	void runProcessor(String processorClass, ServletContext context, String modelId) {
+		try {
+			ProcessorServlet.doProcess(processorClass, context, modelId);
+		}
+		catch(Exception e) {
+			log.warn("Exception executing processor on startup [proc="+processorClass+"; model="+modelId+"]: "+e);
+			log.info("Exception executing processor on startup [proc="+processorClass+"; model="+modelId+"]: "+e.getMessage(), e);
+			//XXX: fail on error?
 		}
 	}
 	

@@ -221,7 +221,7 @@ public class ProcessorServlet extends HttpServlet {
 				}
 				wp.setSubject(currentUser);
 				
-				wp.process(reqspec, resp);
+				wp.process(context, reqspec, resp);
 			}
 			else {
 				output = setOutput(pc, resp);

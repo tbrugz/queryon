@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import javax.naming.NamingException;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -78,7 +79,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 	}
 	
 	@Override
-	public void process(RequestSpec reqspec, HttpServletResponse resp) {
+	public void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp) {
 		// test for SELECT permission on object...
 		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
 		ActionType atype = ActionType.SELECT;

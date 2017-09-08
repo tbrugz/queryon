@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
@@ -72,7 +73,7 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 		metadataAllowQueryExec = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_METADATA_ALLOW_QUERY_EXEC, metadataAllowQueryExec);
 	}
 	
-	public void process() {
+	public void process(ServletContext context) {
 		Set<View> origViews = new HashSet<View>();
 		origViews.addAll(model.getViews());
 		
@@ -411,14 +412,14 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 	}
 
 	@Override
-	public void process(RequestSpec reqspec, HttpServletResponse resp) {
+	public void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp) {
 		try {
 			ProcessorServlet.setOutput(this, resp);
 		}
 		catch(IOException e) {
 			throw new InternalServerException(e.getMessage(), e);
 		}
-		process();
+		process(context);
 	}
 	
 }
