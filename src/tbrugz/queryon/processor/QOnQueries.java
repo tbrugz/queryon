@@ -10,7 +10,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -64,6 +66,8 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 	
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";
 	
+	public static final String ATTR_QUERIES_WARNINGS_PREFIX = "qon-queries-warnings";
+	
 	boolean metadataAllowQueryExec = false;
 	Subject currentUser;
 	
@@ -80,7 +84,7 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 		try {
 			String action = prop.getProperty(PROP_PREFIX+SUFFIX_ACTION, ACTION_READ);
 			if(ACTION_READ.equals(action)) {
-				readFromDatabase();
+				readFromDatabase(context);
 			}
 			else if(ACTION_WRITE.equals(action)) {
 				//XXXdone: call SQLQueries processor before writeToDatabase() ?
@@ -112,12 +116,14 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 	}
 	
 	//XXX: test if table has all columns?
-	void readFromDatabase() throws SQLException {
+	void readFromDatabase(ServletContext context) throws SQLException {
 		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
 		String sql = "select schema_name, name, query, remarks, roles_filter from "+qonQueriesTable+
 				" where (disabled = 0 or disabled is null)"
 				;
 				//+" order by schema, name";
+		
+		clearWarnings(context, model.getModelId());
 		
 		ResultSet rs = null;
 		try {
@@ -144,10 +150,12 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 			//		/*List<String> params*/ null,
 			//		/*String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend*/ null, null, null);
 			
-			count += addQueryFromDB(schema, queryName, stinn, query, remarks, rolesFilterStr);
+			count += addQueryFromDB(schema, queryName, stinn, query, remarks, rolesFilterStr, context);
 			}
 			catch(SQLException e) {
-				log.warn("error reading query '"+queryName+"': "+e);
+				String message = "error reading query '"+queryName+"': "+e;
+				log.warn(message);
+				putWarning(context, model.getModelId(), schema, queryName, message);
 			}
 		}
 		
@@ -156,7 +164,25 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 				"added/replaced "+count+" queries]");
 	}
 	
-	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr) {
+	void clearWarnings(ServletContext context, String modelId) {
+		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = new LinkedHashMap<String, String>();
+		context.setAttribute(warnKey, warnings);
+	}
+	
+	@SuppressWarnings("unchecked")
+	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
+		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		if(warning==null) {
+			log.warn("warning key '"+warnKey+"' should not be null");
+			warnings = new LinkedHashMap<String, String>();
+			context.setAttribute(warnKey, warnings);
+		}
+		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
+	}
+	
+	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr, ServletContext context) {
 		Query query = new Query();
 		query.setSchemaName(schemaName);
 		query.setName(queryName);
@@ -192,8 +218,10 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 				}
 			}
 			else {
+				String message = "resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']";
 				log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']");
 				log.debug("resultset metadata's sqlexception: "+e.getMessage().trim()+" [query='"+queryFullName+"']", e);
+				putWarning(context, model.getModelId(), schemaName, queryName, message);
 			}
 		}
 		
@@ -240,8 +268,10 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 			//log.info("#params = "+inParams+" types = "+paramsTypes); 
 		} catch (SQLException e) {
 			query.setParameterCount(null);
-			log.warn("parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']");
+			String message = "parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']";
+			log.warn(message);
 			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
+			putWarning(context, model.getModelId(), schemaName, queryName, message);
 		}
 		
 		View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), query.getName());

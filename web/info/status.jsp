@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
@@ -31,9 +32,19 @@ if(models!=null && models.entrySet()!=null) {
 	if(ShiroUtils.isPermitted(currentUser, "MANAGE")) {
 		for(Map.Entry<String, SchemaModel> entry: models.entrySet()) {
 			if(i>0) { out.write(",\n"); }
+			String modelId = entry.getKey()!=null?entry.getKey():"null";
 			//out.write(sqd.get(entry.getKey()!=null?entry.getKey():"null")+": "+sqd.get(String.valueOf(entry.getValue().getMetadata())));
 			//XXX: filter properties if user not logged...
-			out.write(sqd.get(entry.getKey()!=null?entry.getKey():"null")+": "+gson.toJson(entry.getValue().getMetadata()));
+			out.write(sqd.get(modelId)+": "+gson.toJson(entry.getValue().getMetadata()));
+			
+			//qon-queries-warnings
+			Map<String, String> warnings = (Map<String, String>) application.getAttribute(QOnQueries.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId);
+			if(warnings!=null && warnings.size()>0) {
+				out.write(",\n");
+				out.write(sqd.get(modelId+".queries-warnings")+": "+gson.toJson(warnings));
+				i++;
+			}
+			
 			i++;
 		}
 	}
@@ -43,6 +54,7 @@ Throwable initError = (Throwable) application.getAttribute(QueryOn.ATTR_INIT_ERR
 if(initError!=null) {
 	if(i>0) { out.write(",\n"); }
 	out.write(sqd.get("init-error")+": "+gson.toJson(initError.toString()));
+	i++;
 }
 
 %>
