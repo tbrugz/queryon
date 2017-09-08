@@ -75,7 +75,7 @@ function onLoadAfter() {
 	var modelId = getParameterByName('model', location.search);
 	
 	if(modelsInfo!=null) {
-		if(modelsInfo.indexOf(modelId)<0) {
+		if(modelsInfo.indexOf(modelId)<0 && isMultiModel()) {
 			console.warn("model not found: ",modelId," models:",modelsInfo);
 			showErrorMessages("messages", "model not found: <b>"+modelId+"</b> [models: "+modelsInfo+"]");
 		}

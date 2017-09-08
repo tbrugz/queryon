@@ -123,6 +123,7 @@ function formatDate(date) {
 // ---------- messages ----------
 
 function getTextHeader(text) {
+	if(! text) { return "[null]"; }
 	var idx = text.indexOf("\n\n");
 	if(idx>0) { return text.substring(0, idx); }
 	return text;
