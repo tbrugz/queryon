@@ -167,10 +167,10 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	@SuppressWarnings("unchecked")
-	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
+	void putWarning(ServletContext context, String modelId, String schemaName, String name, String warning) {
 		String warnKey = ATTR_TABLES_WARNINGS_PREFIX+"."+modelId;
 		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
-		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
+		warnings.put((schemaName!=null?schemaName+".":"") + name, warning);
 	}
 
 	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks,

@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +54,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	
 	public static final String TYPE_SCRIPT = "SCRIPT";
 
+	public static final String ATTR_EXECS_WARNINGS_PREFIX = "qon-execs-warnings";
+	
 	Writer writer;
 
 	@Override
@@ -118,6 +121,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		List<ExecutableObject> execs = new ArrayList<ExecutableObject>();
 		Set<String> schemasGrabbed = new HashSet<String>();
 		
+		clearWarnings(context, model.getModelId());
+		
 		int count = 0;
 		while(rs.next()) {
 			String schema = rs.getString(1);
@@ -164,7 +169,10 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 							body);
 				}
 				else {
-					log.warn("executable '"+(schema!=null?schema+".":"")+(packageName!=null?packageName+".":"")+name+"' not found");
+					String execName = (schema!=null?schema+".":"")+(packageName!=null?packageName+".":"")+name;
+					String message = "executable '"+execName+"' not found";
+					log.warn(message);
+					putWarning(context, model.getModelId(), schema, execName, message);
 					//XXX: throw exception?
 				}
 			}
@@ -178,6 +186,19 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
 				"added/replaced "+count+" executables]");
 		return count;
+	}
+	
+	void clearWarnings(ServletContext context, String modelId) {
+		String warnKey = ATTR_EXECS_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = new LinkedHashMap<String, String>();
+		context.setAttribute(warnKey, warnings);
+	}
+	
+	@SuppressWarnings("unchecked")
+	void putWarning(ServletContext context, String modelId, String schemaName, String name, String warning) {
+		String warnKey = ATTR_EXECS_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		warnings.put((schemaName!=null?schemaName+".":"") + name, warning);
 	}
 	
 	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,

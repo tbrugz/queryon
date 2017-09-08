@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.processor.QOnExecs"%>
 <%@page import="tbrugz.queryon.processor.QOnTables"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="tbrugz.queryon.ResponseSpec"%>
@@ -54,6 +55,14 @@ if(models!=null && models.entrySet()!=null) {
 				i++;
 			}
 
+			//qon-execs-warnings
+			Map<String, String> eWarnings = (Map<String, String>) application.getAttribute(QOnExecs.ATTR_EXECS_WARNINGS_PREFIX+"."+modelId);
+			if(eWarnings!=null && eWarnings.size()>0) {
+				out.write(",\n");
+				out.write(sqd.get(modelId+".execs-warnings")+": "+gson.toJson(eWarnings));
+				i++;
+			}
+			
 			i++;
 		}
 	}
