@@ -94,6 +94,9 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		
 		String modelIdSource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE, false);
 		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET, false);
+		if(modelIdSource==null || modelIdTarget==null) {
+			throw new BadRequestException("source & target models must be informed");
+		}
 		if(modelIdSource.equals(modelIdTarget)) {
 			log.warn("equal models being compared [id="+modelIdSource+"], no diffs can be generated");
 		}

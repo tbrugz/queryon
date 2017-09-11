@@ -296,14 +296,14 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			String colName = lsColNames.get(i);
 			if(finalColNames.contains(colName)) {
 				Object origVal = vals.get(i);
-				Class<?> ctype = finalColTypes.get(i);
+				Class<?> ctype = lsColTypes.get(i);
 				boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
 				boolean isArray = Array.class.isAssignableFrom(ctype);
 				if(isResultSet || isArray) {
 					ResultSet rsInt = null;
 					if(isArray) {
 						Object[] objArr = (Object[]) origVal;
-						rsInt = new ResultSetArrayAdapter(objArr, false, finalColNames.get(i));
+						rsInt = new ResultSetArrayAdapter(objArr, false, colName);
 					}
 					else {
 						rsInt = (ResultSet) origVal;
@@ -318,7 +318,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 					
 					HTMLAttrSyntax htmldd = innerClone();
 					//htmldd.procProperties(prop);
-					DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
+					DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, colName, fos, true);
 					sb.append("\n\t</td>");
 				}
 				else {
