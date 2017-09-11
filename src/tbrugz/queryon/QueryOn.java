@@ -262,14 +262,15 @@ public class QueryOn extends HttpServlet {
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	static boolean validateFilterColumnNames = true;
 	//boolean xSetRequestUtf8 = false;
-	boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
-	Integer defaultLimit;
-	int maxLimit;
+	protected boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
+	protected Integer defaultLimit;
+	protected int maxLimit;
 	boolean debugMode = false; //XXX add prop for debugMode
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
-	ServletContext servletContext = null;
+	protected ServletContext servletContext = null;
+	protected String servletUrlContext = "q";
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -356,8 +357,8 @@ public class QueryOn extends HttpServlet {
 			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
 			
 			if(propertiesResource!=null) {
-			log.info("loading properties: "+propertiesResource);
-			prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
+				log.info("loading properties: "+propertiesResource);
+				prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
 			}
 			else if(propertiesFile!=null) {
 				log.info("loading properties file: "+propertiesFile);
@@ -419,24 +420,7 @@ public class QueryOn extends HttpServlet {
 			//model = SchemaModelUtils.getDefaultModel(context);
 			dsutils = new DumpSyntaxUtils(prop);
 			
-			//log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
-			validateFilterColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_FILTERCOLNAME, validateFilterColumnNames);
-			
-			SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
-			
-			//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
-			boolean useIdDecorator = Utils.getPropBool(prop, PROP_SQL_USEIDDECORATOR, true);
-			if(!useIdDecorator) {
-				SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator("");
-			}
-			
-			// init date formats
-			SQL.initDateFormats(dsutils);
-			
-			//xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
-			
-			defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
-			maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
+			initFromProperties();
 			
 			context.setAttribute(ATTR_PROP, prop);
 			context.setAttribute(ATTR_DUMP_SYNTAX_UTILS, dsutils);
@@ -462,6 +446,27 @@ public class QueryOn extends HttpServlet {
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
 		}
+	}
+	
+	protected void initFromProperties() {
+		//log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
+		validateFilterColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_FILTERCOLNAME, validateFilterColumnNames);
+		
+		SQL.validateOrderColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_ORDERCOLNAME, SQL.validateOrderColumnNames);
+		
+		//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
+		boolean useIdDecorator = Utils.getPropBool(prop, PROP_SQL_USEIDDECORATOR, true);
+		if(!useIdDecorator) {
+			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator("");
+		}
+		
+		// init date formats
+		SQL.initDateFormats(dsutils);
+		
+		//xSetRequestUtf8 = Utils.getPropBool(prop, PROP_X_REQUEST_UTF8, xSetRequestUtf8);
+		
+		defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
+		maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
 	}
 	
 	boolean grabModel(Map<String, SchemaModel> models, String id) {
@@ -619,6 +624,10 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
+		return new RequestSpec(dsutils, req, prop);
+	}
+	
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 		
@@ -635,7 +644,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}*/
 		
-		RequestSpec reqspec = new RequestSpec(dsutils, req, prop);
+		RequestSpec reqspec = getRequestSpec(req);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 		
 		final String otype;
@@ -648,7 +657,7 @@ public class QueryOn extends HttpServlet {
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		
-		DBObjectType statusType = statusObject(reqspec.object.toUpperCase());
+		DBObjectType statusType = statusObject(reqspec.object);
 		//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
 		if(statusType!=null) {
 			atype = ActionType.STATUS;
@@ -1169,7 +1178,7 @@ public class QueryOn extends HttpServlet {
 				//XXX: (also) return number of bind parameters? return as ResultSet? stmt.getParameterMetaData()...
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
 				if(rsmd==null) {
-					String message = "can't get metadata of: <code>"+sql.getFinalSql().trim()+"</code>";
+					String message = "can't get metadata of: "+sql.getFinalSql().trim();
 					throw new BadRequestException(message);
 				}
 				// dumping ResultSetMetaData as a ResultSet ;)
@@ -2136,7 +2145,7 @@ public class QueryOn extends HttpServlet {
 		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, getLimit(reqspec.limit));
 	}
 	
-	static void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
+	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
 			throws SQLException, IOException {
@@ -2166,7 +2175,7 @@ public class QueryOn extends HttpServlet {
 			WebSyntax ws = (WebSyntax) ds;
 			ws.setLimit(limit);
 			ws.setOffset(reqspec.offset);
-			String url = WebUtils.getRequestFullContext(reqspec.request) + "/q/" + (schemaName!=null?schemaName+".":"") + queryName;
+			String url = WebUtils.getRequestFullContext(reqspec.request) + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
 			ws.setBaseHref(url);
 		}
 		
@@ -2347,6 +2356,11 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	static DBObjectType statusObject(String name) {
+		if(name==null) {
+			return null;
+		}
+		name = name.toUpperCase();
+		
 		try {
 			DBObjectType type = DBObjectType.valueOf(name);
 			return type;

@@ -186,12 +186,22 @@ public class RequestSpec {
 	// file extensions to be ignored by RequestSpec
 	final static String[] standardFileExt = { "blob" };
 	
+	final String defaultOutputSyntax;
+	final boolean allowGetDumpSyntaxByAccept;
+	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
 		this(dsutils, req, prop, 0);
 	}
-	
+
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore) throws ServletException, IOException {
+		this(dsutils, req, prop, 0, QueryOn.DEFAULT_OUTPUT_SYNTAX, true, 1, null);
+	}
+	
+	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
+			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject) throws ServletException, IOException {
 		this.request = req;
+		this.defaultOutputSyntax = defaultOutputSyntax;
+		this.allowGetDumpSyntaxByAccept = allowGetDumpSyntaxByAccept;
 		
 		contentType = req.getContentType();
 		
@@ -233,10 +243,15 @@ public class RequestSpec {
 		String varUrl = req.getPathInfo();
 		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }
 		
-		String[] URIparts = varUrl!=null ? varUrl.split("/") : new String[]{} ;
+		//String[] URIparts = varUrl!=null ? varUrl.split("/") : new String[]{} ;
+		String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
-		log.debug("urlparts: "+URIpartz);
-		if(URIpartz.size()<2) { throw new BadRequestException("URL must have at least 1 part"); }
+		if(!URIpartz.isEmpty() && "".equals(URIpartz.get(0))) { URIpartz.remove(0); }
+		
+		log.info("urlparts: "+URIpartz+" [#"+URIpartz.size()+"][minparts="+minUrlParts+"]");
+		if(URIpartz.size()<minUrlParts) {
+			throw new BadRequestException("URL must have at least "+minUrlParts+" part"+(minUrlParts>1?"s":""));
+		}
 
 		/*
 		String lastURIPart = URIpartz.remove(URIpartz.size()-1);
@@ -271,12 +286,12 @@ public class RequestSpec {
 		//log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
 		
 		String objectTmp = URIpartz.remove(0);
-		if(objectTmp == null || objectTmp.equals("")) {
+		/*if(objectTmp == null || objectTmp.equals("")) {
 			//first part may be empty
 			if(URIpartz.size()>0) {
 				objectTmp = URIpartz.remove(0);
 			}
-		}
+		}*/
 		for(int i=0;i<prefixesToIgnore;i++) {
 			if(URIpartz.size()>0) {
 				objectTmp = URIpartz.remove(0);
@@ -284,6 +299,14 @@ public class RequestSpec {
 		}
 		if(convertLatin1ToUtf8) {
 			objectTmp = MiscUtils.latin1ToUtf8(objectTmp);
+		}
+		if(objectTmp==null) {
+			if(defaultObject!=null) {
+				objectTmp = defaultObject;
+			}
+			else {
+				objectTmp = "";
+			}
 		}
 		object = objectTmp;
 		log.info("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
@@ -306,10 +329,12 @@ public class RequestSpec {
 			}
 		}
 		else {
-			outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
+			if(allowGetDumpSyntaxByAccept) {
+				outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
+			}
 			if(outputSyntaxTmp==null) {
-				log.debug("no syntax match, using default: "+QueryOn.DEFAULT_OUTPUT_SYNTAX);
-				outputSyntaxTmp = dsutils.getDumpSyntax(QueryOn.DEFAULT_OUTPUT_SYNTAX);
+				log.debug("no syntax match, using default ["+defaultOutputSyntax+"]");
+				outputSyntaxTmp = dsutils.getDumpSyntax(defaultOutputSyntax);
 			}
 			else {
 				log.debug("syntax defined by accept: syntax: "+outputSyntaxTmp.getSyntaxId()+" ; mime: "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
@@ -477,7 +502,7 @@ public class RequestSpec {
 				log.warn("setParam exception [k:"+key+"; v:"+Arrays.toString(value)+"]: "+e);
 			}
 		}
-			
+
 		/*
 		for(String param: params.keySet()) {
 			if(param.startsWith("feq:")) {

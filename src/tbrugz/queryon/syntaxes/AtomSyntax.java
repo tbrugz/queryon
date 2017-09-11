@@ -98,8 +98,8 @@ public class AtomSyntax extends XMLDataDump implements WebSyntax {
 		out("\n\t<title>"+fullQueryName+"</title>\n", w);
 		//out("\t<subtitle></subtitle>\n", fos);
 		out("\t<link href=\""+baseHref+"\"/>\n", w);
-		String urlSelf = DataDumpUtils.xmlEscapeText(baseHref + ".atom" + (offset>0?"?offset="+offset:""));
-		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + ".atom" + ("?offset="+(offset+limit)));
+		String urlSelf = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ".atom" + (offset>0?"?offset="+offset:""));
+		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ".atom" + ("?offset="+(offset+limit)));
 		out("\t<link rel=\"self\" href=\"" + urlSelf + "\"/>\n", w);
 		//XXX add "previous"?
 		out("\t<link rel=\"next\" href=\"" + urlNext + "\"/>\n", w); //XXX: only if rowcount == limit? add at footer?
