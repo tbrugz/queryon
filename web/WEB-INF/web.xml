@@ -160,6 +160,16 @@
 		<servlet-name>SwaggerServlet</servlet-name>
 		<url-pattern>/swagger/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ODataServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.ODataServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>ODataServlet</servlet-name>
+		<url-pattern>/odata/*</url-pattern>
+	</servlet-mapping>
 
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
