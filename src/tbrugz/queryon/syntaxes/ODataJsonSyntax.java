@@ -11,17 +11,16 @@ import tbrugz.sqldump.datadump.JSONDataDump;
 
 public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneable {
 
+	static final String DATA_ELEMENT = "value";
+	public static final String ODATA_ID = "odata";
+	
 	String baseHref;
 	long limit, offset;
 	String fullQueryName;
 
-	public static String oDataId() {
-		return "odata";
-	}
-	
 	@Override
 	public String getSyntaxId() {
-		return oDataId();
+		return ODATA_ID;
 	}
 	
 	@Override
@@ -35,6 +34,7 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 			throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
 		fullQueryName = (schemaName!=null?schemaName+".":"") + tableName;
+		dataElement = DATA_ELEMENT;
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	@Override
 	protected void dumpXtraHeader(Writer w) throws IOException {
 		String context = baseHref+"$metadata#"+fullQueryName;
-		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + ("?offset="+(offset+limit)));
+		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ("?$skip="+(offset+limit)));
 		
 		out("\n"+padding+"\t\"@odata.context\": \""+context+"\",", w);
 		if(limit>0) {

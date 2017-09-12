@@ -355,12 +355,9 @@ public class RequestSpec {
 		
 		//---------------------
 		
-		String offsetStr = req.getParameter(PARAM_OFFSET);
-		if(offsetStr!=null) { offset = Integer.parseInt(offsetStr); }
-		else { offset = 0; }
+		offset = getFinalOffset(req);
 
-		String limitStr = req.getParameter(PARAM_LIMIT);
-		limit = limitStr!=null ? Integer.parseInt(limitStr) : null;
+		limit = getFinalLimit(req);
 		
 		// max & min updates
 		String updateMaxStr = req.getParameter("updatemax");
@@ -581,6 +578,16 @@ public class RequestSpec {
 		if(showDebugInfo) {
 			showDebugInfo(reqParams);
 		}
+	}
+	
+	protected int getFinalOffset(HttpServletRequest req) {
+		String offsetStr = req.getParameter(PARAM_OFFSET);
+		return offsetStr!=null? Integer.parseInt(offsetStr) : 0;
+	}
+	
+	protected Integer getFinalLimit(HttpServletRequest req) {
+		String limitStr = req.getParameter(PARAM_LIMIT);
+		return limitStr!=null ? Integer.parseInt(limitStr) : null;
 	}
 	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {

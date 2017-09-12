@@ -42,11 +42,12 @@ public class ODataServlet extends QueryOn {
 		String kind;
 		String url;
 		
-		public Entity(String schema, String name, String kind, String url) {
+		public Entity(String schema, String name, String kind) {
 			//this.schema = schema;
-			this.name = (schema!=null?schema+".":"")+name;
+			String fullName = (schema!=null?schema+".":"")+name;
+			this.name = fullName;
 			this.kind = kind;
-			this.url = url;
+			this.url = fullName;
 		}
 		
 		public String getName() {
@@ -143,13 +144,14 @@ public class ODataServlet extends QueryOn {
 	
 	@Override
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
-		return new RequestSpec(dsutils, req, prop, 0, ODataJsonSyntax.oDataId(), false, 0, "relation");
+		return new ODataRequest(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
 	}
 	
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"name"});
 	static final List<String> statusXtraColumns = Arrays.asList(new String[]{"kind", "url"});
 	//XXX kind: EntitySet, Singleton, FunctionImport
 	
+	@SuppressWarnings("resource")
 	@Override
 	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		ResultSet rs = null;
@@ -181,7 +183,7 @@ public class ODataServlet extends QueryOn {
 	List<Entity> getEntities(Set<? extends NamedDBObject> list, String kind) {
 		List<Entity> ret = new ArrayList<Entity>();
 		for(NamedDBObject o: list) {
-			ret.add(new Entity(o.getSchemaName(), o.getName(), kind, o.getName()));
+			ret.add(new Entity(o.getSchemaName(), o.getName(), kind));
 		}
 		return ret;
 	}
