@@ -244,6 +244,10 @@ option.unavaiable {
 	color: #bbb;
 }
 
+.fa-exclamation-triangle {
+	color: #ff8;
+}
+
 /* filters */
 
 #filters input[type=button] {

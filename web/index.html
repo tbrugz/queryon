@@ -21,6 +21,7 @@
 	<script src="js/qon-util.js"></script>
 	<script src="js/menu.js"></script>
 	<script src="js/models.js"></script>
+	<script src="js/model-status.js"></script>
 	<script src="js/auth.js"></script>
 	<script src="js/table.js"></script>
 	<script src="js/settings.js"></script>
@@ -65,6 +66,7 @@
 		}
 
 		doLoadQueries();
+		loadModelStatus();
 	}
 	
 	function loadSettingsCallback() {
@@ -80,6 +82,19 @@
 		testForAuthRequired();
 	}
 	
+	function loadModelStatusContentCallback() {
+		var modelId = getCurrentModelId();
+		if(modelId=="") { modelId = "null"; }
+		var warnings = modelStatus[modelId+".queries-warnings"];
+		if(warnings) {
+			var tooltip = statusWarnings2Text(warnings);
+			byId('navbar-warn').innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" title="'+tooltip+'"></i>';
+		}
+		else {
+			byId('navbar-warn').innerHTML = '';
+		}
+	}
+	
 	function testForAuthRequired() {
 		//console.log("testForAuthRequired, ", settings["queryon.web.auth-required"], authInfo.loaded, authInfo.authenticated);
 		
@@ -91,6 +106,7 @@
 	
 	onModelChanged = function(updateFragment) {
 		doLoadQueries();
+		loadModelStatusContentCallback();
 		/*var m = document.getElementById('model').value;
 		var schemas = schemasByModel[m];
 		
@@ -927,6 +943,9 @@
 		</select>
 		<!-- add descriptions (& parameters? nah) -->
 	</label>
+
+	<span id="navbar-warn">
+	</span>
 	
 	<span id="navbar-prop">
 		<span id="parameters"></span>
