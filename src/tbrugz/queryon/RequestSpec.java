@@ -156,8 +156,8 @@ public class RequestSpec {
 	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
 	final String optimisticLock;
 
-	final List<String> orderCols = new ArrayList<String>();
-	final List<String> orderAscDesc = new ArrayList<String>();
+	protected final List<String> orderCols = new ArrayList<String>();
+	protected final List<String> orderAscDesc = new ArrayList<String>();
 	
 	final boolean showDebugInfo = false;
 
@@ -397,22 +397,8 @@ public class RequestSpec {
 		distinct = req.getParameter(PARAM_DISTINCT)!=null;
 		count = req.getParameter(PARAM_COUNT)!=null;
 		headerParamEncoding = req.getHeader(HEADER_PARAM_ENCODING);
-		
-		String order = req.getParameter(PARAM_ORDER);
-		if(order!=null) {
-			List<String> orderColz = Arrays.asList(order.split(","));
-			for(String ocol: orderColz) {
-				ocol = ocol.trim();
-				if(ocol.startsWith("-")) {
-					ocol = ocol.substring(1);
-					orderAscDesc.add(ORDER_DESC);
-				}
-				else {
-					orderAscDesc.add(ORDER_ASC);
-				}
-				orderCols.add(ocol);
-			}
-		}
+
+		processOrder(req);
 		
 		loStrategy = req.getParameter("lostrategy");
 
@@ -588,6 +574,24 @@ public class RequestSpec {
 	protected Integer getFinalLimit(HttpServletRequest req) {
 		String limitStr = req.getParameter(PARAM_LIMIT);
 		return limitStr!=null ? Integer.parseInt(limitStr) : null;
+	}
+	
+	protected void processOrder(HttpServletRequest req) {
+		String order = req.getParameter(PARAM_ORDER);
+		if(order!=null) {
+			List<String> orderColz = Arrays.asList(order.split(","));
+			for(String ocol: orderColz) {
+				ocol = ocol.trim();
+				if(ocol.startsWith("-")) {
+					ocol = ocol.substring(1);
+					orderAscDesc.add(ORDER_DESC);
+				}
+				else {
+					orderAscDesc.add(ORDER_ASC);
+				}
+				orderCols.add(ocol);
+			}
+		}
 	}
 	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
