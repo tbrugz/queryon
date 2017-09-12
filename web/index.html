@@ -84,8 +84,7 @@
 	
 	function loadModelStatusContentCallback() {
 		var modelId = getCurrentModelId();
-		if(modelId=="") { modelId = "null"; }
-		var warnings = modelStatus[modelId+".queries-warnings"];
+		var warnings = statusGetWarnings(modelId, "queries");
 		if(warnings) {
 			var tooltip = statusWarnings2Text(warnings);
 			byId('navbar-warn').innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" title="'+tooltip+'"></i>';

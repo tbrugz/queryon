@@ -15,11 +15,20 @@ function loadModelStatusContent(oEvent) {
 	if(json["models-info"]) {
 		modelStatus = json["models-info"];
 	}
-	console.log('models-info', modelStatus);
+	//console.log('models-info', modelStatus);
 	
 	if(typeof loadModelStatusContentCallback === 'function') {
 		loadModelStatusContentCallback();
 	}
+}
+
+function statusGetWarnings(modelId, type) {
+	if(modelId=="") { modelId = "null"; }
+	var types = ["queries", "tables", "execs"];
+	if(types.indexOf(type)<0) {
+		console.warn("type [",type,"] must be one of [",types,"]");
+	}
+	return modelStatus[modelId+"."+type+"-warnings"];
 }
 
 function statusWarnings2Text(warnings) {
@@ -28,6 +37,5 @@ function statusWarnings2Text(warnings) {
 	for(var i=0;i<keys.length;i++) {
 		ret += escapeXML(keys[i]+": "+warnings[keys[i]]+"\n\n");
 	}
-	//console.warn(ret);
 	return ret;
 }
