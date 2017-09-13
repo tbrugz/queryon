@@ -77,6 +77,12 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 		}
 		else {
 			outNoPadding("\n", fos);
+			// should work most times, but not if $select=column_a ...
+			/*
+			if(lsColNames.size()==1) {
+				lsColNames.set(0, "value");
+			}
+			*/
 		}
 	}
 	

@@ -65,6 +65,7 @@ public class ODataServlet extends QueryOn {
 	private static final Log log = LogFactory.getLog(ODataServlet.class);
 	
 	static final String DEFAULT_ODATA_CONTEXT = "odata";
+	static final String ODATA_VERSION = "4.0";
 	
 	//static String baseQonUrl = "/q";
 	//static String baseODataUrl = "/odata";
@@ -139,6 +140,11 @@ public class ODataServlet extends QueryOn {
 		}
 
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
+		
+		// ? header: Content-Type: application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+		// x header: OData-Version: 4.0
+		resp.setHeader("OData-Version", ODATA_VERSION);
+		
 		super.doService(req, resp);
 	}
 	
