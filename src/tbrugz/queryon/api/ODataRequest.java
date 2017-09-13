@@ -23,7 +23,10 @@ public class ODataRequest extends RequestSpec {
 	public static final String PARAM_ORDERBY = "$orderby";
 	public static final String PARAM_TOP = "$top";
 	
+	public static final String PARAM_VALUE = "$value";
+	
 	protected String keyValue = null;
+	protected String valueField = null;
 
 	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -80,19 +83,20 @@ public class ODataRequest extends RequestSpec {
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
 		if(parts.size()==0) { return null; }
 		String objectTmp = parts.remove(0);
-		if(objectTmp==null) { return null; }
 		
-		int idx1 = objectTmp.indexOf("(");
-		if(idx1>=0) {
-			int idx2 = objectTmp.indexOf(")");
-			String key = objectTmp.substring(idx1+1, idx2);
-			if(key.charAt(0)=='\'' && key.charAt(key.length()-1)=='\'') {
-				key = key.substring(1, key.length()-1);
+		if(objectTmp!=null) {
+			int idx1 = objectTmp.indexOf("(");
+			if(idx1>=0) {
+				int idx2 = objectTmp.indexOf(")");
+				String key = objectTmp.substring(idx1+1, idx2);
+				if(key.charAt(0)=='\'' && key.charAt(key.length()-1)=='\'') {
+					key = key.substring(1, key.length()-1);
+				}
+				objectTmp = objectTmp.substring(0, idx1);
+				//XXX: allow compoundKey
+				keyValue = key;
+				log.info("object: ["+objectTmp+"] key: ["+keyValue+"]");
 			}
-			objectTmp = objectTmp.substring(0, idx1);
-			//XXX: allow compoundKey
-			keyValue = key;
-			log.info("object: ["+objectTmp+"] key: ["+keyValue+"]");
 		}
 		return objectTmp;
 	}
@@ -102,6 +106,25 @@ public class ODataRequest extends RequestSpec {
 		if(keyValue!=null) {
 			params.add(keyValue);
 		}
+		if(parts.size()>0) {
+			//log.info("parts: "+parts);
+			String col = parts.remove(0).trim();
+			columns.add(col);
+			if(parts.size()>0) {
+				String par = parts.remove(0);
+				if(par.equals(PARAM_VALUE)) {
+					valueField = col;
+				}
+				else {
+					log.warn("unknown parameter: "+par+" [remaining parts: "+parts+"]");
+				}
+			}
+		}
+	}
+	
+	@Override
+	protected String getValueField(HttpServletRequest req) {
+		return valueField;
 	}
 	
 }

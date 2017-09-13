@@ -86,6 +86,7 @@ public class RequestSpec {
 	public static final String PARAM_LIMIT = "limit";
 	public static final String PARAM_OFFSET = "offset";
 	public static final String PARAM_COUNT = "count";
+	public static final String PARAM_VALUEFIELD = "valuefield";
 	public static final String PARAM_OPTIMISTICLOCK = "optimisticlock";
 
 	public static final String PARAM_ONCOLS = "oncols";
@@ -111,7 +112,7 @@ public class RequestSpec {
 	// data manipulation (DML) properties
 	final Integer minUpdates, maxUpdates;
 	
-	final List<String> columns = new ArrayList<String>();
+	protected final List<String> columns = new ArrayList<String>();
 	protected final List<String> params = new ArrayList<String>();
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
@@ -396,7 +397,7 @@ public class RequestSpec {
 			params.add(value);
 		}
 		
-		uniValueCol = req.getParameter("valuefield");
+		uniValueCol = getValueField(req);
 		uniValueMimetype = req.getParameter("mimetype");
 		uniValueMimetypeCol = req.getParameter("mimefield");
 		uniValueFilename = req.getParameter("filename");
@@ -606,6 +607,10 @@ public class RequestSpec {
 	
 	protected String getFields(HttpServletRequest req) {
 		return req.getParameter(PARAM_FIELDS);
+	}
+	
+	protected String getValueField(HttpServletRequest req) {
+		return req.getParameter(PARAM_VALUEFIELD);
 	}
 	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
