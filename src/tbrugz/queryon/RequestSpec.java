@@ -80,20 +80,34 @@ public class RequestSpec {
 	public static final String HEADER_PARAM_ENCODING = "X-ParamEncoding";
 	public static final String PARAM_ENCODING_URLENCODE = "url";
 	
+	// select parameters
 	public static final String PARAM_FIELDS = "fields";
 	public static final String PARAM_DISTINCT = "distinct";
 	public static final String PARAM_ORDER = "order";
 	public static final String PARAM_LIMIT = "limit";
 	public static final String PARAM_OFFSET = "offset";
 	public static final String PARAM_COUNT = "count";
+	public static final String PARAM_LO_STRATEGY = "lostrategy";
+	
+	// "blob" parameters
 	public static final String PARAM_VALUEFIELD = "valuefield";
-	public static final String PARAM_OPTIMISTICLOCK = "optimisticlock";
+	public static final String PARAM_MIMETYPE = "mimetype";
+	public static final String PARAM_MIMETYPE_FIELD = "mimefield"; //TODO: mimefield -> mimetypefield
+	public static final String PARAM_FILENAME = "filename";
+	public static final String PARAM_FILENAME_FIELD = "filenamefield";
 
+	// pivot parameters
 	public static final String PARAM_ONCOLS = "oncols";
 	public static final String PARAM_ONROWS = "onrows";
 	public static final String PARAM_MEASURES = "measures";
 	public static final String PARAM_PIVOTFLAGS = "pivotflags";
 	public static final int DEFAULT_PIVOTFLAGS = PivotResultSet.SHOW_MEASURES_ALLWAYS;
+	
+	// update parameters
+	public static final String PARAM_UPDATE_MIN = "updatemin";
+	public static final String PARAM_UPDATE_MAX = "updatemax";
+	public static final String PARAM_BODY_PARAM_NAME = "bodyparamname";
+	public static final String PARAM_OPTIMISTICLOCK = "optimisticlock";
 	
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";
@@ -348,8 +362,8 @@ public class RequestSpec {
 		limit = getFinalLimit(req);
 		
 		// max & min updates
-		String updateMaxStr = req.getParameter("updatemax");
-		String updateMinStr = req.getParameter("updatemin");
+		String updateMaxStr = req.getParameter(PARAM_UPDATE_MAX);
+		String updateMinStr = req.getParameter(PARAM_UPDATE_MIN);
 		maxUpdates = (updateMaxStr!=null)?Integer.parseInt(updateMaxStr):DEFAULT_MAX_UPDATES;
 		minUpdates = (updateMinStr!=null)?Integer.parseInt(updateMinStr):DEFAULT_MIN_UPDATES;
 		
@@ -389,7 +403,7 @@ public class RequestSpec {
 
 		processOrder(req);
 		
-		loStrategy = req.getParameter("lostrategy");
+		loStrategy = req.getParameter(PARAM_LO_STRATEGY);
 
 		for(int i=1;;i++) {
 			String value = req.getParameter("p"+i);
@@ -398,10 +412,10 @@ public class RequestSpec {
 		}
 		
 		uniValueCol = getValueField(req);
-		uniValueMimetype = req.getParameter("mimetype");
-		uniValueMimetypeCol = req.getParameter("mimefield");
-		uniValueFilename = req.getParameter("filename");
-		uniValueFilenameCol = req.getParameter("filenamefield");
+		uniValueMimetype = req.getParameter(PARAM_MIMETYPE);
+		uniValueMimetypeCol = req.getParameter(PARAM_MIMETYPE_FIELD);
+		uniValueFilename = req.getParameter(PARAM_FILENAME);
+		uniValueFilenameCol = req.getParameter(PARAM_FILENAME_FIELD);
 		
 		//Enumeration<String> en = (Enumeration<String>) req.getParameterNames();
 		//while(en.hasMoreElements()) {
@@ -426,7 +440,7 @@ public class RequestSpec {
 			log.debug("multipart-content: length="+i);
 		}
 		
-		String bodyParamName = req.getParameter("bodyparamname");
+		String bodyParamName = req.getParameter(PARAM_BODY_PARAM_NAME);
 		if(bodyParamName!=null) {
 			try {
 				String value = getRequestBody(req);
