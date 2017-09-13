@@ -365,18 +365,19 @@ public class RequestSpec {
 		maxUpdates = (updateMaxStr!=null)?Integer.parseInt(updateMaxStr):DEFAULT_MAX_UPDATES;
 		minUpdates = (updateMinStr!=null)?Integer.parseInt(updateMinStr):DEFAULT_MIN_UPDATES;
 		
-		String fields = req.getParameter(PARAM_FIELDS);
+		String fields = getFields(req);
 		if(fields!=null) {
-			columns.addAll(Arrays.asList(fields.split(",")));
+			//columns.addAll(Arrays.asList(fields.split(",")));
+			addAllWithTrim(columns, fields);
 		}
 
 		String onColsPar = req.getParameter(PARAM_ONCOLS);
 		if(onColsPar!=null) {
-			oncols.addAll(Arrays.asList(onColsPar.split(",")));
+			addAllWithTrim(oncols, onColsPar);
 		}
 		String onRowsPar = req.getParameter(PARAM_ONROWS);
 		if(onRowsPar!=null) {
-			onrows.addAll(Arrays.asList(onRowsPar.split(",")));
+			addAllWithTrim(onrows, onRowsPar);
 		}
 		String measuresPar = req.getParameter(PARAM_MEASURES);
 		if(measuresPar!=null) {
@@ -388,7 +389,7 @@ public class RequestSpec {
 			}
 			columns.addAll(onrows);
 			columns.addAll(oncols);
-			columns.addAll(Arrays.asList(measuresPar.split(",")));
+			addAllWithTrim(columns, measuresPar);
 		}
 		String pivotStr = req.getParameter(PARAM_PIVOTFLAGS);
 		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
@@ -594,6 +595,10 @@ public class RequestSpec {
 		}
 	}
 	
+	protected String getFields(HttpServletRequest req) {
+		return req.getParameter(PARAM_FIELDS);
+	}
+	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
 		//String key = entry.getKey();
 		//String[] value = entry.getValue();
@@ -796,6 +801,13 @@ public class RequestSpec {
 				request.getRemoteHost()+"/"+request.getRemoteAddr();
 		}
 		return "?";
+	}
+	
+	protected void addAllWithTrim(List<String> list, String values) {
+		String[] varr = values.split(",");
+		for(String v: varr) {
+			list.add(v.trim());
+		}
 	}
 
 }

@@ -18,9 +18,10 @@ public class ODataRequest extends RequestSpec {
 	
 	static final Log log = LogFactory.getLog(ODataRequest.class);
 	
-	public static final String PARAM_TOP = "$top";
+	public static final String PARAM_SELECT = "$select";
 	public static final String PARAM_SKIP = "$skip";
 	public static final String PARAM_ORDERBY = "$orderby";
+	public static final String PARAM_TOP = "$top";
 
 	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -66,6 +67,10 @@ public class ODataRequest extends RequestSpec {
 				}
 			}
 		}
+	}
+	
+	protected String getFields(HttpServletRequest req) {
+		return req.getParameter(PARAM_SELECT);
 	}
 	
 }
