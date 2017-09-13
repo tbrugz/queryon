@@ -193,7 +193,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	}
 	
 	void forward(HttpServletRequest req, HttpServletResponse resp, String relation, String id) throws ServletException, IOException {
-		String redir = "/q/"+relation+"?p1="+id+"&valuefield=BODY&mimefield=MIME";
+		String redir = "/q/"+relation+"?p1="+id+"&valuefield=BODY&mimetypefield=MIME";
 		log.info("redir = "+redir);
 		//resp.setHeader(HEADER_PAGE_ID, id);
 		req.getRequestDispatcher(redir).forward(req, resp);

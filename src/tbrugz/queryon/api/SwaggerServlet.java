@@ -431,7 +431,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			}
 		}
 		
-		//blob: valuefield, mimetype, mimefield, filename, filenamefield
+		//blob: valuefield, mimetype, mimetypefield, filename, filenamefield
 		//updateparams: updatemax, updatemin, v:<xxx>
 		//"p"+i -update (uk)
 		//bodyparamname?

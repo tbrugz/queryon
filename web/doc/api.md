@@ -49,7 +49,7 @@ Useful for Blob types.
 
 * `valuefield` - the column to be returned (only required field for "Blob-dump")
 * `mimetype` - the mimetype to be returned
-* `mimefield` - the column name that represents the mimetype of the value
+* `mimetypefield` - the column name that represents the mimetype of the value
 * `filename` - the filename to be used in the return
 * `filenamefield` - the column that contains the filename of the value
 

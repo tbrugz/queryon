@@ -92,7 +92,7 @@ public class RequestSpec {
 	// "blob" parameters
 	public static final String PARAM_VALUEFIELD = "valuefield";
 	public static final String PARAM_MIMETYPE = "mimetype";
-	public static final String PARAM_MIMETYPE_FIELD = "mimefield"; //TODO: mimefield -> mimetypefield
+	public static final String PARAM_MIMETYPE_FIELD = "mimetypefield"; //TODOne: mimefield -> mimetypefield
 	public static final String PARAM_FILENAME = "filename";
 	public static final String PARAM_FILENAME_FIELD = "filenamefield";
 
