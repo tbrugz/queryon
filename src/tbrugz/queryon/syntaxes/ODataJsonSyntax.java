@@ -85,6 +85,10 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 		if(!uniqueRow) {
 			out("\t"+"]",fos);
 		}
+		else if(count==0) {
+			out("\t\"@null\": true", fos);
+			//XXX: throw new NotFoundException("Not Found");
+		}
 		out("\n"+padding+"}", fos);
 	}
 	
@@ -94,7 +98,7 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ("?$skip="+(offset+limit)));
 		
 		out("\n"+padding+"\t\"@odata.context\": \""+context+"\",", w);
-		if(limit>0) {
+		if(!uniqueRow && limit>0) {
 			out("\n"+padding+"\t\"@odata.nextLink\": \""+urlNext+"\",", w);
 		}
 	}

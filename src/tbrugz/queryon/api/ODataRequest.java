@@ -22,6 +22,8 @@ public class ODataRequest extends RequestSpec {
 	public static final String PARAM_SKIP = "$skip";
 	public static final String PARAM_ORDERBY = "$orderby";
 	public static final String PARAM_TOP = "$top";
+	
+	protected String keyValue = null;
 
 	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -69,8 +71,37 @@ public class ODataRequest extends RequestSpec {
 		}
 	}
 	
+	@Override
 	protected String getFields(HttpServletRequest req) {
 		return req.getParameter(PARAM_SELECT);
+	}
+
+	@Override
+	protected String getObject(List<String> parts, int prefixesToIgnore) {
+		if(parts.size()==0) { return null; }
+		String objectTmp = parts.remove(0);
+		if(objectTmp==null) { return null; }
+		
+		int idx1 = objectTmp.indexOf("(");
+		if(idx1>=0) {
+			int idx2 = objectTmp.indexOf(")");
+			String key = objectTmp.substring(idx1+1, idx2);
+			if(key.charAt(0)=='\'' && key.charAt(key.length()-1)=='\'') {
+				key = key.substring(1, key.length()-1);
+			}
+			objectTmp = objectTmp.substring(0, idx1);
+			//XXX: allow compoundKey
+			keyValue = key;
+			log.info("object: ["+objectTmp+"] key: ["+keyValue+"]");
+		}
+		return objectTmp;
+	}
+	
+	@Override
+	protected void processParams(List<String> parts) {
+		if(keyValue!=null) {
+			params.add(keyValue);
+		}
 	}
 	
 }

@@ -112,7 +112,7 @@ public class RequestSpec {
 	final Integer minUpdates, maxUpdates;
 	
 	final List<String> columns = new ArrayList<String>();
-	final List<String> params = new ArrayList<String>();
+	protected final List<String> params = new ArrayList<String>();
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
 	final boolean distinct;
@@ -285,18 +285,7 @@ public class RequestSpec {
 		URIpartz.add( lastURIPart );
 		//log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
 		
-		String objectTmp = URIpartz.remove(0);
-		/*if(objectTmp == null || objectTmp.equals("")) {
-			//first part may be empty
-			if(URIpartz.size()>0) {
-				objectTmp = URIpartz.remove(0);
-			}
-		}*/
-		for(int i=0;i<prefixesToIgnore;i++) {
-			if(URIpartz.size()>0) {
-				objectTmp = URIpartz.remove(0);
-			}
-		}
+		String objectTmp = getObject(URIpartz, prefixesToIgnore);
 		if(convertLatin1ToUtf8) {
 			objectTmp = MiscUtils.latin1ToUtf8(objectTmp);
 		}
@@ -311,9 +300,7 @@ public class RequestSpec {
 		object = objectTmp;
 		log.info("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
 		
-		for(int i=0;i<URIpartz.size();i++) {
-			params.add(URIpartz.get(i));
-		}
+		processParams(URIpartz);
 		
 		DumpSyntaxInt outputSyntaxTmp = null;
 		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
@@ -592,6 +579,28 @@ public class RequestSpec {
 				}
 				orderCols.add(ocol);
 			}
+		}
+	}
+	
+	protected String getObject(List<String> parts, int prefixesToIgnore) {
+		String objectTmp = parts.remove(0);
+		/*if(objectTmp == null || objectTmp.equals("")) {
+			//first part may be empty
+			if(URIpartz.size()>0) {
+				objectTmp = URIpartz.remove(0);
+			}
+		}*/
+		for(int i=0;i<prefixesToIgnore;i++) {
+			if(parts.size()>0) {
+				objectTmp = parts.remove(0);
+			}
+		}
+		return objectTmp;
+	}
+	
+	protected void processParams(List<String> parts) {
+		for(int i=0;i<parts.size();i++) {
+			params.add(parts.get(i));
 		}
 	}
 	
