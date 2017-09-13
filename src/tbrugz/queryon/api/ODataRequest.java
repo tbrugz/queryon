@@ -23,10 +23,15 @@ public class ODataRequest extends RequestSpec {
 	public static final String PARAM_ORDERBY = "$orderby";
 	public static final String PARAM_TOP = "$top";
 	
+	// collection parameters
+	public static final String PARAM_COUNT = "$count";
+	
+	// instance parameters
 	public static final String PARAM_VALUE = "$value";
 	
 	protected String keyValue = null;
 	protected String valueField = null;
+	protected boolean isCountRequest = false;
 
 	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -106,17 +111,24 @@ public class ODataRequest extends RequestSpec {
 		if(keyValue!=null) {
 			params.add(keyValue);
 		}
+			
 		if(parts.size()>0) {
 			//log.info("parts: "+parts);
 			String col = parts.remove(0).trim();
-			columns.add(col);
-			if(parts.size()>0) {
-				String par = parts.remove(0);
-				if(par.equals(PARAM_VALUE)) {
-					valueField = col;
-				}
-				else {
-					log.warn("unknown parameter: "+par+" [remaining parts: "+parts+"]");
+			if(PARAM_COUNT.equals(col)) {
+				isCountRequest = true;
+				valueField = "count";
+			}
+			else {
+				columns.add(col);
+				if(parts.size()>0) {
+					String par = parts.remove(0);
+					if(PARAM_VALUE.equals(par)) {
+						valueField = col;
+					}
+					else {
+						log.warn("unknown parameter: "+par+" [remaining parts: "+parts+"]");
+					}
 				}
 			}
 		}
@@ -125,6 +137,11 @@ public class ODataRequest extends RequestSpec {
 	@Override
 	protected String getValueField(HttpServletRequest req) {
 		return valueField;
+	}
+	
+	@Override
+	protected boolean isCountRequest(HttpServletRequest req) {
+		return isCountRequest;
 	}
 	
 }

@@ -384,7 +384,7 @@ public class RequestSpec {
 		else { pivotflags = DEFAULT_PIVOTFLAGS; }
 		
 		distinct = req.getParameter(PARAM_DISTINCT)!=null;
-		count = req.getParameter(PARAM_COUNT)!=null;
+		count = isCountRequest(req);
 		headerParamEncoding = req.getHeader(HEADER_PARAM_ENCODING);
 
 		processOrder(req);
@@ -611,6 +611,10 @@ public class RequestSpec {
 	
 	protected String getValueField(HttpServletRequest req) {
 		return req.getParameter(PARAM_VALUEFIELD);
+	}
+	
+	protected boolean isCountRequest(HttpServletRequest req) {
+		return req.getParameter(PARAM_COUNT)!=null;
 	}
 	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
