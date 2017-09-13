@@ -1030,6 +1030,7 @@ public class QueryOn extends HttpServlet {
 		
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
+		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
 		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
@@ -1073,7 +1074,7 @@ public class QueryOn extends HttpServlet {
 		else {
 			Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
-					fks, uks, applyLimitOffsetInResultSet, resp, getLimit(lim));
+					fks, uks, fullKeyDefined, applyLimitOffsetInResultSet, resp, getLimit(lim));
 		}
 		
 		}
@@ -1123,7 +1124,7 @@ public class QueryOn extends HttpServlet {
 				else {
 					Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
 					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), null,
-							null, null, applyLimitOffsetInResultSet, resp, getLimit(lim));
+							null, null, false, applyLimitOffsetInResultSet, resp, getLimit(lim));
 				}
 			}
 			else {
@@ -2142,11 +2143,11 @@ public class QueryOn extends HttpServlet {
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
 			throws SQLException, IOException {
-		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, mayApplyLimitOffset, resp, getLimit(reqspec.limit));
+		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, false, mayApplyLimitOffset, resp, getLimit(reqspec.limit));
 	}
 	
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
-			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
+			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs, boolean fullKeyDefined,
 			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
@@ -2165,6 +2166,9 @@ public class QueryOn extends HttpServlet {
 		}
 		if(ds.usesAllUKs()) {
 			ds.setAllUKs(UKs);
+		}
+		if(fullKeyDefined) {
+			ds.setUniqueRow(true);
 		}
 		
 		if(log.isDebugEnabled()) {

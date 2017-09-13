@@ -17,17 +17,18 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	String baseHref;
 	long limit, offset;
 	String fullQueryName;
+	boolean uniqueRow = false;
 
 	@Override
 	public String getSyntaxId() {
 		return ODATA_ID;
 	}
 	
-	@Override
+	/*@Override
 	public void postProcProperties() {
 		super.postProcProperties();
 		addMetadata = false;
-	}
+	}*/
 	
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md)
@@ -35,6 +36,13 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 		super.initDump(schema, tableName, pkCols, md);
 		fullQueryName = (schemaName!=null?schemaName+".":"") + tableName;
 		dataElement = DATA_ELEMENT;
+		beforeDumpHeader();
+	}
+	
+	protected void beforeDumpHeader() {
+		if(uniqueRow) {
+			encloseRowWithCurlyBraquets = false;
+		}
 	}
 
 	@Override
@@ -50,6 +58,34 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	@Override
 	public void setOffset(long offset) {
 		this.offset = offset;
+	}
+	
+	@Override
+	public void setUniqueRow(boolean unique) {
+		this.uniqueRow = unique;
+		beforeDumpHeader();
+	}
+	
+	@Override
+	public void dumpHeader(Writer fos) throws IOException {
+		out("{", fos);
+		dumpXtraHeader(fos);
+		if(!uniqueRow) {
+			outNoPadding("\n"+padding+"\t\""+dataElement+"\": "
+					+"["
+					+"\n", fos);
+		}
+		else {
+			outNoPadding("\n", fos);
+		}
+	}
+	
+	@Override
+	public void dumpFooter(long count, Writer fos) throws IOException {
+		if(!uniqueRow) {
+			out("\t"+"]",fos);
+		}
+		out("\n"+padding+"}", fos);
 	}
 	
 	@Override
