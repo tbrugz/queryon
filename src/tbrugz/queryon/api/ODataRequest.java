@@ -29,6 +29,9 @@ public class ODataRequest extends RequestSpec {
 	// instance parameters
 	public static final String PARAM_VALUE = "$value";
 	
+	static final String ALIAS_VALUE = "value";
+	static final String VALUEFIELD_COUNT = "count";
+	
 	protected String keyValue = null;
 	protected String valueField = null;
 	protected boolean isCountRequest = false;
@@ -117,12 +120,11 @@ public class ODataRequest extends RequestSpec {
 			String col = parts.remove(0).trim();
 			if(PARAM_COUNT.equals(col)) {
 				isCountRequest = true;
-				valueField = "count";
+				valueField = VALUEFIELD_COUNT;
 			}
 			else {
 				columns.add(col);
-				aliases.add("value");
-				//XXX: rename col to "value" - enclosing SQL?
+				aliases.add(ALIAS_VALUE);
 				if(parts.size()>0) {
 					String par = parts.remove(0);
 					if(PARAM_VALUE.equals(par)) {
