@@ -93,6 +93,27 @@
         <remarks></remarks>
         <type>TABLE</type>
     </table>
+
+    <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>EMP_Q1</name>
+        <schemaName>QUERY</schemaName>
+        <columns>
+            <name>ID</name>
+            <type>INTEGER</type>
+            <columSize>10</columSize>
+            <nullable>false</nullable>
+            <remarks></remarks>
+        </columns>
+        <columns>
+            <name>NAME</name>
+            <type>VARCHAR</type>
+            <columSize>100</columSize>
+            <nullable>false</nullable>
+            <remarks></remarks>
+        </columns>
+        <parameterCount>0</parameterCount>
+        <query>select id, name from EMP</query>
+    </view>
     
     <executable>
         <name>IS_PRIME</name>

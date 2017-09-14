@@ -118,7 +118,6 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 		return content;
 	}
-	
 
 	/*
 	 * see: http://hc.apache.org/httpcomponents-client-ga/quickstart.html
@@ -856,6 +855,39 @@ public class WinstoneAndH2HttpRequestTest {
 		System.out.println("content: "+getContent(response));
 		Assert.assertEquals("Must be BadRequest", 400, response.getStatusLine().getStatusCode());
 		httpGet.releaseConnection();
+	}
+	
+	@Test
+	public void testGetQueryFieldsAndAliases() throws Exception {
+		String url = "/QUERY.EMP_Q1.csv?fields=ID,NAME&aliases=C1,c2";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		String columns = content.substring(0, content.indexOf("\r\n"));
+		Assert.assertEquals("C1,c2", columns);
+	}
+	
+	@Test
+	public void testGetQueryAliases() throws Exception {
+		String url = "/QUERY.EMP_Q1.csv?aliases=C1,C2";
+		
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+url);
+		HttpResponse response = httpclient.execute(httpGet);
+		//System.out.println("content: "+getContent(response));
+		Assert.assertEquals("Must be BadRequest", 400, response.getStatusLine().getStatusCode());
+		httpGet.releaseConnection();
+	}
+	
+	@Test
+	@Ignore("QueryAny does not allow fields (yet)")
+	public void testGetQueryAnyAliases() throws Exception {
+		String sql = "select id, name, 'black' as name_CLASS from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String url = "/QueryAny.csv?_method=POST&name=emp&sql="+sqlpar+"&fields=ID,NAME,NAME+CLASS&aliases=C1,C2,C3";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		String columns = content.substring(0, content.indexOf("\r\n"));
+		Assert.assertEquals("C1,C2,C3", columns);
 	}
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------

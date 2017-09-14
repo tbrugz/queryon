@@ -392,6 +392,11 @@ public class SQL {
 			}
 			else {
 				// no columns selected...
+				//log.warn("no columns selected...");
+				// XXX: select all from table.getColumnNames()?
+				if(reqspec.aliases.size()>0) {
+					throw new BadRequestException("aliases requested without fields");//+" [aliases: "+reqspec.aliases+"]");
+				}
 			}
 		}
 	}
@@ -399,15 +404,16 @@ public class SQL {
 	private static String createSQLColumns(RequestSpec reqspec, Relation table) {
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
-			Set<String> tabCols = new HashSet<String>(table.getColumnNames());
-			checkAliases(reqspec, tabCols);
+			List<String> tabColsList = table.getColumnNames();
+			checkAliases(reqspec, tabColsList);
+			Set<String> tabCols = new HashSet<String>(tabColsList);
 			List<String> sqlCols = new ArrayList<String>(); 
 			for(String reqColumn: reqspec.columns) {
 				if(MiscUtils.containsIgnoreCase(tabCols, reqColumn)) {
 					sqlCols.add(reqColumn);
 				}
 				else {
-					String message = "column not found: '"+reqColumn+"' [table:"+table.getName()+"]";
+					String message = "column not found: '"+reqColumn+"' [relation: "+table.getQualifiedName()+"]";
 					log.warn(message);
 					throw new BadRequestException(message);
 				}
