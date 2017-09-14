@@ -405,7 +405,7 @@ public class SQL {
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
 			List<String> tabColsList = table.getColumnNames();
-			checkAliases(reqspec, tabColsList);
+			checkAliases(reqspec);
 			Set<String> tabCols = new HashSet<String>(tabColsList);
 			List<String> sqlCols = new ArrayList<String>(); 
 			for(String reqColumn: reqspec.columns) {
@@ -427,7 +427,7 @@ public class SQL {
 		}
 		else {
 			List<String> cols = table.getColumnNames();
-			checkAliases(reqspec, cols);
+			checkAliases(reqspec.aliases, cols);
 			if(cols!=null) {
 				columns = getColumnsStr(cols, reqspec.aliases);
 			}
@@ -438,10 +438,15 @@ public class SQL {
 		return columns;
 	}
 	
-	static void checkAliases(RequestSpec reqspec, Collection<String> cols) {
-		int asize = reqspec.aliases.size();
+	static void checkAliases(RequestSpec reqspec) {
+		checkAliases(reqspec.aliases, reqspec.columns);
+	}
+	
+	static void checkAliases(Collection<String> aliases, Collection<String> cols) {
+		int asize = aliases.size();
 		int csize = cols!=null?cols.size():0;
 		if(asize>0 && asize!=csize) {
+			log.debug("checkAliases: exception: cols="+cols+" ; aliases="+aliases);
 			throw new BadRequestException("Field count [#"+csize+"] != aliases count [#"+asize+"]");
 		}
 	}

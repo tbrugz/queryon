@@ -121,6 +121,7 @@ public class ODataRequest extends RequestSpec {
 			}
 			else {
 				columns.add(col);
+				aliases.add("value");
 				//XXX: rename col to "value" - enclosing SQL?
 				if(parts.size()>0) {
 					String par = parts.remove(0);
