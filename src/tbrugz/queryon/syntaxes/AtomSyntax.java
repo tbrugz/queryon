@@ -151,7 +151,8 @@ public class AtomSyntax extends XMLDataDump implements WebSyntax {
 		out("\t</"+rowElement+">\n",w);
 	}
 
-	public void dumpFooter(long count, Writer w) throws IOException {
+	@Override
+	public void dumpFooter(long count, boolean hasMoreRows, Writer w) throws IOException {
 		out(ATOM_SUFFIX, w);
 	}
 	

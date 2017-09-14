@@ -2212,6 +2212,7 @@ public class QueryOn extends HttpServlet {
 				hasNext = rs.next();
 			}
 		}
+		boolean hasMoreRows = false; //XXX: test if there are more rows... 
 		
 		if(count==0) {
 			// rfc2616-sec10.html : 10.2.5 204 No Content
@@ -2220,10 +2221,10 @@ public class QueryOn extends HttpServlet {
 			//resp.addIntHeader("X-ResultSet-Count", count);
 		}
 		if(ds.acceptsOutputStream()) {
-			ds.dumpFooter(count, resp.getOutputStream());
+			ds.dumpFooter(count, hasMoreRows, resp.getOutputStream());
 		}
 		else {
-			ds.dumpFooter(count, resp.getWriter());
+			ds.dumpFooter(count, hasMoreRows, resp.getWriter());
 		}
 	}
 	

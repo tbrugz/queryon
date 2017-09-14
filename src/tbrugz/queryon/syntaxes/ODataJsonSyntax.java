@@ -87,7 +87,7 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		if(!uniqueRow) {
 			out("\t"+"]",fos);
 		}
