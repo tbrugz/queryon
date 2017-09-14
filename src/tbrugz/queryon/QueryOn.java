@@ -1495,7 +1495,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void checkOptimisticLock(Relation relation, RequestSpec reqspec, Constraint pk, Connection conn) throws SQLException, IOException {
-		SQL sqlLock = SQL.createSQL(relation, reqspec);
+		SQL sqlLock = SQL.createSQL(relation, reqspec, null);
 		filterByKey(relation, reqspec, pk, sqlLock);
 		sqlLock.addCount();
 		PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());

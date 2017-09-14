@@ -161,9 +161,9 @@ public class SQL {
 		//return new SQL(createSQLstr(relation, reqspec), relation);
 	}
 
-	public static SQL createSQL(Relation relation, RequestSpec reqspec) {
+	/*public static SQL createSQL(Relation relation, RequestSpec reqspec) {
 		return createSQL(relation, reqspec, null);
-	}
+	}*/
 	
 	public static SQL createInsertSQL(Relation relation) {
 		String sql = "insert into "+
