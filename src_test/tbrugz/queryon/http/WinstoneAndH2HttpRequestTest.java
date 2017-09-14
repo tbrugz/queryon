@@ -112,7 +112,11 @@ public class WinstoneAndH2HttpRequestTest {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpGet);
-		return getContent(response1);
+		String content = getContent(response1);
+		if(response1.getStatusLine().getStatusCode()>=400) {
+			throw new RuntimeException(response1.getStatusLine().getStatusCode()+": "+content);
+		}
+		return content;
 	}
 	
 
@@ -830,6 +834,28 @@ public class WinstoneAndH2HttpRequestTest {
 				Assert.fail("all nodes should be elements");
 			}
 		}
+	}
+	
+	@Test
+	public void testGetAliasesOk() throws ClientProtocolException, IOException {
+		String content = getContentFromUrl(baseUrl+"/EMP.csv?aliases=C1,C2,C3,c4,c5");
+		String columns = content.substring(0, content.indexOf("\r\n")); //CSVDataDump.DELIM_RECORD_DEFAULT));
+		Assert.assertEquals("C1,C2,C3,c4,c5", columns);
+	}
+
+	/*@Test(expected=RuntimeException.class)
+	public void testGetAliasesCountError() throws ClientProtocolException, IOException {
+		getContentFromUrl(baseUrl+"/EMP.csv?aliases=C1,C2");
+	}*/
+	
+	@Test
+	public void testGetAliasesCountError() throws Exception {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+"/EMP.csv?aliases=C1,C2");
+		HttpResponse response = httpclient.execute(httpGet);
+		System.out.println("content: "+getContent(response));
+		Assert.assertEquals("Must be BadRequest", 400, response.getStatusLine().getStatusCode());
+		httpGet.releaseConnection();
 	}
 	
 	//--------------------------- QueryOnSchema Tests -------------------------------

@@ -39,13 +39,6 @@ import tbrugz.sqldump.util.Utils;
 /*
  * TODOne: Recspec: init new dumpsyntax if parameters are present
  * 
- * XXXdone: add ResponseSpec? special-headers-coinvention??
- *  x X-ResultSet-Limit <n>
- *  x X-Execute-ReturnCount <n>
- *  x X-Warning-Execute TooManyReturnParams ReturnCount=<n> -> X-Execute-ReturnCount
- *  x X-Warning-UnknownColumn <message>
- * http://stackoverflow.com/questions/3561381/custom-http-headers-naming-conventions
- * 
  * XXXxx do a select on the inserted/updated row (req.getParameter("doselect"))? maybe use st.getGeneratedKeys() instead...
  */
 public class RequestSpec {
@@ -88,6 +81,7 @@ public class RequestSpec {
 	public static final String PARAM_OFFSET = "offset";
 	public static final String PARAM_COUNT = "count";
 	public static final String PARAM_LO_STRATEGY = "lostrategy";
+	public static final String PARAM_FIELD_ALIASES = "aliases";
 	
 	// "blob" parameters
 	public static final String PARAM_VALUEFIELD = "valuefield";
@@ -127,6 +121,7 @@ public class RequestSpec {
 	final Integer minUpdates, maxUpdates;
 	
 	protected final List<String> columns = new ArrayList<String>();
+	protected final List<String> aliases = new ArrayList<String>();
 	protected final List<String> params = new ArrayList<String>();
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
@@ -371,6 +366,10 @@ public class RequestSpec {
 		if(fields!=null) {
 			//columns.addAll(Arrays.asList(fields.split(",")));
 			addAllWithTrim(columns, fields);
+		}
+		String aliasesParameter = getFieldAliases(req);
+		if(aliasesParameter!=null) {
+			addAllWithTrim(aliases, aliasesParameter);
 		}
 
 		String onColsPar = req.getParameter(PARAM_ONCOLS);
@@ -621,6 +620,10 @@ public class RequestSpec {
 	
 	protected String getFields(HttpServletRequest req) {
 		return req.getParameter(PARAM_FIELDS);
+	}
+	
+	protected String getFieldAliases(HttpServletRequest req) {
+		return req.getParameter(PARAM_FIELD_ALIASES);
 	}
 	
 	protected String getValueField(HttpServletRequest req) {

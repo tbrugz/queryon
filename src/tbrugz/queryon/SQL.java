@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -398,20 +399,21 @@ public class SQL {
 	private static String createSQLColumns(RequestSpec reqspec, Relation table) {
 		String columns = "*";
 		if(reqspec.columns.size()>0) {
-			Set<String> tabCols = new HashSet<String>(table.getColumnNames()); 
+			Set<String> tabCols = new HashSet<String>(table.getColumnNames());
+			checkAliases(reqspec, tabCols);
 			List<String> sqlCols = new ArrayList<String>(); 
 			for(String reqColumn: reqspec.columns) {
 				if(MiscUtils.containsIgnoreCase(tabCols, reqColumn)) {
 					sqlCols.add(reqColumn);
 				}
 				else {
-					String message = "column not found: "+reqColumn+" [table:"+table.getName()+"]";
+					String message = "column not found: '"+reqColumn+"' [table:"+table.getName()+"]";
 					log.warn(message);
 					throw new BadRequestException(message);
 				}
 			}
 			if(sqlCols.size()>0) {
-				columns = Utils.join(sqlCols, ", ", sqlIdDecorator);
+				columns = getColumnsStr(sqlCols, reqspec.aliases);
 			}
 			else {
 				log.warn("no valid column specified. defaulting to 'all'");
@@ -419,14 +421,38 @@ public class SQL {
 		}
 		else {
 			List<String> cols = table.getColumnNames();
+			checkAliases(reqspec, cols);
 			if(cols!=null) {
-				columns = Utils.join(cols, ", ", sqlIdDecorator);
+				columns = getColumnsStr(cols, reqspec.aliases);
 			}
 		}
 		if(reqspec.distinct) {
 			columns = "distinct "+columns;
 		}
 		return columns;
+	}
+	
+	static void checkAliases(RequestSpec reqspec, Collection<String> cols) {
+		int asize = reqspec.aliases.size();
+		int csize = cols!=null?cols.size():0;
+		if(asize>0 && asize!=csize) {
+			throw new BadRequestException("Field count [#"+csize+"] != aliases count [#"+asize+"]");
+		}
+	}
+	
+	static String getColumnsStr(List<String> cols, List<String> aliases) {
+		if(aliases==null || aliases.size()==0) {
+			return Utils.join(cols, ", ", sqlIdDecorator);
+		}
+		StringBuilder buffer = new StringBuilder();
+		for(int i=0;i<cols.size();i++) {
+			if(i>0) {
+				buffer.append(", ");
+			}
+			buffer.append(sqlIdDecorator.get(cols.get(i))).append(" as ").append(sqlIdDecorator.get(aliases.get(i)));
+		}
+		
+		return buffer.toString();
 	}
 	
 	@Override
