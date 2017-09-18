@@ -1,6 +1,7 @@
 
 sql ansi
 --------
+```
 create table qon_queries (
 	schema_name varchar(100),
 	name varchar(100) not null,
@@ -14,6 +15,7 @@ create table qon_queries (
 	created_by varchar(200),
 	updated_at timestamp,
 	updated_by varchar(200),
+	version_seq integer,
 	constraint qon_queries_pk primary key (name)
 	--constraint qon_queries_pk primary key (schema,name)
 )
@@ -65,68 +67,19 @@ create table qon_pages (
 	created_by varchar(200),
 	updated_at timestamp,
 	updated_by varchar(200),
+	version_seq integer,
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
 )
+```
 
 
 oracle
 ------
-create table qon_queries (
-	schema varchar2(100),
-	name varchar2(100) not null,
-	remarks varchar2(400),
-	query clob,
-	roles_filter varchar2(1000),
-	constraint qon_queries_pk primary key (name)
-)
-
-create table qon_tables (
-	schema varchar2(100),
-	name varchar2(100) not null,
-	column_names varchar2(400),
-	pk_column_names varchar2(400),
-	remarks varchar2(400),
-	column_remarks varchar2(4000),
-	roles_select varchar2(1000),
-	roles_insert varchar2(1000),
-	roles_update varchar2(1000),
-	roles_delete varchar2(1000),
-	roles_insert_columns varchar2(1000),
-	roles_update_columns varchar2(1000),
-	constraint qon_tables_pk primary key (name)
-)
-
-create table qon_execs (
-	schema_name varchar2(100),
-	name varchar2(100) not null,
-	remarks varchar2(400),
-	roles_filter varchar2(1000),
-	exec_type varchar2(100),
-	package_name varchar2(100),
-	body clob,
-	parameter_count integer,
-	parameter_names varchar2(1000),
-	parameter_types varchar2(1000),
-	parameter_inouts varchar2(1000),
-	constraint qon_execs_pk primary key (name)
-)
-
-create table qon_pages (
-	id integer,
-	path varchar2(400),
-	remarks varchar2(400),
-	mime varchar2(100),
-	body clob,
-	binary_data blob,
-	roles_filter varchar2(1000),
-	has_body char(1),
-	constraint qon_pages_pk primary key (id),
-	constraint qon_pages_path_uk unique (path)
-)
 
 (see: http://stackoverflow.com/questions/11296361/how-to-create-id-with-auto-increment-on-oracle)
 
+```
 create sequence qon_pages_seq;
 
 create or replace trigger qon_pages_trg_ins
@@ -146,4 +99,4 @@ begin
      :new.has_body := 't';
   end if;
 end;
-
+```

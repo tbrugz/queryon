@@ -12,3 +12,5 @@ demo-dbn/scripts/credentials.properties
 demo-dbn/src/main/resources/credentials.properties
 demo-dbn/classicmodels/*
 web/swagger-ui/*
+demo-minimal/.settings/*
+demo-dbn/.settings/*

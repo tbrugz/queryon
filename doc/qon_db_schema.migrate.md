@@ -1,4 +1,14 @@
 
+2017-09 - qon_queries/pages: add version_seq
+-------------------
+
+alter table qon_queries
+	add column version_seq integer;
+	
+alter table qon_pages
+	add column version_seq integer;
+	
+
 2017-01 - qon_queries & qon_pages
 ---------------------------------
 

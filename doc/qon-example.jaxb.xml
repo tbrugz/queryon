@@ -350,6 +350,14 @@
             <type>PK</type>
             <uniqueColumns>NAME</uniqueColumns>
         </constraints>
+        <grants>
+            <grantee>dev</grantee>
+            <privilege>UPDATE</privilege>
+        </grants>
+        <grants>
+            <grantee>dev</grantee>
+            <privilege>DELETE</privilege>
+        </grants>
         <remarks>QueryOn Queries - DO NOT EDIT BY HAND</remarks>
         <type>TABLE</type>
     </table>
