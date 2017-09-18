@@ -80,14 +80,23 @@ function addFilterDialog(selectedCol) {
 	updateUI();
 }
 
+function filterGetColumnTypes() {
+	var cols = getColumnTypesFromColgroup('content');
+	if(!cols) {
+		cols = getColumnsTypesFromHash();
+	}
+	return cols;
+}
+
 function refreshAutocomplete() {
 	if(bhvalues==null) { return; }
 	var sel = document.getElementById('fin-column');
 	var columnName = sel.options[sel.selectedIndex].value;
 	var input = document.getElementById('fin-value');
-	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
+	var colType = filterGetColumnTypes()[sel.selectedIndex];
+	if(colType) { colType = colType.toUpperCase(); }
 
-	console.log('autocomplete: col='+columnName+' ; type= ['+colType+']');
+	console.log('autocomplete: col=',columnName,' ; type= [',colType,']');
 
 	var inputType = 'text';
 	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
@@ -141,7 +150,7 @@ function addFilterIn() {
 	var col = sel.value;
 	var operator = document.getElementById('fil-operator').value;
 	var value = document.getElementById('fin-value').value;
-	var colType = getColumnsTypesFromHash()[sel.selectedIndex];
+	var colType = filterGetColumnTypes()[sel.selectedIndex];
 
 	addFilterWithValues(col, operator, value, colType);
 }
