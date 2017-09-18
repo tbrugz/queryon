@@ -234,7 +234,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			}
 		}
 	}
-	*/
+	
 	protected void appendStyleNumericAlignRight(StringBuilder sb) {
 		List<String> styleSelector = new ArrayList<String>();
 		for(int i=0;i<finalColNames.size();i++) {
@@ -247,6 +247,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			sb.append("\n\t<style>\n\t\t").append(Utils.join(styleSelector, ", ")).append(" { text-align: right; }\n\t</style>");
 		}
 	}
+	*/
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
