@@ -60,7 +60,7 @@ public class SchemaModelUtils {
 		if(objectParts.length==2) {
 			relation = (Table) DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, objectParts[0], objectParts[1]);
 		}
-		else {
+		else if(objectParts.length==1) {
 			relation = (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, objectParts[0]);
 		}
 		
@@ -80,7 +80,7 @@ public class SchemaModelUtils {
 		if(objectParts.length==2) {
 			view = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getViews(), DBObjectType.VIEW, objectParts[0], objectParts[1]);
 		}
-		else {
+		else if(objectParts.length==1) {
 			view = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, objectParts[0]);
 		}
 		
