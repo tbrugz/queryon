@@ -7,6 +7,8 @@ var defaultNullObjectOption = '<option value="" selected disabled>select object<
 
 var utf8par = "utf8=✓";
 
+var messagesId = "messages";
+
 function init(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
@@ -26,6 +28,9 @@ function init(url, containerId, callback, modelId) {
 				console.log('Error loading relations', data);
 			}
 			callback(containerId, rels);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			showErrorMessages(messagesId, jqXHR.responseText);
 		}
 	});
 }
@@ -151,6 +156,8 @@ function doRun(selectId, containerId, messagesId, callback) {
 			addSortHrefs(containerId, order);
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 			if(callback) { callback(request); }
+			//var doneTimeMilis = Date.now();
+			//console.log('doRun: times: ', startTimeMilis, completedTimeMilis, doneTimeMilis);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');

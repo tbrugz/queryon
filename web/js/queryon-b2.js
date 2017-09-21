@@ -76,6 +76,7 @@ function updateSelectedQueryStateParameters() {
 		var parts = bigParts[0].split('/');
 		var select = document.getElementById('objects');
 		var found = false;
+		//console.log("bigParts", bigParts, "parts", parts);
 		var relname = parts.splice(0, 1);
 		for(var i = 0;i<select.length;i++) {
 			if(select.options[i].value==relname) {
