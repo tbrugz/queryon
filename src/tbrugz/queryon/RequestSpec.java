@@ -258,7 +258,7 @@ public class RequestSpec {
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
 		if(!URIpartz.isEmpty() && "".equals(URIpartz.get(0))) { URIpartz.remove(0); }
 		
-		log.info("urlparts: "+URIpartz+" [#"+URIpartz.size()+"][minparts="+minUrlParts+"]");
+		//log.info("urlparts: "+URIpartz+" [#"+URIpartz.size()+"][minparts="+minUrlParts+"]");
 		if(URIpartz.size()<minUrlParts) {
 			throw new BadRequestException("URL must have at least "+minUrlParts+" part"+(minUrlParts>1?"s":""));
 		}
@@ -367,6 +367,7 @@ public class RequestSpec {
 			//columns.addAll(Arrays.asList(fields.split(",")));
 			addAllWithTrim(columns, fields);
 		}
+		
 		String aliasesParameter = getFieldAliases(req);
 		if(aliasesParameter!=null) {
 			addAllWithTrim(aliases, aliasesParameter);
@@ -396,7 +397,7 @@ public class RequestSpec {
 		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
 		else { pivotflags = DEFAULT_PIVOTFLAGS; }
 		
-		distinct = req.getParameter(PARAM_DISTINCT)!=null;
+		distinct = isDistinct(req);
 		count = isCountRequest(req);
 		headerParamEncoding = req.getHeader(HEADER_PARAM_ENCODING);
 
@@ -631,7 +632,11 @@ public class RequestSpec {
 	}
 	
 	protected boolean isCountRequest(HttpServletRequest req) {
-		return req.getParameter(PARAM_COUNT)!=null;
+		return getBoolValue(req.getParameter(PARAM_COUNT));
+	}
+	
+	protected boolean isDistinct(HttpServletRequest req) {
+		return getBoolValue(req.getParameter(PARAM_DISTINCT));
 	}
 	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
@@ -843,6 +848,10 @@ public class RequestSpec {
 		for(String v: varr) {
 			list.add(v.trim());
 		}
+	}
+	
+	public static boolean getBoolValue(String s) {
+		return s!=null && (s.equalsIgnoreCase("t") || s.equals("true") || s.equals("TRUE") || s.equals("1"));
 	}
 
 }
