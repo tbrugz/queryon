@@ -296,7 +296,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 
 		// parameter: fields
 		// http://stackoverflow.com/questions/36888626/defining-enum-for-array-in-swagger-2-0
-		{
+		if(colNames.size()>0) {
 			Map<String, Object> pFields = new LinkedHashMap<String, Object>();
 			pFields.put("name", "fields");
 			pFields.put("in", "query");
@@ -324,7 +324,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 
 		// parameter: order
-		{
+		if(colNames.size()>0) {
 			Map<String, Object> pOrder = new LinkedHashMap<String, Object>();
 			pOrder.put("name", "order");
 			pOrder.put("in", "query");
