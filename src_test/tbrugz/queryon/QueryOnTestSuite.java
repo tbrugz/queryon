@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import tbrugz.queryon.http.ODataWebTest;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.queryon.r2rml.DirectMappingTest;
 import tbrugz.queryon.resultset.ResultSetDecoratorsTest;
@@ -20,6 +21,7 @@ import tbrugz.queryon.util.StringUtilsTest;
 	SqlCommandTest.class,
 	StringUtilsTest.class,
 	WinstoneAndH2HttpRequestTest.class,
+	ODataWebTest.class,
 })
 public class QueryOnTestSuite {
 
