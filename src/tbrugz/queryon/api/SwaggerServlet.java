@@ -290,6 +290,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		 * or both and the parameter MUST be in "formData".
 		 */
 		List<String> colNames = t.getColumnNames();
+		if(colNames==null) { colNames = new ArrayList<String>(); }
 		//List<String> colRemarks = t.getColumnRemarks();
 		List<String> colTypes = t.getColumnTypes();
 
