@@ -55,13 +55,16 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	private static final Log log = LogFactory.getLog(SwaggerServlet.class);
 	
 	static final String MIME_TYPE_JSON = "application/json";
+
+	static final String DEFAULT_SYNTAX = "json";
 	
 	static final String PARAM_FILTERS = "filters";
 	static final String PARAM_FILTERS_EXCEPT = "filters-except"; //XXX: add 'filters-except'
 	
 	boolean useCanonicalHost = false; //XXX: hostname: add property
 	
-	List<String> syntaxes;
+	Set<String> syntaxes;
+	String defaultSyntax;
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -116,10 +119,16 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		//produces: A list of MIME types the APIs can produce - dumpsyntaxes
 		Map<String, DumpSyntax> dss = dsutils.getSyntaxesByFormat();
 		Set<String> produces = new TreeSet<String>();
-		syntaxes = new ArrayList<String>();
+		syntaxes = new TreeSet<String>();
 		for(Entry<String, DumpSyntax> e: dss.entrySet()) {
 			produces.add(e.getValue().getMimeType());
 			syntaxes.add(e.getValue().getSyntaxId());
+		}
+		if(!syntaxes.contains(DEFAULT_SYNTAX)) {
+			log.warn("default syntax '"+DEFAULT_SYNTAX+"' not present");
+		}
+		else {
+			defaultSyntax = DEFAULT_SYNTAX;
 		}
 		swagger.put("produces", produces);
 		
@@ -260,6 +269,10 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			pSyntax.put("type", "string");
 			//http://stackoverflow.com/questions/27603871/how-to-define-enum-in-swagger-io
 			pSyntax.put("enum", syntaxes);
+			//if(syntaxes.contains(DEFAULT_SYNTAX)) {
+			if(defaultSyntax!=null) {
+				pSyntax.put("default", defaultSyntax);
+			}
 			pSyntax.put("required", true);
 			parameters.add(pSyntax);
 		}
