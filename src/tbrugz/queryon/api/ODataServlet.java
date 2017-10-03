@@ -2,6 +2,7 @@ package tbrugz.queryon.api;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -18,21 +19,37 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
+import org.w3c.dom.DOMConfiguration;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
 public class ODataServlet extends QueryOn {
@@ -67,6 +84,8 @@ public class ODataServlet extends QueryOn {
 	
 	static final String DEFAULT_ODATA_CONTEXT = "odata";
 	static final String ODATA_VERSION = "4.0";
+	
+	static final String odataNS = "OData.QueryOn";
 	
 	//static String baseQonUrl = "/q";
 	//static String baseODataUrl = "/odata";
@@ -134,10 +153,23 @@ public class ODataServlet extends QueryOn {
 			return;
 		}
 		
-		if("$metadata".equals(req.getPathInfo())) {
-			//XXX: generate XML metadata
+		if("/$metadata".equals(req.getPathInfo())) {
 			// http://services.odata.org/V4/(S(frp3ql3rlcjpvorgy0422buq))/TripPinServiceRW/$metadata#Photos
 			// EnumType, ComplexType, *EntityType, *Function, ?Action, EntityContainer(EntitySet, FunctionImport, ActionImport, Annotation), Annotations
+			try {
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+				DOMImplementation domImpl = docBuilder.getDOMImplementation();
+				
+				Document doc = makeMetadata(domImpl, req);
+				serialize(domImpl, doc, resp.getWriter());
+				
+				return;
+			}
+			catch(Exception e) {
+				log.warn("Error making $metadata", e);
+				throw new InternalServerException("Error making $metadata", e);
+			}
 		}
 
 		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
@@ -220,5 +252,128 @@ public class ODataServlet extends QueryOn {
 		}
 		return super.statusObject(name);
 	}*/
+	
+	/*
+	 * see: https://stackoverflow.com/a/528512/616413
+	 */
+	Document makeMetadata(DOMImplementation domImpl, HttpServletRequest req) throws ParserConfigurationException {
+		Document doc = domImpl.createDocument("http://docs.oasis-open.org/odata/ns/edmx", "edmx:Edmx", null);
+		doc.getDocumentElement().setAttribute("Version", "4.0");
+
+		//Document doc = docBuilder.newDocument();
+		//Element rootElement = doc.createElement("Edmx");
+		
+		Element dataServices = doc.createElement("edmx:DataServices");
+		Element schema = doc.createElementNS("http://docs.oasis-open.org/odata/ns/edm", "Schema");
+		schema.setAttribute("Namespace", odataNS);
+		dataServices.appendChild(schema);
+		
+		String modelId = SchemaModelUtils.getModelId(req);
+		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
+		//Set<String> schemaNames = new LinkedHashSet<String>();
+		//Set<String> relationNames = new LinkedHashSet<String>();
+
+		Element entityContainer = doc.createElement("EntityContainer");
+		entityContainer.setAttribute("Name", "Container");
+		
+		Set<Table> ts = model.getTables();
+		for(Table t: ts) {
+			Element entity = createEntityType(doc, t);
+			schema.appendChild(entity);
+			Element entitySet = createEntitySet(doc, t);
+			entityContainer.appendChild(entitySet);
+			//schemaNames.add(t.getSchemaName());
+			//relationNames.add(t.getQualifiedName());
+		}
+		Set<View> vs = model.getViews();
+		for(View v: vs) {
+			Element entity = createEntityType(doc, v);
+			schema.appendChild(entity);
+			//schemaNames.add(v.getSchemaName());
+			//relationNames.add(v.getQualifiedName());
+		}
+		//XXX add actions, functions
+		
+		schema.appendChild(entityContainer);
+		/*for(String s: schemaNames) {
+			Element entityContainer = doc.createElement("EntityContainer");
+		}*/
+		
+		doc.getDocumentElement().appendChild(dataServices);
+		return doc;
+	}
+	
+	Element createEntityType(Document doc, Relation r) {
+		Element entity = doc.createElement("EntityType");
+		entity.setAttribute("Name", r.getQualifiedName());
+		Constraint pk = SchemaModelUtils.getPK(r);
+		if(pk!=null) {
+			Element key = doc.createElement("Key");
+			for(String col: pk.getUniqueColumns()) {
+				Element propRef = doc.createElement("PropertyRef");
+				propRef.setAttribute("Name", col);
+				key.appendChild(propRef);
+			}
+			entity.appendChild(key);
+		}
+		for(int i=0;i<r.getColumnCount();i++) {
+			Element prop = doc.createElement("Property");
+			prop.setAttribute("Name", r.getColumnNames().get(i));
+			prop.setAttribute("Type", getPropertyType(r.getColumnTypes().get(i)) );
+			entity.appendChild(prop);
+		}
+		return entity;
+	}
+	
+	Element createEntitySet(Document doc, Relation r) {
+		Element entitySet = doc.createElement("EntitySet");
+		entitySet.setAttribute("Name", r.getQualifiedName());
+		entitySet.setAttribute("EntityType", odataNS+"."+r.getQualifiedName());
+		return entitySet;
+	}
+	
+	/*
+	 * see: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_The_edm:Documentation_Element
+	 */
+	String getPropertyType(String ctype) {
+		if(ctype==null) { return "Edm.String"; }
+		String upper = ctype.toUpperCase();
+		
+		boolean isInt = DBUtil.INT_COL_TYPES_LIST.contains(upper);
+		if(isInt) {
+			return "Edm.Int32";
+		}
+		boolean isFloat = DBUtil.FLOAT_COL_TYPES_LIST.contains(upper);
+		if(isFloat) {
+			return "Edm.Double";
+		}
+		boolean isDate = DBUtil.DATE_COL_TYPES_LIST.contains(upper);
+		if(isDate) {
+			return "Edm.Date";
+		}
+		boolean isBoolean = DBUtil.BOOLEAN_COL_TYPES_LIST.contains(upper);
+		if(isBoolean) {
+			return "Edm.Boolean";
+		}
+		boolean isBlob = DBUtil.BLOB_COL_TYPES_LIST.contains(upper);
+		if(isBlob) {
+			return "Edm.Binary";
+		}
+		
+		return "Edm.String";
+	}
+
+	/*
+	 * see: http://www.chipkillmar.net/2009/03/25/pretty-print-xml-from-a-dom/
+	 */
+	void serialize(DOMImplementation domImpl, Document document, Writer w) {
+		DOMImplementationLS ls = (DOMImplementationLS) domImpl;
+		LSSerializer lss = ls.createLSSerializer();
+		DOMConfiguration domConfig = lss.getDomConfig();
+		domConfig.setParameter("format-pretty-print", Boolean.TRUE);
+		LSOutput lso = ls.createLSOutput();
+		lso.setCharacterStream(w);
+		lss.write(document, lso);
+	}
 
 }
