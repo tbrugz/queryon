@@ -22,6 +22,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
+import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -50,8 +51,8 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	
 	public static final String ACTION_DUMP_DEBUG = "debugDumpModel";
 	
-	public static final String MIME_XML = "application/xml";
-	public static final String MIME_JSON = "application/json";
+	public static final String MIME_XML = ResponseSpec.MIME_TYPE_XML;
+	public static final String MIME_JSON = ResponseSpec.MIME_TYPE_JSON;
 	public static final String MIME_SQL = "text/plain"; // "application/sql"?; - browsers may "download"
 	public static final String MIME_PATCH = "text/plain"; // http://stackoverflow.com/questions/5160944/proper-mime-type-for-patch-files
 	

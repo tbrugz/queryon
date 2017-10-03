@@ -36,6 +36,7 @@ import org.w3c.dom.ls.LSSerializer;
 
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
@@ -162,6 +163,7 @@ public class ODataServlet extends QueryOn {
 				DOMImplementation domImpl = docBuilder.getDOMImplementation();
 				
 				Document doc = makeMetadata(domImpl, req);
+				resp.setContentType(ResponseSpec.MIME_TYPE_XML);
 				serialize(domImpl, doc, resp.getWriter());
 				
 				return;

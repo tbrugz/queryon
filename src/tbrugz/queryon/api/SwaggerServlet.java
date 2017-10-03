@@ -23,6 +23,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -54,8 +55,6 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(SwaggerServlet.class);
 	
-	static final String MIME_TYPE_JSON = "application/json";
-
 	static final String DEFAULT_SYNTAX = "json";
 	
 	static final String PARAM_FILTERS = "filters";
@@ -208,7 +207,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		// http://swagger.io/specification/#securityRequirementObject
 		// type: "basic", "apiKey" or "oauth2"
 		
-		resp.setContentType(MIME_TYPE_JSON);
+		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
 		//resp.setCharacterEncoding(QueryOn.UTF8);
 		
 		resp.getWriter().write( gson.toJson(swagger) );
