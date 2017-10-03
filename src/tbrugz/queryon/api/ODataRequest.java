@@ -121,7 +121,7 @@ public class ODataRequest extends RequestSpec {
 				params.add(keyValues.get(uniqueKeyKey));
 			}
 			else {
-				//FIXME: correct key order!
+				//FIXedME: correct key order: will be corrected by ODataServlet.preprocessParameters()
 				for(Map.Entry<String, String> e: keyValues.entrySet()) {
 					params.add(e.getValue());
 				}
@@ -182,6 +182,10 @@ public class ODataRequest extends RequestSpec {
 				}
 				else {
 					value = key.substring(idx+1);
+				}
+				
+				if(value.charAt(0)=='\'' && value.charAt(value.length()-1)=='\'') {
+					value = value.substring(1, value.length()-1);
 				}
 				begin = idxComma+1;
 				ret.put(field, value);
