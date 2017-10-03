@@ -73,6 +73,8 @@ public class WinstoneAndH2HttpRequestTest {
 	static String workDir = "work/test/";
 	static String utf8 = "UTF-8";
 	
+	static int relationsInModel = 3;
+	
 	@BeforeClass
 	public static void setup() throws Exception {
 		//TestSetup.setupWinstone();
@@ -170,7 +172,7 @@ public class WinstoneAndH2HttpRequestTest {
 			InputStream instream = entity1.getContent();
 			Document doc = dBuilder.parse(instream);
 			NodeList nl = doc.getElementsByTagName("tr");
-			Assert.assertEquals("Should be 3 rows (2 data rows (db tables) + 1 header)", 3, nl.getLength());
+			Assert.assertEquals("Should be 4 rows (3 data rows (db tables) + 1 header)", relationsInModel+1, nl.getLength());
 			/*for (int i = 0; i < nl.getLength(); i++) {
 				Node nNode = nl.item(i);
 				Element eElement = (Element) nNode;
@@ -339,7 +341,7 @@ public class WinstoneAndH2HttpRequestTest {
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
 		NodeList nl = doc.getElementsByTagName("row");
-		Assert.assertEquals("Should have 2 (data) rows", 2, nl.getLength());
+		Assert.assertEquals("Should have "+relationsInModel+" (data) rows", relationsInModel, nl.getLength());
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
@@ -362,7 +364,7 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
 
 		JSONArray jarr = (JSONArray) obj;
-		Assert.assertEquals("Should have 2 (data) rows", 2, jarr.size());
+		Assert.assertEquals("Should have "+relationsInModel+" (data) rows", relationsInModel, jarr.size());
 		
 		httpGet.releaseConnection();
 	}
@@ -417,9 +419,11 @@ public class WinstoneAndH2HttpRequestTest {
 		record = it.next();
 		value = record.get(1);
 		System.out.println("2nd record (1st col = '"+value+"'): "+record);
-		Assert.assertEquals("2st record' 1st col must be DEPT", "EMP", value);
+		Assert.assertEquals("2st record' 1st col must be EMP", "EMP", value);
 		
-		Assert.assertFalse("Must not have have 3rd element", it.hasNext());
+		Assert.assertTrue("Must have 3rd element", it.hasNext());
+		it.next();
+		Assert.assertFalse("Must not have 4th element", it.hasNext());
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
@@ -682,7 +686,7 @@ public class WinstoneAndH2HttpRequestTest {
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
 		NodeList nl = doc.getElementsByTagName("table");
-		Assert.assertEquals(2, countNodesWithParentTagName(nl, "schemaModel"));
+		Assert.assertEquals(relationsInModel, countNodesWithParentTagName(nl, "schemaModel"));
 	}
 
 	@Test @Ignore

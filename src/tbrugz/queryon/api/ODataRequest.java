@@ -3,7 +3,10 @@ package tbrugz.queryon.api;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +35,7 @@ public class ODataRequest extends RequestSpec {
 	static final String ALIAS_VALUE = "value";
 	static final String VALUEFIELD_COUNT = "count";
 	
-	protected String keyValue = null;
+	protected Map<String, String> keyValues = null;
 	protected String valueField = null;
 	protected boolean isCountRequest = false;
 
@@ -97,22 +100,29 @@ public class ODataRequest extends RequestSpec {
 			if(idx1>=0) {
 				int idx2 = objectTmp.indexOf(")");
 				String key = objectTmp.substring(idx1+1, idx2);
-				if(key.charAt(0)=='\'' && key.charAt(key.length()-1)=='\'') {
-					key = key.substring(1, key.length()-1);
-				}
 				objectTmp = objectTmp.substring(0, idx1);
-				//XXX: allow compoundKey
-				keyValue = key;
-				log.info("object: ["+objectTmp+"] key: ["+keyValue+"]");
+				keyValues = parseKey(key);
+				//log.info("object: ["+objectTmp+"] key: "+keyValues);
 			}
 		}
 		return objectTmp;
 	}
 	
+	static final String uniqueKeyKey = "unique";
+	
 	@Override
 	protected void processParams(List<String> parts) {
-		if(keyValue!=null) {
-			params.add(keyValue);
+		if(keyValues!=null) {
+			if(keyValues.size()==1) {
+				params.add(keyValues.get(uniqueKeyKey));
+			}
+			else {
+				//FIXME: correct key order!
+				for(Map.Entry<String, String> e: keyValues.entrySet()) {
+					params.add(e.getValue());
+				}
+			}
+			//params.addAll(keyValues);
 		}
 			
 		if(parts.size()>0) {
@@ -136,6 +146,46 @@ public class ODataRequest extends RequestSpec {
 				}
 			}
 		}
+	}
+	
+	static final Pattern integerPattern = Pattern.compile("\\d+");
+	
+	Map<String, String> parseKey(String key) {
+		//log.info("key:: "+key+" int-ptrn: "+integerPattern);
+		Map<String, String> ret = new TreeMap<String, String>();
+		if(key.charAt(0)=='\'' && key.charAt(key.length()-1)=='\'') {
+			key = key.substring(1, key.length()-1);
+			ret.put(uniqueKeyKey, key);
+		}
+		else if(integerPattern.matcher(key).matches()) {
+			ret.put(uniqueKeyKey, key);
+		}
+		else {
+			int begin = 0;
+			int idxComma = 0;
+			do {
+				int idx = key.indexOf("=", begin);
+				idxComma = key.indexOf(",", begin);
+				//int idx2 = key.indexOf(",");
+				String field = null;
+				String value = null;
+				//log.info("key: "+key+" ; idx="+idx+" ; idxComma="+idxComma);
+				if(idx>0) {
+					field = key.substring(begin, idx);
+				}
+				if(idxComma>0) {
+					value = key.substring(idx+1, idxComma);
+				}
+				else {
+					value = key.substring(idx+1);
+				}
+				begin = idxComma+1;
+				ret.put(field, value);
+			}
+			while(idxComma>0);
+		}
+		//log.info("key: "+key+" ; ret: "+ret);
+		return ret;
 	}
 	
 	@Override

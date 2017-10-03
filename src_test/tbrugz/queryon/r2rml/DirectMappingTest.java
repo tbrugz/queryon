@@ -111,7 +111,7 @@ public class DirectMappingTest {
 		System.out.println("count: "+countingHandler.getCount());
 		//System.out.println("report:\n"+reportHandler.printReport());
 		
-		Assert.assertEquals("Should have 22 triples (2 rows x 11 properties)", 22, countingHandler.getCount());
+		Assert.assertEquals("Should have 32 triples (3 rows x 11 properties -1)", 32, countingHandler.getCount());
 		
 		httpGet.releaseConnection();
 	}

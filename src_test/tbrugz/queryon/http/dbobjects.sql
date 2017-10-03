@@ -18,6 +18,15 @@ create table EMP ( -- type=TABLE
 	constraint EMP_PK primary key (ID)
 );
 
+drop table if exists PAIR;
+
+create table PAIR ( -- type=TABLE
+	ID1 INTEGER(10) not null,
+	ID2 INTEGER(10) not null,
+	REMARKS VARCHAR,
+	constraint PAIR_PK primary key (ID1, ID2)
+);
+
 --alter table EMP drop constraint EMP_DEPT_FK;
 alter table EMP
 	add constraint EMP_DEPT_FK foreign key (DEPARTMENT_ID)
