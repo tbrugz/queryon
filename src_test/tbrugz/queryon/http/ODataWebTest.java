@@ -163,5 +163,28 @@ public class ODataWebTest {
 		prop = jobj.get("REMARKS");
 		Assert.assertEquals("some text", prop);
 	}
+
+	@Test
+	public void getPairByKeyAnotherOrder() throws IOException, ParserConfigurationException, SAXException {
+		String url = odataUrl+"/PUBLIC.PAIR(ID2=3,ID1=1)";
+		
+		String jsonStr = getContentFromUrl(url);
+		System.out.println("content:\n"+jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		
+		obj = jobj.get("@odata.context");
+		Assert.assertTrue(obj.toString().endsWith("/$metadata#PUBLIC.PAIR"));
+		
+		Object prop = jobj.get("ID1");
+		Assert.assertEquals(1L, prop);
+		prop = jobj.get("ID2");
+		Assert.assertEquals(3L, prop);
+		prop = jobj.get("REMARKS");
+		Assert.assertEquals("some text", prop);
+	}
 	
 }

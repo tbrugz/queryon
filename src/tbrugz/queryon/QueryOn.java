@@ -1032,6 +1032,7 @@ public class QueryOn extends HttpServlet {
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
+		preprocessParameters(reqspec, pk);
 		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
 		PreparedStatement st = conn.prepareStatement(finalSql);
@@ -1090,6 +1091,8 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	protected void preprocessParameters(RequestSpec reqspec, Constraint pk) {}
+
 	void doSql(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		if(relation.getName()==null) {
 			throw new BadRequestException("sql: relation name must not be null");
@@ -1496,6 +1499,7 @@ public class QueryOn extends HttpServlet {
 	
 	void checkOptimisticLock(Relation relation, RequestSpec reqspec, Constraint pk, Connection conn) throws SQLException, IOException {
 		SQL sqlLock = SQL.createSQL(relation, reqspec, null);
+		preprocessParameters(reqspec, pk);
 		filterByKey(relation, reqspec, pk, sqlLock);
 		sqlLock.addCount();
 		PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
@@ -1530,6 +1534,7 @@ public class QueryOn extends HttpServlet {
 		SQL sql = SQL.createDeleteSQL(relation);
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
+		preprocessParameters(reqspec, pk);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
@@ -1668,6 +1673,7 @@ public class QueryOn extends HttpServlet {
 		sql.applyUpdate(sb.toString());
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
+		preprocessParameters(reqspec, pk);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters

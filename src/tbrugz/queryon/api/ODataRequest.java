@@ -2,10 +2,10 @@ package tbrugz.queryon.api;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -35,9 +35,9 @@ public class ODataRequest extends RequestSpec {
 	static final String ALIAS_VALUE = "value";
 	static final String VALUEFIELD_COUNT = "count";
 	
-	protected Map<String, String> keyValues = null;
-	protected String valueField = null;
-	protected boolean isCountRequest = false;
+	protected Map<String, String> keyValues;
+	protected String valueField;
+	protected boolean isCountRequest;
 
 	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -92,6 +92,7 @@ public class ODataRequest extends RequestSpec {
 
 	@Override
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
+		keyValues = null;
 		if(parts.size()==0) { return null; }
 		String objectTmp = parts.remove(0);
 		
@@ -112,6 +113,9 @@ public class ODataRequest extends RequestSpec {
 	
 	@Override
 	protected void processParams(List<String> parts) {
+		valueField = null;
+		isCountRequest = false;
+		
 		if(keyValues!=null) {
 			if(keyValues.size()==1) {
 				params.add(keyValues.get(uniqueKeyKey));
@@ -152,7 +156,7 @@ public class ODataRequest extends RequestSpec {
 	
 	Map<String, String> parseKey(String key) {
 		//log.info("key:: "+key+" int-ptrn: "+integerPattern);
-		Map<String, String> ret = new TreeMap<String, String>();
+		Map<String, String> ret = new LinkedHashMap<String, String>();
 		if(key.charAt(0)=='\'' && key.charAt(key.length()-1)=='\'') {
 			key = key.substring(1, key.length()-1);
 			ret.put(uniqueKeyKey, key);

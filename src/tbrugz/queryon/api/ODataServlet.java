@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -192,6 +193,24 @@ public class ODataServlet extends QueryOn {
 			ret.add(new Entity(o.getSchemaName(), o.getName(), kind));
 		}
 		return ret;
+	}
+	
+	@Override
+	protected void preprocessParameters(RequestSpec reqspec, Constraint pk) {
+		if(! (reqspec instanceof ODataRequest)) { return; }
+		ODataRequest req = (ODataRequest) reqspec;
+		Map<String, String> keymap = req.keyValues;
+		//log.debug("req: "+req+" keymap: "+keymap);
+		if(keymap == null || keymap.size()==1) { return; }
+		
+		List<String> origPar = new ArrayList<String>();
+		origPar.addAll(req.getParams());
+		req.getParams().clear();
+		for(String col: pk.getUniqueColumns()) {
+			String v = keymap.get(col);
+			//log.debug("c: "+col+" ; v: "+v);
+			req.getParams().add(v);
+		}
 	}
 	
 	/*@Override
