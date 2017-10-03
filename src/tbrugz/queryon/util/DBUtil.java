@@ -46,6 +46,9 @@ public class DBUtil {
 	
 	public static final String[] DATE_COL_TYPES = { "TIMESTAMP", "DATE" };
 	public static final List<String> DATE_COL_TYPES_LIST = Arrays.asList(DATE_COL_TYPES);
+
+	public static final String[] BOOLEAN_COL_TYPES = { "BOOLEAN", "BOOL" }; // BIT ?
+	public static final List<String> BOOLEAN_COL_TYPES_LIST = Arrays.asList(BOOLEAN_COL_TYPES);
 	
 	static {
 		TimeZone tz = TimeZone.getTimeZone("UTC");

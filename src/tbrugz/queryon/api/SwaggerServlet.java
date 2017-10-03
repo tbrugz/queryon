@@ -642,11 +642,14 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		if(isFloat) {
 			return "number";
 		}
+		boolean isBoolean = DBUtil.BOOLEAN_COL_TYPES_LIST.contains(upper);
+		if(isBoolean) {
+			return "boolean";
+		}
 		boolean isBlob = DBUtil.BLOB_COL_TYPES_LIST.contains(upper);
 		if(isBlob) {
 			return "file";
 		}
-		//XXX: boolean col types...
 		return "string";
 	}
 
