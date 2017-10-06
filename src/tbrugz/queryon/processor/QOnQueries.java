@@ -33,11 +33,13 @@ import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.SQLQueries;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.Utils;
 
@@ -70,6 +72,7 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 	
 	boolean metadataAllowQueryExec = false;
 	Subject currentUser;
+	DBMSFeatures features;
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -82,6 +85,9 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 		origViews.addAll(model.getViews());
 		
 		try {
+			final DBMSResources res = DBMSResources.instance();
+			features = res.getSpecificFeatures(conn.getMetaData());
+			
 			String action = prop.getProperty(PROP_PREFIX+SUFFIX_ACTION, ACTION_READ);
 			if(ACTION_READ.equals(action)) {
 				readFromDatabase(context);
@@ -197,6 +203,9 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			query.setColumns(DataDumpUtils.getColumns(rsmd));
 		} catch (SQLException e) {
+			if(features.sqlExceptionRequiresRollback()) {
+				DBUtil.doRollback(conn);
+			}
 			query.setColumns(new ArrayList<Column>());
 			if(metadataAllowQueryExec) {
 				long initTime = System.currentTimeMillis();
@@ -285,6 +294,7 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 	}
 	
 	void addQueriesFromProperties() {
+		//TODO: return warning if can't get metadata
 		//-- running SQLQueries...
 		prop.setProperty(SQLQueries.PROP_QUERIES_ADD_TO_MODEL, "true");
 		prop.setProperty(SQLQueries.PROP_QUERIES_RUN, "false");
@@ -307,7 +317,6 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 		String updateSql = "update "+qonQueriesTable+" set schema_name = ?, query = ?, remarks = ?, roles_filter = ?, updated_at = ?, updated_by = ? where name = ?";
 		String insertSql = "insert into "+qonQueriesTable+" (schema_name, query, remarks, roles_filter, name, created_at, created_by) values (?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement updateSt = conn.prepareStatement(updateSql);
-		PreparedStatement insertSt = conn.prepareStatement(insertSql);
 
 		Integer limitUpdateCountExact = Utils.getPropInt(prop, PROP_PREFIX+SUFFIX_LIMIT_UPDATE_EXACT);
 		Integer limitInsertCountExact = Utils.getPropInt(prop, PROP_PREFIX+SUFFIX_LIMIT_INSERT_EXACT);
@@ -344,6 +353,8 @@ public class QOnQueries extends SQLQueries implements WebProcessor {
 					
 					// if no updates, try insert
 					if(countU==0) {
+						PreparedStatement insertSt = conn.prepareStatement(insertSql);
+						
 						insertSt.setString(1, v.getSchemaName());
 						insertSt.setString(2, v.getQuery());
 						insertSt.setString(3, v.getRemarks());
