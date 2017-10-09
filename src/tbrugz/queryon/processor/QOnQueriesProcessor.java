@@ -49,9 +49,9 @@ import tbrugz.sqldump.util.Utils;
  * TODO: saving with 'SQLQueries+QOnQueries' may create inconsistencies when exception occurs in 2nd (QOnQueries) processor (can't rollback 1st processor actions)
  * TODO: should implement UpdatePlugin
  */
-public class QOnQueries extends SQLQueries implements WebProcessor {
+public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 
-	static final Log log = LogFactory.getLog(QOnQueries.class);
+	static final Log log = LogFactory.getLog(QOnQueriesProcessor.class);
 	
 	static final String PROP_PREFIX = "queryon.qon-queries";
 	
