@@ -38,12 +38,13 @@ doLoadExecs = function() {
 loadSelectContent = function(oEvent) {
 	var txt = oEvent.target.responseText;
 	var execs = JSON.parse(txt);
-	console.log('execs:', execs);
+	var executables = getQonData(execs);
+	console.log('execs:', execs, 'executables: ', executables);
 	var select = document.getElementById('objects');
 	select.innerHTML = '<option invalid="true">select executable</option>';
-	for(var i = 0;i<execs.executable.length;i++) {
+	for(var i = 0 ; i < executables.length ; i++) {
 		//XXX: packageName...
-		var e = execs.executable[i];
+		var e = executables[i];
 		var option = '<option value="'+e.qualifiedName+'" params="'+e.params+'" grants="'+e.grants+'">'+
 			e.qualifiedName+(e.remarks?" - "+e.remarks:"")+'</option>';
 		select.innerHTML += option;
