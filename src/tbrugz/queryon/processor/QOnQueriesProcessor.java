@@ -74,6 +74,10 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 	Subject currentUser;
 	DBMSFeatures features;
 	
+	public QOnQueriesProcessor() {
+		setFailOnError(false);
+	}
+	
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
@@ -188,7 +192,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
 	}
 	
-	int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr, ServletContext context) {
+	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr, ServletContext context) {
 		Query query = new Query();
 		query.setSchemaName(schemaName);
 		query.setName(queryName);
