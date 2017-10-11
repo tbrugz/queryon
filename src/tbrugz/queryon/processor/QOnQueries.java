@@ -16,14 +16,12 @@ import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBObjectUtils;
-import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
-import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.Utils;
 
 public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {

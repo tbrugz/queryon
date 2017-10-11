@@ -20,6 +20,8 @@ public class DBObjectUtils {
 
 	static final Log log = LogFactory.getLog(DBObjectUtils.class);
 	
+	static boolean logParameterMetaDataExceptions = false;
+	
 	public static void validateQuery(Query rel, Connection conn, boolean update) throws SQLException {
 		String finalSql = rel.getQuery();
 		log.debug("grabbing colums name & type from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
@@ -39,7 +41,7 @@ public class DBObjectUtils {
 			log.warn("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
 		}
-			
+		
 		try {
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			if(pmd!=null && update) {
@@ -59,7 +61,9 @@ public class DBObjectUtils {
 					}
 					catch(SQLException e) {
 						DBUtil.doRollback(conn);
-						log.warn("Exception getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
+						if(logParameterMetaDataExceptions) {
+							log.warn("Exception getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
+						}
 					}
 					
 					try {
@@ -67,7 +71,9 @@ public class DBObjectUtils {
 					}
 					catch(SQLException e) {
 						DBUtil.doRollback(conn);
-						log.warn("Exception getting parameter type ["+queryFullName+"/"+i+"]: "+e);
+						if(logParameterMetaDataExceptions) {
+							log.warn("Exception getting parameter type ["+queryFullName+"/"+i+"]: "+e);
+						}
 					}
 					
 					if(pmode==ParameterMetaData.parameterModeIn) {
@@ -85,7 +91,7 @@ public class DBObjectUtils {
 				}
 				rel.setParameterCount(inParams);
 				rel.setParameterTypes(paramsTypes);
-				log.info("["+rel.getQualifiedName()+"] params: "+paramsTypes);
+				//log.info("["+rel.getQualifiedName()+"] params: "+paramsTypes);
 			}
 		} catch (SQLException e) {
 			DBUtil.doRollback(conn);
