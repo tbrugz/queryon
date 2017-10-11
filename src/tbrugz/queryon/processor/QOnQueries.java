@@ -14,13 +14,16 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.UpdatePlugin;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBObjectUtils;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.Utils;
 
 public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
@@ -167,6 +170,10 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			String rolesFilterStr, ServletContext context) {
 		Query q = newQuery(schemaName, queryName, sql, remarks,
 				Utils.getStringList(rolesFilterStr, PIPE_SPLIT));
+		return addQueryToModel(q);
+	}
+		
+	protected int addQueryToModel(Query q) {
 		try {
 			DBObjectUtils.validateQuery(q, conn, true);
 		}
@@ -182,6 +189,40 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			return 1;
 		}
 		return 0;
+	}
+	
+	@Override
+	protected void addQueriesFromProperties() {
+		String queriesStr = prop.getProperty(PROP_QUERIES);
+		String[] queriesArr = queriesStr.split(",");
+		if(queriesArr.length!=1) {
+			throw new InternalServerException("queriesArr.length!=1: "+queriesArr.length);
+		}
+		String qid = queriesArr[0];
+		qid = qid.trim();
+		
+		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname");
+		String queryName = prop.getProperty("sqldump.query."+qid+".name");
+		String sql = prop.getProperty("sqldump.query."+qid+".sql");
+		String remarks = prop.getProperty("sqldump.query."+qid+".remarks");
+		String roles = prop.getProperty("sqldump.query."+qid+".roles");
+		//queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+		
+		Query q = newQuery(schemaName, queryName, sql, remarks,
+				Utils.getStringList(roles, PIPE_SPLIT));
+		addQueryToModel(q);
+		/*
+		
+		Query query = new Query();
+		query.setId(qid);
+		query.setName(queryName);
+		//add schemaName
+		query.setSchemaName(schemaName);
+		
+		query.setQuery(sql);
+		query.setRemarks(remarks);
+		setQueryRoles(query, roles);
+		*/
 	}
 
 }

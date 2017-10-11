@@ -37,7 +37,7 @@ public class DBObjectUtils {
 			DBUtil.doRollback(conn);
 			rel.setColumns(new ArrayList<Column>());
 			log.warn("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
-			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
+			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
 		}
 			
 		try {
@@ -58,6 +58,7 @@ public class DBObjectUtils {
 						pmode = pmd.getParameterMode(i);
 					}
 					catch(SQLException e) {
+						DBUtil.doRollback(conn);
 						log.warn("Exception getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
 					}
 					
@@ -65,6 +66,7 @@ public class DBObjectUtils {
 						ptype = pmd.getParameterTypeName(i);
 					}
 					catch(SQLException e) {
+						DBUtil.doRollback(conn);
 						log.warn("Exception getting parameter type ["+queryFullName+"/"+i+"]: "+e);
 					}
 					
@@ -88,8 +90,8 @@ public class DBObjectUtils {
 		} catch (SQLException e) {
 			DBUtil.doRollback(conn);
 			rel.setParameterCount(null);
-			log.warn("parameter metadata's sqlexception: "+e.toString().trim());
-			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
+			log.warn("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
+			log.debug("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
 		}
 		
 	}

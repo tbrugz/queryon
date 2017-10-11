@@ -668,5 +668,37 @@ public class SQL {
 			}
 		}
 	}
+	
+	void addOriginalParameters(RequestSpec reqspec) throws SQLException {
+		int informedParams = reqspec.params.size();
+		//XXX bind all or bind none?
+		//int bindParamsLoop = informedParams; //bind all
+		int bindParamsLoop = -1; // bind none
+		if(originalBindParameterCount!=null) {
+			if(originalBindParameterCount > informedParams) {
+				//XXX option to bind params with null?
+				throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
+					+((informedParams>0)?"only "+informedParams:"none")
+					+((informedParams>1)?" were":" was")
+					+" informed");
+			}
+			bindParamsLoop = originalBindParameterCount;
+		}
+		
+		if(relation!=null && relation.getParameterTypes()!=null && relation.getParameterTypes().size()>0) {
+			log.info("using addParameter: types="+relation.getParameterTypes());
+			for(int i=0;i<bindParamsLoop;i++) {
+				addParameter(reqspec.params.get(i), relation.getParameterTypes().get(i));
+			}
+		}
+		else {
+			log.info("using bindParameterValues: types="+relation.getParameterTypes()+" ; values="+reqspec.params);
+			for(int i=0;i<bindParamsLoop;i++) {
+				bindParameterValues.add(reqspec.params.get(i));
+			}
+		}
+	}
+	
+
 
 }

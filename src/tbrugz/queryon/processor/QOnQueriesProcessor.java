@@ -297,7 +297,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 		return added?1:0;
 	}
 	
-	void addQueriesFromProperties() {
+	protected void addQueriesFromProperties() {
 		//TODO: return warning if can't get metadata
 		//-- running SQLQueries...
 		prop.setProperty(SQLQueries.PROP_QUERIES_ADD_TO_MODEL, "true");
@@ -367,10 +367,16 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 						insertSt.setTimestamp(6, ts);
 						insertSt.setString(7, username);
 						
-						int countI = insertSt.executeUpdate();
-						countInserts += countI;
-						if(countI==0) {
-							throw new ProcessingException("error updating/inserting query '"+v.getName()+"': no insert or update executed");
+						try {
+							int countI = insertSt.executeUpdate();
+							countInserts += countI;
+							if(countI==0) {
+								throw new ProcessingException("error updating/inserting query '"+v.getName()+"': no insert or update executed");
+							}
+						}
+						catch(SQLException e) {
+							String message = "sqlexception: "+e.toString().trim()+"\nsql-insert: "+insertSql;
+							throw new InternalServerException(message, e);
 						}
 					}
 					//test limits
@@ -382,7 +388,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 					}
 					}
 					catch(SQLException e) {
-						String message = "sqlexception: "+e.toString().trim()+"\nsql-update: "+updateSql+"\nsql-insert: "+insertSql;
+						String message = "sqlexception: "+e.toString().trim()+"\nsql-update: "+updateSql;
 						throw new InternalServerException(message, e);
 					}
 				}
