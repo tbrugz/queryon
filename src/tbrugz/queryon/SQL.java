@@ -549,8 +549,9 @@ public class SQL {
 		//log.debug("addParameter:: bind value "+value+" ; type="+type);
 		if(value instanceof String) {
 			String str = (String) value;
+			type = type!=null ? type.toUpperCase() : null;
 			// XXXdone test for empty string ("")
-			if(DBUtil.INT_COL_TYPES_LIST.contains(type.toUpperCase())) {
+			if(DBUtil.INT_COL_TYPES_LIST.contains(type)) {
 				try {
 					bindParameterValues.add(Long.parseLong(str));
 				}
@@ -564,7 +565,7 @@ public class SQL {
 					}
 				}
 			}
-			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type.toUpperCase())) {
+			else if(DBUtil.FLOAT_COL_TYPES_LIST.contains(type)) {
 				try {
 					bindParameterValues.add(Double.parseDouble(str));
 				}
@@ -578,7 +579,7 @@ public class SQL {
 					}
 				}
 			}
-			else if(startsWithAny(type.toUpperCase(), DBUtil.DATE_COL_TYPES_LIST)) {
+			else if(startsWithAny(type, DBUtil.DATE_COL_TYPES_LIST)) {
 				try {
 					Date dt = DBUtil.parseDateMultiFormat(str, dateFormats);
 					bindParameterValues.add(dt);
@@ -618,6 +619,7 @@ public class SQL {
 	}
 	
 	static boolean startsWithAny(String str, List<String> list) {
+		if(str==null) { return false; }
 		for(String s: list) {
 			if(s.startsWith(str)) { return true; }
 		}
@@ -686,13 +688,13 @@ public class SQL {
 		}
 		
 		if(relation!=null && relation.getParameterTypes()!=null && relation.getParameterTypes().size()>0) {
-			log.info("using addParameter: types="+relation.getParameterTypes());
+			//log.info("using addParameter: types="+relation.getParameterTypes());
 			for(int i=0;i<bindParamsLoop;i++) {
 				addParameter(reqspec.params.get(i), relation.getParameterTypes().get(i));
 			}
 		}
 		else {
-			log.info("using bindParameterValues: types="+relation.getParameterTypes()+" ; values="+reqspec.params);
+			//log.info("using bindParameterValues: types="+relation.getParameterTypes()+" ; values="+reqspec.params);
 			for(int i=0;i<bindParamsLoop;i++) {
 				bindParameterValues.add(reqspec.params.get(i));
 			}
