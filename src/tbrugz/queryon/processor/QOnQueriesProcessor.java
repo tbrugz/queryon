@@ -74,6 +74,8 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 	Subject currentUser;
 	DBMSFeatures features;
 	
+	ServletContext servletContext;
+	
 	public QOnQueriesProcessor() {
 		setFailOnError(false);
 	}
@@ -464,6 +466,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 
 	@Override
 	public void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp) {
+		this.servletContext = context;
 		try {
 			ProcessorServlet.setOutput(this, resp);
 		}

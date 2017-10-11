@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.SQL;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBObjectUtils;
@@ -40,6 +41,8 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";*/
 
 	static final String PIPE_SPLIT = "\\|";
+	
+	//ServletContext servletContext;
 	
 	String getQonQueriesTable() {
 		return prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
@@ -85,10 +88,12 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		Query q = newQuery(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("SQL"), v.get("REMARKS"),
 				Utils.getStringList(v.get("ROLES"), PIPE_SPLIT));
 		try {
-			DBObjectUtils.validateQuery(q, conn, true);
+			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
+			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
 		catch(SQLException e) {
-			log.warn("Error validating query:"+e, e);
+			putWarning(servletContext, model.getModelId(), q, e.toString());
+			log.warn("Error validating query: "+e.toString().trim());
 		}
 	
 		if(model.getViews().contains(q)) {
@@ -108,6 +113,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	@Override
 	public void onInit(ServletContext context) {
 		// TODO: do not depend on QOnQueriesProcessor / SQLQueries
+		this.servletContext = context;
 		process(context);
 	}
 	
@@ -173,10 +179,12 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		
 	protected int addQueryToModel(Query q) {
 		try {
-			DBObjectUtils.validateQuery(q, conn, true);
+			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
+			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
 		catch(SQLException e) {
-			log.warn("Error validating query:"+e, e);
+			putWarning(servletContext, model.getModelId(), q, e.toString());
+			log.warn("Error validating query: "+e.toString().trim());
 		}
 	
 		if(model.getViews().contains(q)) {
@@ -221,6 +229,10 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		query.setRemarks(remarks);
 		setQueryRoles(query, roles);
 		*/
+	}
+	
+	void putWarning(ServletContext context, String modelId, Relation r, String warning) {
+		super.putWarning(context, modelId, r.getSchemaName(), r.getName(), warning);
 	}
 
 }

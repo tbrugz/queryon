@@ -24,6 +24,10 @@ public class DBObjectUtils {
 	
 	public static void validateQuery(Query rel, Connection conn, boolean update) throws SQLException {
 		String finalSql = rel.getQuery();
+		validateQuery(rel, finalSql, conn, update);
+	}
+
+	public static void validateQuery(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
 		log.debug("grabbing colums name & type from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
 		PreparedStatement stmt = conn.prepareStatement(finalSql);
 		
@@ -40,6 +44,7 @@ public class DBObjectUtils {
 			rel.setColumns(new ArrayList<Column>());
 			log.warn("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
+			throw e;
 		}
 		
 		try {
@@ -98,6 +103,7 @@ public class DBObjectUtils {
 			rel.setParameterCount(null);
 			log.warn("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
+			throw e;
 		}
 		
 	}

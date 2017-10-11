@@ -1041,15 +1041,6 @@ public class QueryOn extends HttpServlet {
 			ConnectionUtil.showDBInfo(conn.getMetaData());
 		}
 		
-		if(validateQuery) {
-			if(relation instanceof Query) {
-				DBObjectUtils.validateQuery((Query)relation, conn, true);
-			}
-			else {
-				log.warn("relation '"+relation+"' not a query: can't validate");
-			}
-		}
-		
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
@@ -1057,6 +1048,15 @@ public class QueryOn extends HttpServlet {
 		preprocessParameters(reqspec, pk);
 		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
+		if(validateQuery) {
+			if(relation instanceof Query) {
+				DBObjectUtils.validateQuery((Query)relation, finalSql, conn, true);
+			}
+			else {
+				log.warn("relation '"+relation+"' not a query: can't validate");
+			}
+		}
+		//log.info("sql:\n"+finalSql);
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		sql.bindParameters(st);
 		
@@ -1127,9 +1127,8 @@ public class QueryOn extends HttpServlet {
 				ConnectionUtil.showDBInfo(conn.getMetaData());
 			}
 			
-			DBObjectUtils.validateQuery(relation, conn, true);
-			
 			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
 			sql.addOriginalParameters(reqspec);
 	
 			finalSql = sql.getFinalSql();
@@ -1184,9 +1183,8 @@ public class QueryOn extends HttpServlet {
 	void doValidate(Query relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
-			DBObjectUtils.validateQuery(relation, conn, true);
-			
 			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
 
 			ParameterMetaData pmd = stmt.getParameterMetaData();
@@ -1245,9 +1243,9 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("Explain plan not available for database: "+feat.getClass().getSimpleName());
 			}
 			
-			DBObjectUtils.validateQuery(relation, conn, true);
-			
 			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
+			
 			for(int i=0;i<reqspec.params.size();i++) {
 				sql.bindParameterValues.add(reqspec.params.get(i));
 			}
