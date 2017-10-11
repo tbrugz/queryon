@@ -81,7 +81,7 @@ public class ShiroUtils {
 				realmName = prop.getProperty(PROP_AUTH_ANONREALM, DEFAULT_AUTH_ANONREALM);
 			}
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
-			currentUser = new Subject.Builder().principals(principals).authenticated(authenticated).buildSubject();
+			currentUser = new Subject.Builder().principals(principals).authenticated(authenticated).session(currentUser.getSession()).buildSubject();
 		}
 		return currentUser;
 	}

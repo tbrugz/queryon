@@ -1,3 +1,6 @@
+<%@page import="tbrugz.queryon.util.ShiroUtils"%>
+<%@page import="tbrugz.queryon.QueryOn"%>
+<%@page import="java.util.Properties"%>
 <%@page import="java.util.Set"%>
 <%@page import="tbrugz.queryon.shiro.QOnActiveDirectoryRealm"%>
 <%@page import="org.apache.shiro.session.Session"%>
@@ -35,7 +38,12 @@
 String username = request.getParameter("username");
 String password = request.getParameter("password");
 org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
-Subject currentUser = SecurityUtils.getSubject();
+
+//Subject currentUser = SecurityUtils.getSubject();
+
+Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Subject currentUser = ShiroUtils.getSubject(prop, request);
+
 if(username!=null) {
 	AuthenticationToken token = new UsernamePasswordToken(username, password);
 	try {
@@ -80,9 +88,10 @@ else {
 
 <h3>Session info:</h3>
 <%
+try {
 Session ss = currentUser.getSession();
 
-out.write("\n<br><b>id</b>: "+ss.getId());
+out.write("\n<b>id</b>: "+ss.getId());
 out.write("\n<br><b>host</b>: "+ss.getHost());
 out.write("\n<br><b>timeout</b>: "+ss.getTimeout()+"ms");
 out.write("\n<br><b>startTimestamp</b>: "+ss.getStartTimestamp());
@@ -96,25 +105,29 @@ if(keys!=null) {
 	}
 	out.write("\n</ul>");
 }
+}
+catch(RuntimeException e) {
+	out.write("\nException: "+e);
+}
 %>
 <h3>Roles you have:</h3>
 
-<p>
+<ul>
     <shiro:hasRole name="admin"><li>admin<br/></shiro:hasRole>
-    <shiro:hasRole name="developer"><li>developer<br/></shiro:hasRole>
+    <shiro:hasRole name="dev"><li>dev<br/></shiro:hasRole>
     <shiro:hasRole name="user"><li>user<br/></shiro:hasRole>
     
 <%
-String[] roles = new String[]{"admin", "developer", "user"};
+String[] roles = new String[]{"admin", "dev", "user"};
 for(String s: roles) {
 	out.write("<li>role '"+s+"': "+currentUser.hasRole(s));
 }
 %>
-</p>
+</ul>
 
 <h3>Permissions</h3>
 
-<p>
+<ul>
 <%
 String[] perms = new String[]{"RELATION:STATUS", "TABLE:SELECT:ABC"};
 for(String s: perms) {
@@ -122,22 +135,22 @@ for(String s: perms) {
 }
 
 %>
-</p>
+</ul>
 
 
 <%
 PrincipalCollection pc = currentUser.getPrincipals();
 if(pc!=null) {
 	List<?> l = pc.asList();
-	out.write("User info [getPrincipals()]: <ul>");
+	out.write("<h3>User info [getPrincipals()]</h3>\n<ul>\n");
 	for(Object o: l) {
 		out.write("<li>"+o.getClass().getSimpleName()+":: "+o.toString()+"\n");
 	}
-	out.write("</ul>");
-	out.write("<br>int id? = "+pc.oneByType(Integer.class));
+	out.write("</ul>\n");
+	out.write("int id? = "+pc.oneByType(Integer.class));
 	//out.write("first name? = "+);
 }
-if(sm instanceof RealmSecurityManager) {
+if(sm instanceof RealmSecurityManager && (currentUser.hasRole("dev") || currentUser.hasRole("admin")) ) {
 	RealmSecurityManager rsm = (RealmSecurityManager) sm;
 	Collection<Realm> rs = rsm.getRealms();
 	if(rs!=null) {
