@@ -8,27 +8,6 @@ table {
 	border-spacing: 0;
 	/* border-collapse: collapse; */
 }
-table tr:hover td {
-	background-color: #efefef; /* !important */
-	/* https://developer.mozilla.org/en/docs/Web/CSS/filter */
-	/*
-	filter: contrast(100%);
-	-webkit-filter: contrast(100%);
-	*/
-	/*opacity: 0.4; /* CSS3 */
-}
-table tr td table tr:hover td {
-	/* 2nd level (inner) table */
-	background-color: #ddd;
-}
-table tr td table tr td table tr:hover td {
-	/* 3rd level (inner) table */
-	background-color: #efefef;
-}
-table tr td table tr td table tr td table tr:hover td {
-	/* 4th level (inner) table */
-	background-color: #ddd;
-}
 td {
 	border: 1px solid #bbb;
 	padding: 2px 5px 2px 5px;

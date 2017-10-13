@@ -1,0 +1,63 @@
+
+th.texttitle {
+	font-family: Courier, monospace;
+	font-size: medium;
+}
+
+.btndiff {
+	border: 2px;
+	font-weight: bold;
+	margin: 5px;
+	position: sticky;
+	bottom: 0;
+	float: right;
+	background-color: #aaa;
+	padding: 3px;
+}
+
+.btndiff:hover {
+	cursor: pointer;
+}
+
+#diffoutputcontainer {
+	display: none;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #fff;
+}
+
+#diffcontrols {
+	z-index: 10;
+	position: relative;
+}
+
+.diffoutput {
+	font-family: monospace;
+	white-space: pre;
+	/*clear:both;*/
+	/*border: 10px solid #ddd;*/
+	width: 100%;
+	top: 30px;
+	background-color: #fff;
+	
+	overflow-y: scroll;
+	position: absolute;
+	height: 100%;	
+}
+
+.closebtn {
+	float: right;
+	font-weight: bolder;
+	font-size: medium;
+	padding: 3px 7px;
+	margin: 2px;
+	border-top: 1px solid darkgray;
+	background-color: #ccc;
+}
+
+.closebtn:hover {
+	cursor: pointer;
+}
