@@ -10,11 +10,16 @@ function getAddElements() {
 
 function addDiffBtns() {
 	var adds = getAddElements();
+	var count = 0;
 	for(var i=0;i<adds.length;i++) {
 		//console.log(adds[i]);
 		var add = adds[i];
-		
-		//remove = add.nextElementSibling;
+		var remove = add.nextElementSibling;
+		var addtxt = add.innerHTML;
+		var removetxt = remove.innerHTML;
+		// ␀ - &#9216; - \u2400
+		if(!addtxt || addtxt=="\u2400" || !removetxt || removetxt=="\u2400") { continue; } 
+		//console.log("diff: ", ++count, "id=", i, " -- ", addtxt.substring(0,10), removetxt.substring(0, 10));
 		
 		var diffbtn = document.createElement('span');
 		diffbtn.setAttribute("class", "btndiff");
