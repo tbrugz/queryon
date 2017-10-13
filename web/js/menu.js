@@ -86,6 +86,7 @@ function createMenuContent(addCloseBtn) {
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
 			
 			var hrefElem = li.getElementsByTagName("a")[0];
+			if(!hrefElem) { continue; }
 			var href = hrefElem.getAttribute("href-orig");
 			var hrefCurrentLike = href; //"/"+href;
 			if(hrefCurrentLike.startsWith(".")) { hrefCurrentLike = hrefCurrentLike.substring(1); }

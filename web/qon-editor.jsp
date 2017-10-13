@@ -59,6 +59,20 @@ modelId = SchemaModelUtils.getModelId(request);
 		success: function(data) {
 			rolesInfo = JSON.parse(data);
 			//console.log(rolesInfo);
+			
+			var qname = byId('name').value;
+			if(!qname) {
+				// new query
+				var r = byId('roles');
+				if(rolesInfo.defaultRolesForNewQuery) {
+					var rolesStr = rolesInfo.defaultRolesForNewQuery.join("|");
+					if(rolesStr) {
+						console.log("setting default roles:", rolesStr)
+						r.value = rolesStr;
+					}
+				}
+			}
+			
 			refreshRolesInfo();
 		}
 	});
@@ -482,7 +496,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		
 		rl.style.display='initial';
 		if(rolesInfo.roles && rolesInfo.roles.length>0) {
-			console.log('multi-roles');
+			//console.log('multi-roles');
 			refreshRolesCount();
 			var rc = document.getElementById('rolesCount');
 			var rolesBtn = document.getElementById('rolesBtn');

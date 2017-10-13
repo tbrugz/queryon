@@ -1,9 +1,9 @@
 {
-"useRoles": true,
-"roles":
-[
-"admin",
-"developer",
-"user"
-]
+	"useRoles": true,
+	"roles": [
+		"admin",
+		"developer",
+		"user"
+	],
+	"defaultRolesForNewQuery": []
 }
