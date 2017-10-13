@@ -236,7 +236,7 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 			var blocktitle = document.getElementById(contentTitleId);
 			var ukblock = document.getElementById(contentId+"-uk");
 			container.style.display = 'block';
-			block.innerHTML = safeTags(data);
+			block.innerHTML = safeTags(data); //XXX: use textContent?
 			mblock.innerHTML = '';
 			mblock.style.display = 'none';
 			blocktitle.innerHTML = document.getElementById(modelId).value;
@@ -327,10 +327,10 @@ doDiffUsingJS = function(viewType, inverse) {
 			inverse = 1;
 		}
 	}
-	var from = document.getElementById('content-from').innerHTML;
-	var to = document.getElementById('content-to').innerHTML;
-	var fromStatus = document.getElementById('content-from-status').innerHTML;
-	var toStatus = document.getElementById('content-to-status').innerHTML;
+	var from = document.getElementById('content-from').textContent;
+	var to = document.getElementById('content-to').textContent;
+	var fromStatus = document.getElementById('content-from-status').textContent;
+	var toStatus = document.getElementById('content-to-status').textContent;
 	var diffc = document.getElementById('diffoutput-container');
 	
 	if( (from || fromStatus=='404') && (to || toStatus=='404')
@@ -349,8 +349,8 @@ doDiffUsingJS = function(viewType, inverse) {
 		document.getElementById('ddldiff-container').style.display = 'block';
 		
 		if(document.getElementById('type').value=='TABLE') {
-			var fromUk = document.getElementById('content-from-uk').innerHTML;
-			var toUk = document.getElementById('content-to-uk').innerHTML;
+			var fromUk = document.getElementById('content-from-uk').textContent;
+			var toUk = document.getElementById('content-to-uk').textContent;
 			if(toUk && fromUk) {
 				var ddbtn = document.getElementById('doDataDiffBtn');
 				ddbtn.style.display = 'initial';
@@ -543,7 +543,7 @@ getDDLdiff = function(apply) {
 			if(content=='') {
 				content = '-- no changes';
 			}
-			block.innerHTML = safeTags(content);
+			block.innerHTML = safeTags(content); //XXX use .textContent?
 			block.style.display = 'block';
 			if(data && !apply) {
 				//TODOne: test if user has APPLY permission in type/model/schema (ajax) ...
