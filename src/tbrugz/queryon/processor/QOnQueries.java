@@ -2,6 +2,7 @@ package tbrugz.queryon.processor;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import tbrugz.queryon.SQL;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBObjectUtils;
+import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
@@ -58,7 +60,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	}
 	
 	void addGrants(Relation r, String owner, PrivilegeType pt, List<String> roles) {
-		if(roles==null) { return; }
+		if(roles==null || roles.size()==0) { return; }
 		List<Grant> grants = new ArrayList<Grant>();
 		
 		for(String s: roles) {
@@ -85,15 +87,19 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	Query createQonQuery(RequestSpec reqspec) {
 		Map<String, String> v = reqspec.getUpdateValues();
 	
-		Query q = newQuery(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("SQL"), v.get("REMARKS"),
-				Utils.getStringList(v.get("ROLES"), PIPE_SPLIT));
+		Query q = newQuery(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("QUERY"), v.get("REMARKS"),
+				Utils.getStringListIgnoreEmpty(v.get("ROLES_FILTER"), PIPE_SPLIT));
+		
+		Savepoint sp = null;
 		try {
 			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
+			sp = conn.setSavepoint();
 			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
 		catch(SQLException e) {
 			putWarning(servletContext, model.getModelId(), q, e.toString());
 			log.warn("Error validating query: "+e.toString().trim());
+			DBUtil.doRollback(conn, sp);
 		}
 	
 		if(model.getViews().contains(q)) {
@@ -178,13 +184,16 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	}
 		
 	protected int addQueryToModel(Query q) {
+		Savepoint sp = null;
 		try {
 			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
+			sp = conn.setSavepoint();
 			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
 		catch(SQLException e) {
 			putWarning(servletContext, model.getModelId(), q, e.toString());
 			log.warn("Error validating query: "+e.toString().trim());
+			DBUtil.doRollback(conn, sp);
 		}
 	
 		if(model.getViews().contains(q)) {

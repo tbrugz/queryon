@@ -41,11 +41,13 @@ modelId = SchemaModelUtils.getModelId(request);
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
 	<script type="text/javascript" src="js/http-post.js"></script>
 	<script type="text/javascript" src="js/qon-util.js"></script>
+	<script src="js/settings.js"></script>
 	<script type="text/javascript" src="js/table.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
-	var processorUrl = 'processor';
+	//var processorUrl = 'processor';
+	var qonUrl = 'q/QON_QUERIES';
 	var isQuerySaved = false;
 	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;
 	var rolesInfo = {};
@@ -53,29 +55,45 @@ modelId = SchemaModelUtils.getModelId(request);
 	var lastExecutedQuery = null;
 	var utf8par = "utf8=✓";
 	
-	$.ajax({
-		dataType: 'text',
-		url: 'allroles.json',
-		success: function(data) {
-			rolesInfo = JSON.parse(data);
-			//console.log(rolesInfo);
-			
-			var qname = byId('name').value;
-			if(!qname) {
-				// new query
-				var r = byId('roles');
-				if(rolesInfo.defaultRolesForNewQuery) {
-					var rolesStr = rolesInfo.defaultRolesForNewQuery.join("|");
-					if(rolesStr) {
-						console.log("setting default roles:", rolesStr)
-						r.value = rolesStr;
+	function onLoad() {
+		$.ajax({
+			dataType: 'text',
+			url: 'allroles.json',
+			success: function(data) {
+				rolesInfo = JSON.parse(data);
+				//console.log(rolesInfo);
+				
+				var qname = byId('name').value;
+				if(!qname) {
+					// new query
+					var r = byId('roles');
+					if(rolesInfo.defaultRolesForNewQuery) {
+						var rolesStr = rolesInfo.defaultRolesForNewQuery.join("|");
+						if(rolesStr) {
+							console.log("setting default roles:", rolesStr)
+							r.value = rolesStr;
+						}
 					}
 				}
+				
+				refreshRolesInfo();
 			}
-			
-			refreshRolesInfo();
-		}
-	});
+		});
+		loadSettings(function() {
+			var table = settings['queryon.qon-queries.table'];
+			if(table) {
+				qonUrl = 'q/'+table;
+			}
+			console.log("qonUrl: ", qonUrl);
+			/*var modelId = getParameterByName('model', location.search);
+			if(modelId) {
+				byId('modelLabel').style.display = 'inline-block';
+				byId('model').value = modelId;
+			}*/
+			//updateUI();
+		});
+		updateUI();
+	}
 
 	function doRun() {
 		var sqlString = editor.getSelectedText();
@@ -263,6 +281,10 @@ modelId = SchemaModelUtils.getModelId(request);
 		var name = document.getElementById('name').value;
 		var remarks = document.getElementById('remarks').value;
 		var roles = document.getElementById('roles').value;
+		var username = byId('username').innerHTML;
+		var now = new Date();
+		var optimisticlock = 0; //byId('optimisticlock').value;
+		var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
 
 		if(name==null || name=="") {
 			errorMessage('query <b>name</b> cannot be null...');
@@ -271,31 +293,39 @@ modelId = SchemaModelUtils.getModelId(request);
 		}
 		
 		var reqData = {
-			/*"sqldump.queries.addtomodel": "true",
-			"sqldump.queries.runqueries": "false",
-			"sqldump.queries.grabcolsinfofrommetadata": "true",*/
-			"sqldump.queries": "q1",
-			"sqldump.query.q1.schemaname": schema,
-			"sqldump.query.q1.name": name,
-			"sqldump.query.q1.sql": editor.getValue(),
-			"sqldump.query.q1.remarks": remarks,
-			"sqldump.query.q1.roles": roles,
-			//"model": document.getElementById('model').value,
-			"queryon.qon-queries.action": "write",
-			"queryon.qon-queries.querynames": name,
-			"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
-			"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
+			"v:QUERY": editor.getValue(),
+			"v:REMARKS": remarks,
+			"v:ROLES_FILTER": roles
+			//"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
+			//"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
+			//"optimisticlock": encodeURIComponent(optimisticlock)
+			//"v:VERSION_SEQ": encodeURIComponent(version_seq)
 		}
 		if(modelId!=null) {
 			reqData.model = document.getElementById('model').value; // or modelId
 		}
-		/*if(roles) {
-			reqData["sqldump.query.q1.roles"] = roles;
-		}*/
+		
+		var method = "POST"; //post: insert ; patch: update
+		if(isQuerySaved) { // update
+			//saveUrl += "p1="+encodeURIComponent(id);
+			//method = "PATCH";
+			reqData["p1"] = name;
+			reqData["_method"] = "PATCH";
+			reqData["v:SCHEMA_NAME"] = schema, //needed by QOnQueries
+			reqData["v:NAME"] = name, //needed by QOnQueries
+			reqData["v:UPDATED_BY"] = encodeURIComponent(username);
+			reqData["v:UPDATED_AT"] = encodeURIComponent(now.toISOString());
+		}
+		else {
+			reqData["v:SCHEMA_NAME"] = schema,
+			reqData["v:NAME"] = name,
+			reqData["v:CREATED_BY"] = encodeURIComponent(username);
+			reqData["v:CREATED_AT"] = encodeURIComponent(now.toISOString());
+		}
 		
 		var request = $.ajax({
-			url : processorUrl+"/queryon.processor.QOnQueries",
-			type : "POST",
+			url : qonUrl,
+			type : method,
 			data : reqData,
 			dataType : "html"
 		});
@@ -326,15 +356,17 @@ modelId = SchemaModelUtils.getModelId(request);
 
 	function doRemove() {
 		var data = {
-			"queryon.qon-queries.action": "remove",
-			"queryon.qon-queries.querynames": document.getElementById('name').value,
+			"_method": "DELETE",
+			"p1": document.getElementById('name').value
+			//"queryon.qon-queries.action": "remove",
+			//"queryon.qon-queries.querynames": document.getElementById('name').value,
 		};
 		if(modelId!=null) {
 			data["model"] = modelId;
 		}
 		
 		var request = $.ajax({
-			url : processorUrl+"/queryon.processor.QOnQueries",
+			url : qonUrl,
 			type : "POST",
 			data : data,
 			dataType : "html"
@@ -629,7 +661,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	});
 </script>
 </head>
-<body onload="updateUI();">
+<body onload="onLoad();">
 <%!
 SchemaModel model = null;
 String modelId = null;

@@ -66,7 +66,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 	static final String ACTION_WRITE = "write";
 	static final String ACTION_REMOVE = "remove";
 	
-	static final String DEFAULT_QUERIES_TABLE = "qon_queries";
+	public static final String DEFAULT_QUERIES_TABLE = "qon_queries";
 	
 	public static final String ATTR_QUERIES_WARNINGS_PREFIX = "qon-queries-warnings";
 	

@@ -2,6 +2,7 @@ package tbrugz.queryon.util;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Types;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -146,6 +147,18 @@ public class DBUtil {
 			conn.rollback();
 		} catch (SQLException sqle) {
 			log.warn("Error in rollback [autocommit="+auto+"]: "+sqle.getMessage(), sqle);
+			return false;
+		}
+		return true;
+	}
+
+	public static boolean doRollback(Connection conn, Savepoint sp) {
+		boolean auto = false;
+		try {
+			auto = conn.getAutoCommit();
+			conn.rollback(sp);
+		} catch (SQLException sqle) {
+			log.warn("Error in rollback [autocommit="+auto+"; savepoint="+sp+"]: "+sqle.getMessage(), sqle);
 			return false;
 		}
 		return true;

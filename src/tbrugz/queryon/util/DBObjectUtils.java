@@ -22,10 +22,10 @@ public class DBObjectUtils {
 	
 	static boolean logParameterMetaDataExceptions = false;
 	
-	public static void validateQuery(Query rel, Connection conn, boolean update) throws SQLException {
+	/*public static void validateQuery(Query rel, Connection conn, boolean update) throws SQLException {
 		String finalSql = rel.getQuery();
 		validateQuery(rel, finalSql, conn, update);
-	}
+	}*/
 
 	public static void validateQuery(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
 		log.debug("grabbing colums name & type from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
@@ -40,7 +40,7 @@ public class DBObjectUtils {
 				log.warn("getMetaData() returned null: empty query? [query="+rel.getQualifiedName()+"] sql:\n"+finalSql);
 			}
 		} catch (SQLException e) {
-			DBUtil.doRollback(conn);
+			//DBUtil.doRollback(conn);
 			rel.setColumns(new ArrayList<Column>());
 			log.warn("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
@@ -65,7 +65,7 @@ public class DBObjectUtils {
 						pmode = pmd.getParameterMode(i);
 					}
 					catch(SQLException e) {
-						DBUtil.doRollback(conn);
+						//DBUtil.doRollback(conn);
 						if(logParameterMetaDataExceptions) {
 							log.warn("Exception getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
 						}
@@ -75,7 +75,7 @@ public class DBObjectUtils {
 						ptype = pmd.getParameterTypeName(i);
 					}
 					catch(SQLException e) {
-						DBUtil.doRollback(conn);
+						//DBUtil.doRollback(conn);
 						if(logParameterMetaDataExceptions) {
 							log.warn("Exception getting parameter type ["+queryFullName+"/"+i+"]: "+e);
 						}
@@ -99,7 +99,7 @@ public class DBObjectUtils {
 				//log.info("["+rel.getQualifiedName()+"] params: "+paramsTypes);
 			}
 		} catch (SQLException e) {
-			DBUtil.doRollback(conn);
+			//DBUtil.doRollback(conn);
 			rel.setParameterCount(null);
 			log.warn("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
@@ -123,7 +123,7 @@ public class DBObjectUtils {
 				log.warn("getMetaData() returned null: empty query? sql:\n"+finalSql);
 			}
 		} catch (SQLException e) {
-			DBUtil.doRollback(conn);
+			//DBUtil.doRollback(conn);
 			rel.setColumns(new ArrayList<Column>());
 			log.warn("resultset metadata's sqlexception: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);

@@ -1,3 +1,5 @@
+<%@page import="tbrugz.queryon.processor.QOnQueriesProcessor"%>
+<%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.PagesServlet"%>
 <%@page import="tbrugz.queryon.processor.QOnExecs"%>
@@ -12,14 +14,18 @@
 	String[] exposedKeys = {
 			"queryon.models",
 			"queryon.models.default",
+			
+			"queryon.qon-queries.table",
 			"queryon.qon-tables.table",
 			"queryon.qon-execs.table",
 			"queryon.qon-pages.table", //PagesServlet.PROP_PREFIX+PagesServlet.SUFFIX_TABLE
+			
 			"queryon.web.auth-required",
 			"queryon.web.appname",
 		};
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
-	String[] defaultValues = { null, null, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
+	String[] defaultValues = { null, null,
+			QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
 			null, null
 			};
 	
