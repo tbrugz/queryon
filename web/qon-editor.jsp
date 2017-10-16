@@ -283,7 +283,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		var roles = document.getElementById('roles').value;
 		var username = byId('username').innerHTML;
 		var now = new Date();
-		var optimisticlock = 0; //byId('optimisticlock').value;
+		var optimisticlock = byId('optimisticlock').value;
 		var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
 
 		if(name==null || name=="") {
@@ -295,11 +295,11 @@ modelId = SchemaModelUtils.getModelId(request);
 		var reqData = {
 			"v:QUERY": editor.getValue(),
 			"v:REMARKS": remarks,
-			"v:ROLES_FILTER": roles
+			"v:ROLES_FILTER": roles,
 			//"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
 			//"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
-			//"optimisticlock": encodeURIComponent(optimisticlock)
-			//"v:VERSION_SEQ": encodeURIComponent(version_seq)
+			"optimisticlock": encodeURIComponent(optimisticlock),
+			"v:VERSION_SEQ": encodeURIComponent(version_seq)
 		}
 		if(modelId!=null) {
 			reqData.model = document.getElementById('model').value; // or modelId
@@ -330,11 +330,13 @@ modelId = SchemaModelUtils.getModelId(request);
 			dataType : "html"
 		});
 
+		//console.log("optimisticlock", optimisticlock, "version_seq", version_seq);
 		btnActionStart('btnSave');
 		request.done(function(data) {
 			btnActionStop('btnSave');
 			console.log(data);
 			closeMessages('messages');
+			byId('optimisticlock').value = version_seq;
 			infoMessage('query <b>'+name+'</b> successfully saved');
 			//XXX: reload query after save?
 			validateEditComponents(true);
@@ -670,6 +672,7 @@ String queryName = null;
 String query = "";
 String remarks = "";
 String roles = "";
+String versionSeq = null;
 int numOfParameters = 0;
 boolean queryLoaded = false;
 %>
@@ -692,6 +695,20 @@ numOfParameters = 0;
 queryLoaded = false;
 
 if(queryName!=null) {
+	Map<String, String> qmap = QOnQueries.readQueryFromDatabase(prop, modelId, schemaName, queryName);
+	if(qmap!=null) {
+		schemaName = qmap.get("schema_name");
+		query = qmap.get("query");
+		remarks = qmap.get("remarks");
+		roles = qmap.get("roles_filter");
+		if(roles==null) { roles = ""; }
+		versionSeq = qmap.get("version_seq");
+		queryLoaded = true;
+	}
+	else {
+		query = "-- query not found";
+	}
+	/*
 	View v = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getViews(), schemaName, queryName);
 	if(v == null) {
 		v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), queryName);
@@ -726,6 +743,7 @@ if(queryName!=null) {
 			query = "-- query not found";
 		}
 	}
+	*/
 }
 if(query==null || query.equals("")) {
 	query = "select * from table";
@@ -766,6 +784,8 @@ if(remarks==null) { remarks = ""; }
 <div class="container">
 	<div id="sqlparams">
 	</div>
+	
+	<input type="hidden" id="optimisticlock" value="<%= versionSeq!=null?String.valueOf(versionSeq):"" %>" />
 	
 	<div id="button-container">
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">

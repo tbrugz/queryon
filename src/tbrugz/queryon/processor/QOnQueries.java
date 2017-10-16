@@ -1,12 +1,17 @@
 package tbrugz.queryon.processor;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
@@ -242,6 +247,47 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	
 	void putWarning(ServletContext context, String modelId, Relation r, String warning) {
 		super.putWarning(context, modelId, r.getSchemaName(), r.getName(), warning);
+	}
+	
+	public static Map<String, String> readQueryFromDatabase(Properties prop, String modelId, String schemaName, String name) throws SQLException, ClassNotFoundException, NamingException {
+		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
+		String sql = "select schema_name, name, query, remarks, roles_filter, version_seq\n" +
+				"from "+qonQueriesTable+"\n" +
+				"where (disabled = 0 or disabled is null)\n" +
+				"and schema_name = ? and name = ?";
+		
+		Connection conn = null;
+		try {
+			conn = DBUtil.initDBConn(prop, modelId);
+			ResultSet rs = null;
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, schemaName);
+			st.setString(2, name);
+			rs = st.executeQuery();
+		
+			if(rs.next()) {
+				Map<String, String> ret = new HashMap<String, String>();
+				ret.put("schema_name", rs.getString(1));
+				ret.put("name", rs.getString(2));
+				ret.put("query", rs.getString(3));
+				ret.put("remarks", rs.getString(4));
+				ret.put("roles_filter", rs.getString(5));
+				ret.put("version_seq", rs.getString(6));
+				
+				if(rs.next()) {
+					throw new IllegalStateException("more than 1 query with schema '"+schemaName+"' & name '"+name+"'");
+				}
+				return ret;
+			}
+			return null;
+		}
+		catch(SQLException e) {
+			throw new SQLException("Error fetching queries, sql: "+sql, e);
+		}
+		finally {
+			DBUtil.closeConnection(conn);
+		}
+		
 	}
 
 }

@@ -1718,8 +1718,8 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		sql.bindParameters(st);
 
-		log.debug("sql update: "+sql+
-				(willTryLock?" [willTryLock]":""));
+		log.info("sql update: "+sql+
+				(willTryLock?" [willTryOptimisticLock]":""));
 		
 		int count = st.executeUpdate();
 		
