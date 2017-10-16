@@ -164,6 +164,10 @@ public class DBUtil {
 		return true;
 	}
 	
+	public static void closeConnection(Connection conn) {
+		ConnectionUtil.closeConnection(conn);
+	}
+	
 	static boolean staticsInited = false;
 	
 	protected static void initStatics(Connection conn) throws SQLException {
