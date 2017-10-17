@@ -211,6 +211,25 @@
 	background-color: #555;
 }
 
+#download-ext {
+	position: absolute;
+	top: 15px;
+	/*right: 15px;*/
+	width: 15em;
+	z-index: 100;
+	max-height: 80%;
+	background-color: #fff;
+	border: 3px solid #bbb;
+}
+
+#download-ext li {
+	list-style: none;
+}
+
+#download-ext input {
+	float: right;
+	margin: 5px;
+}
 
 /***** diff *****/
 
