@@ -3,6 +3,8 @@ package tbrugz.queryon.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +19,10 @@ public class DumpSyntaxUtils {
 	final Map<String, DumpSyntax> syntaxesByFormat = new HashMap<String, DumpSyntax>();
 	final Map<String, DumpSyntax> syntaxesByFileExtension = new HashMap<String, DumpSyntax>();
 	final Map<String, DumpSyntax> syntaxesByMimeType = new HashMap<String, DumpSyntax>();
+	
+	public final Set<String> syntaxIds = new TreeSet<String>();
+	public final Set<String> syntaxExtensions = new TreeSet<String>();
+	public final Set<String> syntaxMimeTypes = new TreeSet<String>();
 
 	public DumpSyntaxUtils(Properties prop) {
 		for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
@@ -28,6 +34,11 @@ public class DumpSyntaxUtils {
 				syntaxesByFormat.put(ds.getSyntaxId(), ds);
 				syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
 				syntaxesByMimeType.put(ds.getMimeType(), ds);
+				
+				syntaxIds.add(ds.getSyntaxId());
+				syntaxExtensions.add(ds.getDefaultFileExtension());
+				syntaxMimeTypes.add(ds.getMimeType());
+				
 				log.debug("syntax '"+ds.getClass().getSimpleName()+"': id="+ds.getSyntaxId()+" ; ext="+ds.getDefaultFileExtension()+" ; mime="+ds.getMimeType());
 			}
 		}

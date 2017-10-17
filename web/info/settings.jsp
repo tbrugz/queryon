@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.DumpSyntaxUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueriesProcessor"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
 <%@page import="tbrugz.queryon.ResponseSpec"%>
@@ -6,9 +7,11 @@
 <%@page import="tbrugz.sqldump.util.StringDecorator.StringQuoterDecorator"%>
 <%@page import="tbrugz.queryon.processor.QOnTables"%>
 <%@page import="java.util.*, tbrugz.queryon.QueryOn"%>
+<%@page import="com.google.gson.*"%>
 {
 <%
 	response.setContentType(ResponseSpec.MIME_TYPE_JSON);
+	Gson gson = new Gson();
 
 	StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
 	String[] exposedKeys = {
@@ -22,22 +25,32 @@
 			
 			"queryon.web.auth-required",
 			"queryon.web.appname",
+			//"sqldump.datadump.htmlx.dateformat",
+			//"sqldump.datadump.json.dateformat",
 		};
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
 	String[] defaultValues = { null, null,
 			QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
-			null, null
+			null, null//, null, null
 			};
 	
 	int i = 0;
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 	if(prop!=null) {
-	for(;i<exposedKeys.length;) {
-		String k = exposedKeys[i];
-		if(i>0) { out.write(",\n"); }
-		out.write(sqd.get(k)+": "+sqd.get(prop.getProperty(k, defaultValues[i])));
-		i++;
+		for(;i<exposedKeys.length;) {
+			String k = exposedKeys[i];
+			if(i>0) { out.write(",\n"); }
+			out.write(sqd.get(k)+": "+gson.toJson(prop.getProperty(k, defaultValues[i])));
+			i++;
+		}
 	}
+	
+	//syntaxes
+	DumpSyntaxUtils dsutils = (DumpSyntaxUtils) application.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+	if(dsutils!=null) {
+		if(i>0) { out.write(",\n"); }
+		out.write(sqd.get("syntax.fileextensions") + ": " + gson.toJson( dsutils.syntaxExtensions ) );
+		i++;
 	}
 	
 	/*InputStream inputStream = application.getResourceAsStream("/META-INF/MANIFEST.MF");
