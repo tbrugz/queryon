@@ -59,26 +59,29 @@
 	out.write("Implementation-Version: " + atts.getValue("Implementation-Version"));
 	out.write("Implementation-Build: " + atts.getValue("Implementation-Build"));*/
 
-	Properties p2 = new Properties();
+	Map<String, String> p2 = new TreeMap<String, String>();
 	//p2.load(application.getResourceAsStream("/WEB-INF/classes/queryon-version.properties"));
 
-	Properties pqon = new Properties();
-	pqon.load(QueryOn.class.getResourceAsStream("/queryon-version.properties"));
-	for(Map.Entry<Object, Object> entry: pqon.entrySet()) {
-		p2.put("queryon."+entry.getKey(), entry.getValue());
-	}
-	
-	Properties psqld = new Properties();
 	try {
+		Properties pqon = new Properties();
+		pqon.load(QueryOn.class.getResourceAsStream("/queryon-version.properties"));
+		for(Map.Entry<Object, Object> entry: pqon.entrySet()) {
+			p2.put("queryon."+entry.getKey(), String.valueOf(entry.getValue()) );
+		}
+	}
+	catch(RuntimeException e) {} 
+	
+	try {
+		Properties psqld = new Properties();
 		psqld.load(QueryOn.class.getResourceAsStream("/sqldump-version.properties"));
 		for(Map.Entry<Object, Object> entry: psqld.entrySet()) {
-			p2.put("sqldump."+entry.getKey(), entry.getValue());
+			p2.put("sqldump."+entry.getKey(), String.valueOf(entry.getValue()) );
 		}
 	}
 	catch(RuntimeException e) {} 
 	
 	//p2.load(application.getResourceAsStream("/queryon-version.properties"));
-	for(Map.Entry<Object, Object> entry: p2.entrySet()) {
+	for(Map.Entry<String, String> entry: p2.entrySet()) {
 		if(i>0) { out.write(",\n"); }
 		out.write(sqd.get((String)entry.getKey())+": "+sqd.get((String)entry.getValue()));
 		i++;
