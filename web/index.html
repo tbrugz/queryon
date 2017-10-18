@@ -149,6 +149,8 @@
 				tableHeaders[i].style.top = navHeight; /* nav height */
 			}
 		}
+		
+		setDisplayNone('download-ext');
 	}
 	
 	function updateFromFilters() {
@@ -839,7 +841,7 @@
 			objectName = select.options[select.selectedIndex].value;
 		}
 		
-		var closeJs = "byId(\""+elem.id+"\").style.display=\"none\";";
+		var closeJs = "setDisplayNone(\""+elem.id+"\");";
 		var str = "";
 		
 		str += "<input value='close' onclick='"+closeJs+"' type='button'>";
@@ -860,8 +862,18 @@
 			elem.style.top = (rect.top + 20) + "px";
 			elem.style.left = rect.left + "px";
 			//console.log(rect, node);
+			
+			if(elem.getBoundingClientRect().right > document.documentElement.clientWidth) {
+				//console.log("partially invisible...");
+				elem.style.left = (rect.right - elem.getBoundingClientRect().width) + "px";
+			}
 		}
 		
+	}
+	
+	function setDisplayNone(id) {
+		var elem = byId(id);
+		if(elem) { elem.style.display="none"; }
 	}
 	
 	</script>
