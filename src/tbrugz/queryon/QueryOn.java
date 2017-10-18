@@ -92,6 +92,7 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
@@ -468,6 +469,8 @@ public class QueryOn extends HttpServlet {
 		
 		defaultLimit = Utils.getPropInt(prop, QueryOn.PROP_DEFAULT_LIMIT);
 		maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
+		
+		SQLUtils.setProperties(prop);
 	}
 	
 	boolean grabModel(Map<String, SchemaModel> models, String id) {
