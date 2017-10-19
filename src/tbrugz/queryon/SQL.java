@@ -257,8 +257,14 @@ public class SQL {
 		sql = "select "+columns+" from (\n"+sql+"\n) qon_projection "+sqlFilter+sqlOrder;
 	}
 	
+	// XXX: should be private?
 	protected void addCount() {
 		sql = "select count(*) as count from (\n"+sql+"\n) qon_count ";
+	}
+	
+	public void applyCount(RequestSpec reqspec) {
+		if(!reqspec.count) { return; }
+		addCount();
 	}
 	
 	public void applyOrder(RequestSpec reqspec) {
@@ -266,7 +272,10 @@ public class SQL {
 		if(reqspec.orderCols.size()==0) return;
 		
 		List<String> relationCols = null;
-		if(relation!=null) {
+		if(hasGroupBy(reqspec)) {
+			relationCols = reqspec.groupby;
+		}
+		else if(relation!=null) {
 			relationCols = relation.getColumnNames();
 		}
 		
@@ -403,9 +412,11 @@ public class SQL {
 	
 	private static String createSQLColumns(RequestSpec reqspec, Relation table) {
 		String columns = "*";
+		List<String> aliases = hasGroupBy(reqspec) ? null : reqspec.aliases;
+		
 		if(reqspec.columns.size()>0) {
 			List<String> tabColsList = table.getColumnNames();
-			checkAliases(reqspec);
+			if(aliases!=null) { checkAliases(aliases, reqspec.columns); }
 			Set<String> tabCols = new HashSet<String>(tabColsList);
 			List<String> sqlCols = new ArrayList<String>(); 
 			for(String reqColumn: reqspec.columns) {
@@ -419,7 +430,7 @@ public class SQL {
 				}
 			}
 			if(sqlCols.size()>0) {
-				columns = getColumnsStr(sqlCols, reqspec.aliases);
+				columns = getColumnsStr(sqlCols, aliases);
 			}
 			else {
 				log.warn("no valid column specified. defaulting to 'all'");
@@ -427,9 +438,9 @@ public class SQL {
 		}
 		else {
 			List<String> cols = table.getColumnNames();
-			checkAliases(reqspec.aliases, cols);
+			if(aliases!=null) { checkAliases(aliases, cols); }
 			if(cols!=null) {
-				columns = getColumnsStr(cols, reqspec.aliases);
+				columns = getColumnsStr(cols, aliases);
 			}
 		}
 		if(reqspec.distinct) {
@@ -438,11 +449,13 @@ public class SQL {
 		return columns;
 	}
 	
-	static void checkAliases(RequestSpec reqspec) {
+	/*static void checkAliases(RequestSpec reqspec) {
 		checkAliases(reqspec.aliases, reqspec.columns);
-	}
+	}*/
 	
 	static void checkAliases(Collection<String> aliases, Collection<String> cols) {
+		if(aliases==null) { return; }
+		
 		int asize = aliases.size();
 		int csize = cols!=null?cols.size():0;
 		if(asize>0 && asize!=csize) {
@@ -701,6 +714,39 @@ public class SQL {
 		}
 	}
 	
-
+	public static boolean hasGroupBy(RequestSpec reqspec) {
+		return reqspec.groupby.size()>0;
+	}
+	
+	public void applyGroupBy(RequestSpec reqspec) {
+		if(!hasGroupBy(reqspec)) { return; }
+		
+		List<String> relationCols = null;
+		if(relation!=null) {
+			relationCols = relation.getColumnNames();
+		}
+		
+		List<String> sqlCols = new ArrayList<String>();
+		for(String reqColumn: reqspec.groupby) {
+			if(relationCols==null || MiscUtils.containsIgnoreCase(relationCols, reqColumn)) {
+				sqlCols.add(reqColumn);
+			}
+			else {
+				String message = "column not found: '"+reqColumn+"' [relation: "+relation.getQualifiedName()+"]";
+				log.warn(message);
+				throw new BadRequestException(message);
+			}
+		}
+		String columnsWithAliases = getColumnsStr(sqlCols, reqspec.aliases);
+		String columns = getColumnsStr(sqlCols, null);
+		
+		//TODO: add aggregates!
+		
+		sql = "select "+columnsWithAliases+" from (\n"+sql+"\n) qon_group\ngroup by "+columns;
+		if(sql.contains(PARAM_ORDER_CLAUSE)) {
+			sql = sql.replace(PARAM_ORDER_CLAUSE, "");
+		}
+		sql += "\n"+PARAM_ORDER_CLAUSE;
+	}
 
 }

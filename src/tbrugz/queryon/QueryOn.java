@@ -996,6 +996,9 @@ public class QueryOn extends HttpServlet {
 		
 		// projection (select columns) - also adds 'distinct' if requested
 		sql.applyProjection(reqspec, relation);
+		
+		// group by
+		sql.applyGroupBy(reqspec);
 
 		// order by
 		sql.applyOrder(reqspec);
@@ -1021,9 +1024,7 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.addLimitOffset(loStrategy, getLimit(sql.limit, defaultLimit, finalMaxLimit), reqspec.offset);
 		
-		if(reqspec.count) {
-			sql.addCount();
-		}
+		sql.applyCount(reqspec);
 		
 		//query finished!
 		

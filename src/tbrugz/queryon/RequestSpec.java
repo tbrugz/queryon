@@ -82,6 +82,8 @@ public class RequestSpec {
 	public static final String PARAM_COUNT = "count";
 	public static final String PARAM_LO_STRATEGY = "lostrategy";
 	public static final String PARAM_FIELD_ALIASES = "aliases";
+	public static final String PARAM_GROUP_BY = "groupby";
+	public static final String PARAM_GROUP_BY_DIMS = "groupbydims";
 	
 	// "blob" parameters
 	public static final String PARAM_VALUEFIELD = "valuefield";
@@ -123,6 +125,7 @@ public class RequestSpec {
 	protected final List<String> columns = new ArrayList<String>();
 	protected final List<String> aliases = new ArrayList<String>();
 	protected final List<String> params = new ArrayList<String>();
+	protected final List<String> groupby = new ArrayList<String>();
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
 	final boolean distinct;
@@ -373,6 +376,11 @@ public class RequestSpec {
 			addAllWithTrim(aliases, aliasesParameter);
 		}
 
+		String groupByStr = req.getParameter(PARAM_GROUP_BY);
+		if(groupByStr!=null) {
+			addAllWithTrim(groupby, groupByStr);
+		}
+		
 		String onColsPar = req.getParameter(PARAM_ONCOLS);
 		if(onColsPar!=null) {
 			addAllWithTrim(oncols, onColsPar);
@@ -392,6 +400,17 @@ public class RequestSpec {
 			columns.addAll(onrows);
 			columns.addAll(oncols);
 			addAllWithTrim(columns, measuresPar);
+		}
+		boolean groupByDims = Utils.getPropBool(prop, PARAM_GROUP_BY_DIMS);
+		if(groupByDims) {
+			if(onrows.size()==0 && oncols.size()==0) {
+				throw new BadRequestException("can't define '"+PARAM_GROUP_BY_DIMS+"' without 'onrows' or 'oncols' parameters");
+			}
+			if(groupby.size()>0) {
+				throw new BadRequestException("can't define both '"+PARAM_GROUP_BY_DIMS+"' & '"+PARAM_GROUP_BY+"' parameters");
+			}
+			groupby.addAll(onrows);
+			groupby.addAll(oncols);
 		}
 		String pivotStr = req.getParameter(PARAM_PIVOTFLAGS);
 		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
