@@ -14,7 +14,7 @@ function addDiffBtns() {
 	for(var i=0;i<adds.length;i++) {
 		//console.log(adds[i]);
 		var add = adds[i];
-		var remove = add.nextElementSibling;
+		var remove = add.parentElement.querySelector(".remove")
 		var addtxt = add.innerHTML;
 		var removetxt = remove.innerHTML;
 		// ␀ - &#9216; - \u2400
@@ -33,7 +33,7 @@ function diffcell(i) {
 	var adds = getAddElements();
 	
 	var add = adds[i];
-	var remove = add.nextElementSibling;
+	var remove = add.parentElement.querySelector(".remove")
 	
 	console.log("add/remove[", i, "]:" , add, remove);
 	
@@ -44,8 +44,17 @@ function diffcell(i) {
 	
 	var diffed = diffUsingJS(0, remove.textContent, add.textContent, fromTitle, toTitle, 'diffoutput', false);
 	if(diffed) {
-		byId('diffcontrols').innerHTML = "<span class=\"closebtn\" onclick=\"byId('diffoutputcontainer').style.display='none'\" title=\"close\">X</span>";
+		byId('diffcontrols').innerHTML = "<span class=\"closebtn\" onclick=\"closeDiff();\" title=\"close\">X</span>";
 	}
+	
+	var table = document.querySelectorAll('table')[0];
+	table.style.display = 'none';
+}
+
+function closeDiff() {
+	byId('diffoutputcontainer').style.display='none';
+	var table = document.querySelectorAll('table')[0];
+	table.style.display = 'block';
 }
 
 removeTrailingWhitespace = function(txt) {
