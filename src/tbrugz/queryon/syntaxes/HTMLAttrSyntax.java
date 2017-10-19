@@ -21,7 +21,6 @@ import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.datadump.HierarchicalDumpSyntax;
 import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
-import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: pivot: know limitation: attributes doesn't work with measures in rows
@@ -298,8 +297,8 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			if(finalColNames.contains(colName)) {
 				Object origVal = vals.get(i);
 				Class<?> ctype = lsColTypes.get(i);
-				boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
-				boolean isArray = Array.class.isAssignableFrom(ctype);
+				boolean isResultSet = DataDumpUtils.isResultSet(ctype, origVal);
+				boolean isArray = DataDumpUtils.isArray(ctype, origVal);
 				if(isResultSet || isArray) {
 					ResultSet rsInt = null;
 					if(isArray) {
