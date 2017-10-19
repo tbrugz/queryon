@@ -18,7 +18,7 @@ function loadAuthInfo() { //callback?
 	var url = "auth/info.jsp";
 	
 	var request = new XMLHttpRequest();
-	request.open("POST", url, true);
+	request.open("GET", url, true);
 	request.onload = function(oEvent) {
 		var info = JSON.parse(oEvent.target.responseText);
 		console.log('authInfo', info);
