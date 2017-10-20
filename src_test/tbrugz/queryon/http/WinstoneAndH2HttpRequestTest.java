@@ -75,6 +75,8 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	static int relationsInModel = 3;
 	
+	static final String LF = "\r\n";
+	
 	@BeforeClass
 	public static void setup() throws Exception {
 		//TestSetup.setupWinstone();
@@ -1056,6 +1058,42 @@ public class WinstoneAndH2HttpRequestTest {
 			//String resp = getContentFromUrl(url);
 			//System.out.println("swaggerGsonCall: resp = "+resp);
 		}
+	}
+
+	@Test
+	public void testGetGroupBy() throws Exception {
+		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("SUPERVISOR_ID" + LF + 
+				"1" + LF +
+				"2" + LF,
+				content);
+	}
+	
+	@Test
+	public void testGetGroupByWithOrder() throws Exception {
+		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("SUPERVISOR_ID" + LF + 
+				"2" + LF +
+				"1" + LF,
+				content);
+	}
+
+	@Test
+	public void testGetGroupByWithOrderAndAliases() throws Exception {
+		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID&aliases=supervisor";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("supervisor" + LF + 
+				"2" + LF +
+				"1" + LF,
+				content);
 	}
 	
 }
