@@ -404,7 +404,7 @@ public class RequestSpec {
 			columns.addAll(oncols);
 			addAllWithTrim(columns, measuresPar);
 		}
-		boolean groupByDims = Utils.getPropBool(prop, PARAM_GROUP_BY_DIMS);
+		boolean groupByDims = getBoolValue(req.getParameter(PARAM_GROUP_BY_DIMS));
 		if(groupByDims) {
 			if(onrows.size()==0 && oncols.size()==0) {
 				throw new BadRequestException("can't define '"+PARAM_GROUP_BY_DIMS+"' without 'onrows' or 'oncols' parameters");

@@ -1120,4 +1120,16 @@ public class WinstoneAndH2HttpRequestTest {
 				content);
 	}
 	
+	@Test
+	public void testGetGroupByWithAggregatePivot() throws Exception {
+		String url = "/PUBLIC.EMP.csv?onrows=SUPERVISOR_ID&groupbydims=true&agg:SALARY=sum&agg:SALARY=count";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY,count_SALARY" + LF + 
+				"1,3000,2" + LF +
+				"2,4200,3" + LF,
+				content);
+	}
+	
 }
