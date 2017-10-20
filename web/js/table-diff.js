@@ -48,13 +48,13 @@ function diffcell(i) {
 	}
 	
 	var table = document.querySelectorAll('table')[0];
-	table.style.display = 'none';
+	table.style.visibility='hidden'
 }
 
 function closeDiff() {
 	byId('diffoutputcontainer').style.display='none';
 	var table = document.querySelectorAll('table')[0];
-	table.style.display = 'block';
+	table.style.visibility=''
 }
 
 removeTrailingWhitespace = function(txt) {
