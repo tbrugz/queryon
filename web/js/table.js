@@ -122,11 +122,13 @@ function mergeDimensions() {
 	for(var i=lastDimRow ; i>=0 ; i--) {
 		var colname = trs[i].getAttribute("colname");
 		var measuresrow = trs[i].getAttribute("measuresrow");
-		if(!colname && !measuresrow) { break; }
+		//console.log("i",i,"colname",colname,"measuresrow",measuresrow);
+		if(!colname && !measuresrow) { continue; }
 		var ths = trs[i].querySelectorAll("th");
 		//console.log(i,"colname:",colname,"ths",ths);
 		loop1:
 		for(var j=ths.length-1;j>=0;j--) {
+			if(colname) { ths[j].setAttribute("title", "dim: "+colname); }
 			if( ths[j].innerText && ths[j-1] && (ths[j].innerText===ths[j-1].innerText) ) {
 				//XXXdone do not merge if upper row columns are not equally merged
 				for(var z=i-1; z>=0 ; z--) {
