@@ -1096,4 +1096,28 @@ public class WinstoneAndH2HttpRequestTest {
 				content);
 	}
 	
+	@Test
+	public void testGetGroupByWithAggregate() throws Exception {
+		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID&agg:SALARY=sum";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY" + LF + 
+				"2,4200" + LF +
+				"1,3000" + LF,
+				content);
+	}
+
+	@Test
+	public void testGetGroupByWithAggregate4() throws Exception {
+		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID&agg:SALARY=sum&agg:SALARY=max&agg:SALARY=min&agg:SALARY=count";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY,max_SALARY,min_SALARY,count_SALARY" + LF + 
+				"2,4200,2000,1000,3" + LF +
+				"1,3000,2000,1000,2" + LF,
+				content);
+	}
+	
 }

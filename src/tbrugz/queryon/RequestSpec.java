@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -126,6 +127,8 @@ public class RequestSpec {
 	protected final List<String> aliases = new ArrayList<String>();
 	protected final List<String> params = new ArrayList<String>();
 	protected final List<String> groupby = new ArrayList<String>();
+	protected final Map<String, String[]> aggregate = new TreeMap<String, String[]>();
+	
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
 	final boolean distinct;
@@ -499,6 +502,8 @@ public class RequestSpec {
 				
 				setBooleanParam("fnull:", key, filterNull);
 				setBooleanParam("fnotnull:", key, filterNotNull);
+				
+				setMultiParam("agg:", key, value, aggregate);
 				
 				setUniParam("v:", key, value[0], updateValues);
 			}

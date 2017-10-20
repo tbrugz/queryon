@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -740,13 +741,60 @@ public class SQL {
 		String columnsWithAliases = getColumnsStr(sqlCols, reqspec.aliases);
 		String columns = getColumnsStr(sqlCols, null);
 		
-		//TODO: add aggregates!
+		// aggregates
+		String aggs = getColumnAggregates(reqspec.aggregate, relationCols);
+		if(aggs!=null) {
+			columnsWithAliases += ", "+aggs;
+		}
 		
 		sql = "select "+columnsWithAliases+" from (\n"+sql+"\n) qon_group\ngroup by "+columns;
 		if(sql.contains(PARAM_ORDER_CLAUSE)) {
 			sql = sql.replace(PARAM_ORDER_CLAUSE, "");
 		}
 		sql += "\n"+PARAM_ORDER_CLAUSE;
+	}
+	
+	static String getFunction(String f) {
+		if(f.equals("avg")) {
+			return "avg";
+		}
+		if(f.equals("count")) {
+			return "count";
+		}
+		if(f.equals("min")) {
+			return "min";
+		}
+		if(f.equals("max")) {
+			return "max";
+		}
+		if(f.equals("sum")) {
+			return "sum";
+		}
+		//XXX: distinct-count
+		//XXX: var? stdev?
+		throw new IllegalArgumentException("unknown aggregate function: "+f);
+	}
+	
+	//XXX: add aliases
+	String getColumnAggregates(Map<String, String[]> aggregate, List<String> colNames) {
+		if(aggregate==null || aggregate.size()==0) { return null; }
+		
+		int count = 0;
+		StringBuilder sb = new StringBuilder();
+		for(Map.Entry<String, String[]> entry: aggregate.entrySet()) {
+			String col = entry.getKey();
+			if(colNames!=null && !colNames.contains(col)) {
+				throw new IllegalArgumentException("unknown column: "+col);
+			}
+			String[] functions = entry.getValue();
+			for(String f: functions) {
+				String func = getFunction(f);
+				sb.append((count>0?", ":"")+
+						func+"( "+sqlIdDecorator.get(col)+" )"+" as "+sqlIdDecorator.get(func+"_"+col));
+				count++;
+			}
+		}
+		return sb.toString();
 	}
 
 }
