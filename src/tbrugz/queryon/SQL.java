@@ -273,7 +273,7 @@ public class SQL {
 		if(reqspec.orderCols.size()==0) return;
 		
 		List<String> relationCols = null;
-		if(hasGroupBy(reqspec)) {
+		if(hasGroupByOrAggregate(reqspec)) {
 			relationCols = reqspec.groupby;
 		}
 		else if(relation!=null) {
@@ -413,7 +413,7 @@ public class SQL {
 	
 	private static String createSQLColumns(RequestSpec reqspec, Relation table) {
 		String columns = "*";
-		List<String> aliases = hasGroupBy(reqspec) ? null : reqspec.aliases;
+		List<String> aliases = hasGroupByOrAggregate(reqspec) ? null : reqspec.aliases;
 		
 		if(reqspec.columns.size()>0) {
 			List<String> tabColsList = table.getColumnNames();
@@ -715,12 +715,12 @@ public class SQL {
 		}
 	}
 	
-	public static boolean hasGroupBy(RequestSpec reqspec) {
-		return reqspec.groupby.size()>0;
+	public static boolean hasGroupByOrAggregate(RequestSpec reqspec) {
+		return reqspec.groupby.size()>0 || reqspec.aggregate.size()>0;
 	}
 	
-	public void applyGroupBy(RequestSpec reqspec) {
-		if(!hasGroupBy(reqspec)) { return; }
+	public void applyGroupByOrAggregate(RequestSpec reqspec) {
+		if(!hasGroupByOrAggregate(reqspec)) { return; }
 		
 		List<String> relationCols = null;
 		if(relation!=null) {
@@ -744,10 +744,16 @@ public class SQL {
 		// aggregates
 		String aggs = getColumnAggregates(reqspec.aggregate, relationCols);
 		if(aggs!=null) {
-			columnsWithAliases += ", "+aggs;
+			if(sqlCols.size()>0) {
+				columnsWithAliases += ", "+aggs;
+			}
+			else {
+				columnsWithAliases = aggs;
+			}
 		}
 		
-		sql = "select "+columnsWithAliases+" from (\n"+sql+"\n) qon_group\ngroup by "+columns;
+		sql = "select "+columnsWithAliases+" from (\n"+sql+"\n) qon_group" +
+				(sqlCols.size()>0?"\ngroup by "+columns:"");
 		if(sql.contains(PARAM_ORDER_CLAUSE)) {
 			sql = sql.replace(PARAM_ORDER_CLAUSE, "");
 		}

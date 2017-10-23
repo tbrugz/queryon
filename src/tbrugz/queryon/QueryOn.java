@@ -998,7 +998,7 @@ public class QueryOn extends HttpServlet {
 		sql.applyProjection(reqspec, relation);
 		
 		// group by
-		sql.applyGroupBy(reqspec);
+		sql.applyGroupByOrAggregate(reqspec);
 
 		// order by
 		sql.applyOrder(reqspec);
