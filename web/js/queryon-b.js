@@ -362,6 +362,15 @@ function getColumnNamesFromColgroup(containerId) {
 	return colNames;
 }
 
+function getColumnNames(containerId) {
+	var cols = getColumnNamesFromColgroup(containerId);
+	if(cols==null || cols.length==0) {
+		var relation = getCurrentRelation('objects');
+		cols = getColumnsFromRelation(relation);
+	}
+	return cols;
+}
+
 /* returns only htmlx visible column types */
 function getColumnTypesFromColgroup(containerId) {
 	var colTypes = [];
@@ -421,10 +430,11 @@ function getColumnsTypesFromHash() {
 function getValuesFromColumn(containerId, columnName) {
 	//var cols = getColumnsFromContainer(containerId);
 	var relation = getCurrentRelation('objects');
-	var cols = getColumnNamesFromColgroup(containerId);
+	var cols = getColumnNames(containerId);
+	/*var cols = getColumnNamesFromColgroup(containerId);
 	if(cols==null || cols.length==0) {
 		cols = getColumnsFromRelation(relation);
-	}
+	}*/
 	var colPos = cols.indexOf(columnName);
 	if(colPos==-1) {
 		console.log("column "+columnName+" not found");
