@@ -126,6 +126,7 @@ function makeOneHref(objectName, syntax, modelId) {
 	if(modelId) {
 		href += "&model="+modelId;
 	}
+	href = getPivotURL(href);
 	return href;
 }
 
@@ -203,9 +204,11 @@ function makeHrefs() {
 	
 	if(urlpl) {
 		urlpl.href = urlAddFilterOrderOffset(urlpl.href);
+		urlpl.href = getPivotURL(urlpl.href);
 	}
 	if(urldown) {
 		urldown.href = urlAddFilterOrderOffset(urldown.href);
+		urldown.href = getPivotURL(urldown.href);
 	}
 	if(urldownByExt) {
 		//urldownByExt.href = urlAddFilterOrderOffset(urldownByExt.href);

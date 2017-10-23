@@ -177,7 +177,7 @@
 				if(byId(filterColId)) {
 					byId(filterColId).classList.add('filter-selected');
 				}
-				console.log('updateFromFilters', item, colname);
+				//console.log('updateFromFilters', item, colname);
 			}
 		}
 	}
@@ -187,13 +187,19 @@
 		str += colName;
 		document.getElementById('order').value = str;
 		makeHrefs();
-		doRun('objects', 'content', 'messages', doRunCallback);
+		doRun('objects', 'content', 'messages', doRunCallback, doRunErrorCallback);
 	}
 
 	function sortByNone() {
 		document.getElementById('order').value = '';
 		makeHrefs();
 		doRun('objects', 'content', 'messages', doRunCallback);
+	}
+	
+	function doRunErrorCallback(request) {
+		document.getElementById('order').value = '';
+		makeHrefs();
+		console.log("doRunErrorCallback: removing order...");
 	}
 	
 	function doRunCallback(request) {
@@ -408,7 +414,7 @@
 				colTypeOrig=="Blob"?"file":
 				"text";
 			//var colDbType = cols[i].getAttribute("dbtype");
-			console.log(">>>", cols[i], colTypes[i], colDbTypes[i]);
+			//console.log(">>>", cols[i], colTypes[i], colDbTypes[i]);
 			//console.log("col["+i+"]: ",cols[i],"--",allowUpdate,"---",relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
 			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
 			
@@ -672,7 +678,7 @@
 		});
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnUpdate');
-			console.log(jqXHR);
+			console.log("reloadTables: fail: ", jqXHR);
 		});
 	}
 
@@ -709,7 +715,7 @@
 			btnActionStop('btnUpdate');
 			appendMessages(messagesId, ' - error validating executable '+(execName?'<code>'+execName+'</code>':'')+' [status='+textStatus+']');
 			changeMessagesClass(messagesId, 'error');
-			console.log("xhr: ",jqXHR,"; error",errorThrown);
+			console.log("reloadExecs: fail: xhr: ",jqXHR,"; error",errorThrown);
 		});
 	}
 	
@@ -823,7 +829,7 @@
 		if(offsetVal) {
 			document.getElementById('offset').value = offsetVal;
 		}
-		console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
+		//console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
 		updateState();
 	}
 	
@@ -979,6 +985,9 @@
 		var dragto = event.target;
 		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
 		dragto.appendChild(col);
+		//TODO drop: if measure, add select for aggregate function
+		
+		makeHrefs();
 	}
 	
 	</script>

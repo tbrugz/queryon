@@ -112,6 +112,8 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	}
 	queryString += "&" + utf8par;
 	
+	queryString = getPivotURL(queryString);
+
 	//console.log('query-string: '+queryString);
 	var returl = (baseUrlParam?baseUrlParam:baseUrl)
 		+'/'+id+paramsStr
@@ -122,7 +124,48 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	return returl;
 }
 
-function doRun(selectId, containerId, messagesId, callback) {
+function getPivotURL(url) {
+	var pivots = byId('pivots');
+	if(pivots && pivots.style.display!='none') {
+		var measureAgg = "count"; //XXX: fix it
+		
+		var oncols = byId('oncols').querySelectorAll('.col');
+		var oncolsArr = getNodeListAttributeAsArray(oncols, 'data-value');
+		
+		var onrows = byId('onrows').querySelectorAll('.col');
+		var onrowsArr = getNodeListAttributeAsArray(onrows, 'data-value');
+
+		var measures = byId('measures').querySelectorAll('.col');
+		var measuresArr = getNodeListAttributeAsArray(measures, 'data-value');
+		
+		//console.log(">> pivot: cols:", oncolsArr, "rows:", onrowsArr, "measures:", measuresArr);
+		
+		if(oncols.length>0 || onrows.length>0 || measures.length>0) {
+			var measuresStr = "";
+			for(var i=0;i<measuresArr.length;i++) {
+				measuresStr += "&agg:"+measuresArr[i]+"="+measureAgg;
+			}
+			var newUrl = url +
+				(oncols.length>0?"&oncols="+oncolsArr.join():"") +
+				(onrows.length>0?"&onrows="+onrowsArr.join():"") +
+				(oncols.length>0 || onrows.length>0?"&groupbydims=true":"") +
+				measuresStr;
+			//console.log(">> pivot: newUrl:", newUrl);
+			return newUrl;
+		}
+	}
+	return url;
+}
+
+function getNodeListAttributeAsArray(nodelist, attr) {
+	var arr = [];
+	for(var i=0;i<nodelist.length;i++) {
+		arr.push(nodelist[i].getAttribute(attr));
+	}
+	return arr;
+}
+
+function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 	var finalUrl = getQueryUrl(selectId, 'htmlx');
 	
 	btnActionStart('go-button');
@@ -151,7 +194,7 @@ function doRun(selectId, containerId, messagesId, callback) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
 			container.innerHTML = data;
-			console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
+			//console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
 			closeMessages(messagesId);
 			addSortHrefs(containerId, order);
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
@@ -162,6 +205,7 @@ function doRun(selectId, containerId, messagesId, callback) {
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
 			showErrorMessages(messagesId, jqXHR.responseText);
+			if(errorCallback) { errorCallback(errorThrown); }
 			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 			//$('#'+messagesId).attr('class','error');
 		}
@@ -177,6 +221,11 @@ function addSortHrefs(containerId, order) {
 	//console.log('headers.length: '+headers.length);
 	for(var i=0;i<headers.length;i++) {
 		var elem = headers[i];
+		if(elem.classList.contains("blank")) { continue; }
+		if(elem.getAttribute("measure")=="true" ||
+				elem.parentNode.getAttribute("measuresrow")=="true" ||
+				elem.parentNode.getAttribute("colname")!=null) { continue; } //XXX really needed?
+		
 		var colname = elem.innerHTML;
 		var idx = colname.indexOf('<');
 		if(idx>0) {
@@ -242,7 +291,7 @@ function setParameters(parametersId, numparams) {
 
 function setParametersValues(values) {
 	var params = document.querySelectorAll('.parameter');
-	console.log('setParametersValues: ', params, values);
+	//console.log('setParametersValues: ', params, values);
 	for(var i=0;i<params.length;i++) {
 		if(values.length>i) {
 			params[i].value = values[i];
