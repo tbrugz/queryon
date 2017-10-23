@@ -111,12 +111,29 @@ input[type=button].simplebutton {
 	display: inline-block;
 }
 
+button {
+	cursor: pointer;
+	border: 0;
+	padding: 3px 9px 3px 9px;
+	font-weight: bold;
+	margin: 0px 1px 0px 1px;
+	background-color: rgb(221, 221, 221);
+}
+
+button.on {
+	background-color: #eaa845; /* #ddab60; #f90; */
+}
+
 input[type=button] {
 	border: 0;
 	padding: 3px 9px 3px 9px;
 	font-weight: bold;
 	margin: 0px 1px 0px 1px;
 	background-color: rgb(221, 221, 221);
+}
+
+span[draggable=true]:hover {
+	cursor: grab;
 }
 
 input.mainaction {

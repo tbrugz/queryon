@@ -876,6 +876,111 @@
 		if(elem) { elem.style.display="none"; }
 	}
 	
+	function togglePivotDialog() {
+		var btn = byId('btn-pivot-toggle');
+		var pivots = byId('pivots');
+		var isOn = btn.classList.contains("on");
+		if(isOn) {
+			btn.classList.remove("on");
+			pivots.style.display='none';
+		}
+		else {
+			btn.classList.add("on");
+			pivots.style.display='block';
+			updatePivotCols();
+		}
+		updateUI();
+	}
+	
+	function updatePivotCols() {
+		var cols = getColumnNames('content');
+		var unusedcols = byId('unusedcols');
+		//XXX only add not-present cols
+		unusedcols.innerHTML = '';
+		
+		var existing = byId('pivots').querySelectorAll('.col');
+		var existingData = [];
+		for(var i=existing.length-1;i>=0;i--) {
+			//console.log(existing[i]);
+			var dv = existing[i].getAttribute('data-value');
+			if(cols.indexOf(dv)==-1) {
+				existing[i].parentNode.removeChild(existing[i]);
+			}
+			else {
+				existingData.push(dv);
+			}
+		}
+		//console.log("updatePivotCols: existingData: ",existingData);
+		for(var i=0;i<cols.length;i++) {
+			if(existingData.indexOf(cols[i])==-1) {
+				unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
+			}
+		}
+	}
+	
+	// see: https://html.spec.whatwg.org/multipage/dnd.html#dnd
+	var internalDNDType = 'text/x-example'; // set this to something specific to your site
+
+	function dragStartHandler(event) {
+		//console.log('dragStartHandler');
+		if (event.target instanceof HTMLSpanElement) {
+			// use the element's data-value="" attribute as the value to be moving:
+			event.dataTransfer.setData(internalDNDType, event.target.dataset.value);
+			event.dataTransfer.effectAllowed = 'move'; // only allow moves
+		} else {
+			event.preventDefault(); // don't allow selection to be dragged
+		}
+	}
+
+	function dragEnterHandler(event) {
+		//console.log('dragEnterHandler');
+		var items = event.dataTransfer.items;
+		for (var i = 0; i < items.length; ++i) {
+			var item = items[i];
+			if (item.kind == 'string' && item.type == internalDNDType) {
+				event.preventDefault();
+				return;
+			}
+		}
+	}
+	
+	function dragOverHandler(event) {
+		//console.log('dragOverHandler');
+		event.dataTransfer.dropEffect = 'move';
+		event.preventDefault();
+	}
+	
+	function dropHandler(event) {
+		var col = document.createElement('span');
+		var data = event.dataTransfer.getData(internalDNDType);
+		col.classList.add("col");
+		col.setAttribute("draggable", "true");
+		col.setAttribute("data-value", data);
+		col.textContent = data;
+		//unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
+		console.log('dropHandler', col, data, event);
+
+		//remove old
+		var pivots = byId('pivots');
+		var origCol = pivots.querySelector('.col[data-value='+data+']');
+		//console.log('dropHandler2', origCol, col);
+		var removed = origCol.parentNode.removeChild(origCol);
+		if(! removed) {
+			console.log("not removed: "+origCol+" -- "+removed);
+		}
+		
+		/*
+		var origCols = pivots.querySelectorAll('.col[data-value='+data+']');
+		console.log('dropHandler2', origCols, col);
+		for(var i=0;i<origCols.length;i++) {
+			origCols[i].parentNode.removeChild(origCols[i]);
+		}
+		*/
+		var dragto = event.target;
+		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
+		dragto.appendChild(col);
+	}
+	
 	</script>
 	<style type="text/css">
 	#objects {
@@ -963,6 +1068,44 @@
 		padding: 2px 8px;
 	}
 	
+	#pivots {
+		margin: 4px 16px 2px 16px;
+		background-color: #666;
+	}
+	
+	.pivotcols {
+		padding: 2px 8px;
+		/* height: 1.4em; */
+		/* margin: 0px 1px 0px 2px; */
+		border: solid 1px #767676;
+	}
+	
+	.dimlabel {
+		/*float: left;*/
+		/*width: 6em;*/
+	}
+	
+	.pivotcols button {
+		/*float: left;
+		width: 7em;
+		text-align: left;*/
+		display: none;
+	}
+	
+	.pivotcols .col {
+		border: 1px solid #ccc;
+		margin: 0 2px;
+		padding: 1px;
+	}
+	
+	.ondim {
+		min-width: 40em;
+		min-height: 1.4em;
+		border: 1px dashed #ccc;
+		background-color: #888;
+		display: inline-block;
+	}
+	
 	@media screen {
 		#nav {
 			position: fixed;
@@ -1003,6 +1146,9 @@
 		<span id="parameters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilterDialog();" title="add filter"/>
+		<!-- <button id="btn-pivot-toggle" type="submit" value="" onclick="togglePivotDialog();" title="pivot query">
+			<i class="fa fa-cubes"></i>
+		</button> -->
 		<!-- TODOne limit/offset or page/pagesize -->
 		<label id="offset-label">offset: <input type="text" name="offset" id="offset" onchange="makeHrefs();"/></label>
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRun('objects', 'content', 'messages', doRunCallback);" title="execute query"/>
@@ -1026,7 +1172,13 @@
 		<span id="authaction"></span>
 	</span>
 	
-	<span id="filters"></span>
+	<div id="pivots" style="display: none" ondragstart="dragStartHandler(event)">
+		<div class="pivotcols"><span class="dimlabel" title="unused columns">All (unused) cols:</span> <div class="ondim" id="unusedcols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
+		<div class="pivotcols"><span class="dimlabel">Columns:</span> <button value="">+ col</button> <div class="ondim" id="oncols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
+		<div class="pivotcols"><span class="dimlabel">Rows:</span> <button value="">+ row</button> <div class="ondim" id="onrows" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
+		<div class="pivotcols"><span class="dimlabel">Measures:</span> <button value="">+ measure</button> <div class="ondim" id="measures" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
+	</div>
+	<div id="filters"></div>
 	<div id="messages"></div>
 </nav>
 
