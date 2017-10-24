@@ -93,6 +93,11 @@ The source and target nodes may have special properties, as follows:
 * `[SOURCE|TARGET]_COLOR` - source/target color, value should be a valid [web color](https://en.wikipedia.org/wiki/Web_colors), e.g.: `#ccc`
 * `[SOURCE|TARGET]_SIZE` - source/target size, default is `1`
 
+The edges may have special properties, as follows:
+
+* `EDGE_COLOR` - edge color, value should be a valid [web color](https://en.wikipedia.org/wiki/Web_colors), e.g.: `#ccc`
+* `EDGE_SIZE` - edge size (width)
+
 Default implementation of graphs visualization uses the [Sigma.js javascript library](http://sigmajs.org/).
 
 **map**

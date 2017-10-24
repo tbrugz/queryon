@@ -261,6 +261,11 @@ body {
 		}
 		
 		function addNode(graph, prefix, elem) {
+			//console.log("prefix",prefix,"will add node",elem[prefix]);
+			if(!elem[prefix]) {
+				console.log("addNode: null element ; id=", elem[prefix], "prefix=", prefix, "element=", elem);
+				return;
+			}
 			var id = ""+elem[prefix];
 			var label = elem[prefix+"_LABEL"]?elem[prefix+"_LABEL"]:id;
 			var color = elem[prefix+"_COLOR"]?elem[prefix+"_COLOR"]:'#fff';
@@ -274,7 +279,6 @@ body {
 				size : size,
 				color : color,
 			});
-			//console.log("added node "+elem[prefix]);
 		}
 		
 		function getUrlParams() {
@@ -316,42 +320,59 @@ body {
 			var queryString = (modelId ? 'model='+modelId : '') + filterStr;
 			btnActionStart('go-button');
 			var url = 'q/'+qid+paramsStr+'.json?'+queryString;
-			console.log('url['+qid+']: '+url);
+			//console.log('url['+qid+']: '+url);
 			var jqxhr = $.getJSON(url, function(data) {
 				btnActionStop('go-button');
 				data = getQonData(data);
 				s.graph.clear();
 				//console.log(data);
 				//XXX: test if valid query (valid columns)
+				// node priority: SOURCE nodes
 				for(var i=0;i<data.length;i++) {
 					// maybe add source node
 					if(!contains(s.graph,data[i].SOURCE)) {
 						addNode(s.graph, "SOURCE", data[i]);
 					}
+				}
+				for(var i=0;i<data.length;i++) {
 					// maybe add target node
 					if(!contains(s.graph,data[i].TARGET)) {
 						addNode(s.graph, "TARGET", data[i]);
 					}
+				}
+				for(var i=0;i<data.length;i++) {
 					// add edge
 					try {
 						//var eid = data[i].SOURCE+"$"+data[i].TARGET;
 						var eid = "edge"+i;
-						s.graph.addEdge({
+						//var size = 2;
+						var edge = {
 							id : eid,
 							// Reference extremities:
 							source : ""+data[i].SOURCE,
 							target : ""+data[i].TARGET,
 							type: 'arrow',
 							//type : 'curve',
-							size: 2, //increases thickness & arrow size
-						});
-						//console.log("added edge "+eid);
+							//size: size //increases thickness & arrow size
+						}
+						if(! edge.source || !edge.target) {
+							console.log("addEdge: invalid source or target, ignoring", edge);
+							//continue;
+						}
+						if(data[i].EDGE_SIZE) {
+							edge.size = data[i].EDGE_SIZE;
+						}
+						if(data[i].EDGE_COLOR) {
+							edge.color = data[i].EDGE_COLOR;
+						}
+						s.graph.addEdge(edge);
+						//console.log("added edge [",eid,"]: ",edge);
 					}
 					catch (e) {
-						console.log(e+" / i: "+i+" ; source: "+data[i].SOURCE+" ; target: "+data[i].TARGET);
+						console.log("addEdge:", e, "; i: ",i," ; source: ",data[i].SOURCE," ; target: ",data[i].TARGET);
 					}
 				}
-				console.log("#nodes = "+s.graph.nodes().length+" ; #edges = "+s.graph.edges().length);
+				console.log("#nodes =",s.graph.nodes().length," ; #edges =",s.graph.edges().length);
 				// Finally, let's ask our sigma instance to refresh:
 				s.refresh();
 				document.getElementById('graphbuttons').style.display = 'initial';
