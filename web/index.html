@@ -36,6 +36,8 @@
 	
 	var aggregateFunctions = [ "count", "sum", "min", "max", "avg" ];
 	
+	var pivotAllColsAreStatic = false;
+	
 	var onLoad = function() {
 		loadModels(); //loadModelsCallback);
 		loadAuthInfo();
@@ -897,6 +899,15 @@
 			pivots.style.display='block';
 			updatePivotCols();
 		}
+		
+		var allColsLabel = byId('unusedcolsLabel');
+		if(pivotAllColsAreStatic) {
+			allColsLabel.innerHTML = "All cols:";
+		}
+		else {
+			allColsLabel.innerHTML = "All (unused) cols:";
+		}
+		
 		updateUI();
 	}
 	
@@ -912,6 +923,7 @@
 			//console.log(existing[i]);
 			var dv = existing[i].getAttribute('data-value');
 			if(cols.indexOf(dv)==-1) {
+				//console.log("updatePivotCols: removing col", dv, existing[i]);
 				existing[i].parentNode.removeChild(existing[i]);
 			}
 			else {
@@ -930,10 +942,11 @@
 	var internalDNDType = 'text/x-example'; // set this to something specific to your site
 
 	function dragStartHandler(event) {
-		//console.log('dragStartHandler');
+		//console.log('dragStartHandler', event.target.parentElement.id);
 		if (event.target instanceof HTMLSpanElement) {
 			// use the element's data-value="" attribute as the value to be moving:
 			event.dataTransfer.setData(internalDNDType, event.target.dataset.value);
+			event.dataTransfer.setData('text/parent-id', event.target.parentElement.id);
 			event.dataTransfer.effectAllowed = 'move'; // only allow moves
 		} else {
 			event.preventDefault(); // don't allow selection to be dragged
@@ -961,28 +974,34 @@
 	function dropHandler(event) {
 		var col = document.createElement('span');
 		var data = event.dataTransfer.getData(internalDNDType);
+		var origColParentId = event.dataTransfer.getData('text/parent-id');
 		col.classList.add("col");
 		col.setAttribute("draggable", "true");
 		col.setAttribute("data-value", data);
 		col.textContent = data;
 		//unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
-		console.log('dropHandler', col, data, event);
+		console.log('dropHandler', col, data, origColParentId, event);
 
 		//remove old
-		var pivots = byId('pivots');
+		var colContainer = byId(origColParentId); //origCol.parentNode;
+		//var pivots = byId('pivots');
 		var origCol = null;
-		var cols = pivots.querySelectorAll('.col');
+		var cols = colContainer.querySelectorAll('.col');
 		for(var i=0;i<cols.length;i++) {
 			if(cols[i].getAttribute("data-value")==data) {
 				origCol = cols[i];
 			}
 		}
 		//console.log('dropHandler2', origCol, col);
-		var removed = origCol.parentNode.removeChild(origCol);
-		if(! removed) {
-			console.log("not removed: "+origCol+" -- "+removed);
+		if(!pivotAllColsAreStatic || colContainer.id!='unusedcols') {
+			var removed = colContainer.removeChild(origCol);
+			if(! removed) {
+				console.log("not removed: ",origCol," -- ",removed);
+			}
+			else {
+				//console.log("removing: ",origCol," -- ",removed);
+			}
 		}
-		
 		/*
 		var origCols = pivots.querySelectorAll('.col[data-value='+data+']');
 		console.log('dropHandler2', origCols, col);
@@ -992,7 +1011,10 @@
 		*/
 		var dragto = event.target;
 		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
-		dragto.appendChild(col);
+		if(!pivotAllColsAreStatic || dragto.id!='unusedcols') {
+			dragto.appendChild(col);
+		}
+		//console.log("pivotAllColsAreStatic",pivotAllColsAreStatic,"dragto.id",dragto.id);
 		if(dragto.id=="measures") {
 			//console.log("drop at measures!");
 			var div = document.createElement('span');
@@ -1127,6 +1149,7 @@
 		border: 1px solid #ccc;
 		margin: 0 2px;
 		padding: 1px;
+		display: inline-block;
 	}
 	
 	.ondim {
@@ -1209,7 +1232,7 @@
 	</span>
 	
 	<div id="pivots" style="display: none" ondragstart="dragStartHandler(event)">
-		<div class="pivotcols"><span class="dimlabel" title="unused columns">All (unused) cols:</span> <div class="ondim" id="unusedcols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
+		<div class="pivotcols"><span class="dimlabel" id="unusedcolsLabel">All (unused) cols:</span> <div class="ondim" id="unusedcols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
 		<div class="pivotcols"><span class="dimlabel">Columns:</span> <button value="">+ col</button> <div class="ondim" id="oncols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
 		<div class="pivotcols"><span class="dimlabel">Rows:</span> <button value="">+ row</button> <div class="ondim" id="onrows" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
 		<div class="pivotcols"><span class="dimlabel">Measures:</span> <button value="">+ measure</button> <div class="ondim" id="measures" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
