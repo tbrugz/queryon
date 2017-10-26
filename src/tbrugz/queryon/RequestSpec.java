@@ -210,7 +210,7 @@ public class RequestSpec {
 	}
 
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore) throws ServletException, IOException {
-		this(dsutils, req, prop, 0, QueryOn.DEFAULT_OUTPUT_SYNTAX, true, 1, null);
+		this(dsutils, req, prop, prefixesToIgnore, QueryOn.DEFAULT_OUTPUT_SYNTAX, true, 1, null);
 	}
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
