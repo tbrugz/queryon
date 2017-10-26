@@ -96,7 +96,7 @@ The source and target nodes may have special properties, as follows:
 The edges may have special properties, as follows:
 
 * `EDGE_COLOR` - edge color, value should be a valid [web color](https://en.wikipedia.org/wiki/Web_colors), e.g.: `#ccc`
-* `EDGE_SIZE` - edge size (width)
+* `EDGE_WIDTH` - edge width
 
 Default implementation of graphs visualization uses the [Sigma.js javascript library](http://sigmajs.org/).
 

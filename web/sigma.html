@@ -359,9 +359,14 @@ body {
 							console.log("addEdge: invalid source or target, ignoring", edge);
 							//continue;
 						}
-						if(data[i].EDGE_SIZE) {
+						
+						if(data[i].EDGE_WIDTH) {
+							edge.size = data[i].EDGE_WIDTH;
+						}
+						else if(data[i].EDGE_SIZE) {
 							edge.size = data[i].EDGE_SIZE;
 						}
+						
 						if(data[i].EDGE_COLOR) {
 							edge.color = data[i].EDGE_COLOR;
 						}
