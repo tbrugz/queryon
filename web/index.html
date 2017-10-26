@@ -32,7 +32,9 @@
 	
 	var schemaNameFilter = null;
 	
-	var downloadExtFilter = ["csv", "ods", "json", "xml", "xls", "xlsx" ];
+	var downloadExtFilter = [ "csv", "ods", "json", "xml", "xls", "xlsx" ];
+	
+	var aggregateFunctions = [ "count", "sum", "min", "max", "avg" ];
 	
 	var onLoad = function() {
 		loadModels(); //loadModelsCallback);
@@ -991,6 +993,20 @@
 		var dragto = event.target;
 		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
 		dragto.appendChild(col);
+		if(dragto.id=="measures") {
+			//console.log("drop at measures!");
+			var div = document.createElement('span');
+			var s = "<select>";
+			for(var i=0;i<aggregateFunctions.length;i++) {
+				s += "<option value='"+aggregateFunctions[i]+"'>"+aggregateFunctions[i]+"</option>";
+			}
+			s += "</select>";
+			div.innerHTML += s;
+			col.appendChild(div);
+		}
+		else {
+			//remove select? nah...
+		}
 		//TODO drop: if measure, add select for aggregate function
 		
 		makeHrefs();
@@ -1119,6 +1135,11 @@
 		border: 1px dashed #ccc;
 		background-color: #888;
 		display: inline-block;
+	}
+	
+	.ondim select {
+		border: 0;
+		margin-left: 5px;
 	}
 	
 	@media screen {

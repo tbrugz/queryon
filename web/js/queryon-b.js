@@ -127,8 +127,6 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 function getPivotURL(url) {
 	var pivots = byId('pivots');
 	if(pivots && pivots.style.display!='none') {
-		var measureAgg = "count"; //XXX: fix it
-		
 		var oncols = byId('oncols').querySelectorAll('.col');
 		var oncolsArr = getNodeListAttributeAsArray(oncols, 'data-value');
 		
@@ -137,13 +135,19 @@ function getPivotURL(url) {
 
 		var measures = byId('measures').querySelectorAll('.col');
 		var measuresArr = getNodeListAttributeAsArray(measures, 'data-value');
+
+		var measuresAggs = byId('measures').querySelectorAll('.col select');
+		var measuresAggsArr = []
+		for(var i=0;i<measuresAggs.length;i++) {
+			measuresAggsArr.push(measuresAggs[i].value);
+		}
 		
-		//console.log(">> pivot: cols:", oncolsArr, "rows:", onrowsArr, "measures:", measuresArr);
+		//console.log(">> pivot: cols:", oncolsArr, "rows:", onrowsArr, "measures:", measuresArr, "measuresAggsArr:", measuresAggsArr);
 		
 		if(oncols.length>0 || onrows.length>0 || measures.length>0) {
 			var measuresStr = "";
 			for(var i=0;i<measuresArr.length;i++) {
-				measuresStr += "&agg:"+measuresArr[i]+"="+measureAgg;
+				measuresStr += "&agg:"+measuresArr[i]+"="+measuresAggsArr[i];
 			}
 			var newUrl = url +
 				(oncols.length>0?"&oncols="+oncolsArr.join():"") +
