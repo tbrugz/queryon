@@ -25,13 +25,14 @@
 			
 			"queryon.web.auth-required",
 			"queryon.web.appname",
+			"queryon.web.login.show",
 			//"sqldump.datadump.htmlx.dateformat",
 			//"sqldump.datadump.json.dateformat",
 		};
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
 	String[] defaultValues = { null, null,
 			QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
-			null, null//, null, null
+			null, null, "true"//, null, null
 			};
 	
 	int i = 0;
