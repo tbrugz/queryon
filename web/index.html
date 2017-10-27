@@ -912,7 +912,8 @@
 	}
 	
 	function updatePivotCols() {
-		var cols = getColumnNames('content');
+		var relation = getCurrentRelation('objects');
+		var cols = getColumnsFromRelation(relation);
 		var unusedcols = byId('unusedcols');
 		//XXX only add not-present cols
 		unusedcols.innerHTML = '';
@@ -993,6 +994,13 @@
 			}
 		}
 		//console.log('dropHandler2', origCol, col);
+		var dragto = event.target;
+		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
+		if(dragto==null) {
+			console.log("dragto is null!", event.target);
+			return;
+		}
+		
 		if(!pivotAllColsAreStatic || colContainer.id!='unusedcols') {
 			var removed = colContainer.removeChild(origCol);
 			if(! removed) {
@@ -1009,8 +1017,6 @@
 			origCols[i].parentNode.removeChild(origCols[i]);
 		}
 		*/
-		var dragto = event.target;
-		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
 		if(!pivotAllColsAreStatic || dragto.id!='unusedcols') {
 			dragto.appendChild(col);
 		}
