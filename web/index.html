@@ -94,6 +94,17 @@
 		if(warnings) {
 			var tooltip = statusWarnings2Text(warnings);
 			byId('navbar-warn').innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" title="'+tooltip+'"></i>';
+			/*var relations = byId('objects');
+			console.log("loadModelStatusContentCallback: ", warnings, relations);
+			for(var i=0;i<relations.length;i++) {
+				console.log(">",i,relations.item(i).value);
+				var relWarn = warnings[relations.item(i).value];
+				if(relWarn) {
+					relations.item(i).classList.add("warning");
+					//relations.item(i).value += " [warning]";
+					//relations.item(i).setAttribute("warning", relWarn);
+				}
+			}*/
 		}
 		else {
 			byId('navbar-warn').innerHTML = '';
@@ -1045,6 +1056,12 @@
 	#objects {
 		max-width: 50em;
 	}
+	/*#objects .warning {
+		background-color: #ff3;
+	}
+	#objects .warning::after {
+		content: "[warning]";
+	}*/
 	#content-container {
 		/*position: fixed;*/
 		position: relative;
@@ -1082,10 +1099,10 @@
 		z-index: 10;
 	}
 	#content > table > tbody > tr:nth-child(1) {
-		position: -webkit-sticky;
+		/*position: -webkit-sticky;
 		position: -moz-sticky;
 		position: -ms-sticky;
-		position: -o-sticky;
+		position: -o-sticky;*/
 		position: sticky;
 		/* top: 33px; - nav height */
 	}
