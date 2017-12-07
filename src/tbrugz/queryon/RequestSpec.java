@@ -131,6 +131,7 @@ public class RequestSpec {
 	
 	final String outputTypeStr;
 	final DumpSyntaxInt outputSyntax;
+	final Properties syntaxSpecificProperties = new Properties();
 	final boolean distinct;
 	final boolean count;
 	final String headerParamEncoding;
@@ -244,7 +245,7 @@ public class RequestSpec {
 			}
 			else {
 				// assume url encoding as latin1 (iso-8859-1)
-				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] [expected="+WebUtils.UTF8_CHECK+"]");
+				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] [expected="+WebUtils.UTF8_CHECK+"] - will 'convertLatin1ToUtf8'");
 				convertLatin1ToUtf8 = true;
 				//req.setCharacterEncoding("xxx");
 				// 226 156 147 ? http://www.utf8-chartable.de/unicode-utf8-table.pl?start=9984&number=128&names=-&utf8=dec
@@ -351,7 +352,7 @@ public class RequestSpec {
 		}
 		else {
 			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
-			setSyntaxProps(outputSyntax, req, feat, prop);
+			setSyntaxProps(req, feat, prop);
 		}
 
 		log.debug("outputSyntax: "+outputSyntax);
@@ -712,13 +713,11 @@ public class RequestSpec {
 		return false;
 	}
 	
-	public static void setSyntaxProps(DumpSyntaxInt ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
-		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
-		
+	public static Properties getSyntaxProps(DumpSyntaxInt ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
 		List<String> pkeys = Utils.getStringListFromProp(syntaxProperties, ds.getSyntaxId()+".allowed-parameters", ",");
 		//<syntax>.parameter@callback.prop=sqldump.datadump.<syntax>.zzz
 		//<syntax>.parameter@callback.regex=[a-zA-Z_][a-zA-Z_0-9]*
-		if(pkeys==null) { return; }
+		if(pkeys==null) { return null; }
 		
 		Properties newProps = new Properties();
 		for(String key: pkeys) {
@@ -741,8 +740,44 @@ public class RequestSpec {
 				}
 			}
 		}
+		
+		return newProps;
+	}
 
-		if(newProps.size()==0) {
+	public void setSyntaxProps(HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
+		DumpSyntaxInt ds = outputSyntax;
+		
+		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
+		
+		Properties newProps = getSyntaxProps(ds, req, feat, initProps);
+		
+		if(newProps==null || newProps.size()==0) {
+			ds.procProperties(initProps);
+			return;
+		}
+		
+		syntaxSpecificProperties.putAll(newProps);
+		
+		Properties modifiedProps = new ParametrizedProperties();
+		modifiedProps.putAll(initProps);
+		//if(newProps.size()>0) {
+			log.debug("["+ds.getSyntaxId()+"] parameter props: "+newProps);
+			modifiedProps.putAll(newProps);
+		/*}
+		else {
+			//log.info("["+ds.getSyntaxId()+"] no parameter props");
+			return;
+		}*/
+		ds.procProperties(modifiedProps);
+	}
+
+	@Deprecated // only used by DataDiffServlet
+	public static void setSyntaxProps(DumpSyntaxInt ds, HttpServletRequest req, DBMSFeatures feat, Properties initProps) {
+		if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
+		
+		Properties newProps = getSyntaxProps(ds, req, feat, initProps);
+		
+		if(newProps==null || newProps.size()==0) {
 			ds.procProperties(initProps);
 			return;
 		}

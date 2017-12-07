@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +32,7 @@ import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -803,4 +805,41 @@ public class SQL {
 		return sb.toString();
 	}
 
+	protected static Properties processSqlParameterProperties(String sql, DumpSyntaxInt ds) {
+		String propsKey = ds.getSyntaxId()+".allowed-sql-parameters";
+		List<String> pkeys = Utils.getStringListFromProp(RequestSpec.syntaxProperties, propsKey, ",");
+		Properties newprops = new Properties();
+		
+		if(pkeys!=null) {
+			for(String key: pkeys) {
+				String propKey = ds.getSyntaxId()+".parameter@"+key+".prop";
+				String regexKey = ds.getSyntaxId()+".parameter@"+key+".regex";
+				String propRegex = RequestSpec.syntaxProperties.getProperty(regexKey);
+				
+				Pattern ptrn = Pattern.compile("/\\*.*\\b"+Pattern.quote(ds.getSyntaxId()+":"+key)+"\\s*=\\s*("+propRegex+")\\b.*\\*/", Pattern.DOTALL);
+				//log.info("- ptrn "+ptrn);
+				
+				Matcher m = ptrn.matcher(sql);
+				//log.info("- ptrn: "+ptrn+" matcher: "+m);
+				if(m.find()) {
+					String g1 = m.group(1);
+					if(g1!=null) {
+						String finalPropKey = RequestSpec.syntaxProperties.getProperty(propKey);
+						newprops.setProperty(finalPropKey, g1);
+					}
+					//return defaultValue;
+				}
+			}
+		}
+		
+		/*if(newprops.size()>0) {
+			log.info("newprops: "+newprops);
+		}
+		else {
+			log.info("no new props...");
+		}*/
+		
+		return newprops;
+	}
+	
 }

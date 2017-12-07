@@ -3,6 +3,9 @@ package tbrugz.queryon.util;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
+
+import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class MiscUtils {
 
@@ -33,6 +36,14 @@ public class MiscUtils {
 	
 	public static String latin1ToUtf8(String str) throws UnsupportedEncodingException {
 		return new String(str.getBytes("ISO-8859-1"), "UTF-8");
+	}
+	
+	public static Properties mergeProperties(Properties... props) {
+		Properties merged = new ParametrizedProperties();
+		for(Properties prop: props) {
+			merged.putAll(prop);
+		}
+		return merged;
 	}
 
 }

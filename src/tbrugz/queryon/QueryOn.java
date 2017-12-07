@@ -1100,6 +1100,18 @@ public class QueryOn extends HttpServlet {
 		}
 		else {
 			Integer lim = MathUtil.minIgnoreNull(sql.limit, sql.limitMax);
+
+			Properties sqlProps = SQL.processSqlParameterProperties(finalSql, reqspec.outputSyntax);
+			if(sqlProps!=null && sqlProps.size()>0) {
+				//Properties modifiedProps = new ParametrizedProperties();
+				//modifiedProps.putAll(prop);
+				//modifiedProps.putAll(sqlProps);
+				//modifiedProps.putAll(reqspec.syntaxSpecificProperties);
+				Properties modifiedProps = MiscUtils.mergeProperties(prop, sqlProps, reqspec.syntaxSpecificProperties);
+				reqspec.outputSyntax.procProperties(modifiedProps);
+				//log.info("["+reqspec.outputSyntax.getSyntaxId()+"] sql props: "+sqlProps);
+			}
+			
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
 					fks, uks, fullKeyDefined, applyLimitOffsetInResultSet, resp, getLimit(lim));
 		}
@@ -2208,10 +2220,8 @@ public class QueryOn extends HttpServlet {
 		if(fullKeyDefined) {
 			ds.setUniqueRow(true);
 		}
-		
-		if(log.isDebugEnabled()) {
-			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
-		}
+
+		log.debug("dump columns ["+queryName+"]:\n\t"+Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t"));
 		
 		if(ds instanceof WebSyntax) {
 			WebSyntax ws = (WebSyntax) ds;
