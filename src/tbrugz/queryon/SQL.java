@@ -77,6 +77,7 @@ public class SQL {
 	final Integer limitMax;
 	final String username;
 	//XXX final String userroles;
+	final List<String> namedParameters; //XXX how to expose namedParameters to, say, swagger?
 	
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
@@ -105,6 +106,13 @@ public class SQL {
 		//log.info("limit="+limit+" ; limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
 		
 		this.username = getFinalVariableValue(username);
+		String namedParamsStr = processPatternString(sql, namedParametersPattern, null);
+		if(namedParamsStr!=null) {
+			namedParameters = Utils.getStringList(namedParamsStr, ",");
+		}
+		else {
+			namedParameters = null;
+		}
 	}
 
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
@@ -511,13 +519,16 @@ public class SQL {
 	static final String PTRN_ALLOW_ENCAPSULATION = "allow-encapsulation";
 	static final String PTRN_LIMIT_MAX = "limit-max";
 	static final String PTRN_LIMIT_DEFAULT = "limit-default";
+	static final String PTRN_NAMED_PARAMETERS = "named-parameters";
 	
 	static final String PTRN_MATCH_BOOLEAN = "true|false";
 	static final String PTRN_MATCH_INT = "\\d+";
+	static final String PTRN_MATCH_STRINGLIST = "[\\w\\-,]+";
 	
 	static final Pattern allowEncapsulationBooleanPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_ALLOW_ENCAPSULATION)+"\\s*=\\s*("+PTRN_MATCH_BOOLEAN+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitMaxIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_MAX)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitDefaultIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_DEFAULT)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
+	static final Pattern namedParametersPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_NAMED_PARAMETERS)+"\\s*=\\s*("+PTRN_MATCH_STRINGLIST+")\\b.*\\*/", Pattern.DOTALL);
 	
 	static boolean processPatternBoolean(String sql, Pattern pattern, boolean defaultValue) {
 		Matcher m = pattern.matcher(sql);
@@ -543,6 +554,18 @@ public class SQL {
 		String g1 = m.group(1);
 		if(g1!=null) {
 			return Integer.parseInt(g1);
+		}
+		return defaultValue;
+	}
+
+	static String processPatternString(String sql, Pattern pattern, String defaultValue) {
+		Matcher m = pattern.matcher(sql);
+		//log.info("s: "+s+" matcher: "+m);
+		if(!m.find()) { return defaultValue; }
+		
+		String g1 = m.group(1);
+		if(g1!=null) {
+			return g1;
 		}
 		return defaultValue;
 	}

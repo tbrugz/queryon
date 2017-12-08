@@ -63,6 +63,7 @@ Special query constructs inside SQL comments (`/* ... */`)
 * `limit-default=<numeric>` - sets the default limit of the number of rows that may be returned by the query in a single
   request - may be overriden by the `limit` parameter
 * `limit-max=<numeric>` - limits the number of rows that may be returned by the query in a single request
+* `named-parameters=<param1-name>[,<param2-name>[,...]]` - request parameter names to be binded into the query
 
 
 Query commands

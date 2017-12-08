@@ -912,5 +912,24 @@ public class RequestSpec {
 	public static boolean getBoolValue(String s) {
 		return s!=null && (s.equalsIgnoreCase("t") || s.equals("true") || s.equals("TRUE") || s.equals("1"));
 	}
+	
+	public void setNamedParameters(SQL sql) {
+		if(sql.namedParameters!=null) {
+			int originalParamsCount = this.params.size();
+			for(int i=0;i<sql.namedParameters.size();i++) {
+				String param = sql.namedParameters.get(i);
+				String value = this.request.getParameter(param);
+				if(value!=null) {
+					int i2 = i+1;
+					if(originalParamsCount >= i2) {
+						log.warn("named parameter '"+param+"' present but #"+i2+" positional parameter already exists [originalParamsCount="+originalParamsCount+"]");
+					}
+					else {
+						this.params.add(value);
+					}
+				}
+			}
+		}
+	}
 
 }

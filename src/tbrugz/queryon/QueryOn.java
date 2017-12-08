@@ -975,6 +975,9 @@ public class QueryOn extends HttpServlet {
 		
 		SQL sql = SQL.createSQL(relation, reqspec, username);
 		
+		// sets named parameters
+		reqspec.setNamedParameters(sql);
+		
 		// add parameters for Query
 		sql.addOriginalParameters(reqspec);
 		
