@@ -208,8 +208,8 @@ public class SQL {
 		}
 		sql.append("call ");
 		sql.append(
-			(eo.getSchemaName()!=null?eo.getSchemaName()+".":"")+
-			(eo.getPackageName()!=null?eo.getPackageName()+".":"")+
+			(!MiscUtils.isNullOrEmpty(eo.getSchemaName())?eo.getSchemaName()+".":"")+
+			(!MiscUtils.isNullOrEmpty(eo.getPackageName())?eo.getPackageName()+".":"")+
 			eo.getName());
 		if(eo.getParams()!=null) {
 			sql.append("(");

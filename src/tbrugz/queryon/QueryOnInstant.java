@@ -96,7 +96,7 @@ public class QueryOnInstant extends QueryOn {
 		//res.updateMetaData(conn.getMetaData(), true);
 		//final DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
-		final String schemaName = reqspec.params.get(0);
+		final String schemaName = String.valueOf( reqspec.params.get(0) );
 		ResultSet rs;
 		
 		//final DBObjectType type = DBObjectType.valueOf(reqspec.object.toUpperCase());

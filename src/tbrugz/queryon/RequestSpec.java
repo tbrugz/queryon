@@ -125,7 +125,7 @@ public class RequestSpec {
 	
 	protected final List<String> columns = new ArrayList<String>();
 	protected final List<String> aliases = new ArrayList<String>();
-	protected final List<String> params = new ArrayList<String>();
+	protected final List<Object> params = new ArrayList<Object>();
 	protected final List<String> groupby = new ArrayList<String>();
 	protected final Map<String, String[]> aggregate = new TreeMap<String, String[]>();
 	
@@ -456,7 +456,15 @@ public class RequestSpec {
 				//log.info("part["+i+"]: " + name + (fileName!=null?" / filename="+fileName:"") );
 				if(p.getContentType()!=null) {
 					boolean added = setUniParam("v:", name, p, updatePartValues);
-					log.info("part["+i+";added="+added+"]: " + name + "; content-type="+p.getContentType() + " ;  size=" + p.getSize() + " ; " + (fileName!=null?" / filename="+fileName:"") );
+					boolean partParamAdded = false;
+					if(!added) {
+						//TODO: mixed part & non-part parameters are probably not working...
+						if(name.equals("p"+(i+1))) {
+							params.add(p);
+							partParamAdded = true;
+						}
+					}
+					log.info("part["+i+";added="+added+";partParamAdded="+partParamAdded+"]: " + name + "; content-type="+p.getContentType() + " ;  size=" + p.getSize() + " ; " + (fileName!=null?" / filename="+fileName:"") );
 				}
 				i++;
 			}
@@ -810,7 +818,7 @@ public class RequestSpec {
 		return url+params;
 	}
 	
-	public List<String> getParams() {
+	public List<Object> getParams() {
 		return params;
 	}
 	

@@ -118,7 +118,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	}
 	
 	Query getQOnQueryFromModel(RequestSpec reqspec) {
-		return (Query) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, reqspec.getParams().get(0));
+		return (Query) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, String.valueOf( reqspec.getParams().get(0) ));
 	}
 	
 	@Override

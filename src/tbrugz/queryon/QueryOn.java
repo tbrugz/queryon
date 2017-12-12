@@ -35,6 +35,7 @@ import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1320,7 +1321,8 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [pc="+pc+"]");
 			}
 			for(int i=0;i<pc;i++) {
-				stmt.setObject(i+1, reqspec.params.get(i));
+				Object o = reqspec.params.get(i);
+				setStatementParameter(stmt, i+1, o);
 			}
 			stmt.execute();
 
@@ -1363,7 +1365,7 @@ public class QueryOn extends HttpServlet {
 					throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of executable's parameter [i="+i+" ; inParamCount="+(inParamCount)+" ; size="+eo.getParams().size()+"]");
 				}*/
 				//XXX: oracle: when using IN OUT parameters, driver may require to use specific type (stmt.setDouble()) // stmt.setDouble(i+paramOffset, ...);
-				stmt.setObject(i+paramOffset, reqspec.params.get(i));
+				setStatementParameter(stmt, i+paramOffset, reqspec.params.get(i));
 				//log.info("["+i+"/"+(inParamCount+paramOffset)+"] setObject: "+reqspec.params.get(inParamCount));
 				inParamCount++;
 			}
@@ -1438,6 +1440,17 @@ public class QueryOn extends HttpServlet {
 			ConnectionUtil.closeConnection(conn);
 		}
 	}
+	
+	void setStatementParameter(PreparedStatement stmt, int pos, Object o) throws SQLException, IOException {
+		if(o instanceof Part) {
+			Part p = (Part) o;
+			stmt.setBinaryStream(pos, p.getInputStream());
+			//XXX clob: new InputStreamReader(...)
+		}
+		else {
+			stmt.setObject(pos, o);
+		}
+	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	// XXX: add "columns"? add columnNulls/columnSizes?
@@ -1509,7 +1522,7 @@ public class QueryOn extends HttpServlet {
 	
 	protected ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser, PrivilegeType privilege) throws SQLException {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
-			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), reqspec.params);
+			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), MiscUtils.toStringList(reqspec.params) );
 		}
 		//log.info("doFilterStatusByQueryGrants: "+doFilterStatusByPermission+" / "+doFilterStatusByQueryGrants+" / "
 		//		+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)+":"+doNotCheckGrantsPermission);
@@ -1803,7 +1816,7 @@ public class QueryOn extends HttpServlet {
 					log.warn("unknown PK column: "+pkcol);
 					continue;
 				}
-				String pkval = reqspec.params.get(i);
+				String pkval = String.valueOf( reqspec.params.get(i) );
 				if(pkcol!=null && pkval!=null) {
 					reqspec.updateValues.put(pkcol, pkval);
 				}
@@ -1971,7 +1984,7 @@ public class QueryOn extends HttpServlet {
 		resp.setContentType(MIME_TEXT);
 		//log.info("doManage: params: "+reqspec.params);
 		
-		String action = reqspec.params.get(0);
+		String action = String.valueOf( reqspec.params.get(0) );
 		if("reload".equals(action)) {
 			doInit(req.getServletContext());
 			resp.getWriter().write("queryon config reloaded");

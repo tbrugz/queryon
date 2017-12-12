@@ -406,7 +406,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	Table getQOnTableFromModel(RequestSpec reqspec) {
-		return (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, reqspec.getParams().get(0));
+		return (Table) DBIdentifiable.getDBIdentifiableByTypeAndName(model.getTables(), DBObjectType.TABLE, String.valueOf( reqspec.getParams().get(0) ));
 	}
 	
 	static boolean validColumnList(List<String> cols) {

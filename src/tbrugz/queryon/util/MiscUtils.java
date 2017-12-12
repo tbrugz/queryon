@@ -1,6 +1,7 @@
 package tbrugz.queryon.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -44,6 +45,18 @@ public class MiscUtils {
 			merged.putAll(prop);
 		}
 		return merged;
+	}
+	
+	public static boolean isNullOrEmpty(String str) {
+		return str==null || str.isEmpty();
+	}
+	
+	public static List<String> toStringList(List<Object> objs) {
+		List<String> ret = new ArrayList<String>();
+		for(Object o: objs) {
+			ret.add(String.valueOf(o));
+		}
+		return ret;
 	}
 
 }

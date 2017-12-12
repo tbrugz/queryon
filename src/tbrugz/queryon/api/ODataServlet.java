@@ -237,8 +237,9 @@ public class ODataServlet extends QueryOn {
 		//log.debug("req: "+req+" keymap: "+keymap);
 		if(keymap == null || keymap.size()==1) { return; }
 		
-		List<String> origPar = new ArrayList<String>();
-		origPar.addAll(req.getParams());
+		//List<Object> origPar = new ArrayList<Object>();
+		//origPar.addAll(req.getParams());
+		
 		req.getParams().clear();
 		for(String col: pk.getUniqueColumns()) {
 			String v = keymap.get(col);

@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.UpdatePlugin;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -205,10 +206,11 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			String packageName, String parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
 			String body) {
 		ExecutableObject e = new ExecutableObject();
-		e.setSchemaName(schema);
 		e.setName(execName);
-		e.setPackageName(packageName);
+		if(!MiscUtils.isNullOrEmpty(schema)) { e.setSchemaName(schema); }
+		if(!MiscUtils.isNullOrEmpty(packageName)) { e.setPackageName(packageName); }
 		e.setRemarks(remarks);
+		
 		if(execType==null) {
 			throw new BadRequestException("Executable 'type' is mandatory");
 		}
@@ -371,7 +373,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	ExecutableObject getQOnExecutableFromModel(Relation relation, RequestSpec reqspec) {
 		if(!isQonExecsRelation(relation)) { return null; }
 		
-		ExecutableObject eo = (ExecutableObject) DBIdentifiable.getDBIdentifiableByName(model.getExecutables(), reqspec.getParams().get(0));
+		ExecutableObject eo = (ExecutableObject) DBIdentifiable.getDBIdentifiableByName(model.getExecutables(), String.valueOf( reqspec.getParams().get(0) ));
 		
 		if(eo==null) {
 			log.warn("getQOnExecutableFromModel: eo: "+eo+" ; reqspec.getParams(): "+reqspec.getParams());
