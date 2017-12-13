@@ -196,13 +196,25 @@ function doRequest(url, btnId, callback) {
 			byId('resultContainer').style.display = 'block';
 			//console.log("Ok", oEvent);
 			var updateCount = request.getResponseHeader("X-UpdateCount");
+			var warnings = request.getResponseHeader("X-Warning");
 			if(updateCount) {
-				//showInfoMessages("messages", updateCount+" rows updated");
-				showInfoMessages("messages", oEvent.target.responseText);
+				var message = oEvent.target.responseText;
+				//var message = updateCount+" rows updated"
+				if(warnings) {
+					message += " (<em>"+warnings+"</em>)";
+					showWarnMessages("messages", message);
+				}
+				else {
+					showInfoMessages("messages", message);
+				}
 			}
 			else {
 				byId('queryResult').innerHTML = oEvent.target.responseText;
 				showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
+			}
+			
+			if(warnings) {
+				console.log("warnings: ", warnings);
 			}
 		}
 		else {

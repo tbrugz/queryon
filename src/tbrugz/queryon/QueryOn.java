@@ -1056,6 +1056,7 @@ public class QueryOn extends HttpServlet {
 		preprocessParameters(reqspec, pk);
 		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
+		
 		if(validateQuery) {
 			if(relation instanceof Query) {
 				DBObjectUtils.validateQuery((Query)relation, finalSql, conn, true);
@@ -1159,6 +1160,8 @@ public class QueryOn extends HttpServlet {
 	
 			ResultSet rs = null;
 			boolean hasResultSet = st.execute();
+			WebUtils.addSqlWarningsAsHeaders(st.getWarnings(), resp);
+			
 			if(hasResultSet) {
 				rs = st.getResultSet();
 			}

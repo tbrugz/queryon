@@ -3,6 +3,7 @@ package tbrugz.queryon.util;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLWarning;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.ResponseSpec;
 
 public class WebUtils {
 
@@ -76,6 +78,14 @@ public class WebUtils {
 			}
 		}
 		return false;
+	}
+	
+	public static void addSqlWarningsAsHeaders(SQLWarning sqlw, HttpServletResponse resp) {
+		while(sqlw!=null) {
+			log.warn("sqlw: "+sqlw);
+			resp.addHeader(ResponseSpec.HEADER_WARNING, sqlw.getMessage()+" ["+sqlw.getSQLState()+"]");
+			sqlw = sqlw.getNextWarning();
+		}
 	}
 	
 }
