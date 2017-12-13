@@ -488,9 +488,14 @@ public class RequestSpec {
 						Matcher m = positionalParamPattern.matcher(name);
 						if(m.matches()) {
 							int pos = Integer.parseInt( m.group(1) );
-							postionalParamsMap.put(pos, p);
-							partParamAdded = true;
-							//log.info("part["+i+"]: pos==" + pos);
+							if(postionalParamsMap.get(pos)!=null) {
+								log.warn("parameter p"+pos+" already setted");
+							}
+							else {
+								postionalParamsMap.put(pos, p);
+								partParamAdded = true;
+								//log.info("part["+i+"]: pos==" + pos);
+							}
 						}
 					}
 					log.debug("part["+i+";added="+added+";partParamAdded="+partParamAdded+"]: " + name + "; content-type="+p.getContentType() + " ;  size=" + p.getSize() + " ; " + (fileName!=null?" / filename="+fileName:"") );
@@ -505,8 +510,13 @@ public class RequestSpec {
 		if(bodyParamIndex!=null) {
 			try {
 				int pos = Integer.parseInt( bodyParamIndex );
-				String value = getRequestBody(req);
-				postionalParamsMap.put(pos, value);
+				if(postionalParamsMap.get(pos)!=null) {
+					log.warn("positional parameter #"+pos+" already setted");
+				}
+				else {
+					String value = getRequestBody(req);
+					postionalParamsMap.put(pos, value);
+				}
 			} catch (NumberFormatException e) {
 				log.warn("error parsing parameter index [bodyParamIndex="+bodyParamIndex+"]: "+e);
 			} catch (IOException e) {
