@@ -329,14 +329,18 @@ i[onclick] {
 }
 
 .leftmenu li.dev {
-	background-color: rgba(255, 153, 0, 0.43);
+	background-color: rgba(255, 153, 0, 0.4);
 }
 .leftmenu li.multimodel {
 	background-color: rgba(255, 153, 0, 0.8);
 }
 .leftmenu li.auth {
-	background-color: rgba(140, 140, 140, 0.43);
+	background-color: rgba(140, 140, 140, 0.4);
 }
+.leftmenu li.sqlany {
+	background-color: rgba(255, 54, 0, 0.4);
+}
+
 
 .leftmenu li.current {
 	background-color: #fff;
