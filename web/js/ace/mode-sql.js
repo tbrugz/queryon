@@ -12,6 +12,7 @@ var SqlHighlightRules = function() {
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant"
             + "|set|distinct|with|then|between|like|is|into|values|alter|constraint|unique|in"
             + "|all|exists|full|partition|any|some|using"
+            + "|replace|function|procedure|package|body|begin|return|for" // plsql keywords
     );
 
     var builtinConstants = (
@@ -30,6 +31,7 @@ var SqlHighlightRules = function() {
     var dataTypes = (
         "int|numeric|decimal|date|varchar|char|bigint|float|double|bit|binary|text|set|timestamp|" +
         "money|real|number|integer"
+            + "|clob|blob"
     );
 
     var keywordMapper = this.createKeywordMapper({
