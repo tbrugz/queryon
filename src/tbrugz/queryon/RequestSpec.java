@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -93,6 +94,10 @@ public class RequestSpec {
 	public static final String PARAM_FILENAME = "filename";
 	public static final String PARAM_FILENAME_FIELD = "filenamefield";
 
+	// positional parameters
+	public static final String PARAM_BODY_PARAM_INDEX = "bodyparamindex";
+	static final Pattern positionalParamPattern = Pattern.compile("p([1-9]+[0-9]*)", Pattern.DOTALL);
+	
 	// pivot parameters
 	public static final String PARAM_ONCOLS = "oncols";
 	public static final String PARAM_ONROWS = "onrows";
@@ -103,7 +108,7 @@ public class RequestSpec {
 	// update parameters
 	public static final String PARAM_UPDATE_MIN = "updatemin";
 	public static final String PARAM_UPDATE_MAX = "updatemax";
-	public static final String PARAM_BODY_PARAM_NAME = "bodyparamname";
+	public static final String PARAM_BODY_PARAM_NAME = "bodyparamname"; //body(update)paramname?
 	public static final String PARAM_OPTIMISTICLOCK = "optimisticlock";
 	
 	public static final String ORDER_ASC = "ASC";
@@ -427,12 +432,6 @@ public class RequestSpec {
 		processOrder(req);
 		
 		loStrategy = req.getParameter(PARAM_LO_STRATEGY);
-
-		for(int i=1;;i++) {
-			String value = req.getParameter("p"+i);
-			if(value==null) break;
-			params.add(value);
-		}
 		
 		uniValueCol = getValueField(req);
 		uniValueMimetype = req.getParameter(PARAM_MIMETYPE);
@@ -446,6 +445,33 @@ public class RequestSpec {
 		//	String[] value = req.getParameterValues(key);
 		
 		optimisticLock = request.getParameter(PARAM_OPTIMISTICLOCK);
+
+		Map<Integer, Object> postionalParamsMap = new TreeMap<Integer, Object>();
+
+		Map<String,String[]> reqParams = req.getParameterMap();
+		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
+			Matcher m = positionalParamPattern.matcher(entry.getKey());
+			if(m.matches()) {
+				int pos = Integer.parseInt( m.group(1) );
+				String[] values = entry.getValue();
+				if(values==null || values.length==0) {
+					log.warn("null (or empty) 'values': "+entry.getKey()+" / "+values);
+				}
+				else {
+					if(values.length>1) {
+						log.warn("values.length>1 ["+values.length+"]: "+entry.getKey());
+					}
+					postionalParamsMap.put(pos, values[0]);
+				}
+			}
+			
+		}
+		/*for(int i=1;;i++) {
+			String value = req.getParameter("p"+i);
+			if(value==null) break;
+			//params.add(value);
+			paramMap.put(i, value);
+		}*/
 		
 		// http://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
 		if(isContentTypeMultiPart()) {
@@ -458,30 +484,59 @@ public class RequestSpec {
 					boolean added = setUniParam("v:", name, p, updatePartValues);
 					boolean partParamAdded = false;
 					if(!added) {
-						//TODO: mixed part & non-part parameters are probably not working...
-						if(name.equals("p"+(i+1))) {
-							params.add(p);
+						//TODOne: mixed part & non-part parameters are probably not working...
+						Matcher m = positionalParamPattern.matcher(name);
+						if(m.matches()) {
+							int pos = Integer.parseInt( m.group(1) );
+							postionalParamsMap.put(pos, p);
 							partParamAdded = true;
+							//log.info("part["+i+"]: pos==" + pos);
 						}
 					}
-					log.info("part["+i+";added="+added+";partParamAdded="+partParamAdded+"]: " + name + "; content-type="+p.getContentType() + " ;  size=" + p.getSize() + " ; " + (fileName!=null?" / filename="+fileName:"") );
+					log.debug("part["+i+";added="+added+";partParamAdded="+partParamAdded+"]: " + name + "; content-type="+p.getContentType() + " ;  size=" + p.getSize() + " ; " + (fileName!=null?" / filename="+fileName:"") );
 				}
 				i++;
 			}
 			log.debug("multipart-content: length="+i);
 		}
-		
+
+		String bodyParamIndex = req.getParameter(PARAM_BODY_PARAM_INDEX);
 		String bodyParamName = req.getParameter(PARAM_BODY_PARAM_NAME);
-		if(bodyParamName!=null) {
+		if(bodyParamIndex!=null) {
+			try {
+				int pos = Integer.parseInt( bodyParamIndex );
+				String value = getRequestBody(req);
+				postionalParamsMap.put(pos, value);
+			} catch (NumberFormatException e) {
+				log.warn("error parsing parameter index [bodyParamIndex="+bodyParamIndex+"]: "+e);
+			} catch (IOException e) {
+				log.warn("error decoding http message body [bodyParamIndex="+bodyParamIndex+"]: "+e);
+			}
+		}
+		else if(bodyParamName!=null) {
 			try {
 				String value = getRequestBody(req);
 				updateValues.put(bodyParamName, value);
 			} catch (IOException e) {
-				log.warn("error decoding http message body [bodyparamname="+bodyParamName+"]: "+e);
+				log.warn("error decoding http message body [bodyParamName="+bodyParamName+"]: "+e);
+			}
+		}
+
+		// seting positional params
+		{
+			int pCount = 1;
+			for(Map.Entry<Integer, Object> e: postionalParamsMap.entrySet()) {
+				int i = e.getKey();
+				if(i==pCount) {
+					params.add(e.getValue());
+					pCount++;
+				}
+				else {
+					log.warn("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
+				}
 			}
 		}
 		
-		Map<String,String[]> reqParams = req.getParameterMap();
 		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
