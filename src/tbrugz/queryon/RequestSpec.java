@@ -171,6 +171,9 @@ public class RequestSpec {
 	public static final String[] FILTERS_MULTIPARAM_STRONLY = { "flk", "fnlk" };
 	public static final String[] FILTERS_BOOL = { "fnull", "fnotnull" };
 	
+	public static final String PROP_FILTERS_ALLOWED = "queryon.filter.allowed"; //feq, fne, fgt, fge, flt, fle, fin, fnin, flk, fnlk, fnull, fnotnull
+	public static final String PROP_GROUPBY_ALLOW = "queryon.groupby.allow";
+	
 	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 
 	//XXX: add filter: between (btwn)?
 	
@@ -387,7 +390,12 @@ public class RequestSpec {
 
 		String groupByStr = req.getParameter(PARAM_GROUP_BY);
 		if(groupByStr!=null) {
-			addAllWithTrim(groupby, groupByStr);
+			if(Utils.getPropBool(prop, PROP_GROUPBY_ALLOW, true)) {
+				addAllWithTrim(groupby, groupByStr);
+			}
+			else {
+				throw new BadRequestException("groupby not allowed");
+			}
 		}
 		
 		String onColsPar = req.getParameter(PARAM_ONCOLS);
@@ -547,6 +555,14 @@ public class RequestSpec {
 			}
 		}
 		
+		// set filters
+		Set<String> allowedFilters = null;
+		List<String> allowedFiltersList = Utils.getStringListFromProp(prop, PROP_FILTERS_ALLOWED, ",");
+		if(allowedFiltersList!=null) {
+			allowedFilters = new HashSet<String>();
+			allowedFilters.addAll(allowedFiltersList);
+		}
+		
 		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
@@ -562,24 +578,27 @@ public class RequestSpec {
 			}
 			
 			try {
-				setUniParam("feq:", key, value[0], filterEquals);
-				setUniParam("fne:", key, value[0], filterNotEquals);
-				setUniParam("fgt:", key, value[0], filterGreaterThan);
-				setUniParam("fge:", key, value[0], filterGreaterOrEqual);
-				setUniParam("flt:", key, value[0], filterLessThan);
-				setUniParam("fle:", key, value[0], filterLessOrEqual);
+				setFilterUniParam("feq", key, value[0], filterEquals, allowedFilters);
+				setFilterUniParam("fne", key, value[0], filterNotEquals, allowedFilters);
+				setFilterUniParam("fgt", key, value[0], filterGreaterThan, allowedFilters);
+				setFilterUniParam("fge", key, value[0], filterGreaterOrEqual, allowedFilters);
+				setFilterUniParam("flt", key, value[0], filterLessThan, allowedFilters);
+				setFilterUniParam("fle", key, value[0], filterLessOrEqual, allowedFilters);
 				
-				setMultiParam("fin:", key, value, filterIn);
-				setMultiParam("fnin:", key, value, filterNotIn);
-				setMultiParam("flk:", key, value, filterLike);
-				setMultiParam("fnlk:", key, value, filterNotLike);
+				setFilterMultiParam("fin", key, value, filterIn, allowedFilters);
+				setFilterMultiParam("fnin", key, value, filterNotIn, allowedFilters);
+				setFilterMultiParam("flk", key, value, filterLike, allowedFilters);
+				setFilterMultiParam("fnlk", key, value, filterNotLike, allowedFilters);
 				
-				setBooleanParam("fnull:", key, filterNull);
-				setBooleanParam("fnotnull:", key, filterNotNull);
+				setFilterBooleanParam("fnull", key, filterNull, allowedFilters);
+				setFilterBooleanParam("fnotnull", key, filterNotNull, allowedFilters);
 				
 				setMultiParam("agg:", key, value, aggregate);
 				
 				setUniParam("v:", key, value[0], updateValues);
+			}
+			catch(BadRequestException e) {
+				throw e;
 			}
 			catch(RuntimeException e) {
 				//log.warn("encoding error [e: "+entry+"]: "+e);
@@ -752,6 +771,30 @@ public class RequestSpec {
 		return false;
 	}*/
 
+	public static <T> boolean setFilterUniParam(String prefix, String key, T value, Map<String, T> uniFilter, Set<String> allowedFilters) {
+		boolean set = setUniParam(prefix+":", key, value, uniFilter);
+		if(set && allowedFilters!=null && !allowedFilters.contains(prefix)) {
+			throw new BadRequestException("filter '"+prefix+"' not allowed");
+		}
+		return set;
+	}
+
+	public static boolean setFilterMultiParam(String prefix, String key, String[] values, Map<String, String[]> multiFilter, Set<String> allowedFilters) {
+		boolean set = setMultiParam(prefix+":", key, values, multiFilter);
+		if(set && allowedFilters!=null &&!allowedFilters.contains(prefix)) {
+			throw new BadRequestException("filter '"+prefix+"' not allowed");
+		}
+		return set;
+	}
+	
+	public static boolean setFilterBooleanParam(String prefix, String key, Set<String> uniFilter, Set<String> allowedFilters) {
+		boolean set = setBooleanParam(prefix+":", key, uniFilter);
+		if(set && allowedFilters!=null &&!allowedFilters.contains(prefix)) {
+			throw new BadRequestException("filter '"+prefix+"' not allowed");
+		}
+		return set;
+	}
+	
 	public static <T> boolean setUniParam(String prefix, String key, T value, Map<String, T> uniFilter) {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
