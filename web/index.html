@@ -326,7 +326,7 @@
 		}
 
 		// insert/update/delete
-		if(relationType != 'query') {
+		if(relationType != 'query' && !pivotQueryActive()) {
 			var rel = relationsHash[id];
 			var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
 			var match = re.exec(rel.constraints);

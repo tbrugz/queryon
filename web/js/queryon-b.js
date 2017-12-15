@@ -124,9 +124,13 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	return returl;
 }
 
-function getPivotURL(url) {
+function pivotQueryActive() {
 	var pivots = byId('pivots');
-	if(pivots && pivots.style.display!='none') {
+	return (pivots && pivots.style.display!='none');
+}
+
+function getPivotURL(url) {
+	if(pivotQueryActive()) {
 		var oncols = byId('oncols').querySelectorAll('.col');
 		var oncolsArr = getNodeListAttributeAsArray(oncols, 'data-value');
 		
