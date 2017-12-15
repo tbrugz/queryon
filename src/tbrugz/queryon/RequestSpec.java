@@ -388,14 +388,13 @@ public class RequestSpec {
 			addAllWithTrim(aliases, aliasesParameter);
 		}
 
+		boolean allowGroupBy = Utils.getPropBool(prop, PROP_GROUPBY_ALLOW, true);
 		String groupByStr = req.getParameter(PARAM_GROUP_BY);
 		if(groupByStr!=null) {
-			if(Utils.getPropBool(prop, PROP_GROUPBY_ALLOW, true)) {
-				addAllWithTrim(groupby, groupByStr);
-			}
-			else {
+			if(!allowGroupBy) {
 				throw new BadRequestException("groupby not allowed");
 			}
+			addAllWithTrim(groupby, groupByStr);
 		}
 		
 		String onColsPar = req.getParameter(PARAM_ONCOLS);
@@ -426,6 +425,10 @@ public class RequestSpec {
 			if(groupby.size()>0) {
 				throw new BadRequestException("can't define both '"+PARAM_GROUP_BY_DIMS+"' & '"+PARAM_GROUP_BY+"' parameters");
 			}
+			if(!allowGroupBy) {
+				throw new BadRequestException("groupby/groupbydims not allowed");
+			}
+			
 			groupby.addAll(onrows);
 			groupby.addAll(oncols);
 		}
