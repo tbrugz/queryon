@@ -84,6 +84,9 @@
 		if(settings["queryon.web.login.show"]=="false") {
 			byId('authinfo').style.display='none';
 		}
+		if(settings["queryon.groupby.allow"]=="false") {
+			byId('btn-pivot-toggle').style.display='none';
+		}
 	}
 	
 	function loadAuthInfoCallback() {
@@ -1219,7 +1222,7 @@
 	</label>
 	
 	<label>
-		<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updateState();">
+		<select id="objects" onchange="onQueryChangedClean();onQueryChanged();updatePivotCols();updateState();">
 		</select>
 		<!-- add descriptions (& parameters? nah) -->
 	</label>
@@ -1231,9 +1234,9 @@
 		<span id="parameters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
 		<input type="button" value="+ filter" onclick="addFilterDialog();" title="add filter"/>
-		<!-- <button id="btn-pivot-toggle" type="submit" value="" onclick="togglePivotDialog();" title="pivot query">
+		<button id="btn-pivot-toggle" type="submit" value="" onclick="togglePivotDialog();" title="pivot query">
 			<i class="fa fa-cubes"></i>
-		</button> -->
+		</button>
 		<!-- TODOne limit/offset or page/pagesize -->
 		<label id="offset-label">offset: <input type="text" name="offset" id="offset" onchange="makeHrefs();"/></label>
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doRun('objects', 'content', 'messages', doRunCallback);" title="execute query"/>

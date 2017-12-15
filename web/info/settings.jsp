@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.exception.InternalServerException"%>
 <%@page import="tbrugz.queryon.util.DumpSyntaxUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueriesProcessor"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
@@ -22,6 +23,9 @@
 			"queryon.qon-tables.table",
 			"queryon.qon-execs.table",
 			"queryon.qon-pages.table", //PagesServlet.PROP_PREFIX+PagesServlet.SUFFIX_TABLE
+
+			"queryon.filter.allowed",
+			"queryon.groupby.allow",
 			
 			"queryon.web.auth-required",
 			"queryon.web.appname",
@@ -32,8 +36,13 @@
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
 	String[] defaultValues = { null, null,
 			QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
+			null, null,
 			null, null, "true"//, null, null
 			};
+	
+	if(exposedKeys.length!=defaultValues.length) {
+		throw new InternalServerException("exposedKeys.length ["+exposedKeys.length+"] != defaultValues.length ["+defaultValues.length+"]");
+	}
 	
 	int i = 0;
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
