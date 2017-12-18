@@ -154,6 +154,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		Map<String, Object> paths = new LinkedHashMap<String, Object>();
 		
+		//XXX: only show table/view/executable that user has permission
+		
 		//Table
 		for(Table t: model.getTables()) {
 			{
@@ -256,7 +258,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			oper.put("tags", tags);
 		}
 		oper.put("summary", "retrieve values from " + fullName );
-		oper.put("description", "");
+		oper.put("description", t.getRemarks());
 		oper.put("operationId", "get."+fullName);
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
 		//syntaxes
@@ -496,7 +498,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			ActionType.DELETE.equals(action)?"delete values from ":
 			"unknown operation with ";
 		oper.put("summary", summary + fullName );
-		oper.put("description", "");
+		oper.put("description", r.getRemarks());
 		oper.put("operationId", action + "."+fullName);
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
 		
@@ -561,7 +563,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 		String summary = "execute "+eo.getDBObjectType().toString().toLowerCase()+" ";
 		oper.put("summary", summary + fullName );
-		oper.put("description", "");
+		oper.put("description", eo.getRemarks());
 		oper.put("operationId", "execute."+fullName);
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
 		
