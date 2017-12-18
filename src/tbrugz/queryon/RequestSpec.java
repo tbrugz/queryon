@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1049,6 +1050,28 @@ public class RequestSpec {
 				}
 			}
 		}
+	}
+	
+	public Map<String, Map<String, ? extends Object>> getMapFilters() {
+		Map<String, Map<String, ? extends Object>> ret = new LinkedHashMap<String, Map<String, ? extends Object>>();
+		ret.put("feq", filterEquals);
+		ret.put("fne", filterNotEquals);
+		ret.put("fgt", filterGreaterThan);
+		ret.put("fge", filterGreaterOrEqual);
+		ret.put("flt", filterLessThan);
+		ret.put("fle", filterLessOrEqual);
+		ret.put("fin", filterIn);
+		ret.put("fnin", filterLike);
+		ret.put("flk", filterLike);
+		ret.put("fnlk", filterNotLike);
+		return ret;
+	}
+	
+	public Map<String, Set<String>> getSetFilters() {
+		Map<String, Set<String>> ret = new LinkedHashMap<String, Set<String>>();
+		ret.put("fnull", filterNull);
+		ret.put("fnotnull", filterNotNull);
+		return ret;
 	}
 
 }

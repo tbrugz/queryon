@@ -2109,8 +2109,22 @@ public class QueryOn extends HttpServlet {
 			addMultiFilterSubexpression(reqspec.filterNotIn, colNames, colTypes, sql, "not in", relationName, warnings);
 		}
 		else {
-			if(reqspec.filterEquals.size()>0) {
-				log.warn("relation '"+relation.getName()+"' has no columns specified");
+			Map<String, Map<String, ? extends Object>> mapFilters = reqspec.getMapFilters();
+			for(Map.Entry<String, Map<String, ? extends Object>> e: mapFilters.entrySet()) {
+				if(e.getValue().size()>0) {
+					String message = "can't set '"+e.getKey()+"' filter: relation '"+relation.getName()+"' has no columns specified";
+					log.warn(message);
+					warnings.add(message);
+				}
+			}
+
+			Map<String, Set<String>> setFilters = reqspec.getSetFilters();
+			for(Map.Entry<String, Set<String>> e: setFilters.entrySet()) {
+				if(e.getValue().size()>0) {
+					String message = "can't set '"+e.getKey()+"' filter: relation '"+relation.getName()+"' has no columns specified";
+					log.warn(message);
+					warnings.add(message);
+				}
 			}
 		}
 		
