@@ -28,7 +28,7 @@
 	<script src="js/xtra.js"></script>
 	<script type="text/javascript">
 	
-	var lastQueryThatRunned = null;
+	var lastQueryThatRan = null;
 	
 	var schemaNameFilter = null;
 	
@@ -36,7 +36,7 @@
 	
 	var aggregateFunctions = [ "count", "sum", "min", "max", "avg" ];
 	
-	var pivotAllColsAreStatic = false;
+	var pivotAllColsAreStatic = true;
 	
 	var onLoad = function() {
 		loadModels(); //loadModelsCallback);
@@ -311,7 +311,7 @@
 		doTableOnLoad();
 		
 		// scroll to top - only if query changed
-		if(lastQueryThatRunned==null || lastQueryThatRunned!=id) {
+		if(lastQueryThatRan==null || lastQueryThatRan!=id) {
 			var bodyElem = document.getElementsByTagName('body')[0];
 			bodyElem.scrollTop = 0;
 		}
@@ -357,7 +357,7 @@
 			}
 		}
 			
-		lastQueryThatRunned = id;
+		lastQueryThatRan = id;
 	}
 		
 	function doOpenInsertDialog() {
