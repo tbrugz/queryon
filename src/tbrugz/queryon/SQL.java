@@ -89,7 +89,8 @@ public class SQL {
 		//this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
-		this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationBooleanPattern, true);
+		//this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationBooleanPattern, true);
+		this.allowEncapsulation = allowEncapsulation(sql);
 		Integer limitDefault = processPatternInteger(sql, limitDefaultIntPattern);
 		this.limitMax = processPatternInteger(sql, limitMaxIntPattern);
 		this.originalBindParameterCount = originalBindParameterCount;
@@ -863,6 +864,10 @@ public class SQL {
 		}*/
 		
 		return newprops;
+	}
+	
+	public static boolean allowEncapsulation(String sql) {
+		return processPatternBoolean(sql, SQL.allowEncapsulationBooleanPattern, true);
 	}
 	
 }

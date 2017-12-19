@@ -25,6 +25,7 @@ import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.queryon.SQL;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -33,6 +34,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -340,7 +342,11 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 		
 		// parameter: distinct
-		{
+		boolean allowDistinct = true;
+		if(t instanceof Query) {
+			allowDistinct = SQL.allowEncapsulation(((Query) t).getQuery());
+		}
+		if(allowDistinct) {
 			Map<String, Object> pDistinct = new LinkedHashMap<String, Object>();
 			pDistinct.put("name", "distinct");
 			pDistinct.put("in", "query");
