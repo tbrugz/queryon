@@ -64,6 +64,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	static final String PARAM_FILTERS = "filters";
 	static final String PARAM_FILTERS_EXCEPT = "filters-except"; //XXX: add 'filters-except'
 	
+	static final String PROP_PREFIX = "queryon.api.swagger";
+	static final String SUFFIX_FILTERS = ".filters";
+	
 	boolean useCanonicalHost = false; //XXX: hostname: add property
 	
 	Set<String> syntaxes;
@@ -150,14 +153,27 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			filters = new ArrayList<String>();
 			filters.addAll(Arrays.asList(filtersParam.split(",")));
 		}
-		
-		List<String> allowedFilters = Utils.getStringListFromProp(prop, RequestSpec.PROP_FILTERS_ALLOWED, ",");
-		if(allowedFilters!=null) {
-			if(filters!=null) {
-				filters.retainAll(allowedFilters);
+
+		{
+			List<String> allowedFilters = Utils.getStringListFromProp(prop, RequestSpec.PROP_FILTERS_ALLOWED, ",");
+			if(allowedFilters!=null) {
+				if(filters!=null) {
+					filters.retainAll(allowedFilters);
+				}
+				else {
+					filters = allowedFilters;
+				}
 			}
-			else {
-				filters = allowedFilters;
+		}
+		{
+			List<String> swaggerFilters = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_FILTERS, ",");
+			if(swaggerFilters!=null) {
+				if(filters!=null) {
+					filters.retainAll(swaggerFilters);
+				}
+				else {
+					filters = swaggerFilters;
+				}
 			}
 		}
 		
