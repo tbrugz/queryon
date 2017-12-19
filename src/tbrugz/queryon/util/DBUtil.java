@@ -51,6 +51,9 @@ public class DBUtil {
 	public static final String[] BOOLEAN_COL_TYPES = { "BOOLEAN", "BOOL" }; // BIT ?
 	public static final List<String> BOOLEAN_COL_TYPES_LIST = Arrays.asList(BOOLEAN_COL_TYPES);
 	
+	public static final String[] OBJECT_COL_TYPES = { "ARRAY", "REFCURSOR" };
+	public static final List<String> OBJECT_COL_TYPES_LIST = Arrays.asList(OBJECT_COL_TYPES);
+	
 	static {
 		TimeZone tz = TimeZone.getTimeZone("UTC");
 		/*

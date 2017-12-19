@@ -404,7 +404,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 				String colName = colNames.get(i);
 				//String remark = colRemarks.get(i);
 				String type = getType(colTypes.get(i));
-				if("file".equals(type)) {
+				if(allowFilterOnType(type)) {
 					continue;
 				}
 				
@@ -433,7 +433,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 				String colName = colNames.get(i);
 				//String remark = colRemarks.get(i);
 				String type = getType(colTypes.get(i));
-				if("file".equals(type)) {
+				if(allowFilterOnType(type)) {
 					continue;
 				}
 				
@@ -462,7 +462,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			for(int i=0;i<colNames.size();i++) {
 				String colName = colNames.get(i);
 				String type = getType(colTypes.get(i));
-				if("file".equals(type)) {
+				if(allowFilterOnType(type)) {
 					continue;
 				}
 				
@@ -685,7 +685,17 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		if(isBlob) {
 			return "file";
 		}
+		boolean isObject = DBUtil.OBJECT_COL_TYPES_LIST.contains(upper);
+		if(isObject) {
+			return "object";
+		}
+		//XXX: date?
+		//log.info("unknown? "+upper);
 		return "string";
+	}
+	
+	boolean allowFilterOnType(String type) {
+		return "file".equals(type) || "object".equals(type);
 	}
 
 }
