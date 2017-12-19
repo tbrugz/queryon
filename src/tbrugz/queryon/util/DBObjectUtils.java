@@ -14,7 +14,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Query;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.View;
 
 public class DBObjectUtils {
 
@@ -108,7 +110,7 @@ public class DBObjectUtils {
 		
 	}
 
-	public static void validateTable(Table rel, Connection conn, boolean update) throws SQLException {
+	public static void validateTable(Relation rel, Connection conn, boolean update) throws SQLException {
 		String finalSql = "select * from "+rel.getQualifiedName();
 		
 		log.debug("grabbing colums name & type from prepared statement's metadata [name="+rel.getQualifiedName()+"]");
@@ -117,18 +119,34 @@ public class DBObjectUtils {
 		try {
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			if(rsmd!=null && update) {
-				rel.setColumns(DataDumpUtils.getColumns(rsmd));
+				//rel.setColumns(DataDumpUtils.getColumns(rsmd));
+				setColumns(rel, DataDumpUtils.getColumns(rsmd));
 			}
 			else {
 				log.warn("getMetaData() returned null: empty query? sql:\n"+finalSql);
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
-			rel.setColumns(new ArrayList<Column>());
+			//rel.setColumns(new ArrayList<Column>());
+			setColumns(rel, new ArrayList<Column>());
 			log.warn("resultset metadata's sqlexception: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
 		}
 		
+	}
+	
+	static void setColumns(Relation rel, List<Column> columns) {
+		if(rel instanceof Table) {
+			Table t = (Table) rel;
+			t.setColumns(columns);
+		}
+		else if(rel instanceof View) {
+			View v = (View) rel;
+			v.setColumns(columns);
+		}
+		else {
+			log.warn("Relation '"+rel+"' not table or view");
+		}
 	}
 	
 }

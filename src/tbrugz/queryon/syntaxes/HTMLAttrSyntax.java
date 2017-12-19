@@ -2,7 +2,6 @@ package tbrugz.queryon.syntaxes;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
