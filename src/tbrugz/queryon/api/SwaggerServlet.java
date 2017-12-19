@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,6 +38,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.StringUtils;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * Servlet mappings:
@@ -110,7 +112,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("basePath", contextPath + "/q");
 		
 		ServletContext context = req.getServletContext();
-		//Properties prop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
 		DumpSyntaxUtils dsutils = (DumpSyntaxUtils) context.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
 
 		//schemes: "http", "https", "ws", "wss"
@@ -145,6 +147,16 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		if(filtersParam!=null) {
 			filters = new ArrayList<String>();
 			filters.addAll(Arrays.asList(filtersParam.split(",")));
+		}
+		
+		List<String> allowedFilters = Utils.getStringListFromProp(prop, RequestSpec.PROP_FILTERS_ALLOWED, ",");
+		if(allowedFilters!=null) {
+			if(filters!=null) {
+				filters.retainAll(allowedFilters);
+			}
+			else {
+				filters = allowedFilters;
+			}
 		}
 		
 		String urlAppend = "";
