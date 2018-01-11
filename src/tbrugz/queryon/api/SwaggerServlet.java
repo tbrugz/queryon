@@ -186,11 +186,13 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		//XXX: only show table/view/executable that user has permission
 		
+		boolean allowDistinct = Utils.getPropBool(prop, RequestSpec.PROP_DISTINCT_ALLOW, true);
+		
 		//Table
 		for(Table t: model.getTables()) {
 			{
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			operations.put("get", createGetOper(t, filters));
+			operations.put("get", createGetOper(t, filters, allowDistinct));
 			paths.put("/"+t.getQualifiedName()+".{syntax}"+urlAppend, operations);
 			}
 			
@@ -210,7 +212,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		//View
 		for(View v: model.getViews()) {
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			operations.put("get", createGetOper(v, filters));
+			operations.put("get", createGetOper(v, filters, allowDistinct));
 			
 			paths.put("/"+v.getQualifiedName()+".{syntax}"+urlAppend, operations);
 		}
@@ -277,7 +279,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("tags", tags);
 	}
 	
-	Map<String, Object> createGetOper(Relation t, List<String> filters) {
+	Map<String, Object> createGetOper(Relation t, List<String> filters, boolean allowDistinct) {
 		Map<String, Object> oper = new LinkedHashMap<String, Object>();
 		//oper.put("summary", "retrieve values from "+t.getQualifiedName());
 		String fullName = t.getQualifiedName();
@@ -358,8 +360,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 		
 		// parameter: distinct
-		boolean allowDistinct = true;
-		if(t instanceof Query) {
+		if(allowDistinct && t instanceof Query) {
 			allowDistinct = SQL.allowEncapsulation(((Query) t).getQuery());
 		}
 		if(allowDistinct) {

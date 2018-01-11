@@ -174,6 +174,7 @@ public class RequestSpec {
 	
 	public static final String PROP_FILTERS_ALLOWED = "queryon.filter.allowed"; //feq, fne, fgt, fge, flt, fle, fin, fnin, flk, fnlk, fnull, fnotnull
 	public static final String PROP_GROUPBY_ALLOW = "queryon.groupby.allow";
+	public static final String PROP_DISTINCT_ALLOW = "queryon.distinct.allow";
 	
 	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 
 	//XXX: add filter: between (btwn)?
@@ -437,7 +438,7 @@ public class RequestSpec {
 		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
 		else { pivotflags = DEFAULT_PIVOTFLAGS; }
 		
-		distinct = isDistinct(req);
+		distinct = isDistinct(req, Utils.getPropBool(prop, PROP_DISTINCT_ALLOW, true));
 		count = isCountRequest(req);
 		headerParamEncoding = req.getHeader(HEADER_PARAM_ENCODING);
 
@@ -756,8 +757,12 @@ public class RequestSpec {
 		return getBoolValue(req.getParameter(PARAM_COUNT));
 	}
 	
-	protected boolean isDistinct(HttpServletRequest req) {
-		return getBoolValue(req.getParameter(PARAM_DISTINCT));
+	protected boolean isDistinct(HttpServletRequest req, boolean allowDistinct) {
+		boolean isDistinct = getBoolValue(req.getParameter(PARAM_DISTINCT));
+		if(isDistinct && !allowDistinct) {
+			throw new BadRequestException("distinct not allowed");
+		}
+		return isDistinct;
 	}
 	
 	/*boolean setUniParam(String prefix, String key, String[] values, Map<String, String> uniFilter) {
