@@ -42,6 +42,9 @@ ant start-db-derby
 credentials: copy `src/main/resources/credentials.template.properties` to
 `credentials.properties` & edit.
 
+environment vars (optional): copy `src/main/resources/env.template.properties` to
+`env.properties` & edit.
+
 postgresql: create database `classicmodels`
 
 * create & load databases
