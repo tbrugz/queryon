@@ -97,6 +97,18 @@
 		</java>
 	</target>
 	
+	<target name="run-sqlrun-h2embed">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.h2embed.properties"/>
+		</java>
+	</target>
+
+	<target name="run-sqldiff-h2embed">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=scripts/sqldiff.h2embed.properties"/>
+		</java>
+	</target>
+
 	<target name="run-sqlrun-h2">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.h2.properties"/>
