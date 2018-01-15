@@ -1,3 +1,7 @@
+<%@page import="tbrugz.queryon.QueryOn"%>
+<%@page import="tbrugz.queryon.util.ShiroUtils"%>
+<%@page import="org.apache.shiro.subject.Subject"%>
+<%@page import="java.util.Properties"%>
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <!DOCTYPE html>
@@ -12,7 +16,10 @@
 <%
 String returnUrl = request.getParameter("return");
 
-SecurityUtils.getSubject().logout();
+Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Subject currentUser = ShiroUtils.getSubject(prop, request);
+
+currentUser.logout();
 //session.invalidate();
 
 if(returnUrl!=null) {

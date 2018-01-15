@@ -39,8 +39,6 @@ String username = request.getParameter("username");
 String password = request.getParameter("password");
 org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
 
-//Subject currentUser = SecurityUtils.getSubject();
-
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 
@@ -74,7 +72,7 @@ else {
 
 %>
 <h3>Hi <shiro:guest>Guest</shiro:guest><shiro:user>
-<%= org.apache.shiro.SecurityUtils.getSubject().getPrincipal() %>
+<%= currentUser.getPrincipal() %>
 </shiro:user>!
 </h3>
 

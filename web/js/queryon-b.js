@@ -212,7 +212,8 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
-			showErrorMessages(messagesId, jqXHR.responseText);
+			showErrorMessages(messagesId, jqXHR.responseText ? jqXHR.responseText : "No response from server");
+			//if(! jqXHR.responseText) { console.warn("Error", jqXHR); }
 			if(errorCallback) { errorCallback(errorThrown); }
 			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
 			//$('#'+messagesId).attr('class','error');

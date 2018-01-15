@@ -69,7 +69,7 @@ else {
 
 %>
 <!-- <h3>Hi <shiro:guest>Guest</shiro:guest><shiro:user>
-<%= org.apache.shiro.SecurityUtils.getSubject().getPrincipal() %>
+<%= currentUser.getPrincipal() %>
 </shiro:user>!
 </h3> -->
 
