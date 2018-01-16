@@ -213,41 +213,49 @@ public class ResultSetMetadata2RsAdapter extends AbstractResultSet {
 	
 	@Override
 	public String getString(int columnIndex) throws SQLException {
-		return getObject(columnIndex).toString();
+		Object o = getObject(columnIndex);
+		return o==null?null:o.toString();
 	}
 	
 	@Override
 	public String getString(String columnLabel) throws SQLException {
-		return getObject(columnLabel).toString();
+		Object o = getObject(columnLabel);
+		return o==null?null:o.toString();
 	}
 	
 	@Override
 	public int getInt(int columnIndex) throws SQLException {
-		return Integer.parseInt(getObject(columnIndex).toString());
+		Object o = getObject(columnIndex);
+		return o==null?null:Integer.parseInt(o.toString());
 	}
 	
 	@Override
 	public int getInt(String columnLabel) throws SQLException {
-		return Integer.parseInt(getObject(columnLabel).toString());
+		Object o = getObject(columnLabel);
+		return o==null?null:Integer.parseInt(o.toString());
 	}
 	
 	@Override
 	public double getDouble(int columnIndex) throws SQLException {
-		return Double.parseDouble(getObject(columnIndex).toString());
+		Object o = getObject(columnIndex);
+		return o==null?null:Double.parseDouble(o.toString());
 	}
 
 	@Override
 	public double getDouble(String columnLabel) throws SQLException {
-		return Double.parseDouble(getObject(columnLabel).toString());
+		Object o = getObject(columnLabel);
+		return o==null?null:Double.parseDouble(o.toString());
 	}
 	
 	@Override
 	public long getLong(int columnIndex) throws SQLException {
-		return Long.parseLong(getObject(columnIndex).toString());
+		Object o = getObject(columnIndex);
+		return o==null?null:Long.parseLong(o.toString());
 	}
 	
 	@Override
 	public long getLong(String columnLabel) throws SQLException {
-		return Long.parseLong(getObject(columnLabel).toString());
+		Object o = getObject(columnLabel);
+		return o==null?null:Long.parseLong(o.toString());
 	}
 }
