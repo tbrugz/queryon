@@ -81,6 +81,8 @@ public class SQL {
 	
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
+	Integer applyedLimit;
+	//Integer applyedOffset; //XXX add applyedOffset?
 	boolean orderByApplyed = false;
 	List<Object> bindParameterValues = new ArrayList<Object>();
 	//XXX add 'final String initialSql;'?
@@ -329,6 +331,7 @@ public class SQL {
 	
 	protected void addLimitOffset(LimitOffsetStrategy strategy, Integer limit, int offset) throws ServletException {
 		if(limit==null) { limit = 0; }
+		else { applyedLimit = limit; }
 		if(limit<=0 && offset<=0) { return; }
 		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return; }
 		

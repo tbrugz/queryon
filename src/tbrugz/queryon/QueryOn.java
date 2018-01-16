@@ -1081,14 +1081,26 @@ public class QueryOn extends HttpServlet {
 		
 		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
 			int originalColCount = rs.getMetaData().getColumnCount();
+			//boolean hasMeasures = reqspec.columns.size() > reqspec.oncols.size() + reqspec.onrows.size();
+			boolean hasMeasures = reqspec.aggregate.size() > 0;
+			int pivotFlags = reqspec.pivotflags!=null?reqspec.pivotflags:
+				hasMeasures?RequestSpec.DEFAULT_PIVOTFLAGS_WITH_MEASURES:RequestSpec.DEFAULT_PIVOTFLAGS_WITHOUT_MEASURES;
+			
 			@SuppressWarnings("resource")
-			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, reqspec.pivotflags);
+			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
 			rs = prs;
-			String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
-			log.info("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
-			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" colCount: "+prs.getMetaData().getColumnCount()+"; "+
+			if(log.isDebugEnabled()) {
+				String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
+				log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
+			}
+			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
 					"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
-					"flags: "+reqspec.pivotflags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
+					"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
+			if(sql.applyedLimit!=null && prs.getOriginalRowCount()==sql.applyedLimit) {
+				String message = "Pivot Query data limited to "+prs.getOriginalRowCount()+" rows";
+				resp.addHeader(ResponseSpec.HEADER_WARNING, message);
+				log.debug(message);
+			}
 		}
 		
 		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());

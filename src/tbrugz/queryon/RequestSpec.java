@@ -104,7 +104,8 @@ public class RequestSpec {
 	public static final String PARAM_ONROWS = "onrows";
 	public static final String PARAM_MEASURES = "measures";
 	public static final String PARAM_PIVOTFLAGS = "pivotflags";
-	public static final int DEFAULT_PIVOTFLAGS = PivotResultSet.SHOW_MEASURES_ALLWAYS;
+	public static final int DEFAULT_PIVOTFLAGS_WITH_MEASURES = PivotResultSet.SHOW_MEASURES_ALLWAYS | PivotResultSet.FLAG_NON_EMPTY_COLS;
+	public static final int DEFAULT_PIVOTFLAGS_WITHOUT_MEASURES = PivotResultSet.SHOW_MEASURES_ALLWAYS;
 	
 	// update parameters
 	public static final String PARAM_UPDATE_MIN = "updatemin";
@@ -144,7 +145,7 @@ public class RequestSpec {
 	
 	final List<String> oncols = new ArrayList<String>();
 	final List<String> onrows = new ArrayList<String>();
-	final int pivotflags;
+	final Integer pivotflags;
 	
 	// 'eq', 'ne', 'gt', 'lt', 'ge', 'le'? see: http://en.wikipedia.org/wiki/Relational_operator
 	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
@@ -436,7 +437,7 @@ public class RequestSpec {
 		}
 		String pivotStr = req.getParameter(PARAM_PIVOTFLAGS);
 		if(pivotStr!=null) { pivotflags = Integer.parseInt(pivotStr); }
-		else { pivotflags = DEFAULT_PIVOTFLAGS; }
+		else { pivotflags = null; }
 		
 		distinct = isDistinct(req, Utils.getPropBool(prop, PROP_DISTINCT_ALLOW, true));
 		count = isCountRequest(req);
