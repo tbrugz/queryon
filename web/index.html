@@ -320,9 +320,18 @@
 		// http://stackoverflow.com/questions/3241326/set-more-than-one-http-header-with-the-same-name
 		// X-Warning-UnknownColumn <message>
 		// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#getResponseHeader()
+		var warnings = request.getResponseHeader("X-Warning");
 		var warnUnknownCols = request.getResponseHeader('X-Warning-UnknownColumn');
+		
+		var warnArr = [];
+		if(warnings) {
+			warnArr.push(warnings);
+		}
 		if(warnUnknownCols) {
-			showWarnMessages('messages', warnUnknownCols);
+			warnArr.push(warnUnknownCols);
+		}
+		if(warnArr.length>0) {
+			showWarnMessages('messages', warnArr.join(", "));
 		}
 
 		// insert/update/delete
