@@ -1081,25 +1081,29 @@ public class QueryOn extends HttpServlet {
 		
 		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
 			int originalColCount = rs.getMetaData().getColumnCount();
-			//boolean hasMeasures = reqspec.columns.size() > reqspec.oncols.size() + reqspec.onrows.size();
-			boolean hasMeasures = reqspec.aggregate.size() > 0;
+			boolean hasMeasures = reqspec.aggregate.size() > 0 || (reqspec.columns.size() > reqspec.oncols.size() + reqspec.onrows.size());
 			int pivotFlags = reqspec.pivotflags!=null?reqspec.pivotflags:
 				hasMeasures?RequestSpec.DEFAULT_PIVOTFLAGS_WITH_MEASURES:RequestSpec.DEFAULT_PIVOTFLAGS_WITHOUT_MEASURES;
 			
-			@SuppressWarnings("resource")
-			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
-			rs = prs;
-			if(log.isDebugEnabled()) {
-				String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
-				log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
+			try {
+				@SuppressWarnings("resource")
+				PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
+				rs = prs;
+				if(log.isDebugEnabled()) {
+					String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
+					log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
+				}
+				log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
+						"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
+						"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
+				if(sql.applyedLimit!=null && prs.getOriginalRowCount()==sql.applyedLimit) {
+					String message = "Pivot Query data limited to "+prs.getOriginalRowCount()+" rows";
+					resp.addHeader(ResponseSpec.HEADER_WARNING, message);
+					log.debug(message);
+				}
 			}
-			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
-					"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
-					"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
-			if(sql.applyedLimit!=null && prs.getOriginalRowCount()==sql.applyedLimit) {
-				String message = "Pivot Query data limited to "+prs.getOriginalRowCount()+" rows";
-				resp.addHeader(ResponseSpec.HEADER_WARNING, message);
-				log.debug(message);
+			catch(RuntimeException e) {
+				throw new BadRequestException(e.getMessage(), e);
 			}
 		}
 		
@@ -1762,7 +1766,8 @@ public class QueryOn extends HttpServlet {
 
 		//log.info("pre-sql update: "+sql);
 		
-		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
+		String finalSql = sql.getFinalSql();
+		PreparedStatement st = conn.prepareStatement(finalSql);
 		sql.bindParameters(st);
 
 		log.info("sql update: "+sql+
