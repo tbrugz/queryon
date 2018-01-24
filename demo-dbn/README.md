@@ -52,6 +52,7 @@ postgresql: create database `classicmodels`
 ant run-sqlrun-mysql
 ant run-sqlrun-pgsql
 ant run-sqlrun-h2
+ant run-sqlrun-h2embed
 ant run-sqlrun-derby
 ```
 
