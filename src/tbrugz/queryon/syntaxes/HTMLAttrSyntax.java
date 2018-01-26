@@ -123,7 +123,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		tablePrepend(fos);
 		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
 		StringBuilder sb = new StringBuilder();
-		sb.append("<table class='"+tableName+"'>");
+		sb.append("<table class='"+getTableStyleClass()+"'>");
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
 		}
