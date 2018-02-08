@@ -133,6 +133,7 @@ input[type=button] {
 }
 
 span[draggable=true]:hover {
+	cursor: move;
 	cursor: grab;
 }
 

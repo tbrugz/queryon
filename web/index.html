@@ -960,7 +960,7 @@
 		}
 		//console.log("updatePivotCols: existingData: ",existingData);
 		for(var i=0;i<cols.length;i++) {
-			if(existingData.indexOf(cols[i])==-1) {
+			if(existingData.indexOf(cols[i])==-1 || pivotAllColsAreStatic) {
 				unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
 			}
 		}
@@ -1168,6 +1168,7 @@
 	.pivotcols {
 		padding: 2px 8px;
 		/* height: 1.4em; */
+		height: 22px;
 		/* margin: 0px 1px 0px 2px; */
 		border: solid 1px #767676;
 	}
@@ -1189,6 +1190,18 @@
 		margin: 0 2px;
 		padding: 1px;
 		display: inline-block;
+	}
+
+	.pivotcols #onrows .col {
+		background-color: #444444;
+	}
+
+	.pivotcols #oncols .col {
+		background-color: #444444;
+	}
+
+	.pivotcols #measures .col {
+		background-color: #444444; /* #555555; #3f5098; #525e93; */
 	}
 	
 	.ondim {
