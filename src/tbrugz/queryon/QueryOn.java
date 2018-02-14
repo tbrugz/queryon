@@ -1320,7 +1320,7 @@ public class QueryOn extends HttpServlet {
 	 * http://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 	 */
 	void doExecute(ExecutableObject eo, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		log.info("eo: "+eo+" ; currentUser: "+currentUser.getPrincipal() + " ; remote: "+reqspec.getRemoteInfo());
+		//log.info("eo: "+eo+" ; currentUser: "+currentUser.getPrincipal() + " ; remote: "+reqspec.getRemoteInfo());
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		
 		//XXXdone: test for Subject's permissions
@@ -1396,11 +1396,15 @@ public class QueryOn extends HttpServlet {
 			//log.info("["+i+"] param: "+ep);
 		}
 		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
-			stmt.registerOutParameter(1, DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
+			int type = Types.VARCHAR;
+			if(eo.getReturnParam()!=null) {
+				type = DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType());
+			}
+			stmt.registerOutParameter(1, type);
 			//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
 			outParamCount++;
 		}
-		log.info("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
+		log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
 		stmt.execute();
 		boolean gotReturn = false;
 		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
