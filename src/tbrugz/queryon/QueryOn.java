@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -1327,24 +1328,39 @@ public class QueryOn extends HttpServlet {
 		//XXXdone: test for Subject's permissions
 		try {
 		
+		int pc = eo.getParams()!=null ? eo.getParams().size() : 0;
+		int inParamCount = SchemaModelUtils.getNumberOfInParameters(eo.getParams());
 		int outParamCount = 0;
 		Object retObject = null;
 		String sql = SQL.createExecuteSqlFromBody(eo, getUsername(currentUser) );
+		CallableStatement stmt = null;
+		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
+		boolean hasResultSet = false;
+		
 		if((eo.getType()==DBObjectType.EXECUTABLE || eo.getType()==DBObjectType.SCRIPT)
 				&& sql!=null && !sql.equals("")) {
-		
+			
 			//log.info("executing BODY: "+sql);
-			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt = conn.prepareCall(sql.toString());
 			ParameterMetaData pmd = stmt.getParameterMetaData();
-			int pc = pmd.getParameterCount();
-			if(reqspec.params.size() < pc) {
-				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [pc="+pc+"]");
+			if(pc != pmd.getParameterCount()) {
+				log.warn("#eo.getParams() ["+pc+"] != pmd.getParameterCount() ["+pmd.getParameterCount()+"]");
 			}
+			if(reqspec.params.size() < inParamCount) {
+				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [#params="+pc+" ; inParamCount="+inParamCount+"]");
+			}
+			int paramIndex = 0;
 			for(int i=0;i<pc;i++) {
-				Object o = reqspec.params.get(i);
-				setStatementParameter(stmt, i+1, o);
+				ExecutableParameter ep = eo.getParams().get(i); 
+				if(SchemaModelUtils.isInParameter(ep)) {
+					Object o = reqspec.params.get(paramIndex++);
+					setStatementParameter(stmt, i+1, o);
+				}
+				else {
+					stmt.registerOutParameter(i+1, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
+				}
 			}
-			stmt.execute();
+			hasResultSet = stmt.execute();
 
 			int updatecount = stmt.getUpdateCount();
 			//log.info("updateCount: "+updatecount);
@@ -1358,64 +1374,60 @@ public class QueryOn extends HttpServlet {
 				}
 			}
 			catch(SQLException e) {
-				log.warn("getGeneratedKeys: "+e.getMessage());
+				log.warn("doExecute: getGeneratedKeys: "+e.getMessage());
 			}
-			
-			retObject = stmt.getResultSet();
-			/*if(result!=null) {
-				dumpResultSet(result, reqspec, eo.getSchemaName(), eo.getName(), null, null, null, false, resp, 1000);
-			}*/
-			/*if(updatecount>0) {
-				conn.commit();
-			}*/
 		}
 		else {
-		
-		sql = SQL.createExecuteSQLstr(eo);
-		CallableStatement stmt = conn.prepareCall(sql.toString());
-		int paramOffset = 1 + (eo.getType()==DBObjectType.FUNCTION?1:0);
-		int inParamCount = 0;
-		if(reqspec.params.size() < eo.getParams().size()) {
-			throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters ["+eo.getParams().size()+"]");
-		}
-		for(int i=0;i<eo.getParams().size();i++) {
-			ExecutableParameter ep = eo.getParams().get(i);
-			if(ep.getInout()==null || ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
-				/*if(reqspec.params.size() <= i) {
-					throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of executable's parameter [i="+i+" ; inParamCount="+(inParamCount)+" ; size="+eo.getParams().size()+"]");
-				}*/
-				//XXX: oracle: when using IN OUT parameters, driver may require to use specific type (stmt.setDouble()) // stmt.setDouble(i+paramOffset, ...);
-				setStatementParameter(stmt, i+paramOffset, reqspec.params.get(i));
-				//log.info("["+i+"/"+(inParamCount+paramOffset)+"] setObject: "+reqspec.params.get(inParamCount));
-				inParamCount++;
+			sql = SQL.createExecuteSQLstr(eo);
+			stmt = conn.prepareCall(sql.toString());
+			//int inParamCount = 0;
+			if(reqspec.params.size() < eo.getParams().size()) {
+				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters ["+eo.getParams().size()+"]");
 			}
-			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
-				stmt.registerOutParameter(i+paramOffset, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
-				//log.info("["+i+"/"+(outParamCount+paramOffset)+"] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(ep.getDataType()));
+			for(int i=0;i<eo.getParams().size();i++) {
+				ExecutableParameter ep = eo.getParams().get(i);
+				if(SchemaModelUtils.isInParameter(ep)) {
+					/*if(reqspec.params.size() <= i) {
+						throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than index of executable's parameter [i="+i+" ; inParamCount="+(inParamCount)+" ; size="+eo.getParams().size()+"]");
+					}*/
+					//XXX: oracle: when using IN OUT parameters, driver may require to use specific type (stmt.setDouble()) // stmt.setDouble(i+paramOffset, ...);
+					setStatementParameter(stmt, i+paramOffset, reqspec.params.get(i));
+					//log.info("["+i+"/"+(inParamCount+paramOffset)+"] setObject: "+reqspec.params.get(inParamCount));
+					//inParamCount++;
+				}
+				if(SchemaModelUtils.isOutParameter(ep)) {
+					stmt.registerOutParameter(i+paramOffset, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
+					//log.info("["+i+"/"+(outParamCount+paramOffset)+"] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(ep.getDataType()));
+					outParamCount++;
+				}
+				//log.info("["+i+"] param: "+ep);
+			}
+			if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
+				int type = Types.VARCHAR;
+				if(eo.getReturnParam()!=null) {
+					type = DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType());
+				}
+				stmt.registerOutParameter(1, type);
+				//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
 				outParamCount++;
 			}
-			//log.info("["+i+"] param: "+ep);
+			log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
+			hasResultSet = stmt.execute();
 		}
-		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
-			int type = Types.VARCHAR;
-			if(eo.getReturnParam()!=null) {
-				type = DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType());
-			}
-			stmt.registerOutParameter(1, type);
-			//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
-			outParamCount++;
-		}
-		log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
-		stmt.execute();
+		
 		boolean gotReturn = false;
 		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
 			retObject = stmt.getObject(1);
 			gotReturn = true;
 		}
+		if(hasResultSet && !gotReturn) {
+			retObject = stmt.getResultSet();
+			gotReturn = true;
+		}
 		boolean warnedManyOutParams = false;
-		for(int i=0;i<eo.getParams().size();i++) {
+		for(int i=0;i<pc;i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
-			if(ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT) {
+			if(SchemaModelUtils.isOutParameter(ep)) {
 				if(gotReturn) {
 					if(outParamCount>1 && !warnedManyOutParams) {
 						log.warn("there are "+outParamCount+" out parameter. Only the first will be returned");
@@ -1433,14 +1445,17 @@ public class QueryOn extends HttpServlet {
 		}
 		resp.addHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, String.valueOf(outParamCount));
 		
-		}
-		
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
 				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
 			}
 			else {
 				resp.setContentType(MIME_TEXT);
+				if(retObject instanceof Clob) {
+					Clob cret = (Clob) retObject;
+					//retObject = cret.getSubString(0L, (int) cret.length());
+					retObject = IOUtil.readFile(cret.getCharacterStream());
+				}
 				resp.getWriter().write(retObject.toString());
 			}
 		}
@@ -1454,13 +1469,13 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 
+		conn.commit();
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
 		}
 		finally {
-			conn.commit();
 			ConnectionUtil.closeConnection(conn);
 		}
 	}

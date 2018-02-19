@@ -551,12 +551,10 @@ public class RequestSpec {
 			int pCount = 1;
 			for(Map.Entry<Integer, Object> e: postionalParamsMap.entrySet()) {
 				int i = e.getKey();
-				if(i==pCount) {
-					params.add(e.getValue());
-					pCount++;
-				}
-				else {
-					log.warn("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
+				params.add(e.getValue());
+				pCount++;
+				if(i!=pCount) {
+					log.debug("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
 				}
 			}
 		}

@@ -18,6 +18,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -224,6 +225,23 @@ public class SchemaModelUtils {
 			}
 		}
 		return pk;
+	}
+	
+	public static int getNumberOfInParameters(List<ExecutableParameter> list) {
+		if(list==null) { return 0; }
+		int ret = 0;
+		for(ExecutableParameter ep: list) {
+			ret += isInParameter(ep) ? 1 : 0;
+		}
+		return ret;
+	}
+	
+	public static boolean isInParameter(ExecutableParameter ep) {
+		return (ep.getInout()==null || ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT);
+	}
+	
+	public static boolean isOutParameter(ExecutableParameter ep) {
+		return (ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT);
 	}
 	
 }
