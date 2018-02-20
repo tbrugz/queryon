@@ -990,7 +990,7 @@ public class QueryOn extends HttpServlet {
 
 		// xtra filters
 		List<String> warnings = filterByXtraParams(relation, reqspec, sql);
-		if(warnings!=null && warnings.size()>0) {
+		if(warnings!=null && warnings.size()>0 && resp!=null) {
 			String warns = Utils.join(warnings, ", ");
 			resp.addHeader(ResponseSpec.HEADER_WARNING_UNKNOWN_COLUMN, warns);
 		}
@@ -1028,6 +1028,7 @@ public class QueryOn extends HttpServlet {
 		if(sql.limitMax!=null) {
 			finalMaxLimit = Math.min(finalMaxLimit, sql.limitMax);
 		}
+		//log.info("finalMaxLimit="+finalMaxLimit+" ; sql.limitMax="+sql.limitMax+" ; defaultLimit="+defaultLimit);
 		sql.addLimitOffset(loStrategy, getLimit(sql.limit, defaultLimit, finalMaxLimit), reqspec.offset);
 		
 		sql.applyCount(reqspec);
@@ -1067,8 +1068,9 @@ public class QueryOn extends HttpServlet {
 				log.warn("relation '"+relation+"' not a query: can't validate");
 			}
 		}
-		//log.info("sql:\n"+finalSql);
+		//log.debug("sql:\n"+finalSql);
 		PreparedStatement st = conn.prepareStatement(finalSql);
+		//st.setFetchSize(limit+1); //XXX ?
 		sql.bindParameters(st);
 		
 		//boolean applyLimitOffsetInResultSet = loStrategy==LimitOffsetStrategy.RESULTSET_CONTROL;
@@ -1112,6 +1114,7 @@ public class QueryOn extends HttpServlet {
 		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
 		List<Constraint> uks = ModelUtils.getUKs(relation);
 		
+		//XXX incompatible with cache-control?
 		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
 			String contentLocation = reqspec.getCanonicalUrl(prop);
 			//log.info("content-location header: "+contentLocation);
@@ -1563,7 +1566,7 @@ public class QueryOn extends HttpServlet {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), MiscUtils.toStringList(reqspec.params) );
 		}
-		//log.info("doFilterStatusByQueryGrants: "+doFilterStatusByPermission+" / "+doFilterStatusByQueryGrants+" / "
+		//log.info("doFilterStatusByPermission: "+doFilterStatusByPermission+" / doFilterStatusByQueryGrants: "+doFilterStatusByQueryGrants+" / "
 		//		+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)+":"+doNotCheckGrantsPermission);
 		if(doFilterStatusByPermission) {
 			// filter by [(relation)Type]:SELECT|EXECUTE:[schemaName]:[name]
@@ -1764,6 +1767,8 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 
+		//log.debug("updateValues: "+reqspec.updateValues);
+
 		if("".equals(sb.toString())) {
 			throw new BadRequestException("[update] No valid columns");
 		}
@@ -1790,8 +1795,7 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		sql.bindParameters(st);
 
-		log.info("sql update: "+sql+
-				(willTryLock?" [willTryOptimisticLock]":""));
+		//log.debug("sql update: "+sql+"\nfinalSql: "+finalSql+(willTryLock?" [willTryOptimisticLock]":""));
 		
 		int count = st.executeUpdate();
 		
@@ -1930,12 +1934,12 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.applyInsert(sbCols.toString(), sbVals.toString());
 
+		//log.debug("sql insert: " + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
+
 		PreparedStatement st = pkcols!=null? 
 			conn.prepareStatement(sql.getFinalSql(), pkcols):
 			conn.prepareStatement(sql.getFinalSql());
 		sql.bindParameters(st);
-
-		log.info("sql insert: " + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
 		
 		int count = st.executeUpdate();
 		
@@ -2271,6 +2275,7 @@ public class QueryOn extends HttpServlet {
 			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
+			//log.info("mayApplyLimitOffset: "+limit+"/"+reqspec.offset);
 			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
 		}
 		DumpSyntaxInt ds = reqspec.outputSyntax;
@@ -2307,8 +2312,10 @@ public class QueryOn extends HttpServlet {
 		//resp.addHeader("Content-disposition", "attachment;filename="+table.name+"."+ds.getDefaultFileExtension());
 		String contentLocation = (String) reqspec.request.getAttribute(REQ_ATTR_CONTENTLOCATION);
 		if(contentLocation!=null) {
+			//log.debug(ResponseSpec.HEADER_CONTENT_LOCATION+": "+contentLocation);
 			resp.addHeader(ResponseSpec.HEADER_CONTENT_LOCATION, contentLocation);
 		}
+		//log.debug("dumpResultSet:: "+reqspec.limit+", "+defaultLimit+", "+maxLimit);
 		resp.addHeader(ResponseSpec.HEADER_RESULTSET_LIMIT, String.valueOf(limit));
 		
 		int count = 0;
@@ -2325,6 +2332,7 @@ public class QueryOn extends HttpServlet {
 			ds.dumpHeader(resp.getWriter());
 			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
 			while(hasNext) {
+				//log.info("rs count:: "+ rs.getMetaData().getColumnCount());
 				ds.dumpRow(rs, count, resp.getWriter());
 				count++;
 				hasNext = rs.next();
@@ -2519,6 +2527,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	static int getLimit(Integer requestSpecLimit, Integer defaultLimit, int maxLimit) {
+		//log.info("requestSpecLimit="+requestSpecLimit+" ; defaultLimit="+defaultLimit+" ; maxLimit="+maxLimit);
 		if(requestSpecLimit!=null) {
 			return Math.min(requestSpecLimit, maxLimit);
 		}

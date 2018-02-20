@@ -282,7 +282,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			return null;
 		}
 		catch(SQLException e) {
-			throw new SQLException("Error fetching queries, sql: "+sql, e);
+			throw new SQLException("Error fetching queries ["+e.getMessage()+"; sql: "+sql+"]", e);
 		}
 		finally {
 			DBUtil.closeConnection(conn);
