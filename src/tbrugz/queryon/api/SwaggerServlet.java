@@ -83,8 +83,8 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		// http://swagger.io/specification/#infoObject
 		Map<String, Object> info = new LinkedHashMap<String, Object>();
-		info.put("title", "Queryon");
-		info.put("version", "1.0");
+		info.put("title", "Queryon"); // XXX add 'title' property
+		info.put("version", "1.0");   // XXX add 'version' property - use scm commit id?
 		
 		swagger.put("info", info);
 		
