@@ -25,23 +25,43 @@ public class DumpSyntaxUtils {
 	public final Set<String> syntaxMimeTypes = new TreeSet<String>();
 
 	public DumpSyntaxUtils(Properties prop) {
+		int dscount = 0;
 		for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
 			DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 			if(ds!=null) {
 				ds.procProperties(prop);
 				//ds.needsDBMSFeatures(); ds.setFeatures(null); //no needed... features will be set by RequestSpec
 				//XXX: what if syntax was already putted?
-				syntaxesByFormat.put(ds.getSyntaxId(), ds);
-				syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
-				syntaxesByMimeType.put(ds.getMimeType(), ds);
+				if(syntaxesByFormat.containsKey(ds.getSyntaxId())) {
+					log.info("syntaxId ["+ds.getSyntaxId()+"] already loaded: "+syntaxesByFormat.get(ds.getSyntaxId()).getClass().getSimpleName()+" [wont load "+ds.getClass().getSimpleName()+" in syntaxesByFormat]");
+				}
+				else {
+					syntaxesByFormat.put(ds.getSyntaxId(), ds);
+				}
+
+				if(syntaxesByFileExtension.containsKey(ds.getDefaultFileExtension())) {
+					log.info("syntaxExt ["+ds.getDefaultFileExtension()+"] already loaded: "+syntaxesByFileExtension.get(ds.getDefaultFileExtension()).getClass().getSimpleName()+" [wont load "+ds.getClass().getSimpleName()+" in syntaxesByFileExtension]");
+				}
+				else {
+					syntaxesByFileExtension.put(ds.getDefaultFileExtension(), ds);
+				}
+
+				if(syntaxesByMimeType.containsKey(ds.getMimeType())) {
+					log.info("syntaxMime ["+ds.getMimeType()+"] already loaded: "+syntaxesByMimeType.get(ds.getMimeType()).getClass().getSimpleName()+" [wont load "+ds.getClass().getSimpleName()+" in syntaxesByMimeType]");
+				}
+				else {
+					syntaxesByMimeType.put(ds.getMimeType(), ds);
+				}
 				
 				syntaxIds.add(ds.getSyntaxId());
 				syntaxExtensions.add(ds.getDefaultFileExtension());
 				syntaxMimeTypes.add(ds.getMimeType());
 				
 				log.debug("syntax '"+ds.getClass().getSimpleName()+"': id="+ds.getSyntaxId()+" ; ext="+ds.getDefaultFileExtension()+" ; mime="+ds.getMimeType());
+				dscount++;
 			}
 		}
+		log.debug("#syntaxesByFormat: "+syntaxesByFormat.size()+" ; #syntaxExtensions: "+syntaxExtensions.size()+" ; #syntaxMimeTypes: "+syntaxMimeTypes.size()+" ; count: "+dscount);
 	}
 	
 	public DumpSyntax getDumpSyntax(String format) {
