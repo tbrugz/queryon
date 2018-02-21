@@ -113,24 +113,37 @@ doGo = function() {
 
 	var url = queryOnUrl + option.getAttribute("value");
 
+	var reqData = new FormData();
 	var params = document.querySelectorAll('.parameter');
-	var paramsStr = '';
 
 	var modelId = getCurrentModelId();
 	if(modelId) {
-		paramsStr = '?model='+modelId;
+		reqData.set("model", modelId);
 	}
 	for (var i = 0; i < params.length; ++i) {
-		var item = params[i].value;
-		//if(str=='') { str = '-'; }
-		paramsStr += (paramsStr.length==0?"?":"&") + "p" + (i+1) + "=" + item;
+		var type = params[i].getAttribute("type");
+		
+		//console.log(i, " -- ", params[i].name, params[i].readonly, params[i].getAttribute("readonly"));
+		if(params[i].getAttribute("readonly")!=null) {}
+		else if(type=="file") {
+			if(params[i].files[0]) {
+				reqData.append(params[i].name, params[i].files[0], params[i].value);
+			}
+			else {
+				showWarnMessages("messages", "parameter <strong>"+params[i].name+"</strong> (file) must be selected");
+				return;
+			}
+		}
+		else {
+			reqData.set("p" + (i+1), params[i].value);
+		}
 	}
 
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", doGoCallback);
-	oReq.open("GET", url+paramsStr);
+	oReq.open("POST", url, true);
 	btnActionStart('go-button');
-	oReq.send();
+	oReq.send(reqData);
 	closeMessages('messages');
 }
 
@@ -162,6 +175,7 @@ goSetParameters = function(parametersId, pars) {
 			var isOut = parts[3].indexOf("OUT")==0;
 			var inputType = "text";
 			if(numericSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'number'; }
+			if(blobSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'file'; }
 			content += "<label class='parameter-label'>p"+i+
 				": <input type='"+inputType+"' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'"+
 				(isOut?" value='(OUT)' readonly":"")+"/></label>";
@@ -227,7 +241,7 @@ updateUIFromFragmentParams = function() {
 		var params = document.querySelectorAll('.parameter');
 		
 		for (var i = 0; i < params.length; ++i) {
-			if(parts[i+1]) {
+			if(parts[i+1] && params[i].type!="file") {
 				params[i].value = parts[i+1];
 			}
 		}

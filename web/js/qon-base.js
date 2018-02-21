@@ -5,6 +5,8 @@
 var numericSqlTypes = ["TINYINT", "SMALLINT", "INTEGER", "BIGINT", "DECIMAL", "NUMERIC", "NUMBER", "REAL", "FLOAT", "DOUBLE",
 	"DOUBLE PRECISION", "INT2", "INT4", "INT8"];
 
+var blobSqlTypes = ["BLOB", "RAW", "LONG RAW", "BYTEA"]; // see DBUtil.java
+
 function getQonData(qonData) { //JSON...
 	if(Array.isArray(qonData)) { return qonData; }
 	var keys = Object.keys(qonData);

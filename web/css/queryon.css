@@ -157,6 +157,10 @@ input.parameter {
 	width: 8em;
 }
 
+input.parameter[type=file] {
+	width: 15em;
+}
+
 input.filter {
 	width: 10em;
 	border: 1px;

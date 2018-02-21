@@ -314,7 +314,7 @@ function getParameters() {
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
 		//console.log(item);
-		var value = item.value;
+		var value = item.type!='file' ? item.value : '';
 		if(value=='') { value = '-'; }
 		paramsStr += '/'+value;
 	}
