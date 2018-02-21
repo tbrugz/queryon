@@ -11,6 +11,7 @@ table {
 td {
 	border: 1px solid #bbb;
 	padding: 2px 5px 2px 5px;
+	height: 1.2em;
 }
 th {
 	border: 1px solid #bbb;

@@ -118,11 +118,11 @@
 	}
 	
 	function testForAuthRequired() {
-		console.log("testForAuthRequired, ", settings["queryon.web.auth-required"], authInfo.loaded, authInfo.authenticated);
+		console.log("testForAuthRequired: settings[queryon.web.auth-required] = ", settings["queryon.web.auth-required"], " ; loaded = ", authInfo.loaded, " ; authenticated = ",authInfo.authenticated);
 		
 		if(settings["queryon.web.auth-required"]=="true" && authInfo.loaded===true && authInfo.authenticated===false) {
 			var url = authGetLoginUrl();
-			console.log("testForAuthRequired [will redirect] ", settings["queryon.web.auth-required"], authInfo.loaded, authInfo.authenticated, "url", url);
+			console.log("testForAuthRequired [will redirect] url = ", url);
 			window.location.href = url;
 		}
 	}
