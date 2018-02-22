@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -14,16 +15,20 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.api.ODataFilterParser.Filter;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 
 public class ODataRequest extends RequestSpec {
 	
 	static final Log log = LogFactory.getLog(ODataRequest.class);
 	
+	// XXX $expand
+	public static final String PARAM_FILTER = "$filter";
+	public static final String PARAM_ORDERBY = "$orderby";
 	public static final String PARAM_SELECT = "$select";
 	public static final String PARAM_SKIP = "$skip";
-	public static final String PARAM_ORDERBY = "$orderby";
 	public static final String PARAM_TOP = "$top";
 	
 	// collection parameters
@@ -194,6 +199,51 @@ public class ODataRequest extends RequestSpec {
 		}
 		//log.info("key: "+key+" ; ret: "+ret);
 		return ret;
+	}
+	
+	@Override
+	protected void processRequestParameterMap(Map<String, String[]> reqParams, Set<String> allowedFilters) {
+		String filter = request.getParameter(PARAM_FILTER);
+		if(filter!=null) {
+			try {
+				List<Filter> filters = ODataFilterParser.parse(filter);
+				log.info("filters: "+filters);
+				for(Filter f: filters) {
+					if("eq".equals(f.operator)) {
+						setODataFilterUniParam("feq", f.var, f.literal, filterEquals, allowedFilters);
+					}
+					else if("ne".equals(f.operator)) {
+						setODataFilterUniParam("fne", f.var, f.literal, filterNotEquals, allowedFilters);
+					}
+					else if("gt".equals(f.operator)) {
+						setODataFilterUniParam("fgt", f.var, f.literal, filterGreaterThan, allowedFilters);
+					}
+					else if("ge".equals(f.operator)) {
+						setODataFilterUniParam("fge", f.var, f.literal, filterGreaterOrEqual, allowedFilters);
+					}
+					else if("lt".equals(f.operator)) {
+						setODataFilterUniParam("flt", f.var, f.literal, filterLessThan, allowedFilters);
+					}
+					else if("le".equals(f.operator)) {
+						setODataFilterUniParam("fle", f.var, f.literal, filterLessOrEqual, allowedFilters);
+					}
+					else {
+						throw new BadRequestException("unknown filter operator '"+f.operator+"'");
+					}
+				}
+			}
+			catch(RuntimeException e) {
+				throw new BadRequestException(e.getMessage(), e);
+			}
+		}
+		
+	}
+	
+	public <T> void setODataFilterUniParam(String prefix, String key, T value, Map<String, T> uniFilter, Set<String> allowedFilters) {
+		if(allowedFilters!=null && !allowedFilters.contains(prefix)) {
+			throw new BadRequestException("filter '"+prefix+"' not allowed");
+		}
+		uniFilter.put(key, value);
 	}
 	
 	@Override

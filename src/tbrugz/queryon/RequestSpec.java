@@ -2,6 +2,7 @@ package tbrugz.queryon;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,7 +117,7 @@ public class RequestSpec {
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";
 	
-	final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
+	protected final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
 	final String httpMethod;
 	public final String modelId;
@@ -151,12 +152,12 @@ public class RequestSpec {
 	// 'in', 'nin - not in', 'null', 'nnull - not null', 'like', 'not like', 'between' - see: http://en.wikipedia.org/wiki/SQL#Operators
 	
 	// unique value filters
-	final Map<String, String> filterEquals = new HashMap<String, String>();
-	final Map<String, String> filterNotEquals = new HashMap<String, String>();
-	final Map<String, String> filterGreaterThan = new HashMap<String, String>();
-	final Map<String, String> filterGreaterOrEqual = new HashMap<String, String>();
-	final Map<String, String> filterLessThan = new HashMap<String, String>();
-	final Map<String, String> filterLessOrEqual = new HashMap<String, String>();
+	protected final Map<String, String> filterEquals = new HashMap<String, String>();
+	protected final Map<String, String> filterNotEquals = new HashMap<String, String>();
+	protected final Map<String, String> filterGreaterThan = new HashMap<String, String>();
+	protected final Map<String, String> filterGreaterOrEqual = new HashMap<String, String>();
+	protected final Map<String, String> filterLessThan = new HashMap<String, String>();
+	protected final Map<String, String> filterLessOrEqual = new HashMap<String, String>();
 	
 	// multiple value filters
 	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
@@ -559,13 +560,21 @@ public class RequestSpec {
 			}
 		}
 		
-		// set filters
+		// set filters, aggregates, update values
 		Set<String> allowedFilters = null;
 		List<String> allowedFiltersList = Utils.getStringListFromProp(prop, PROP_FILTERS_ALLOWED, ",");
 		if(allowedFiltersList!=null) {
 			allowedFilters = new HashSet<String>();
 			allowedFilters.addAll(allowedFiltersList);
 		}
+		processRequestParameterMap(reqParams, allowedFilters);
+		
+		if(showDebugInfo) {
+			showDebugInfo(reqParams);
+		}
+	}
+	
+	protected void processRequestParameterMap(Map<String,String[]> reqParams, Set<String> allowedFilters) throws UnsupportedEncodingException {
 		
 		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 			String key = entry.getKey();
@@ -684,10 +693,6 @@ public class RequestSpec {
 			//XXX: warn unknown parameters
 		}
 		*/
-		
-		if(showDebugInfo) {
-			showDebugInfo(reqParams);
-		}
 	}
 	
 	protected int getFinalOffset(HttpServletRequest req) {
