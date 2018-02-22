@@ -116,8 +116,33 @@ public class ODataWebTest {
 		
 		obj = jobj.get("value");
 		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
+		
+		JSONArray jarr = (JSONArray) obj;
+		Assert.assertEquals(3, jarr.size());
 	}
 
+	@Test
+	public void getDeptsWithFilter() throws IOException, ParserConfigurationException, SAXException {
+		String url = odataUrl+"/PUBLIC.DEPT?$filter=NAME+eq+'HR'";
+		
+		String jsonStr = getContentFromUrl(url);
+		System.out.println("content:\n"+jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		
+		obj = jobj.get("@odata.context");
+		Assert.assertTrue(obj.toString().endsWith("/$metadata#PUBLIC.DEPT"));
+		
+		obj = jobj.get("value");
+		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
+		
+		JSONArray jarr = (JSONArray) obj;
+		Assert.assertEquals(1, jarr.size());
+	}
+	
 	@Test
 	public void getDeptByKey() throws IOException, ParserConfigurationException, SAXException {
 		String url = odataUrl+"/PUBLIC.DEPT(2)";
