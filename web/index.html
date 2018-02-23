@@ -1045,7 +1045,22 @@
 		}
 		*/
 		if(!pivotAllColsAreStatic || dragto.id!='unusedcols') {
-			dragto.appendChild(col);
+			//console.log("event", event);
+			var inserted = false;
+			for(var i=0;i<dragto.children.length;i++) {
+				var el = dragto.children[i];
+				var rect = el.getBoundingClientRect();
+				if(event.clientX < rect.left + (rect.width/2)) {
+					//console.log("before", el, event.clientX, rect.left);
+					el.parentNode.insertBefore(col, el);
+					inserted = true;
+					break;
+				}
+			}
+			if(!inserted) {
+				//console.log("NOT before", event.clientX);
+				dragto.appendChild(col);
+			}
 		}
 		//console.log("pivotAllColsAreStatic",pivotAllColsAreStatic,"dragto.id",dragto.id);
 		if(dragto.id=="measures") {
