@@ -1687,9 +1687,14 @@ public class QueryOn extends HttpServlet {
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
 		conn.commit();
+		Integer status = reqspec.getDeleteSucessStatus();
+		if(status!=null) {
+			resp.setStatus(status);
+		}
 		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
-		resp.setContentType(MIME_TEXT);
-		resp.getWriter().write(count+" rows deleted");
+		if(status==null || status!=HttpServletResponse.SC_NO_CONTENT) {
+			writeUpdateCount(resp, count, "deleted");
+		}
 		
 		}
 		catch(BadRequestException e) {
@@ -1824,7 +1829,15 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		writeUpdateCount(resp, count, "updated");
+		
+		Integer status = reqspec.getUpdateSucessStatus();
+		if(status!=null) {
+			resp.setStatus(status);
+		}
+		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
+		if(status==null || status!=HttpServletResponse.SC_NO_CONTENT) {
+			writeUpdateCount(resp, count, "updated");
+		}
 
 		}
 		catch(BadRequestException e) {
@@ -1993,7 +2006,6 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void writeUpdateCount(HttpServletResponse resp, int count, String action) throws IOException {
-		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
 	}

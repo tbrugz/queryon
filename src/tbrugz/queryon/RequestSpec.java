@@ -1082,5 +1082,13 @@ public class RequestSpec {
 		ret.put("fnotnull", filterNotNull);
 		return ret;
 	}
+	
+	public Integer getUpdateSucessStatus() {
+		return null;
+	}
 
+	public Integer getDeleteSucessStatus() {
+		return null;
+	}
+	
 }

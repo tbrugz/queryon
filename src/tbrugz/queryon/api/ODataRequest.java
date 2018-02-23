@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -289,6 +290,16 @@ public class ODataRequest extends RequestSpec {
 	@Override
 	protected boolean isCountRequest(HttpServletRequest req) {
 		return isCountRequest;
+	}
+	
+	@Override
+	public Integer getUpdateSucessStatus() {
+		return HttpServletResponse.SC_NO_CONTENT;
+	}
+
+	@Override
+	public Integer getDeleteSucessStatus() {
+		return HttpServletResponse.SC_NO_CONTENT;
 	}
 	
 }

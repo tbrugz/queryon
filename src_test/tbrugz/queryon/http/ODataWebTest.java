@@ -68,6 +68,7 @@ public class ODataWebTest {
 	
 	public static String getContent(HttpResponse response) throws IllegalStateException, IOException {
 		HttpEntity entity = response.getEntity();
+		if(entity==null) { return ""; }
 		InputStream instream = entity.getContent();
 		return IOUtil.readFile(new InputStreamReader(instream));
 	}
@@ -239,7 +240,9 @@ public class ODataWebTest {
 		
 		HttpResponse response1 = httpclient.execute(httpPatch);
 		
-		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		Assert.assertEquals(204, response1.getStatusLine().getStatusCode());
+		String content = getContent(response1);
+		Assert.assertEquals("", content);
 
 		Header header = response1.getFirstHeader("X-UpdateCount");
 		Assert.assertEquals("1", header.getValue());
@@ -259,7 +262,9 @@ public class ODataWebTest {
 		
 		HttpResponse response1 = httpclient.execute(httpDel);
 		
-		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		Assert.assertEquals(204, response1.getStatusLine().getStatusCode());
+		String content = getContent(response1);
+		Assert.assertEquals("", content);
 
 		Header header = response1.getFirstHeader("X-UpdateCount");
 		Assert.assertEquals("1", header.getValue());
