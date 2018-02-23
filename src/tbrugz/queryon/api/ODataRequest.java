@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.gson.Gson;
+
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.api.ODataFilterParser.Filter;
@@ -133,6 +135,7 @@ public class ODataRequest extends RequestSpec {
 			}
 			//params.addAll(keyValues);
 		}
+		//log.info("processParams: parts: "+parts+" / params: "+params+" / keyvalues: "+keyValues);
 			
 		if(parts.size()>0) {
 			//log.info("parts: "+parts);
@@ -237,6 +240,38 @@ public class ODataRequest extends RequestSpec {
 			}
 		}
 		
+		try {
+			Gson gson = new Gson();
+			
+			//java 8
+			//Type type = new TypeToken<Map<String, Object>>(){}.getType();
+			//Map<String, Object> map = gson.fromJson(request.getReader(), type);
+			
+			//Map<String, Object> map = new HashMap<String,Object>();
+			//map = gson.fromJson(request.getReader(), map.getClass());
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = gson.fromJson(request.getReader(), Map.class);
+			
+			if(map!=null) {
+				for(Map.Entry<String, Object> e: map.entrySet()) {
+					String value = getValueForUpdate( e.getValue() );
+					log.debug("odata body: "+e.getKey()+" / "+e.getValue()+" / "+value+" ["+e.getValue().getClass()+"]");
+					updateValues.put(e.getKey(), value);
+				}
+			}
+		}
+		catch(IOException e) {
+			throw new BadRequestException(e.getMessage());
+		}
+		
+	}
+	
+	String getValueForUpdate(Object o) {
+		if(o instanceof Double) {
+			Double d = (Double) o;
+			if(d.doubleValue() % 1 == 0) { return String.valueOf(d.longValue()); }
+		}
+		return String.valueOf(o);
 	}
 	
 	public <T> void setODataFilterUniParam(String prefix, String key, T value, Map<String, T> uniFilter, Set<String> allowedFilters) {

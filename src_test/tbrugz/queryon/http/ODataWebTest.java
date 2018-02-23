@@ -10,10 +10,15 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -210,6 +215,61 @@ public class ODataWebTest {
 		Assert.assertEquals(3L, prop);
 		prop = jobj.get("REMARKS");
 		Assert.assertEquals("some text", prop);
+	}
+	
+	@Test
+	public void createEmp() throws Exception {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(odataUrl+"/EMP");
+		String json = "{\"ID\": 10, \"NAME\": \"Bill\", \"SUPERVISOR_ID\": 1, \"DEPARTMENT_ID\": 1, \"SALARY\": 4000}";
+		httpPost.setEntity(new StringEntity(json));
+		
+		HttpResponse response1 = httpclient.execute(httpPost);
+		
+		Assert.assertEquals(201, response1.getStatusLine().getStatusCode());
+		httpPost.releaseConnection();
+	}
+	
+	@Test
+	public void updateEmp() throws Exception {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPatch httpPatch = new HttpPatch(odataUrl+"/EMP(5)");
+		String json = "{\"SALARY\": 2500}";
+		httpPatch.setEntity(new StringEntity(json));
+		
+		HttpResponse response1 = httpclient.execute(httpPatch);
+		
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+
+		Header header = response1.getFirstHeader("X-UpdateCount");
+		Assert.assertEquals("1", header.getValue());
+
+		/*Header[] headers = response1.getAllHeaders();
+		for(Header h: headers) {
+			System.out.println(h.getName()+" / "+h.getValue());
+		}*/
+		
+		httpPatch.releaseConnection();
+	}
+
+	@Test
+	public void deleteEmp() throws Exception {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpDelete httpDel = new HttpDelete(odataUrl+"/EMP(3)");
+		
+		HttpResponse response1 = httpclient.execute(httpDel);
+		
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+
+		Header header = response1.getFirstHeader("X-UpdateCount");
+		Assert.assertEquals("1", header.getValue());
+
+		/*Header[] headers = response1.getAllHeaders();
+		for(Header h: headers) {
+			System.out.println(h.getName()+" / "+h.getValue());
+		}*/
+		
+		httpDel.releaseConnection();
 	}
 	
 }

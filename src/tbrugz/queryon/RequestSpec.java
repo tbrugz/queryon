@@ -181,7 +181,7 @@ public class RequestSpec {
 	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 
 	//XXX: add filter: between (btwn)?
 	
-	final Map<String, String> updateValues = new HashMap<String, String>();
+	protected final Map<String, String> updateValues = new HashMap<String, String>();
 	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
 	final String optimisticLock;
 
