@@ -374,6 +374,7 @@ function getColumnsFromRelation(relation) {
 	var colsStr = relation.columnNames;
 	if(! colsStr) { return null; }
 	var cols = colsStr.split(",");
+	//XXX: ignore *_STYLE, *_CLASS, *_TITLE & *_HREF" ??
 
 	for(var i=cols.length-1;i>=0;i--) {
 		cols[i] = cols[i].replace("[","").replace("]","").trim();
@@ -421,10 +422,21 @@ function getColumnNamesFromColgroup(containerId) {
 }
 
 function getColumnNames(containerId) {
-	var cols = getColumnNamesFromColgroup(containerId);
-	if(cols==null || cols.length==0) {
-		var relation = getCurrentRelation('objects');
+	var cols = null;
+	var relation = getCurrentRelation('objects');
+	
+	if(pivotQueryActive()) {
+		// pivot query changes colgroup...
 		cols = getColumnsFromRelation(relation);
+	}
+	if(cols==null || cols.length==0) {
+		cols = getColumnNamesFromColgroup(containerId);
+	}
+	if(cols==null || cols.length==0) {
+		cols = getColumnsFromRelation(relation);
+	}
+	if(cols==null || cols.length==0) {
+		cols = getColumnsFromContainer('content');
 	}
 	return cols;
 }
@@ -486,7 +498,6 @@ function getColumnsTypesFromHash() {
 }
 
 function getValuesFromColumn(containerId, columnName) {
-	//var cols = getColumnsFromContainer(containerId);
 	var relation = getCurrentRelation('objects');
 	var cols = getColumnNames(containerId);
 	/*var cols = getColumnNamesFromColgroup(containerId);
