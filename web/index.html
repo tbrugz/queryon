@@ -935,6 +935,7 @@
 			allColsLabel.innerHTML = "All (unused) cols:";
 		}
 		
+		makeHrefs();
 		updateUI();
 	}
 	
@@ -967,7 +968,8 @@
 	}
 	
 	// see: https://html.spec.whatwg.org/multipage/dnd.html#dnd
-	var internalDNDType = 'text/x-example'; // set this to something specific to your site
+	var internalDNDType = 'text/this-col'; // set this to something specific to your site
+	var dndSequence = 0;
 
 	function dragStartHandler(event) {
 		//console.log('dragStartHandler', event.target.parentElement.id);
@@ -975,7 +977,13 @@
 			// use the element's data-value="" attribute as the value to be moving:
 			event.dataTransfer.setData(internalDNDType, event.target.dataset.value);
 			event.dataTransfer.setData('text/parent-id', event.target.parentElement.id);
+			event.dataTransfer.setData('text/this-id', event.target.id);
 			event.dataTransfer.effectAllowed = 'move'; // only allow moves
+			var aggSelect = event.target.querySelector('select');
+			if(aggSelect) {
+				//console.log("select: ", aggSelect.value, "select=", aggSelect);
+				event.dataTransfer.setData('text/this-agg', aggSelect.value);
+			}
 		} else {
 			event.preventDefault(); // don't allow selection to be dragged
 		}
@@ -1003,26 +1011,40 @@
 		var col = document.createElement('span');
 		var data = event.dataTransfer.getData(internalDNDType);
 		var origColParentId = event.dataTransfer.getData('text/parent-id');
+		var origColId = event.dataTransfer.getData('text/this-id');
+		var origColAgg = event.dataTransfer.getData('text/this-agg');
+		var origCol = null;
+		
+		if(!origColId) {
+			origColId = data + "_" + (++dndSequence);
+		}
+		else {
+			origCol = byId(origColId);
+		}
 		col.classList.add("col");
 		col.setAttribute("draggable", "true");
 		col.setAttribute("data-value", data);
+		col.setAttribute("id", origColId);
 		col.textContent = data;
 		//unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
 		console.log('dropHandler', col, data, origColParentId, event);
 
 		//remove old
 		var colContainer = byId(origColParentId); //origCol.parentNode;
-		//var pivots = byId('pivots');
-		var origCol = null;
-		var cols = colContainer.querySelectorAll('.col');
-		for(var i=0;i<cols.length;i++) {
-			if(cols[i].getAttribute("data-value")==data) {
-				origCol = cols[i];
+		if(!origCol) {
+			var cols = colContainer.querySelectorAll('.col');
+			for(var i=0;i<cols.length;i++) {
+				if(cols[i].getAttribute("data-value")==data) {
+					origCol = cols[i];
+				}
 			}
 		}
 		//console.log('dropHandler2', origCol, col);
 		var dragto = event.target;
-		if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
+		for(var i=0;i<5;i++) {
+			if(!dragto.classList.contains("ondim")) { dragto = dragto.parentElement; }
+		}
+		//if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
 		if(dragto==null) {
 			console.log("dragto is null!", event.target);
 			return;
@@ -1066,12 +1088,17 @@
 		if(dragto.id=="measures") {
 			//console.log("drop at measures!");
 			var div = document.createElement('span');
-			var s = "<select>";
+			var select = document.createElement('select');
+			var s = "";
 			for(var i=0;i<aggregateFunctions.length;i++) {
 				s += "<option value='"+aggregateFunctions[i]+"'>"+aggregateFunctions[i]+"</option>";
 			}
-			s += "</select>";
-			div.innerHTML += s;
+			select.innerHTML += s;
+			if(origColAgg) {
+				select.value = origColAgg;
+			}
+			//s += "</select>";
+			div.appendChild(select);
 			col.appendChild(div);
 		}
 		else {
