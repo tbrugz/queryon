@@ -233,7 +233,7 @@
 		var offset = document.getElementById('offset').value;
 		var prevOffset = -1, nextOffset = -1;
 		offset = offset ? parseInt(offset) : 0;
-		console.log('relationType',relationType,'limit',rsLimit,'rownum',rownum,'offset',offset);
+		//console.log('relationType',relationType,'limit',rsLimit,'rownum',rownum,'offset',offset);
 		var limOffNav = document.getElementById('limoff-nav');
 		limOffNav.innerHTML = '';
 
@@ -1027,7 +1027,7 @@
 		col.setAttribute("id", origColId);
 		col.textContent = data;
 		//unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
-		console.log('dropHandler', col, data, origColParentId, event);
+		//console.log('dropHandler origColId=', origColId, "col=", col, "data=", data, "origColParentId=", origColParentId, "origColAgg=", origColAgg); //, "event=", event);
 
 		//remove old
 		var colContainer = byId(origColParentId); //origCol.parentNode;

@@ -6,7 +6,7 @@ function loadSettings(callbackOk) {
 		dataType: "text",
 		success: function(data) {
 			var info = JSON.parse(data);
-			console.log('settings',info);
+			//console.log('settings',info);
 			settings = info;
 			if(callbackOk) { callbackOk(); }
 		}

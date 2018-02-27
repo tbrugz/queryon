@@ -21,7 +21,7 @@ function loadAuthInfo() { //callback?
 	request.open("GET", url, true);
 	request.onload = function(oEvent) {
 		var info = JSON.parse(oEvent.target.responseText);
-		console.log('authInfo', info);
+		//console.log('authInfo', info);
 		info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
 		info.isDev = info.isAdmin;
 		info.loaded = true;

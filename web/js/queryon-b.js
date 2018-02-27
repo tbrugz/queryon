@@ -60,7 +60,7 @@ function loadRelation(selectId, parametersId, containerId) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
 	var params = relationsHash[id] ? relationsHash[id].parameterCount : null;
-	console.log('selected: '+id+' ; params: '+params);
+	//console.log('selected: '+id+' ; params: '+params);
 	if(params==null || params=="") {
 		params = 0;
 	}
@@ -282,7 +282,7 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 
 function setParameters(parametersId, numparams) {
 	var params = document.querySelectorAll('.parameter');
-	console.log('numparams: '+numparams+' ; params.length: '+params.length);
+	//console.log('numparams: '+numparams+' ; params.length: '+params.length);
 	if(numparams > params.length) {
 		for(var i=params.length+1;i<=numparams;i++) {
 			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'/></label>");

@@ -16,7 +16,7 @@ function loadModelsContent(oEvent) {
 		modelsInfo = json.models;
 		//loadSelect(json.models, 'model');
 	}
-	console.log('modelsInfo', modelsInfo);
+	//console.log('modelsInfo', modelsInfo);
 	/*if(json.models.length>1) {
 		document.getElementById('model').parentNode.style.display = 'inline-block';
 	}
