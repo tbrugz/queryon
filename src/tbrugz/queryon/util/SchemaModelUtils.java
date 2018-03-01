@@ -85,6 +85,8 @@ public class SchemaModelUtils {
 			view = DBIdentifiable.getDBIdentifiableByTypeAndName(model.getViews(), DBObjectType.VIEW, objectParts[0]);
 		}
 		
+		//log.debug("objectParts: "+Arrays.asList(objectParts)+" view: "+view);
+		
 		return view;
 	}
 
@@ -142,6 +144,7 @@ public class SchemaModelUtils {
 	}
 	
 	//XXXXX: should this be in tbrugz.sqldump.dbmodel.DBIdentifiable ? no, it uses RequestSpec as parameter
+	//XXX: allow ignore case
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(SchemaModel model, RequestSpec reqspec) {
 		//try {

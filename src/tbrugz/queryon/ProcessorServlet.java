@@ -67,6 +67,7 @@ public class ProcessorServlet extends HttpServlet {
 			doProcess(req, resp);
 		} catch(BadRequestException e) {
 			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
+			log.debug(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			resp.setStatus(e.getCode());
 			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
 			if(resp.isCommitted()) {
@@ -210,6 +211,7 @@ public class ProcessorServlet extends HttpServlet {
 					reqspec = new RequestSpec(dsutils, req, prop, 1);
 					dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(sm, reqspec);
 					currentUser = ShiroUtils.getSubject(prop, req);
+					//log.info("dbobj: "+dbobj+" currentUser: "+currentUser);
 				}
 				
 				try {

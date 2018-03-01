@@ -1,5 +1,8 @@
 package tbrugz.queryon;
 
+/*
+ * http://stackoverflow.com/questions/3561381/custom-http-headers-naming-conventions
+ */
 public class ResponseSpec {
 
 	public static final String MIME_TYPE_TEXT_PLAIN = "text/plain";

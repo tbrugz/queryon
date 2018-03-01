@@ -1068,7 +1068,7 @@ public class QueryOn extends HttpServlet {
 				log.warn("relation '"+relation+"' not a query: can't validate");
 			}
 		}
-		//log.debug("sql:\n"+finalSql);
+		//log.info("sql:\n"+finalSql);
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		//st.setFetchSize(limit+1); //XXX ?
 		sql.bindParameters(st);
@@ -2295,6 +2295,7 @@ public class QueryOn extends HttpServlet {
 			ds = ((DumpSyntaxBuilder) ds).build(schemaName, queryName, uniqueColumns, rs.getMetaData());
 		}
 		else {
+			log.warn("syntax '"+ds.getSyntaxId()+"' isn't a DumpSyntaxBuilder");
 			ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
 		}
 

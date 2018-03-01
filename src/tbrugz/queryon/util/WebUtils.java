@@ -55,6 +55,8 @@ public class WebUtils {
 		resp.getWriter().write(e.getMessage());
 		
 		if(debugMode) {
+			log.warn("Exception: "+e);
+			log.debug("Exception: "+e.getMessage(), e);
 			StringWriter errors = new StringWriter();
 			e.printStackTrace(new PrintWriter(errors));
 			resp.getWriter().write("\n\n");

@@ -10,7 +10,7 @@ public interface WebSyntax {
 	
 	// setQueryDescription
 	
-	// setFilters
+	// TODO setFilters
 	
 	// getWarnings?
 	
