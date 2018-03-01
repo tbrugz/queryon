@@ -44,6 +44,8 @@ import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
@@ -192,6 +194,11 @@ public class ODataServlet extends QueryOn {
 	static final List<String> statusXtraColumns = Arrays.asList(new String[]{"kind", "url"});
 	//XXX kind: EntitySet, Singleton, FunctionImport
 	
+	/*
+	 * service document?
+	 * http://docs.oasis-open.org/odata/odata-json-format/v4.0/errata03/os/odata-json-format-v4.0-errata03-os-complete.html#_Toc453766639
+	 * http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Service_Document_Request
+	 */
 	@SuppressWarnings("resource")
 	@Override
 	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
@@ -206,7 +213,7 @@ public class ODataServlet extends QueryOn {
 		//XXX: sort objects?
 		list.addAll(getEntities(model.getViews(), "EntitySet"));
 		list.addAll(getEntities(model.getTables(), "EntitySet"));
-		list.addAll(getEntities(model.getExecutables(), "FunctionImport"));
+		//list.addAll(getEntities(model.getExecutables(), "ActionImport")); //looks like ActionImport should not appear in the "Service Document"
 		rs = new ResultSetListAdapter<Entity>(objectName, statusUniqueColumns, statusXtraColumns, list, Entity.class);
 
 		//List<ExecutableObject> list = new ArrayList<ExecutableObject>(); list.addAll(model.getExecutables());
@@ -235,7 +242,8 @@ public class ODataServlet extends QueryOn {
 		ODataRequest req = (ODataRequest) reqspec;
 		Map<String, String> keymap = req.keyValues;
 		//log.debug("req: "+req+" keymap: "+keymap);
-		if(keymap == null || keymap.size()==1) { return; }
+		if(keymap == null || keymap.size()==1 ||
+				pk==null || pk.getUniqueColumns()==null) { return; }
 		
 		//List<Object> origPar = new ArrayList<Object>();
 		//origPar.addAll(req.getParams());
@@ -292,10 +300,19 @@ public class ODataServlet extends QueryOn {
 		for(View v: vs) {
 			Element entity = createEntityType(doc, v);
 			schema.appendChild(entity);
+			Element entitySet = createEntitySet(doc, v);
+			entityContainer.appendChild(entitySet);
 			//schemaNames.add(v.getSchemaName());
 			//relationNames.add(v.getQualifiedName());
 		}
-		//XXX add actions, functions
+		//XXXdone add actions
+		Set<ExecutableObject> eos = model.getExecutables();
+		for(ExecutableObject eo: eos) {
+			Element action = createAction(doc, eo);
+			schema.appendChild(action);
+			Element actionImport = createActionImport(doc, eo);
+			entityContainer.appendChild(actionImport);
+		}
 		
 		schema.appendChild(entityContainer);
 		/*for(String s: schemaNames) {
@@ -335,6 +352,32 @@ public class ODataServlet extends QueryOn {
 		return entitySet;
 	}
 	
+	Element createAction(Document doc, ExecutableObject eo) {
+		Element action = doc.createElement("Action");
+		action.setAttribute("Name", eo.getQualifiedName());
+		action.setAttribute("IsBound", "false");
+		for(int i=0;i<eo.getParams().size();i++) {
+			ExecutableParameter ep = eo.getParams().get(i);
+			
+			Element parameter = doc.createElement("Parameter");
+			// test if IN parameter
+			if(ep.getName()!=null) {
+				parameter.setAttribute("Name", ep.getName());
+			}
+			// or: "p"+(i+1)
+			parameter.setAttribute("Type", getPropertyType(ep.getDataType()) );
+			action.appendChild(parameter);
+		}
+		return action;
+	}
+
+	Element createActionImport(Document doc, ExecutableObject eo) {
+		Element actionImport = doc.createElement("ActionImport");
+		actionImport.setAttribute("Name", eo.getQualifiedName());
+		actionImport.setAttribute("Action", odataNS+"."+eo.getQualifiedName());
+		return actionImport;
+	}
+	
 	/*
 	 * see: http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part3-csdl/odata-v4.0-errata03-os-part3-csdl-complete.html#_The_edm:Documentation_Element
 	 */
@@ -352,7 +395,7 @@ public class ODataServlet extends QueryOn {
 		}
 		boolean isDate = DBUtil.DATE_COL_TYPES_LIST.contains(upper);
 		if(isDate) {
-			return "Edm.Date";
+			return "Edm.Date"; //XXX: Edm.DateTimeOffset? "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" format... DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 		}
 		boolean isBoolean = DBUtil.BOOLEAN_COL_TYPES_LIST.contains(upper);
 		if(isBoolean) {

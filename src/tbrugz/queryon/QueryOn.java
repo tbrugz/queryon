@@ -1465,6 +1465,7 @@ public class QueryOn extends HttpServlet {
 		else {
 			resp.setContentType(MIME_TEXT);
 			if(outParamCount==0) {
+				//XXX reqspec.getExecuteWithNoReturnSucessStatus(); //?
 				resp.getWriter().write("execution successful - no return");
 			}
 			else {

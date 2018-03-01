@@ -27,7 +27,8 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	/*@Override
 	public void postProcProperties() {
 		super.postProcProperties();
-		addMetadata = false;
+		//addMetadata = false;
+		dateFormatter = DBUtil.getIsoDateFormat();
 	}*/
 	
 	@Override
@@ -101,7 +102,10 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	@Override
 	protected void dumpXtraHeader(Writer w) throws IOException {
 		String context = baseHref+"$metadata#"+fullQueryName;
-		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ("?$skip="+(offset+limit)));
+		// nextLink:  http://docs.oasis-open.org/odata/odata-json-format/v4.0/errata03/os/odata-json-format-v4.0-errata03-os-complete.html#_Annotation_odata.nextLink
+		// skiptoken: http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793701
+		// skip:      http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793698
+		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ("?$skiptoken="+(offset+limit))); //skip= ? / skiptoken= ?
 		
 		out("\n"+padding+"\t\"@odata.context\": \""+context+"\",", w);
 		if(!uniqueRow && limit>0) {

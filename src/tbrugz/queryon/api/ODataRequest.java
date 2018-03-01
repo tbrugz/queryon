@@ -184,7 +184,7 @@ public class ODataRequest extends RequestSpec {
 				String value = null;
 				//log.info("key: "+key+" ; idx="+idx+" ; idxComma="+idxComma);
 				if(idx>0) {
-					field = key.substring(begin, idx);
+					field = key.substring(begin, idx); //.trim()?
 				}
 				if(idxComma>0) {
 					value = key.substring(idx+1, idxComma);
@@ -193,6 +193,7 @@ public class ODataRequest extends RequestSpec {
 					value = key.substring(idx+1);
 				}
 				
+				//value = value.trim() ?
 				if(value.charAt(0)=='\'' && value.charAt(value.length()-1)=='\'') {
 					value = value.substring(1, value.length()-1);
 				}
@@ -258,6 +259,9 @@ public class ODataRequest extends RequestSpec {
 					String value = getValueForUpdate( e.getValue() );
 					log.debug("odata body: "+e.getKey()+" / "+e.getValue()+" / "+value+" ["+e.getValue().getClass()+"]");
 					updateValues.put(e.getKey(), value);
+					
+					//XXX if matches 'p[1-9][0-9]*', add to params? action invocation
+					// http://docs.oasis-open.org/odata/odata-json-format/v4.0/odata-json-format-v4.0.html#_Toc368563119
 				}
 			}
 		}
