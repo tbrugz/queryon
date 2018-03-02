@@ -214,6 +214,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_CONTEXT_PATH = "queryon.context-path";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
+	static final String PROP_SYNTAX_DEFAULT = "queryon.syntax.default";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
 	static final String PROP_UPDATE_PLUGINS = "queryon.update-plugins";
 	static final String PROP_PROCESSORS_ON_STARTUP = "queryon.processors-on-startup";

@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.api.ODataFilterParser.Filter;
+import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 
 public class ODataRequest extends RequestSpec {
@@ -284,6 +285,11 @@ public class ODataRequest extends RequestSpec {
 			throw new BadRequestException("filter '"+prefix+"' not allowed");
 		}
 		uniFilter.put(key, value);
+	}
+	
+	@Override
+	protected String getDefaultOutputSyntax(Properties prop, String defaultSyntax) {
+		return ODataJsonSyntax.ODATA_ID; //defaultSyntax
 	}
 	
 	@Override

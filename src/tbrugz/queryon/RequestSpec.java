@@ -215,8 +215,8 @@ public class RequestSpec {
 	// file extensions to be ignored by RequestSpec
 	final static String[] standardFileExt = { "blob" };
 	
-	final String defaultOutputSyntax;
-	final boolean allowGetDumpSyntaxByAccept;
+	//final String defaultOutputSyntax;
+	//final boolean allowGetDumpSyntaxByAccept;
 	
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
 		this(dsutils, req, prop, 0);
@@ -229,8 +229,8 @@ public class RequestSpec {
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject) throws ServletException, IOException {
 		this.request = req;
-		this.defaultOutputSyntax = defaultOutputSyntax;
-		this.allowGetDumpSyntaxByAccept = allowGetDumpSyntaxByAccept;
+		//this.allowGetDumpSyntaxByAccept = allowGetDumpSyntaxByAccept;
+		defaultOutputSyntax = getDefaultOutputSyntax(prop, defaultOutputSyntax);
 		
 		contentType = req.getContentType();
 		
@@ -331,32 +331,7 @@ public class RequestSpec {
 		
 		processParams(URIpartz);
 		
-		DumpSyntaxInt outputSyntaxTmp = null;
-		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-		String acceptHeader = req.getHeader(HEADER_ACCEPT);
-		log.debug("accept: "+acceptHeader+" ; modelId: "+this.modelId);
-		
-		if(outputTypeStr != null) {
-			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr);
-			if(outputSyntaxTmp==null) {
-				// will never happen?
-				throw new BadRequestException("Unknown output syntax: "+outputTypeStr);
-			}
-		}
-		else {
-			if(allowGetDumpSyntaxByAccept) {
-				outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
-			}
-			if(outputSyntaxTmp==null) {
-				log.debug("no syntax match, using default ["+defaultOutputSyntax+"]");
-				outputSyntaxTmp = dsutils.getDumpSyntax(defaultOutputSyntax);
-			}
-			else {
-				log.debug("syntax defined by accept: syntax: "+outputSyntaxTmp.getSyntaxId()+" ; mime: "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
-			}
-		}
-		outputSyntax = outputSyntaxTmp;
+		outputSyntax = getOutputSyntax(req, dsutils, allowGetDumpSyntaxByAccept, defaultOutputSyntax);
 		
 		SchemaModel sm = SchemaModelUtils.getModel(req.getServletContext(), this.modelId);
 		if(sm==null) {
@@ -572,6 +547,39 @@ public class RequestSpec {
 		if(showDebugInfo) {
 			showDebugInfo(reqParams);
 		}
+	}
+	
+	protected DumpSyntaxInt getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {
+		DumpSyntaxInt outputSyntaxTmp = null;
+		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+		// accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+		String acceptHeader = req.getHeader(HEADER_ACCEPT);
+		log.debug("accept: "+acceptHeader+" ; modelId: "+this.modelId);
+		
+		if(outputTypeStr != null) {
+			outputSyntaxTmp = dsutils.getDumpSyntax(outputTypeStr);
+			if(outputSyntaxTmp==null) {
+				// will never happen?
+				throw new BadRequestException("Unknown output syntax: "+outputTypeStr);
+			}
+		}
+		else {
+			if(allowGetDumpSyntaxByAccept) {
+				outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
+			}
+			if(outputSyntaxTmp==null) {
+				log.info("no syntax match, using default ["+defaultOutputSyntax+"]");
+				outputSyntaxTmp = dsutils.getDumpSyntax(defaultOutputSyntax);
+			}
+			else {
+				log.debug("syntax defined by accept: syntax: "+outputSyntaxTmp.getSyntaxId()+" ; mime: "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
+			}
+		}
+		return outputSyntaxTmp;
+	}
+	
+	protected String getDefaultOutputSyntax(Properties prop, String defaultSyntax) {
+		return prop.getProperty(QueryOn.PROP_SYNTAX_DEFAULT, defaultSyntax);
 	}
 	
 	protected void processRequestParameterMap(Map<String,String[]> reqParams, Set<String> allowedFilters) throws UnsupportedEncodingException {
