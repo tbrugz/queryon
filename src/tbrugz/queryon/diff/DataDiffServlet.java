@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.SQL;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -65,13 +67,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	static final String PARAM_MIMETYPE = "mimetype";
 	static final String PARAM_DATADIFFTYPES = "dmlops";
 	
+	static final String PREFIX_IGNORECOL = "ignorecol:";
+	static final String PREFIX_ALTERNATE_UK = "altuk:";
+	static final String PREFIX_FILTER_IN = "fin:";
+	static final String PREFIX_FILTER_NOT_IN = "fnin:";
+	
 	//final boolean instant = true;
 	long loopLimit = DEFAULT_LOOP_LIMIT;
 	
 	//XXXdone: add param columnsToIgnore - for each table: ignorecol:TABLE2=COL2&ignorecol:TABLE2=COL3
 	//XXXdone: add alternateUk - for each table: ?altuk:TABLE2=COL2&altuk:TABLE2=COL3
 	//XXXdone: add dml operations: INSERT,UPDATE,DELETE
-	//XXX: add filters?
+	//XXXdone: add filters (fin, fnin)
+	//TODO: filters: use bind parameters
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -126,13 +134,16 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			Map<String,String[]> reqParams = req.getParameterMap();
 			final Map<String, String[]> cols2ignore = new HashMap<String, String[]>();
 			final Map<String, String[]> altUk = new HashMap<String, String[]>();
+			final Map<String, String[]> filterIn = new HashMap<String, String[]>();
+			final Map<String, String[]> filterNotIn = new HashMap<String, String[]>();
 			for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 				String key = entry.getKey();
 				String[] value = entry.getValue();
 				
-				//setUniParam("ignorecols:", key, value[0], );
-				RequestSpec.setMultiParam("ignorecol:", key, value, cols2ignore);
-				RequestSpec.setMultiParam("altuk:", key, value, altUk);
+				RequestSpec.setMultiParam(PREFIX_IGNORECOL, key, value, cols2ignore);
+				RequestSpec.setMultiParam(PREFIX_ALTERNATE_UK, key, value, altUk);
+				RequestSpec.setMultiParam(PREFIX_FILTER_IN, key, value, filterIn);
+				RequestSpec.setMultiParam(PREFIX_FILTER_NOT_IN, key, value, filterNotIn);
 			}
 			String dmlOps = req.getParameter(PARAM_DATADIFFTYPES);
 			List<DataDiffType> dmlTypes = getDataDiffTypes(dmlOps);
@@ -156,11 +167,14 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			String[] colarr = cols2ignore.get(obj.getName());
 			if(colarr!=null) {
 				List<String> ignoreCols = Arrays.asList( colarr );
+				int ignored = 0;
 				for(int i=cols.size()-1;i>=0;i--) {
 					if(ignoreCols.contains( cols.get(i).getName() )) {
 						cols.remove(i);
+						ignored++;
 					}
 				}
+				log.info("ignored cols ["+obj.getName()+"/#"+ignored+"]: "+Arrays.asList(colarr)+"");
 			}
 			String columnsForSelect = DataDiff.getColumnsForSelect(cols);
 			List<String> keyColsSource = getKeyCols(tSource);
@@ -186,13 +200,29 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			
 			String sqlSource = null;
 			String sqlTarget = null;
+			
+			List<String> filters = new ArrayList<String>();
+			{
+				String sqlFilterIn = createSqlFilter(filterIn, "in", obj.getName());
+				if(sqlFilterIn!=null) { filters.add(sqlFilterIn); }
+			}
+			{
+				String sqlFilterNotIn = createSqlFilter(filterNotIn, "not in", obj.getName());
+				if(sqlFilterNotIn!=null) { filters.add(sqlFilterNotIn); }
+			}
+			String whereClause = Utils.join(filters, " and ");
+			if("".equals(whereClause)) { whereClause = null; }
+			else {
+				log.info("whereClause: "+whereClause);
+			}
+			
 			if(tableAltUk!=null) {
-				sqlSource = DataDump.getQuery(table, columnsForSelect, null, Utils.join(keyCols, ", "), false, quote);
-				sqlTarget = DataDump.getQuery(table, columnsForSelect, null, Utils.join(keyCols, ", "), false, quoteTarget);
+				sqlSource = DataDump.getQuery(table, columnsForSelect, whereClause, Utils.join(keyCols, ", "), false, quote);
+				sqlTarget = DataDump.getQuery(table, columnsForSelect, whereClause, Utils.join(keyCols, ", "), false, quoteTarget);
 			}
 			else {
-				sqlSource = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
-				sqlTarget = DataDump.getQuery(table, columnsForSelect, null, null, true, quoteTarget);
+				sqlSource = DataDump.getQuery(table, columnsForSelect, whereClause, null, true, quote);
+				sqlTarget = DataDump.getQuery(table, columnsForSelect, whereClause, null, true, quoteTarget);
 			}
 			
 			if(firstObject) {
@@ -205,7 +235,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				//resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "inline");
 				String filename = partz.get(1)+"."+ds.getDefaultFileExtension();
 				//resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
-				log.info(">> filename: "+filename+" mimetype: "+ds.getMimeType());
+				log.debug("filename: "+filename+" mimetype: "+ds.getMimeType());
 				firstObject = false;
 			}
 			runDiff(connSource, connTarget, sqlSource, sqlTarget, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, limit, resp.getWriter());
@@ -353,6 +383,37 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	void setupProperties(Properties prop) {
 		loopLimit = Utils.getPropLong(prop, PROP_LIMIT_MAX, Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT, DEFAULT_LOOP_LIMIT));
 		//log.info("loopLimit = "+loopLimit);
+	}
+	
+	static final Pattern allowedNumbers = Pattern.compile("[\\d]+");
+	static final Pattern allowedStrings = Pattern.compile("[\\w]*");
+	
+	String createSqlFilter(final Map<String, String[]> valueMap, String compareExpression, String relationName) {
+		if(valueMap==null || valueMap.size()==0) { return null; }
+		
+		List<String> filters = new ArrayList<String>();
+		for(String col: valueMap.keySet()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" (");
+			String[] values = valueMap.get(col);
+			for(int i=0;i<values.length;i++) {
+				String value = values[i];
+				if(allowedNumbers.matcher(value).matches()) {
+					sb.append((i>0?", ":"") + value);
+				}
+				else if(allowedStrings.matcher(value).matches()) {
+					sb.append((i>0?", ":"") + "'" + value + "'");
+				}
+				else {
+					String message = "value not allowed in filter: '"+value+"'";
+					log.warn(message);
+					throw new BadRequestException(message);
+				}
+			}
+			sb.append(")");
+			filters.add(sb.toString());
+		}
+		return Utils.join(filters, "\n and ");
 	}
 	
 }
