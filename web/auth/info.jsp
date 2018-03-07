@@ -6,9 +6,12 @@
 <%@page import="tbrugz.sqldump.util.Utils"%>
 <%@page import="java.util.*"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
-<%@page import="org.apache.shiro.SecurityUtils"
-%><%@page import="org.apache.shiro.subject.Subject"
-%>{<%
+<%@page import="org.apache.shiro.SecurityUtils"%>
+<%@page import="org.apache.shiro.subject.Subject"%>
+<%@page import="com.google.gson.*"%>
+{<%
+	Gson gson = new Gson();
+
 	StringDecorator quoter = new JsonDecorator();
 	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 	Subject currentUser = ShiroUtils.getSubject(prop, request);
@@ -25,11 +28,21 @@
 	
 	//out.write(",\n\t\"session-id\": "+ ( quoter.get(session.getId()) ) );
 	
+	List<String> exceptions = new ArrayList<String>();
+	
 	//XXX: anonymous user may have roles or permissions?
 			
 	// roles
+	Set<String> roles = new HashSet<String>();
+	try {
+		roles = ShiroUtils.getSubjectRoles(currentUser);
+	}
+	catch(Exception e) {
+		exceptions.add("getSubjectRoles: "+String.valueOf(e));
+		//out.write(",\n\t\"exception.getSubjectRoles\": "+quoter.get(String.valueOf(e)));
+	}
+	
 	out.write(",\n\t\"roles\": [");
-	Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 	boolean is1st = true;
 	for(String role: roles) {
 		if(currentUser.hasRole(role)) {
@@ -56,12 +69,23 @@
 	}
 	
 	List<String> userPerms = new ArrayList<String>();
-	for(String perm: permissionList) {
-		if(ShiroUtils.isPermitted(currentUser, perm)) {
-			userPerms.add(perm);
+	try {
+		for(String perm: permissionList) {
+			if(ShiroUtils.isPermitted(currentUser, perm)) {
+				userPerms.add(perm);
+			}
 		}
 	}
+	catch(Exception e) {
+		exceptions.add("isPermitted: "+String.valueOf(e));
+		//out.write(",\n\t\"exception.isPermitted\": "+quoter.get(String.valueOf(e)));
+	}
+	
 	response.setContentType(ResponseSpec.MIME_TYPE_JSON);
 	out.write(",\n\t\"permissions\": ["+Utils.join(userPerms, ",", quoter)+"]");
+	
+	if(exceptions.size()>0) {
+		out.write(",\n\t\"exceptions\": "+gson.toJson(exceptions));
+	}
 %>
 }
