@@ -11,7 +11,7 @@ var SqlHighlightRules = function() {
         "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant"
             + "|set|distinct|with|then|between|like|is|into|values|alter|constraint|unique|in"
-            + "|all|exists|full|partition|any|some|using"
+            + "|all|exists|full|partition|any|some|using|alias|aggregate"
             + "|replace|function|procedure|package|body|begin|return|for" // plsql keywords
     );
 

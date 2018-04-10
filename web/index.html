@@ -130,6 +130,10 @@
 	onModelChanged = function(updateFragment) {
 		doLoadQueries();
 		loadModelStatusContentCallback();
+		
+		// query changed...
+		onQueryChangedClean();onQueryChanged();updatePivotCols();updateState();
+		
 		/*var m = document.getElementById('model').value;
 		var schemas = schemasByModel[m];
 		
