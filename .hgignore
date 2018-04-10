@@ -7,10 +7,13 @@ work/output/*
 tmp/*
 z_etc/*
 web/WEB-INF/classes/*
+web/swagger-ui/*
+
 demo-dbn/data/*
+demo-dbn/classicmodels/*
 demo-dbn/scripts/credentials.properties
 demo-dbn/src/main/resources/credentials.properties
-demo-dbn/classicmodels/*
-web/swagger-ui/*
+demo-dbn/src/main/resources/env.properties
+
 demo-minimal/.settings/*
 demo-dbn/.settings/*

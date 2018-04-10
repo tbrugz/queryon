@@ -13,12 +13,14 @@ building
 -------
 
 * install queryon:
+
 ```
 cd ..
 mvn install -DskipTests
 ```
 
 * build demo-DBn:
+
 ```
 cd demo-dbn
 mvn package
@@ -32,6 +34,7 @@ ant unzip-data
 ```
 
 * init h2 & derby databases:
+
 ```
 ant start-db-h2
 ant start-db-derby
@@ -48,12 +51,25 @@ environment vars (optional): copy `src/main/resources/env.template.properties` t
 postgresql: create database `classicmodels`
 
 * create & load databases
+
 ```
-ant run-sqlrun-mysql
-ant run-sqlrun-pgsql
+ant run-sqlrun-derby
 ant run-sqlrun-h2
 ant run-sqlrun-h2embed
-ant run-sqlrun-derby
+ant run-sqlrun-mysql
+ant run-sqlrun-pgsql
+```
+
+* create queryon tables
+
+```
+ant run-sqldiff-derby
+ant run-sqlrun-derby-afterdiff
+ant run-sqldiff-h2
+ant run-sqldiff-h2embed
+ant run-sqldiff-mysql
+ant run-sqldiff-pgsql
+ant run-sqlrun-pgsql-afterdiff
 ```
 
 **Note**: to run on less databases, edit the `queryon.models` property on the
@@ -102,3 +118,17 @@ map
 world (geojson) map from:
 [johan/world.geo.json](https://github.com/johan/world.geo.json), [unlicensed](https://github.com/johan/world.geo.json/blob/master/UNLICENSE)
 (without Antarctica)
+
+
+cleanup
+-------
+
+* Drop databases
+
+```
+ant run-sqlrun-derby-dropdatabase
+ant run-sqlrun-h2-dropdatabase
+ant run-sqlrun-h2embed-dropdatabase
+ant run-sqlrun-mysql-dropdatabase
+ant run-sqlrun-pgsql-dropdatabase
+```

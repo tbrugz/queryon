@@ -8,3 +8,6 @@ DROP TABLE IF EXISTS orderdetails;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS products;
+
+DROP TABLE IF EXISTS countries;
+DROP TABLE IF EXISTS qon_queries;

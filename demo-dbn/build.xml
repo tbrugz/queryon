@@ -78,6 +78,12 @@
 		</java>
 	</target>
 	
+	<target name="run-sqlrun-mysql-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.mysql-drop.properties"/>
+		</java>
+	</target>
+	
 	<!-- you must create database 'classicmodels' first -->
 	<target name="run-sqlrun-pgsql">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
@@ -94,6 +100,12 @@
 	<target name="run-sqlrun-pgsql-afterdiff">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.pgsql-afterdiff.properties"/>
+		</java>
+	</target>
+
+	<target name="run-sqlrun-pgsql-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.pgsql-drop.properties"/>
 		</java>
 	</target>
 	
@@ -121,6 +133,18 @@
 		</java>
 	</target>
 
+	<target name="run-sqlrun-h2-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.h2-drop.properties"/>
+		</java>
+	</target>
+
+	<target name="run-sqlrun-h2embed-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.h2embed-drop.properties"/>
+		</java>
+	</target>
+	
 	<target name="run-sqlrun-derby">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.derby.properties"/>
@@ -141,7 +165,7 @@
 	
 	<target name="run-sqlrun-derby-dropdatabase">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
-			<arg value="-propfile=scripts/sqlrun-drop.derby.properties"/>
+			<arg value="-propfile=scripts/sqlrun.derby-drop.properties"/>
 		</java>
 	</target>
 
