@@ -1,4 +1,6 @@
 
+set schema classicmodels;
+
 DROP TABLE Customers;
 DROP TABLE Employees;
 DROP TABLE Offices;
@@ -8,9 +10,10 @@ DROP TABLE Payments;
 DROP TABLE Products;
 
 DROP TABLE countries;
-DROP TABLE qon_queries;
 
 DROP SCHEMA classicmodels RESTRICT;
+
+set schema queryon;
 
 drop table queryon.qon_queries;
 drop table queryon.qon_execs;
