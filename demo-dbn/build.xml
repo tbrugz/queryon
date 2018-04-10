@@ -7,16 +7,17 @@
 	<!--<property name="derby.version" value="10.12.1.1"/>-->
 	<!--<property name="derby.version" value="10.11.1.1"/>-->
 	<property name="derby.version" value="10.10.2.0"/>
+	<property name="h2.version" value="1.4.197"/>
 
 	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
 		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
-		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.16-SNAPSHOT" scope="runtime">
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.16" scope="runtime">
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
 		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="1.5.2" scope="runtime"/>
 		<dependency groupId="org.postgresql" artifactId="postgresql" version="9.4.1208.jre6" scope="runtime"/>
-		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
+		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
 		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
 	</artifact:dependencies>
 
@@ -26,7 +27,7 @@
 	</path>
 
 	<artifact:dependencies pathId="h2.classpath">
-		<dependency groupId="com.h2database" artifactId="h2" version="1.4.191" scope="runtime"/>
+		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
 	</artifact:dependencies>
 
 	<artifact:dependencies pathId="derby.classpath">
