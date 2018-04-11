@@ -64,6 +64,9 @@ public class ShiroUtils {
 						try {
 							userIdentity = m.group(1);
 						}
+						catch(IllegalStateException e) {
+							log.warn("getSubject: Exception: "+e+" [pattern: "+usernamePattern+"]");
+						}
 						catch(IndexOutOfBoundsException e) {
 							log.warn("getSubject: Exception: "+e+" [pattern: "+usernamePattern+"]");
 						}

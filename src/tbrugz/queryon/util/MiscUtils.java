@@ -59,4 +59,29 @@ public class MiscUtils {
 		return ret;
 	}
 
+	/*
+	public static Object getFieldValue(Object o, String field) {
+		try {
+			Field f = o.getClass().getDeclaredField(field);
+			f.setAccessible(true);
+			return f.get(o);
+		}
+		catch(Exception e) {
+			log.warn(e);
+			return null;
+		}
+	}
+	
+	public static Object invokeMethod(Object o, String methodName) {
+		try {
+			Method method = o.getClass().getDeclaredMethod(methodName);
+			method.setAccessible(true);
+			return method.invoke(o);
+		}
+		catch(Exception e) {
+			log.warn(e);
+			return null;
+		}
+	}
+	*/
 }
