@@ -144,6 +144,9 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 			List<String> parameterTypes = Utils.getStringList(parameter_types_str, PIPE_SPLIT);
 			List<String> parameterInouts = Utils.getStringList(parameter_inouts_str, PIPE_SPLIT);
 			
+			String execName = (packageName!=null?packageName+".":"")+name;
+			String execFullName = (schema!=null?schema+".":"")+execName;
+			
 			try {
 				if(!schemasGrabbed.contains(schema)) {
 					execs.addAll(jgrab.doGrabFunctions(dbmd, schema, false));
@@ -157,7 +160,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 							packageName, parameterCount, parameterNames, parameterTypes, parameterInouts,
 							body);
 				}
-				if(body!=null) {
+				else if(body!=null) {
 					PreparedStatement stmt = conn.prepareStatement(body);
 					ResultSetMetaData rsmd = stmt.getMetaData();
 					int colcount = rsmd!=null ? rsmd.getColumnCount() : -1;
@@ -170,16 +173,17 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 							body);
 				}
 				else {
-					String execName = (packageName!=null?packageName+".":"")+name;
-					String message = "executable '"+(schema!=null?schema+".":"")+execName+"' not found";
+					String message = "executable '"+execFullName+"' not found";
 					log.warn(message);
 					putWarning(context, model.getModelId(), schema, execName, message);
-					//XXX: throw exception?
+					//XXX: throw SQLException?
 				}
 			}
 			catch(SQLException e) {
-				log.warn("error reading table '"+name+"': "+e);
-				throw e;
+				String message = "error reading executable '"+execFullName+"': "+e;
+				log.warn(message);
+				putWarning(context, model.getModelId(), schema, execName, message);
+				//throw e;
 			}
 		}
 		
@@ -201,6 +205,23 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
 		warnings.put((schemaName!=null?schemaName+".":"") + name, warning);
 	}
+
+	/*
+	void putWarning(ServletContext context, String modelId, ExecutableObject eo, String warning) {
+		putWarning(context, modelId, eo.getSchemaName(), eo.getName(), warning);
+	}
+
+	@SuppressWarnings("unchecked")
+	void removeWarning(ServletContext context, String modelId, String schemaName, String name) {
+		String warnKey = ATTR_EXECS_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		warnings.remove((schemaName!=null?schemaName+".":"") + name);
+	}
+
+	void removeWarning(ServletContext context, String modelId, ExecutableObject eo) {
+		removeWarning(context, modelId, eo.getSchemaName(), eo.getName());
+	}
+	*/
 	
 	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,
 			String packageName, String parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
@@ -326,11 +347,14 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	@Override
 	public void onUpdate(Relation relation, RequestSpec reqspec) {
 		ExecutableObject eo = getQOnExecutableFromModel(relation, reqspec);
+		boolean removed = false;
 		if(eo==null) {
-			return;
+			//return;
+		}
+		else {
+			removed = model.getExecutables().remove(eo);
 		}
 		//XXX: validate updated executable?
-		boolean removed = model.getExecutables().remove(eo);
 		boolean added = createQonExec(reqspec);
 		log.info("onUpdate: removed "+eo+"? "+removed+" ; added exec on "+relation+"? "+added);
 	}
