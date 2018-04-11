@@ -193,6 +193,13 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 		}
 		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
 	}
+
+	@SuppressWarnings("unchecked")
+	void removeWarning(ServletContext context, String modelId, String schemaName, String queryName) {
+		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		warnings.remove((schemaName!=null?schemaName+".":"") + queryName);
+	}
 	
 	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr, ServletContext context) {
 		Query query = new Query();

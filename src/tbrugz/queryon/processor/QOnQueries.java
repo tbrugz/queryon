@@ -95,22 +95,9 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		Query q = newQuery(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("QUERY"), v.get("REMARKS"),
 				Utils.getStringListIgnoreEmpty(v.get("ROLES_FILTER"), PIPE_SPLIT));
 		
-		Savepoint sp = null;
-		try {
-			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
-			sp = conn.setSavepoint();
-			DBObjectUtils.validateQuery(q, sql, conn, true);
-		}
-		catch(SQLException e) {
-			putWarning(servletContext, model.getModelId(), q, e.toString());
-			log.warn("Error validating query: "+e.toString().trim());
-			DBUtil.doRollback(conn, sp);
-		}
-	
-		if(model.getViews().contains(q)) {
-			model.getViews().remove(q);
-		}
-		boolean added = model.getViews().add(q);
+		int addcount = addQueryToModel(q);
+		boolean added = addcount==1;
+
 		if(added) {
 			return q;
 		}
@@ -193,6 +180,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		try {
 			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
 			sp = conn.setSavepoint();
+			removeWarning(servletContext, model.getModelId(), q);
 			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
 		catch(SQLException e) {
@@ -247,6 +235,10 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	
 	void putWarning(ServletContext context, String modelId, Relation r, String warning) {
 		super.putWarning(context, modelId, r.getSchemaName(), r.getName(), warning);
+	}
+
+	void removeWarning(ServletContext context, String modelId, Relation r) {
+		super.removeWarning(context, modelId, r.getSchemaName(), r.getName());
 	}
 	
 	public static Map<String, String> readQueryFromDatabase(Properties prop, String modelId, String schemaName, String name) throws SQLException, ClassNotFoundException, NamingException {
