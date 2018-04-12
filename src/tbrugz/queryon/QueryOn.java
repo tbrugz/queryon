@@ -203,6 +203,7 @@ public class QueryOn extends HttpServlet {
 	//static final String INITP_MODEL_ID = "model-id";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String DEFAULT_PROPERTIES_VALUES_RESOURCE = "/queryon-defaults.properties";
+	//static final String DEFAULT_MODELID = "default";
 	
 	public static final String CONN_PROPS_PREFIX = "queryon";
 	
@@ -286,6 +287,10 @@ public class QueryOn extends HttpServlet {
 		doInit(config.getServletContext());
 	}
 	
+	static {
+		//BaseResultSetCollectionAdapter.setCollectionValuesJoiner("|");
+	}
+	
 	protected void doInitProperties(ServletConfig config) {
 		//log4jInit();
 		propertiesResource = config.getInitParameter(INITP_PROPERTIES_RESOURCE);
@@ -347,7 +352,7 @@ public class QueryOn extends HttpServlet {
 			context.removeAttribute(ATTR_INIT_ERROR);
 			
 			//XXX: protocol: add from ServletRequest?
-			String protocol = "http://";
+			String protocol = "http://"; //XXX https protocol??
 			//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
 			String path = protocol + InetAddress.getLocalHost().getHostName().toLowerCase();
 			String contextPath = getServletContext().getContextPath();
@@ -389,33 +394,41 @@ public class QueryOn extends HttpServlet {
 						//throw new ServletException(msg);
 					}
 					else {
+						String modelWarningsKey = id+"."+ATTR_INIT_ERROR;
 						if( grabModel(models, id) ) {
 							modelsGrabbed.add(id);
+							context.removeAttribute(modelWarningsKey);
+						}
+						else {
+							context.setAttribute(modelWarningsKey, "Error grabbing model '"+id+"'");
 						}
 					}
 				}
 				//log.info("modelsGrabbed="+modelsGrabbed);
 				String defaultModel = prop.getProperty(PROP_MODELS_DEFAULT);
 				if(defaultModel==null) {
-					String msg = "multi-model instance must define a default model [prop '"+PROP_MODELS_DEFAULT+"']";
-					log.warn(msg);
-					//throw new ServletException(msg);
+					if(modelIds.size()>1) {
+						String msg = "multi-model instance must define a default model [prop '"+PROP_MODELS_DEFAULT+"']";
+						log.warn(msg);
+						throw new ServletException(msg);
+					}
+					defaultModel = modelIds.get(0);
 				}
 				if(!modelsGrabbed.contains(defaultModel)) {
 					String msg = "unknown default model '"+defaultModel+"'";
 					log.warn(msg);
 					defaultModel = null;
-					//throw new ServletException(msg);
+					throw new ServletException(msg);
 				}
-				if(defaultModel==null && modelsGrabbed.size()>0) {
+				/*if(defaultModel==null && modelsGrabbed.size()>2) {
 					defaultModel = modelsGrabbed.get(0);
 					log.warn("null default model [prop '"+PROP_MODELS_DEFAULT+"'], defaultModel set to '"+defaultModel+"'");
-				}
+				}*/
 				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [grabbed: "+modelsGrabbed+"]");
 			}
 			else {
-				String defaultModel = null;
+				String defaultModel = null; // XXX: use DEFAULT_MODELID? 
 				grabModel(models, defaultModel);
 				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [single-model]");
@@ -534,7 +547,8 @@ public class QueryOn extends HttpServlet {
 				ConnectionUtil.closeConnection(conn);
 			}
 			catch(Exception e) {
-				log.warn("Exception starting update-plugin [model="+modelId+"]: "+e, e);
+				log.warn("Exception starting update-plugin [model="+modelId+"]: "+e);
+				log.debug("Exception starting update-plugin [model="+modelId+"]: "+e, e);
 			}
 		}
 	}
@@ -700,7 +714,7 @@ public class QueryOn extends HttpServlet {
 			atype = ActionType.SQL_ANY;
 			otype = ActionType.SQL_ANY.name();
 		}
-		else if(ActionType.MANAGE.name().equals(reqspec.object)) {
+		else if(ActionType.MANAGE.name().toLowerCase().equals(reqspec.object)) {
 			atype = ActionType.MANAGE;
 			otype = ActionType.MANAGE.name();
 		}
@@ -852,7 +866,7 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			//log.warn(e, e);
 			log.warn(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage(), e);
-			throw new ServletException(e);
+			throw new InternalServerException(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage(), e);
 		}
 		catch(IOException e) {
 			throw new ServletException(e);
@@ -1063,7 +1077,12 @@ public class QueryOn extends HttpServlet {
 		
 		if(validateQuery) {
 			if(relation instanceof Query) {
-				DBObjectUtils.validateQuery((Query)relation, finalSql, conn, true);
+				try {
+					DBObjectUtils.validateQuery((Query)relation, finalSql, conn, true);
+				}
+				catch(SQLException e) {
+					log.warn("error validating query '"+relation+"': "+finalSql);
+				}
 			}
 			else {
 				log.warn("relation '"+relation+"' not a query: can't validate");
@@ -1093,6 +1112,7 @@ public class QueryOn extends HttpServlet {
 			try {
 				@SuppressWarnings("resource")
 				PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
+				//log.info("reqspec.onrows="+reqspec.onrows+" ;; reqspec.oncols="+reqspec.oncols);
 				rs = prs;
 				if(log.isDebugEnabled()) {
 					String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
@@ -1148,8 +1168,9 @@ public class QueryOn extends HttpServlet {
 			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
 			//XXX: create new SQLException including the query string? throw BadRequestException? InternalServerException?
-			throw new InternalServerException("Exception in 'doSelect': "+e, e);
-			//throw e;
+			//throw new InternalServerException("Exception in 'doSelect': "+e, e);
+			//e.printStackTrace();
+			throw e;
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
@@ -1849,7 +1870,8 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			log.warn("Update error, ex="+e.getMessage()+" ; sql=\n"+sql,e); //e.printStackTrace();
-			throw new InternalServerException("SQL Error: "+e);
+			//throw new InternalServerException("SQL Error: "+e, e);
+			throw e;
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
@@ -1898,7 +1920,7 @@ public class QueryOn extends HttpServlet {
 				Map.Entry<String, String> colmap = cols.next();
 				String col = colmap.getKey();
 				if(! MiscUtils.containsIgnoreCase(columns, col)) {
-				log.warn("unknown 'value' column: "+col);
+				log.warn("doInsert: unknown 'value' column: "+col); //+" ; cols: "+columns);
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
 			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
@@ -2000,7 +2022,8 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			//e.printStackTrace();
-			throw new InternalServerException("SQL Error: "+e);
+			//throw new InternalServerException("SQL Error: "+e, e);
+			throw e;
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
@@ -2048,6 +2071,9 @@ public class QueryOn extends HttpServlet {
 			resp.getWriter().write("queryon config reloaded");
 			return;
 		}
+		
+		// XXX reload-auth-info - reload shiro config -- how to know if user has permission? how to reload?
+		
 		/*
 		 * validate? diff? - generate diff script between (memory) model & database
 		 * for each table, grab table's metadata from database & compare
