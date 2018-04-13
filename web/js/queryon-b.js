@@ -30,7 +30,12 @@ function init(url, containerId, callback, modelId) {
 			callback(containerId, rels);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
-			showErrorMessages(messagesId, jqXHR.responseText);
+			//console.log("jqXHR", jqXHR, "textStatus", textStatus, "errorThrown", errorThrown);
+			var message = jqXHR.responseText;
+			if(!message) {
+				message = jqXHR.status + ": " + jqXHR.statusText;
+			}
+			showErrorMessages(messagesId, message);
 		}
 	});
 }
