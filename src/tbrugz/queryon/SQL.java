@@ -60,7 +60,7 @@ public class SQL {
 	
 	//XXX add limit/offset-clause?
 
-	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString());
+	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString()); //FIXME: StringDecorator should not be static
 	
 	public static final List<DateFormat> dateFormats = new ArrayList<DateFormat>();
 	
@@ -214,10 +214,10 @@ public class SQL {
 			(!MiscUtils.isNullOrEmpty(eo.getSchemaName())?eo.getSchemaName()+".":"")+
 			(!MiscUtils.isNullOrEmpty(eo.getPackageName())?eo.getPackageName()+".":"")+
 			eo.getName());
-		if(eo.getParams()!=null) {
+		int paramArgCount = eo.getParams()!=null ? eo.getParams().size() : 0;
+		if(paramArgCount>0) {
 			sql.append("(");
-			for(int i=0;i<eo.getParams().size();i++) {
-				//ExecutableParameter ep = eo.params.get(i);
+			for(int i=0;i<paramArgCount;i++) {
 				sql.append((i>0?", ":"")+"?");
 			}
 			sql.append(")");
@@ -807,6 +807,8 @@ public class SQL {
 		}
 		//XXX: distinct-count
 		//XXX: var? stdev?
+		//XXX: see avaiable functions by DBMS?
+		// median, mode, rank, percentile_cont
 		throw new IllegalArgumentException("unknown aggregate function: "+f);
 	}
 	
