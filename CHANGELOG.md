@@ -1,4 +1,53 @@
 
+queryon-ng
+----------
+* web: added "web" props: '.auth-required' & '.appname' (900)
+* datadiff: multi-table support
+* datadiff: added 'ignorecol' & 'altuk' params
+* datadiff: added 'dmlops' param
+* web: map: added updateFragment() & onLoadUpdateUiComponents() (945)
+* queryon: syntax: added WebSyntax
+* queryon: syntax: added AtomSyntax
+* datadiff: added 'limit' parameter ; diff2q: also added 'dmlops'
+* queryon: added prop 'sql.use-id-decorator'
+* queryon: QOnQueries/pages: added audit (created|updated + at|by)
+* queryon: insert/update: allow date/timestamp
+* api: added SwaggerServlet (989)
+* api: swagger: added params: fields, distinct, order, uni/multi filters
+* build: added 'download-deps' (ant) to 'generate-resources' maven phase
+* api: swagger: added insert/update/delete operations
+* api: swagger: added execute (POST) operation
+* queryon: execute: added type SCRIPT
+* queryon: added 'count' parameter
+* queryon: select: added pivot query (params: oncols/onrows) (1037)
+* queryon: added 'pivotflags' parameter
+* queryon: added 'measures' parameter (pivot)
+* queryon: added optimistic-lock
+* queryon: added 'utf8' parameter
+* web: added workspace.html (experimental)
+* filter: added CacheControlFilter (uses parameter 'cache-max-age')
+* processor(s): added warnings to servlet context
+* api: added ODataServlet (1105)
+* api: odata: added ODataRequest, $top & $skip parameters
+* api: odata: added $orderby parameter
+* api: odata: added $select parameter
+* api: odata: added $value parameter
+* api: odata: added $count parameter
+* queryon: added 'aliases' parameter
+* api: odata: add $metadata
+* queryon: added 'groupby' parameter
+* queryon: added 'agg' (aggregate) parameter
+* web: index: pivot support
+* web: sigma: added optionals EDGE_SIZE & EDGE_COLOR
+* queryon: SQL: added 'named-parameters' "special construct"
+* queryon: executables now accept binary parameters
+* queryon: added props 'queryon.filter.allowed' & 'queryon.groupby.allow'
+* queryon: added prop 'queryon.distinct.allow'
+* api: odata: added $filter parameter/parser (1230)
+* api: odata: added create/remove/update 
+* datadiff: added 'fin:' & 'fnin:' param prefixes
+
+
 queryon 0.6.1
 ----------
 * build: added status.jsp & build.revisionNumber
