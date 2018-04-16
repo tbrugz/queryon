@@ -23,6 +23,7 @@ mvn package
 * init h2 database:
 ```
 ant run-sqlrun
+ant run-sqldiff
 ```
 
 running
