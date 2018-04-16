@@ -121,7 +121,9 @@ button {
 }
 
 button.on {
-	background-color: #eaa845; /* #ddab60; #f90; */
+	/*background-color: #eaa845; #ddab60; #f90; */
+	background-color: #767676;
+	color: #ddd;
 }
 
 input[type=button] {
