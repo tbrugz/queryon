@@ -346,6 +346,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 	@Override
 	public void onUpdate(Relation relation, RequestSpec reqspec) {
+		if(!isQonExecsRelation(relation)) { return; }
+		
 		ExecutableObject eo = getQOnExecutableFromModel(relation, reqspec);
 		boolean removed = false;
 		if(eo==null) {
@@ -361,6 +363,8 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 	@Override
 	public void onDelete(Relation relation, RequestSpec reqspec) {
+		if(!isQonExecsRelation(relation)) { return; }
+		
 		ExecutableObject eo = getQOnExecutableFromModel(relation, reqspec);
 		if(eo==null) {
 			return;
