@@ -1,5 +1,5 @@
 
-queryon-ng
+queryon 0.6.2
 ----------
 * web: added "web" props: '.auth-required' & '.appname' (900)
 * datadiff: multi-table support
@@ -45,7 +45,7 @@ queryon-ng
 * queryon: added prop 'queryon.distinct.allow'
 * api: odata: added $filter parameter/parser (1230)
 * api: odata: added create/remove/update 
-* datadiff: added 'fin:' & 'fnin:' param prefixes
+* datadiff: added 'fin:' & 'fnin:' param prefixes (1241)
 
 
 queryon 0.6.1
