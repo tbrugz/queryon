@@ -292,7 +292,7 @@
 	</artifact:dependencies>
 	</target>
 	
-	<target name="download-deps">
+	<!--<target name="download-deps">
 		<property name="download.dir" value="target/download"/>
 		<property name="version.swagger" value="2.2.10"/>
 		
@@ -304,6 +304,6 @@
 			<fileset dir="${download.dir}/swagger-ui/unzipped/swagger-ui-${version.swagger}/dist" includes="**/*"/>
 		</copy>
 		<copy tofile="web/swagger-ui/index.html" file="web/swagger-ui-index.html" overwrite="true"/>
-	</target>
+	</target>-->
 	
 </project>

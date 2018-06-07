@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - pages editor</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-editor.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="js/jquery.jkey.js"></script>
+	<script src="js/qon-base.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script src="js/auth.js"></script>
+	<script src="js/models.js"></script>
+	<script src="js/settings.js"></script>
+	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+// load url: http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY&mimetypefield=MIME
+//javascript, html, json, markdown, css, xml //XXX add sql?
+
+var extMap = {
+	".css": "css",
+	".diff": "diff",
+	".html": "html",
+	".js": "javascript",
+	".json": "json",
+	".md": "markdown", 
+	".markdown": "markdown", 
+	".patch": "diff",
+	".txt": "plain_text",
+	".text": "plain_text",
+	".xml": "xml",
+	".xsl": "xml"
+};
+var mimeMap = {
+	"html": "text/html",
+	"css": "text/css",
+	"javascript": "application/javascript",
+	"json": "application/json",
+	"xml": "application/xml",
+	"markdown": "text/markdown",
+	"plain_text": "text/plain",
+	"diff": "text/plain"
+};
+
+var pagesUrl = 'p/';
+var qonUrl = 'q/QON_PAGES';
+var editor = null;
+var pageAltered = false;
+
+onLoad = function() {
+	var id = getParameterByName('id', location.search);
+	
+	loadAce();
+	loadAuthInfo();
+	loadSettings(function() {
+		var table = settings['queryon.qon-pages.table'];
+		if(table) {
+			qonUrl = 'q/'+table;
+		}
+		console.log("qonUrl: ", qonUrl);
+		var modelId = getParameterByName('model', location.search);
+		if(modelId) {
+			byId('modelLabel').style.display = 'inline-block';
+			byId('model').value = modelId;
+		}
+
+		if(id) {
+			byId('id').value = id;
+			doLoadPage(id);
+		}
+		
+		updateUI();
+	});
+	registerKeybindings();
+}
+
+updateUI = function() {
+	var editorDiv = byId('editor');
+	var btns = byId('action-btns');
+	var nav = byId('nav');
+	editorDiv.style.height = (window.innerHeight - btns.offsetHeight - nav.offsetHeight - 7) + 'px';
+	if(editor) { editor.resize(); }
+}
+
+window.onresize = updateUI;
+
+makeHrefs = function() {
+	refreshAuthInfo();
+}
+
+function doSaveError(evt) {
+	btnActionStop('btnSave');
+	console.log('error: ',evt);
+	var target = evt.target;
+	showErrorMessages('messages', 'error saving page: '+target.responseText+
+			(target.status==403?" (invalid session?)":"")
+			);
+}
+
+function doSave() {
+	var id = byId('id').value;
+	var path = byId('path').value;
+	var mime = byId('mime').value;
+	var username = byId('username').innerHTML;
+	var now = new Date();
+	var optimisticlock = byId('optimisticlock').value;
+	var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
+	//console.log("now:",now,now.toISOString(),'optimisticlock',optimisticlock,'version_seq',version_seq,'isInteger(optimisticlock)',isInteger(optimisticlock));
+
+	// normalizing path
+	path = path.replace(/\/+/g, '\/').replace(/^\//, '');
+	//console.log('doSave', byId('path').value, path);
+	byId('path').value = path;
+	
+	//var remarks = byId('remarks').value;
+	//var roles = byId('roles').value;
+
+	if(path==null || path=="") {
+		showErrorMessages('messages', '<b>path</b> cannot be null...');
+		//updateUI();
+		return;
+	}
+
+	var saveUrl = qonUrl+'?';
+
+	var payload = "v:PATH=" + encodeURIComponent(path) +
+		"&v:MIME=" + encodeURIComponent(mime) +
+		"&v:HAS_BODY=t" +
+		"&bodyparamname=BODY" +
+		"&optimisticlock=" + encodeURIComponent(optimisticlock) +
+		"&v:VERSION_SEQ=" + encodeURIComponent(version_seq) +
+		(getCurrentModelId()?'&model='+getCurrentModelId():'');
+		//"&v:BODY=" + encodeURIComponent( editor.getValue() );
+	//console.log("payload", payload);
+	
+	var messageBody = editor.getValue();
+	var method = "POST"; //post: insert ; patch: update
+	// TODO: add "now"
+	if(id) { // update
+		saveUrl += "p1="+encodeURIComponent(id);
+		method = "PATCH";
+		payload += "&v:UPDATED_BY="+encodeURIComponent(username);
+		payload += "&v:UPDATED_AT="+encodeURIComponent(now.toISOString());
+	}
+	else {
+		payload += "&v:CREATED_BY="+encodeURIComponent(username);
+		payload += "&v:CREATED_AT="+encodeURIComponent(now.toISOString());
+	}
+	saveUrl += "&" + payload;
+	
+	//var payload = new FormData();
+	//payload.append('v:ID', id);
+	//payload.append('v:PATH', path);
+	
+	// http://stackoverflow.com/questions/6121203/how-to-do-fade-in-and-fade-out-with-javascript-and-css
+	byId('messages').innerHTML = '';
+	byId('messages').classList.remove('fadeoutable');
+	setTimeout(function() {
+		byId('messages').classList.remove('fade');
+	}, 10);
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(evt) {
+		var req = evt.target
+		var status = req.status;
+		if(status>=200 && status<300) {
+			console.log("is now? now=", formatDate(now), "lock=", byId('optimisticlock').value);
+			btnActionStop('btnSave');
+			var pkvals = req.getResponseHeader('X-Relation-UK-Values');
+			if(pkvals) {
+				byId('id').value = pkvals.trim();
+				history.replaceState(null, null, "?id="+byId('id').value);
+			}
+			byId('optimisticlock').value = version_seq;
+			console.log('doSave.ok, pkvals=', pkvals, '; evt=', evt);
+			//closeMessages('messages');
+			byId('messages').classList.remove('fadeoutable');
+			setTimeout(function() {
+				byId('messages').classList.remove('fade');
+				byId('messages').classList.add('fadeoutable');
+				showInfoMessages('messages', 'page <b>'+name+'</b> successfully saved');
+				refreshUI();
+				setTimeout(
+						function() { byId('messages').classList.add('fade'); },
+						2000);
+				console.log("fading...");
+			}, 10);
+			pageAltered = false;
+		}
+		else if(status==409) { //conflict
+			console.log("not now? now=", formatDate(now), "lock=", byId('optimisticlock').value);
+			doSaveError(evt);
+		}
+		else {
+			doSaveError(evt);
+		}
+	};
+	//oReq.addEventListener("error", transferFailed);
+	oReq.onerror = doSaveError;
+	btnActionStart('btnSave');
+	oReq.open(method, saveUrl);
+	oReq.send(messageBody);
+	//oReq.send(payload);
+}
+
+/*
+function doRun() {
+	var url = byId('pages-open').getAttribute("href"); //.href;
+	var output = editor.getValue();
+	console.log("doRun", url);
+	
+	//var w = window.open(url, 'pages-editing');
+	var w = window.open('blank.html', 'pages-editing');
+	//var w = window.open('', 'pages-editing');
+	setTimeout(function() {
+		//w.document.head.innerHTML = '';
+		//w.document.body.innerHTML = '';
+		//w.document.documentElement.innerHTML = '';
+		w.history.replaceState({}, '', url);
+		w.document.write(output);
+	}, 100);
+	//w.document.write(output);
+}
+*/
+
+function doLoadPageError(evt) {
+	//btnActionStop('btnSave');
+	console.log('error: ',evt);
+	var target = evt.target;
+	showErrorMessages('messages', 'error loading page: '+target.responseText+
+			(target.status==403?" (invalid session?)":"")
+			);
+}
+
+function doLoadPage(id) {
+	var loadUrl = qonUrl+'.json';
+
+	var payload = "p1=" + encodeURIComponent(id) +
+		(getCurrentModelId()?'&model='+getCurrentModelId():'');
+	loadUrl += "?" + payload;
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(evt) {
+		var req = evt.target
+		var status = req.status;
+		if(status>=200 && status<300) {
+			//btnActionStop('btnSave');
+			console.log('doLoadPage.ok', evt);
+			//showInfoMessages('messages', 'page '+name+' successfully loaded');
+			var data = getQonData(JSON.parse(req.responseText))[0];
+			var PATH = data.PATH || data.path;
+			var MIME = data.MIME || data.mime;
+			var BODY = data.BODY || data.body;
+			var UPDATED_AT = data.UPDATED_AT || data.updated_at;
+			var VERSION_SEQ = data.VERSION_SEQ || data.version_seq;
+			console.log('doLoadPage.ok2', data);
+			byId('path').value = PATH;
+			if(MIME) {
+				byId('mime').value = MIME;
+			}
+			byId('optimisticlock').value = VERSION_SEQ;
+			//console.log("byId('optimisticlock').value", byId('optimisticlock').value);
+			// http://stackoverflow.com/questions/18614169/set-value-for-ace-editor-without-selecting-the-whole-editor
+			editor.setValue(BODY, -1);
+			// http://stackoverflow.com/questions/30986732/reset-the-undo-stack-in-ace-editor
+			editor.getSession().setUndoManager(new ace.UndoManager());
+			refreshUI();
+			pageAltered = false;
+		}
+		else {
+			doLoadPageError(evt);
+		}
+	};
+	oReq.onerror = doLoadPageError;
+	//btnActionStart('btnSave');
+	oReq.open("GET", loadUrl);
+	oReq.send(null);
+	//oReq.send(payload);
+}
+
+function refreshUI() {
+	var id = byId('id').value;
+	if(id) {
+		byId('pages-open').style.display = 'initial';
+		var url = (pagesUrl + byId('path').value).replace(/\/+/, '/');
+		byId('pages-open').href = url;
+	}
+	else {
+		byId('pages-open').style.display = 'none';
+	}
+	updateEditorMode();
+}
+
+function onPathChange() {
+	updateEditorMode();
+}
+
+function onTextFieldChange() {
+	pageAltered = true;
+}
+
+// http://stackoverflow.com/questions/2229942/how-to-block-users-from-closing-a-window-in-javascript
+// https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+function confirmExit(event) {
+	if (pageAltered) {
+		var dialogText = "Current page has been altered. Are you sure you want to close?";
+		event.returnValue = dialogText;
+		return dialogText;
+	}
+}
+
+window.addEventListener("beforeunload", confirmExit);
+
+function loadAce() {
+	editor = ace.edit("editor");
+	editor.$blockScrolling = true;
+	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
+	editor.getSession().setMode("ace/mode/html"); //javascript, html, json, markdown, css, xml
+	editor.setOptions({
+		fontSize: "11pt"
+	});
+	editor.getSession().on('change', onTextFieldChange);
+	/*editor.getSelectedText = function() {
+		return this.getSession().getTextRange(this.getSelectionRange());
+	};*/
+}
+
+updateEditorMode = function() {
+	var modeParts = editor.getSession().getMode().$id.split("/");
+	var mode = modeParts[modeParts.length-1];
+	var path = byId('path').value;
+	if(path.endsWith(mode)) { return; }
+	
+	var keys = Object.keys(extMap);
+	for(var i=0;i<keys.length;i++) {
+		var type = extMap[keys[i]];
+		if(path.endsWith(keys[i])) {
+			if(mode!=type) {
+				editor.getSession().setMode("ace/mode/"+type);
+			}
+			byId('mime').value = mimeMap[type];
+			return;
+		}
+	}
+	//if not found...
+	type = "html";
+	if(mode!=type) {
+		editor.getSession().setMode("ace/mode/"+type);
+	}
+	byId('mime').value = mimeMap[type];
+}
+
+/*$(document).jkey('f10',function(){
+	console.log('f10 pressed: doSave()');
+	doSave();
+});*/
+
+function registerKeybindings() {
+	document.onkeydown = function(evt) {
+		var evt = evt || window.event;
+		var key = evt.keyCode; // evt.key
+		var keyname = "";
+		
+		if(key == 27) { //esc
+			//closeDialogs();
+			//keyname = "ESC";
+		}
+		if(key==119) { //f8
+		}
+		if(key==120) { //f9
+		}
+		if(key==121) { //f10
+			evt.preventDefault();
+			evt.stopPropagation();
+			evt.stopImmediatePropagation();
+			doSave();
+			keyname = "F10";
+		}
+		
+		if(keyname) {
+			console.log('document.onkeydown: ',key,keyname);
+			return false;
+		}
+	}
+	
+	/* For Opera */
+	document.onkeypress = function(evt) {
+		var evt = evt || window.event;
+		var key = evt.keyCode; // evt.key
+		if(key==121) { //f10
+			evt.preventDefault();
+			evt.stopPropagation();
+			evt.stopImmediatePropagation();
+			console.log('document.onkeypress: ',key);
+			return false;
+		}
+	};
+	
+}
+</script>
+	<style>
+#messages {
+	/*border: 1px solid #000;*/
+	display: none;
+	margin: 2px 4px 0 4px;
+	padding: 0 2px 0 4px;
+	margin-top: 0;
+}
+#authinfo {
+	float: right;
+	margin-top: 2px;
+}
+	</style>
+</head>
+<body onload="onLoad();">
+<div id="spec">
+
+<nav class="container" id="nav">
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Pages</code></span>
+	<label>id: <input type="text" id="id" name="id" size="6" readonly="readonly"/></label>
+	<label title="resource URL (known extensions: css, html, javascript, json, markdown, md, xml)">
+		path: <input type="text" id="path" name="path" onchange="onPathChange();onTextFieldChange();" size="40"/>
+	</label>
+	<label>mime: <input type="text" id="mime" name="mime" size="15" readonly="readonly" value="text/html"/></label>
+	<label style="display: none">remarks: <input type="text" id="remarks" name="remarks" size="60" onchange="onTextFieldChange();"/></label>
+	<label id="rolesLabel" style="display: none;">
+		<span id="rolesLabelText">roles:</span>
+		<input type="text" id="roles" name="roles"/>
+		<span id="rolesCount" title="# of current allowed roles"></span>
+		<input type="button" id="rolesBtn" value="+/- roles" title="Add/Remove roles" onclick="showRolesDialog()"/>
+	</label>
+	<label id="modelLabel" style="display: none;">model: <input type="text" id="model" name="model" readonly="readonly" value=""/></label>
+	
+	<span id="xtra-actions">
+		<span id="actions-container" style="display: none">
+			<a id="url-reload" href="" title="Reload page">reload</a>
+			<a id="url-permalink" href="" target="_blank">permalink</a>
+			<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove page '+byId('name').value+'?')){doRemove();}" title="Remove Page">remove</a>
+		</span>
+		<!-- <span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span> -->
+	</span>
+
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction"></span>
+	</span>
+	
+</nav>
+
+<div id="editor" style="width: 100%"></div>
+
+<div class="container" id="action-btns">
+	
+	<input type="hidden" id="optimisticlock" value="" />
+	
+	<div id="button-container">
+		<!-- <input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run (F9)"> -->
+		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Page (F10)">
+		<a id="pages-open" href="" target="_blank" style="display: none" title="Open in new window"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+		<span id="messages"></span>
+	</div>
+	
+</div>
+
+</div>
+
+<div id="rolesListDialogContainer" style="display: none;">
+	<div id="rolesListDialog">
+		<form id="rolesForm">
+		<div id="rolesListDialogContent"></div>
+		<div id="rolesListDialogBtns">
+			<input type="button" value="change roles" onclick="updateRoles();"/>
+			<input type="button" value="close" onclick="closeRolesDialog();"/>
+		</div>
+		</form>
+	</div>
+</div>
+
+</body>
