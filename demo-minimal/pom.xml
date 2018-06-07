@@ -1,15 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.bitbucket.tbrugz</groupId>
+		<artifactId>queryon</artifactId>
+		<version>0.7-SNAPSHOT</version>
+	</parent>
 	
-	<groupId>org.bitbucket.tbrugz</groupId>
 	<artifactId>qon-demo-minimal</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${project.parent.version}</version>
 	<packaging>war</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<queryon.version>0.6.2-SNAPSHOT</queryon.version>
-		<sqldump.version>0.9.16</sqldump.version>
 	</properties>
 	
 	<build>
@@ -64,12 +66,19 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
-			<artifactId>queryon</artifactId>
-			<version>${queryon.version}</version>
+			<artifactId>qon-web</artifactId>
+			<version>${project.parent.version}</version>
 			<type>war</type>
 		</dependency>
 
-		<!-- considering a skinny queryon war -->
+		<!-- considering a skinny qon-web war -->
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-core</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+			<!-- <type>war</type> -->
+		</dependency>
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>sqldump</artifactId>
