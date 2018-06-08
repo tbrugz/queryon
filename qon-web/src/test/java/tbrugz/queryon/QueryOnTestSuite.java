@@ -24,5 +24,5 @@ import tbrugz.queryon.util.StringUtilsTest;
 	ODataWebTest.class,
 })
 public class QueryOnTestSuite {
-
+	//public static final String basedir = "src/test/java";
 }

@@ -36,9 +36,11 @@ import tbrugz.sqldump.util.IOUtil;
 
 public class ODataWebTest {
 
-	static String workDir = "work/test/";
-	static String utf8 = "UTF-8";
-	static String odataUrl = qonUrl + "/odata";
+	public static final String basedir = "src/test/java";
+
+	//static String workDir = "work/test/";
+	//static String utf8 = "UTF-8";
+	static final String odataUrl = qonUrl + "/odata";
 	
 	@BeforeClass
 	public static void setup() throws Exception {
@@ -60,7 +62,7 @@ public class ODataWebTest {
 	}
 	
 	public static void setupH2() throws ClassNotFoundException, IOException, SQLException, NamingException {
-		String[] params = {"-propfile=src_test/tbrugz/queryon/http/sqlrun.properties"};
+		String[] params = {"-propfile="+basedir+"/tbrugz/queryon/http/sqlrun.properties"};
 		SQLRun.main(params);
 	}
 
@@ -79,6 +81,7 @@ public class ODataWebTest {
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
 		if(response1.getStatusLine().getStatusCode()>=400) {
+			//System.out.println("content:: "+content);
 			throw new RuntimeException(response1.getStatusLine().getStatusCode()+": "+content);
 		}
 		return content;
@@ -132,7 +135,7 @@ public class ODataWebTest {
 		String url = odataUrl+"/PUBLIC.DEPT?$filter=NAME+eq+'HR'";
 		
 		String jsonStr = getContentFromUrl(url);
-		System.out.println("content:\n"+jsonStr);
+		//System.out.println("content:\n"+jsonStr);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
@@ -177,7 +180,7 @@ public class ODataWebTest {
 		String url = odataUrl+"/PUBLIC.PAIR(ID1=1,ID2=3)";
 		
 		String jsonStr = getContentFromUrl(url);
-		System.out.println("content:\n"+jsonStr);
+		//System.out.println("content:\n"+jsonStr);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
@@ -200,7 +203,7 @@ public class ODataWebTest {
 		String url = odataUrl+"/PUBLIC.PAIR(ID2=3,ID1=1)";
 		
 		String jsonStr = getContentFromUrl(url);
-		System.out.println("content:\n"+jsonStr);
+		//System.out.println("content:\n"+jsonStr);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);

@@ -47,7 +47,7 @@ public class JettySetup {
 		server.setConnectors(new Connector[]{ connector });
 
 		WebAppContext webapp = new WebAppContext();
-		String webRoot = "src_test/tbrugz/queryon/http";
+		String webRoot = WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http";
 		webapp.setDescriptor(webRoot+"/WEB-INF/web.xml");
 		webapp.setResourceBase(webRoot);
 		webapp.setContextPath("/");

@@ -67,6 +67,8 @@ import tbrugz.sqldump.util.Utils;
 import static tbrugz.queryon.http.JettySetup.*;
 
 public class WinstoneAndH2HttpRequestTest {
+
+	public static final String basedir = "src/test/java";
 	
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;
@@ -87,7 +89,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	public static void setupH2() throws ClassNotFoundException, IOException, SQLException, NamingException {
-		String[] params = {"-propfile=src_test/tbrugz/queryon/http/sqlrun.properties"};
+		String[] params = {"-propfile="+basedir+"/tbrugz/queryon/http/sqlrun.properties"};
 		SQLRun.main(params);
 	}
 	

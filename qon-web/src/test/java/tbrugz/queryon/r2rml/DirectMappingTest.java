@@ -43,6 +43,8 @@ import static tbrugz.queryon.http.JettySetup.*;
  */
 public class DirectMappingTest {
 
+	public static final String basedir = "src/test/java";
+	
 	@BeforeClass
 	public static void setup() throws Exception {
 		JettySetup.setupServer();
@@ -63,7 +65,8 @@ public class DirectMappingTest {
 	}
 
 	public static void setupH2() throws ClassNotFoundException, IOException, SQLException, NamingException {
-		String[] params = {"-propfile=src_test/tbrugz/queryon/r2rml/sqlrun.properties"};
+		String[] params = {"-propfile="+basedir+"/tbrugz/queryon/r2rml/sqlrun.properties"};
+		//System.out.println("user.dir = "+System.getProperty("user.dir"));
 		SQLRun.main(params);
 	}
 
@@ -74,7 +77,7 @@ public class DirectMappingTest {
 	@Test
 	public void dumpTest() throws Exception {
 		String[] params = {
-				"-propfile=src_test/tbrugz/queryon/r2rml/sqldump.properties",
+				"-propfile="+basedir+"/tbrugz/queryon/r2rml/sqldump.properties",
 				"-usesysprop=false"
 		};
 		SQLDump.main(params);
