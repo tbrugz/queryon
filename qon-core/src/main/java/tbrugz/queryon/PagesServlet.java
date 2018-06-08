@@ -3,6 +3,8 @@ package tbrugz.queryon;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -133,31 +135,43 @@ public class PagesServlet extends AbstractHttpServlet {
 		ResultSet rs = getPage(conn, relation, pathInfo);
 		String id = rs.getString(1);
 		String mimeType = rs.getString(2);
-		//String body = rs.getString(3);
 		
 		resp.setContentType(mimeType);
 		//resp.setHeader(HEADER_PAGE_ID, id);
-		InputStream is = rs.getBinaryStream(3);
-		boolean wasNull = rs.wasNull();
-		if(wasNull) {
+
+		boolean hasWritterOutput = false;
+		// character stream
+		{
+			Reader reader = rs.getCharacterStream(3);
+			if(reader!=null) {
+				boolean wasNull = rs.wasNull();
+				if(!wasNull) {
+					//log.info("col4 was not null");
+					Writer writer = resp.getWriter();
+					pipeCharacterStreams(reader, writer);
+					hasWritterOutput = true;
+				}
+				reader.close();
+			}
+		}
+
+		// binary stream
+		if(!hasWritterOutput) {
 			//log.info("col3 was null");
-			is = rs.getBinaryStream(4);
-			wasNull = rs.wasNull();
+			InputStream is = rs.getBinaryStream(4);
+			boolean wasNull = rs.wasNull();
+			if(is!=null) {
+				if(!wasNull) {
+					//log.info("col4 was not null");
+					OutputStream os = resp.getOutputStream();
+					IOUtil.pipeStreams(is, os);
+					hasWritterOutput = true;
+				}
+				is.close();
+			}
 		}
 		
-		if(is!=null) {
-			if(!wasNull) {
-				//log.info("col4 was not null");
-				OutputStream os = resp.getOutputStream();
-				IOUtil.pipeStreams(is, os);
-			}
-			else {
-				//log.warn("cols 3 and 4 were null");
-				sendNoContent(resp, pathInfo, id);
-			}
-			is.close();
-		}
-		else {
+		if(!hasWritterOutput) {
 			sendNoContent(resp, pathInfo, id);
 		}
 		
@@ -221,4 +235,15 @@ public class PagesServlet extends AbstractHttpServlet {
 		req.getRequestDispatcher(notFoundUrl).forward(req, resp);
 	}
 	
+	static final int BUFFER_SIZE = 1024*8;
+
+	@Deprecated
+	public static void pipeCharacterStreams(Reader r, Writer w) throws IOException {
+		char[] buffer = new char[BUFFER_SIZE];
+		int len;
+		while ((len = r.read(buffer)) != -1) {
+			w.write(buffer, 0, len);
+		}
+	}
+
 }
