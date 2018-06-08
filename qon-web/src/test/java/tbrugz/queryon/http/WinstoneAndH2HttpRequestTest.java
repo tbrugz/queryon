@@ -72,8 +72,8 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;
-	static String workDir = "work/test/";
-	static String utf8 = "UTF-8";
+	//static String workDir = "work/test/";
+	static final String utf8 = "UTF-8";
 	
 	static int relationsInModel = 3;
 	
@@ -83,6 +83,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public static void setup() throws Exception {
 		//TestSetup.setupWinstone();
 		JettySetup.setupServer();
+		//System.out.println(">> user.dir: "+System.getProperty("user.dir"));
 		
 		dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();

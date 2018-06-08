@@ -342,7 +342,7 @@ public class RequestSpec {
 			setSyntaxProps(req, feat, prop);
 		}
 
-		log.debug("outputSyntax: "+outputSyntax);
+		//log.debug("outputSyntax: "+outputSyntax);
 		
 		//---------------------
 		
