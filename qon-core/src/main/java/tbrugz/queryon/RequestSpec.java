@@ -570,6 +570,10 @@ public class RequestSpec {
 			if(outputSyntaxTmp==null) {
 				log.info("no syntax match, using default ["+defaultOutputSyntax+"]");
 				outputSyntaxTmp = dsutils.getDumpSyntax(defaultOutputSyntax);
+				if(outputSyntaxTmp==null) {
+					//log.warn("null outputSyntax ["+defaultOutputSyntax+"]");
+					throw new BadRequestException("Unknown default output syntax: "+defaultOutputSyntax);
+				}
 			}
 			else {
 				log.debug("syntax defined by accept: syntax: "+outputSyntaxTmp.getSyntaxId()+" ; mime: "+outputSyntaxTmp.getMimeType()+" ; accept: "+acceptHeader);
