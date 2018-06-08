@@ -77,7 +77,6 @@
 			<artifactId>qon-core</artifactId>
 			<version>${project.parent.version}</version>
 			<scope>runtime</scope>
-			<!-- <type>war</type> -->
 		</dependency>
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>

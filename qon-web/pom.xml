@@ -225,6 +225,12 @@
   <dependencies>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>qon-core</artifactId>
+      <version>${project.parent.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
       <version>${sqldump.version}</version>
       <scope>compile</scope>
@@ -238,12 +244,6 @@
          <artifactId>jettison</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.bitbucket.tbrugz</groupId>
-      <artifactId>qon-core</artifactId>
-      <version>${project.parent.version}</version>
-      <scope>compile</scope>
     </dependency>
     
     <dependency>
