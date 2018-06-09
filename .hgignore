@@ -1,4 +1,5 @@
 syntax: glob
+
 bin/*
 lib/*
 dist/*
@@ -8,6 +9,8 @@ tmp/*
 z_etc/*
 web/WEB-INF/classes/*
 web/swagger-ui/*
+
+qon-web/src/main/webapp/swagger-ui/*
 
 demo-dbn/data/*
 demo-dbn/classicmodels/*
