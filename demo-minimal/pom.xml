@@ -9,6 +9,7 @@
 	<artifactId>qon-demo-minimal</artifactId>
 	<version>${project.parent.version}</version>
 	<packaging>war</packaging>
+	<name>qon-demo-minimal</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
