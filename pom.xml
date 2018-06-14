@@ -28,6 +28,8 @@
     <!-- <queryon.version>0.7-SNAPSHOT</queryon.version> -->
     <sqldump.version>0.9.17-SNAPSHOT</sqldump.version>
 
+    <servlet-api.version>3.0.1</servlet-api.version>
+
     <shiro.version>1.3.2</shiro.version>
 
     <findbugs.version>2.5.2</findbugs.version>
@@ -234,15 +236,11 @@
 
       <!--  web plugins -->
 
-      <plugin>
+      <!-- <plugin>
         <groupId>org.apache.tomcat.maven</groupId>
         <artifactId>tomcat7-maven-plugin</artifactId>
         <version>2.2</version>
-        <!-- <configuration>
-          <path>/web</path>
-          <warSourceDirectory>/web</warSourceDirectory>
-        </configuration> -->
-      </plugin>
+      </plugin> -->
 
       <!-- <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -330,7 +328,7 @@
       <scope>compile</scope>
     </dependency>
     <!-- http://stackoverflow.com/questions/1979473/available-servlet-3-0-implementations -->
-    <dependency>
+    <!-- <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>3.0.1</version>
@@ -341,9 +339,9 @@
       <artifactId>jstl</artifactId>
       <version>1.2</version>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
-    <dependency>
+    <!-- <dependency>
       <groupId>org.apache.shiro</groupId>
       <artifactId>shiro-core</artifactId>
       <version>${shiro.version}</version>
@@ -354,7 +352,7 @@
       <artifactId>shiro-web</artifactId>
       <version>${shiro.version}</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency> -->
     <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -368,19 +366,19 @@
       <version>2.2.2</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.pegdown</groupId>
       <artifactId>pegdown</artifactId>
       <version>1.6.0</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency> -->
     <!-- used by PatchDumper -->
-    <dependency>
+    <!-- <dependency>
       <groupId>com.googlecode.java-diff-utils</groupId>
       <artifactId>diffutils</artifactId>
       <version>1.2.1</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency> -->
 
     <!-- <dependency>
       <groupId>org.slf4j</groupId>
@@ -400,12 +398,12 @@
       <version>1.6.6</version>
     </dependency-->
 
-    <dependency>
+    <!-- <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>1.3.173</version>
       <scope>test</scope>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -424,22 +422,20 @@
       <version>8.1.16.v20140903</version>
       <scope>test</scope>
     </dependency> -->
-    <dependency>
+    <!-- <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>8.1.19.v20160209</version>
-      <!-- <version>7.6.19.v20160209</version> -->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
       <version>8.1.19.v20160209</version>
-      <!-- <version>7.6.19.v20160209</version> -->
       <scope>test</scope>
-    </dependency>
+    </dependency> -->
 
-    <dependency>
+    <!-- <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.2.1</version>
@@ -480,7 +476,7 @@
       <artifactId>kmlutils</artifactId>
       <version>0.5.5</version>
       <scope>test</scope>
-    </dependency>
+    </dependency> -->
 
     <!-- <dependency>
       <groupId>org.quartz-scheduler</groupId>

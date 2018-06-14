@@ -105,7 +105,6 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
         <version>1.3</version>
-        <!-- <version>1.4-SNAPSHOT</version> -->
         <executions>
           <execution>
             <phase>validate</phase>
@@ -229,7 +228,7 @@
       <version>${project.parent.version}</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>sqldump</artifactId>
       <version>${sqldump.version}</version>
@@ -244,15 +243,14 @@
          <artifactId>jettison</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
+    </dependency> -->
     
-    <dependency>
-      <!-- also as transitive dependency from sqldump -->
+    <!-- <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.2</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency> -->
     <!-- <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -263,7 +261,7 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-      <version>3.0.1</version>
+      <version>${servlet-api.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -324,12 +322,12 @@
       <version>1.6.6</version>
       <optional>true</optional>
     </dependency> -->
-    <dependency>
+    <!-- <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.17</version>
       <optional>true</optional>
-    </dependency>
+    </dependency> -->
     <!-- dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -342,12 +340,12 @@
       <version>1.3.173</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
       <scope>test</scope>
-    </dependency>
+    </dependency> -->
     <!-- <dependency>
       <groupId>net.sourceforge.winstone</groupId>
       <artifactId>winstone</artifactId>
@@ -418,7 +416,7 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
+    <!-- <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
       <version>2.2.1</version>
@@ -432,7 +430,7 @@
       <groupId>javax.ejb</groupId>
       <artifactId>javax.ejb-api</artifactId>
       <version>3.2</version>
-    </dependency>
+    </dependency> -->
 
   </dependencies>
 
