@@ -284,7 +284,10 @@ function refreshUI() {
 	var id = byId('id').value;
 	if(id) {
 		byId('pages-open').style.display = 'initial';
-		var url = (pagesUrl + byId('path').value).replace(/\/+/, '/');
+		var modelId = getParameterByName('model', location.search);
+		var url = pagesUrl + byId('path').value + ( modelId ? "?model="+modelId : "" );
+		url = url.replace(/\/+/, '/');
+		
 		byId('pages-open').href = url;
 	}
 	else {
