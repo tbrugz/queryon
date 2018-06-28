@@ -2315,6 +2315,7 @@ public class QueryOn extends HttpServlet {
 		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, false, mayApplyLimitOffset, resp, getLimit(reqspec.limit));
 	}
 	
+	@SuppressWarnings("deprecation")
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs, boolean fullKeyDefined,
 			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 

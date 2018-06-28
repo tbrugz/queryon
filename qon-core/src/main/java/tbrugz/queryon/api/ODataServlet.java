@@ -38,7 +38,6 @@ import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.exception.InternalServerException;
-import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -187,7 +186,8 @@ public class ODataServlet extends QueryOn {
 	
 	@Override
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
-		return new ODataRequest(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
+		//return new ODataRequest(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
+		return new ODataRequest(dsutils, req, prop);
 	}
 	
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"name"});

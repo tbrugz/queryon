@@ -48,10 +48,15 @@ public class ODataRequest extends RequestSpec {
 	protected String valueField;
 	protected boolean isCountRequest;
 
-	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
+	/*public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
 			throws ServletException, IOException {
 		super(dsutils, req, prop, prefixesToIgnore, defaultOutputSyntax, allowGetDumpSyntaxByAccept, minUrlParts, defaultObject);
+	}*/
+
+	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop)
+			throws ServletException, IOException {
+		super(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
 	}
 	
 	@Override
