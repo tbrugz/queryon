@@ -173,6 +173,12 @@ public class RequestSpec {
 	public static final String[] FILTERS_MULTIPARAM = { "fin", "fnin", "flk", "fnlk" };
 	public static final String[] FILTERS_MULTIPARAM_STRONLY = { "flk", "fnlk" };
 	public static final String[] FILTERS_BOOL = { "fnull", "fnotnull" };
+
+	public static final String[] FILTERS_MULTIPARAM_STRONLY_ORDERED;
+	static {
+		FILTERS_MULTIPARAM_STRONLY_ORDERED = Arrays.copyOf(FILTERS_MULTIPARAM_STRONLY, FILTERS_MULTIPARAM_STRONLY.length);
+		Arrays.sort(FILTERS_MULTIPARAM_STRONLY_ORDERED);
+	}
 	
 	public static final String PROP_FILTERS_ALLOWED = "queryon.filter.allowed"; //feq, fne, fgt, fge, flt, fle, fin, fnin, flk, fnlk, fnull, fnotnull
 	public static final String PROP_GROUPBY_ALLOW = "queryon.groupby.allow";

@@ -148,7 +148,7 @@ public class PagesServlet extends AbstractHttpServlet {
 				if(!wasNull) {
 					//log.info("col4 was not null");
 					Writer writer = resp.getWriter();
-					pipeCharacterStreams(reader, writer);
+					IOUtil.pipeCharacterStreams(reader, writer);
 					hasWritterOutput = true;
 				}
 				reader.close();
@@ -237,13 +237,13 @@ public class PagesServlet extends AbstractHttpServlet {
 	
 	static final int BUFFER_SIZE = 1024*8;
 
-	@Deprecated
+	/*@Deprecated
 	public static void pipeCharacterStreams(Reader r, Writer w) throws IOException {
 		char[] buffer = new char[BUFFER_SIZE];
 		int len;
 		while ((len = r.read(buffer)) != -1) {
 			w.write(buffer, 0, len);
 		}
-	}
+	}*/
 
 }
