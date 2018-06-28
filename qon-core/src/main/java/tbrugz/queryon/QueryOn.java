@@ -1053,6 +1053,36 @@ public class QueryOn extends HttpServlet {
 		return sql;
 		//log.info("sql:\n"+sql);
 	}
+	
+	ResultSet pivotResultSet(final ResultSet rs, Relation relation, SQL sql, RequestSpec reqspec, HttpServletResponse resp) throws SQLException {
+		int originalColCount = rs.getMetaData().getColumnCount();
+		boolean hasMeasures = reqspec.aggregate.size() > 0 || (reqspec.columns.size() > reqspec.oncols.size() + reqspec.onrows.size());
+		int pivotFlags = reqspec.pivotflags!=null?reqspec.pivotflags:
+			hasMeasures?RequestSpec.DEFAULT_PIVOTFLAGS_WITH_MEASURES:RequestSpec.DEFAULT_PIVOTFLAGS_WITHOUT_MEASURES;
+		
+		try {
+			//@SuppressWarnings("resource")
+			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
+			//log.info("reqspec.onrows="+reqspec.onrows+" ;; reqspec.oncols="+reqspec.oncols);
+			//rs = prs;
+			if(log.isDebugEnabled()) {
+				String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
+				log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
+			}
+			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
+					"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
+					"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
+			if(sql.applyedLimit!=null && prs.getOriginalRowCount()==sql.applyedLimit) {
+				String message = "Pivot Query data limited to "+prs.getOriginalRowCount()+" rows";
+				resp.addHeader(ResponseSpec.HEADER_WARNING, message);
+				log.debug(message);
+			}
+			return prs;
+		}
+		catch(RuntimeException e) {
+			throw new BadRequestException(e.getMessage(), e);
+		}
+	}
 		
 	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		if(relation.getName()==null) {
@@ -1104,32 +1134,7 @@ public class QueryOn extends HttpServlet {
 		ResultSet rs = st.executeQuery();
 		
 		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
-			int originalColCount = rs.getMetaData().getColumnCount();
-			boolean hasMeasures = reqspec.aggregate.size() > 0 || (reqspec.columns.size() > reqspec.oncols.size() + reqspec.onrows.size());
-			int pivotFlags = reqspec.pivotflags!=null?reqspec.pivotflags:
-				hasMeasures?RequestSpec.DEFAULT_PIVOTFLAGS_WITH_MEASURES:RequestSpec.DEFAULT_PIVOTFLAGS_WITHOUT_MEASURES;
-			
-			try {
-				@SuppressWarnings("resource")
-				PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
-				//log.info("reqspec.onrows="+reqspec.onrows+" ;; reqspec.oncols="+reqspec.oncols);
-				rs = prs;
-				if(log.isDebugEnabled()) {
-					String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
-					log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
-				}
-				log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
-						"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
-						"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
-				if(sql.applyedLimit!=null && prs.getOriginalRowCount()==sql.applyedLimit) {
-					String message = "Pivot Query data limited to "+prs.getOriginalRowCount()+" rows";
-					resp.addHeader(ResponseSpec.HEADER_WARNING, message);
-					log.debug(message);
-				}
-			}
-			catch(RuntimeException e) {
-				throw new BadRequestException(e.getMessage(), e);
-			}
+			rs = pivotResultSet(rs, relation, sql, reqspec, resp);
 		}
 		
 		List<FK> fks = ModelUtils.getImportedKeys(relation, model.getForeignKeys());
