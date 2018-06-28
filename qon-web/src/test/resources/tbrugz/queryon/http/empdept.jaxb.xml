@@ -29,7 +29,7 @@
             <type>PK</type>
             <uniqueColumns>ID</uniqueColumns>
         </constraints>
-        <remarks></remarks>
+        <remarks>Departments' table</remarks>
         <type>TABLE</type>
     </table>
     <table>
@@ -90,7 +90,7 @@
             <privilege>DELETE</privilege>
             <table>EMP</table>
         </grants>
-        <remarks></remarks>
+        <remarks>Employees' table</remarks>
         <type>TABLE</type>
     </table>
 
@@ -115,6 +115,7 @@
             <uniqueColumns>ID1</uniqueColumns>
             <uniqueColumns>ID2</uniqueColumns>
         </constraints>
+        <remarks>Table with pair of Integers</remarks>
         <type>TABLE</type>
     </table>
 
@@ -137,6 +138,7 @@
         </columns>
         <parameterCount>0</parameterCount>
         <query>select id, name from EMP</query>
+        <remarks>Query of EMP</remarks>
     </view>
     
     <executable>
@@ -154,6 +156,7 @@
             <position>0</position>
         </returnParam>
         <type>FUNCTION</type>
+        <remarks>IS_PRIME function</remarks>
     </executable>
     
     <foreignKey>
