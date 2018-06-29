@@ -276,7 +276,10 @@ public class RequestSpec {
 		//TODO test if model with this id exists
 		
 		String varUrl = req.getPathInfo();
-		if(varUrl==null) { throw new BadRequestException("URL (path-info) must not be null"); }
+		if(varUrl==null) {
+			varUrl = "";
+			//throw new BadRequestException("URL (path-info) must not be null");
+		}
 		
 		//String[] URIparts = varUrl!=null ? varUrl.split("/") : new String[]{} ;
 		String[] URIparts = varUrl.split("/");

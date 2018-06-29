@@ -669,13 +669,14 @@ public class QueryOn extends HttpServlet {
 		RequestSpec reqspec = getRequestSpec(req);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 		
-		final String otype;
-		final ActionType atype;
-		DBIdentifiable dbobj = null;
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
 		if(model==null) {
 			throw new InternalServerException("null model [modelId="+reqspec.modelId+"]");
 		}
+		
+		final String otype;
+		final ActionType atype;
+		DBIdentifiable dbobj = null;
 		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 		//XXX should status object names have special syntax? like meta:table, meta:fk
 		
@@ -1084,7 +1085,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 		
-	void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		if(relation.getName()==null) {
 			throw new BadRequestException("select: relation name must not be null");
 		}
@@ -1351,7 +1352,7 @@ public class QueryOn extends HttpServlet {
 	 * http://stackoverflow.com/questions/4526273/what-does-enctype-multipart-form-data-mean
 	 * http://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 	 */
-	void doExecute(ExecutableObject eo, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	protected void doExecute(ExecutableObject eo, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		//log.info("eo: "+eo+" ; currentUser: "+currentUser.getPrincipal() + " ; remote: "+reqspec.getRemoteInfo());
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		
@@ -1646,7 +1647,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
+	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 		// roles permission
@@ -1739,7 +1740,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	protected void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		SQL sql = null;
 		try {
@@ -1883,7 +1884,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 
@@ -2559,8 +2560,11 @@ public class QueryOn extends HttpServlet {
 		else if(dbid instanceof View) {
 			ret = DBObjectType.VIEW.name();
 		}
-		else {
+		else if(dbid instanceof Relation){
 			ret = QueryOn.CONST_RELATION;
+		}
+		else if(dbid instanceof ExecutableObject) {
+			ret = DBObjectType.EXECUTABLE.name();
 		}
 		return ret;
 	}
