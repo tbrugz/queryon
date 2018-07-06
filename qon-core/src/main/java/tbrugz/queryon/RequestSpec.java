@@ -121,7 +121,7 @@ public class RequestSpec {
 
 	final String httpMethod;
 	public final String modelId;
-	public final String object;
+	public String object;
 	final int offset;
 	final Integer limit;
 	final String loStrategy;
@@ -138,7 +138,7 @@ public class RequestSpec {
 	protected final Map<String, String[]> aggregate = new TreeMap<String, String[]>();
 	
 	final String outputTypeStr;
-	final DumpSyntaxInt outputSyntax;
+	protected final DumpSyntaxInt outputSyntax;
 	final Properties syntaxSpecificProperties = new Properties();
 	final boolean distinct;
 	final boolean count;
