@@ -122,8 +122,8 @@ public class RequestSpec {
 	final String httpMethod;
 	public final String modelId;
 	public String object;
-	final int offset;
-	final Integer limit;
+	protected int offset;
+	protected Integer limit;
 	final String loStrategy;
 	final String contentType;
 	final String utf8;
@@ -140,7 +140,7 @@ public class RequestSpec {
 	final String outputTypeStr;
 	protected final DumpSyntaxInt outputSyntax;
 	final Properties syntaxSpecificProperties = new Properties();
-	final boolean distinct;
+	protected boolean distinct;
 	final boolean count;
 	final String headerParamEncoding;
 	

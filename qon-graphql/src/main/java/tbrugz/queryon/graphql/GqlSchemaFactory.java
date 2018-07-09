@@ -140,6 +140,11 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				.name(p)
 				.type(Scalars.GraphQLInt));
 		}
+		for(String p: REQ_PARAMS_BOOL) {
+			f.argument(GraphQLArgument.newArgument()
+				.name(p)
+				.type(Scalars.GraphQLBoolean));
+		}
 
 		for(int i=0;i<r.getColumnCount(); i++) {
 
