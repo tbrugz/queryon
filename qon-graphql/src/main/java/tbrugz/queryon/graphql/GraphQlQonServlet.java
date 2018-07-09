@@ -25,15 +25,15 @@ import graphql.GraphQL;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLSchema;
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.util.IOUtil;
 
-public class GraphQlQonServlet extends QueryOn { // extends HttpServlet
+public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(GraphQlQonServlet.class);
