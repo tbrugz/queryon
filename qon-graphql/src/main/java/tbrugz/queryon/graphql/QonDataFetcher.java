@@ -21,7 +21,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.exception.NotFoundException;
-import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -33,13 +33,15 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	private static final Log log = LogFactory.getLog(QonDataFetcher.class);
 	
 	final SchemaModel sm;
+	final Map<String, QonAction> actionMap;
 	final GraphQlQonServlet servlet;
 	final HttpServletRequest req;
 	final HttpServletResponse resp;
 	final Properties prop;
 	
-	public QonDataFetcher(SchemaModel sm, GraphQlQonServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
+	public QonDataFetcher(SchemaModel sm, Map<String, QonAction> actionMap, GraphQlQonServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
 		this.sm = sm;
+		this.actionMap = actionMap;
 		this.servlet = servlet;
 		this.req = req;
 		this.resp = resp;
@@ -59,16 +61,21 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			GqlRequest reqspec = new GqlRequest(env, prop, req);
 			//log.info("gcds(#1): "+reqspec.getCurrentDumpSyntax());
 			
-			DBIdentifiable dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(sm, reqspec);
+			QonAction action = actionMap.get(reqspec.object);
+			if(action==null) {
+				throw new NotFoundException("object not found in map: "+reqspec.object);
+			}
+			DBIdentifiable dbobj = getDBIdentifiable(action.dbType, action.objectName);
 			if(dbobj==null) {
 				throw new NotFoundException("object not found: "+reqspec.object);
 			}
 
 			//TODO mutation?
-			boolean mutation = false;
+			//boolean mutation = false;
 			String otype = QueryOn.getObjectType(dbobj);
-			ActionType atype = DBObjectType.EXECUTABLE.name().equals(otype)?ActionType.EXECUTE:
-				(mutation?ActionType.EXECUTE:ActionType.SELECT);
+			ActionType atype = action.atype;
+			//ActionType atype = DBObjectType.EXECUTABLE.name().equals(otype)?ActionType.EXECUTE:
+			//	(mutation?ActionType.EXECUTE:ActionType.SELECT);
 			
 			Subject currentUser = ShiroUtils.getSubject(servlet.getProperties(), req);
 			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
@@ -113,6 +120,23 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			//throw new RuntimeException(e);
 		}
 		
+		return null;
+	}
+	
+	<U extends DBIdentifiable> U getDBIdentifiable(DBObjectType type, String name) {
+		U ret;
+		if(type==DBObjectType.RELATION || type==DBObjectType.TABLE) {
+			ret = DBIdentifiable.getDBIdentifiableByName(sm.getTables(), name);
+			if(ret!=null) { return ret; }
+		}
+		if(type==DBObjectType.RELATION || type==DBObjectType.VIEW) {
+			ret = DBIdentifiable.getDBIdentifiableByName(sm.getViews(), name);
+			if(ret!=null) { return ret; }
+		}
+		if(type==DBObjectType.EXECUTABLE) {
+			ret = DBIdentifiable.getDBIdentifiableByName(sm.getExecutables(), name);
+			if(ret!=null) { return ret; }
+		}
 		return null;
 	}
 

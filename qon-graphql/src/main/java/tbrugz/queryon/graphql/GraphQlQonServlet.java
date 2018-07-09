@@ -28,6 +28,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -41,6 +42,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	static final String[] ACCEPTED_METHODS = {"GET", "POST"};
 	
 	SchemaModel sm = null;
+	Map<String, QonAction> actionMap = null;
 	
 	@Override
 	//protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -67,9 +69,10 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		
 		resp.setContentType(GqlMapBufferSyntax.MIME_TYPE);
 		
-		GqlSchemaFactory gqls = new GqlSchemaFactory();
+		GqlSchemaFactory gqls = new GqlSchemaFactory(sm);
+		actionMap = gqls.amap;
 		DataFetcher<?> df = getDataFetcher(req, resp);
-		GraphQLSchema graphQLSchema = gqls.getSchema(sm, df);
+		GraphQLSchema graphQLSchema = gqls.getSchema(df);
 		GraphQL gql = GraphQL.newGraphQL(graphQLSchema).build();
 		ExecutionResult executionResult = gql.execute(exec);
 		
@@ -208,7 +211,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 	
 	DataFetcher<?> getDataFetcher(HttpServletRequest req, HttpServletResponse resp) {
-		return new QonDataFetcher<>(sm, this, req, resp);
+		return new QonDataFetcher<>(sm, actionMap, this, req, resp);
 	}
 	
 	protected Properties getProperties() {

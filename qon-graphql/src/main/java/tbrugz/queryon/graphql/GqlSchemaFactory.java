@@ -1,6 +1,8 @@
 package tbrugz.queryon.graphql;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import graphql.Scalars;
 import graphql.schema.DataFetcher;
@@ -11,7 +13,9 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
@@ -25,18 +29,37 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
  * @author tbrugz
  */
 /*
- * XXX: add (gql)field-name->(qon)schema-object/method (needed by GqlRequestSpec)?
+ * XXXxx: add (gql)field-name->(qon)schema-object/method (needed by GqlRequestSpec)?
  */
-public class GqlSchemaFactory { //XXX GqlSchemaBuilder/Factory?
+public class GqlSchemaFactory { // GqlSchemaBuilder?
+	
+	public static class QonAction {
+		final ActionType atype;
+		final DBObjectType dbType;
+		final String objectName;
+		
+		public QonAction(ActionType atype, DBObjectType dbType, String name) {
+			this.atype = atype;
+			this.dbType = dbType;
+			this.objectName = name;
+		}
+	}
 
 	boolean addFiltersToTypeField = true;
 	boolean addFiltersToQueryField = false;
 	
-	public GraphQLSchema getSchema(SchemaModel sm) {
-		return getSchema(sm, null);
+	final SchemaModel sm;
+	final Map<String, QonAction> amap = new HashMap<>();
+	
+	public GqlSchemaFactory(SchemaModel sm) {
+		this.sm = sm;
 	}
 	
-	public GraphQLSchema getSchema(SchemaModel sm, DataFetcher<?> df) {
+	public GraphQLSchema getSchema() {
+		return getSchema(null);
+	}
+	
+	public GraphQLSchema getSchema(DataFetcher<?> df) {
 		/*
 		 * GraphQLObjectType fooType = GraphQLObjectType.newObject() .name("Foo")
 		 * .field(GraphQLFieldDefinition.newFieldDefinition() .name("bar")
@@ -103,10 +126,14 @@ public class GqlSchemaFactory { //XXX GqlSchemaBuilder/Factory?
 	// XXX PARAM_FIELDS, PARAM_ORDER
 	
 	GraphQLFieldDefinition createQueryField(GraphQLObjectType t, Relation r, DataFetcher<?> df) {
+		//XXX listXXX, findXXX, allXXX
+		String qFieldName = "list_"+t.getName();
 		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
-			.name(t.getName())
+			//.name(t.getName())
+			.name(qFieldName)
 			//.name("list"+capitalize(t.getName()))
 			.type(GraphQLList.list(t));
+		amap.put(qFieldName, new QonAction(ActionType.SELECT, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
 
 		for(String p: REQ_PARAMS_INT) {
 			f.argument(GraphQLArgument.newArgument()

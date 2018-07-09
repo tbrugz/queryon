@@ -33,16 +33,16 @@ public class GqlSchemaTest {
 	}
 	
 	GraphQL getGraphQL() {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
-		GraphQLSchema graphQLSchema = gs.getSchema(getSchemaModel());
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
+		GraphQLSchema graphQLSchema = gs.getSchema();
 		
 		return GraphQL.newGraphQL(graphQLSchema).build();
 	}
 	
 	@Test
 	public void printSchema() throws IOException {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
-		GraphQLSchema schema = gs.getSchema(getSchemaModel());
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
+		GraphQLSchema schema = gs.getSchema();
 		
 		SchemaPrinter sp = new SchemaPrinter();
 		String schemaStr = sp.print(schema);
@@ -56,8 +56,8 @@ public class GqlSchemaTest {
 	
 	@Test
 	public void testIntrospection() {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
-		GraphQLSchema graphQLSchema = gs.getSchema(getSchemaModel());
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
+		GraphQLSchema graphQLSchema = gs.getSchema();
 		
 		GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
 		//ExecutionResult executionResult = build.execute("{hello}");
@@ -100,14 +100,14 @@ public class GqlSchemaTest {
 
 	@Test
 	public void testQuerySyntax() {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
-		GraphQLSchema graphQLSchema = gs.getSchema(getSchemaModel());
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
+		GraphQLSchema graphQLSchema = gs.getSchema();
 		
 		GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
 
 		//---
 		
-		String query = "query { DEPT (limit:10, offset: 0) { ID NAME } }";
+		String query = "query { list_DEPT (limit:10, offset: 0) { ID NAME } }";
 		ExecutionResult executionResult = build.execute(query);
 
 		//System.out.println(executionResult);
@@ -117,7 +117,7 @@ public class GqlSchemaTest {
 		
 		//---
 		
-		query = "{ DEPT(limit:10, offset: 0) { ID NAME } }";
+		query = "{ list_DEPT(limit:10, offset: 0) { ID NAME } }";
 		executionResult = build.execute(query);
 		
 		Assert.assertNotNull(executionResult.getData());
@@ -126,7 +126,7 @@ public class GqlSchemaTest {
 
 		//---
 		
-		query = "{ DEPT { ID NAME } }";
+		query = "{ list_DEPT { ID NAME } }";
 		executionResult = build.execute(query);
 		
 		Assert.assertNotNull(executionResult.getData());
@@ -155,7 +155,7 @@ public class GqlSchemaTest {
         
 		//---
 
-		query = "{ DEPT { ID NAME (flk: [\"abc%\", \"%def\"]) } }";
+		query = "{ list_DEPT { ID NAME (flk: [\"abc%\", \"%def\"]) } }";
 		executionResult = build.execute(query);
 		
 		Assert.assertNotNull(executionResult.getData());
@@ -164,7 +164,7 @@ public class GqlSchemaTest {
 		
 		//--- ERR
 		
-		query = "query { DEPT(limit:10, offset: 0) { } }";
+		query = "query { list_DEPT(limit:10, offset: 0) { } }";
 		executionResult = build.execute(query);
 		
 		Assert.assertNull(executionResult.getData());
@@ -173,7 +173,7 @@ public class GqlSchemaTest {
 		
 		//--- ERR
 		
-		query = "query { DEPT(limit:10, offset: 0) }";
+		query = "query { list_DEPT(limit:10, offset: 0) }";
 		executionResult = build.execute(query);
 		
 		Assert.assertNull(executionResult.getData());
@@ -184,15 +184,15 @@ public class GqlSchemaTest {
 	
 	@Test
 	public void testQuerySyntax1() {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
 		DataFetcher<?> df = new LogDataFetcher<>();
-		GraphQLSchema graphQLSchema = gs.getSchema(getSchemaModel(), df);
+		GraphQLSchema graphQLSchema = gs.getSchema(df);
 		
 		GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
 
 		//---
 		
-		String query = "query { DEPT (limit:10, offset: 0) { ID (fin: [1,2]) NAME } }";
+		String query = "query { list_DEPT (limit:10, offset: 0) { ID (fin: [1,2]) NAME } }";
 		System.out.println("query: "+query);
 		ExecutionResult executionResult = build.execute(query);
 
@@ -204,15 +204,15 @@ public class GqlSchemaTest {
 
 	@Test
 	public void testQueryWithLogger() {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
 		DataFetcher<?> df = new LogDataFetcher<>();
-		GraphQLSchema graphQLSchema = gs.getSchema(getSchemaModel(), df);
+		GraphQLSchema graphQLSchema = gs.getSchema(df);
 		
 		GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
 
 		//---
 
-		String query = "{ DEPT(limit:10) { ID (fnin: [2,3]) NAME (flk: \"abc%\") } }";
+		String query = "{ list_DEPT(limit:10) { ID (fnin: [2,3]) NAME (flk: \"abc%\") } }";
 		ExecutionResult executionResult = build.execute(query);
 		
 		Assert.assertNotNull(executionResult.getData());
@@ -223,15 +223,15 @@ public class GqlSchemaTest {
 
 	@Test
 	public void testQueryWithDf1() {
-		GqlSchemaFactory gs = new GqlSchemaFactory();
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
 		DataFetcher<?> df = new DF1<>();
-		GraphQLSchema graphQLSchema = gs.getSchema(getSchemaModel(), df);
+		GraphQLSchema graphQLSchema = gs.getSchema(df);
 		
 		GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
 
 		//---
 
-		String query = "{ DEPT(limit:10) { ID (fnin: [2,3]) NAME (flk: \"abc%\") } }";
+		String query = "{ list_DEPT(limit:10) { ID (fnin: [2,3]) NAME (flk: \"abc%\") } }";
 		ExecutionResult executionResult = build.execute(query);
 		
 		Assert.assertNotNull(executionResult.getData());
