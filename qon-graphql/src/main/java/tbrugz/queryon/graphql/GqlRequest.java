@@ -2,7 +2,9 @@ package tbrugz.queryon.graphql;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,9 +41,10 @@ public class GqlRequest extends RequestSpec {
 		
 		object = env.getField().getName();
 		
+		{
 		List<Argument> args = env.getField().getArguments();
 		for(Argument arg: args) {
-			log.info("arg:: name: "+arg.getName()+" / value: "+arg.getValue());
+			//log.info("arg:: name: "+arg.getName()+" / value: "+arg.getValue());
 			switch (arg.getName()) {
 			case RequestSpec.PARAM_LIMIT:
 				limit = ((IntValue)arg.getValue()).getValue().intValue();
@@ -56,8 +59,96 @@ public class GqlRequest extends RequestSpec {
 				break;
 			}
 		}
+		}
 	
-		//TODO: filters, ...
+		//log.info("getSelectionSet: "+env.getSelectionSet()+"\n- "+env.getSelectionSet().getArguments());
+		Map<String, Map<String, Object>> fieldsArguments = env.getSelectionSet().getArguments();
+		
+		for(Map.Entry<String, Map<String, Object>> eset: fieldsArguments.entrySet()) {
+			String field = eset.getKey();
+			Map<String, Object> args = eset.getValue();
+			for(Map.Entry<String, Object> argMap: args.entrySet()) {
+				String filter = argMap.getKey();
+				Object value = argMap.getValue();
+				
+				addValueToFilter(field, filter, value);
+			}
+			
+		}
+		
+	}
+	
+	void addValueToFilter(String field, String filter, Object value) {
+		Map<String, String> ufilter = getUniFilter(filter);
+		if(ufilter!=null) {
+			ufilter.put(field, String.valueOf(value));
+			return;
+		}
+
+		Map<String, String[]> mfilter = getMultiFilter(filter);
+		if(mfilter!=null) {
+			//log.info("f: "+filter+" / "+value+" / "+value.getClass());
+			List<Object> values = (List<Object>) value;
+			String[] strs = new String[values.size()];
+			for(int i=0;i<values.size();i++) {
+				strs[i] = String.valueOf(values.get(i));
+			}
+			mfilter.put(field, strs);
+			return;
+		}
+		
+		Set<String> sfilter = getSetFilter(filter);
+		if(sfilter!=null) {
+			sfilter.add(field);
+			return;
+		}
+		
+		log.warn("unknown filter: "+filter);
+	}
+	
+	Map<String, String> getUniFilter(String filter) {
+		switch (filter) {
+		case "feq":
+			return filterEquals;
+		case "fne":
+			return filterNotEquals;
+		case "fgt":
+			return filterGreaterThan;
+		case "fge":
+			return filterGreaterOrEqual;
+		case "flt":
+			return filterLessThan;
+		case "fle":
+			return filterLessOrEqual;
+		default:
+			return null;
+		}
+	}
+
+	Map<String, String[]> getMultiFilter(String filter) {
+		switch (filter) {
+		case "fin":
+			return filterIn;
+		case "fnin":
+			return filterNotIn;
+		case "flk":
+			return filterLike;
+		case "fnlk":
+			return filterNotLike;
+		default:
+			return null;
+		}
+	}
+
+	Set<String> getSetFilter(String filter) {
+		switch (filter) {
+		case "fnull":
+			return filterNull;
+		case "fnotnull":
+			return filterNotNull;
+		default:
+			return null;
+		}
 	}
 	
 	/*@Override

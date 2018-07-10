@@ -102,7 +102,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			if(addFiltersToTypeField) {
 				addArgumentsToField(f, cType, cName, false);
 			}
-			// if(df!=null) { f.dataFetcher(df); } //XXX add dataFetcher to Relation's fields?
+			// if(df!=null) { f.dataFetcher(df); } // add dataFetcher to Relation's fields? don't think so...
 			builder.field(f);
 			
 		}
@@ -139,6 +139,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				.name(p)
 				.type(Scalars.GraphQLInt));
 		}
+		// XXX: see RequestSpec.PROP_DISTINCT_ALLOW
 		for(String p: REQ_PARAMS_BOOL) {
 			f.argument(GraphQLArgument.newArgument()
 				.name(p)
@@ -162,6 +163,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	void addArgumentsToField(GraphQLFieldDefinition.Builder f, String ctype, String cname, boolean inlcudeColNameInFilter) {
 		if(!allowFilterOnType(ctype)) { return; }
 		
+		//XXX: see RequestSDpec.PROP_FILTERS_ALLOWED
 		for(String p: RequestSpec.FILTERS_UNIPARAM) {
 			f.argument(GraphQLArgument.newArgument()
 				.name( p+(inlcudeColNameInFilter?"_" + cname:""))

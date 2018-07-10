@@ -160,14 +160,14 @@ public class RequestSpec {
 	protected final Map<String, String> filterLessOrEqual = new HashMap<String, String>();
 	
 	// multiple value filters
-	final Map<String, String[]> filterIn = new HashMap<String, String[]>();
-	final Map<String, String[]> filterNotIn = new HashMap<String, String[]>(); // not in (fnin)
-	final Map<String, String[]> filterLike = new HashMap<String, String[]>();
-	final Map<String, String[]> filterNotLike = new HashMap<String, String[]>();
+	protected final Map<String, String[]> filterIn = new HashMap<String, String[]>();
+	protected final Map<String, String[]> filterNotIn = new HashMap<String, String[]>(); // not in (fnin)
+	protected final Map<String, String[]> filterLike = new HashMap<String, String[]>();
+	protected final Map<String, String[]> filterNotLike = new HashMap<String, String[]>();
 
 	// boolean valued filters
-	final Set<String> filterNull = new HashSet<String>();
-	final Set<String> filterNotNull = new HashSet<String>();
+	protected final Set<String> filterNull = new HashSet<String>();
+	protected final Set<String> filterNotNull = new HashSet<String>();
 	
 	public static final String[] FILTERS_UNIPARAM = { "feq", "fne", "fgt", "fge", "flt", "fle" };
 	public static final String[] FILTERS_MULTIPARAM = { "fin", "fnin", "flk", "fnlk" };
