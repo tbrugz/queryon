@@ -171,6 +171,16 @@
 		<url-pattern>/odata/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>GraphQlQonServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.graphql.GraphQlQonServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>GraphQlQonServlet</servlet-name>
+		<url-pattern>/graphql/*</url-pattern>
+	</servlet-mapping>
+
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
