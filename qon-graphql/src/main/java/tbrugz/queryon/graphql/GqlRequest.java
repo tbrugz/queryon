@@ -38,6 +38,7 @@ public class GqlRequest extends RequestSpec {
 		//log.info("GqlRequest(): "+this.hashCode()+"/"+dumpSyntax);
 		
 		object = env.getField().getName();
+		
 		List<Argument> args = env.getField().getArguments();
 		for(Argument arg: args) {
 			log.info("arg:: name: "+arg.getName()+" / value: "+arg.getValue());

@@ -102,7 +102,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			if(addFiltersToTypeField) {
 				addArgumentsToField(f, cType, cName, false);
 			}
-			// if(df!=null) { f.dataFetcher(df); } //XXX
+			// if(df!=null) { f.dataFetcher(df); } //XXX add dataFetcher to Relation's fields?
 			builder.field(f);
 			
 		}
@@ -128,10 +128,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	GraphQLFieldDefinition createQueryField(GraphQLObjectType t, Relation r, DataFetcher<?> df) {
 		//XXX listXXX, findXXX, allXXX
 		String qFieldName = "list_"+t.getName();
+		//.name("list"+capitalize(t.getName()))
 		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
-			//.name(t.getName())
 			.name(qFieldName)
-			//.name("list"+capitalize(t.getName()))
 			.type(GraphQLList.list(t));
 		amap.put(qFieldName, new QonAction(ActionType.SELECT, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
 
@@ -155,25 +154,6 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			}
 			
 			if(df!=null) { f.dataFetcher(df); }
-			/*
-			for(String p: RequestSpec.FILTERS_UNIPARAM) {
-				f.argument(GraphQLArgument.newArgument()
-					.name(p+"_"+cname)
-					.type(getGlType(ctype)));
-			}
-	
-			for(String p: RequestSpec.FILTERS_MULTIPARAM) {
-				f.argument(GraphQLArgument.newArgument()
-					.name(p+"_"+cname)
-					.type(GraphQLList.list(getGlType(ctype))));
-			}
-			
-			for(String p: RequestSpec.FILTERS_BOOL) {
-				f.argument(GraphQLArgument.newArgument()
-					.name(p+"_"+cname)
-					.type(getGlType(ctype)));
-			}
-			*/
 		}
 		
 		return f.build();

@@ -51,10 +51,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	
 	@Override
 	public T get(DataFetchingEnvironment env) {
+		/*
 		log.info("env: args: "+env.getArguments()+" / source: "+env.getSource()+" / field: "+env.getField());
 		log.info("env2: ctx: "+env.getContext()+" / exec-ctx: "+env.getExecutionContext()+" / exec-id: "+env.getExecutionId());
 		log.info("env3: definition: "+env.getFieldDefinition()+"\n- fields: "+env.getFields()+"\n- field-type: "+env.getFieldType()+"\n- f-t-info: "+env.getFieldTypeInfo());
 		log.info("env4: getSelectionSet: "+env.getSelectionSet());
+		*/
 		
 		try {
 			//GqlRequest reqspec = servlet.getRequestSpec(req); //servlet.getCurrentRequestSpec();
@@ -80,17 +82,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			Subject currentUser = ShiroUtils.getSubject(servlet.getProperties(), req);
 			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
 			
+			log.info("get:: object: "+reqspec.object+" ; objType/aType: "+otype+"/"+atype+" ; exec-id: "+env.getExecutionId());
 			//log.info("gcds(#2): "+reqspec.getCurrentDumpSyntax());
+			
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;
-				/*if(rel==null) {
-					log.warn("strange... rel is null");
-					rel = SchemaModelUtils.getRelation(sm, reqspec, true); //XXX: option to search views based on property?
-				}
-				if(! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) {
-					checkGrantsAndRolesMatches(currentUser, PrivilegeType.SELECT, rel);
-				}*/
 				servlet.doSelect(sm, rel, reqspec, currentUser, resp, false);
 				}
 				break;
