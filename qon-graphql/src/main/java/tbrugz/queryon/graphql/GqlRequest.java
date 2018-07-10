@@ -87,7 +87,7 @@ public class GqlRequest extends RequestSpec {
 
 		Map<String, String[]> mfilter = getMultiFilter(filter);
 		if(mfilter!=null) {
-			//log.info("f: "+filter+" / "+value+" / "+value.getClass());
+			//log.info("f[MultiFilter]: "+filter+" / "+value+" / "+value.getClass());
 			List<Object> values = (List<Object>) value;
 			String[] strs = new String[values.size()];
 			for(int i=0;i<values.size();i++) {
@@ -99,7 +99,10 @@ public class GqlRequest extends RequestSpec {
 		
 		Set<String> sfilter = getSetFilter(filter);
 		if(sfilter!=null) {
-			sfilter.add(field);
+			//log.info("f[SetFilter]: "+filter+" / "+value+" / "+value.getClass());
+			if(value instanceof Boolean && (Boolean) value) {
+				sfilter.add(field);
+			}
 			return;
 		}
 		

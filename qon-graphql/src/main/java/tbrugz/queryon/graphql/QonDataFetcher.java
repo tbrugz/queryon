@@ -101,7 +101,8 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			GqlMapBufferSyntax mbs = reqspec.getCurrentDumpSyntax();
 			//log.info("mbs: "+mbs);
 			List<Map<String, Object>> list = mbs.getBuffer();
-			log.info("list[#"+list.size()+"]: "+list);
+			//log.info("list[#"+list.size()+"]: "+list);
+			log.debug("list[#"+list.size()+"]");
 			
 			return (T) list;
 			//return (T) reqspec.getCurrentDumpSyntax().getBuffer();
