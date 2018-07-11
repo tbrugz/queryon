@@ -1037,7 +1037,7 @@ public class QueryOn extends HttpServlet {
 			loStrategy = LimitOffsetStrategy.valueOf(reqspec.loStrategy);
 		}
 		if(loStrategy!=LimitOffsetStrategy.RESULTSET_CONTROL) {
-			log.debug("pre-sql:\n"+sql.getSql());
+			log.debug("pre-LimitOffsetStrategy ["+loStrategy+"] sql:\n"+sql.getSql());
 		}
 		//int limit = (sql.limitMax!=null && sql.limitMax < reqspec.limit) ? sql.limitMax : reqspec.limit;
 		int finalMaxLimit = maxLimit;
@@ -1119,7 +1119,7 @@ public class QueryOn extends HttpServlet {
 				log.warn("relation '"+relation+"' not a query: can't validate");
 			}
 		}
-		//log.info("sql:\n"+finalSql);
+		log.debug("sql:\n"+finalSql);
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		//st.setFetchSize(limit+1); //XXX ?
 		sql.bindParameters(st);

@@ -336,7 +336,7 @@ public class RequestSpec {
 			}
 		}
 		object = objectTmp;
-		log.info("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
+		log.debug("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
 		
 		processParams(URIpartz);
 		
