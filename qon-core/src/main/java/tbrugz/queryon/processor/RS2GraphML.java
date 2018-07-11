@@ -126,7 +126,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 			int maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
 			
 			//XXX QueryOn.preprocessParameters(reqspec, pk);
-			SQL sql = QueryOn.getSelectQuery(model, relation, reqspec, pk, loStrategy, QueryOn.getUsername(currentUser), defaultLimit, maxLimit, resp);
+			SQL sql = QueryOn.getSelectQuery(relation, reqspec, pk, loStrategy, QueryOn.getUsername(currentUser), defaultLimit, maxLimit, resp);
 			finalSql = sql.getFinalSql();
 			List<Object> params = sql.getParameterValues();
 			log.info("params: "+params);

@@ -989,7 +989,7 @@ public class QueryOn extends HttpServlet {
 		return relation;
 	}
 	
-	public static SQL getSelectQuery(SchemaModel model, Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy,
+	public static SQL getSelectQuery(Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy,
 			String username, Integer defaultLimit, int maxLimit, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		
 		SQL sql = SQL.createSQL(relation, reqspec, username);
@@ -1103,7 +1103,7 @@ public class QueryOn extends HttpServlet {
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
 		preprocessParameters(reqspec, pk);
-		SQL sql = getSelectQuery(model, relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
+		SQL sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
 		
 		if(validateQuery) {
@@ -1233,7 +1233,7 @@ public class QueryOn extends HttpServlet {
 				}
 				
 				conn.commit();
-				writeUpdateCount(resp, updateCount, "updated");
+				writeUpdateCount(reqspec, resp, updateCount, "updated");
 			}
 		}
 		catch(SQLException e) {
@@ -1722,7 +1722,7 @@ public class QueryOn extends HttpServlet {
 		}
 		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
 		if(status==null || status!=HttpServletResponse.SC_NO_CONTENT) {
-			writeUpdateCount(resp, count, "deleted");
+			writeUpdateCount(reqspec, resp, count, "deleted");
 		}
 		
 		}
@@ -1865,7 +1865,7 @@ public class QueryOn extends HttpServlet {
 		}
 		resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, count);
 		if(status==null || status!=HttpServletResponse.SC_NO_CONTENT) {
-			writeUpdateCount(resp, count, "updated");
+			writeUpdateCount(reqspec, resp, count, "updated");
 		}
 
 		}
@@ -2018,7 +2018,7 @@ public class QueryOn extends HttpServlet {
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
 		resp.setStatus(HttpServletResponse.SC_CREATED);
-		writeUpdateCount(resp, count, "inserted");
+		writeUpdateCount(reqspec, resp, count, "inserted");
 		
 		}
 		catch(BadRequestException e) {
@@ -2036,7 +2036,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	void writeUpdateCount(HttpServletResponse resp, int count, String action) throws IOException {
+	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
 	}
