@@ -64,7 +64,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		ExecutionInput exec = execBuilder.build();*/
 		ExecutionInput exec = getExecutionInput(req);
 		
-		String modelId = SchemaModelUtils.getModelId(req);
+		String modelId = SchemaModelUtils.getModelId(req); //XXX: get modelId (also) from POST body (json)?
 		SchemaModel sm = getSchemaModel(modelId, req);
 		
 		resp.setContentType(GqlMapBufferSyntax.MIME_TYPE);

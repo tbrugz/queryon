@@ -88,7 +88,7 @@
           newPathname += "/";
           newPathname += pathArray[i];
         }
-        return newPathname + "/graphql";
+        return newPathname + "/graphql" + (parameters.model ? "?model="+parameters.model : "");
       }
 
       function graphQLFetcher(graphQLParams) {
