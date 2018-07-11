@@ -545,7 +545,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		Constraint cpk = SchemaModelUtils.getPK(r);
 		//Constraint cpk = t.getPKConstraint();
-		if(cpk!=null) {
+		if(cpk!=null && (ActionType.UPDATE.equals(action) || ActionType.DELETE.equals(action)) ) {
 			List<String> cols = cpk.getUniqueColumns();
 			for(int i=1;i<=cols.size();i++) {
 				Map<String, Object> pPk = new LinkedHashMap<String, Object>();
