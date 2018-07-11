@@ -40,6 +40,9 @@ public class GqlRequest extends RequestSpec {
 		//log.info("GqlRequest(): "+this.hashCode()+"/"+dumpSyntax);
 		
 		object = env.getField().getName();
+		//log.debug("field-names: "+env.getSelectionSet().get().keySet());
+		Set<String> fieldNames = env.getSelectionSet().get().keySet();
+		columns.addAll(fieldNames);
 		
 		{
 		List<Argument> args = env.getField().getArguments();
