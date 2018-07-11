@@ -91,6 +91,12 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-graphql</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+		</dependency>		
+		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-web</artifactId>
 			<version>1.2.3</version>
