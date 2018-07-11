@@ -41,8 +41,8 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	
 	static final String[] ACCEPTED_METHODS = {"GET", "POST"};
 	
-	SchemaModel sm = null;
-	Map<String, QonAction> actionMap = null;
+	//SchemaModel sm = null;
+	//Map<String, QonAction> actionMap = null;
 	
 	@Override
 	//protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -65,13 +65,14 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		ExecutionInput exec = getExecutionInput(req);
 		
 		String modelId = SchemaModelUtils.getModelId(req);
-		sm = getSchemaModel(modelId, req);
+		SchemaModel sm = getSchemaModel(modelId, req);
 		
 		resp.setContentType(GqlMapBufferSyntax.MIME_TYPE);
 		
+		// XXX "cache" GqlSchemaFactory? application attribute... also: when to invalidate?
 		GqlSchemaFactory gqls = new GqlSchemaFactory(sm);
-		actionMap = gqls.amap;
-		DataFetcher<?> df = getDataFetcher(req, resp);
+		Map<String, QonAction> actionMap = gqls.amap;
+		DataFetcher<?> df = getDataFetcher(sm, actionMap, req, resp);
 		GraphQLSchema graphQLSchema = gqls.getSchema(df);
 		GraphQL gql = GraphQL.newGraphQL(graphQLSchema).build();
 		ExecutionResult executionResult = gql.execute(exec);
@@ -210,7 +211,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		return model;
 	}
 	
-	DataFetcher<?> getDataFetcher(HttpServletRequest req, HttpServletResponse resp) {
+	DataFetcher<?> getDataFetcher(SchemaModel sm, Map<String, QonAction> actionMap, HttpServletRequest req, HttpServletResponse resp) {
 		return new QonDataFetcher<>(sm, actionMap, this, req, resp);
 	}
 	
