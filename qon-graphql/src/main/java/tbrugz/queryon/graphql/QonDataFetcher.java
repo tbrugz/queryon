@@ -120,18 +120,17 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		}
 		catch (ForbiddenException e) {
 			log.warn("ForbiddenException: "+e);
+			throw e;
 		}
 		catch (BadRequestException e) {
 			log.warn("BadRequestException: "+e);
-			//throw e;
+			throw e;
 		}
 		catch (ServletException | IOException | ClassNotFoundException | SQLException | NamingException e) {
 			log.warn("Exception: "+e);
 			//e.printStackTrace();
-			//throw new RuntimeException(e);
+			throw new RuntimeException(e);
 		}
-		
-		return null;
 	}
 	
 	<U extends DBIdentifiable> U getDBIdentifiable(DBObjectType type, String name) {
