@@ -14,9 +14,14 @@ import org.apache.commons.logging.LogFactory;
 
 import graphql.language.Argument;
 import graphql.language.BooleanValue;
+import graphql.language.FloatValue;
 import graphql.language.IntValue;
+import graphql.language.StringValue;
+import graphql.language.Value;
 import graphql.schema.DataFetchingEnvironment;
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 
 public class GqlRequest extends RequestSpec {
@@ -33,16 +38,21 @@ public class GqlRequest extends RequestSpec {
 			throws ServletException, IOException {
 		super(dsutils, req, prop, 0, null, true, 0, null);
 	}*/
+	
+	final QonAction action;
+	int updateCount;
 
-	public GqlRequest(DataFetchingEnvironment env, Properties prop, HttpServletRequest req)
+	public GqlRequest(DataFetchingEnvironment env, Map<String, QonAction> actionMap, Properties prop, HttpServletRequest req)
 			throws ServletException, IOException {
 		super(null, req, prop, 0, null, true, 0, null);
 		//log.info("GqlRequest(): "+this.hashCode()+"/"+dumpSyntax);
 		
 		object = env.getField().getName();
+		action = actionMap.get(object);
+
 		//log.debug("field-names: "+env.getSelectionSet().get().keySet());
 		Set<String> fieldNames = env.getSelectionSet().get().keySet();
-		columns.addAll(fieldNames);
+		columns.addAll(fieldNames); //"fields" param (PARAM_FIELDS)
 		
 		{
 		List<Argument> args = env.getField().getArguments();
@@ -59,6 +69,12 @@ public class GqlRequest extends RequestSpec {
 				distinct = ((BooleanValue)arg.getValue()).isValue();
 				break;
 			default:
+				if(action.atype==ActionType.INSERT || action.atype==ActionType.UPDATE) {
+					updateValues.put(arg.getName(), getStringValue(arg.getValue()));
+				}
+				else {
+					log.info("unknown argument:: name: "+arg.getName()+" / value: "+arg.getValue());
+				}
 				break;
 			}
 		}
@@ -79,6 +95,23 @@ public class GqlRequest extends RequestSpec {
 			
 		}
 		
+	}
+	
+	String getStringValue(Value<?> value) {
+		if(value instanceof StringValue) {
+			return ((StringValue) value).getValue();
+		}
+		if(value instanceof IntValue) {
+			return ((IntValue) value).getValue().toString();
+		}
+		if(value instanceof FloatValue) {
+			return ((FloatValue) value).getValue().toString();
+		}
+		if(value instanceof BooleanValue) {
+			return String.valueOf(((BooleanValue) value).isValue());
+		}
+		log.warn("getStringValue: unknown type: "+value);
+		return null;
 	}
 	
 	void addValueToFilter(String field, String filter, Object value) {

@@ -9,15 +9,18 @@ import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Table;
 
 /**
  * see:
@@ -50,6 +53,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	final SchemaModel sm;
 	final Map<String, QonAction> amap = new HashMap<>();
+	transient Map<String, GraphQLObjectType> typeMap = new HashMap<>();
 	
 	public GqlSchemaFactory(SchemaModel sm) {
 		this.sm = sm;
@@ -68,6 +72,8 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 
 		//List<GraphQLObjectType> types = new ArrayList<>();
 		GraphQLSchema.Builder gqlSchemaBuilder = GraphQLSchema.newSchema();
+		
+		// SELECT
 		GraphQLObjectType.Builder queryBuilder = GraphQLObjectType.newObject().name("QueryType");
 		
 		for(Relation t: sm.getTables()) {
@@ -77,6 +83,21 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			addRelation(queryBuilder, v, df);
 		}
 		gqlSchemaBuilder.query(queryBuilder.build());
+		
+		// INSERT/UPDATE/DELETE
+		// https://graphql.org/learn/queries/#mutations
+		// https://graphql.org/learn/schema/#the-query-and-mutation-types
+		GraphQLObjectType.Builder mutationBuilder = GraphQLObjectType.newObject().name("MutationType");
+		int mutationCount = 0;
+		GraphQLObjectType updateType = getUpdateType(mutationBuilder);
+		for(Table t: sm.getTables()) {
+			addMutation(mutationBuilder, t, updateType, df);
+			mutationCount++;
+		}
+		if(mutationCount>0) {
+			//add UpdateInfo type
+			gqlSchemaBuilder.mutation(mutationBuilder.build());
+		}
 		
 		// XXXxx each type should have a query? -> listXxx, listSchemaName
 		// XXX add executables (mutations)
@@ -107,7 +128,23 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			
 		}
 		GraphQLObjectType gt = builder.build();
+		typeMap.put(r.getName(), gt);
 		queryBuilder.field(createQueryField(gt, r, df));
+	}
+
+	void addMutation(GraphQLObjectType.Builder mutationBuilder, Table t, GraphQLObjectType returnType, DataFetcher<?> df) {
+		GraphQLObjectType gt = typeMap.get(t.getName());
+		mutationBuilder.field(createInsertField(gt, returnType, t, df));
+	}
+	
+	GraphQLObjectType getUpdateType(GraphQLObjectType.Builder mutationBuilder) {
+		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
+			.name("UpdateInfoType")
+			.description("update info")
+			.field(GraphQLFieldDefinition.newFieldDefinition()
+				.name("updateCount")
+				.type(Scalars.GraphQLInt));
+		return builder.build();
 	}
 	
 	/*
@@ -153,6 +190,33 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				String cname = r.getColumnNames().get(i);
 				addArgumentsToField(f, ctype, cname, true);
 			}
+			
+			if(df!=null) { f.dataFetcher(df); }
+		}
+		
+		return f.build();
+	}
+	
+	GraphQLFieldDefinition createInsertField(GraphQLObjectType t, GraphQLObjectType returnType, Table r, DataFetcher<?> df) {
+		String qFieldName = "insert_"+t.getName();
+		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+			.name(qFieldName)
+			.type(returnType); //XXX return own record? type with updateCount (& own record)?
+		amap.put(qFieldName, new QonAction(ActionType.INSERT, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
+
+		//XXX: test shiro permission?
+
+		for(int i=0;i<r.getColumnCount(); i++) {
+			Column c = r.getColumns().get(i);
+			String cname = c.getName();
+			String ctype = c.getType();
+			boolean generated = c.getAutoIncrement()!=null && c.getAutoIncrement();
+			boolean required = !c.isNullable() && !generated;
+			
+			f.argument(GraphQLArgument.newArgument()
+					.name(cname)
+					.type( required ? new GraphQLNonNull(getGlType(ctype)) : getGlType(ctype) )
+					);
 			
 			if(df!=null) { f.dataFetcher(df); }
 		}

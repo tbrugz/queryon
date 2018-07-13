@@ -226,4 +226,28 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		super.doSelect(model, relation, reqspec, currentUser, resp, validateQuery);
 	}
 	
+	@Override
+	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
+			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		super.doInsert(relation, reqspec, currentUser, resp);
+	}
+	
+	@Override
+	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
+		if(count!=1) {
+			log.warn("update count != 1: "+count);
+		}
+		else {
+			log.info(count+" "+(count>1?"rows":"row")+" "+action);
+		}
+		
+		if(reqspec instanceof GqlRequest) {
+			GqlRequest req = (GqlRequest) reqspec;
+			req.updateCount = count;
+		}
+		else {
+			log.warn("reqspec is not a GqlRequest: "+reqspec.getClass());
+		}
+	}
+	
 }

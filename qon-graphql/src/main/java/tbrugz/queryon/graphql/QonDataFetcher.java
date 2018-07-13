@@ -2,6 +2,7 @@ package tbrugz.queryon.graphql;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -20,6 +21,7 @@ import graphql.schema.DataFetchingEnvironment;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
+import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.ShiroUtils;
@@ -60,12 +62,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		
 		try {
 			//GqlRequest reqspec = servlet.getRequestSpec(req); //servlet.getCurrentRequestSpec();
-			GqlRequest reqspec = new GqlRequest(env, prop, req);
+			GqlRequest reqspec = new GqlRequest(env, actionMap, prop, req);
 			//log.info("gcds(#1): "+reqspec.getCurrentDumpSyntax());
 			
-			QonAction action = actionMap.get(reqspec.object);
+			QonAction action = reqspec.action;
 			if(action==null) {
-				throw new NotFoundException("object not found in map: "+reqspec.object);
+				throw new NotFoundException("object not found (in actionMap): "+reqspec.object);
 			}
 			DBIdentifiable dbobj = getDBIdentifiable(action.dbType, action.objectName);
 			if(dbobj==null) {
@@ -80,9 +82,10 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			//	(mutation?ActionType.EXECUTE:ActionType.SELECT);
 			
 			Subject currentUser = ShiroUtils.getSubject(servlet.getProperties(), req);
-			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
+			ShiroUtils.checkPermission(currentUser, otype+":"+atype, action.objectName);
 			
 			log.info("get:: object: "+reqspec.object+" ; objType/aType: "+otype+"/"+atype+" ; exec-id: "+env.getExecutionId());
+			//log.info("currentUser: "+currentUser.getPrincipal());
 			//log.info("gcds(#2): "+reqspec.getCurrentDumpSyntax());
 			
 			switch (atype) {
@@ -91,8 +94,15 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 				servlet.doSelect(sm, rel, reqspec, currentUser, resp, false);
 				}
 				break;
+			case INSERT: {
+				servlet.doInsert((Relation) dbobj, reqspec, currentUser, resp);
+				return (T) getUpdateCountMap(reqspec.updateCount);
+				}
+			//TODO: execute, update, delete 
+			case UPDATE:
+			case DELETE:
+				log.info(atype+": updateValues: "+reqspec.getUpdateValues());
 			case EXECUTE:
-				//TODO: execute, insert, update, delete 
 			default:
 				log.warn("unknown action type: "+atype);
 				return null;
@@ -107,6 +117,9 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			return (T) list;
 			//return (T) reqspec.getCurrentDumpSyntax().getBuffer();
 			
+		}
+		catch (ForbiddenException e) {
+			log.warn("ForbiddenException: "+e);
 		}
 		catch (BadRequestException e) {
 			log.warn("BadRequestException: "+e);
@@ -136,6 +149,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			if(ret!=null) { return ret; }
 		}
 		return null;
+	}
+	
+	Map<String, Integer> getUpdateCountMap(int count) {
+		Map<String, Integer> updateCount = new HashMap<>();
+		updateCount.put("updateCount", count);
+		return updateCount;
 	}
 
 }
