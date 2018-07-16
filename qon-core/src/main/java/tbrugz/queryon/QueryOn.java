@@ -247,6 +247,7 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
 	
 	public static final String METHOD_GET = "GET";
+	public static final String METHOD_HEAD = "HEAD";
 	public static final String METHOD_PATCH = "PATCH";
 	public static final String METHOD_POST = "POST";
 	public static final String METHOD_PUT = "PUT";
@@ -729,6 +730,9 @@ public class QueryOn extends HttpServlet {
 				if(reqspec.httpMethod.equals(METHOD_GET)) {
 					atype = ActionType.SELECT;
 				}
+				else if(reqspec.httpMethod.equals(METHOD_HEAD)) {
+					atype = ActionType.SELECT;
+				}
 				else if(reqspec.httpMethod.equals(METHOD_POST)) {
 					atype = ActionType.INSERT; //upsert?
 				}
@@ -1120,6 +1124,13 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		log.debug("sql:\n"+finalSql);
+		/*
+		if(reqspec.isHeadMethod()) {
+			log.info("HEAD method: response body is empty"); 
+			return;
+		}
+		*/
+		
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		//st.setFetchSize(limit+1); //XXX ?
 		sql.bindParameters(st);
@@ -2366,6 +2377,12 @@ public class QueryOn extends HttpServlet {
 		//log.debug("dumpResultSet:: "+reqspec.limit+", "+defaultLimit+", "+maxLimit);
 		resp.addHeader(ResponseSpec.HEADER_RESULTSET_LIMIT, String.valueOf(limit));
 		
+		if(reqspec.isHeadMethod()) {
+			//XXX: HEAD & Content-Length: https://stackoverflow.com/a/18925736/616413
+			log.debug("HEAD method: response body is empty"); 
+			return;
+		}
+		
 		int count = 0;
 		if(ds.acceptsOutputStream()) {
 			ds.dumpHeader(resp.getOutputStream());
@@ -2466,6 +2483,11 @@ public class QueryOn extends HttpServlet {
 			if(filename!=null) {
 				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
 			}
+			if(reqspec.isHeadMethod()) {
+				log.debug("HEAD method: response body is empty"); 
+				return;
+			}
+			
 			try {
 			InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
 			if(is!=null) {

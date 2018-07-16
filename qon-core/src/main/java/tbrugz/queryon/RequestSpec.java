@@ -1111,5 +1111,9 @@ public class RequestSpec {
 	public Integer getDeleteSucessStatus() {
 		return null;
 	}
-	
+
+	boolean isHeadMethod() {
+		return QueryOn.METHOD_HEAD.equals(httpMethod);
+	}
+
 }
