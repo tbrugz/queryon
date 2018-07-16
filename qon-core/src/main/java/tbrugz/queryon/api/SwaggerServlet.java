@@ -68,6 +68,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	static final String SUFFIX_FILTERS = ".filters";
 	
 	boolean useCanonicalHost = false; //XXX: hostname: add property
+	boolean addHeadMethod = false; //XXX: head method: add property
 	
 	Set<String> syntaxes;
 	String defaultSyntax;
@@ -192,8 +193,13 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		for(Table t: model.getTables()) {
 			{
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			operations.put("get", createGetOper(t, filters, allowDistinct));
+			operations.put("get", createGetOper(t, filters, "get", allowDistinct));
 			paths.put("/"+t.getQualifiedName()+".{syntax}"+urlAppend, operations);
+			
+			if(addHeadMethod) {
+				operations.put("head", createGetOper(t, filters, "head", allowDistinct));
+				paths.put("/"+t.getQualifiedName()+".{syntax}"+urlAppend, operations);
+			}
 			}
 			
 			{
@@ -212,9 +218,13 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		//View
 		for(View v: model.getViews()) {
 			Map<String, Object> operations = new LinkedHashMap<String, Object>();
-			operations.put("get", createGetOper(v, filters, allowDistinct));
-			
+			operations.put("get", createGetOper(v, filters, "get", allowDistinct));
 			paths.put("/"+v.getQualifiedName()+".{syntax}"+urlAppend, operations);
+			
+			if(addHeadMethod) {
+				operations.put("head", createGetOper(v, filters, "head", allowDistinct));
+				paths.put("/"+v.getQualifiedName()+".{syntax}"+urlAppend, operations);
+			}
 		}
 		
 		//Executable
@@ -279,7 +289,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("tags", tags);
 	}
 	
-	Map<String, Object> createGetOper(Relation t, List<String> filters, boolean allowDistinct) {
+	Map<String, Object> createGetOper(Relation t, List<String> filters, String method, boolean allowDistinct) {
 		Map<String, Object> oper = new LinkedHashMap<String, Object>();
 		//oper.put("summary", "retrieve values from "+t.getQualifiedName());
 		String fullName = t.getQualifiedName();
@@ -291,7 +301,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 		oper.put("summary", "retrieve values from " + fullName );
 		oper.put("description", t.getRemarks());
-		oper.put("operationId", "get."+fullName);
+		oper.put("operationId", method+"."+fullName);
 		List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
 		//syntaxes
 		{
