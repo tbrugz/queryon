@@ -247,6 +247,12 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 	
 	@Override
+	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
+			throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
+		super.doDelete(relation, reqspec, currentUser, resp);
+	}
+	
+	@Override
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		if(count!=1) {
 			log.warn("update count != 1: "+count);

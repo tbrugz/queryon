@@ -143,6 +143,10 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		if(updateField!=null) {
 			mutationBuilder.field(updateField);
 		}
+		GraphQLFieldDefinition deleteField = createDeleteField(gt, returnType, t, df);
+		if(deleteField!=null) {
+			mutationBuilder.field(deleteField);
+		}
 	}
 	
 	GraphQLObjectType getUpdateType(GraphQLObjectType.Builder mutationBuilder) {
@@ -226,8 +230,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 					.type( required ? new GraphQLNonNull(getGlType(ctype)) : getGlType(ctype) )
 					);
 			
-			if(df!=null) { f.dataFetcher(df); }
 		}
+
+		if(df!=null) { f.dataFetcher(df); }
 		
 		return f.build();
 	}
@@ -256,7 +261,6 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 					.type(getGlType(ctype))
 					);
 			
-			if(df!=null) { f.dataFetcher(df); }
 		}
 		
 		for(String col: pk.getUniqueColumns()) {
@@ -265,6 +269,32 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				.type(new GraphQLNonNull(Scalars.GraphQLString)) //XXX: non-string col type?
 				);
 		}
+
+		if(df!=null) { f.dataFetcher(df); }
+		
+		return f.build();
+	}
+
+	GraphQLFieldDefinition createDeleteField(GraphQLObjectType t, GraphQLObjectType returnType, Table r, DataFetcher<?> df) {
+		String qFieldName = "delete_"+t.getName();
+		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+			.name(qFieldName)
+			.type(returnType);
+		amap.put(qFieldName, new QonAction(ActionType.DELETE, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
+		
+		Constraint pk = SchemaModelUtils.getPK(r);
+		if(pk==null) { return null; }
+
+		//XXX: test shiro permission?
+
+		for(String col: pk.getUniqueColumns()) {
+			f.argument(GraphQLArgument.newArgument()
+				.name(FILTER_KEY_PREPEND+col)
+				.type(new GraphQLNonNull(Scalars.GraphQLString)) //XXX: non-string col type?
+				);
+		}
+		
+		if(df!=null) { f.dataFetcher(df); }
 		
 		return f.build();
 	}

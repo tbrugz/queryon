@@ -102,9 +102,11 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 				servlet.doUpdate((Relation) dbobj, reqspec, currentUser, resp);
 				return (T) getUpdateCountMap(reqspec.updateCount);
 				}
-			//TODO: execute, delete 
-			case DELETE:
-				log.info(atype+": updateValues: "+reqspec.getUpdateValues());
+			case DELETE: {
+				servlet.doDelete((Relation) dbobj, reqspec, currentUser, resp);
+				return (T) getUpdateCountMap(reqspec.updateCount);
+				}
+			//TODO: execute 
 			case EXECUTE:
 			default:
 				log.warn("unknown action type: "+atype);
