@@ -1,6 +1,7 @@
 package tbrugz.queryon.graphql;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -24,8 +25,10 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaPrinter;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
@@ -46,12 +49,15 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		if(Arrays.binarySearch(ACCEPTED_METHODS, req.getMethod().toUpperCase())<0) {
 			throw new BadRequestException("Method not accepted: "+req.getMethod());
 		}
-		log.info(">> GraphQlQonServlet: method: "+req.getMethod());
 		
+		boolean requestSchema = req.getParameter("schema")!=null;
 		ExecutionInput exec = getExecutionInput(req);
-		if(exec.getQuery()==null) {
+		
+		if(exec.getQuery()==null && !requestSchema) {
 			throw new BadRequestException("query must not be null");
 		}
+
+		log.info(">> GraphQlQonServlet: method: "+req.getMethod());
 		
 		String modelId = SchemaModelUtils.getModelId(req); //XXX: get modelId (also) from POST body (json)?
 		SchemaModel sm = getSchemaModel(modelId, req);
@@ -63,6 +69,11 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		Map<String, QonAction> actionMap = gqls.amap;
 		DataFetcher<?> df = getDataFetcher(sm, actionMap, req, resp);
 		GraphQLSchema graphQLSchema = gqls.getSchema(df);
+		if(requestSchema) {
+			resp.setContentType(ResponseSpec.MIME_TYPE_TEXT_PLAIN);
+			writeSchema(graphQLSchema, resp.getWriter());
+			return;
+		}
 		GraphQL gql = GraphQL.newGraphQL(graphQLSchema).build();
 		ExecutionResult executionResult = gql.execute(exec);
 		
@@ -73,6 +84,12 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 				.create();
 		resp.getWriter().write(gson.toJson(executionSpecResult));
 		//writeResult(exec, executionResult, resp);
+	}
+	
+	void writeSchema(GraphQLSchema graphQLSchema, Writer writer) throws IOException {
+		SchemaPrinter sp = new SchemaPrinter();
+		String schemaStr = sp.print(graphQLSchema);
+		writer.write(schemaStr);
 	}
 	
 	@Deprecated
