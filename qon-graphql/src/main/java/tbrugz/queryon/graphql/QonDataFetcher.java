@@ -98,8 +98,11 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 				servlet.doInsert((Relation) dbobj, reqspec, currentUser, resp);
 				return (T) getUpdateCountMap(reqspec.updateCount);
 				}
-			//TODO: execute, update, delete 
-			case UPDATE:
+			case UPDATE: {
+				servlet.doUpdate((Relation) dbobj, reqspec, currentUser, resp);
+				return (T) getUpdateCountMap(reqspec.updateCount);
+				}
+			//TODO: execute, delete 
 			case DELETE:
 				log.info(atype+": updateValues: "+reqspec.getUpdateValues());
 			case EXECUTE:

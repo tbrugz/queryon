@@ -1,6 +1,7 @@
 package tbrugz.queryon.graphql;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -41,6 +42,7 @@ public class GqlRequest extends RequestSpec {
 	
 	final QonAction action;
 	int updateCount;
+	final Map<String, String> keyValues = new LinkedHashMap<String, String>();
 
 	public GqlRequest(DataFetchingEnvironment env, Map<String, QonAction> actionMap, Properties prop, HttpServletRequest req)
 			throws ServletException, IOException {
@@ -69,7 +71,10 @@ public class GqlRequest extends RequestSpec {
 				distinct = ((BooleanValue)arg.getValue()).isValue();
 				break;
 			default:
-				if(action.atype==ActionType.INSERT || action.atype==ActionType.UPDATE) {
+				if( (action.atype==ActionType.UPDATE || action.atype==ActionType.DELETE) && arg.getName().startsWith(GqlSchemaFactory.FILTER_KEY_PREPEND) ) {
+					keyValues.put(arg.getName().substring(GqlSchemaFactory.FILTER_KEY_PREPEND.length()), getStringValue(arg.getValue()));
+				}
+				else if(action.atype==ActionType.INSERT || action.atype==ActionType.UPDATE) {
 					updateValues.put(arg.getName(), getStringValue(arg.getValue()));
 				}
 				else {
@@ -95,6 +100,7 @@ public class GqlRequest extends RequestSpec {
 			
 		}
 		
+		//log.debug("keyValues: "+keyValues);
 	}
 	
 	String getStringValue(Value<?> value) {

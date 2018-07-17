@@ -16,7 +16,9 @@ import graphql.schema.GraphQLSchema;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -35,6 +37,8 @@ import tbrugz.sqldump.dbmodel.Table;
  * XXXxx: add (gql)field-name->(qon)schema-object/method (needed by GqlRequestSpec)?
  */
 public class GqlSchemaFactory { // GqlSchemaBuilder?
+	
+	public static final String FILTER_KEY_PREPEND = "filter_by_";
 	
 	public static class QonAction {
 		final ActionType atype;
@@ -135,6 +139,10 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	void addMutation(GraphQLObjectType.Builder mutationBuilder, Table t, GraphQLObjectType returnType, DataFetcher<?> df) {
 		GraphQLObjectType gt = typeMap.get(t.getName());
 		mutationBuilder.field(createInsertField(gt, returnType, t, df));
+		GraphQLFieldDefinition updateField = createUpdateField(gt, returnType, t, df);
+		if(updateField!=null) {
+			mutationBuilder.field(updateField);
+		}
 	}
 	
 	GraphQLObjectType getUpdateType(GraphQLObjectType.Builder mutationBuilder) {
@@ -223,6 +231,59 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		
 		return f.build();
 	}
+
+	GraphQLFieldDefinition createUpdateField(GraphQLObjectType t, GraphQLObjectType returnType, Table r, DataFetcher<?> df) {
+		String qFieldName = "update_"+t.getName();
+		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+			.name(qFieldName)
+			.type(returnType); //XXX return own record? type with updateCount (& own record)?
+		amap.put(qFieldName, new QonAction(ActionType.UPDATE, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
+		
+		Constraint pk = SchemaModelUtils.getPK(r);
+		if(pk==null) { return null; }
+
+		//XXX: test shiro permission?
+
+		for(int i=0;i<r.getColumnCount(); i++) {
+			Column c = r.getColumns().get(i);
+			String cname = c.getName();
+			String ctype = c.getType();
+			//boolean generated = c.getAutoIncrement()!=null && c.getAutoIncrement();
+			//boolean required = !c.isNullable() && !generated;
+			
+			f.argument(GraphQLArgument.newArgument()
+					.name(cname)
+					.type(getGlType(ctype))
+					);
+			
+			if(df!=null) { f.dataFetcher(df); }
+		}
+		
+		for(String col: pk.getUniqueColumns()) {
+			f.argument(GraphQLArgument.newArgument()
+				.name(FILTER_KEY_PREPEND+col)
+				.type(new GraphQLNonNull(Scalars.GraphQLString)) //XXX: non-string col type?
+				);
+		}
+		
+		return f.build();
+	}
+	
+	/*
+	GraphQLObjectType getWhereSubtype(GraphQLObjectType.Builder mutationBuilder, Constraint pk) {
+		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
+			.name("WhereType")
+			.description("where info");
+		for(String col: pk.getUniqueColumns()) {
+			builder.field(
+				GraphQLFieldDefinition.newFieldDefinition()
+				.name(col)
+				.type(Scalars.GraphQLString) //XXX: non-string col type?
+				);
+		}
+		return builder.build();
+	}
+	*/
 	
 	void addArgumentsToField(GraphQLFieldDefinition.Builder f, String ctype, String cname, boolean inlcudeColNameInFilter) {
 		if(!allowFilterOnType(ctype)) { return; }
