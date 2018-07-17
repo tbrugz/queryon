@@ -95,6 +95,7 @@ function createMenuContent(addCloseBtn) {
 				hrefCurrentLike = hrefCurrentLike.substring(0, hrefCurrentLike.indexOf('?'));
 			}
 			
+			var currentModelId = getCurrentModelId();
 			//console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
 			if(path.endsWith(hrefCurrentLike)) {
 				li.classList.add("current");
@@ -107,8 +108,8 @@ function createMenuContent(addCloseBtn) {
 				href += location.search;
 				hrefElem.setAttribute("href", href);
 			}
-			if(li.classList.contains("addmodel")) {
-				href += "?model="+getCurrentModelId();
+			if(li.classList.contains("addmodel") && currentModelId) {
+				href += "?model="+currentModelId;
 				hrefElem.setAttribute("href", href);
 			}
 			innerContent += li.outerHTML;
