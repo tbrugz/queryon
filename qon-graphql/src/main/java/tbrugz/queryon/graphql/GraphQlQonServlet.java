@@ -41,28 +41,17 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	
 	static final String[] ACCEPTED_METHODS = {"GET", "POST"};
 	
-	//SchemaModel sm = null;
-	//Map<String, QonAction> actionMap = null;
-	
 	@Override
-	//protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		if(Arrays.binarySearch(ACCEPTED_METHODS, req.getMethod().toUpperCase())<0) {
 			throw new BadRequestException("Method not accepted: "+req.getMethod());
 		}
-		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
+		log.info(">> GraphQlQonServlet: method: "+req.getMethod());
 		
-		/*String query = getGraphqlQuery(req);
-		if(query==null || query.equals("")) {
-			throw new BadRequestException("Query must not be null");
-		}
-		//{"query":"{ hn { topStories { id title url }}}","variables":"","operationName":null}
-		//String variables = getGraphqlVariables(req);
-		//String operationName = getGraphqlOperationName(req);
-		//log.info(">> query: "+query);
-		ExecutionInput.Builder execBuilder = ExecutionInput.newExecutionInput().query(query);
-		ExecutionInput exec = execBuilder.build();*/
 		ExecutionInput exec = getExecutionInput(req);
+		if(exec.getQuery()==null) {
+			throw new BadRequestException("query must not be null");
+		}
 		
 		String modelId = SchemaModelUtils.getModelId(req); //XXX: get modelId (also) from POST body (json)?
 		SchemaModel sm = getSchemaModel(modelId, req);
@@ -152,6 +141,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 	
 	// should move to GqlRequest ? maybe not...
+	@SuppressWarnings("unchecked")
 	ExecutionInput getExecutionInput(HttpServletRequest req) throws IOException {
 		ExecutionInput.Builder execBuilder = ExecutionInput.newExecutionInput();
 		if(req.getMethod().equals("GET")) {
