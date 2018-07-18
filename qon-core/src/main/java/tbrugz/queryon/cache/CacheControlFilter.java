@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.util.MiscUtils;
+
 public class CacheControlFilter implements Filter {
 
 	private static final Log log = LogFactory.getLog(CacheControlFilter.class);
@@ -41,7 +43,7 @@ public class CacheControlFilter implements Filter {
 			if("GET".equals(req.getMethod())) {
 				String maxAge = req.getParameter(CACHE_MAX_AGE);
 				if(maxAge!=null) {
-					if(isInt(maxAge)) {
+					if(MiscUtils.isInt(maxAge)) {
 						HttpServletResponse resp = (HttpServletResponse) response;
 						String value = (privateCache?"private, ":"") + "max-age="+maxAge;
 						resp.setHeader("Cache-Control", value);
@@ -65,16 +67,6 @@ public class CacheControlFilter implements Filter {
 			}
 		}
 		chain.doFilter(request, response);
-	}
-	
-	boolean isInt(String s) {
-		try {
-			Integer.parseInt(s);
-			return true;
-		}
-		catch(NumberFormatException e) {
-			return false;
-		}
 	}
 
 }

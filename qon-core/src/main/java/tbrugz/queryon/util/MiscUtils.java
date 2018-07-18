@@ -67,6 +67,23 @@ public class MiscUtils {
 		}
 		return val;
 	}
+	
+	public static boolean isInt(String s) {
+		try {
+			Integer.parseInt(s);
+			return true;
+		}
+		catch(NumberFormatException e) {
+			return false;
+		}
+	}
+
+	public static Integer getInt(String value) {
+		if (value!=null) {
+			return Integer.parseInt(value);
+		}
+		return null;
+	}
 
 	/*
 	public static Object getFieldValue(Object o, String field) {
