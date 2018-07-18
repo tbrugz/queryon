@@ -1,5 +1,7 @@
 package tbrugz.queryon.processor;
 
+import static tbrugz.queryon.util.MiscUtils.getLowerAlso;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.PreparedStatement;
@@ -389,9 +391,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	Table createQonTable(RequestSpec reqspec) {
 		Map<String, String> v = reqspec.getUpdateValues();
 		
-		return addTable(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("COLUMN_NAMES"), Utils.getStringList(v.get("PK_COLUMN_NAMES"), ","), Utils.getStringList(v.get("COLUMN_REMARKS"), PIPE_SPLIT),
-				v.get("REMARKS"), Utils.getStringList(v.get("ROLES_SELECT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_INSERT"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_UPDATE"), PIPE_SPLIT), Utils.getStringList(v.get("ROLES_DELETE"), PIPE_SPLIT),
-				v.get("ROLES_INSERT_COLUMNS"), v.get("ROLES_UPDATE_COLUMNS"));
+		return addTable(getLowerAlso(v, "SCHEMA_NAME"), getLowerAlso(v, "NAME"), getLowerAlso(v, "COLUMN_NAMES"), Utils.getStringList(getLowerAlso(v, "PK_COLUMN_NAMES"), ","), Utils.getStringList(getLowerAlso(v, "COLUMN_REMARKS"), PIPE_SPLIT),
+				getLowerAlso(v, "REMARKS"), Utils.getStringList(getLowerAlso(v, "ROLES_SELECT"), PIPE_SPLIT), Utils.getStringList(getLowerAlso(v, "ROLES_INSERT"), PIPE_SPLIT), Utils.getStringList(getLowerAlso(v, "ROLES_UPDATE"), PIPE_SPLIT), Utils.getStringList(getLowerAlso(v, "ROLES_DELETE"), PIPE_SPLIT),
+				getLowerAlso(v, "ROLES_INSERT_COLUMNS"), getLowerAlso(v, "ROLES_UPDATE_COLUMNS"));
 	}
 	
 	boolean isQonTablesRelationUpdate(Relation relation) {
