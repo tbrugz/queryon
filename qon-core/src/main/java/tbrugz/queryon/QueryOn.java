@@ -1382,11 +1382,16 @@ public class QueryOn extends HttpServlet {
 		if((eo.getType()==DBObjectType.EXECUTABLE || eo.getType()==DBObjectType.SCRIPT)
 				&& sql!=null && !sql.equals("")) {
 			
-			//log.info("executing BODY: "+sql);
+			//log.debug("executing BODY: "+sql);
 			stmt = conn.prepareCall(sql.toString());
-			ParameterMetaData pmd = stmt.getParameterMetaData();
-			if(pc != pmd.getParameterCount()) {
-				log.warn("#eo.getParams() ["+pc+"] != pmd.getParameterCount() ["+pmd.getParameterCount()+"]");
+			try {
+				ParameterMetaData pmd = stmt.getParameterMetaData();
+				if(pc != pmd.getParameterCount()) {
+					log.warn("#eo.getParams() ["+pc+"] != pmd.getParameterCount() ["+pmd.getParameterCount()+"]");
+				}
+			}
+			catch(SQLException e) {
+				log.warn("doExecute: error on getParameterMetaData() [pc="+pc+"]: "+e);
 			}
 			if(reqspec.params.size() < inParamCount) {
 				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [#params="+pc+" ; inParamCount="+inParamCount+"]");

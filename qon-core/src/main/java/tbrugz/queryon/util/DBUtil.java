@@ -1,6 +1,7 @@
 package tbrugz.queryon.util;
 
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Types;
@@ -208,6 +209,47 @@ public class DBUtil {
 			catch(ParseException e) {}
 		}
 		throw new ParseException("Unparseable date: "+date, 0);
+	}
+	
+	public static int getInParameterCount(ParameterMetaData pmd, String stmtId) throws SQLException {
+		int params = pmd.getParameterCount();
+		int inParams = 0;
+		
+		for(int i=1;i<=params;i++) {
+			int pmode = ParameterMetaData.parameterModeIn; // assuming IN parameter
+			//String ptype = null;
+			
+			try {
+				pmode = pmd.getParameterMode(i);
+				//log.debug("pmode ["+stmtId+"/"+i+"]: "+pmode);
+			}
+			catch(SQLException e) {
+				// oracle: java.sql.SQLFeatureNotSupportedException: Unsupported feature: checkValidIndex - https://community.oracle.com/thread/587880
+				log.debug("Exception getting parameter mode ["+stmtId+"/"+i+"]: "+e);
+			}
+			
+			/*try {
+				ptype = pmd.getParameterTypeName(i);
+			}
+			catch(SQLException e) {
+				log.debug("Exception getting parameter type ["+stmtId+"/"+i+"]: "+e);
+			}*/
+			
+			if(pmode==ParameterMetaData.parameterModeIn) {
+				inParams++;
+				//paramsTypes.add(ptype);
+			}
+			else if(pmode==ParameterMetaData.parameterModeInOut) {
+				inParams++;
+				//paramsTypes.add(ptype);
+				log.debug("INOUT parameter type in Query ["+stmtId+"/"+i+"/"+pmode+"]");
+			}
+			else {
+				log.warn("Parameter of mode '"+pmode+"' not understood for query '"+stmtId+"/"+i+"'");
+			}
+		}
+		
+		return inParams;
 	}
 	
 }
