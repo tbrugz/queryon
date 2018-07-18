@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -57,6 +58,14 @@ public class MiscUtils {
 			ret.add(String.valueOf(o));
 		}
 		return ret;
+	}
+	
+	public static <T> T getLowerAlso(Map<String, T> map, String key) {
+		T val = map.get(key);
+		if(val==null) {
+			val = map.get(key.toLowerCase());
+		}
+		return val;
 	}
 
 	/*
