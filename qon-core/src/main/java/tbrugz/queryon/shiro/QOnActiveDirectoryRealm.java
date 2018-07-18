@@ -185,6 +185,7 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
     /**
      * Making 'getAuthorizationInfo' public ;)
      */
+    @Override
     public AuthorizationInfo getAuthorizationInfo(PrincipalCollection principals) {
         return super.getAuthorizationInfo(principals);
     }

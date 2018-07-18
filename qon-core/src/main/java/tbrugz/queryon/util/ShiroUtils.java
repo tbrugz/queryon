@@ -147,11 +147,15 @@ public class ShiroUtils {
 					if(r instanceof AuthorizationInfoInformer) {
 						AuthorizationInfoInformer ar = (AuthorizationInfoInformer) r;
 						AuthorizationInfo ai = ar.getAuthorizationInfo(subject.getPrincipals()); 
+						log.debug("AuthorizationInfo:: "+ai.getClass()+" / "+ai);
 						Collection<String> cr = ai.getRoles();
 						if(cr!=null) {
-							log.debug("roles:: "+cr);
+							log.debug("roles:: "+cr+" [realm="+r.getName()+"]");
 							roles.addAll(cr);
 						}
+					}
+					else {
+						log.debug("AuthorizationInfo (not an AuthorizationInfoInformer class):: "+r.getClass()+" / "+r.getName());
 					}
 				}
 			}
