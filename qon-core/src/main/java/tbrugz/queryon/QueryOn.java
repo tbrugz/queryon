@@ -1503,17 +1503,17 @@ public class QueryOn extends HttpServlet {
 					//retObject = cret.getSubString(0L, (int) cret.length());
 					retObject = IOUtil.readFile(cret.getCharacterStream());
 				}
-				resp.getWriter().write(retObject.toString());
+				writeExecuteOutput(reqspec, resp, retObject.toString());
 			}
 		}
 		else {
 			resp.setContentType(MIME_TEXT);
 			if(outParamCount==0) {
 				//XXX reqspec.getExecuteWithNoReturnSucessStatus(); //?
-				resp.getWriter().write("execution successful - no return");
+				writeExecuteOutput(reqspec, resp, "execution successful - no return");
 			}
 			else {
-				resp.getWriter().write("execution successful - null return");
+				writeExecuteOutput(reqspec, resp, "execution successful - null return");
 			}
 		}
 
@@ -2055,6 +2055,10 @@ public class QueryOn extends HttpServlet {
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
+	}
+
+	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+		resp.getWriter().write(value);
 	}
 	
 	void addPartParameter(RequestSpec reqspec, SQL sql, String ctype, String col, int colindex) throws IOException {
