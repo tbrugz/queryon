@@ -27,6 +27,7 @@ import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
@@ -71,7 +72,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			}
 			DBIdentifiable dbobj = getDBIdentifiable(action.dbType, action.objectName);
 			if(dbobj==null) {
-				throw new NotFoundException("object not found: "+reqspec.object);
+				throw new NotFoundException("object not found: "+reqspec.object+" [objectName="+action.objectName+"]");
 			}
 
 			//TODO mutation?
@@ -106,11 +107,14 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 				servlet.doDelete((Relation) dbobj, reqspec, currentUser, resp);
 				return (T) getUpdateCountMap(reqspec.updateCount);
 				}
-			//TODO: execute 
-			case EXECUTE:
+			case EXECUTE: {
+				servlet.doExecute((ExecutableObject) dbobj, reqspec, currentUser, resp);
+				return (T) getExecuteReturnMap(reqspec.executeOutput);
+				}
 			default:
 				log.warn("unknown action type: "+atype);
-				return null;
+				throw new BadRequestException("unknown action type: "+atype);
+				//return null;
 			}
 			
 			GqlMapBufferSyntax mbs = reqspec.getCurrentDumpSyntax();
@@ -148,7 +152,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			ret = DBIdentifiable.getDBIdentifiableByName(sm.getViews(), name);
 			if(ret!=null) { return ret; }
 		}
-		if(type==DBObjectType.EXECUTABLE) {
+		if(type.isExecutableType()) {
 			ret = DBIdentifiable.getDBIdentifiableByName(sm.getExecutables(), name);
 			if(ret!=null) { return ret; }
 		}
@@ -161,4 +165,10 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		return updateCount;
 	}
 
+	Map<String, String> getExecuteReturnMap(String returnValue) {
+		Map<String, String> map = new HashMap<>();
+		map.put("returnValue", returnValue);
+		return map;
+	}
+	
 }

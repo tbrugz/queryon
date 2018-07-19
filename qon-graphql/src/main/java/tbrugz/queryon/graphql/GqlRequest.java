@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,7 @@ public class GqlRequest extends RequestSpec {
 	
 	final QonAction action;
 	int updateCount;
+	String executeOutput;
 	final Map<String, String> keyValues = new LinkedHashMap<String, String>();
 
 	public GqlRequest(DataFetchingEnvironment env, Map<String, QonAction> actionMap, Properties prop, HttpServletRequest req)
@@ -58,6 +60,7 @@ public class GqlRequest extends RequestSpec {
 		
 		{
 		List<Argument> args = env.getField().getArguments();
+		Map<String, String> execValues = new TreeMap<>();
 		for(Argument arg: args) {
 			//log.info("arg:: name: "+arg.getName()+" / value: "+arg.getValue());
 			switch (arg.getName()) {
@@ -77,11 +80,18 @@ public class GqlRequest extends RequestSpec {
 				else if(action.atype==ActionType.INSERT || action.atype==ActionType.UPDATE) {
 					updateValues.put(arg.getName(), getStringValue(arg.getValue()));
 				}
+				else if(action.atype==ActionType.EXECUTE) {
+					//log.info("Exec/arg:: name: "+arg.getName()+" / value: "+arg.getValue());
+					execValues.put(arg.getName(), getStringValue(arg.getValue()));
+				}
 				else {
 					log.info("unknown argument:: name: "+arg.getName()+" / value: "+arg.getValue());
 				}
 				break;
 			}
+		}
+		for(Map.Entry<String, String> e: execValues.entrySet()) {
+			params.add(e.getValue());
 		}
 		}
 	

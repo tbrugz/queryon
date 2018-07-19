@@ -20,6 +20,8 @@ import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -94,18 +96,23 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		GraphQLObjectType.Builder mutationBuilder = GraphQLObjectType.newObject().name("MutationType");
 		int mutationCount = 0;
 		GraphQLObjectType updateType = getUpdateType(mutationBuilder);
+		GraphQLObjectType executeType = getExecuteReturnType(mutationBuilder);
+
 		for(Table t: sm.getTables()) {
 			addMutation(mutationBuilder, t, updateType, df);
 			mutationCount++;
 		}
+		for(ExecutableObject eo: sm.getExecutables()) {
+			addMutation(mutationBuilder, eo, executeType, df);
+			mutationCount++;
+		}
+		
 		if(mutationCount>0) {
 			//add UpdateInfo type
 			gqlSchemaBuilder.mutation(mutationBuilder.build());
 		}
 		
 		// XXXxx each type should have a query? -> listXxx, listSchemaName
-		// XXX add executables (mutations)
-		// XXX add relation's Mutation's? insert/update/delete
 		// https://github.com/okgrow/merge-graphql-schemas#merging-type-definitions
 
 		return gqlSchemaBuilder.build();
@@ -148,6 +155,13 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			mutationBuilder.field(deleteField);
 		}
 	}
+
+	void addMutation(GraphQLObjectType.Builder mutationBuilder, ExecutableObject eo, GraphQLObjectType returnType, DataFetcher<?> df) {
+		//typeMap.put(eo.getName(), gt);
+		//GraphQLObjectType gt = typeMap.get(eo.getName());
+		
+		mutationBuilder.field(createExecuteField(returnType, eo, df));
+	}
 	
 	GraphQLObjectType getUpdateType(GraphQLObjectType.Builder mutationBuilder) {
 		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
@@ -156,6 +170,16 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			.field(GraphQLFieldDefinition.newFieldDefinition()
 				.name("updateCount")
 				.type(Scalars.GraphQLInt));
+		return builder.build();
+	}
+
+	GraphQLObjectType getExecuteReturnType(GraphQLObjectType.Builder mutationBuilder) {
+		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
+			.name("ExecuteReturnType")
+			.description("execution return")
+			.field(GraphQLFieldDefinition.newFieldDefinition()
+				.name("returnValue")
+				.type(Scalars.GraphQLString));
 		return builder.build();
 	}
 	
@@ -293,6 +317,36 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				.type(new GraphQLNonNull(Scalars.GraphQLString)) //XXX: non-string col type?
 				);
 		}
+		
+		if(df!=null) { f.dataFetcher(df); }
+		
+		return f.build();
+	}
+	
+	GraphQLFieldDefinition createExecuteField(GraphQLObjectType returnType, ExecutableObject eo, DataFetcher<?> df) {
+		String qFieldName = "execute_"+eo.getName();
+		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+			.name(qFieldName)
+			.type(returnType);
+		amap.put(qFieldName, new QonAction(ActionType.EXECUTE, /*DBObjectType.EXECUTABLE*/ eo.getType(), eo.getName())); // XXX add schemaName? NamedTypedDBObject?
+		
+		//XXX: test shiro permission?
+		
+		for(int i=0;i<eo.getParams().size(); i++) {
+			ExecutableParameter ep = eo.getParams().get(i);
+			if(!SchemaModelUtils.isInParameter(ep)) { continue; }
+			
+			//String cname = ep.getName()!=null?ep.getName():"p"+(i+1);
+			String cname = "p"+(i+1);
+			String ctype = ep.getDataType();
+			
+			f.argument(GraphQLArgument.newArgument()
+					.name(cname)
+					.type(getGlType(ctype))
+					);
+		}
+		
+		// out type: struct? must refactor QueryOn...
 		
 		if(df!=null) { f.dataFetcher(df); }
 		

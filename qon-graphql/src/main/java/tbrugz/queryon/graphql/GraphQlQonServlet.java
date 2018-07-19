@@ -34,6 +34,7 @@ import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.util.IOUtil;
@@ -253,6 +254,12 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 	
 	@Override
+	protected void doExecute(ExecutableObject eo, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
+			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		super.doExecute(eo, reqspec, currentUser, resp);
+	}
+	
+	@Override
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		if(count!=1) {
 			log.warn("update count != 1: "+count);
@@ -264,6 +271,17 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		if(reqspec instanceof GqlRequest) {
 			GqlRequest req = (GqlRequest) reqspec;
 			req.updateCount = count;
+		}
+		else {
+			log.warn("reqspec is not a GqlRequest: "+reqspec.getClass());
+		}
+	}
+
+	@Override
+	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+		if(reqspec instanceof GqlRequest) {
+			GqlRequest req = (GqlRequest) reqspec;
+			req.executeOutput = value;
 		}
 		else {
 			log.warn("reqspec is not a GqlRequest: "+reqspec.getClass());
