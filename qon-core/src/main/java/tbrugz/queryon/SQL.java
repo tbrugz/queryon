@@ -483,12 +483,18 @@ public class SQL {
 		if(aliases==null || aliases.size()==0) {
 			return Utils.join(cols, ", ", sqlIdDecorator);
 		}
+		if(cols.size()!=aliases.size()) {
+			log.warn("getColumnsStr: cols.size() ["+cols.size()+"] != aliases.size() ["+aliases.size()+"] - ignoring aliases");
+			return Utils.join(cols, ", ", sqlIdDecorator);
+		}
 		StringBuilder buffer = new StringBuilder();
 		for(int i=0;i<cols.size();i++) {
 			if(i>0) {
 				buffer.append(", ");
 			}
-			buffer.append(sqlIdDecorator.get(cols.get(i))).append(" as ").append(sqlIdDecorator.get(aliases.get(i)));
+			buffer.append( sqlIdDecorator.get(cols.get(i)) +
+					(aliases.get(i)!=null ? " as " + sqlIdDecorator.get(aliases.get(i)) : "")
+					);
 		}
 		
 		return buffer.toString();

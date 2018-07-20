@@ -477,6 +477,7 @@ public class QueryOn extends HttpServlet {
 		//SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
 		boolean useIdDecorator = Utils.getPropBool(prop, PROP_SQL_USEIDDECORATOR, true);
 		if(!useIdDecorator) {
+			log.warn("sqlIdDecorator: will not use decorator [prop "+PROP_SQL_USEIDDECORATOR+"]");
 			SQL.sqlIdDecorator = new StringDecorator.StringQuoterDecorator("");
 		}
 		
@@ -866,6 +867,7 @@ public class QueryOn extends HttpServlet {
 		catch(BadRequestException e) {
 			//XXX: do not log exception!
 			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
+			//log.debug(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			throw e;
 		}
 		catch(SQLException e) {
@@ -2498,16 +2500,16 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			try {
-			InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
-			if(is!=null) {
-				IOUtil.pipeStreams(is, resp.getOutputStream());
-				is.close();
+				InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
+				if(is!=null) {
+					IOUtil.pipeStreams(is, resp.getOutputStream());
+					is.close();
+				}
+				else {
+					// null return: null
+					//throw new BadRequestException("Null stream [column="+reqspec.uniValueCol+"]");
+				}
 			}
-			else {
-				// null return: null
-				//throw new BadRequestException("Null stream [column="+reqspec.uniValueCol+"]");
-			}
-		}
 			catch(SQLException e) {
 				resp.setContentType(MIME_TEXT);
 				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, ResponseSpec.HEADERVALUE_CONTENT_DISPOSITION_INLINE);
