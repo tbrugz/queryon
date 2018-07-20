@@ -47,11 +47,11 @@
       <artifactId>graphql-java</artifactId>
       <version>9.0</version>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java-servlet</artifactId>
       <version>5.0.1</version>
-    </dependency>
+    </dependency> -->
     
     <!-- <dependency> 
       <groupId>org.slf4j</groupId>
