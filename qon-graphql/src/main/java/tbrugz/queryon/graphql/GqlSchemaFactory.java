@@ -49,6 +49,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	public static final String FILTER_KEY_PREPEND = "filter_by_";
 	
+	static final String FIELD_UPDATE_COUNT = "updateCount";
+	static final String FIELD_RETURN_VALUE = "returnValue";
+	
 	public static class QonAction {
 		final ActionType atype;
 		final DBObjectType dbType;
@@ -62,7 +65,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	}
 
 	final boolean addFiltersToTypeField = true;
-	final boolean addFiltersToQueryField = false; //do not change!
+	final boolean addFiltersToQueryField = false;
 	final boolean addMutations = true;
 	
 	final SchemaModel sm;
@@ -201,7 +204,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			.name("UpdateInfoType")
 			.description("update info")
 			.field(GraphQLFieldDefinition.newFieldDefinition()
-				.name("updateCount")
+				.name(FIELD_UPDATE_COUNT)
 				.type(Scalars.GraphQLInt));
 		return builder.build();
 	}
@@ -211,7 +214,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			.name("ExecuteReturnType")
 			.description("execution return")
 			.field(GraphQLFieldDefinition.newFieldDefinition()
-				.name("returnValue")
+				.name(FIELD_RETURN_VALUE)
 				.type(Scalars.GraphQLString));
 		return builder.build();
 	}

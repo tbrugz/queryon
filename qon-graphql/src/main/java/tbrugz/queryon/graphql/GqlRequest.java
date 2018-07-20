@@ -159,6 +159,7 @@ public class GqlRequest extends RequestSpec {
 		Map<String, String[]> mfilter = getMultiFilter(filter);
 		if(mfilter!=null) {
 			//log.info("f[MultiFilter]: "+filter+" / "+value+" / "+value.getClass());
+			@SuppressWarnings("unchecked")
 			List<Object> values = (List<Object>) value;
 			String[] strs = new String[values.size()];
 			for(int i=0;i<values.size();i++) {

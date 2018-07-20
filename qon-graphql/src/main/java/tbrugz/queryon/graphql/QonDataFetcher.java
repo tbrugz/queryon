@@ -54,6 +54,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		this.prop = new Properties();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public T get(DataFetchingEnvironment env) {
 		/*
@@ -163,13 +164,13 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	
 	Map<String, Integer> getUpdateCountMap(int count) {
 		Map<String, Integer> updateCount = new HashMap<>();
-		updateCount.put("updateCount", count);
+		updateCount.put(GqlSchemaFactory.FIELD_UPDATE_COUNT, count);
 		return updateCount;
 	}
 
 	Map<String, String> getExecuteReturnMap(String returnValue) {
 		Map<String, String> map = new HashMap<>();
-		map.put("returnValue", returnValue);
+		map.put(GqlSchemaFactory.FIELD_RETURN_VALUE, returnValue);
 		return map;
 	}
 	
