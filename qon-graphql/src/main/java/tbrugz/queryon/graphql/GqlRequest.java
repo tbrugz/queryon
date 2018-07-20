@@ -60,7 +60,7 @@ public class GqlRequest extends RequestSpec {
 		
 		{
 		List<Argument> args = env.getField().getArguments();
-		Map<String, String> execValues = new TreeMap<>();
+		Map<String, String> positionalValues = new TreeMap<>();
 		for(Argument arg: args) {
 			//log.info("arg:: name: "+arg.getName()+" / value: "+arg.getValue());
 			switch (arg.getName()) {
@@ -80,9 +80,9 @@ public class GqlRequest extends RequestSpec {
 				else if(action.atype==ActionType.INSERT || action.atype==ActionType.UPDATE) {
 					updateValues.put(arg.getName(), getStringValue(arg.getValue()));
 				}
-				else if(action.atype==ActionType.EXECUTE) {
+				else if( (action.atype==ActionType.SELECT || action.atype==ActionType.EXECUTE) && positionalParamPattern.matcher(arg.getName()).matches()) {
 					//log.info("Exec/arg:: name: "+arg.getName()+" / value: "+arg.getValue());
-					execValues.put(arg.getName(), getStringValue(arg.getValue()));
+					positionalValues.put(arg.getName(), getStringValue(arg.getValue()));
 				}
 				else {
 					log.info("unknown argument:: name: "+arg.getName()+" / value: "+arg.getValue());
@@ -90,7 +90,7 @@ public class GqlRequest extends RequestSpec {
 				break;
 			}
 		}
-		for(Map.Entry<String, String> e: execValues.entrySet()) {
+		for(Map.Entry<String, String> e: positionalValues.entrySet()) {
 			params.add(e.getValue());
 		}
 		}

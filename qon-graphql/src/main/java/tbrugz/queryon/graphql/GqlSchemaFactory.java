@@ -1,9 +1,14 @@
 package tbrugz.queryon.graphql;
 
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import graphql.GraphQLException;
 import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
@@ -40,6 +45,8 @@ import tbrugz.sqldump.dbmodel.Table;
  */
 public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
+	static final Log log = LogFactory.getLog(GqlSchemaFactory.class);
+	
 	public static final String FILTER_KEY_PREPEND = "filter_by_";
 	
 	public static class QonAction {
@@ -54,8 +61,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		}
 	}
 
-	boolean addFiltersToTypeField = true;
-	boolean addFiltersToQueryField = false;
+	final boolean addFiltersToTypeField = true;
+	final boolean addFiltersToQueryField = false; //do not change!
+	final boolean addMutations = true;
 	
 	final SchemaModel sm;
 	final Map<String, QonAction> amap = new HashMap<>();
@@ -93,23 +101,25 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		// INSERT/UPDATE/DELETE
 		// https://graphql.org/learn/queries/#mutations
 		// https://graphql.org/learn/schema/#the-query-and-mutation-types
-		GraphQLObjectType.Builder mutationBuilder = GraphQLObjectType.newObject().name("MutationType");
-		int mutationCount = 0;
-		GraphQLObjectType updateType = getUpdateType(mutationBuilder);
-		GraphQLObjectType executeType = getExecuteReturnType(mutationBuilder);
-
-		for(Table t: sm.getTables()) {
-			addMutation(mutationBuilder, t, updateType, df);
-			mutationCount++;
-		}
-		for(ExecutableObject eo: sm.getExecutables()) {
-			addMutation(mutationBuilder, eo, executeType, df);
-			mutationCount++;
-		}
+		if(addMutations) {
+			GraphQLObjectType.Builder mutationBuilder = GraphQLObjectType.newObject().name("MutationType");
+			int mutationCount = 0;
+			GraphQLObjectType updateType = getUpdateType(mutationBuilder);
+			GraphQLObjectType executeType = getExecuteReturnType(mutationBuilder);
+	
+			for(Table t: sm.getTables()) {
+				addMutation(mutationBuilder, t, updateType, df);
+				mutationCount++;
+			}
+			for(ExecutableObject eo: sm.getExecutables()) {
+				addMutation(mutationBuilder, eo, executeType, df);
+				mutationCount++;
+			}
 		
-		if(mutationCount>0) {
-			//add UpdateInfo type
-			gqlSchemaBuilder.mutation(mutationBuilder.build());
+			if(mutationCount>0) {
+				//add UpdateInfo type
+				gqlSchemaBuilder.mutation(mutationBuilder.build());
+			}
 		}
 		
 		// XXXxx each type should have a query? -> listXxx, listSchemaName
@@ -119,14 +129,23 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	}
 	
 	void addRelation(GraphQLObjectType.Builder queryBuilder, Relation r, DataFetcher<?> df) {
+		String name = normalizeName(r.getName());
+		if(r.getColumnCount()==0) {
+			log.warn("Relation '"+name+"' has no fields [ignoring]");
+			return;
+		}
 		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
 				//.name(t.getQualifiedName())
-				.name(r.getName());
+				.name(name);
+		try {
+			
 		if(r.getRemarks()!=null) {
 			builder.description(r.getRemarks());
 		}
 		for(int i=0;i<r.getColumnCount();i++) {
+			//String cName = normalizeName( r.getColumnNames().get(i) );
 			String cName = r.getColumnNames().get(i);
+			if(!isNormalizedName(cName)) { continue; }
 			String cType = r.getColumnTypes().get(i);
 			GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
 					.name(cName)
@@ -138,13 +157,24 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			builder.field(f);
 			
 		}
+		
 		GraphQLObjectType gt = builder.build();
-		typeMap.put(r.getName(), gt);
+		typeMap.put(name, gt);
 		queryBuilder.field(createQueryField(gt, r, df));
+		
+		}
+		catch(GraphQLException e) {
+			log.warn("GraphQLException: "+e);
+		}
 	}
 
 	void addMutation(GraphQLObjectType.Builder mutationBuilder, Table t, GraphQLObjectType returnType, DataFetcher<?> df) {
-		GraphQLObjectType gt = typeMap.get(t.getName());
+		String name = normalizeName(t.getName());
+		GraphQLObjectType gt = typeMap.get(name);
+		if(gt==null) {
+			log.warn("addMutation: object "+name+" not found in typeMap");
+			return;
+		}
 		mutationBuilder.field(createInsertField(gt, returnType, t, df));
 		GraphQLFieldDefinition updateField = createUpdateField(gt, returnType, t, df);
 		if(updateField!=null) {
@@ -207,6 +237,18 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			.type(GraphQLList.list(t));
 		amap.put(qFieldName, new QonAction(ActionType.SELECT, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
 
+		if(r.getParameterCount()!=null) {
+			for(int i=0;i<r.getParameterCount();i++) {
+				GraphQLScalarType type = getGlType(
+						(r.getParameterTypes()!=null && r.getParameterTypes().size()>i)?r.getParameterTypes().get(i):"VARCHAR"
+						);
+				f.argument(GraphQLArgument.newArgument()
+						.name("p"+(i+1))
+						.type(new GraphQLNonNull(type))
+						);
+			}
+		}
+		
 		for(String p: REQ_PARAMS_INT) {
 			f.argument(GraphQLArgument.newArgument()
 				.name(p)
@@ -275,7 +317,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 
 		for(int i=0;i<r.getColumnCount(); i++) {
 			Column c = r.getColumns().get(i);
+			//String cname = normalizeName( c.getName() );
 			String cname = c.getName();
+			if(!isNormalizedName(cname)) { continue; }
 			String ctype = c.getType();
 			//boolean generated = c.getAutoIncrement()!=null && c.getAutoIncrement();
 			//boolean required = !c.isNullable() && !generated;
@@ -419,6 +463,25 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		//XXX: date?
 		//log.info("unknown? "+upper);
 		return Scalars.GraphQLString;
+	}
+	
+	static String normalizeName(String name) {
+		if(name==null || name.length()==0) { return ""; }
+		
+		String ret = Normalizer.normalize(name, Normalizer.Form.NFD);
+		ret = ret.replaceAll("[^\\p{ASCII}]", "");
+		ret = ret.replaceAll("[^_0-9A-Za-z]", "_");
+		char char1 = ret.charAt(0);
+		if(char1 >= '0' && char1 <='9') { ret = "_"+ret; }
+		if(! name.equals(ret)) {
+			log.info("name normalized: '"+name+"' -> '"+ret+"'"+" [norm1="+Normalizer.normalize(name, Normalizer.Form.NFD)+"]");
+		}
+		return ret;
+	}
+	
+	static boolean isNormalizedName(String name) {
+		String normal = normalizeName(name);
+		return normal.equals(name);
 	}
 	
 	public static String capitalize(String s) {

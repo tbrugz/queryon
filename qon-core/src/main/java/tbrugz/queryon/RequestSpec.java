@@ -98,7 +98,7 @@ public class RequestSpec {
 
 	// positional parameters
 	public static final String PARAM_BODY_PARAM_INDEX = "bodyparamindex";
-	static final Pattern positionalParamPattern = Pattern.compile("p([1-9]+[0-9]*)", Pattern.DOTALL);
+	protected static final Pattern positionalParamPattern = Pattern.compile("p([1-9]+[0-9]*)", Pattern.DOTALL);
 	
 	// pivot parameters
 	public static final String PARAM_ONCOLS = "oncols";
