@@ -19,6 +19,7 @@ import org.apache.shiro.subject.Subject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -60,11 +61,10 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		}
 
 		log.info(">> GraphQlQonServlet: method: "+req.getMethod());
+		//log.info(">> GqlQuery: "+exec.getQuery());
 		
 		String modelId = SchemaModelUtils.getModelId(req); //XXX: get modelId (also) from POST body (json)?
 		SchemaModel sm = getSchemaModel(modelId, req);
-		
-		resp.setContentType(GqlMapBufferSyntax.MIME_TYPE);
 		
 		// XXX "cache" GqlSchemaFactory? application attribute... also: when to invalidate?
 		GqlSchemaFactory gqls = new GqlSchemaFactory(sm);
@@ -76,14 +76,14 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 			writeSchema(graphQLSchema, resp.getWriter());
 			return;
 		}
+		resp.setContentType(GqlMapBufferSyntax.MIME_TYPE);
 		GraphQL gql = GraphQL.newGraphQL(graphQLSchema).build();
 		ExecutionResult executionResult = gql.execute(exec);
 		
 		// https://github.com/graphql-java/graphql-java/issues/649
 		// https://github.com/graphql-java/graphql-java/blob/master/docs/execution.rst#serializing-results-to-json
 		Map<String, Object> executionSpecResult = executionResult.toSpecification();
-		Gson gson = new GsonBuilder()
-				.create();
+		Gson gson = new GsonBuilder().create();
 		resp.getWriter().write(gson.toJson(executionSpecResult));
 		//writeResult(exec, executionResult, resp);
 	}
@@ -171,17 +171,25 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 			//XXX test for Content-Type: application/json or application/graphql
 			String httpBody = IOUtil.readFile(req.getReader()).trim();
 			Gson gson = new Gson();
-			Map<String, Object> map = (Map<String, Object>) gson.fromJson(httpBody, Map.class);
-			
-			String query = (String) map.get("query");
-			execBuilder.query(query);
-			Object oVar = (Object) map.get("variables");
-			if(oVar instanceof Map<?, ?>) {
-				Map<String, Object> variables = (Map<String, Object>) oVar;
-				execBuilder.variables(variables);
+			try {
+				Map<String, Object> map = (Map<String, Object>) gson.fromJson(httpBody, Map.class);
+				if(map==null) {
+					throw new BadRequestException("empty body? [method: "+req.getMethod()+"]");
+				}
+				
+				String query = (String) map.get("query");
+				execBuilder.query(query);
+				Object oVar = (Object) map.get("variables");
+				if(oVar instanceof Map<?, ?>) {
+					Map<String, Object> variables = (Map<String, Object>) oVar;
+					execBuilder.variables(variables);
+				}
+				String operationName = (String) map.get("operationName");
+				execBuilder.operationName(operationName);
 			}
-			String operationName = (String) map.get("operationName");
-			execBuilder.operationName(operationName);
+			catch(JsonSyntaxException e) {
+				throw new BadRequestException("malformed json in body [method: "+req.getMethod()+"]");
+			}
 		}
 		else {
 			throw new BadRequestException("GraphQl query missing [method: "+req.getMethod()+"]");
