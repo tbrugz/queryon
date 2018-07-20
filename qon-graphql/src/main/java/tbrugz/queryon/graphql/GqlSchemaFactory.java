@@ -67,6 +67,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	final SchemaModel sm;
 	final Map<String, QonAction> amap = new HashMap<>();
+	final Map<String, Map<String, String>> colMap = new HashMap<>();
 	transient Map<String, GraphQLObjectType> typeMap = new HashMap<>();
 	
 	public GqlSchemaFactory(SchemaModel sm) {
@@ -139,14 +140,16 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				.name(name);
 		try {
 			
+		Map<String, String> relColMap = new HashMap<>();
+		colMap.put(name, relColMap);
+		
 		if(r.getRemarks()!=null) {
 			builder.description(r.getRemarks());
 		}
 		for(int i=0;i<r.getColumnCount();i++) {
-			//String cName = normalizeName( r.getColumnNames().get(i) );
-			String cName = r.getColumnNames().get(i);
-			if(!isNormalizedName(cName)) { continue; }
+			String cName = normalizeName( r.getColumnNames().get(i) );
 			String cType = r.getColumnTypes().get(i);
+			relColMap.put(cName, r.getColumnNames().get(i));
 			GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
 					.name(cName)
 					.type(getGlType(cType));
@@ -317,9 +320,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 
 		for(int i=0;i<r.getColumnCount(); i++) {
 			Column c = r.getColumns().get(i);
-			//String cname = normalizeName( c.getName() );
-			String cname = c.getName();
-			if(!isNormalizedName(cname)) { continue; }
+			String cname = normalizeName( c.getName() );
 			String ctype = c.getType();
 			//boolean generated = c.getAutoIncrement()!=null && c.getAutoIncrement();
 			//boolean required = !c.isNullable() && !generated;
@@ -368,7 +369,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	}
 	
 	GraphQLFieldDefinition createExecuteField(GraphQLObjectType returnType, ExecutableObject eo, DataFetcher<?> df) {
-		String qFieldName = "execute_"+eo.getName();
+		String qFieldName = "execute_"+normalizeName(eo.getName());
 		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
 			.name(qFieldName)
 			.type(returnType);
@@ -473,8 +474,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		ret = ret.replaceAll("[^_0-9A-Za-z]", "_");
 		char char1 = ret.charAt(0);
 		if(char1 >= '0' && char1 <='9') { ret = "_"+ret; }
-		if(! name.equals(ret)) {
-			log.info("name normalized: '"+name+"' -> '"+ret+"'"+" [norm1="+Normalizer.normalize(name, Normalizer.Form.NFD)+"]");
+		if(log.isDebugEnabled() && ! name.equals(ret)) {
+			log.debug("name normalized: '"+name+"' -> '"+ret+"'");
+			//log.info("name normalized: '"+name+"' -> '"+ret+"'"+" [norm1="+Normalizer.normalize(name, Normalizer.Form.NFD)+"]");
 		}
 		return ret;
 	}

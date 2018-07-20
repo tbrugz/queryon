@@ -45,18 +45,37 @@ public class GqlRequest extends RequestSpec {
 	int updateCount;
 	String executeOutput;
 	final Map<String, String> keyValues = new LinkedHashMap<String, String>();
+	final Map<String, String> relationColMap;
 
-	public GqlRequest(DataFetchingEnvironment env, Map<String, QonAction> actionMap, Properties prop, HttpServletRequest req)
+	public GqlRequest(DataFetchingEnvironment env, Map<String, QonAction> actionMap, Map<String, Map<String, String>> colMap, Properties prop, HttpServletRequest req)
 			throws ServletException, IOException {
 		super(null, req, prop, 0, null, true, 0, null);
 		//log.info("GqlRequest(): "+this.hashCode()+"/"+dumpSyntax);
 		
 		object = env.getField().getName();
 		action = actionMap.get(object);
+		relationColMap = colMap.get(action.objectName);
+		//log.info("relationColMap: "+relationColMap+" // "+action.objectName+" // "+object);
 
 		//log.debug("field-names: "+env.getSelectionSet().get().keySet());
 		Set<String> fieldNames = env.getSelectionSet().get().keySet();
-		columns.addAll(fieldNames); //"fields" param (PARAM_FIELDS)
+		//columns.addAll(fieldNames); //"fields" param (PARAM_FIELDS)
+		// non-normalized columns will not be retrieved...
+		/*for(String s: fieldNames) {
+			if(GqlSchemaFactory.isNormalizedName(s)) {
+				columns.add(s);
+			}
+		}*/
+		for(String f: fieldNames) {
+			String unnormalizedCol = relationColMap.get(f);
+			columns.add(unnormalizedCol);
+			if(unnormalizedCol.equals(f)) {
+				aliases.add(null);
+			}
+			else {
+				aliases.add(f);
+			}
+		}
 		
 		{
 		List<Argument> args = env.getField().getArguments();

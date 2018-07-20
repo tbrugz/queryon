@@ -69,7 +69,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		// XXX "cache" GqlSchemaFactory? application attribute... also: when to invalidate?
 		GqlSchemaFactory gqls = new GqlSchemaFactory(sm);
 		Map<String, QonAction> actionMap = gqls.amap;
-		DataFetcher<?> df = getDataFetcher(sm, actionMap, req, resp);
+		DataFetcher<?> df = getDataFetcher(sm, actionMap, gqls.colMap, req, resp);
 		GraphQLSchema graphQLSchema = gqls.getSchema(df);
 		if(requestSchema) {
 			resp.setContentType(ResponseSpec.MIME_TYPE_TEXT_PLAIN);
@@ -220,8 +220,8 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		return model;
 	}
 	
-	DataFetcher<?> getDataFetcher(SchemaModel sm, Map<String, QonAction> actionMap, HttpServletRequest req, HttpServletResponse resp) {
-		return new QonDataFetcher<>(sm, actionMap, this, req, resp);
+	DataFetcher<?> getDataFetcher(SchemaModel sm, Map<String, QonAction> actionMap, Map<String, Map<String,String>> colMap, HttpServletRequest req, HttpServletResponse resp) {
+		return new QonDataFetcher<>(sm, actionMap, colMap, this, req, resp);
 	}
 	
 	protected Properties getProperties() {

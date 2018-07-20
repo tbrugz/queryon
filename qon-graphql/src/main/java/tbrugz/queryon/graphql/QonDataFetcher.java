@@ -37,14 +37,16 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	
 	final SchemaModel sm;
 	final Map<String, QonAction> actionMap;
+	final Map<String, Map<String, String>> colMap;
 	final GraphQlQonServlet servlet;
 	final HttpServletRequest req;
 	final HttpServletResponse resp;
 	final Properties prop;
 	
-	public QonDataFetcher(SchemaModel sm, Map<String, QonAction> actionMap, GraphQlQonServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
+	public QonDataFetcher(SchemaModel sm, Map<String, QonAction> actionMap, Map<String, Map<String, String>> colMap, GraphQlQonServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
 		this.sm = sm;
 		this.actionMap = actionMap;
+		this.colMap = colMap;
 		this.servlet = servlet;
 		this.req = req;
 		this.resp = resp;
@@ -63,7 +65,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		
 		try {
 			//GqlRequest reqspec = servlet.getRequestSpec(req); //servlet.getCurrentRequestSpec();
-			GqlRequest reqspec = new GqlRequest(env, actionMap, prop, req);
+			GqlRequest reqspec = new GqlRequest(env, actionMap, colMap, prop, req);
 			//log.info("gcds(#1): "+reqspec.getCurrentDumpSyntax());
 			
 			QonAction action = reqspec.action;
