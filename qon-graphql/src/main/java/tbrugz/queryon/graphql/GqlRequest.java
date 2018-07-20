@@ -68,6 +68,13 @@ public class GqlRequest extends RequestSpec {
 		}*/
 		for(String f: fieldNames) {
 			String unnormalizedCol = relationColMap.get(f);
+			if(unnormalizedCol==null) {
+				log.debug("null unnormalized column [normalized="+f+"]");
+				columns.add(f);
+				aliases.add(null);
+				continue;
+			}
+			
 			columns.add(unnormalizedCol);
 			if(unnormalizedCol.equals(f)) {
 				aliases.add(null);

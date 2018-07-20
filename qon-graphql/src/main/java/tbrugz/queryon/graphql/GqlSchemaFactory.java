@@ -469,6 +469,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		return Scalars.GraphQLString;
 	}
 	
+	// see: https://stackoverflow.com/questions/3322152/is-there-a-way-to-get-rid-of-accents-and-convert-a-whole-string-to-regular-lette
 	static String normalizeName(String name) {
 		if(name==null || name.length()==0) { return ""; }
 		
