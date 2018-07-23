@@ -492,8 +492,9 @@ public class SQL {
 			if(i>0) {
 				buffer.append(", ");
 			}
+			String alias = aliases.get(i);
 			buffer.append( sqlIdDecorator.get(cols.get(i)) +
-					(aliases.get(i)!=null ? " as " + sqlIdDecorator.get(aliases.get(i)) : "")
+					( (alias!=null && !alias.equals(""))? " as " + sqlIdDecorator.get(alias) : "")
 					);
 		}
 		
