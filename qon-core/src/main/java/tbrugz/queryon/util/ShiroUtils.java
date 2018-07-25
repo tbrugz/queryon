@@ -144,23 +144,17 @@ public class ShiroUtils {
 			if(rs!=null) {
 				log.debug("#realms = "+rs.size());
 				for(Realm r: rs) {
-					if(r instanceof AuthorizationInfoInformer) {
-						AuthorizationInfoInformer ar = (AuthorizationInfoInformer) r;
-						AuthorizationInfo ai = ar.getAuthorizationInfo(subject.getPrincipals());
-						if(ai!=null) {
-							log.debug("AuthorizationInfo:: "+ai.getClass());
-							Collection<String> cr = ai.getRoles();
-							if(cr!=null) {
-								log.debug("roles:: "+cr+" [realm="+r.getName()+"]");
-								roles.addAll(cr);
-							}
-						}
-						else {
-							log.debug("null AuthorizationInfo: AuthorizationInfoInformer="+ar.getClass());
+					AuthorizationInfo ai = getAuthorizationInfo(r, subject);
+					if(ai!=null) {
+						log.debug("AuthorizationInfo:: "+ai.getClass());
+						Collection<String> cr = ai.getRoles();
+						if(cr!=null) {
+							log.debug("roles:: "+cr+" [realm="+r.getName()+"]");
+							roles.addAll(cr);
 						}
 					}
 					else {
-						log.debug("AuthorizationInfo (not an AuthorizationInfoInformer class):: "+r.getClass()+" / "+r.getName());
+						log.debug("null AuthorizationInfo: Realm/AuthorizationInfoInformer="+r.getClass());
 					}
 				}
 			}
@@ -180,6 +174,18 @@ public class ShiroUtils {
 	public static void authenticate(Subject currentUser, String username, String password) {
 		AuthenticationToken token = new UsernamePasswordToken(username, password);
 		currentUser.login(token);
+	}
+	
+	static AuthorizationInfo getAuthorizationInfo(Realm r, Subject subject) {
+		if(r instanceof AuthorizationInfoInformer) {
+			AuthorizationInfoInformer ar = (AuthorizationInfoInformer) r;
+			AuthorizationInfo ai = ar.getAuthorizationInfo(subject.getPrincipals());
+			return ai;
+		}
+		log.debug("AuthorizationInfo (not an AuthorizationInfoInformer class - will use reflection):: "+r.getClass()+" / "+r.getName());
+		Object o = ReflectionUtil.callProtectedMethodNoException(r, "getAuthorizationInfo", new Class<?>[]{ PrincipalCollection.class }, subject.getPrincipals());
+		//log.info("AuthorizationInfo:: "+o);
+		return (AuthorizationInfo) o;
 	}
 	
 }
