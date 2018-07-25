@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
@@ -245,6 +246,10 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		for(Table t: model.getTables()) {
 			definitions.put(t.getQualifiedName(), createDefinition(t));
 		}
+		//View
+		for(View v: model.getViews()) {
+			definitions.put(v.getQualifiedName(), createDefinition(v));
+		}
 		
 		//XXX security
 		// http://swagger.io/specification/#securityDefinitionsObject
@@ -406,7 +411,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 
 		// parameters: lostrategy?
 		
-		//XXX: filters: allowedColumns? CLOB, ...
+		//XXX: filters: allowFilterOnColumn()? CLOB, ...
 		
 		// parameter: filter: uniparam
 		{
@@ -518,14 +523,31 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			parameters.add(pOffset);
 		}
 		
-		/*
-		 * XXX add 'responses', possibly with schema (schema is json-only?)
-		 * errors: 400 client error, 403 forbidden, 500 internal error
-		 * ok: 200 ok
-		 * insert: 201 created
-		 * delete: 404 not found
-		 */
 		oper.put("parameters", parameters);
+		
+		/*
+		 * XXXdone add 'responses', possibly with schema (schema is json-only?)
+		 * XXX errors: 400 client error, 403 forbidden, 500 internal error
+		 * ok: 200 ok
+		 * insert: 201 created - text
+		 * update: 200 ok - text
+		 * delete: 200 ok - text
+		 * delete: 404 not found
+		 * execute: 200 ok - text
+		 */
+		// responses: 200
+		{
+			Map<String, Object> rOkSchema = new LinkedHashMap<String, Object>();
+			rOkSchema.put("$ref", "#/definitions/" + fullName);
+			Map<String, Object> rOk = new LinkedHashMap<String, Object>();
+			rOk.put("description", "Ok");
+			rOk.put("schema", rOkSchema);
+			
+			Map<Integer, Map<String, Object>> responses = new TreeMap<Integer, Map<String, Object>>();
+			responses.put(200, rOk);
+			oper.put("responses", responses);
+		}
+		
 		return oper;
 	}
 	
@@ -593,7 +615,28 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		//XXX ActionType==update/PATCH | delete: add "filterByXtraParams"
 		
 		oper.put("parameters", parameters);
-		// responses: 201- created ; 500- error
+		
+		// responses: 200, 201, 404
+		{
+			Map<Integer, Map<String, Object>> responses = new TreeMap<Integer, Map<String, Object>>();
+			
+			Integer okCode = ActionType.INSERT.equals(action)?201:
+				ActionType.UPDATE.equals(action)?200:
+				ActionType.DELETE.equals(action)?200:
+				500; // unknown
+			Map<String, Object> rOk = new LinkedHashMap<String, Object>();
+			rOk.put("description", "Ok");
+			responses.put(okCode, rOk);
+			
+			if(ActionType.DELETE.equals(action)) {
+				Map<String, Object> rNotFound = new LinkedHashMap<String, Object>();
+				rNotFound.put("description", "Not Found");
+				responses.put(HttpServletResponse.SC_NOT_FOUND, rNotFound);
+			}
+			
+			oper.put("responses", responses);
+		}
+		
 		return oper;
 	}
 	
@@ -641,9 +684,18 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		oper.put("parameters", parameters);
 		
+		// responses: 200
+		{
+			Map<String, Object> rOk = new LinkedHashMap<String, Object>();
+			rOk.put("description", "Ok");
+			
+			Map<Integer, Map<String, Object>> responses = new TreeMap<Integer, Map<String, Object>>();
+			responses.put(200, rOk);
+			oper.put("responses", responses);
+		}
+		
 		return oper;
 	}
-	
 	
 	Map<String, Object> createDefinition(Relation r) {
 		//type, required, properties
