@@ -162,7 +162,7 @@ input[type=button] {
 
 #rolesCount {
 	display: none;
-	background-color: rgb(146, 218, 136);
+	background-color: #92DA88; /* rgb(146, 218, 136); */
 	/*padding: 2px 4px 2px 3px;*/
 	padding: 0px 4px 0px 3px;
 	border: 1px solid #888;

@@ -131,7 +131,8 @@ loadPagesList = function() {
 	oReq.onload = function(evt) {
 		var req = evt.target
 		var status = req.status;
-		btnActionStop('url-refresh');
+		//btnActionStop('url-refresh');
+		actionStop();
 		if(status>=200 && status<300) {
 			var content = byId('content');
 
@@ -164,7 +165,8 @@ loadPagesList = function() {
 	}
 	oReq.open("GET", loadUrl);
 	oReq.send(null);
-	btnActionStart('url-refresh');
+	actionStart();
+	//btnActionStart('url-refresh');
 }
 
 hasBody = function(hasBodyVal) {
@@ -308,7 +310,8 @@ doConfirmUpload = function() {
 	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json' + qs;
 	
 	request.open("POST", loadUrl, true);
-	btnActionStart('btnUpdate');
+	actionStart();
+	//btnActionStart('btnUpdate');
 	request.onload = function(oEvent) {
 		var req = oEvent.target
 		var msg = null;
@@ -321,11 +324,25 @@ doConfirmUpload = function() {
 			msg = "Error " + request.status + " occurred when trying to upload your file: "+oEvent.target.responseText.trim();
 			showErrorMessages('dialog-messages', msg);
 		}
-		btnActionStop('btnUpdate');
+		//btnActionStop('btnUpdate');
+		actionStop();
 		console.log(msg, oEvent);
 	};
 	//console.log('FormData: ', fd, ' - formElement', formElement);
 	request.send(fd);
+}
+
+function actionStart() {
+	var cl = byId('url-refresh').classList;
+	//cl.add("onaction");
+	cl.add("fa-spin");
+	//byId('btnUpdate').classList.add("onaction");
+}
+
+function actionStop() {
+	var cl = byId('url-refresh').classList;
+	cl.remove("onaction"); cl.remove("fa-spin");
+	//byId('btnUpdate').classList.remove("onaction");
 }
 
 </script>
@@ -390,8 +407,13 @@ li.removed {
 	padding: 0 3px;
 }
 
+i.onaction {
+	cursor: progress;
+}
+
 .onaction {
-	background-color: #f90;
+	color: #777;
+	background-color: #222;
 }
 
 </style>

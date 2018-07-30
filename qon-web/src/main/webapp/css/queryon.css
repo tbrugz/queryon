@@ -140,11 +140,17 @@ span[draggable=true]:hover {
 }
 
 input.mainaction {
-	background-color: rgb(146, 218, 136);
+	background-color: #92DA88; /* rgb(146, 218, 136); */
 }
 
 input.onaction {
-	background-color: #f90 !important;
+	background-color: #578251; /* #3a5736; #f90 !important; */
+	/* color: #ddd; */
+	cursor: progress;
+}
+
+input[type="button"].onaction {
+	cursor: progress;
 }
 
 select.onaction {
@@ -152,7 +158,16 @@ select.onaction {
 }
 
 .onaction {
-	background-color: #f90;
+	background-color: #578251;
+	/* color: #ddd; */
+	cursor: progress;
+	/* background-color: #f90, red; */
+	/* animation: color_change 0.5s infinite alternate; */
+}
+
+@keyframes color_change {
+	from { background-color: #92DA88; }
+	to { background-color: #757575; } /* #ff9900 #cc4444 #C8B944; -- #92DA88; rgb(146, 218, 136); */
 }
 
 input.parameter {
@@ -225,7 +240,7 @@ input[type=button].orderbutton {
 }
 
 input[type=button].button-selected {
-	background-color: rgb(146, 218, 136);
+	background-color: #92DA88; /* rgb(146, 218, 136); */
 }
 
 input[type=button].filter-selected {

@@ -124,7 +124,7 @@ doGo = function() {
 		var type = params[i].getAttribute("type");
 		
 		//console.log(i, " -- ", params[i].name, params[i].readonly, params[i].getAttribute("readonly"));
-		if(params[i].getAttribute("readonly")!=null) {}
+		if(params[i].getAttribute("readonly")!=null || params[i].getAttribute("disabled")!=null) {}
 		else if(type=="file") {
 			if(params[i].files[0]) {
 				reqData.append(params[i].name, params[i].files[0], params[i].value);
@@ -178,7 +178,7 @@ goSetParameters = function(parametersId, pars) {
 			if(blobSqlTypes.indexOf(colType)>=0 && !isOut) { inputType = 'file'; }
 			content += "<label class='parameter-label'>p"+i+
 				": <input type='"+inputType+"' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'"+
-				(isOut?" value='(OUT)' readonly":"")+"/></label>";
+				(isOut?" value='(OUT)' disabled":"")+"/></label>";
 		}
 	}
 	paramsContainer.innerHTML = content;
