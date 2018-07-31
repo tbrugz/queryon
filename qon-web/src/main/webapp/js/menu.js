@@ -25,6 +25,10 @@ function loadMenuContent(oEvent) {
 	var oParser = new DOMParser();
 	var oDOM = oParser.parseFromString(txt, "text/xml");
 	menucontent = oDOM.getElementById("content");
+	if(! menucontent) {
+		console.warn("loadMenuContent: null menucontent: ", menucontent);
+		return;
+	}
 	var hrefs = menucontent.getElementsByTagName('a');
 	for(var i=0;i<hrefs.length;i++) {
 		var a = hrefs[i];
@@ -53,6 +57,10 @@ function toggleMenu() {
 	}
 
 	var menu = createMenuContent(true);
+	if(! menu) {
+		console.warn("toggleMenu: null menu: ", menu);
+		return;
+	}
 	menu.setAttribute("id", "leftmenu");
 
 	//menu.style.top = nav.offsetHeight + 'px';
@@ -66,6 +74,10 @@ function toggleMenu() {
 }
 
 function createMenuContent(addCloseBtn) {
+	if(! menucontent) {
+		console.warn("createMenuContent: null menucontent", menucontent);
+		return;
+	}
 	var lis = menucontent.getElementsByTagName('li');
 	var menu = document.createElement("div");
 	menu.classList.add("leftmenu");

@@ -145,9 +145,11 @@ function showInfoMessages(messagesId, text) {
 function showWarnMessages(messagesId, text) {
 	var m = document.getElementById(messagesId);
 	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
-	m.classList.remove('info');
-	m.classList.add('warn');
-	m.classList.remove('error');
+	if(m.classList) {
+		m.classList.remove('info');
+		m.classList.add('warn');
+		m.classList.remove('error');
+	}
 	var display = 'block';
 	if(m.tagName=='SPAN') { display = 'inline-block'; }
 	m.style.display = display;

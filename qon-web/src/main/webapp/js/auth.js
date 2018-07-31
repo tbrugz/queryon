@@ -15,7 +15,7 @@ var authInfo = {
 };
 
 function loadAuthInfo() { //callback?
-	var url = "auth/info.jsp";
+	var url = "auth/info.jsp?ts=" + new Date();
 	
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
