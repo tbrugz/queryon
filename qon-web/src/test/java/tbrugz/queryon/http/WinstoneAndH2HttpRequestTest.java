@@ -694,7 +694,7 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertEquals(relationsInModel, countNodesWithParentTagName(nl, "schemaModel"));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testDelete_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/DEPT/1");
