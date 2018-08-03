@@ -27,6 +27,7 @@
 String defaultAppname = "QueryOn";
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 String appname = prop.getProperty(WebUtils.PROP_WEB_APPNAME, defaultAppname);
+String loginMessage = prop.getProperty(WebUtils.PROP_WEB_LOGINMESSAGE);
 
 String username = request.getParameter("username");
 String password = request.getParameter("password");
@@ -80,6 +81,10 @@ else {
 	<hr/>
 	<% if(loginError!=null) { %>
 	<em class='warning'><%= loginError %></em>
+	<hr/>
+	<% } %>
+	<% if(loginMessage!=null) { %>
+	<div><%= loginMessage %></div>
 	<hr/>
 	<% } %>
 	<form method="post">

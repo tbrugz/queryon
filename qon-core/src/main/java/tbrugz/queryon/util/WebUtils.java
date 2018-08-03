@@ -21,6 +21,7 @@ public class WebUtils {
 	public static final String MIME_TEXT = "text/plain";
 	
 	public static final String PROP_WEB_APPNAME = "queryon.web.appname";
+	public static final String PROP_WEB_LOGINMESSAGE = "queryon.web.login-message";
 	
 	public static final String PARAM_UTF8 = "utf8";
 	
