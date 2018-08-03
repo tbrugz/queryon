@@ -431,6 +431,9 @@ public class SQL {
 		
 		if(reqspec.columns.size()>0) {
 			List<String> tabColsList = table.getColumnNames();
+			if(tabColsList==null) {
+				throw new BadRequestException("relation's columns not found [relation: "+table.getQualifiedName()+"]");
+			}
 			if(aliases!=null) { checkAliases(aliases, reqspec.columns); }
 			Set<String> tabCols = new HashSet<String>(tabColsList);
 			List<String> sqlCols = new ArrayList<String>(); 
