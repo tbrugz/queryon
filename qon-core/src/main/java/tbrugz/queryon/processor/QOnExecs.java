@@ -259,7 +259,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 				List<ExecutableParameter> eps = new ArrayList<ExecutableParameter>();
 				Integer pCountInt = MiscUtils.getInt(parameterCount);
 				if(pCountInt!=null && pCountInt==parameterInouts.size() && pCountInt==parameterTypes.size()) {
-					log.info("addExecutable [with parameters]: "+e.getQualifiedName()+" ["+TYPE_SCRIPT+"]: pCountInt = "+parameterCount);
+					log.debug("addExecutable [with parameters]: "+e.getQualifiedName()+" ["+TYPE_SCRIPT+"]: pCountInt = "+parameterCount);
 					for(int i=0;i<pCountInt;i++) {
 						ExecutableParameter ep = new ExecutableParameter();
 						ep.setDataType(parameterTypes.get(i));
@@ -274,7 +274,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 					}
 				}
 				else {
-					log.info("addExecutable [with metadata]: "+e.getQualifiedName()+" ["+TYPE_SCRIPT+"]: parameterCount = "+parameterCount);
+					log.debug("addExecutable [with metadata]: "+e.getQualifiedName()+" ["+TYPE_SCRIPT+"]: parameterCount = "+parameterCount);
 					ParameterMetaData pmd = stmt.getParameterMetaData();
 					int pc = DBUtil.getInParameterCount(pmd, e.getQualifiedName());
 					//int pc = pmd.getParameterCount();

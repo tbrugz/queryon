@@ -42,6 +42,7 @@ import tbrugz.sqldump.dbmodel.Table;
  */
 /*
  * XXXxx: add (gql)field-name->(qon)schema-object/method (needed by GqlRequestSpec)?
+ * XXX: add "me" query (like /auth/info.jsp: authenticated, username, roles)
  */
 public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
@@ -135,7 +136,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	void addRelation(GraphQLObjectType.Builder queryBuilder, Relation r, DataFetcher<?> df) {
 		String name = normalizeName(r.getName());
 		if(r.getColumnCount()==0) {
-			log.warn("Relation '"+name+"' has no fields [ignoring]");
+			log.debug("Relation '"+name+"' has no fields [ignoring]");
 			return;
 		}
 		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
@@ -478,10 +479,10 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		ret = ret.replaceAll("[^_0-9A-Za-z]", "_");
 		char char1 = ret.charAt(0);
 		if(char1 >= '0' && char1 <='9') { ret = "_"+ret; }
-		if(log.isDebugEnabled() && ! name.equals(ret)) {
+		/*if(log.isDebugEnabled() && ! name.equals(ret)) {
 			log.debug("name normalized: '"+name+"' -> '"+ret+"'");
 			//log.info("name normalized: '"+name+"' -> '"+ret+"'"+" [norm1="+Normalizer.normalize(name, Normalizer.Form.NFD)+"]");
-		}
+		}*/
 		return ret;
 	}
 	
