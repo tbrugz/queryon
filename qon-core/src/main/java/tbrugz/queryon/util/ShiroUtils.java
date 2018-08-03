@@ -95,7 +95,7 @@ public class ShiroUtils {
 				object = object.replaceAll("\\.", ":");
 			}
 			log.warn("no permission '"+permission+"' for subject '"+subject.getPrincipal()+"' on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
-			throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required");
+			throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", subject.isAuthenticated());
 		}
 	}
 
@@ -121,7 +121,7 @@ public class ShiroUtils {
 		}
 		String permissionsStr = Arrays.asList(permissionList).toString();
 		log.warn("no permission '"+permissionsStr+"' for subject '"+subject+" ; "+subject.getPrincipal()+"'");
-		throw new ForbiddenException("no authorization for any of "+permissionsStr);
+		throw new ForbiddenException("no authorization for any of "+permissionsStr, subject.isAuthenticated());
 	}
 	
 	public static Set<String> getSubjectRoles(Subject subject) {

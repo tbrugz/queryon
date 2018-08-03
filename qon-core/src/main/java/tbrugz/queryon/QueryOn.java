@@ -639,6 +639,12 @@ public class QueryOn extends HttpServlet {
 		catch(InternalServerException e) {
 			WebUtils.writeException(resp, e, debugMode);
 		}
+		catch(ForbiddenException e) {
+			WebUtils.writeException(resp, e, debugMode);
+			// XXX if currentUser not authenticated, throw 401/Unauthorized ?
+			//int status = e.isAuthenticated() ? e.getCode() : HttpServletResponse.SC_UNAUTHORIZED;
+			//WebUtils.writeException(resp, e, status, debugMode);
+		}
 		catch(BadRequestException e) {
 			WebUtils.writeException(resp, e, debugMode);
 		}
@@ -896,14 +902,14 @@ public class QueryOn extends HttpServlet {
 		boolean check = grantsAndRolesMatches(subject, privilege, rel.getGrants());
 		if(!check) {
 			String schema = rel.getSchemaName();
-			throw new ForbiddenException("no "+privilege+" permission on "+(schema!=null?schema+".":"")+rel.getName());
+			throw new ForbiddenException("no "+privilege+" permission on "+(schema!=null?schema+".":"")+rel.getName(), subject.isAuthenticated());
 		}
 	}
 
 	public static void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, ExecutableObject eo) {
 		boolean check = grantsAndRolesMatches(subject, privilege, eo.getGrants());
 		if(!check) {
-			throw new ForbiddenException("no "+privilege+" permission on "+eo.getQualifiedName());
+			throw new ForbiddenException("no "+privilege+" permission on "+eo.getQualifiedName(), subject.isAuthenticated());
 		}
 	}
 	
@@ -1785,7 +1791,7 @@ public class QueryOn extends HttpServlet {
 			}
 			//TODOne: check UPDATE permission on each row, based on grants
 			if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
-				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
+				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 			}
 			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
 			sb.append((colsCount!=0?", ":"")+col+" = ?");
@@ -1806,7 +1812,7 @@ public class QueryOn extends HttpServlet {
 				}
 				//TODOne: check UPDATE permission on each row, based on grants
 				if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
-					throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col);
+					throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 				}
 				//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
 				sb.append((colsCount!=0?", ":"")+col+" = ?");
@@ -1949,7 +1955,7 @@ public class QueryOn extends HttpServlet {
 			}
 			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
 				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles);
-				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col);
+				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 			}
 			//XXX timestamp '' ?
 			sbCols.append((colsCount!=0?", ":"")+col);
@@ -1971,7 +1977,7 @@ public class QueryOn extends HttpServlet {
 					throw new BadRequestException("[insert] unknown column: "+pcol);
 				}
 				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, pcol)) {
-					throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+pcol);
+					throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+pcol, currentUser.isAuthenticated());
 				}
 				int colindex = MiscUtils.indexOfIgnoreCase(relation.getColumnNames(), pcol);
 				if(colindex>=0) {

@@ -47,11 +47,15 @@ public class WebUtils {
 	}
 	
 	public static void writeException(HttpServletResponse resp, BadRequestException e, boolean debugMode) throws IOException {
+		writeException(resp, e, e.getCode(), debugMode);
+	}
+	
+	public static void writeException(HttpServletResponse resp, BadRequestException e, int status, boolean debugMode) throws IOException {
 		//e.printStackTrace();
 		//log.warn("BRE: "+e.getMessage()+
 		//		(e.internalMessage!=null?" ; internal="+e.internalMessage:""));
 		resp.reset();
-		resp.setStatus(e.getCode());
+		resp.setStatus(status);
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(e.getMessage());
 		
