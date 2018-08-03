@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import tbrugz.queryon.http.GraphQlWebTest;
 import tbrugz.queryon.http.ODataWebTest;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.queryon.r2rml.DirectMappingTest;
@@ -22,6 +23,7 @@ import tbrugz.queryon.util.StringUtilsTest;
 	StringUtilsTest.class,
 	WinstoneAndH2HttpRequestTest.class,
 	ODataWebTest.class,
+	GraphQlWebTest.class,
 })
 public class QueryOnTestSuite {
 	//public static final String basedir = "src/test/java";
