@@ -66,21 +66,23 @@ public class GqlRequest extends RequestSpec {
 				columns.add(s);
 			}
 		}*/
-		for(String f: fieldNames) {
-			String unnormalizedCol = relationColMap.get(f);
-			if(unnormalizedCol==null) {
-				log.debug("null unnormalized column [normalized="+f+"]");
-				columns.add(f);
-				aliases.add(null);
-				continue;
-			}
-			
-			columns.add(unnormalizedCol);
-			if(unnormalizedCol.equals(f)) {
-				aliases.add(null);
-			}
-			else {
-				aliases.add(f);
+		if(relationColMap!=null) {
+			for(String f: fieldNames) {
+				String unnormalizedCol = relationColMap.get(f);
+				if(unnormalizedCol==null) {
+					log.debug("null unnormalized column [normalized="+f+"]");
+					columns.add(f);
+					aliases.add(null);
+					continue;
+				}
+				
+				columns.add(unnormalizedCol);
+				if(unnormalizedCol.equals(f)) {
+					aliases.add(null);
+				}
+				else {
+					aliases.add(f);
+				}
 			}
 		}
 		
