@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,6 +30,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import graphql.language.Document;
+import graphql.parser.Parser;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
@@ -75,15 +79,19 @@ public class GraphQlWebTest {
 		return getContent(query, null, null);
 	}
 	
+	static String escapeJson(String str) {
+		return str.replaceAll(Pattern.quote("\""), Matcher.quoteReplacement("\\\""));
+	}
+	
 	public static String getContent(String query, String variables, String operationName) throws ClientProtocolException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost httpReq = new HttpPost(graphqlUrl);
 		List<String> qparts = new ArrayList<String>();
 		if(query!=null) {
-			qparts.add("\"query\": \""+query+"\"");
+			qparts.add("\"query\": \""+escapeJson(query)+"\"");
 		}
 		if(variables!=null) {
-			qparts.add("\"variables\": \""+variables+"\"");
+			qparts.add("\"variables\": "+variables+"");
 		}
 		if(operationName!=null) {
 			qparts.add("\"operationName\": \""+operationName+"\"");
@@ -101,6 +109,21 @@ public class GraphQlWebTest {
 		return content;
 	}
 	
+	static void assertGraphqlOk(String jsonStr) {
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		JSONObject o = (JSONObject) obj;
+		Assert.assertTrue("'data' should be a JSONObject", o.get("data") instanceof JSONObject);
+		Assert.assertNull("'errors' should be null", o.get("errors"));
+	}
+	
+	static void assertGraphqlErrors(String jsonStr) {
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		JSONObject o = (JSONObject) obj;
+		Assert.assertNotNull("'errors' should NOT be null", o.get("errors"));
+	}
+	
 	//---------------------
 	
 	@Test
@@ -109,19 +132,81 @@ public class GraphQlWebTest {
 		String jsonStr = getContent(query);
 		//System.out.println("content:\n"+jsonStr);
 
-		Object obj = JSONValue.parse(jsonStr);
-		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
-		//JSONObject jobj = (JSONObject) obj;
+		assertGraphqlOk(jsonStr);
 	}
 
 	@Test
 	public void getEmps() throws IOException, ParserConfigurationException, SAXException {
-		String query = "{ list_EMP { ID NAME SUPERVISOR_ID DEPARTMENT_ID SALARY }";
+		String query = "{ list_EMP { ID NAME SUPERVISOR_ID DEPARTMENT_ID SALARY }}";
 		String jsonStr = getContent(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
 
-		Object obj = JSONValue.parse(jsonStr);
-		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		assertGraphqlOk(jsonStr);
 	}
 
+	@Test
+	public void getEmpsAndDepts() throws IOException, ParserConfigurationException, SAXException {
+		String query = "{ e1: list_EMP { ID NAME SUPERVISOR_ID DEPARTMENT_ID SALARY }"+
+				"d1: list_DEPT {NAME} }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlOk(jsonStr);
+	}
+	
+	@Test
+	public void getEmpsWithFilter() throws IOException, ParserConfigurationException, SAXException {
+		String query = "{ list_EMP { ID NAME SUPERVISOR_ID(feq: 1) DEPARTMENT_ID SALARY }}";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlOk(jsonStr);
+	}
+	
+	@Test
+	public void getEmpsWithVariable() throws IOException, ParserConfigurationException, SAXException {
+		String query = "query($supId: Int) { list_EMP { ID NAME SUPERVISOR_ID(feq: $supId) DEPARTMENT_ID SALARY }}";
+		String variables = "{ \"supId\": 1 }";
+		String jsonStr = getContent(query, variables, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlOk(jsonStr);
+	}
+
+	@Test
+	public void getEmpsOrDeptsWithOperationName() throws IOException, ParserConfigurationException, SAXException {
+		String query = "query e1 { list_EMP { ID NAME SUPERVISOR_ID DEPARTMENT_ID SALARY } }\n"+
+				"query d1 { list_DEPT { NAME } }";
+		String jsonStr = getContent(query, null, "e1");
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlOk(jsonStr);
+	}
+	
+	@Test
+	public void executeIsPrime() throws ClientProtocolException, IOException {
+		String query = "mutation { execute_IS_PRIME(p1: 181) { returnValue } }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlOk(jsonStr);
+	}
+
+	@Test
+	public void executeIsPrimeError() throws ClientProtocolException, IOException {
+		String query = "mutation { execute_IS_PRIME(p1: \"asdasd\") { returnValue } }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlErrors(jsonStr);
+	}
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void requestSchema() throws ClientProtocolException, IOException {
+		String str = ODataWebTest.getContentFromUrl(graphqlUrl+"?schema=true");
+		Parser parser = new Parser();
+		Document doc = parser.parseDocument(str);
+		//System.out.println("doc.getChildren().size(): "+doc.getChildren().size());
+	}
 }
