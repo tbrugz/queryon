@@ -252,4 +252,13 @@ public class DBUtil {
 		return inParams;
 	}
 	
+	/*
+	static int getInParameterCount(String sql, String queryName, Connection conn) throws SQLException {
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ParameterMetaData pmd = stmt.getParameterMetaData();
+		int pc = DBUtil.getInParameterCount(pmd, queryName);
+		return pc;
+	}
+	*/
+	
 }

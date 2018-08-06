@@ -72,7 +72,7 @@ public class SQL {
 	
 	final Relation relation;
 	final boolean allowEncapsulation;
-	final Integer originalBindParameterCount;
+	final int originalBindParameterCount;
 	final Integer limit;
 	final Integer limitMax;
 	final String username;
@@ -95,7 +95,7 @@ public class SQL {
 		this.allowEncapsulation = allowEncapsulation(sql);
 		Integer limitDefault = processPatternInteger(sql, limitDefaultIntPattern);
 		this.limitMax = processPatternInteger(sql, limitMaxIntPattern);
-		this.originalBindParameterCount = originalBindParameterCount;
+		this.originalBindParameterCount = originalBindParameterCount != null ? originalBindParameterCount : 0;
 		
 		Integer limit = limitDefault!=null ? limitDefault : null;
 		limit = reqspecLimit!=null ? reqspecLimit : limit;
@@ -112,6 +112,14 @@ public class SQL {
 		String namedParamsStr = processPatternString(sql, namedParametersPattern, null);
 		if(namedParamsStr!=null) {
 			namedParameters = Utils.getStringList(namedParamsStr, ",");
+			
+			int namedParameterCount = namedParameters==null ? 0 : namedParameters.size();
+			if(namedParameterCount != this.originalBindParameterCount) {
+				String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+this.originalBindParameterCount+"]";
+				log.warn(message);
+				new BadRequestException(message).printStackTrace();
+				throw new BadRequestException(message);
+			}
 		}
 		else {
 			namedParameters = null;
@@ -729,16 +737,14 @@ public class SQL {
 		//XXX bind all or bind none?
 		//int bindParamsLoop = informedParams; //bind all
 		int bindParamsLoop = -1; // bind none
-		if(originalBindParameterCount!=null) {
-			if(originalBindParameterCount > informedParams) {
-				//XXX option to bind params with null?
-				throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
-					+((informedParams>0)?"only "+informedParams:"none")
-					+((informedParams>1)?" were":" was")
-					+" informed");
-			}
-			bindParamsLoop = originalBindParameterCount;
+		if(originalBindParameterCount > informedParams) {
+			//XXX option to bind params with null?
+			throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
+				+((informedParams>0)?"only "+informedParams:"none")
+				+((informedParams>1)?" were":" was")
+				+" informed");
 		}
+		bindParamsLoop = originalBindParameterCount;
 		
 		if(relation!=null && relation.getParameterTypes()!=null && relation.getParameterTypes().size()>0) {
 			//log.info("using addParameter: types="+relation.getParameterTypes());
