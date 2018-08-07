@@ -378,7 +378,8 @@ function getColumnsFromRelation(relation) {
 	//console.log("getColumnsFromRelation",relation);
 	var colsStr = relation.columnNames;
 	if(! colsStr) { return null; }
-	var cols = colsStr.split(",");
+	var cols = getScalarArrayFromValue(colsStr);
+	
 	//XXX: ignore *_STYLE, *_CLASS, *_TITLE & *_HREF" ??
 
 	for(var i=cols.length-1;i>=0;i--) {
@@ -448,13 +449,16 @@ function getColumnNames(containerId) {
 
 /* returns only htmlx visible column types */
 function getColumnTypesFromColgroup(containerId) {
-	var colTypes = [];
 	var content = document.getElementById(containerId);
 	if(!content) {
-		return colTypes;
+		return null;
 	}
 	var cols = content.querySelectorAll('table > colgroup > col');
 	//console.log('cols.length: '+cols.length);
+	if(cols.length==0) {
+		return null;
+	}
+	var colTypes = [];
 	for(var i=0;i<cols.length;i++) {
 		var elem = cols[i];
 		var ct = elem.getAttribute('type');
@@ -484,7 +488,7 @@ function getAttributeListFromObjectList(objs, attr) {
 
 function getColumnsRemarks() {
 	var rel = getCurrentRelation('objects');
-	var arr = rel.columnRemarks.substring(1, rel.columnRemarks.length-1).split(",");
+	var arr = getScalarArrayFromValue(rel.columnRemarks);
 	var ret = [];
 	for(var i=0;i<arr.length;i++) {
 		ret.push(arr[i].trim());
@@ -494,7 +498,7 @@ function getColumnsRemarks() {
 
 function getColumnsTypesFromHash() {
 	var rel = getCurrentRelation('objects');
-	var arr = rel.columnTypes.substring(1, rel.columnTypes.length-1).split(",");
+	var arr = getScalarArrayFromValue(rel.columnTypes);
 	var ret = [];
 	for(var i=0;i<arr.length;i++) {
 		ret.push(arr[i].trim());

@@ -129,10 +129,7 @@ function loadTableJson(tableid, filter) {
 			var fks = fksFkHash[tableid];
 			console.log(tableid+': fks:: ',fks);
 
-			/*var columns = tablesHash[tableid].columnNames;
-			columns = columns.replace(/[\[\]]/g, '');
-			var cols = columns.split(',');*/
-			var cols = getColumns(tablesHash[tableid].columnNames);
+			var cols = getColumnsFromRelation(tablesHash[tableid]);
 			var tablesLinks = {};
 			for(var j=0;j<cols.length;j++) {
 				//cols[j] = cols[j].trim();
@@ -184,19 +181,19 @@ function stringToId(str) {
 	return str.replace(/[\/\-\.]/g, '');
 }
 
-function getColumns(columns) {
+/*function getColumns(columns) {  
 	columns = columns.replace(/[\[\]]/g, '');
 	var cols = columns.split(',');
 	for(var j=0;j<cols.length;j++) {
 		cols[j] = cols[j].trim();
 	}
 	return cols;
-}
+}*/
 
 function matchFkTable(fks, col) {
 	if(fks!=null) {
 		for(var i=0;i<fks.length;i++) {
-			var cols = getColumns(fks[i].fkColumns);
+			var cols = getScalarArrayFromValue(fks[i].fkColumns);
 			var idx = $.inArray(col, cols);
 			if(idx>=0) {
 				console.log('idx', idx, fks[i].pkTable);

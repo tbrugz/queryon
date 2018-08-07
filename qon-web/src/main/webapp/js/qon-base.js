@@ -32,6 +32,34 @@ function append2url(url, append) {
 	}
 }
 
+function getScalarArrayFromValue(value) {
+	if(typeof value === "string") {
+		return value.split(",");
+	}
+	if(Array.isArray(value)) {
+		if(value.length>0) {
+			var o1 = value[0];
+			if(o1 === Object(o1)) {
+				var keys = Object.keys(o1);
+				if(keys.length==1) {
+					var ret = [];
+					for(var i=0;i<value.length;i++) {
+						ret.push(value[i][keys[0]]);
+					}
+					return ret;
+				}
+			}
+			else {
+				return value;
+			}
+		}
+		else {
+			return value;
+		}
+	}
+	return null;
+}
+
 // polyfill IE - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
 
 if (!String.prototype.startsWith) {
