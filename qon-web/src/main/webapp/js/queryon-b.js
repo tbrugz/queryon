@@ -376,9 +376,7 @@ function getQueryVariable(variable) {
 
 function getColumnsFromRelation(relation) {
 	//console.log("getColumnsFromRelation",relation);
-	var colsStr = relation.columnNames;
-	if(! colsStr) { return null; }
-	var cols = getScalarArrayFromValue(colsStr);
+	var cols = getScalarArrayFromValue(relation.columnNames);
 	
 	//XXX: ignore *_STYLE, *_CLASS, *_TITLE & *_HREF" ??
 
@@ -509,10 +507,6 @@ function getColumnsTypesFromHash() {
 function getValuesFromColumn(containerId, columnName) {
 	var relation = getCurrentRelation('objects');
 	var cols = getColumnNames(containerId);
-	/*var cols = getColumnNamesFromColgroup(containerId);
-	if(cols==null || cols.length==0) {
-		cols = getColumnsFromRelation(relation);
-	}*/
 	var colPos = cols.indexOf(columnName);
 	if(colPos==-1) {
 		console.log("column "+columnName+" not found");
@@ -603,13 +597,12 @@ function getPkCols(selectId) {
 	var id = select.options[select.selectedIndex].value;
 	var rel = relationsHash[id];
 	var re = /\[[PU]K:[A-Za-z0-9_ ]*:([A-Za-z0-9_, ]+)\]/g;
-	var match = re.exec(rel.constraints);
+	var match = re.exec(getScalarArrayFromValue(rel.constraints).join());
 	var pkcols = null;
 	//while(match!=null) {
 	if(match!=null) {
 		//console.log(match[1]);
 		return match[1].split(',');
-		//match = re.exec(rel.constraints);
 	}
 	return null;
 }
@@ -633,8 +626,7 @@ function relationHasGrantOfType(relation, grant, column) {
 		+(column?"col="+column:"")
 		+";\\]";
 	var re = new RegExp(restr);
-	//var match = re.exec(rel.grants);
-	var match = relation.grants.match(re);
+	var match = getScalarArrayFromValue(relation.grants).join().match(re);
 	//console.log('roles== ',roles,'; restr==',restr,'; relation.grants==',relation.grants,'; re==',re,'; match==',match);
 	return match;
 }
@@ -647,7 +639,6 @@ function relationHasGrantOfTypeAnyColumn(relation, grant) {
 		+";\\]";
 	var re = new RegExp(restr);
 	//console.log('roles== ',roles,'; restr==',restr,'; relation.grants==',relation.grants,'; re==',re);
-	//var match = re.exec(rel.grants);
-	var match = relation.grants.match(re);
+	var match = getScalarArrayFromValue(relation.grants).join().match(re);
 	return match;
 }

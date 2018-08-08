@@ -45,13 +45,6 @@ function addFilterDialog(selectedCol) {
 	var dialog = document.getElementById('dialog');
 	dialog.style.display = 'block';
 	var cols = getColumnNames('content');
-	/*var cols = getColumnNamesFromColgroup('content');
-	if(cols==null || cols.length==0) {
-		cols = getColumnsFromRelation(relationsHash[id]);
-	}
-	if(cols==null || cols.length==0) {
-		cols = getColumnsFromContainer('content');
-	}*/
 
 	var selectHTML = "<select name='fin-column' id='fin-column' onchange='refreshAutocomplete()'>";
 	for(var i=0;i<cols.length;i++) {

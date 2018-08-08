@@ -361,16 +361,12 @@
 		if(relationType != 'query' && !pivotQueryActive()) {
 			var rel = relationsHash[id];
 			var re = /\[[PU]K:[A-Za-z_ ]*:([A-Za-z_, ]+)\]/g;
-			var match = re.exec(rel.constraints);
+			var match = re.exec(getScalarArrayFromValue(rel.constraints).join());
 			var pkcols = null;
-			//while(match!=null) {
 			if(match!=null) {
 				//console.log(match[1]);
 				pkcols = match[1];
-				//match = re.exec(rel.constraints);
 			}
-			//var constr = rel.constraints.match(re);
-			//var re = /\[[PU]K:[A-Za-z_ ]*:[A-Za-z_, ]+\]/g;
 			
 			var rows = content.querySelectorAll('tr');
 			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT') || authHasPermission('INSERT_ANY'); // check insert-any-column

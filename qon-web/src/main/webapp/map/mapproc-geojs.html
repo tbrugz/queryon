@@ -646,7 +646,7 @@ $.ajax({
 		var matches = 0;
 		for(var i=0;i<sources.length;i++) {
 			//if(sources[i].columnNames.toUpperCase().indexOf("GEOM_ID")>0) {
-			if(colsMatchAnyUpper(sources[i].columnNames, mapsData.geomIdColumns)) {
+			if(colsArrMatchAnyUpper(getScalarArrayFromValue(sources[i].columnNames), mapsData.geomIdColumns)) {
 				//console.log(">> match",i,sources[i].columnNames, mapsData.geomIdColumns);
 				var elname = (sources[i].schemaName?sources[i].schemaName+".":"")+sources[i].name;
 				addElement2Select(select,
@@ -656,8 +656,8 @@ $.ajax({
 						"url": "../q/"+elname+".json",
 						"name": elname,
 						"parameterCount": sources[i].parameterCount,
-						"columnNames": sources[i].columnNames.substring(1,sources[i].columnNames.length-1),
-						"columnTypes": sources[i].columnTypes.substring(1,sources[i].columnTypes.length-1),
+						"columnNames": getScalarArrayFromValue(sources[i].columnNames).join(),
+						"columnTypes": getScalarArrayFromValue(sources[i].columnTypes).join(),
 						"remarks": sources[i].remarks ? sources[i].remarks.replace(/['"]/gi, "") : ''
 					}
 				);
@@ -706,9 +706,22 @@ $.ajax({
 });
 }
 
-function colsMatchAnyUpper(cols, array) {
+/*function colsMatchAnyUpper(cols, array) {
 	for(var j=0;j<array.length;j++) {
 		if( cols.toUpperCase().indexOf(array[j].toUpperCase())>=0 ) { return true; }
+	}
+	return false;
+}
+
+function upperArray(arr) {
+	return arr.map(function(x){ return x.toUpperCase() });
+}*/
+
+function colsArrMatchAnyUpper(cols, array) {
+	//var upCols = upperArray(cols);
+	var upCols = cols.map(function(x){ return x.toUpperCase() });
+	for(var j=0;j<array.length;j++) {
+		if( cols.indexOf(array[j].toUpperCase())>=0 ) { return true; }
 	}
 	return false;
 }

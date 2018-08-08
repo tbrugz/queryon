@@ -34,6 +34,8 @@ function append2url(url, append) {
 
 function getScalarArrayFromValue(value) {
 	if(typeof value === "string") {
+		if(value.substring(0,1)=="[") { value = value.substring(1); }
+		if(value.substring(value.length-1)=="]") { value = value.substring(0,value.length-1) }
 		return value.split(",");
 	}
 	if(Array.isArray(value)) {
