@@ -109,21 +109,7 @@ public class SQL {
 		//log.info("limit="+limit+" ; limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
 		
 		this.username = getFinalVariableValue(username);
-		String namedParamsStr = processPatternString(sql, namedParametersPattern, null);
-		if(namedParamsStr!=null) {
-			namedParameters = Utils.getStringList(namedParamsStr, ",");
-			
-			int namedParameterCount = namedParameters==null ? 0 : namedParameters.size();
-			if(namedParameterCount != this.originalBindParameterCount) {
-				String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+this.originalBindParameterCount+"]";
-				log.warn(message);
-				new BadRequestException(message).printStackTrace();
-				throw new BadRequestException(message);
-			}
-		}
-		else {
-			namedParameters = null;
-		}
+		this.namedParameters = getNamedParameterNames(sql, this.originalBindParameterCount);
 	}
 
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
@@ -889,6 +875,23 @@ public class SQL {
 	
 	public static boolean allowEncapsulation(String sql) {
 		return processPatternBoolean(sql, SQL.allowEncapsulationBooleanPattern, true);
+	}
+	
+	public static List<String> getNamedParameterNames(String sql, int bindParameterCount) {
+		List<String> namedParameters = null;
+		String namedParamsStr = processPatternString(sql, namedParametersPattern, null);
+		if(namedParamsStr!=null) {
+			namedParameters = Utils.getStringList(namedParamsStr, ",");
+			
+			int namedParameterCount = namedParameters==null ? 0 : namedParameters.size();
+			if(namedParameterCount != bindParameterCount) {
+				String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+bindParameterCount+"]";
+				log.warn(message);
+				new BadRequestException(message).printStackTrace();
+				throw new BadRequestException(message);
+			}
+		}
+		return namedParameters;
 	}
 	
 }
