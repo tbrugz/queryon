@@ -125,6 +125,17 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 		return content;
 	}
+	
+	public static List<Node> getElementChildNodes(Node node) {
+		List<Node> nodes = new ArrayList<Node>();
+		for(int i=0;i<node.getChildNodes().getLength();i++) {
+			Node n = node.getChildNodes().item(i);
+			if(n instanceof Element) {
+				nodes.add(n);
+			}
+		}
+		return nodes;
+	}
 
 	/*
 	 * see: http://hc.apache.org/httpcomponents-client-ga/quickstart.html
@@ -176,8 +187,9 @@ public class WinstoneAndH2HttpRequestTest {
 			HttpEntity entity1 = response1.getEntity();
 			InputStream instream = entity1.getContent();
 			Document doc = dBuilder.parse(instream);
-			NodeList nl = doc.getElementsByTagName("tr");
-			Assert.assertEquals("Should be 4 rows (3 data rows (db tables) + 1 header)", relationsInModel+1, nl.getLength());
+			//NodeList nl = doc.getElementsByTagName("tr");
+			Node tableNode = doc.getElementsByTagName("table").item(0);
+			Assert.assertEquals("Should be 4 rows (3 data rows (db tables) + 1 header)", relationsInModel+1, getElementChildNodes(tableNode).size());
 			/*for (int i = 0; i < nl.getLength(); i++) {
 				Node nNode = nl.item(i);
 				Element eElement = (Element) nNode;
@@ -202,8 +214,9 @@ public class WinstoneAndH2HttpRequestTest {
 			//System.out.println("content: "+getContent(response1));
 			InputStream instream = entity1.getContent();
 			Document doc = dBuilder.parse(instream);
-			NodeList nl = doc.getElementsByTagName("tr");
-			Assert.assertEquals("Should be 3 rows (2 data rows (FKs) + 1 header)", 3, nl.getLength());
+			//NodeList nl = doc.getElementsByTagName("tr");
+			Node tableNode = doc.getElementsByTagName("table").item(0);
+			Assert.assertEquals("Should be 3 rows (2 data rows (FKs) + 1 header)", 3, getElementChildNodes(tableNode).size());
 			
 			EntityUtils.consume(entity1);
 		} finally {
@@ -343,11 +356,15 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.xml");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
+		//String content = getContent(response1);
+		//System.out.println("content: "+content);
 		HttpEntity entity1 = response1.getEntity();
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
-		NodeList nl = doc.getElementsByTagName("row");
-		Assert.assertEquals("Should have "+relationsInModel+" (data) rows", relationsInModel, nl.getLength());
+		Node tableNode = doc.getElementsByTagName("table").item(0);
+		//System.out.println("count == "+getElementChildNodes(tableNode).size());
+		//NodeList nl = doc.getElementsByTagName("row");
+		Assert.assertEquals("Should have "+relationsInModel+" (data) rows", relationsInModel, getElementChildNodes(tableNode).size());
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
