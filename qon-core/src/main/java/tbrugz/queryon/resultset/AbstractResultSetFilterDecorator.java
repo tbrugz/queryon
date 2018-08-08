@@ -3,6 +3,8 @@ package tbrugz.queryon.resultset;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import tbrugz.sqldump.resultset.AbstractResultSetDecorator;
+
 public abstract class AbstractResultSetFilterDecorator extends AbstractResultSetDecorator {
 
 	public AbstractResultSetFilterDecorator(ResultSet rs) {

@@ -1,4 +1,4 @@
-package tbrugz.queryon.resultset;
+/*package tbrugz.queryon.resultset;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -848,3 +848,4 @@ public abstract class AbstractResultSetDecorator implements ResultSet {
 	
 	
 }
+*/
