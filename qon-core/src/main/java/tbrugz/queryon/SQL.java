@@ -887,8 +887,7 @@ public class SQL {
 			if(namedParameterCount != bindParameterCount) {
 				String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+bindParameterCount+"]";
 				log.warn(message);
-				new BadRequestException(message).printStackTrace();
-				throw new BadRequestException(message);
+				throw new IllegalStateException(message);
 			}
 		}
 		return namedParameters;

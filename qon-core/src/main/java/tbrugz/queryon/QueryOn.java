@@ -799,6 +799,9 @@ public class QueryOn extends HttpServlet {
 						doSelect(model, relation, reqspec, currentUser, conn, resp, true);
 					}
 				}
+				catch(RuntimeException e) {
+					throw new BadRequestException(e.getMessage(), e);
+				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
 				}
@@ -809,6 +812,9 @@ public class QueryOn extends HttpServlet {
 					Query relation = getQuery(req, reqspec, conn);
 					doValidate(relation, reqspec, currentUser, conn, resp);
 				}
+				catch(RuntimeException e) {
+					throw new BadRequestException(e.getMessage(), e);
+				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
 				}
@@ -818,6 +824,9 @@ public class QueryOn extends HttpServlet {
 					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					Query relation = getQuery(req, reqspec, conn);
 					doExplain(relation, reqspec, currentUser, conn, resp);
+				}
+				catch(RuntimeException e) {
+					throw new BadRequestException(e.getMessage(), e);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -832,6 +841,9 @@ public class QueryOn extends HttpServlet {
 					if(!sqlCommandExecuted) {
 						doSql(model, relation, reqspec, currentUser, conn, resp);
 					}
+				}
+				catch(RuntimeException e) {
+					throw new BadRequestException(e.getMessage(), e);
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -989,7 +1001,8 @@ public class QueryOn extends HttpServlet {
 		relation.setQuery(sql);
 		//XXXxx: validate first & return number of parameters?
 		//relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway (would need connection to validate SQL)
-		DBObjectUtils.validateQuery(relation, sql, conn, true);
+		String finalSql = SQL.getFinalSqlNoUsername(sql);
+		DBObjectUtils.validateQuery(relation, finalSql, conn, true);
 		
 		return relation;
 	}

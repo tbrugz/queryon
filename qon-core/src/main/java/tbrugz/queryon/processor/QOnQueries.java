@@ -183,9 +183,14 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			removeWarning(servletContext, model.getModelId(), q);
 			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
+		catch(RuntimeException e) {
+			putWarning(servletContext, model.getModelId(), q, e.toString());
+			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
+			DBUtil.doRollback(conn, sp);
+		}
 		catch(SQLException e) {
 			putWarning(servletContext, model.getModelId(), q, e.toString());
-			log.warn("Error validating query: "+e.toString().trim());
+			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
 			DBUtil.doRollback(conn, sp);
 		}
 	
