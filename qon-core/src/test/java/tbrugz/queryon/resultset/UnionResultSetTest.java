@@ -142,5 +142,44 @@ public class UnionResultSetTest {
 		urs.close();
 		
 	}
+
+	@Test
+	public void testWithUnionWithReset() throws IntrospectionException, SQLException, IOException {
+		ResultSetListAdapter<TestBean> rs1 = new ResultSetListAdapter<TestBean>("tb", TestBean.getUniqueCols(), TestBean.getAllCols(), l1, TestBean.class);
+		ResultSetListAdapter<NamedTestBean> rs2 = new ResultSetListAdapter<NamedTestBean>("ntb", NamedTestBean.getUniqueCols(), NamedTestBean.getAllCols(), nl1, NamedTestBean.class);
+		List<ResultSet> rsl = new ArrayList<ResultSet>();
+		rsl.add(rs1); rsl.add(rs2);
+		
+		UnionResultSet urs = new UnionResultSet(rsl, false);
+		/*StringWriter sw = new StringWriter();
+		DataDumpUtils.dumpRS(new FFCDataDump(), urs.getMetaData(), urs, "schema", "table", sw, false);
+		System.out.println(sw);*/
+		
+		// rs1
+		Assert.assertTrue(urs.next());
+		Assert.assertEquals(1, urs.getInt(1));
+		Assert.assertTrue(urs.next());
+		Assert.assertTrue(urs.next());
+		Assert.assertEquals("c2", urs.getString(3));
+		// rs2
+		Assert.assertTrue(urs.next());
+		Assert.assertEquals(6, urs.getInt(1));
+		Assert.assertTrue(urs.next());
+		Assert.assertEquals(7, urs.getInt(1));
+		
+		Assert.assertFalse(urs.next());
+		
+		// reset position & test 'beforeFirst'
+		urs.beforeFirst();
+		Assert.assertTrue(urs.next());
+		Assert.assertEquals(1, urs.getInt(1));
+
+		// reset position & test 'first'
+		Assert.assertTrue(urs.next());
+		urs.first();
+		Assert.assertEquals(1, urs.getInt(1));
+		
+		urs.close();
+	}
 	
 }

@@ -84,24 +84,21 @@ public class UnionResultSet extends AbstractResultSetDecorator {//ResultSetProje
 		return next;
 	}
 	
-	/*
-	@Override
-	public Object getObject(int columnIndex) throws SQLException {
-		if(columnIndex<1) {
-			log.info("getObject idx "+columnIndex);
-			return null;
-		}
-		return super.getObject(columnIndex);
+	void resetPosition() throws SQLException {
+		currentResultSet = 0;
+		updateCurrentResultSet();
 	}
 	
 	@Override
-	public String getString(int columnIndex) throws SQLException {
-		if(columnIndex<1) {
-			log.info("getString idx "+columnIndex);
-			return null;
-		}
-		return super.getString(columnIndex);
+	public void beforeFirst() throws SQLException {
+		resetPosition();
+		super.beforeFirst();
 	}
-	*/
+	
+	@Override
+	public boolean first() throws SQLException {
+		beforeFirst();
+		return next();
+	}
 
 }
