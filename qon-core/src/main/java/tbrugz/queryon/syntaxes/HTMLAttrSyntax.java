@@ -18,7 +18,6 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxBuilder;
 import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.datadump.HierarchicalDumpSyntax;
-import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 
 /*
@@ -301,8 +300,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				if(isResultSet || isArray) {
 					ResultSet rsInt = null;
 					if(isArray) {
-						Object[] objArr = (Object[]) origVal;
-						rsInt = new ResultSetArrayAdapter(objArr, false, colName);
+						rsInt = DataDumpUtils.getResultSetFromArray(origVal, false, colName);
 					}
 					else {
 						rsInt = (ResultSet) origVal;
