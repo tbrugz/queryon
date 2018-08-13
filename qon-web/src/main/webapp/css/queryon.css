@@ -117,7 +117,7 @@ button {
 	padding: 3px 9px 3px 9px;
 	font-weight: bold;
 	margin: 0px 1px 0px 1px;
-	background-color: rgb(221, 221, 221);
+	background-color: #dddddd; /* rgb(221, 221, 221); */
 }
 
 button.on {
@@ -131,7 +131,7 @@ input[type=button] {
 	padding: 3px 9px 3px 9px;
 	font-weight: bold;
 	margin: 0px 1px 0px 1px;
-	background-color: rgb(221, 221, 221);
+	background-color: #dddddd; /* rgb(221, 221, 221); */
 }
 
 span[draggable=true]:hover {
@@ -144,9 +144,13 @@ input.mainaction {
 }
 
 input.onaction {
-	background-color: #578251; /* #3a5736; #f90 !important; */
+	background-color: #999999; /* #3a5736; #f90 !important; */
 	/* color: #ddd; */
 	cursor: progress;
+}
+
+input.onaction.mainaction {
+	background-color: #578251;
 }
 
 input[type="button"].onaction {
@@ -157,8 +161,12 @@ select.onaction {
 	background-color: #f90;
 }
 
-.onaction {
+.mainaction.onaction {
 	background-color: #578251;
+}
+
+.onaction {
+	background-color: #999999; /* #578251; */
 	/* color: #ddd; */
 	cursor: progress;
 	/* background-color: #f90, red; */
