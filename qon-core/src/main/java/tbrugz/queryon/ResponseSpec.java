@@ -33,6 +33,7 @@ public class ResponseSpec {
 	
 	public static final String HEADER_VALIDATE_PARAMCOUNT = "X-Validate-ParameterCount";
 	public static final String HEADER_VALIDATE_PARAMTYPES = "X-Validate-ParameterTypes";
+	public static final String HEADER_VALIDATE_NAMED_PARAMETER_NAMES = "X-Validate-NamedParameterNames";
 	
 	public static final String HEADER_DIFFCOUNT = "X-DiffCount";
 

@@ -1300,7 +1300,8 @@ public class QueryOn extends HttpServlet {
 			}
 			//log.info("doValidate: #params="+params+" ; types = "+paramsTypes);
 			resp.setIntHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT, params);
-			resp.setHeader(ResponseSpec.HEADER_VALIDATE_PARAMTYPES, paramsTypes.toString());
+			resp.setHeader(ResponseSpec.HEADER_VALIDATE_PARAMTYPES, Utils.join(paramsTypes, ","));
+			resp.setHeader(ResponseSpec.HEADER_VALIDATE_NAMED_PARAMETER_NAMES, Utils.join(sql.namedParameters, ","));
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
 				//XXX: (also) return number of bind parameters? return as ResultSet? stmt.getParameterMetaData()...
