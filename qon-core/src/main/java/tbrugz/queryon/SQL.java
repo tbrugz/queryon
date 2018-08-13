@@ -77,7 +77,7 @@ public class SQL {
 	final Integer limitMax;
 	final String username;
 	//XXX final String userroles;
-	final List<String> namedParameters; //XXX how to expose namedParameters to, say, swagger?
+	final List<String> namedParameters;
 	
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	

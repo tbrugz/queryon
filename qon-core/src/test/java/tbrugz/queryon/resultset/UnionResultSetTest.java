@@ -2,7 +2,6 @@ package tbrugz.queryon.resultset;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,8 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.datadump.FFCDataDump;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
 public class UnionResultSetTest {

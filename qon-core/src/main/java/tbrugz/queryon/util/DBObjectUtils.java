@@ -114,6 +114,10 @@ public class DBObjectUtils {
 			throw e;
 		}
 		
+		if(update) {
+			List<String> namedParameterNames = SQL.getNamedParameterNames(finalSql, rel.getParameterCount());
+			rel.setNamedParameterNames(namedParameterNames);
+		}
 	}
 
 	public static void validateTable(Relation rel, Connection conn, boolean update) throws SQLException {

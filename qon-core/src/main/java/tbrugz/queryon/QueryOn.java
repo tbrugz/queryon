@@ -52,6 +52,7 @@ import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.resultset.ResultSetMetadata2RsAdapter;
 import tbrugz.queryon.resultset.ResultSetPermissionFilterDecorator;
+import tbrugz.queryon.resultset.UnionResultSet;
 import tbrugz.queryon.sqlcmd.ShowColumns;
 import tbrugz.queryon.sqlcmd.ShowExportedKeys;
 import tbrugz.queryon.sqlcmd.ShowImportedKeys;
@@ -1555,20 +1556,24 @@ public class QueryOn extends HttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
-	// XXX: add "columns"? add columnNulls/columnSizes?
 	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks","constraints", "remarks", "grants"});
-	//XXX: qualifiedName needed? (no body & dumpable) 
 	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "params", "returnParam","remarks", "grants"});
+	
+	static final List<String> tableExclusiveColumns = Arrays.asList(new String[]{"PKConstraint"});
+	static final List<String> viewExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes"});
+	static final List<String> queryExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes", "namedParameterNames"});
 
-	static final List<String> tableAllColumns;// =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "PKConstraint"});
-	static final List<String> viewAllColumns;//  =     Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
-	static final List<String> relationAllColumns;//  = Arrays.asList(new String[]{"columnNames", "constraints", "remarks", "relationType", "grants", "parameterCount"});
+	static final List<String> tableAllColumns;
+	static final List<String> viewAllColumns;
+	static final List<String> queryAllColumns;
+	static final List<String> relationAllColumns;
 	static final List<String> executableAllColumns;
 	
 	static {
-		tableAllColumns = new ArrayList<String>(); tableAllColumns.addAll(relationCommonCols); tableAllColumns.addAll(Arrays.asList(new String[]{"PKConstraint"}));
-		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(Arrays.asList(new String[]{"parameterCount", "parameterTypes"}));
-		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(Arrays.asList(new String[]{"parameterCount", "parameterTypes"}));
+		tableAllColumns = new ArrayList<String>(); tableAllColumns.addAll(relationCommonCols); tableAllColumns.addAll(tableExclusiveColumns);
+		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(viewExclusiveColumns);
+		queryAllColumns = new ArrayList<String>(); queryAllColumns.addAll(relationCommonCols); queryAllColumns.addAll(queryExclusiveColumns);
+		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(viewExclusiveColumns);
 		executableAllColumns = new ArrayList<String>(); executableAllColumns.addAll(executableCols);
 	}
 	
@@ -1582,22 +1587,32 @@ public class QueryOn extends HttpServlet {
 		//XXX: filter by schemaName, name? ResultSetFilterDecorator(rs, colpositions, colvalues)?
 		//log.info("doStatus: "+statusType);
 		switch (statusType) {
+		//XXX Relations: importedFKs = ...?
 		case TABLE: {
 			List<Table> list = new ArrayList<Table>(); list.addAll(model.getTables());
 			rs = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, tableAllColumns, list, Table.class);
-			//XXX importedFKs = ...
 			break;
 		}
 		case VIEW: {
 			List<View> list = new ArrayList<View>(); list.addAll(model.getViews());
 			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, list, View.class);
-			//XXX importedFKs = ...
 			break;
 		}
 		case RELATION: {
-			List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables()); //XXX: sort relations?
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, list, Relation.class);
-			//XXX importedFKs = ... ?
+			/*List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables());
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, list, Relation.class);*/
+			//XXX: sort relations? maybe a client (js) task
+			List<View> lViews = Utils.newList(model.getViews());
+			ResultSet rsQ = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, queryAllColumns, lViews, Query.class);
+			List<Table> lTable = Utils.newList(model.getTables());
+			ResultSet rsT = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, queryAllColumns, lTable, Table.class);
+			List<ResultSet> lrs = Utils.newList(rsQ, rsT);
+			rs = new UnionResultSet(lrs);
+			break;
+		}
+		case QUERY: {
+			List<View> list = Utils.newList(model.getViews());
+			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, queryAllColumns, list, Query.class);
 			break;
 		}
 		case EXECUTABLE: {
