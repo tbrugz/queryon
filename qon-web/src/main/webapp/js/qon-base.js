@@ -41,7 +41,7 @@ function getScalarArrayFromValue(value) {
 	if(Array.isArray(value)) {
 		if(value.length>0) {
 			var o1 = value[0];
-			if(o1 === Object(o1)) {
+			if(isObject(o1)) {
 				var keys = Object.keys(o1);
 				if(keys.length==1) {
 					var ret = [];

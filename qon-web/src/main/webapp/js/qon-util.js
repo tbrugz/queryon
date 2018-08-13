@@ -120,6 +120,11 @@ function formatDate(date) {
 		':' + pad(date.getSeconds());
 }
 
+// https://stackoverflow.com/questions/8511281/check-if-a-value-is-an-object-in-javascript
+function isObject(obj) {
+	return obj === Object(obj);
+}
+
 // ---------- messages ----------
 
 function getTextHeader(text) {
