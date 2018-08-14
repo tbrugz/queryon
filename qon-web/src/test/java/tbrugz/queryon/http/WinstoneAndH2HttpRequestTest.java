@@ -1170,5 +1170,55 @@ public class WinstoneAndH2HttpRequestTest {
 				content);
 		
 	}
+
+	@Test
+	public void testGetQueryWithNamedParametersUsingPositionals() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?p1=1&p2=2&p3=3";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("C1" + LF + 
+				"1" + LF +
+				"2" + LF +
+				"3" + LF,
+				content);
+	}
+
+	@Test(expected=RuntimeException.class)
+	public void testGetQueryWithNamedParametersUsingMixed() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?p1=1&par2=2";
+		getContentFromUrl(baseUrl+url);
+	}
+	
+
+	@Test(expected=RuntimeException.class)
+	public void testGetQueryWithNamedParametersUsingMixed2() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&p2=2";
+		getContentFromUrl(baseUrl+url);
+	}
+
+	@Test(expected=RuntimeException.class)
+	public void testGetQueryWithNamedParametersMissingParam() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1";
+		getContentFromUrl(baseUrl+url);
+	}
+	
+	@Test
+	public void testGetQueryWithNamedParametersNullBind1() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?par1=1";
+		getContentFromUrl(baseUrl+url);
+	}
+
+	@Test
+	public void testGetQueryWithNamedParametersNullBind2() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?p1=1";
+		getContentFromUrl(baseUrl+url);
+	}
+	
+	@Test(expected=RuntimeException.class)
+	public void testGetQueryWithNamedParametersNullBindError() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?par1=1&p2=2";
+		getContentFromUrl(baseUrl+url);
+	}
 	
 }
