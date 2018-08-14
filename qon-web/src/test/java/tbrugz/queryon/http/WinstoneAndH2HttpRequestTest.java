@@ -1067,16 +1067,20 @@ public class WinstoneAndH2HttpRequestTest {
 		for(Entry<String, JsonElement> e: paths.entrySet()) {
 			String key = e.getKey();
 			JsonObject operation = e.getValue().getAsJsonObject();
+			String path = key.replaceFirst("\\{syntax\\}", "json");
+			String queryString = "";
 			//System.out.println(key+" >>> "+operation);
 			if(operation.get("get")==null) {
 				// testing get (retrieve) operations only
 				continue;
 			}
-			String path = key.replaceFirst("\\{syntax\\}", "json");
-			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path;
+			if(path.indexOf("NAMED_PARAMS_1")>=0) {
+				queryString = "?par1=1&par2=2";
+			}
+			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path+queryString;
 			//System.out.println("swaggerGsonCall: "+url);
 			JsonElement resp = parser.parse(getContentFromUrl(url));
-			//String resp = getContentFromUrl(url);
+			//String respStr = getContentFromUrl(url);
 			//System.out.println("swaggerGsonCall: resp = "+resp);
 		}
 	}
@@ -1151,6 +1155,20 @@ public class WinstoneAndH2HttpRequestTest {
 				"1,3000,2" + LF +
 				"2,4200,3" + LF,
 				content);
+	}
+
+	@Test
+	public void testGetQueryWithNamedParameters() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&par2=2";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("C1" + LF + 
+				"1" + LF +
+				"2" + LF +
+				"1" + LF,
+				content);
+		
 	}
 	
 }

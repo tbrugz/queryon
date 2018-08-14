@@ -140,6 +140,20 @@
         <query>select id, name from EMP</query>
         <remarks>Query of EMP</remarks>
     </view>
+
+    <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>NAMED_PARAMS_1</name>
+        <schemaName>QUERY</schemaName>
+        <parameterCount>3</parameterCount>
+        <query>
+/*
+named-parameters=par1,par2,par1
+*/
+select cast(? as varchar) as c1
+union all select cast(? as varchar)
+union all select cast(? as varchar)
+       </query>
+    </view>
     
     <executable>
         <name>IS_PRIME</name>
