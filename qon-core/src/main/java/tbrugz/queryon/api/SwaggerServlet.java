@@ -708,23 +708,25 @@ public class SwaggerServlet extends AbstractHttpServlet {
 				def.put("required", pk.getUniqueColumns());
 			}
 		}
-		Map<String, Object> properties = new LinkedHashMap<String, Object>();
 		List<String> colNames = r.getColumnNames();
 		List<String> colTypes = r.getColumnTypes();
 		List<String> colRemarks = r.getColumnRemarks();
-		for(int i=0;i<colNames.size();i++) {
-			Map<String, Object> col = new LinkedHashMap<String, Object>();
-			String name = colNames.get(i);
-			String type = getType(colTypes.get(i));
-			String remarks = colRemarks.get(i);
-			
-			col.put("type", type);
-			if(remarks!=null && !remarks.equals("")) {
-				col.put("description", remarks);
+		if(colNames!=null) {
+			Map<String, Object> properties = new LinkedHashMap<String, Object>();
+			for(int i=0;i<colNames.size();i++) {
+				Map<String, Object> col = new LinkedHashMap<String, Object>();
+				String name = colNames.get(i);
+				String type = getType(colTypes.get(i));
+				String remarks = colRemarks.get(i);
+				
+				col.put("type", type);
+				if(remarks!=null && !remarks.equals("")) {
+					col.put("description", remarks);
+				}
+				properties.put(name, col);
 			}
-			properties.put(name, col);
+			def.put("properties", properties);
 		}
-		def.put("properties", properties);
 		return def;
 	}
 	
