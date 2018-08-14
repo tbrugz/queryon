@@ -64,7 +64,7 @@ public class SQL {
 	
 	public static final List<DateFormat> dateFormats = new ArrayList<DateFormat>();
 	
-	static boolean validateOrderColumnNames = true;
+	static boolean validateOrderColumnNames = true; //TODO: should not be static
 	
 	//final String initialSql;
 	String sql;
@@ -78,6 +78,7 @@ public class SQL {
 	final String username;
 	//XXX final String userroles;
 	final List<String> namedParameters;
+	final boolean bindNullOnMissingParameters;
 	
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
@@ -110,6 +111,7 @@ public class SQL {
 		
 		this.username = getFinalVariableValue(username);
 		this.namedParameters = getNamedParameterNames(sql, this.originalBindParameterCount);
+		this.bindNullOnMissingParameters = bindNullOnMissingParameters();
 	}
 
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
@@ -528,6 +530,7 @@ public class SQL {
 	static final String PTRN_LIMIT_MAX = "limit-max";
 	static final String PTRN_LIMIT_DEFAULT = "limit-default";
 	static final String PTRN_NAMED_PARAMETERS = "named-parameters";
+	static final String PTRN_BIND_NULL_ON_MISSING_PARAMS = "bind-null-on-missing-parameters";
 	
 	static final String PTRN_MATCH_BOOLEAN = "true|false";
 	static final String PTRN_MATCH_INT = "\\d+";
@@ -537,6 +540,7 @@ public class SQL {
 	static final Pattern limitMaxIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_MAX)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitDefaultIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_DEFAULT)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern namedParametersPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_NAMED_PARAMETERS)+"\\s*=\\s*("+PTRN_MATCH_STRINGLIST+")\\b.*\\*/", Pattern.DOTALL);
+	static final Pattern bindNullOnMissingParamsPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_BIND_NULL_ON_MISSING_PARAMS)+"\\s*=\\s*("+PTRN_MATCH_BOOLEAN+")\\b.*\\*/", Pattern.DOTALL);
 	
 	static boolean processPatternBoolean(String sql, Pattern pattern, boolean defaultValue) {
 		Matcher m = pattern.matcher(sql);
@@ -724,11 +728,19 @@ public class SQL {
 		//int bindParamsLoop = informedParams; //bind all
 		int bindParamsLoop = -1; // bind none
 		if(originalBindParameterCount > informedParams) {
-			//XXX option to bind params with null?
-			throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
-				+((informedParams>0)?"only "+informedParams:"none")
-				+((informedParams>1)?" were":" was")
-				+" informed");
+			if(!bindNullOnMissingParameters) {
+				throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
+					+((informedParams>0)?"only "+informedParams:"none")
+					+((informedParams>1)?" were":" was")
+					+" informed");
+			}
+			else {
+				log.info("addOriginalParameters: will bind NULL on missing bind parameters [informedParams="+informedParams+";bindParameterCount="+originalBindParameterCount+"]");
+				for(int i=informedParams; i < originalBindParameterCount; i++) {
+					//log.info("-- ["+i+"] binding null on parameter "+(reqspec.params.size()+1));
+					reqspec.params.add(null);
+				}
+			}
 		}
 		bindParamsLoop = originalBindParameterCount;
 		
@@ -741,7 +753,8 @@ public class SQL {
 		else {
 			//log.info("using bindParameterValues: types="+relation.getParameterTypes()+" ; values="+reqspec.params);
 			for(int i=0;i<bindParamsLoop;i++) {
-				bindParameterValues.add(reqspec.params.get(i));
+				addParameter(reqspec.params.get(i), null);
+				//bindParameterValues.add(reqspec.params.get(i));
 			}
 		}
 	}
@@ -875,6 +888,10 @@ public class SQL {
 	
 	public static boolean allowEncapsulation(String sql) {
 		return processPatternBoolean(sql, SQL.allowEncapsulationBooleanPattern, true);
+	}
+	
+	public boolean bindNullOnMissingParameters() {
+		return processPatternBoolean(sql, SQL.bindNullOnMissingParamsPattern, false);
 	}
 	
 	public static List<String> getNamedParameterNames(String sql, int bindParameterCount) {

@@ -60,6 +60,7 @@ Special query constructs inside SQL comments (`/* ... */`)
 * `allow-encapsulation=<true|false>` - allows the query to be encapsulated within another query by the QueryOn engine so
   that, for example, the query results may be paginated in the database. In some edge cases this may be a problem, so
   it can be disabled (default is *true*)
+* `bind-null-on-missing-parameters=<true|false>` - binds `NULL` on required missing parameters
 * `limit-default=<numeric>` - sets the default limit of the number of rows that may be returned by the query in a single
   request - may be overriden by the `limit` parameter
 * `limit-max=<numeric>` - limits the number of rows that may be returned by the query in a single request

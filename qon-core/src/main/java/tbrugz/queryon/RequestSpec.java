@@ -1066,17 +1066,28 @@ public class RequestSpec {
 	public void setNamedParameters(SQL sql) {
 		if(sql.namedParameters!=null) {
 			int originalParamsCount = this.params.size();
+			int boundParameters = 0;
 			for(int i=0;i<sql.namedParameters.size();i++) {
 				String param = sql.namedParameters.get(i);
 				String value = this.request.getParameter(param);
 				if(value!=null) {
 					int i2 = i+1;
 					if(originalParamsCount >= i2) {
-						log.warn("named parameter '"+param+"' present but #"+i2+" positional parameter already exists [originalParamsCount="+originalParamsCount+"]");
+						String message = "named parameter '"+param+"' present but #"+i2+" positional parameter already exists [originalParamsCount="+originalParamsCount+"]";
+						log.warn(message);
+						throw new BadRequestException(message);
 					}
 					else {
 						this.params.add(value);
+						boundParameters++;
 					}
+				}
+				else if(sql.bindNullOnMissingParameters) {
+					this.params.add(null);
+					boundParameters++;
+				}
+				else if(boundParameters>0) {
+					throw new BadRequestException("named parameter '"+param+"' not present but "+boundParameters+" named parameters already bound");
 				}
 			}
 		}
