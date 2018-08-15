@@ -63,7 +63,7 @@ function onQueryChanged() {
 	makeHrefs();
 }
 
-function onParameterChange(i) {
+function onParameterChange(pname) {
 	updateState();
 	makeHrefs();
 }
@@ -122,7 +122,7 @@ function makeOneHref(objectName, syntax, modelId) {
 	var utf8par = "utf8=✓";
 	var href = queryOnUrl+"/"+encodeURIComponent(objectName);
 	
-	href += getParameters()+"."+syntax+"?"+utf8par;
+	href += getParameters(true)+"."+syntax+"?"+utf8par;
 	if(modelId) {
 		href += "&model="+modelId;
 	}
@@ -177,7 +177,7 @@ function makeHrefs() {
 		if(urlpl) {
 			urlpl.style.display = 'initial';
 			urlpl.href = queryOnUrl+"/"+encodeURIComponent(id);
-			urlpl.href += getParameters()+".htmlx"+"?"+utf8par;
+			urlpl.href += getParameters(true)+".htmlx"+"?"+utf8par;
 			if(modelId) {
 				urlpl.href += "&model="+modelId;
 			}
@@ -186,7 +186,7 @@ function makeHrefs() {
 		if(urldown) {
 			urldown.style.display = 'initial';
 			urldown.href = queryOnUrl+"/"+encodeURIComponent(id);
-			urldown.href += getParameters()+".csv"+"?"+utf8par;
+			urldown.href += getParameters(true)+".csv"+"?"+utf8par;
 			if(modelId) {
 				urldown.href += "&model="+modelId;
 			}
@@ -194,19 +194,16 @@ function makeHrefs() {
 		
 		if(urldownByExt) {
 			urldownByExt.style.display = 'initial';
-			/*urldownByExt.href = queryOnUrl+"/"+encodeURIComponent(id);
-			urldownByExt.href += getParameters()+".csv"+"?"+utf8par;
-			if(modelId) {
-				urldownByExt.href += "&model="+modelId;
-			}*/
 		}
 	}
 	
 	if(urlpl) {
+		urlpl.href = urlAddNamedParameters(urlpl.href);
 		urlpl.href = urlAddFilterOrderOffset(urlpl.href);
 		urlpl.href = getPivotURL(urlpl.href);
 	}
 	if(urldown) {
+		urlpl.href = urlAddNamedParameters(urlpl.href);
 		urldown.href = urlAddFilterOrderOffset(urldown.href);
 		urldown.href = getPivotURL(urldown.href);
 	}
@@ -220,6 +217,11 @@ function makeHrefs() {
 	
 	updateUI();
 	refreshAuthInfo();
+}
+
+function urlAddNamedParameters(urlz) {
+	urlz = append2url(urlz, urlGetQueryParameters(true));
+	return urlz;
 }
 
 function urlAddFilterOrderOffset(urlz) {

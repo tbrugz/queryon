@@ -184,10 +184,12 @@ modelId = SchemaModelUtils.getModelId(request);
 		btnActionStart('btnValidate');
 		request.done(function(data, textStatus, jqXHR) {
 			btnActionStop('btnValidate');
+			var paramNames = jqXHR.getResponseHeader('X-Validate-NamedParameterNames');
 			var paramCount = jqXHR.getResponseHeader('X-Validate-ParameterCount');
-			console.log('#params = '+paramCount);
+			console.log('#params = ', paramCount, ' ; named-params = ', paramNames);
+			//XXX set named parameters
 			//var container = document.getElementById('sqlparams');
-			setParameters(paramCount);
+			setParameters(paramNames, paramCount);
 			makeHrefs();
 			
 			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
@@ -421,11 +423,68 @@ modelId = SchemaModelUtils.getModelId(request);
 		
 	}
 
-	function setParameters(numparams) {
+	// from: queryon-b.js
+	function getParametersWithValues() {
 		var params = document.querySelectorAll('.parameter');
+		//console.log("params:", params);
+		var ret = {};
+		for (var i = 0; i < params.length; ++i) {
+			var item = params[i];
+			//console.log(item);
+			ret[item.name] = item.value;
+		}
+		//console.log("ret:", ret);
+		return ret;
+	}
+	
+	// from: queryon-b.js
+	function setParametersValues(values) {
+		var params = document.querySelectorAll('.parameter');
+		//console.log('setParametersValues: ', params, values);
+		if(Array.isArray(values)) {
+			for(var i=0;i<params.length;i++) {
+				if(values.length>i) {
+					params[i].value = values[i];
+				}
+			}
+		}
+		else if(isObject(values)) {
+			for(var i=0;i<params.length;i++) {
+				if(values[params[i].name]) {
+					params[i].value = values[params[i].name];
+				}
+			}
+		}
+	}
+	
+	function setParameters(paramNamesStr, numparams) {
+		var paramNames = [];
+		var positionalParameters = true;
+		if(paramNamesStr) {
+			//XXX: sort array?
+			paramNames = [...new Set(paramNamesStr.split(","))];
+			numparams = paramNames.length;
+			positionalParameters = false;
+		}
+		else {
+			for(var i=0;i<=numparams;i++) {
+				paramNames.push("p"+(i+1));
+			}
+		}
+		console.log('numparams: ',numparams,' ; paramNames: ',paramNames);
+		
+		var currentParamsWithValues = getParametersWithValues();
+		var paramsStr = '';
+		for(var i=0;i<numparams;i++) {
+			paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
+				" id='"+paramNames[i]+"' name='"+paramNames[i]+"'"+
+				"/>"+"</label>";
+		}
+		byId('sqlparams').innerHTML = paramsStr;
+		setParametersValues(currentParamsWithValues);
+		
 		//$("#sqlparams").html('');
-		console.log('numparams: '+numparams+' ; params.length: '+params.length);
-		if(numparams > params.length) {
+		/*if(numparams > params.length) {
 			for(var i=params.length+1;i<=numparams;i++) {
 				$("#sqlparams").append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");
 			}
@@ -437,7 +496,7 @@ modelId = SchemaModelUtils.getModelId(request);
 				item = item.parentNode;
 				item.parentNode.removeChild(item);
 			}
-		}
+		}*/
 	}
 	
 	function validateEditComponents(saved) {
@@ -746,7 +805,7 @@ if(queryName!=null) {
 	*/
 }
 if(query==null || query.equals("")) {
-	query = "select * from table";
+	query = "select *\nfrom table";
 }
 if(schemaName==null) { schemaName = ""; }
 if(queryName==null) { queryName = ""; }
@@ -838,7 +897,7 @@ if(remarks==null) { remarks = ""; }
 	editor.setAutoScrollEditorIntoView(true);
 	editor.getSession().on('change', onTextFieldChange);
 	
-	setParameters(<%= numOfParameters %>);
+	setParameters(null, <%= numOfParameters %>);
 </script>
 <script type="text/javascript">
 	makeHrefs();

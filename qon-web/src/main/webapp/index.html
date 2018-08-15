@@ -906,6 +906,7 @@
 		for(var i=0;i<exts.length;i++) {
 			if(downloadExtFilter.indexOf(exts[i])<0) { continue; }
 			var href = makeOneHref(objectName, exts[i], modelId);
+			href = urlAddNamedParameters(href);
 			href = urlAddFilterOrderOffset(href);
 			str += "<li><a href='"+href+"' target='_blank' onclick='"+closeJs+"' title='download "+exts[i]+"'>"+exts[i]+"</a>";
 		}

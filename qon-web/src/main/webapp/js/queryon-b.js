@@ -64,26 +64,46 @@ function writeRelations(containerId, relations) {
 function loadRelation(selectId, parametersId, containerId) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
-	var params = relationsHash[id] ? relationsHash[id].parameterCount : null;
-	//console.log('selected: '+id+' ; params: '+params);
+	var params = relationsHash[id] ?
+			( relationsHash[id].namedParameterNames ? getScalarArrayFromValue( relationsHash[id].namedParameterNames ) : relationsHash[id].parameterCount ) :
+			null;
+	//console.log('selected: ',id,' ; params: ',params);
 	if(params==null || params=="") {
 		params = 0;
 	}
 	setParameters(parametersId, params);
 }
 
+function urlGetQueryParameters(namedParametersOnly) {
+	var params = document.querySelectorAll('.parameter');
+	var ret = '';
+	for (var i = 0; i < params.length; ++i) {
+		var item = params[i];
+		if(namedParametersOnly && item.classList.contains("positional")) {
+			continue;
+		}
+		var value = item.value;
+		//console.log("urlAddParameters",item, item.name + "=" + encodeURIComponent(value));
+		//if(value=='') { value = '-'; }
+		ret += (i>0?"&":"") + item.name + "=" + encodeURIComponent(value);
+	}
+	//console.log("ret",ret);
+	return ret;
+}
+
 function getQueryUrl(selectId, syntax, baseUrlParam) {
 	var select = document.getElementById(selectId);
 	var id = select.options[select.selectedIndex].value;
-	var params = document.querySelectorAll('.parameter');
+	//var params = document.querySelectorAll('.parameter');
 	var paramsStr = '';
-	for (var i = 0; i < params.length; ++i) {
+	paramsStr = getParameters(true);
+	/*for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
 		//console.log(item);
 		var str = item.value;
 		if(str=='') { str = '-'; } 
 		paramsStr += '/'+str;
-	}
+	}*/
 	
 	var queryString = '';
 	
@@ -94,6 +114,8 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 			queryString += 'model='+modelId;
 		}
 	}
+
+	queryString += urlGetQueryParameters(true);
 	
 	var filters = document.querySelectorAll('.filter');
 	for (var i = 0; i < filters.length; ++i) {
@@ -200,6 +222,7 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 	}
 	else {
 	
+	//console.log("doRun(): ",finalUrl);
 	$.ajax({
 		url: finalUrl,
 		dataType: "html",
@@ -285,9 +308,34 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	messages.style.display = '';
 }
 
-function setParameters(parametersId, numparams) {
-	var params = document.querySelectorAll('.parameter');
-	//console.log('numparams: '+numparams+' ; params.length: '+params.length);
+function setParameters(parametersId, params) {
+	var numparams = params;
+	var paramNames = [];
+	var positionalParameters = true;
+	if(Array.isArray(params)) {
+		//XXX: sort array?
+		paramNames = [...new Set(params)];
+		numparams = paramNames.length;
+		positionalParameters = false;
+	}
+	else {
+		for(var i=0;i<=numparams;i++) {
+			paramNames.push("p"+(i+1));
+		}
+	}
+	var currentParamsWithValues = getParametersWithValues();
+	//console.log('params: ', params, ' ; numparams: ', numparams, ' ; paramNames: ', paramNames, ' ; currentParamsWithValues: ',currentParamsWithValues);
+	
+	var paramsStr = '';
+	for(var i=0;i<numparams;i++) {
+		paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
+			" id='"+paramNames[i]+"' name='"+paramNames[i]+"' onchange='onParameterChange(\""+paramNames[i]+"\");'"+
+			"/>"+"</label>";
+	}
+	byId(parametersId).innerHTML = paramsStr;
+	setParametersValues(currentParamsWithValues);
+	
+	/*
 	if(numparams > params.length) {
 		for(var i=params.length+1;i<=numparams;i++) {
 			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'/></label>");
@@ -301,24 +349,49 @@ function setParameters(parametersId, numparams) {
 			item.parentNode.removeChild(item);
 		}
 	}
+	*/
+}
+
+function getParametersWithValues() {
+	var params = document.querySelectorAll('.parameter');
+	//console.log("params:", params);
+	var ret = {};
+	for (var i = 0; i < params.length; ++i) {
+		var item = params[i];
+		//console.log(item);
+		ret[item.name] = item.value;
+	}
+	//console.log("ret:", ret);
+	return ret;
 }
 
 function setParametersValues(values) {
 	var params = document.querySelectorAll('.parameter');
 	//console.log('setParametersValues: ', params, values);
-	for(var i=0;i<params.length;i++) {
-		if(values.length>i) {
-			params[i].value = values[i];
+	if(Array.isArray(values)) {
+		for(var i=0;i<params.length;i++) {
+			if(values.length>i) {
+				params[i].value = values[i];
+			}
+		}
+	}
+	else if(isObject(values)) {
+		for(var i=0;i<params.length;i++) {
+			if(values[params[i].name]) {
+				params[i].value = values[params[i].name];
+			}
 		}
 	}
 }
 
-function getParameters() {
+function getParameters(positionalsOnly) {
 	var params = document.querySelectorAll('.parameter');
 	var paramsStr = '';
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
-		//console.log(item);
+		if(positionalsOnly && !item.classList.contains("positional")) {
+			continue;
+		}
 		var value = item.type!='file' ? item.value : '';
 		if(value=='') { value = '-'; }
 		paramsStr += '/'+value;

@@ -228,3 +228,8 @@ input[type=button] {
 #name {
 	width: 20em;
 }
+
+.parameter-label {
+	padding-right: 10px;
+}
+
