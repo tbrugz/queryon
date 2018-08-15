@@ -1077,6 +1077,9 @@ public class WinstoneAndH2HttpRequestTest {
 			if(path.indexOf("NAMED_PARAMS_1")>=0) {
 				queryString = "?par1=1&par2=2";
 			}
+			if(path.indexOf("QUERY_WITH_PARAMS_NULL_BIND_ARRAY")>=0) {
+				queryString = "?par2=2";
+			}
 			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path+queryString;
 			//System.out.println("swaggerGsonCall: "+url);
 			JsonElement resp = parser.parse(getContentFromUrl(url));
@@ -1214,10 +1217,40 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?p1=1";
 		getContentFromUrl(baseUrl+url);
 	}
+
+	@Test
+	public void testGetQueryWithNamedParametersNullBind3() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv";
+		getContentFromUrl(baseUrl+url);
+	}
 	
 	@Test(expected=RuntimeException.class)
 	public void testGetQueryWithNamedParametersNullBindError() throws Exception {
 		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?par1=1&p2=2";
+		getContentFromUrl(baseUrl+url);
+	}
+
+	/*
+		QUERY_WITH_PARAMS_NULL_BIND_ARRAY
+		named-parameters=par1,par2,par1
+		bind-null-on-missing-parameters=true,false,true
+	*/
+	
+	@Test
+	public void testGetQueryWithNamedParametersNullBindArray() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND_ARRAY.csv?p1=1&p2=2&p3=1";
+		getContentFromUrl(baseUrl+url);
+	}
+
+	@Test(expected=RuntimeException.class)
+	public void testGetQueryWithNamedParametersNullBindArray2() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND_ARRAY.csv";
+		getContentFromUrl(baseUrl+url);
+	}
+
+	@Test
+	public void testGetQueryWithNamedParametersNullBindArray3() throws Exception {
+		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND_ARRAY.csv?par2=2";
 		getContentFromUrl(baseUrl+url);
 	}
 	
