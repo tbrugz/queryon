@@ -1,7 +1,9 @@
 package tbrugz.queryon.util;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,35 @@ public class MiscUtils {
 			return Integer.parseInt(value);
 		}
 		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T[] expandArray(T[] arr, int len, Class<T> clazz) {
+		if(arr==null || arr.length==0) { return null; }
+		if(arr.length==len) { return arr; }
+		if(arr.length!=1) {
+			throw new IllegalArgumentException("can't expand array "+Arrays.toString(arr)+" to length "+len);
+		}
+		
+		T[] ret = (T[]) Array.newInstance(clazz, len);
+		for(int i=0;i<len;i++) {
+			ret[i] = arr[0];
+		}
+		return ret;
+	}
+
+	public static boolean[] expandBooleanArray(boolean[] arr, int len) {
+		if(arr==null || arr.length==0) { return null; }
+		if(arr.length==len) { return arr; }
+		if(arr.length!=1) {
+			throw new IllegalArgumentException("can't expand array "+Arrays.toString(arr)+" to length "+len);
+		}
+		
+		boolean[] ret = (boolean[]) Array.newInstance(Boolean.TYPE, len);
+		for(int i=0;i<len;i++) {
+			ret[i] = arr[0];
+		}
+		return ret;
 	}
 
 	/*

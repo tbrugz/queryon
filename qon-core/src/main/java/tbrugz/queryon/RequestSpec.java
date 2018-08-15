@@ -1066,7 +1066,7 @@ public class RequestSpec {
 	public void setNamedParameters(SQL sql) {
 		if(sql.namedParameters!=null) {
 			int originalParamsCount = this.params.size();
-			int boundParameters = 0;
+			int namedParametersBound = 0;
 			for(int i=0;i<sql.namedParameters.size();i++) {
 				String param = sql.namedParameters.get(i);
 				String value = this.request.getParameter(param);
@@ -1079,15 +1079,19 @@ public class RequestSpec {
 					}
 					else {
 						this.params.add(value);
-						boundParameters++;
+						namedParametersBound++;
 					}
 				}
-				else if(sql.bindNullOnMissingParameters) {
+				else if(sql.bindNullOnMissingParameters!=null && sql.bindNullOnMissingParameters[i]) {
+					if(this.params.size()<i) {
+						throw new BadRequestException("can't bind null on parameter '"+param+"' ["+i+"] if previous parameters are not bound [size=="+this.params.size()+"]");
+					}
 					this.params.add(null);
-					boundParameters++;
+					//boundParameters++;
+					//log.info("binding null on parameter '"+param+"' ["+i+"]");
 				}
-				else if(boundParameters>0) {
-					throw new BadRequestException("named parameter '"+param+"' not present but "+boundParameters+" named parameters already bound");
+				else if(namedParametersBound>0) {
+					throw new BadRequestException("named parameter '"+param+"' not present but "+namedParametersBound+" named parameters already bound");
 				}
 			}
 		}

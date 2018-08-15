@@ -78,7 +78,7 @@ public class SQL {
 	final String username;
 	//XXX final String userroles;
 	final List<String> namedParameters;
-	final boolean bindNullOnMissingParameters;
+	final boolean[] bindNullOnMissingParameters;
 	
 	static DBMSFeatures features = null; //FIXME: DBMSFeatures should not be static
 	
@@ -111,7 +111,15 @@ public class SQL {
 		
 		this.username = getFinalVariableValue(username);
 		this.namedParameters = getNamedParameterNames(sql, this.originalBindParameterCount);
-		this.bindNullOnMissingParameters = bindNullOnMissingParameters();
+		this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNullOnMissingParameters(), this.originalBindParameterCount);
+		//log.info("bindNullOnMissingParameters == "+Arrays.toString(bindNullOnMissingParameters));
+		
+		if(bindNullOnMissingParameters != null &&
+			bindNullOnMissingParameters.length != this.originalBindParameterCount) {
+			String message = "'"+PTRN_BIND_NULL_ON_MISSING_PARAMS+"' count [#"+bindNullOnMissingParameters.length+"] should be equal to 1 or bind parameters count [#"+this.originalBindParameterCount+"]";
+			log.warn(message);
+			throw new BadRequestException(message);
+		}
 	}
 
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
@@ -535,16 +543,17 @@ public class SQL {
 	static final String PTRN_MATCH_BOOLEAN = "true|false";
 	static final String PTRN_MATCH_INT = "\\d+";
 	static final String PTRN_MATCH_STRINGLIST = "[\\w\\-,]+";
+	static final String PTRN_MATCH_BOOLEANLIST = "[true|false][,[true|false]]*";
 	
 	static final Pattern allowEncapsulationBooleanPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_ALLOW_ENCAPSULATION)+"\\s*=\\s*("+PTRN_MATCH_BOOLEAN+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitMaxIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_MAX)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitDefaultIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_DEFAULT)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern namedParametersPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_NAMED_PARAMETERS)+"\\s*=\\s*("+PTRN_MATCH_STRINGLIST+")\\b.*\\*/", Pattern.DOTALL);
-	static final Pattern bindNullOnMissingParamsPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_BIND_NULL_ON_MISSING_PARAMS)+"\\s*=\\s*("+PTRN_MATCH_BOOLEAN+")\\b.*\\*/", Pattern.DOTALL);
+	static final Pattern bindNullOnMissingParamsPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_BIND_NULL_ON_MISSING_PARAMS)+"\\s*=\\s*("+PTRN_MATCH_BOOLEANLIST+")\\b.*\\*/", Pattern.DOTALL);
 	
 	static boolean processPatternBoolean(String sql, Pattern pattern, boolean defaultValue) {
 		Matcher m = pattern.matcher(sql);
-		//log.info("s: "+s+" matcher: "+m);
+		//log.info("s: "+sql+" matcher: "+m);
 		if(!m.find()) { return defaultValue; }
 		
 		String g1 = m.group(1);
@@ -554,6 +563,30 @@ public class SQL {
 		return defaultValue;
 	}
 
+	static boolean[] processPatternBooleanArray(String str, Pattern pattern, boolean defaultValue) {
+		List<Boolean> ret = new ArrayList<Boolean>();
+		Matcher m = pattern.matcher(str);
+		//log.info("str: "+str+" matcher: "+m);
+		if(!m.find()) {
+			boolean bret[] = new boolean[]{ defaultValue };
+			return bret;
+		}
+		
+		String g1 = m.group(1);
+		if(g1!=null) {
+			String[] bools = g1.split(",");
+			for(String s: bools) {
+				ret.add(s.trim().equals("true"));
+				//log.info("- "+s+" / "+s.trim().equals("true"));
+			}
+		}
+		boolean[] bret = new boolean[ret.size()];
+		for(int i=0;i<ret.size();i++) {
+			bret[i] = ret.get(i);
+		}
+		return bret;
+	}
+	
 	static Integer processPatternInteger(String sql, Pattern pattern) {
 		return processPatternInteger(sql, pattern, null);
 	}
@@ -724,22 +757,19 @@ public class SQL {
 	
 	void addOriginalParameters(RequestSpec reqspec) throws SQLException {
 		int informedParams = reqspec.params.size();
-		//XXX bind all or bind none?
-		//int bindParamsLoop = informedParams; //bind all
 		int bindParamsLoop = -1; // bind none
 		if(originalBindParameterCount > informedParams) {
-			if(!bindNullOnMissingParameters) {
-				throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
-					+((informedParams>0)?"only "+informedParams:"none")
-					+((informedParams>1)?" were":" was")
-					+" informed");
-			}
-			else {
-				log.info("addOriginalParameters: will bind NULL on missing bind parameters [informedParams="+informedParams+";bindParameterCount="+originalBindParameterCount+"]");
-				for(int i=informedParams; i < originalBindParameterCount; i++) {
-					//log.info("-- ["+i+"] binding null on parameter "+(reqspec.params.size()+1));
-					reqspec.params.add(null);
+			//log.debug("addOriginalParameters: will bind NULL on missing bind parameters [informedParams="+informedParams+";bindParameterCount="+originalBindParameterCount+"]");
+			for(int i=informedParams; i < originalBindParameterCount; i++) {
+				if(bindNullOnMissingParameters!=null && !bindNullOnMissingParameters[i]) {
+					throw new BadRequestException("Query '"+reqspec.object+"' needs "+originalBindParameterCount+" parameters but "
+							+((informedParams>0)?"only "+informedParams:"none")
+							+((informedParams>1)?" were":" was")
+							+" informed"
+							+", and can't bind null on parameter "+i+" by default");
 				}
+				//log.info("-- ["+i+"] binding null on parameter "+(reqspec.params.size()+1));
+				reqspec.params.add(null);
 			}
 		}
 		bindParamsLoop = originalBindParameterCount;
@@ -890,8 +920,8 @@ public class SQL {
 		return processPatternBoolean(sql, SQL.allowEncapsulationBooleanPattern, true);
 	}
 	
-	public boolean bindNullOnMissingParameters() {
-		return processPatternBoolean(sql, SQL.bindNullOnMissingParamsPattern, false);
+	public boolean[] bindNullOnMissingParameters() {
+		return processPatternBooleanArray(sql, SQL.bindNullOnMissingParamsPattern, false);
 	}
 	
 	public static List<String> getNamedParameterNames(String sql, int bindParameterCount) {
