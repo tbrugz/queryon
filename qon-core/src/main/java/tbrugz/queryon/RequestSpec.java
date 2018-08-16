@@ -551,7 +551,7 @@ public class RequestSpec {
 			allowedFilters = new HashSet<String>();
 			allowedFilters.addAll(allowedFiltersList);
 		}
-		processRequestParameterMap(reqParams, allowedFilters);
+		processRequestParameterMap(allowedFilters);
 		
 		if(showDebugInfo) {
 			showDebugInfo(reqParams);
@@ -595,9 +595,8 @@ public class RequestSpec {
 		return prop.getProperty(QueryOn.PROP_SYNTAX_DEFAULT, defaultSyntax);
 	}
 	
-	protected void processRequestParameterMap(Map<String,String[]> reqParams, Set<String> allowedFilters) throws UnsupportedEncodingException {
-		
-		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
+	protected void processRequestParameterMap(Set<String> allowedFilters) throws UnsupportedEncodingException {
+		for(Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
 			

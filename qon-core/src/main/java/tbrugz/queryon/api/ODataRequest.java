@@ -213,7 +213,7 @@ public class ODataRequest extends RequestSpec {
 	}
 	
 	@Override
-	protected void processRequestParameterMap(Map<String, String[]> reqParams, Set<String> allowedFilters) {
+	protected void processRequestParameterMap(Set<String> allowedFilters) {
 		String filter = request.getParameter(PARAM_FILTER);
 		if(filter!=null) {
 			try {
