@@ -299,23 +299,21 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	// copied from ODataServlet
 	@Override
 	protected void preprocessParameters(RequestSpec reqspec, Constraint pk) {
-		if(! (reqspec instanceof GqlRequest)) { return; }
-		GqlRequest req = (GqlRequest) reqspec;
-		Map<String, String> keymap = req.keyValues;
+		Map<String, String> keymap = reqspec.keyValues;
 		//log.debug("req: "+req+" keymap: "+keymap);
-		if(keymap == null || keymap.size()==0 ||
+		if(keymap == null || keymap.size()==0 || keymap.size()==1 ||
 				pk==null || pk.getUniqueColumns()==null) { return; }
 		
 		//List<Object> origPar = new ArrayList<Object>();
 		//origPar.addAll(req.getParams());
 		
-		req.getParams().clear();
+		// ordering params by pk key cols order
+		reqspec.getParams().clear();
 		for(String col: pk.getUniqueColumns()) {
 			String v = keymap.get(col);
 			//log.debug("c: "+col+" ; v: "+v);
-			req.getParams().add(v);
+			reqspec.getParams().add(v);
 		}
 	}
 
-	
 }

@@ -44,7 +44,6 @@ public class ODataRequest extends RequestSpec {
 	static final String ALIAS_VALUE = "value";
 	static final String VALUEFIELD_COUNT = "count";
 	
-	protected Map<String, String> keyValues;
 	protected String valueField;
 	protected boolean isCountRequest;
 
@@ -106,7 +105,7 @@ public class ODataRequest extends RequestSpec {
 
 	@Override
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
-		keyValues = null;
+		keyValues.clear();
 		if(parts.size()==0) { return null; }
 		String objectTmp = parts.remove(0);
 		
@@ -116,7 +115,11 @@ public class ODataRequest extends RequestSpec {
 				int idx2 = objectTmp.indexOf(")");
 				String key = objectTmp.substring(idx1+1, idx2);
 				objectTmp = objectTmp.substring(0, idx1);
-				keyValues = parseKey(key);
+				/*Map<String, String> keyMap = parseKey(key);
+				if(keyMap!=null) {
+					keyValues.putAll(keyMap);
+				}*/
+				keyValues.putAll(parseKey(key));
 				//log.info("object: ["+objectTmp+"] key: "+keyValues);
 			}
 		}

@@ -45,7 +45,6 @@ public class GqlRequest extends RequestSpec {
 	final QonAction action;
 	int updateCount;
 	String executeOutput;
-	final Map<String, String> keyValues = new LinkedHashMap<String, String>();
 	final Map<String, String> relationColMap;
 	final Map<String, String> xtraParametersMap = new HashMap<>();
 

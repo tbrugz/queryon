@@ -28,6 +28,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -219,6 +220,59 @@ public class ODataWebTest {
 		Assert.assertEquals(3L, prop);
 		prop = jobj.get("REMARKS");
 		Assert.assertEquals("some text", prop);
+	}
+	
+	@Test
+	public void getQueryPositionalParams() throws IOException, ParserConfigurationException, SAXException {
+		String url = odataUrl+"/NAMED_PARAMS_1(p1=1,p2=2,p3=3)";
+		
+		String jsonStr = getContentFromUrl(url);
+		//System.out.println("content:\n"+jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		JSONArray jarr = (JSONArray) jobj.get("value");
+		
+		jobj = (JSONObject) jarr.get(0);
+		Object prop = jobj.get("C1");
+		Assert.assertEquals("1", prop);
+		
+		jobj = (JSONObject) jarr.get(1);
+		prop = jobj.get("C1");
+		Assert.assertEquals("2", prop);
+		
+		jobj = (JSONObject) jarr.get(2);
+		prop = jobj.get("C1");
+		Assert.assertEquals("3", prop);
+	}
+
+	@Test
+	@Ignore("ODataServlet does not handle named parameters yet")
+	public void getQueryNamedParams() throws IOException, ParserConfigurationException, SAXException {
+		String url = odataUrl+"/NAMED_PARAMS_1(par1=1,par2=2)";
+		
+		String jsonStr = getContentFromUrl(url);
+		//System.out.println("content:\n"+jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		JSONArray jarr = (JSONArray) jobj.get("value");
+		
+		jobj = (JSONObject) jarr.get(0);
+		Object prop = jobj.get("C1");
+		Assert.assertEquals("1", prop);
+		
+		jobj = (JSONObject) jarr.get(1);
+		prop = jobj.get("C1");
+		Assert.assertEquals("2", prop);
+		
+		jobj = (JSONObject) jarr.get(2);
+		prop = jobj.get("C1");
+		Assert.assertEquals("1", prop);
 	}
 	
 	@Test

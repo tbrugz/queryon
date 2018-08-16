@@ -766,7 +766,7 @@ public class SQL {
 							+((informedParams>0)?"only "+informedParams:"none")
 							+((informedParams>1)?" were":" was")
 							+" informed"
-							+", and can't bind null on parameter "+i+" by default");
+							+", and can't bind null on parameter "+(i+1)+" by default");
 				}
 				//log.info("-- ["+i+"] binding null on parameter "+(reqspec.params.size()+1));
 				reqspec.params.add(null);
