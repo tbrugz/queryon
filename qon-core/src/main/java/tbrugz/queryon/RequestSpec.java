@@ -1064,13 +1064,16 @@ public class RequestSpec {
 	}
 	
 	public void setNamedParameters(SQL sql) {
+		//log.debug("setNamedParameters: "+sql.namedParameters);
 		if(sql.namedParameters!=null) {
 			int originalParamsCount = this.params.size();
 			int namedParametersBound = 0;
+			Map<String, String> parameterMap = getParameterMapUniqueValues();
 			for(int i=0;i<sql.namedParameters.size();i++) {
 				String param = sql.namedParameters.get(i);
-				String value = this.request.getParameter(param);
+				String value = parameterMap.get(param);
 				if(value!=null) {
+					//log.debug("- param: "+param+" ; value: "+value);
 					int i2 = i+1;
 					if(originalParamsCount >= i2) {
 						String message = "named parameter '"+param+"' present but #"+i2+" positional parameter already exists [originalParamsCount="+originalParamsCount+"]";
@@ -1130,5 +1133,18 @@ public class RequestSpec {
 	boolean isHeadMethod() {
 		return QueryOn.METHOD_HEAD.equals(httpMethod);
 	}
+	
+	/*public Map<String, String[]> getParameterMap() {
+		return request.getParameterMap();
+	}*/
 
+	public Map<String, String> getParameterMapUniqueValues() {
+		Map<String, String> ret = new HashMap<String, String>();
+		for(Map.Entry<String, String[]> e: request.getParameterMap().entrySet()) {
+			String[] vals = e.getValue();
+			ret.put(e.getKey(), vals!=null && vals.length>0 ? vals[0] : null);
+		}
+		return ret;
+	}
+	
 }
