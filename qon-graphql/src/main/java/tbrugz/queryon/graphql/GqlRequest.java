@@ -1,6 +1,7 @@
 package tbrugz.queryon.graphql;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class GqlRequest extends RequestSpec {
 	String executeOutput;
 	final Map<String, String> keyValues = new LinkedHashMap<String, String>();
 	final Map<String, String> relationColMap;
+	final Map<String, String> xtraParametersMap = new HashMap<>();
 
 	public GqlRequest(DataFetchingEnvironment env, Map<String, QonAction> actionMap, Map<String, Map<String, String>> colMap, Properties prop, HttpServletRequest req)
 			throws ServletException, IOException {
@@ -113,7 +115,8 @@ public class GqlRequest extends RequestSpec {
 					positionalValues.put(arg.getName(), getStringValue(arg.getValue()));
 				}
 				else {
-					log.info("unknown argument:: name: "+arg.getName()+" / value: "+arg.getValue());
+					log.debug("unknown argument:: name: "+arg.getName()+" / value: "+arg.getValue());
+					xtraParametersMap.put(arg.getName(), getStringValue(arg.getValue()));
 				}
 				break;
 			}
@@ -256,6 +259,11 @@ public class GqlRequest extends RequestSpec {
 	protected GqlMapBufferSyntax getCurrentDumpSyntax() {
 		//log.info("getCurrentDumpSyntax... "+this.hashCode()+"/"+outputSyntax);
 		return (GqlMapBufferSyntax) outputSyntax;
+	}
+
+	@Override
+	public Map<String, String> getParameterMapUniqueValues() {
+		return xtraParametersMap;
 	}
 	
 }

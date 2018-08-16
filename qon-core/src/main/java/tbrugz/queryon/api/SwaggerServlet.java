@@ -68,9 +68,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	static final String PROP_PREFIX = "queryon.api.swagger";
 	static final String SUFFIX_FILTERS = ".filters";
 	
-	boolean useCanonicalHost = false; //XXX: hostname: add property
-	boolean addHeadMethod = false; //XXX: head method: add property
-	boolean useNamedParameters = true;
+	final boolean useCanonicalHost = false; //XXX: hostname: add property
+	final boolean addHeadMethod = false; //XXX: head method: add property
+	final boolean useNamedParameters = true;
 	
 	Set<String> syntaxes;
 	String defaultSyntax;

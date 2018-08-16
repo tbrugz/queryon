@@ -3,6 +3,7 @@ package tbrugz.queryon.graphql;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -68,7 +70,8 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	final boolean addFiltersToTypeField = true;
 	final boolean addFiltersToQueryField = false;
 	final boolean addMutations = true;
-	
+	final boolean useNamedParameters = true;
+
 	final SchemaModel sm;
 	final Map<String, QonAction> amap = new HashMap<>();
 	final Map<String, Map<String, String>> colMap = new HashMap<>();
@@ -245,14 +248,30 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		amap.put(qFieldName, new QonAction(ActionType.SELECT, DBObjectType.RELATION, t.getName())); // XXX add schemaName? NamedTypedDBObject?
 
 		if(r.getParameterCount()!=null) {
-			for(int i=0;i<r.getParameterCount();i++) {
-				GraphQLScalarType type = getGlType(
-						(r.getParameterTypes()!=null && r.getParameterTypes().size()>i)?r.getParameterTypes().get(i):"VARCHAR"
-						);
-				f.argument(GraphQLArgument.newArgument()
-						.name("p"+(i+1))
-						.type(new GraphQLNonNull(type))
-						);
+			if(useNamedParameters && r instanceof Query && ((Query)r).getNamedParameterNames()!=null) {
+				Query q = (Query) r;
+				List<String> namedParameters = SchemaModelUtils.getUniqueNamedParameterNames(q);
+				List<String> namedParameterTypes = SchemaModelUtils.getUniqueNamedParameterTypes(q);
+				for(int i=0;i <namedParameters.size() ;i++) {
+					GraphQLScalarType type = getGlType(
+							(namedParameterTypes!=null && namedParameterTypes.size()>i)?namedParameterTypes.get(i):"VARCHAR"
+							);
+					f.argument(GraphQLArgument.newArgument()
+							.name(namedParameters.get(i))
+							.type(new GraphQLNonNull(type))
+							);
+				}
+			}
+			else {
+				for(int i=0;i<r.getParameterCount();i++) {
+					GraphQLScalarType type = getGlType(
+							(r.getParameterTypes()!=null && r.getParameterTypes().size()>i)?r.getParameterTypes().get(i):"VARCHAR"
+							);
+					f.argument(GraphQLArgument.newArgument()
+							.name("p"+(i+1))
+							.type(new GraphQLNonNull(type))
+							);
+				}
 			}
 		}
 		
