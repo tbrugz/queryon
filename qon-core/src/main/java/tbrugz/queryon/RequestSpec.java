@@ -1147,4 +1147,16 @@ public class RequestSpec {
 		return ret;
 	}
 	
+	public Object getAttribute(String name) {
+		return request.getAttribute(name);
+	}
+
+	public void setAttribute(String name, Object o) {
+		request.setAttribute(name, o);
+	}
+	
+	public String getRequestFullContext() {
+		return WebUtils.getRequestFullContext(request);
+	}
+	
 }
