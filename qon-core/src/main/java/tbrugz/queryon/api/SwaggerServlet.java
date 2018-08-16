@@ -70,6 +70,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	
 	boolean useCanonicalHost = false; //XXX: hostname: add property
 	boolean addHeadMethod = false; //XXX: head method: add property
+	boolean useNamedParameters = true;
 	
 	Set<String> syntaxes;
 	String defaultSyntax;
@@ -325,19 +326,34 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			parameters.add(pSyntax);
 		}
 		
+		//int paramCount = t.getParameterCount() !=null ? t.getParameterCount() : 0;
 		if(t instanceof View) {
-			View v = (View) t;
-			//XXXdone "p"+i - retrieve (query)
-			Integer paramCount = v.getParameterCount();
-			if(paramCount!=null) {
-				for(int i=1;i<=paramCount;i++) {
-					Map<String, Object> pNumbered = new LinkedHashMap<String, Object>();
-					pNumbered.put("name", "p"+i);
-					pNumbered.put("in", "query");
-					pNumbered.put("description", "parameter number "+i);
-					pNumbered.put("type", "string");
-					pNumbered.put("required", true);
-					parameters.add(pNumbered);
+			if(useNamedParameters && t instanceof Query && ((Query)t).getNamedParameterNames()!=null) {
+				Query q = (Query) t;
+				List<String> namedParameters = SchemaModelUtils.getUniqueNamedParameterNames(q);
+				for(int i=0;i <namedParameters.size() ;i++) {
+					Map<String, Object> pNamed = new LinkedHashMap<String, Object>();
+					pNamed.put("name", namedParameters.get(i));
+					pNamed.put("in", "query");
+					pNamed.put("description", "parameter "+namedParameters.get(i));
+					pNamed.put("type", "string");
+					pNamed.put("required", true); //XXX what if 'bind-null-on-missing-parameters'?
+					parameters.add(pNamed);
+				}
+			}
+			else {
+				View v = (View) t;
+				Integer paramCount = v.getParameterCount();
+				if(paramCount!=null) {
+					for(int i=1; i<=paramCount; i++) {
+						Map<String, Object> pNumbered = new LinkedHashMap<String, Object>();
+						pNumbered.put("name", "p"+i);
+						pNumbered.put("in", "query");
+						pNumbered.put("description", "parameter number "+i);
+						pNumbered.put("type", "string");
+						pNumbered.put("required", true);
+						parameters.add(pNumbered);
+					}
 				}
 			}
 		}

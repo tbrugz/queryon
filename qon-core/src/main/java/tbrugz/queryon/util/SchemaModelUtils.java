@@ -1,6 +1,9 @@
 package tbrugz.queryon.util;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,10 +22,12 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.util.Utils;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public class SchemaModelUtils {
@@ -245,6 +250,33 @@ public class SchemaModelUtils {
 	
 	public static boolean isOutParameter(ExecutableParameter ep) {
 		return (ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT);
+	}
+	
+	public static List<String> getUniqueNamedParameterNames(Query q) {
+		List<String> pNames = q.getNamedParameterNames();
+		if(pNames == null) { return null; }
+		
+		Set<String> uniqueNames = new LinkedHashSet<String>();
+		uniqueNames.addAll(pNames);
+		return Utils.newList(uniqueNames);
+	}
+
+	public static List<String> getUniqueNamedParameterTypes(Query q) {
+		List<String> pTypes = q.getParameterTypes();
+		List<String> pNames = q.getNamedParameterNames();
+		Integer pCount = q.getParameterCount();
+		if(pNames == null || pTypes==null || pCount==null || pCount == 0) { return null; }
+		
+		List<String> ret = new ArrayList<String>();
+		Set<String> uniqueNames = new HashSet<String>();
+		for(int i=0; i<pCount; i++) {
+			String pname = pNames.get(i);
+			if(!uniqueNames.contains(pname)) {
+				ret.add(pTypes.get(i));
+				uniqueNames.add(pname);
+			}
+		}
+		return ret;
 	}
 	
 }
