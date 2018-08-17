@@ -630,6 +630,8 @@ public class RequestSpec {
 				setMultiParam("agg:", key, value, aggregate);
 				
 				setUniParam("v:", key, value[0], updateValues);
+				
+				setUniParam("k:", key, value[0], keyValues);
 			}
 			catch(BadRequestException e) {
 				throw e;
@@ -1035,6 +1037,7 @@ public class RequestSpec {
 		for(String par: reqParams.keySet()) {
 			log.info("debug: reqParams["+par+"]: "+Arrays.toString(reqParams.get(par)));
 		}
+		log.info("debug: keyValues: "+keyValues);
 		log.info("debug: updateValues: "+updateValues);
 		log.info("debug: updatePartValues: "+updatePartValues);
 	}

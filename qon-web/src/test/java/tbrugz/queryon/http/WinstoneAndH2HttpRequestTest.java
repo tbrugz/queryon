@@ -298,6 +298,29 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void testPatchEmpKeyVals() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP?k:ID=1&v:NAME=newname&_method=PATCH");
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+		//System.out.println("content: "+getContent(response1));
+
+		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
+		httpPut.releaseConnection();
+	}
+
+	@Test
+	public void testPatchPairKeyVals() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/PAIR?k:ID2=3&k:ID1=1&v:REMARKS=another+text&_method=PATCH");
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+
+		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
+		httpPut.releaseConnection();
+	}
+	
+	@Test
 	public void testPut_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?_method=PATCH");
