@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1125,7 +1126,7 @@ public class QueryOn extends HttpServlet {
 		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
-		preprocessParameters(reqspec, pk);
+		preprocessParameters(reqspec, relation, pk);
 		SQL sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
 		
@@ -1213,7 +1214,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	protected void preprocessParameters(RequestSpec reqspec, Constraint pk) {}
+	protected void preprocessParameters(RequestSpec reqspec, Relation relation, Constraint pk) {}
 
 	void doSql(SchemaModel model, Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		if(relation.getName()==null) {
@@ -1675,7 +1676,7 @@ public class QueryOn extends HttpServlet {
 	
 	void checkOptimisticLock(Relation relation, RequestSpec reqspec, Constraint pk, Connection conn) throws SQLException, IOException {
 		SQL sqlLock = SQL.createSQL(relation, reqspec, null);
-		preprocessParameters(reqspec, pk);
+		preprocessParameters(reqspec, relation, pk);
 		filterByKey(relation, reqspec, pk, sqlLock);
 		sqlLock.addCount();
 		PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
@@ -1710,7 +1711,7 @@ public class QueryOn extends HttpServlet {
 		SQL sql = SQL.createDeleteSQL(relation);
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
-		preprocessParameters(reqspec, pk);
+		preprocessParameters(reqspec, relation, pk);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
@@ -1856,7 +1857,7 @@ public class QueryOn extends HttpServlet {
 		sql.applyUpdate(sb.toString());
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
-		preprocessParameters(reqspec, pk);
+		preprocessParameters(reqspec, relation, pk);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters
@@ -1940,10 +1941,10 @@ public class QueryOn extends HttpServlet {
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
 
-		//use url params to set PK cols values
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		String[] pkcols = null;
 		if(pk!=null) {
+			//use url params to set PK cols values
 			for(int i=0;i<pk.getUniqueColumns().size() && i<reqspec.params.size();i++) {
 				String pkcol = pk.getUniqueColumns().get(i);
 				if(! MiscUtils.containsIgnoreCase(columns, pkcol)) {
@@ -2158,7 +2159,8 @@ public class QueryOn extends HttpServlet {
 			return false;
 		}
 		//log.info("#cols: pk="+pk.getUniqueColumns().size()+", req="+reqspec.params.size());
-		return pk.getUniqueColumns().size() <= reqspec.params.size();
+		int paramsCount = reqspec.keyValues.size() + reqspec.params.size();
+		return pk.getUniqueColumns().size() <= paramsCount;
 	}
 	
 	List<String> getGeneratedKeys(ResultSet generatedKeys) throws SQLException {
@@ -2173,36 +2175,71 @@ public class QueryOn extends HttpServlet {
 	static void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
 		String filter = "";
 		// TODOxxx: what if parameters already defined in query?
-		if(reqspec.params.size()>0) {
+		if(reqspec.keyValues.size()>0 && reqspec.params.size()>0) {
+			log.warn("filterByKey: both keyValues "+reqspec.keyValues+" and params "+reqspec.params+" defined - should be only one");
+		}
+		int paramsCount = reqspec.keyValues.size() + reqspec.params.size();
+		//log.info("filterByKey: "+reqspec.keyValues+" / "+reqspec.params);
+		if(paramsCount>0) {
 			if(relation.getParameterCount()!=null && relation.getParameterCount()>0) {
 				// query parameters already added in 'addOriginalParameters()'
-				if(relation.getParameterCount() > reqspec.params.size()) {
-					log.warn("parameters defined "+reqspec.params+" but query '"+relation.getName()+"' expects more ["+relation.getParameterCount()+"] parameters");
+				if(relation.getParameterCount() > paramsCount) {
+					log.warn("#"+paramsCount+" parameters defined "+reqspec.params+"/"+reqspec.keyValues+
+							" but query '"+relation.getName()+"' expects more ["+relation.getParameterCount()+"] parameters");
 				}
-				else if(relation.getParameterCount() < reqspec.params.size()) {
-					log.warn("parameters defined "+reqspec.params+" but query '"+relation.getName()+"' expects less ["+relation.getParameterCount()+"] parameters");
+				else if(relation.getParameterCount() < paramsCount) {
+					log.warn("#"+paramsCount+" parameters defined "+reqspec.params+"/"+reqspec.keyValues+
+							" but query '"+relation.getName()+"' expects less ["+relation.getParameterCount()+"] parameters");
 				}
 			}
 			else if(pk==null) {
 				log.warn("filter params defined "+reqspec.params+" but table '"+relation.getName()+"' has no PK or UNIQUE constraint");
 			}
 			else {
-				if(reqspec.params.size()>pk.getUniqueColumns().size()) {
-					log.warn("parameter count [#"+reqspec.params.size()+"] bigger than pk size [#"+pk.getUniqueColumns().size()+"]");
-					log.debug("parameters: "+reqspec.params);
+				List<Object> allParams = new ArrayList<Object>();
+				allParams.addAll(getValuesOrderedByPkCols(reqspec.keyValues, pk.getUniqueColumns()));
+				allParams.addAll(reqspec.params);
+				
+				if(allParams.size()>pk.getUniqueColumns().size()) {
+					log.warn("parameter count [#"+allParams.size()+"] bigger than pk size [#"+pk.getUniqueColumns().size()+"]");
+					log.debug("parameters: "+allParams);
 					//XXX throw BadRequest ?
 				}
 				for(int i=0;i<pk.getUniqueColumns().size();i++) {
-					if(reqspec.params.size()<=i) { break; }
+					if(allParams.size()<=i) { break; }
 					//String s = reqspec.params.get(i);
 					String column = pk.getUniqueColumns().get(i);
 					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(column)+" = ?";
-					sql.addParameter(reqspec.params.get(i), DBUtil.getColumnTypeFromColName(relation, column));
-					logFilter.info("filterByKey: value["+i+"]="+reqspec.params.get(i));
+					sql.addParameter(allParams.get(i), DBUtil.getColumnTypeFromColName(relation, column));
+					logFilter.info("filterByKey: value["+i+"]="+allParams.get(i));
 				}
 			}
 		}
 		sql.addFilter(filter);
+	}
+	
+	static List<Object> getValuesOrderedByPkCols(Map<String, String> keyValues, List<String> pkCols) {
+		if(pkCols==null || pkCols.size()==0) { return null; }
+		List<Object> ret = new ArrayList<Object>();
+		if(pkCols.size()==1) {
+			Collection<String> vals = keyValues.values();
+			if(vals.size()>0) {
+				String v = vals.iterator().next();
+				//log.debug("size==1 ; v: "+v);
+				ret.add(v);
+			}
+		}
+		else {
+			for(String col: pkCols) {
+				if(keyValues.containsKey(col)) {
+					String v = keyValues.get(col);
+					//log.debug("c: "+col+" ; v: "+v);
+					ret.add(v);
+				}
+			}
+		}
+		//log.debug("#pkCols = "+pkCols.size()+" ; #keyValues = "+keyValues.size()+" ; #values = "+ret.size());
+		return ret;
 	}
 	
 	/**

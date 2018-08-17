@@ -34,7 +34,6 @@ import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.SchemaModelUtils;
-import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -296,6 +295,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		}
 	}
 	
+	/*
 	// copied from ODataServlet
 	@Override
 	protected void preprocessParameters(RequestSpec reqspec, Constraint pk) {
@@ -315,5 +315,6 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 			reqspec.getParams().add(v);
 		}
 	}
+	*/
 
 }

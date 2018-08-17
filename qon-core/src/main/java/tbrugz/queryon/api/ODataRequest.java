@@ -2,11 +2,14 @@ package tbrugz.queryon.api;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -46,6 +49,7 @@ public class ODataRequest extends RequestSpec {
 	
 	protected String valueField;
 	protected boolean isCountRequest;
+	Map<String, String> xtraParametersMap;
 
 	/*public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -132,8 +136,9 @@ public class ODataRequest extends RequestSpec {
 	protected void processParams(List<String> parts) {
 		valueField = null;
 		isCountRequest = false;
+		xtraParametersMap = new HashMap<String, String>();
 		
-		if(keyValues!=null) {
+		/*if(keyValues!=null) {
 			if(keyValues.size()==1) {
 				params.add(keyValues.get(uniqueKeyKey));
 			}
@@ -144,6 +149,36 @@ public class ODataRequest extends RequestSpec {
 				}
 			}
 			//params.addAll(keyValues);
+		}*/
+		if(keyValues!=null) {
+			Map<Integer, Object> postionalParamsMap = new TreeMap<Integer, Object>();
+			for(Map.Entry<String, String> entry: keyValues.entrySet()) {
+				Matcher m = positionalParamPattern.matcher(entry.getKey());
+				if(m.matches()) {
+					int pos = Integer.parseInt( m.group(1) );
+					String value = entry.getValue();
+					if(value==null) {
+						log.warn("null (or empty) 'value': "+entry.getKey()+" / "+value);
+					}
+					else {
+						postionalParamsMap.put(pos, value);
+					}
+				}
+				else {
+					xtraParametersMap.put(entry.getKey(), entry.getValue());
+				}
+			}
+			{
+				int pCount = 1;
+				for(Map.Entry<Integer, Object> e: postionalParamsMap.entrySet()) {
+					int i = e.getKey();
+					params.add(e.getValue());
+					pCount++;
+					if(i!=pCount) {
+						log.debug("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
+					}
+				}
+			}
 		}
 		//log.info("processParams: parts: "+parts+" / params: "+params+" / keyvalues: "+keyValues);
 			
@@ -318,6 +353,11 @@ public class ODataRequest extends RequestSpec {
 	@Override
 	public Integer getDeleteSucessStatus() {
 		return HttpServletResponse.SC_NO_CONTENT;
+	}
+
+	@Override
+	public Map<String, String> getParameterMapUniqueValues() {
+		return xtraParametersMap;
 	}
 	
 }

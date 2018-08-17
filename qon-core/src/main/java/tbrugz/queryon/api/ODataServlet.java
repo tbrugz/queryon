@@ -236,10 +236,11 @@ public class ODataServlet extends QueryOn {
 		return ret;
 	}
 	
-	@Override
-	protected void preprocessParameters(RequestSpec reqspec, Constraint pk) {
+	/*@Override
+	protected void preprocessParameters(RequestSpec reqspec, Relation relation, Constraint pk) {
+		// set params based on keyValues & relation.getParameters?
 		Map<String, String> keymap = reqspec.keyValues;
-		//log.debug("req: "+req+" keymap: "+keymap);
+		//log.debug("req: "+reqspec+" keymap: "+keymap+" reqspec.getParams(): "+reqspec.getParams()+" pk: "+pk);
 		if(keymap == null || keymap.size()==0 || keymap.size()==1 ||
 				pk==null || pk.getUniqueColumns()==null) { return; }
 		
@@ -250,7 +251,7 @@ public class ODataServlet extends QueryOn {
 			//log.debug("c: "+col+" ; v: "+v);
 			reqspec.getParams().add(v);
 		}
-	}
+	}*/
 	
 	/*@Override
 	protected DBObjectType statusObject(String name) {
