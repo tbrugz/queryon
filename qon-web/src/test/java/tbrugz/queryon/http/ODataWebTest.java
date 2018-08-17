@@ -249,7 +249,7 @@ public class ODataWebTest {
 	}
 
 	@Test
-	@Ignore("ODataServlet does not handle named parameters yet")
+	//@Ignore("ODataServlet does not handle named parameters yet")
 	public void getQueryNamedParams() throws IOException, ParserConfigurationException, SAXException {
 		String url = odataUrl+"/NAMED_PARAMS_1(par1=1,par2=2)";
 		

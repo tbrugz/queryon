@@ -287,11 +287,11 @@ public class WinstoneAndH2HttpRequestTest {
 		//nvps.add(new BasicNameValuePair("v:NAME", "newname"));
 		//httpPut.setEntity(new UrlEncodedFormEntity(nvps));
 		
-		System.out.println("PATCH-uri: "+httpPut.getRequestLine());
+		//System.out.println("PATCH-uri: "+httpPut.getRequestLine());
 		//System.out.println(EntityUtils.toString(new UrlEncodedFormEntity(nvps)));		
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
-		System.out.println("content: "+getContent(response1));
+		//System.out.println("content: "+getContent(response1));
 
 		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
@@ -314,13 +314,13 @@ public class WinstoneAndH2HttpRequestTest {
 
 		HttpGet httpGet = new HttpGet(baseUrl+"/EMP/5?_method=DELETE");
 		HttpResponse response1 = httpclient.execute(httpGet);
-		System.out.println("content: "+getContent(response1));
+		//System.out.println("content: "+getContent(response1));
 		Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
 		httpGet.releaseConnection();
 
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/4");
 		HttpResponse response2 = httpclient.execute(httpDelete);
-		System.out.println("content: "+getContent(response2));
+		//System.out.println("content: "+getContent(response2));
 		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
 		httpDelete.releaseConnection();
 	}
@@ -330,7 +330,7 @@ public class WinstoneAndH2HttpRequestTest {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/7");
 		HttpResponse response2 = httpclient.execute(httpDelete);
-		System.out.println("content: "+getContent(response2));
+		//System.out.println("content: "+getContent(response2));
 		Assert.assertEquals("Must be Not Found (no rows deleted)?", 404, response2.getStatusLine().getStatusCode());
 		httpDelete.releaseConnection();
 	}
@@ -342,7 +342,7 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&_method=DELETE&updatemax=5");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		String content = getContent(response2);
-		System.out.println("content: "+content);
+		//System.out.println("content: "+content);
 		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
 		//XXX: response may change...
 		int rows = Integer.parseInt(content.split(" ")[0]);
@@ -717,7 +717,7 @@ public class WinstoneAndH2HttpRequestTest {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/DEPT/1");
 		HttpResponse response2 = httpclient.execute(httpDelete);
-		System.out.println("content: "+getContent(response2));
+		//System.out.println("content: "+getContent(response2));
 		Assert.assertEquals("Must be Forbidden (403)", 403, response2.getStatusLine().getStatusCode());
 		httpDelete.releaseConnection();
 	}
@@ -739,7 +739,7 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&_method=PATCH");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
-		System.out.println("content: "+getContent(response1));
+		//System.out.println("content: "+getContent(response1));
 
 		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
@@ -879,7 +879,7 @@ public class WinstoneAndH2HttpRequestTest {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/EMP.csv?aliases=C1,C2");
 		HttpResponse response = httpclient.execute(httpGet);
-		System.out.println("content: "+getContent(response));
+		//System.out.println("content: "+getContent(response));
 		Assert.assertEquals("Must be BadRequest", 400, response.getStatusLine().getStatusCode());
 		httpGet.releaseConnection();
 	}

@@ -205,8 +205,26 @@ public class GraphQlWebTest {
 	@Test
 	public void requestSchema() throws ClientProtocolException, IOException {
 		String str = ODataWebTest.getContentFromUrl(graphqlUrl+"?schema=true");
+		//System.out.println("schema: "+str);
 		Parser parser = new Parser();
 		Document doc = parser.parseDocument(str);
 		//System.out.println("doc.getChildren().size(): "+doc.getChildren().size());
 	}
+	
+	@Test
+	public void getNamedParams1WithPositionals() throws IOException, ParserConfigurationException, SAXException {
+		String query = "{ list_NAMED_PARAMS_1(p1: \"1\", p2: \"2\", p3: \"3\") { C1 }}";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+		assertGraphqlOk(jsonStr);
+	}
+	
+	@Test
+	public void getQueryWithNamedParams() throws IOException, ParserConfigurationException, SAXException {
+		String query = "{ list_QUERY_WITH_PARAMS_NULL_BIND(par1: \"1\", par2: \"2\") { C1 }}";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+		assertGraphqlOk(jsonStr);
+	}
+	
 }

@@ -144,6 +144,10 @@
     <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <name>NAMED_PARAMS_1</name>
         <schemaName>QUERY</schemaName>
+        <columns>
+            <name>C1</name>
+            <type>VARCHAR</type>
+        </columns>
         <parameterCount>3</parameterCount>
         <query>
 /*
@@ -158,7 +162,14 @@ union all select cast(? as varchar)
     <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <name>QUERY_WITH_PARAMS_NULL_BIND</name>
         <schemaName>QUERY</schemaName>
+        <columns>
+            <name>C1</name>
+            <type>VARCHAR</type>
+        </columns>
         <parameterCount>3</parameterCount>
+        <namedParameterNames>par1</namedParameterNames>
+        <namedParameterNames>par2</namedParameterNames>
+        <namedParameterNames>par1</namedParameterNames>
         <query>
 /*
 named-parameters=par1,par2,par1
@@ -173,6 +184,10 @@ union all select cast(? as varchar)
     <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <name>QUERY_WITH_PARAMS_NULL_BIND_ARRAY</name>
         <schemaName>QUERY</schemaName>
+        <columns>
+            <name>C1</name>
+            <type>VARCHAR</type>
+        </columns>
         <parameterCount>3</parameterCount>
         <query>
 /*
