@@ -48,14 +48,19 @@ public class ModelValidator extends AbstractSQLProc {
 		while(it2.hasNext()) {
 			View rel = it2.next();
 			if(rel instanceof Query) {
-				Query q = (Query) rel;
-				SQL sql = SQL.createSQL(q, null, null);
 				try {
+					Query q = (Query) rel;
+					SQL sql = SQL.createSQL(q, null, null);
 					DBObjectUtils.validateQuery(q, sql.getFinalSql(), conn, update);
+				}
+				catch(RuntimeException e) {
+					if(removeInvalid) { it2.remove(); }
+					log.warn("Error with query '"+rel.getFinalQualifiedName()+"': "+e);
+					countErr++;
 				}
 				catch(SQLException e) {
 					if(removeInvalid) { it2.remove(); }
-					log.warn(e);
+					log.warn("Error with query '"+rel.getFinalQualifiedName()+"': "+e);
 					countErr++;
 				}
 				count++;
@@ -64,9 +69,14 @@ public class ModelValidator extends AbstractSQLProc {
 				try {
 					DBObjectUtils.validateTable(rel, conn, update);
 				}
+				catch(RuntimeException e) {
+					if(removeInvalid) { it2.remove(); }
+					log.warn("Error with table '"+rel.getFinalQualifiedName()+"': "+e);
+					countErr++;
+				}
 				catch(SQLException e) {
 					if(removeInvalid) { it2.remove(); }
-					log.warn(e);
+					log.warn("Error with table '"+rel.getFinalQualifiedName()+"': "+e);
 					countErr++;
 				}
 				count++;
