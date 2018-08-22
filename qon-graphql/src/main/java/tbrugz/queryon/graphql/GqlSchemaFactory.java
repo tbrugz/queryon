@@ -52,6 +52,11 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	public static final String FILTER_KEY_PREPEND = "filter_by_";
 	
+	static final String TYPE_QUERY = "QueryType";
+	static final String TYPE_MUTATION = "MutationType";
+	static final String TYPE_UPDATE_INFO = "UpdateInfoType";
+	static final String TYPE_EXECUTION_RETURN = "ExecuteReturnType";
+	
 	static final String FIELD_UPDATE_COUNT = "updateCount";
 	static final String FIELD_RETURN_VALUE = "returnValue";
 	
@@ -96,13 +101,13 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		GraphQLSchema.Builder gqlSchemaBuilder = GraphQLSchema.newSchema();
 		
 		// SELECT
-		GraphQLObjectType.Builder queryBuilder = GraphQLObjectType.newObject().name("QueryType");
+		GraphQLObjectType.Builder queryBuilder = GraphQLObjectType.newObject().name(TYPE_QUERY);
 		
-		for(Relation t: sm.getTables()) {
-			addRelation(queryBuilder, t, df);
-		}
 		for(Relation v: sm.getViews()) {
 			addRelation(queryBuilder, v, df);
+		}
+		for(Relation t: sm.getTables()) {
+			addRelation(queryBuilder, t, df);
 		}
 		gqlSchemaBuilder.query(queryBuilder.build());
 		
@@ -110,7 +115,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		// https://graphql.org/learn/queries/#mutations
 		// https://graphql.org/learn/schema/#the-query-and-mutation-types
 		if(addMutations) {
-			GraphQLObjectType.Builder mutationBuilder = GraphQLObjectType.newObject().name("MutationType");
+			GraphQLObjectType.Builder mutationBuilder = GraphQLObjectType.newObject().name(TYPE_MUTATION);
 			int mutationCount = 0;
 			GraphQLObjectType updateType = getUpdateType(mutationBuilder);
 			GraphQLObjectType executeType = getExecuteReturnType(mutationBuilder);
@@ -205,7 +210,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	GraphQLObjectType getUpdateType(GraphQLObjectType.Builder mutationBuilder) {
 		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
-			.name("UpdateInfoType")
+			.name(TYPE_UPDATE_INFO)
 			.description("update info")
 			.field(GraphQLFieldDefinition.newFieldDefinition()
 				.name(FIELD_UPDATE_COUNT)
@@ -215,7 +220,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 
 	GraphQLObjectType getExecuteReturnType(GraphQLObjectType.Builder mutationBuilder) {
 		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
-			.name("ExecuteReturnType")
+			.name(TYPE_EXECUTION_RETURN)
 			.description("execution return")
 			.field(GraphQLFieldDefinition.newFieldDefinition()
 				.name(FIELD_RETURN_VALUE)
