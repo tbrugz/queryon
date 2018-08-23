@@ -695,7 +695,7 @@ function hasGrantOfType(grant, column) {
 function relationHasGrantOfType(relation, grant, column) {
 	//authInfo.roles
 	var roles = authInfo.roles.join("|");
-	var restr = "\\["+relation.name+";priv="+grant+";to:("+roles+");"
+	var restr = "\\["+relation.name+";priv="+grant+";to=("+roles+");"
 		+(column?"col="+column:"")
 		+";\\]";
 	var re = new RegExp(restr);
@@ -707,7 +707,7 @@ function relationHasGrantOfType(relation, grant, column) {
 function relationHasGrantOfTypeAnyColumn(relation, grant) {
 	//authInfo.roles
 	var roles = authInfo.roles.join("|");
-	var restr = "\\["+relation.name+";priv="+grant+";to:("+roles+");"
+	var restr = "\\["+relation.name+";priv="+grant+";to=("+roles+");"
 		+"(col=.+)?"
 		+";\\]";
 	var re = new RegExp(restr);
