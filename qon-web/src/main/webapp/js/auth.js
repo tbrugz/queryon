@@ -1,8 +1,4 @@
 
-/*
- * requires: jquery
- */
-
 var authInfo = {
 		// similar to 'auth/info.jsp'
 		authenticated: false,
@@ -22,8 +18,8 @@ function loadAuthInfo() { //callback?
 	request.onload = function(oEvent) {
 		var info = JSON.parse(oEvent.target.responseText);
 		//console.log('authInfo', info);
-		info.isAdmin = info.permissions.indexOf("SELECT_ANY")>=0;
-		info.isDev = info.isAdmin;
+		info.isAdmin = info.permissions.indexOf("SQL_ANY")>=0;
+		info.isDev = info.permissions.indexOf("SELECT_ANY")>=0;
 		info.loaded = true;
 		authInfo = info;
 		

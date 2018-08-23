@@ -59,7 +59,7 @@
 	
 	// permissions
 	// * fixed list of permissions
-	String[] permissionsArr = { "SELECT_ANY", "INSERT_ANY", "UPDATE_ANY", "DELETE_ANY", "MANAGE" };
+	String[] permissionsArr = { "SELECT_ANY", "INSERT_ANY", "UPDATE_ANY", "DELETE_ANY", "SQL_ANY", "MANAGE" };
 	List<String> permissionList = new ArrayList<String>();
 	permissionList.addAll(Arrays.asList(permissionsArr));
 	// * apply permissions
