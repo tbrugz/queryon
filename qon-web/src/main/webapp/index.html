@@ -187,7 +187,7 @@
 			tableHeader.style.top = navHeight; /* nav height */
 		}
 
-		var tableHeaders = document.querySelectorAll("#content > table th");
+		var tableHeaders = document.querySelectorAll("#content > table > tbody > tr:nth-child(1) > th");
 		if(tableHeaders) {
 			for(var i=0;i<tableHeaders.length;i++) {
 				tableHeaders[i].style.top = navHeight; /* nav height */
@@ -374,15 +374,16 @@
 			var allowDelete = relationHasGrantOfType(rel, 'DELETE') || authHasPermission('DELETE_ANY');
 			//rows[0].innerHTML += "<th>actions</th>";
 			if(allowInsert) {
-				rows[0].innerHTML += "<th><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></th>"
+				rows[0].innerHTML += "<th class='row1 collast'><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></th>"
 			}
 			for(var i=1;i<rows.length;i++) {
 				if(!allowUpdate && !allowDelete) { continue; }
-				rows[i].innerHTML += "<th>"
+				rows[i].innerHTML += "<td class='collast'>"
 					+ (allowUpdate?"<input type=button title='update' class='btn-update' onclick='doOpenUpdateDialog("+i+")' value='&#x21bb;'/> ":"")
 					+ (allowDelete?"<input type=button title='delete' class='btn-delete' onclick='doRunDelete("+i+")' value='x'/>":"")
-					+ "</th>";
+					+ "</td>";
 			}
+			updateUI();
 		}
 			
 		lastQueryThatRan = id;
@@ -516,7 +517,7 @@
 		updateUI();
 		
 		// a bit hacky ;)
-		document.location = "#body";
+		//document.location = "#body";
 		updateState();
 	}
 	
@@ -1128,6 +1129,8 @@
 		
 		makeHrefs();
 	}
+	
+	window.onresize = updateUI;
 	
 	</script>
 	<style type="text/css">

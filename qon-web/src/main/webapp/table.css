@@ -37,7 +37,7 @@ table > tbody > tr:nth-child(1) {
 	top: 0px;
 }
 
-table th {
+table > tbody > tr:nth-child(1) > th {
 	position: sticky;
 	top: 0px;
 	z-index: 3;

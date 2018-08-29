@@ -291,6 +291,19 @@ option.unavaiable {
 	color: #bbb;
 }
 
+td.collast, th.collast {
+	position: sticky;
+	right: 0;
+	z-index: 2;
+	/* from 'th' */
+	background-color: #fff;
+	text-align: center;
+}
+
+th.row1 {
+	z-index: 5;
+}
+
 .fa-exclamation-triangle {
 	color: #ff8;
 }
