@@ -661,7 +661,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
+		//log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 		
 		try {
 
@@ -677,6 +677,9 @@ public class QueryOn extends HttpServlet {
 		}*/
 		
 		RequestSpec reqspec = getRequestSpec(req);
+		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod()+
+				( (reqspec.httpMethod!=null && !reqspec.httpMethod.equals(req.getMethod())?" ; final-method: "+reqspec.httpMethod:"") )
+				);
 		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 		
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
@@ -2613,8 +2616,8 @@ public class QueryOn extends HttpServlet {
 		for(SqlCommand cmd: cmds) {
 			if(cmd.matches(sql)) {
 				Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
-				ResultSet rs = cmd.run(conn);
 				try {
+					ResultSet rs = cmd.run(conn);
 					//XXX: mayApplyLimitOffset should be true or false?
 					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ true, resp);
 				}

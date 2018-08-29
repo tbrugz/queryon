@@ -30,6 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -60,6 +61,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import tbrugz.queryon.ResponseSpec;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
@@ -269,6 +271,17 @@ public class WinstoneAndH2HttpRequestTest {
 		httpPost.releaseConnection();
 	}
 
+	@Test
+	public void testPost_Emp_KeyOnPath_Created() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(baseUrl+"/EMP/11?v:NAME=sonya");
+		
+		HttpResponse response1 = httpclient.execute(httpPost);
+		
+		Assert.assertEquals("Must be Created (201)", 201, response1.getStatusLine().getStatusCode());
+		httpPost.releaseConnection();
+	}
+	
 	/*
 	 * TODO: HttpPut isn't working with winstone
 	 * http://code.google.com/p/winstone/source/browse/trunk/winstone/src/main/java/net/winstone/core/listener/HttpListener.java
@@ -331,6 +344,21 @@ public class WinstoneAndH2HttpRequestTest {
 		httpPut.releaseConnection();
 	}
 
+	@Test
+	public void testPatchEmpKeyVals_ByPath() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PATCH");
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+		//System.out.println("content: "+getContent(response1));
+		Header hUpdate = response1.getFirstHeader(ResponseSpec.HEADER_UPDATECOUNT);
+		//System.out.println("header "+ResponseSpec.HEADER_UPDATECOUNT+": "+hUpdate.getValue());
+		
+		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
+		Assert.assertEquals("Must be 1 updated row", "1", hUpdate.getValue());
+		httpPut.releaseConnection();
+	}
+	
 	@Test
 	public void testDelete_Emp_Ok() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
