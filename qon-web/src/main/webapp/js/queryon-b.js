@@ -115,7 +115,7 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 		}
 	}
 
-	queryString += urlGetQueryParameters(true);
+	queryString += (queryString?"&":"") + urlGetQueryParameters(true);
 	
 	var filters = document.querySelectorAll('.filter');
 	for (var i = 0; i < filters.length; ++i) {
