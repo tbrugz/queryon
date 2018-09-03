@@ -98,12 +98,20 @@ public class ShiroUtils {
 			throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", subject.isAuthenticated());
 		}
 	}
+	
+	public static boolean throwPermissionException(Subject subject, String permission, String object) {
+		if(object!=null) {
+			object = object.replaceAll("\\.", ":");
+		}
+		log.warn("no permission '"+permission+"' for subject '"+subject.getPrincipal()+"' on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
+		throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", subject.isAuthenticated());
+	}
 
 	public static boolean isPermitted(Subject subject, String permission) {
 		return isPermitted(subject, permission, null);
 	}
 	
-	static boolean isPermitted(Subject subject, String permission, String object) {
+	public static boolean isPermitted(Subject subject, String permission, String object) {
 		if(object!=null) {
 			object = object.replaceAll("\\.", ":");
 			permission += ":"+object;
@@ -113,6 +121,20 @@ public class ShiroUtils {
 		return permitted;
 	}
 
+	public static boolean isPermitted(Subject subject, String permission, String object, String parameter) {
+		if(object!=null) {
+			object = object.replaceAll("\\.", ":");
+			permission += ":"+object;
+		}
+		if(parameter!=null) {
+			parameter = parameter.replaceAll("\\.", ":");
+			permission += ":"+parameter;
+		}
+		boolean permitted =  subject.isPermitted(permission);
+		//log.info("checking permission '"+permission+"', subject = "+subject.getPrincipal()+" :: "+permitted);
+		return permitted;
+	}
+	
 	public static void checkPermissionAny(Subject subject, String[] permissionList) {
 		for(String permission: permissionList) {
 			if(subject.isPermitted(permission)) {

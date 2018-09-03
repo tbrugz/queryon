@@ -272,7 +272,7 @@ public class QueryOn extends HttpServlet {
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	static boolean validateFilterColumnNames = true;
 	//boolean xSetRequestUtf8 = false;
-	protected boolean validateUpdateColumnPermissions = false; //XXX: add prop for validateUpdateColumnPermissions
+	protected boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
 	protected Integer defaultLimit;
 	protected int maxLimit;
 	boolean debugMode = false; //XXX add prop for debugMode
@@ -777,7 +777,16 @@ public class QueryOn extends HttpServlet {
 		
 			Subject currentUser = ShiroUtils.getSubject(prop, req);
 			
-			ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
+			//ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
+			boolean permitted = ShiroUtils.isPermitted(currentUser, otype+":"+atype, reqspec.object);
+			if(!permitted) {
+				if( (atype==ActionType.UPDATE || atype == ActionType.INSERT) && validateUpdateColumnPermissions) {
+					// should validate columns on doInsert/doUpdate
+				}
+				else {
+					ShiroUtils.throwPermissionException(currentUser, otype+":"+atype, reqspec.object);
+				}
+			}
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;
@@ -865,11 +874,11 @@ public class QueryOn extends HttpServlet {
 				doExecute(eo, reqspec, currentUser, resp);
 				break;
 			case INSERT: {
-				doInsert((Relation) dbobj, reqspec, currentUser, resp);
+				doInsert((Relation) dbobj, reqspec, currentUser, permitted, resp);
 				}
 				break;
 			case UPDATE: {
-				doUpdate((Relation) dbobj, reqspec, currentUser, resp);
+				doUpdate((Relation) dbobj, reqspec, currentUser, permitted, resp);
 				}
 				break;
 			case DELETE: {
@@ -1791,7 +1800,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	protected void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	protected void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, boolean isPermitted, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		SQL sql = null;
 		try {
@@ -1801,15 +1810,19 @@ public class QueryOn extends HttpServlet {
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
 
+		/*
 		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		List<Grant> updateGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.UPDATE);
 		boolean hasRelationUpdatePermission = QOnModelUtils.hasPermissionWithoutColumn(updateGrants, roles)
 				|| ShiroUtils.isPermitted(currentUser, ActionType.UPDATE_ANY.name());
+		*/
+		boolean hasRelationInsertPermission = isPermitted || ShiroUtils.isPermitted(currentUser, ActionType.UPDATE_ANY.name());
 		
 		StringBuilder sb = new StringBuilder();
 		int colsCount = 0;
 		{
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
+		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
 		for(; cols.hasNext();) {
 			String col = cols.next();
 			if(! MiscUtils.containsIgnoreCase(columns, col)) {
@@ -1817,7 +1830,8 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("[update] unknown column: "+col);
 			}
 			//TODOne: check UPDATE permission on each row, based on grants
-			if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
+			//if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
+			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.UPDATE.name(), relation.getName(), col)) {
 				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 			}
 			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
@@ -1838,7 +1852,8 @@ public class QueryOn extends HttpServlet {
 					throw new BadRequestException("[update] unknown column: "+col);
 				}
 				//TODOne: check UPDATE permission on each row, based on grants
-				if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
+				//if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
+				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, ActionType.UPDATE.name(), relation.getName(), col)) {
 					throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 				}
 				//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
@@ -1935,7 +1950,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, boolean isPermitted, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 
@@ -1962,16 +1977,20 @@ public class QueryOn extends HttpServlet {
 			pkcols = pk.getUniqueColumns().toArray(new String[]{});
 		}
 		
+		/*
 		Set<String> roles = ShiroUtils.getSubjectRoles(currentUser);
 		List<Grant> insertGrants = QOnModelUtils.filterGrantsByPrivilegeType(relation.getGrants(), PrivilegeType.INSERT);
 		boolean hasRelationInsertPermission = QOnModelUtils.hasPermissionWithoutColumn(insertGrants, roles)
 				|| ShiroUtils.isPermitted(currentUser, ActionType.INSERT_ANY.name());
+		*/
+		boolean hasRelationInsertPermission = isPermitted || ShiroUtils.isPermitted(currentUser, ActionType.INSERT_ANY.name());
 		
 		StringBuilder sbCols = new StringBuilder();
 		StringBuilder sbVals = new StringBuilder();
 		int colsCount = 0;
 		{
 			Iterator<Map.Entry<String, String>> cols = reqspec.updateValues.entrySet().iterator();
+			String otype = QueryOn.getObjectType((DBIdentifiable) relation);
 			
 		for(; cols.hasNext();) {
 				Map.Entry<String, String> colmap = cols.next();
@@ -1980,7 +1999,8 @@ public class QueryOn extends HttpServlet {
 				log.warn("doInsert: unknown 'value' column: "+col); //+" ; cols: "+columns);
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
-			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
+			//if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
+			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.INSERT.name(), relation.getName(), col)) {
 				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles);
 				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 			}
@@ -2003,7 +2023,8 @@ public class QueryOn extends HttpServlet {
 					log.warn("unknown 'value' column: "+pcol);
 					throw new BadRequestException("[insert] unknown column: "+pcol);
 				}
-				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, pcol)) {
+				//if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, pcol)) {
+				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, ActionType.INSERT.name(), relation.getName(), pcol)) {
 					throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+pcol, currentUser.isAuthenticated());
 				}
 				int colindex = MiscUtils.indexOfIgnoreCase(relation.getColumnNames(), pcol);

@@ -243,15 +243,15 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 	
 	@Override
-	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
+	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, boolean isPermitted, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
-		super.doInsert(relation, reqspec, currentUser, resp);
+		super.doInsert(relation, reqspec, currentUser, isPermitted, resp);
 	}
 	
 	@Override
-	protected void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
+	protected void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, boolean isPermitted, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
-		super.doUpdate(relation, reqspec, currentUser, resp);
+		super.doUpdate(relation, reqspec, currentUser, isPermitted, resp);
 	}
 	
 	@Override

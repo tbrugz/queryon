@@ -287,7 +287,7 @@ public class WinstoneAndH2HttpRequestTest {
 	 * http://code.google.com/p/winstone/source/browse/trunk/winstone/src/main/java/net/winstone/core/listener/HttpListener.java
 	 */
 	@Test
-	public void testPut_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
+	public void testPatch_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PATCH");
 		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PATCH");
@@ -334,7 +334,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@Test
-	public void testPut_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
+	public void testPatch_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?_method=PATCH");
 		
@@ -356,6 +356,17 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
 		Assert.assertEquals("Must be 1 updated row", "1", hUpdate.getValue());
+		httpPut.releaseConnection();
+	}
+
+	@Test
+	public void testPatchDeptForbidden() throws IOException, ParserConfigurationException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT?k:ID=1&v:PARENT_ID=2&_method=PATCH");
+		
+		HttpResponse response1 = httpclient.execute(httpPut);
+		
+		Assert.assertEquals("Must be Forbidden (updated)", 403, response1.getStatusLine().getStatusCode());
 		httpPut.releaseConnection();
 	}
 	
@@ -785,7 +796,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@Test
-	public void testPut_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
+	public void testPatchDeptOk() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&_method=PATCH");
 		

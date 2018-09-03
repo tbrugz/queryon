@@ -92,6 +92,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			//log.info("currentUser: "+currentUser.getPrincipal());
 			//log.info("gcds(#2): "+reqspec.getCurrentDumpSyntax());
 			
+			//XXX: per-column permission on INSERT / UPDATE 
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;
@@ -99,11 +100,11 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 				}
 				break;
 			case INSERT: {
-				servlet.doInsert((Relation) dbobj, reqspec, currentUser, resp);
+				servlet.doInsert((Relation) dbobj, reqspec, currentUser, true, resp);
 				return (T) getUpdateCountMap(reqspec.updateCount);
 				}
 			case UPDATE: {
-				servlet.doUpdate((Relation) dbobj, reqspec, currentUser, resp);
+				servlet.doUpdate((Relation) dbobj, reqspec, currentUser, true, resp);
 				return (T) getUpdateCountMap(reqspec.updateCount);
 				}
 			case DELETE: {
