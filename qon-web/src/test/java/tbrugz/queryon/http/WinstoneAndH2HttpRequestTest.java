@@ -454,23 +454,24 @@ public class WinstoneAndH2HttpRequestTest {
 		httpGet.releaseConnection();
 	}
 	
+	@SuppressWarnings("unused")
 	@Test
 	public void testGet_JGSON_Tables_PrettyPrint() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.json");
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String jsonStr = getContent(response1);
-		System.out.print("json-original:\n"+jsonStr+"\n");
+		//System.out.print("json-original:\n"+jsonStr+"\n");
 		
 		Gson gsonpretty = new GsonBuilder().setPrettyPrinting().create();
 		Object jsonObj = gsonpretty.fromJson(jsonStr, Object.class);
 		String jsonOutput = gsonpretty.toJson(jsonObj);
-		System.out.print("json-pretty:\n"+jsonOutput+"\n");
+		//System.out.print("json-pretty:\n"+jsonOutput+"\n");
 
 		Gson gson = new Gson();
 		jsonObj = gson.fromJson(jsonStr, Object.class);
 		jsonOutput = gson.toJson(jsonObj);
-		System.out.print("json-compact:\n"+jsonOutput+"\n");
+		//System.out.print("json-compact:\n"+jsonOutput+"\n");
 	}
 
 	@Test
@@ -665,7 +666,7 @@ public class WinstoneAndH2HttpRequestTest {
 			select.add("select "+i+" as n");
 		}
 		String sql = Utils.join(select, " union all\n");
-		System.out.println("sql: "+sql);
+		//System.out.println("sql: "+sql);
 		return sql;
 	}
 	

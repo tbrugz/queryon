@@ -82,6 +82,7 @@ public class DirectMappingTest {
 		SQLDump.main(params);
 	}
 	
+	@SuppressWarnings("unused")
 	@Test
 	//@Ignore("properties count is frequantly changinf")
 	public void testGet_Turtle_Tables_withAny23() throws IOException, ParserConfigurationException, SAXException, ExtractionException, TripleHandlerException {
@@ -109,9 +110,11 @@ public class DirectMappingTest {
 		}
 		
 		String n3 = out.toString("UTF-8");
+		/*
 		System.out.println("before:\n"+turtleStr);
 		System.out.println("after:\n"+n3);
 		System.out.println("count: "+countingHandler.getCount());
+		*/
 		//System.out.println("report:\n"+reportHandler.printReport());
 		
 		//int propCount = 6;
