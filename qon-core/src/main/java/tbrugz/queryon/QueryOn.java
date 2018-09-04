@@ -205,6 +205,8 @@ public class QueryOn extends HttpServlet {
 	//static final String INITP_MODEL_ID = "model-id";
 	static final String DEFAULT_PROPERTIES_RESOURCE = "/queryon.properties";
 	static final String DEFAULT_PROPERTIES_VALUES_RESOURCE = "/queryon-defaults.properties";
+	static final String DEFAULT_SYNTAXES_RESOURCE = "/dumpsyntaxes-qon.properties";
+	
 	//static final String DEFAULT_MODELID = "default";
 	
 	public static final String CONN_PROPS_PREFIX = "queryon";
@@ -382,6 +384,7 @@ public class QueryOn extends HttpServlet {
 				log.warn("no properties config loaded");
 			}
 
+			DumpSyntaxRegistry.setSyntaxesResource(DEFAULT_SYNTAXES_RESOURCE);
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
 			log.info("syntaxes: "+StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );
 			
