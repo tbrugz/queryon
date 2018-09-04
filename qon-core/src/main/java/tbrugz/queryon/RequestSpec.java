@@ -578,7 +578,7 @@ public class RequestSpec {
 				outputSyntaxTmp = dsutils.getDumpSyntaxByAccept(acceptHeader);
 			}
 			if(outputSyntaxTmp==null) {
-				log.info("no syntax match, using default ["+defaultOutputSyntax+"]");
+				log.debug("no syntax match, using default ["+defaultOutputSyntax+"]");
 				outputSyntaxTmp = dsutils.getDumpSyntax(defaultOutputSyntax);
 				if(outputSyntaxTmp==null) {
 					//log.warn("null outputSyntax ["+defaultOutputSyntax+"]");

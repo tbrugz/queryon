@@ -900,7 +900,8 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(InternalServerException e) {
 			//log.warn(e, e);
-			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
+			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
+			//log.debug(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			throw e;
 		}
 		catch(BadRequestException e) {
@@ -911,7 +912,8 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			//log.warn(e, e);
-			log.warn(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage(), e);
+			log.warn(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage());
+			//log.debug(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage(), e);
 			throw new InternalServerException(e.getClass().getSimpleName()+" [SQLException]: "+e.getMessage(), e);
 		}
 		catch(IOException e) {
@@ -1743,7 +1745,7 @@ public class QueryOn extends HttpServlet {
 		PreparedStatement st = conn.prepareStatement(sql.getFinalSql());
 		sql.bindParameters(st);
 		
-		log.info("sql delete: "+sql);
+		log.debug("sql delete: "+sql);
 		
 		int count = st.executeUpdate();
 		
@@ -2136,7 +2138,7 @@ public class QueryOn extends HttpServlet {
 				//log.info("2.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
 			//}
 		}
-		log.info("col["+colindex+"] "+col+": "+ctype+" [isBinary="+isBinary+"]");
+		log.debug("col["+colindex+"] "+col+": "+ctype+" [isBinary="+isBinary+"]");
 	}
 	
 	void doManage(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {
@@ -2238,7 +2240,7 @@ public class QueryOn extends HttpServlet {
 					String column = pk.getUniqueColumns().get(i);
 					filter += (i!=0?" and ":"")+SQL.sqlIdDecorator.get(column)+" = ?";
 					sql.addParameter(allParams.get(i), DBUtil.getColumnTypeFromColName(relation, column));
-					logFilter.info("filterByKey: value["+i+"]="+allParams.get(i));
+					logFilter.debug("filterByKey: value["+i+"]="+allParams.get(i));
 				}
 			}
 		}
@@ -2339,7 +2341,7 @@ public class QueryOn extends HttpServlet {
 				int idx = colNames.indexOf(col);
 				sql.addParameter( valueMap.get(col), idx>=0?colTypes.get(idx):null );
 				sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareSymbol+" ?");
-				logFilter.info("addUniqueFilter: values="+valueMap.get(col));
+				logFilter.debug("addUniqueFilter: values="+valueMap.get(col));
 			}
 			else {
 				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
@@ -2356,7 +2358,7 @@ public class QueryOn extends HttpServlet {
 					sql.bindParameterValues.add(values[i]);
 					sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareExpression); //" like ?"
 				}
-				logFilter.info("addMultiFilter: values="+Arrays.asList(values));
+				logFilter.debug("addMultiFilter: values="+Arrays.asList(values));
 			}
 			else {
 				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
@@ -2380,7 +2382,7 @@ public class QueryOn extends HttpServlet {
 				}
 				sb.append(")");
 				sql.addFilter(sb.toString());
-				logFilter.info("addMultiFilterSubexpression: values="+Arrays.asList(values));
+				logFilter.debug("addMultiFilterSubexpression: values="+Arrays.asList(values));
 			}
 			else {
 				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
@@ -2393,7 +2395,7 @@ public class QueryOn extends HttpServlet {
 		for(String col: valueSet) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareSymbol);
-				logFilter.info("addBooleanFilter: value="+col+" ; symbol="+compareSymbol);
+				logFilter.debug("addBooleanFilter: value="+col+" ; symbol="+compareSymbol);
 			}
 			else {
 				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
