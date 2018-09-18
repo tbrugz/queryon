@@ -9,6 +9,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
+	<meta charset="utf-8">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<!-- link href="css/prism.css" rel="stylesheet" /-->
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
@@ -299,6 +300,7 @@ doClear = function() {
 	mblock.style.display = 'none';
 	
 	document.getElementById('ddldiff-container').style.display = 'none';
+	document.getElementById('datadiff-container').style.display = 'none';
 	doClearDdlOutput();
 	
 	document.getElementById('content-toggle').style.display = 'none';
@@ -347,6 +349,7 @@ doDiffUsingJS = function(viewType, inverse) {
 		//XXX
 		document.getElementById('ddldiff-message').style.display='none';
 		document.getElementById('ddldiff-container').style.display = 'block';
+		document.getElementById('datadiff-container').style.display = 'block';
 		
 		if(document.getElementById('type').value=='TABLE') {
 			var fromUk = document.getElementById('content-from-uk').textContent;
@@ -443,10 +446,12 @@ diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId, invertS
 		}));
 		byId('togglediffbtn').style.visibility = 'visible';
 		byId('ddldiff-container').style.display = 'block';
+		byId('datadiff-container').style.display = 'block';
 	}
 	else {
 		byId('togglediffbtn').style.visibility = 'hidden';
 		byId('ddldiff-container').style.display = 'none';
+		byId('datadiff-container').style.display = 'none';
 	}
 }
 
@@ -580,11 +585,21 @@ getDDLdiff = function(apply) {
 }
 
 getDataDiffUrl = function(syntax) {
+	var dmlops = "";
+	var opIns = byId('insert').checked;
+	var opUpd = byId('update').checked;
+	var opDel = byId('delete').checked;
+	var opEq = byId('equals').checked;
+	if(!opIns || !opUpd || !opDel || !opEq) {
+		dmlops = "&dmlops=" + (opIns?"INSERT,":"") + (opUpd?"UPDATE,":"") + (opDel?"DELETE,":"") + (opEq?"EQUALS,":"");
+	}
+
 	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
-	+ document.getElementById('object').value
-	+ (syntax?"."+syntax:"")
-	+'?modelSource='+document.getElementById('modelSource').value
-	+'&modelTarget='+document.getElementById('modelTarget').value
+		+ document.getElementById('object').value
+		+ (syntax?"."+syntax:"")
+		+'?modelSource='+document.getElementById('modelSource').value
+		+'&modelTarget='+document.getElementById('modelTarget').value
+		+dmlops
 	;
 }
 
@@ -815,7 +830,8 @@ toggleCode = function() {
 		border-bottom: 1px solid #ccc;
 	}
 	.content-elem {
-		border: 10px solid #ddd;
+		padding: 10px
+		/* border: 10px solid #ddd; */
 	}
 	
 	#diffoutput {
@@ -876,6 +892,16 @@ toggleCode = function() {
 	}
 	#ddldiff-msg {
 		width: 80%;
+	}
+	
+	#datadiff-container {
+		display: none;
+		clear: both;
+		background-color: #aaa;
+	}
+	#datadiff-container label {
+		padding: 3px;
+		border: 1px solid #999;
 	}
 	
 	#ddldiff-message {
@@ -978,14 +1004,34 @@ toggleCode = function() {
 	<div id="ddldiff-container">
 		<div id="ddldiff-controls" class="content-elem">
 			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
-			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
-			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/>
+			<!-- <input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
+			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/> -->
 			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
-			<span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span>
+			<!-- <span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span> -->
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
 		<div id="ddldiff-msg" class="message" style="display: none;"></div>
 		<code id="ddldiff-output" class="language-sql content-elem"></code>
+	</div>
+
+	<div id="datadiff-container">
+		<div class="content-elem">
+			<strong>Data Diff</strong>
+			<div>
+				DML operations:
+				<label>Insert<input type="checkbox" id="insert" checked/></label>
+				<label>Update<input type="checkbox" id="update" checked/></label>
+				<label>Delete<input type="checkbox" id="delete" checked/></label>
+				<label>Equals<input type="checkbox" id="equals" checked/></label>
+			</div>
+		</div>
+		<div id="datadiff-controls" class="content-elem">
+			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
+			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/>
+			<span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span>
+		</div>
+		<!-- <div id="ddldiff-msg" class="message" style="display: none;"></div>
+		<code id="ddldiff-output" class="language-sql content-elem"></code> -->
 	</div>
 </div>
 
