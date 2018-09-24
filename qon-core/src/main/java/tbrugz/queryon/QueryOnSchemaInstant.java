@@ -156,10 +156,12 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			throw new BadRequestException("null object?");
 		}
 		if(dbid instanceof Relation) {
-			Constraint pk = SchemaModelUtils.getPK((Relation) dbid);
+			Relation rel = (Relation) dbid;
+			Constraint pk = SchemaModelUtils.getPK(rel);
 			if(pk!=null && pk.getUniqueColumns()!=null) {
 				resp.addHeader(ResponseSpec.HEADER_RELATION_UK, Utils.join(pk.getUniqueColumns(), ", "));
 			}
+			resp.addHeader(ResponseSpec.HEADER_RELATION_COLUMNS, Utils.join(rel.getColumnNames(), ", "));
 		}
 		resp.getWriter().write(dbid.getDefinition(true));
 		writeFooter(dbid, resp.getWriter());
