@@ -236,6 +236,7 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 			divStatus.innerHTML = '200';
 			var blocktitle = document.getElementById(contentTitleId);
 			var ukblock = document.getElementById(contentId+"-uk");
+			var colsblock = document.getElementById(contentId+"-cols");
 			container.style.display = 'block';
 			block.innerHTML = safeTags(data); //XXX: use textContent?
 			mblock.innerHTML = '';
@@ -244,8 +245,10 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
 			//Prism.highlightElement(block);
 			var uk = jqXHR.getResponseHeader('X-Relation-UK');
-			console.log('['+modelId+']: '+document.getElementById('object').value+': uk='+uk);
+			var cols = jqXHR.getResponseHeader('X-Relation-Columns');
+			//console.log('['+modelId+']: ',document.getElementById('object').value,': uk=',uk); //," ; cols=",cols);
 			ukblock.innerHTML = uk;
+			colsblock.innerHTML = cols;
 			if(callback) { callback(); }
 		},
 		error: function(err) {
@@ -333,6 +336,8 @@ doDiffUsingJS = function(viewType, inverse) {
 	var to = document.getElementById('content-to').textContent;
 	var fromStatus = document.getElementById('content-from-status').textContent;
 	var toStatus = document.getElementById('content-to-status').textContent;
+	var fromCols = document.getElementById('content-from-cols').textContent.split(",").map(s => s.trim());
+	var toCols = document.getElementById('content-to-cols').textContent.split(",").map(s => s.trim());
 	var diffc = document.getElementById('diffoutput-container');
 	
 	if( (from || fromStatus=='404') && (to || toStatus=='404')
@@ -355,16 +360,28 @@ doDiffUsingJS = function(viewType, inverse) {
 			var fromUk = document.getElementById('content-from-uk').textContent;
 			var toUk = document.getElementById('content-to-uk').textContent;
 			if(toUk && fromUk) {
+				var ddc = byId('datadiff-container');
+				ddc.style.display = 'block';
 				var ddbtn = document.getElementById('doDataDiffBtn');
-				ddbtn.style.display = 'initial';
+				//ddbtn.style.display = 'initial';
 				ddbtn.href = getDataDiffUrl();
 				var ddsbtn = document.getElementById('doDataDiffSqlBtn');
-				ddsbtn.style.display = 'initial';
+				//ddsbtn.style.display = 'initial';
 				ddsbtn.href = getDataDiffUrl();
+				var cols = arrayIntersect(fromCols, toCols);
+				//console.log('columns: ',cols);
+				var buf = '';
+				for(var e in cols) {
+					buf += '<label>'+cols[e]+'<input type="checkbox" class="diffcolumn" id="col:'+cols[e]+'" checked/></label>';
+				}
+				byId('columns-container').innerHTML = buf;
 			}
 			else {
 				document.getElementById('ddldiff-message').style.display='initial';
 			}
+		}
+		else {
+			byId('datadiff-container').style.display = 'none';
 		}
 	}
 	else {
@@ -374,8 +391,9 @@ doDiffUsingJS = function(viewType, inverse) {
 		//console.log("show ddldiff-container....");
 		//document.getElementById('ddldiff-container').style.display = 'block';
 		doClearDdlOutput();
-		document.getElementById('doDataDiffBtn').style.display = 'none';
-		document.getElementById('doDataDiffSqlBtn').style.display = 'none';
+		//document.getElementById('doDataDiffBtn').style.display = 'none';
+		//document.getElementById('doDataDiffSqlBtn').style.display = 'none';
+		byId('datadiff-container').style.display = 'none';
 	}
 	
 	if(viewType==1) {
@@ -548,7 +566,8 @@ getDDLdiff = function(apply) {
 			if(content=='') {
 				content = '-- no changes';
 			}
-			block.innerHTML = safeTags(content); //XXX use .textContent?
+			block.innerHTML = "<input type='button' value='X' class='simplebutton' style='float: right;' onclick='byId(\"ddldiff-output\").style.display=\"none\";'/></div>";
+			block.innerHTML += safeTags(content); //XXX use .textContent?
 			block.style.display = 'block';
 			if(data && !apply) {
 				//TODOne: test if user has APPLY permission in type/model/schema (ajax) ...
@@ -593,13 +612,23 @@ getDataDiffUrl = function(syntax) {
 	if(!opIns || !opUpd || !opDel || !opEq) {
 		dmlops = "&dmlops=" + (opIns?"INSERT,":"") + (opUpd?"UPDATE,":"") + (opDel?"DELETE,":"") + (opEq?"EQUALS,":"");
 	}
+	var cols = document.querySelectorAll('#columns-container input');
+	var ignorecols = [];
+	var objName = byId('object')[byId('object').selectedIndex].innerText;
+	for(var i=0; i<cols.length; i++) {
+		if(!cols[i].checked) {
+			ignorecols.push("ignorecol:"+objName+"="+cols[i].id.substring(cols[i].id.indexOf(":")+1));
+		}
+	}
+	//console.log("ignorecols",ignorecols);
 
 	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
 		+ document.getElementById('object').value
 		+ (syntax?"."+syntax:"")
-		+'?modelSource='+document.getElementById('modelSource').value
-		+'&modelTarget='+document.getElementById('modelTarget').value
-		+dmlops
+		+ '?modelSource='+document.getElementById('modelSource').value
+		+ '&modelTarget='+document.getElementById('modelTarget').value
+		+ dmlops
+		+ (ignorecols.length>0 ? "&" + ignorecols.join("&") : "");
 	;
 }
 
@@ -619,7 +648,7 @@ function updateState() {
 	var type = select.options[select.selectedIndex].value;
 	select = document.getElementById('object');
 	var object = select.options[select.selectedIndex] ? select.options[select.selectedIndex].value : null;
-	console.log('updateState: s:', modelSource,' t:', modelTarget, 'sch:', schema, 'type:', type, 'obj:', object)
+	//console.log('updateState: s:', modelSource,' t:', modelTarget, 'sch:', schema, 'type:', type, 'obj:', object)
 	
 	if(modelSource && modelTarget && schema) {
 		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schema
@@ -889,6 +918,7 @@ toggleCode = function() {
 		overflow-x: auto;
 		padding: 5px;
 		width: 80%;
+		margin-left: 10px;
 	}
 	#ddldiff-msg {
 		width: 80%;
@@ -898,10 +928,13 @@ toggleCode = function() {
 		display: none;
 		clear: both;
 		background-color: #aaa;
+		line-height: 1.7em;
 	}
+	
 	#datadiff-container label {
 		padding: 3px;
 		border: 1px solid #999;
+		background: #ccc;
 	}
 	
 	#ddldiff-message {
@@ -917,6 +950,18 @@ toggleCode = function() {
 	
 	#dialog {
 		right: 20%;
+	}
+	
+	#applyDdlDiffBtn[disabled] {
+		text-decoration: line-through;
+	}
+	
+	input[type="button"] {
+		margin: 0;
+	}
+	
+	input[type="button"].simplebutton {
+		padding: 2px;
 	}
 	</style>
 </head>
@@ -969,12 +1014,14 @@ toggleCode = function() {
 		<div class="code-container" style="float: left;" id="content-from-panel">
 			<div id="content-from-msg" class="message" style="display: none;"></div>
 			<div id="content-from-uk" style="display: none;"></div>
+			<div id="content-from-cols" style="display: none;"></div>
 			<div id="content-from-status" style="display: none;"></div>
 			<pre style="display: none;"><span class="code-title" id="content-from-title"></span><code id="content-from" class="language-sql"></code></pre>
 		</div>
 		<div class="code-container" style="float: right;" id="content-to-panel">
 			<div id="content-to-msg" class="message" style="display: none;"></div>
 			<div id="content-to-uk" style="display: none;"></div>
+			<div id="content-to-cols" style="display: none;"></div>
 			<div id="content-to-status" style="display: none;"></div>
 			<pre style="display: none;"><span class="code-title" id="content-to-title"></span><code id="content-to" class="language-sql"></code></pre>
 		</div>
@@ -1004,17 +1051,16 @@ toggleCode = function() {
 	<div id="ddldiff-container">
 		<div id="ddldiff-controls" class="content-elem">
 			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
-			<!-- <input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
-			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/> -->
 			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
-			<!-- <span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span> -->
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
 		<div id="ddldiff-msg" class="message" style="display: none;"></div>
 		<code id="ddldiff-output" class="language-sql content-elem"></code>
 	</div>
 
-	<div id="datadiff-container">
+	<p>
+
+	<div id="datadiff-container" style="display: none">
 		<div class="content-elem">
 			<strong>Data Diff</strong>
 			<div>
@@ -1024,15 +1070,19 @@ toggleCode = function() {
 				<label>Delete<input type="checkbox" id="delete" checked/></label>
 				<label>Equals<input type="checkbox" id="equals" checked/></label>
 			</div>
+			<div>
+				Columns to diff:
+				<span id="columns-container"></span>
+			</div>
 		</div>
 		<div id="datadiff-controls" class="content-elem">
-			<input id="doDataDiffBtn" class="content-btn external" type="button" style="display: none" value="diff data (html)" onClick="doDataDiff();"/>
-			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" style="display: none" value="diff data (sql)" onClick="doDataDiff('sql');"/>
+			<input id="doDataDiffBtn" class="content-btn external" type="button" value="diff data (html)" onClick="doDataDiff();"/>
+			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" value="diff data (sql)" onClick="doDataDiff('sql');"/>
 			<span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span>
 		</div>
-		<!-- <div id="ddldiff-msg" class="message" style="display: none;"></div>
-		<code id="ddldiff-output" class="language-sql content-elem"></code> -->
 	</div>
+	
+	<p>
 </div>
 
 
