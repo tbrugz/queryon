@@ -168,7 +168,7 @@ public class DBUtil {
 		return true;
 	}
 	
-	public static void closeConnection(Connection conn) {
+	static void closeConnection(Connection conn) {
 		ConnectionUtil.closeConnection(conn);
 	}
 	

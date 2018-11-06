@@ -610,6 +610,7 @@ public class QueryOn extends HttpServlet {
 		schemaGrabber.setProperties(prop);
 		
 		Connection conn = null;
+		try {
 		if(schemaGrabber.needsConnection()) {
 			conn = DBUtil.initDBConn(prop, modelId);
 			//DBMSResources.instance().updateMetaData(conn.getMetaData());
@@ -631,9 +632,12 @@ public class QueryOn extends HttpServlet {
 		
 		if(conn!=null) {
 			QOnModelUtils.setModelMetadata(sm, modelId, conn);
-			ConnectionUtil.closeConnection(conn);
 		}
 		return sm;
+		}
+		finally {
+			ConnectionUtil.closeConnection(conn);
+		}
 	}
 
 	protected void doFacade(HttpServletRequest req, HttpServletResponse resp)
@@ -779,6 +783,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 			Subject currentUser = ShiroUtils.getSubject(prop, req);
+			Connection conn = null;
 			
 			//ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
 			boolean permitted = ShiroUtils.isPermitted(currentUser, otype+":"+atype, reqspec.object);
@@ -805,7 +810,7 @@ public class QueryOn extends HttpServlet {
 				break;
 			case SELECT_ANY:
 				try {
-					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					Query relation = getQuery(req, reqspec, conn);
 					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
@@ -822,10 +827,13 @@ public class QueryOn extends HttpServlet {
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
 				}
+				finally {
+					ConnectionUtil.closeConnection(conn);
+				}
 				break;
 			case VALIDATE_ANY:
 				try {
-					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					Query relation = getQuery(req, reqspec, conn);
 					doValidate(relation, reqspec, currentUser, conn, resp);
 				}
@@ -835,10 +843,13 @@ public class QueryOn extends HttpServlet {
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
 				}
+				finally {
+					ConnectionUtil.closeConnection(conn);
+				}
 				break;
 			case EXPLAIN_ANY:
 				try {
-					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					Query relation = getQuery(req, reqspec, conn);
 					doExplain(relation, reqspec, currentUser, conn, resp);
 				}
@@ -848,10 +859,13 @@ public class QueryOn extends HttpServlet {
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
 				}
+				finally {
+					ConnectionUtil.closeConnection(conn);
+				}
 				break;
 			case SQL_ANY:
 				try {
-					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					Query relation = getQuery(req, reqspec, conn);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
@@ -864,6 +878,9 @@ public class QueryOn extends HttpServlet {
 				}
 				catch(SQLException e) {
 					throw new BadRequestException(e.getMessage(), e);
+				}
+				finally {
+					ConnectionUtil.closeConnection(conn);
 				}
 				break;
 			case EXECUTE:
@@ -2642,8 +2659,9 @@ public class QueryOn extends HttpServlet {
 		for(SqlCommand cmd: cmds) {
 			if(cmd.matches(sql)) {
 				Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+				ResultSet rs = null;
 				try {
-					ResultSet rs = cmd.run(conn);
+					rs = cmd.run(conn);
 					//XXX: mayApplyLimitOffset should be true or false?
 					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), /*pk*/ null, /*fks*/ null, /*uks*/ null, /*mayApplyLimitOffset*/ true, resp);
 				}
@@ -2653,6 +2671,7 @@ public class QueryOn extends HttpServlet {
 					throw e;
 				}
 				finally {
+					if(rs!=null) { rs.close(); }
 					ConnectionUtil.closeConnection(conn);
 				}
 				return true;

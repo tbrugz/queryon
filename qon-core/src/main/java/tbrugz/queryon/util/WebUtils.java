@@ -54,14 +54,17 @@ public class WebUtils {
 		//e.printStackTrace();
 		//log.warn("BRE: "+e.getMessage()+
 		//		(e.internalMessage!=null?" ; internal="+e.internalMessage:""));
+		String message = e.getMessage();
+		if(message==null) { message = e.toString(); }
+		
 		resp.reset();
 		resp.setStatus(status);
 		resp.setContentType(MIME_TEXT);
-		resp.getWriter().write(e.getMessage());
+		resp.getWriter().write(message);
 		
 		if(debugMode) {
 			log.warn("Exception: "+e);
-			log.debug("Exception: "+e.getMessage(), e);
+			log.debug("Exception: "+message, e);
 			StringWriter errors = new StringWriter();
 			e.printStackTrace(new PrintWriter(errors));
 			resp.getWriter().write("\n\n");

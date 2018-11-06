@@ -30,6 +30,7 @@ import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
 public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
@@ -282,7 +283,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			throw new SQLException("Error fetching queries ["+e.getMessage()+"; sql: "+sql+"]", e);
 		}
 		finally {
-			DBUtil.closeConnection(conn);
+			ConnectionUtil.closeConnection(conn);
 		}
 		
 	}
