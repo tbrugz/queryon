@@ -44,6 +44,7 @@
   <modules>
     <module>qon-core</module>
     <module>qon-graphql</module>
+    <module>qon-soap</module>
     <module>qon-web</module>
     <module>demo-minimal</module>
     <module>demo-dbn</module>

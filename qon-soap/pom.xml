@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.bitbucket.tbrugz</groupId>
+    <artifactId>queryon</artifactId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>qon-soap</artifactId>
+  <packaging>war</packaging>
+  <version>${project.parent.version}</version>
+
+  <name>${project.artifactId}</name>
+
+  <!-- <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build> -->
+    
+  <dependencies>
+
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>qon-core</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-rt</artifactId>
+      <version>2.2.10</version>
+    </dependency>
+
+    <!-- <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <version>3.2.6</version>
+    </dependency> -->
+    
+    <!-- <dependency> 
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.8.0-beta2</version>
+    </dependency> -->
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>${servlet-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-core</artifactId>
+      <version>${shiro.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+  </dependencies>
+
+  <!-- <repositories>
+    <repository>
+      <id>central</id>
+      <url>http://repo.maven.apache.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>aduana</id>
+      <url>http://maven.ontotext.com/content/repositories/aduna/</url>
+    </repository>
+    <repository>
+      <id>bitbucket-tbrugz</id>
+      <url>https://bitbucket.org/tbrugz/mvn-repo/raw/tip/</url>
+    </repository>
+    <repository>
+      <id>pentaho-rep</id>
+      <url>http://repo.pentaho.org/artifactory/repo/</url>
+    </repository>
+    <repository>
+      <id>apache-snapshots</id>
+      <url>https://repository.apache.org/content/groups/snapshots/</url>
+    </repository>
+  </repositories> -->
+</project>

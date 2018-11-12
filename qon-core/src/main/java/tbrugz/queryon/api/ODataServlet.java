@@ -30,6 +30,7 @@ import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
@@ -409,14 +410,14 @@ public class ODataServlet extends QueryOn {
 	/*
 	 * see: http://www.chipkillmar.net/2009/03/25/pretty-print-xml-from-a-dom/
 	 */
-	void serialize(DOMImplementation domImpl, Document document, Writer w) {
+	public static void serialize(DOMImplementation domImpl, Node node, Writer w) {
 		DOMImplementationLS ls = (DOMImplementationLS) domImpl;
 		LSSerializer lss = ls.createLSSerializer();
 		DOMConfiguration domConfig = lss.getDomConfig();
 		domConfig.setParameter("format-pretty-print", Boolean.TRUE);
 		LSOutput lso = ls.createLSOutput();
 		lso.setCharacterStream(w);
-		lss.write(document, lso);
+		lss.write(node, lso);
 	}
 
 }
