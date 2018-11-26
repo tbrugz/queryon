@@ -233,11 +233,11 @@ public class RequestSpec {
 		this(dsutils, req, prop, prefixesToIgnore, QueryOn.DEFAULT_OUTPUT_SYNTAX, true, 1, null);
 	}
 	
-	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
-			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject) throws ServletException, IOException {
+	public RequestSpec(final DumpSyntaxUtils dsutils, final HttpServletRequest req, final Properties prop, final int prefixesToIgnore,
+			final String defaultOutputSyntax, final boolean allowGetDumpSyntaxByAccept, final int minUrlParts, final String defaultObject) throws ServletException, IOException {
 		this.request = req;
 		//this.allowGetDumpSyntaxByAccept = allowGetDumpSyntaxByAccept;
-		defaultOutputSyntax = getDefaultOutputSyntax(prop, defaultOutputSyntax);
+		String defaultOutputSyntaxTmp = getDefaultOutputSyntax(prop, defaultOutputSyntax);
 		
 		contentType = req.getContentType();
 		
@@ -247,14 +247,7 @@ public class RequestSpec {
 		 * http://laraveldaily.com/theres-no-putpatchdelete-method-or-how-to-build-a-laravel-form-manually/
 		 * http://symfony.com/doc/current/cookbook/routing/method_parameters.html
 		 */
-		String method = req.getParameter(PARAM_METHOD);
-		//XXX: may method be changed? property?
-		if(method!=null) {
-			httpMethod = method;
-		}
-		else {
-			httpMethod = req.getMethod();
-		}
+		httpMethod = getMethod(req);
 		
 		this.utf8 = req.getParameter(WebUtils.PARAM_UTF8);
 		boolean convertLatin1ToUtf8 = false;
@@ -321,7 +314,10 @@ public class RequestSpec {
 			lastURIPart = lastURIPart.substring(0, lastURIPart.length()-1-outputTypeStr.length());
 		}
 
-		URIpartz.add( lastURIPart );
+		if(lastURIPart!=null) {
+			URIpartz.add( lastURIPart );
+		}
+		//log.info("varUrl="+varUrl+" / URIparts="+Arrays.asList(URIparts)+" / URIpartz="+URIpartz+" / URIpartz.size="+URIpartz.size()+ " / lastURIPart = "+lastURIPart);
 		//log.info("output-type: "+outputTypeStr+"; new urlparts: "+URIpartz);
 		
 		String objectTmp = getObject(URIpartz, prefixesToIgnore);
@@ -341,7 +337,7 @@ public class RequestSpec {
 		
 		processParams(URIpartz);
 		
-		outputSyntax = getOutputSyntax(req, dsutils, allowGetDumpSyntaxByAccept, defaultOutputSyntax);
+		outputSyntax = getOutputSyntax(req, dsutils, allowGetDumpSyntaxByAccept, defaultOutputSyntaxTmp);
 		
 		SchemaModel sm = SchemaModelUtils.getModel(req.getServletContext(), this.modelId);
 		if(sm==null) {
@@ -559,6 +555,15 @@ public class RequestSpec {
 		}
 	}
 	
+	protected String getMethod(HttpServletRequest req) {
+		//XXX: may method be changed? property?
+		String method = req.getParameter(PARAM_METHOD);
+		if(method==null) {
+			method = req.getMethod();
+		}
+		return method;
+	}
+	
 	protected DumpSyntaxInt getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {
 		DumpSyntaxInt outputSyntaxTmp = null;
 		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
@@ -747,7 +752,10 @@ public class RequestSpec {
 	}
 	
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
-		String objectTmp = parts.remove(0);
+		String objectTmp = null;
+		if(parts.size()>0) {
+			objectTmp = parts.remove(0);
+		}
 		/*if(objectTmp == null || objectTmp.equals("")) {
 			//first part may be empty
 			if(URIpartz.size()>0) {
@@ -762,6 +770,7 @@ public class RequestSpec {
 		return objectTmp;
 	}
 	
+	//XXX rename to processUrlParts
 	protected void processParams(List<String> parts) {
 		for(int i=0;i<parts.size();i++) {
 			params.add(parts.get(i));
@@ -1084,6 +1093,7 @@ public class RequestSpec {
 						throw new BadRequestException(message);
 					}
 					else {
+						//XXX sql.bindParameterValues.add(value) ? this.namedParameters.add(value) ?
 						this.params.add(value);
 						namedParametersBound++;
 					}

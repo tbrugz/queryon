@@ -10,7 +10,7 @@
   </parent>
   
   <artifactId>qon-soap</artifactId>
-  <packaging>war</packaging>
+  <packaging>jar</packaging>
   <version>${project.parent.version}</version>
 
   <name>${project.artifactId}</name>
@@ -36,12 +36,12 @@
       <artifactId>qon-core</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
-    
-    <dependency>
+
+    <!-- <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
-      <version>2.2.10</version>
-    </dependency>
+      <version>2.3.1 / 2.2.10</version> 
+    </dependency> -->
 
     <!-- <dependency>
       <groupId>org.apache.cxf</groupId>

@@ -8,7 +8,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 import javax.xml.ws.Provider;
@@ -29,6 +28,7 @@ import tbrugz.queryon.api.ODataServlet;
  * 
  * http://localhost:8080/qon-soap/qonsoap
  */
+@Deprecated
 @WebServiceProvider(serviceName = "qonsoap", portName = "qonsoap-port", targetNamespace = "http://bitbucket.org/tbrugz/queryon/soap")
 @ServiceMode(value = Service.Mode.MESSAGE)
 public class QonSoapProvider implements Provider<SOAPMessage> {
@@ -44,7 +44,7 @@ public class QonSoapProvider implements Provider<SOAPMessage> {
 			
 			SOAPEnvelope se = sp.getEnvelope();
 			SOAPBody sb = se.getBody();
-			SOAPHeader sh = se.getHeader();
+			//SOAPHeader sh = se.getHeader();
 
 			//log.info("> "+sp+" / "+se+" / "+sb+" / "+sh + "\n "+sp.getAttributes()+" / "+se.get);
 			log.info("sb: "+sb.getNodeName());

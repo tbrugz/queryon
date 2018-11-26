@@ -277,7 +277,7 @@ public class QueryOn extends HttpServlet {
 	protected boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
 	protected Integer defaultLimit;
 	protected int maxLimit;
-	boolean debugMode = false; //XXX add prop for debugMode
+	protected boolean debugMode = false; //XXX add prop for debugMode
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
@@ -914,6 +914,7 @@ public class QueryOn extends HttpServlet {
 			default:
 				throw new BadRequestException("Unknown action type: "+atype); 
 			}
+			postService(model, reqspec, req, resp);
 		}
 		catch(InternalServerException e) {
 			//log.warn(e, e);
@@ -948,6 +949,9 @@ public class QueryOn extends HttpServlet {
 		catch(Throwable e) {
 			throw new ServletException(e);
 		}
+	}
+    
+	protected void postService(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) {
 	}
 	
 	public static void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, Relation rel) {

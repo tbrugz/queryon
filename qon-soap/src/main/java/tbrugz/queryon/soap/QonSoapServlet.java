@@ -3,8 +3,10 @@ package tbrugz.queryon.soap;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Set;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,11 +19,15 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.sun.xml.ws.transport.http.servlet.WSServlet;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -30,48 +36,155 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 
-public class QonSoapServlet extends WSServlet {
+public class QonSoapServlet extends BaseApiServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	private static final Log log = LogFactory.getLog(QonSoapServlet.class);
 	
+	public static final String NS_QON_PREFIX = "http://bitbucket.org/tbrugz/queryon/";
+	
 	public static final String NS_WSDL = "http://schemas.xmlsoap.org/wsdl/";
 	public static final String NS_XMLSCHEMA = "http://www.w3.org/2001/XMLSchema"; // xmlns:xs 
 	public static final String NS_SOAP = "http://schemas.xmlsoap.org/wsdl/soap/";
+	public static final String NS_SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/"; // "http://www.w3.org/2003/05/soap-envelope"; "http://www.w3.org/2001/12/soap-envelope";
+	
+	public static final String XMLNS = "xmlns";
+	
+	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
+	
+	DocumentBuilderFactory dbFactory;
+	DocumentBuilder dBuilder;
 	
 	String serviceName;
 	
 	@Override
-	public void init() throws ServletException {
-		super.init();
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
 		serviceName = "queryOnService";
+		
+		try {
+			dbFactory = DocumentBuilderFactory.newInstance();
+			dBuilder = dbFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ServletException(e); 
+		}
 	}
 	
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
-		if(req.getQueryString()!=null && req.getQueryString().startsWith("wsdl")) {
-			log.info("doGet: wsdl: queryString = "+req.getQueryString());
-			try {
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-				DOMImplementation domImpl = docBuilder.getDOMImplementation();
-				
-				Document doc = makeWsdl(domImpl, req);
-				resp.setContentType(ResponseSpec.MIME_TYPE_XML);
-				ODataServlet.serialize(domImpl, doc, resp.getWriter());
+	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		if(req.getMethod().equalsIgnoreCase(METHOD_GET)) {
+			if(req.getQueryString()!=null && req.getQueryString().startsWith("wsdl")) {
+				log.info("doGet: wsdl: queryString = "+req.getQueryString());
+				try {
+					//DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+					//DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+					DOMImplementation domImpl = dBuilder.getDOMImplementation();
+					
+					Document doc = makeWsdl(domImpl, req);
+					resp.setContentType(ResponseSpec.MIME_TYPE_XML);
+					ODataServlet.serialize(domImpl, doc, resp.getWriter());
+				}
+				catch(ParserConfigurationException e) {
+					log.warn("doGet: wsdl: "+e);
+					throw new BadRequestException("Error retrieving WSDL: "+e);
+				}
+				catch(IOException e) {
+					log.warn("doGet: wsdl: "+e);
+					throw new BadRequestException("Error retrieving WSDL: "+e);
+				}
+				return;
 			}
-			catch(ParserConfigurationException e) {
-				log.warn("doGet: wsdl: "+e);
+			else {
+				log.info("doGet: pathInfo = "+req.getPathInfo());
+				throw new BadRequestException("GET method only supported for retrieving wsdl");
 			}
-			catch(IOException e) {
-				log.warn("doGet: wsdl: "+e);
-			}
-			return;
+			//super.doGet(req, resp);
 		}
-		
-		log.info("doGet: pathInfo = "+req.getPathInfo());
-		super.doGet(req, resp);
+		else if(req.getMethod().equalsIgnoreCase(METHOD_POST)) {
+			String prefixSoapenv = "soapenv1";
+			String prefixQueryon = null;
+			
+			try {
+				Document doc = dBuilder.parse(req.getInputStream());
+				log.info("doc: "+doc);
+				Element el = doc.getDocumentElement();
+				log.info("el: "+el.getTagName() + " // " + el.getNamespaceURI() + " // "+el.getPrefix() + " // "+el.getLocalName());
+				NamedNodeMap nnm = el.getAttributes();
+				int substrIdx = XMLNS.length()+1;
+				for(int i=0;i<nnm.getLength();i++) {
+					Node n = nnm.item(i);
+					log.info("- ["+i+"]: "+n.getNodeName()+" // "+n.getNodeValue());
+					if(n.getNodeName().startsWith(XMLNS+":")) {
+						if(n.getNodeValue().equals(NS_SOAP_ENVELOPE)) {
+							prefixSoapenv = n.getNodeName().substring(substrIdx);
+						}
+						if(n.getNodeValue().startsWith(NS_QON_PREFIX)) {
+							prefixQueryon = n.getNodeName().substring(substrIdx);
+						}
+					}
+				}
+				log.info("prefixSoapenv: "+prefixSoapenv + " / prefixQueryon: " + prefixQueryon);
+				if(prefixSoapenv!=null) {
+					NodeList nl = el.getElementsByTagName(prefixSoapenv+":"+"Body");
+					log.info("body:: nl.getLength(): "+nl.getLength());
+					List<Element> els = XmlUtils.getElementsFromNodeList( nl.item(0).getChildNodes() );
+					log.info("body content:: els.size: "+els.size());
+					if(els.size()==1) {
+						SoapRequest.setAttributesOnRequest(req, els.get(0), prefixQueryon);
+						doServiceIntern(req, resp);
+					}
+					else {
+						throw new BadRequestException("Soap Body has more than 1 element [size="+els.size()+"]");
+					}
+				}
+			}
+			catch (SAXException e) {
+				e.printStackTrace();
+				throw new BadRequestException("Error parsing xml: "+e.getMessage(), e);
+			}
+		}
+		else {
+			throw new BadRequestException("Method not allowed: "+req.getMethod());
+		}
+	}
+	
+	@Override
+	protected SoapRequest getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
+		//SoapRequest.setAttributes(req, requestEl, nsPrefix);
+		return new SoapRequest(/*requestEl, nsPrefix,*/ dsutils, req, prop);
+	}
+	
+	protected void doServiceIntern(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//processSoapMessage(els.get(0), prefixQueryon, req, resp);
+		//XXX: on exception throw soap fault... override doFacade() ? only for POST
+		try {
+			super.doService(req, resp);
+		}
+		catch(Exception e) {
+			log.warn("doServiceIntern: Exeption: "+e);
+			if(! (e instanceof BadRequestException)) {
+				log.info("doServiceIntern: Exeption: "+e.getMessage(), e);
+			}
+			XmlUtils.writeSoapFault(resp, e, debugMode);
+		}
+	}
+	
+	/*void processSoapMessage(Element requestEl, String nsPrefix, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		SoapRequest.setAttributesOnRequest(req, requestEl, nsPrefix);
+		SoapRequest reqspec = getRequestSpec(req);
+		//SoapRequest reqspec = new SoapRequest(dsutils, req, prop);
+		//log.info("request: "+reqspec.toStringDebug());
+	}*/
+
+	@Override
+	protected void postService(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) {
+		if(reqspec instanceof SoapRequest) {
+			log.info("request: "+ ((SoapRequest)reqspec).toStringDebug());
+		}
+		else {
+			log.info("request should be instanceof SoapRequest: "+ reqspec.getClass());
+		}
 	}
 	
 	/*String getBaseNamespace() {
@@ -79,11 +192,11 @@ public class QonSoapServlet extends WSServlet {
 	}*/
 
 	String getWsdlNamespace() {
-		return "http://bitbucket.org/tbrugz/queryon/" + serviceName + ".wsdl";
+		return NS_QON_PREFIX + serviceName + ".wsdl";
 	}
 
 	String getXsdNamespace() {
-		return "http://bitbucket.org/tbrugz/queryon/" + serviceName + ".xsd";
+		return NS_QON_PREFIX + serviceName + ".xsd";
 	}
 	
 	Document makeWsdl(DOMImplementation domImpl, HttpServletRequest req) throws ParserConfigurationException {
@@ -162,11 +275,11 @@ public class QonSoapServlet extends WSServlet {
 		// -- MESSAGES --
 		
 		for(View v: vs) {
-			definitions.appendChild(createMessage(doc, normalize( v.getQualifiedName() )+"Input", normalize( v.getQualifiedName() )+"Request"));
+			definitions.appendChild(createMessage(doc, normalize( v.getQualifiedName() )+"Input", normalize( v.getQualifiedName() )+SUFFIX_REQUEST_ELEMENT));
 			definitions.appendChild(createMessage(doc, normalize( v.getQualifiedName() )+"Output", "listOf" + normalize( v.getQualifiedName() )));
 		}
 		for(Table t: ts) {
-			definitions.appendChild(createMessage(doc, normalize( t.getQualifiedName() )+"Input", normalize( t.getQualifiedName() )+"Request"));
+			definitions.appendChild(createMessage(doc, normalize( t.getQualifiedName() )+"Input", normalize( t.getQualifiedName() )+SUFFIX_REQUEST_ELEMENT));
 			definitions.appendChild(createMessage(doc, normalize( t.getQualifiedName() )+"Output", "listOf" + normalize( t.getQualifiedName() )));
 		}
 
@@ -286,7 +399,7 @@ public class QonSoapServlet extends WSServlet {
 
 	Element createElementRequest(Document doc, Relation r) {
 		Element element = doc.createElement("xs:"+"element");
-		element.setAttribute("name", normalize( r.getQualifiedName() )+"Request");
+		element.setAttribute("name", normalize( r.getQualifiedName() )+SUFFIX_REQUEST_ELEMENT);
 		Element complexType = doc.createElement("xs:"+"complexType");
 		element.appendChild(complexType);
 		Element all = doc.createElement("xs:"+"all");
@@ -399,7 +512,8 @@ public class QonSoapServlet extends WSServlet {
 	}
 	
 	static String normalize(String s) {
-		return s.replaceAll("\\.", "_");
+		return s.replaceAll(" ", "_");
+		//return s.replaceAll("\\.", "_");
 	}
 	
 	static String getServiceHost(HttpServletRequest req, boolean addScheme, boolean useCanonicalHost) {
