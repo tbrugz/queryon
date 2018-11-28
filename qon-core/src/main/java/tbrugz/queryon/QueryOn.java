@@ -657,6 +657,10 @@ public class QueryOn extends HttpServlet {
 		catch(BadRequestException e) {
 			WebUtils.writeException(resp, e, debugMode);
 		}
+		catch(RuntimeException e) {
+			//e.printStackTrace();
+			throw new ServletException(e);
+		}
 		catch(ServletException e) {
 			//e.printStackTrace();
 			throw e;
@@ -941,7 +945,9 @@ public class QueryOn extends HttpServlet {
 			throw new ServletException(e);
 		}
 		catch(NamingException e) {
-			throw new ServletException(e);
+			log.warn(e.getClass().getSimpleName()+" [NamingException]: "+e.getMessage(), e);
+			throw new InternalServerException(e.getClass().getSimpleName()+" [NamingException]: "+e.getMessage(), e);
+			//throw new ServletException(e);
 		}
 		catch(IntrospectionException e) {
 			throw new ServletException(e);
@@ -949,9 +955,6 @@ public class QueryOn extends HttpServlet {
 		catch(Throwable e) {
 			throw new ServletException(e);
 		}
-	}
-    
-	protected void postService(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) {
 	}
 	
 	public static void checkGrantsAndRolesMatches(Subject subject, PrivilegeType privilege, Relation rel) {
@@ -2204,6 +2207,9 @@ public class QueryOn extends HttpServlet {
 		throw new BadRequestException("unknown action: "+action);
 	}
 	
+	protected void postService(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) {
+	}
+	
 	static boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
 		if(pk==null) {
 			return false;
@@ -2454,7 +2460,7 @@ public class QueryOn extends HttpServlet {
 		dumpResultSet(rs, reqspec, schemaName, queryName, uniqueColumns, importedFKs, UKs, false, mayApplyLimitOffset, resp, getLimit(reqspec.limit));
 	}
 	
-	@SuppressWarnings("deprecation")
+	//@SuppressWarnings("deprecation")
 	void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs, boolean fullKeyDefined,
 			boolean mayApplyLimitOffset, HttpServletResponse resp, int limit) 

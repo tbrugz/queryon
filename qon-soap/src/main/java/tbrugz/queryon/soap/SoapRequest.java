@@ -70,7 +70,6 @@ public class SoapRequest extends RequestSpec {
 		return limitStr!=null ? Integer.parseInt(limitStr) : null;
 	}
 	
-	//XXX getOutputSyntax ...
 	@Override
 	protected SoapDumpSyntax getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {
 		SoapDumpSyntax dumpSyntax = new SoapDumpSyntax();
