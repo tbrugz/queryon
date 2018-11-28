@@ -71,11 +71,11 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			
 			QonAction action = reqspec.action;
 			if(action==null) {
-				throw new NotFoundException("object not found (in actionMap): "+reqspec.object);
+				throw new NotFoundException("object not found (in actionMap): "+reqspec.getObject());
 			}
 			DBIdentifiable dbobj = getDBIdentifiable(action.dbType, action.objectName);
 			if(dbobj==null) {
-				throw new NotFoundException("object not found: "+reqspec.object+" [objectName="+action.objectName+"]");
+				throw new NotFoundException("object not found: "+reqspec.getObject()+" [objectName="+action.objectName+"]");
 			}
 
 			//TODO mutation?
@@ -88,7 +88,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			Subject currentUser = ShiroUtils.getSubject(servlet.getProperties(), req);
 			ShiroUtils.checkPermission(currentUser, otype+":"+atype, action.objectName);
 			
-			log.info("get:: object: "+reqspec.object+" ; objType/aType: "+otype+"/"+atype+" ; exec-id: "+env.getExecutionId());
+			log.info("get:: object: "+reqspec.getObject()+" ; objType/aType: "+otype+"/"+atype+" ; exec-id: "+env.getExecutionId());
 			//log.info("currentUser: "+currentUser.getPrincipal());
 			//log.info("gcds(#2): "+reqspec.getCurrentDumpSyntax());
 			

@@ -55,10 +55,10 @@ public class SchemaModelUtils {
 			if(relation!=null) { return relation; }
 		}
 		
-		String[] objectParts = reqspec.object.split("\\.");
+		String[] objectParts = reqspec.getObject().split("\\.");
 		
 		if(objectParts.length>2) {
-			log.debug("getRelation: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			log.debug("getRelation: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.getObject()+"']");
 			//throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 			return null;
 		}
@@ -74,11 +74,11 @@ public class SchemaModelUtils {
 	}
 
 	private static View getView(SchemaModel model, RequestSpec reqspec) {
-		String[] objectParts = reqspec.object.split("\\.");
+		String[] objectParts = reqspec.getObject().split("\\.");
 		
 		View view = null;
 		if(objectParts.length>2) {
-			log.debug("getView: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
+			log.debug("getView: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.getObject()+"']");
 			//throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 			return null;
 		}
@@ -96,7 +96,7 @@ public class SchemaModelUtils {
 	}
 
 	static ExecutableObject getExecutable(SchemaModel model, RequestSpec reqspec) {
-		String[] objectParts = reqspec.object.split("\\.");
+		String[] objectParts = reqspec.getObject().split("\\.");
 		
 		ExecutableObject exec = null;
 		if(objectParts.length==1) { //PROCEDURE

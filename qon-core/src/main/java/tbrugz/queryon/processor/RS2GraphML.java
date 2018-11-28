@@ -84,7 +84,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
 		ActionType atype = ActionType.SELECT;
 		log.debug("user: "+currentUser+" ; otype="+otype+"; atype="+atype); 
-		ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
+		ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.getObject());
 		if(! ShiroUtils.isPermitted(currentUser, QueryOn.doNotCheckGrantsPermission)) {
 			QueryOn.checkGrantsAndRolesMatches(currentUser, PrivilegeType.SELECT, relation);
 		}
@@ -111,7 +111,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 	}
 	
 	void processInternal(RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
-		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		Connection conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 		String finalSql = null;
 		
 		try {

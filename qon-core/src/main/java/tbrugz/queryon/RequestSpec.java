@@ -120,8 +120,8 @@ public class RequestSpec {
 	protected final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
 	final String httpMethod;
-	public final String modelId;
-	public String object;
+	protected final String modelId;
+	protected String object;
 	protected int offset;
 	protected Integer limit;
 	final String loStrategy;
@@ -187,7 +187,7 @@ public class RequestSpec {
 	//XXXdone: add filters: is null (fnull), is not null (fnn/fnnull/fnotnull), 
 	//XXX: add filter: between (btwn)?
 	
-	public final Map<String, String> keyValues = new LinkedHashMap<String, String>();
+	protected final Map<String, String> keyValues = new LinkedHashMap<String, String>();
 	protected final Map<String, String> updateValues = new HashMap<String, String>();
 	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
 	final String optimisticLock;
@@ -1172,4 +1172,12 @@ public class RequestSpec {
 		return WebUtils.getRequestFullContext(request);
 	}
 	
+	public String getObject() {
+		return object;
+	}
+
+	public String getModelId() {
+		return modelId;
+	}
+
 }
