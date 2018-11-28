@@ -19,8 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -48,8 +46,6 @@ public class QonSoapServlet extends BaseApiServlet {
 	public static final String NS_XMLSCHEMA = "http://www.w3.org/2001/XMLSchema"; // xmlns:xs 
 	public static final String NS_SOAP = "http://schemas.xmlsoap.org/wsdl/soap/";
 	public static final String NS_SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/"; // "http://www.w3.org/2003/05/soap-envelope"; "http://www.w3.org/2001/12/soap-envelope";
-	
-	public static final String XMLNS = "xmlns";
 	
 	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
 	
@@ -108,14 +104,19 @@ public class QonSoapServlet extends BaseApiServlet {
 			try {
 				Document doc = dBuilder.parse(req.getInputStream());
 				log.info("doc: "+doc);
+				
+				//StringWriter sw = new StringWriter();
+				//ODataServlet.serialize(dBuilder.getDOMImplementation(), doc, sw);
+				//log.info("xml::\n"+sw);
+				
 				Element el = doc.getDocumentElement();
 				log.info("el: "+el.getTagName() + " // " + el.getNamespaceURI() + " // "+el.getPrefix() + " // "+el.getLocalName());
-				NamedNodeMap nnm = el.getAttributes();
-				int substrIdx = XMLNS.length()+1;
+				/*NamedNodeMap nnm = el.getAttributes();
+				int substrIdx = XmlUtils.XMLNS.length()+1;
 				for(int i=0;i<nnm.getLength();i++) {
 					Node n = nnm.item(i);
 					log.info("- ["+i+"]: "+n.getNodeName()+" // "+n.getNodeValue());
-					if(n.getNodeName().startsWith(XMLNS+":")) {
+					if(n.getNodeName().startsWith(XmlUtils.XMLNS+":")) {
 						if(n.getNodeValue().equals(NS_SOAP_ENVELOPE)) {
 							prefixSoapenv = n.getNodeName().substring(substrIdx);
 						}
@@ -123,7 +124,9 @@ public class QonSoapServlet extends BaseApiServlet {
 							prefixQueryon = n.getNodeName().substring(substrIdx);
 						}
 					}
-				}
+				}*/
+				prefixSoapenv = XmlUtils.searchForNamespace(el, NS_SOAP_ENVELOPE, false);
+				prefixQueryon = XmlUtils.searchForNamespace(el, NS_QON_PREFIX, true);
 				log.info("prefixSoapenv: "+prefixSoapenv + " / prefixQueryon: " + prefixQueryon);
 				if(prefixSoapenv!=null) {
 					NodeList nl = el.getElementsByTagName(prefixSoapenv+":"+"Body");
@@ -140,8 +143,9 @@ public class QonSoapServlet extends BaseApiServlet {
 				}
 			}
 			catch (SAXException e) {
-				e.printStackTrace();
-				throw new BadRequestException("Error parsing xml: "+e.getMessage(), e);
+				log.warn("Exception parsing xml: "+e); //, e);
+				XmlUtils.writeSoapFault(resp, e, debugMode);
+				//throw new BadRequestException("Error parsing xml: "+e.getMessage(), e);
 			}
 		}
 		else {
@@ -157,7 +161,8 @@ public class QonSoapServlet extends BaseApiServlet {
 	
 	protected void doServiceIntern(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//processSoapMessage(els.get(0), prefixQueryon, req, resp);
-		//XXX: on exception throw soap fault... override doFacade() ? only for POST
+		
+		// on exception throw soap fault... override doFacade() ? only for POST
 		try {
 			super.doService(req, resp);
 		}
@@ -467,7 +472,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			operation.appendChild(output);
 		}
 		
-		{
+		/*{
 			Element fault = doc.createElement("wsdl:"+"fault");
 			fault.setAttribute("name", "Exception");
 			Element soapFault = doc.createElement("soap:fault");
@@ -475,7 +480,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			soapFault.setAttribute("use", "literal");
 			fault.appendChild(soapFault);
 			operation.appendChild(fault);
-		}
+		}*/
 		
 		return operation;
 	}
