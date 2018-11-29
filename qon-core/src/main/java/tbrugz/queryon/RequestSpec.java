@@ -1053,7 +1053,7 @@ public class RequestSpec {
 	
 	@Override
 	public String toString() {
-		return "RequestSpec[object="+object+";params="+params+";model="+modelId+"]";
+		return this.getClass().getSimpleName()+"[object="+object+";params="+params+";model="+modelId+"]";
 	}
 	
 	public String getRemoteInfo() {

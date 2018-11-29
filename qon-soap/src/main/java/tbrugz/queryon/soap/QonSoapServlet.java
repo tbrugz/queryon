@@ -411,10 +411,20 @@ public class QonSoapServlet extends BaseApiServlet {
 		complexType.appendChild(all);
 		
 		// XXX request parameters...
-		Element el = doc.createElement("xs:"+"element");
-		el.setAttribute("name", "limit");
-		el.setAttribute("type", "xs:" + "int" );
-		all.appendChild(el);
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "limit");
+			el.setAttribute("type", "xs:" + "int" );
+			el.setAttribute("minOccurs", "0");
+			all.appendChild(el);
+		}
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "offset");
+			el.setAttribute("type", "xs:" + "int" );
+			el.setAttribute("minOccurs", "0");
+			all.appendChild(el);
+		}
 		return element;
 	}
 

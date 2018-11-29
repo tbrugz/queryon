@@ -71,6 +71,12 @@ public class SoapRequest extends RequestSpec {
 	}
 	
 	@Override
+	protected int getFinalOffset(HttpServletRequest req) {
+		String offsetStr = XmlUtils.getUniqueTagValueOfChildren(getRequestElement(), PARAM_OFFSET);
+		return offsetStr!=null ? Integer.parseInt(offsetStr) : 0;
+	}
+	
+	@Override
 	protected SoapDumpSyntax getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {
 		SoapDumpSyntax dumpSyntax = new SoapDumpSyntax();
 		return dumpSyntax;
@@ -84,7 +90,7 @@ public class SoapRequest extends RequestSpec {
 	//-----
 	
 	public String toStringDebug() {
-		return super.toString()+"[limit="+limit+";keyValues="+keyValues+";params="+params+"]";
+		return super.toString()+"[limit="+limit+";offset="+offset+";keyValues="+keyValues+";params="+params+"]";
 	}
 	
 	public static void setAttributesOnRequest(HttpServletRequest req, Element requestEl, String nsPrefix) {
