@@ -676,116 +676,64 @@ public class QueryOn extends HttpServlet {
 		
 		try {
 
-		/*if(xSetRequestUtf8) {
-			try {
-				String origCharset = req.getCharacterEncoding();
-				log.debug("setting request encoding to UTF-8 [was: "+origCharset+"]");
-				req.setCharacterEncoding(UTF8);
-				//resp.setCharacterEncoding(UTF8);
-			} catch (UnsupportedEncodingException e) {
-				log.warn("Exception on setCharacterEncoding: "+e.getMessage(), e);
-			}
-		}*/
-		
-		RequestSpec reqspec = getRequestSpec(req);
-		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod()+
-				( (reqspec.httpMethod!=null && !reqspec.httpMethod.equals(req.getMethod())?" ; final-method: "+reqspec.httpMethod:"") )
-				);
-		//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
-		
-		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
-		if(model==null) {
-			throw new InternalServerException("null model [modelId="+reqspec.modelId+"]");
-		}
-		
-		final String otype;
-		final ActionType atype;
-		DBIdentifiable dbobj = null;
-		//StatusObject sobject = StatusObject.valueOf(reqspec.object)
-		//XXX should status object names have special syntax? like meta:table, meta:fk
-		
-		DBObjectType statusType = statusObject(reqspec.object);
-		//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
-		if(statusType!=null) {
-			atype = ActionType.STATUS;
-			otype = statusType.name();
-		}
-		else if(ACTION_QUERY_ANY.equals(reqspec.object)) {
-			if(! METHOD_POST.equals(reqspec.httpMethod)) {
-				// XXX use 405: SC_METHOD_NOT_ALLOWED?
-				throw new BadRequestException(reqspec.object+": method must be POST");
-			}
-			atype = ActionType.SELECT_ANY;
-			otype = ActionType.SELECT_ANY.name();
-		}
-		else if(ACTION_VALIDATE_ANY.equals(reqspec.object)) {
-			if(! METHOD_POST.equals(reqspec.httpMethod)) {
-				throw new BadRequestException(reqspec.object+": method must be POST");
-			}
-			atype = ActionType.VALIDATE_ANY;
-			otype = ActionType.VALIDATE_ANY.name();
-		}
-		else if(ACTION_EXPLAIN_ANY.equals(reqspec.object)) {
-			if(! METHOD_POST.equals(reqspec.httpMethod)) {
-				throw new BadRequestException(reqspec.object+": method must be POST");
-			}
-			atype = ActionType.EXPLAIN_ANY;
-			otype = ActionType.EXPLAIN_ANY.name();
-		}
-		else if(ACTION_SQL_ANY.equals(reqspec.object)) {
-			if(! METHOD_POST.equals(reqspec.httpMethod)) {
-				throw new BadRequestException(reqspec.object+": method must be POST");
-			}
-			atype = ActionType.SQL_ANY;
-			otype = ActionType.SQL_ANY.name();
-		}
-		else if(ActionType.MANAGE.name().toLowerCase().equals(reqspec.object)) {
-			atype = ActionType.MANAGE;
-			otype = ActionType.MANAGE.name();
-		}
-		else {
-			dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
-			if(dbobj==null) {
-				throw new NotFoundException("object not found: "+reqspec.object);
+			/*if(xSetRequestUtf8) {
+				try {
+					String origCharset = req.getCharacterEncoding();
+					log.debug("setting request encoding to UTF-8 [was: "+origCharset+"]");
+					req.setCharacterEncoding(UTF8);
+					//resp.setCharacterEncoding(UTF8);
+				} catch (UnsupportedEncodingException e) {
+					log.warn("Exception on setCharacterEncoding: "+e.getMessage(), e);
+				}
+			}*/
+			
+			RequestSpec reqspec = getRequestSpec(req);
+			log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod()+
+					( (reqspec.httpMethod!=null && !reqspec.httpMethod.equals(req.getMethod())?" ; final-method: "+reqspec.httpMethod:"") )
+					);
+			//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
+			
+			SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
+			if(model==null) {
+				throw new InternalServerException("null model [modelId="+reqspec.modelId+"]");
 			}
 			
-			if(dbobj instanceof Relation) {
-				if(reqspec.httpMethod.equals(METHOD_GET)) {
-					atype = ActionType.SELECT;
-				}
-				else if(reqspec.httpMethod.equals(METHOD_HEAD)) {
-					atype = ActionType.SELECT;
-				}
-				else if(reqspec.httpMethod.equals(METHOD_POST)) {
-					atype = ActionType.INSERT; //upsert?
-				}
-				else if(reqspec.httpMethod.equals(METHOD_PATCH)) {
-					//XXXdone: PUT should be idempotent ... maybe should be used for INSERT? use PATCH instead of PUT?
-					atype = ActionType.UPDATE;
-				}
-				else if(reqspec.httpMethod.equals(METHOD_PUT)) {
-					// for backward compatibility
-					atype = ActionType.UPDATE;
-				}
-				else if(reqspec.httpMethod.equals(METHOD_DELETE)) {
-					atype = ActionType.DELETE;
-				}
-				else {
-					throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [obj="+reqspec.object+"]");
-				}
-				
-				otype = QueryOn.getObjectType(dbobj);
-			}
-			else if(dbobj instanceof ExecutableObject) {
-				//XXX only if POST method?
-				atype = ActionType.EXECUTE;
-				otype = DBObjectType.EXECUTABLE.name();
+			final String otype;
+			final ActionType atype; //XXX: add ActionType to RequestSpec
+			final DBIdentifiable dbobj;
+			//StatusObject sobject = StatusObject.valueOf(reqspec.object)
+			//XXX should status object names have special syntax? like meta:table, meta:fk
+			
+			DBObjectType statusType = statusObject(reqspec.object);
+			//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
+			if(statusType!=null) {
+				atype = ActionType.STATUS;
+				otype = statusType.name();
+				dbobj = null;
 			}
 			else {
-				throw new BadRequestException("unknown object type: "+dbobj.getClass().getName()+" [obj="+reqspec.object+"]");
+				ActionType atypeTmp = getPrivilegedAction(reqspec.object, reqspec.httpMethod);
+				if(atypeTmp!=null) {
+					atype = atypeTmp;
+					otype = atype.name();
+					dbobj = null;
+				}
+				else {
+					dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
+					if(dbobj==null) {
+						throw new NotFoundException("object not found: "+reqspec.object);
+					}
+					atype = getActionTypeFromDbObject(dbobj, reqspec.httpMethod);
+					if(atype.equals(ActionType.EXECUTE)) {
+						otype = DBObjectType.EXECUTABLE.name();
+					}
+					else {
+						otype = QueryOn.getObjectType(dbobj);
+					}
+				}
 			}
-		}
 		
+			//log.info("atype: "+atype+" ; otype: "+otype);
 			Subject currentUser = ShiroUtils.getSubject(prop, req);
 			Connection conn = null;
 			
@@ -954,6 +902,75 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(Throwable e) {
 			throw new ServletException(e);
+		}
+	}
+	
+	ActionType getPrivilegedAction(String object, String httpMethod) {
+		if(ACTION_QUERY_ANY.equals(object)) {
+			if(! METHOD_POST.equals(httpMethod)) {
+				// XXX use 405: SC_METHOD_NOT_ALLOWED?
+				throw new BadRequestException(object+": method must be POST");
+			}
+			return ActionType.SELECT_ANY;
+		}
+		if(ACTION_VALIDATE_ANY.equals(object)) {
+			if(! METHOD_POST.equals(httpMethod)) {
+				throw new BadRequestException(object+": method must be POST");
+			}
+			return ActionType.VALIDATE_ANY;
+		}
+		if(ACTION_EXPLAIN_ANY.equals(object)) {
+			if(! METHOD_POST.equals(httpMethod)) {
+				throw new BadRequestException(object+": method must be POST");
+			}
+			return ActionType.EXPLAIN_ANY;
+		}
+		if(ACTION_SQL_ANY.equals(object)) {
+			if(! METHOD_POST.equals(httpMethod)) {
+				throw new BadRequestException(object+": method must be POST");
+			}
+			return ActionType.SQL_ANY;
+		}
+		if(ActionType.MANAGE.name().toLowerCase().equals(object)) {
+			return ActionType.MANAGE;
+		}
+		return null;
+	}
+	
+	ActionType getActionTypeFromDbObject(DBIdentifiable dbobj, String httpMethod) {
+		if(dbobj instanceof Relation) {
+			return getRelationActionType(httpMethod);
+		}
+		if(dbobj instanceof ExecutableObject) {
+			//XXX only if POST method?
+			return ActionType.EXECUTE;
+		}
+		throw new BadRequestException("unknown object type: "+dbobj.getClass().getName()+" [obj="+dbobj.getName()+"]");
+	}
+	
+	ActionType getRelationActionType(String httpMethod) {
+		if(httpMethod.equals(METHOD_GET)) {
+			return ActionType.SELECT;
+		}
+		if(httpMethod.equals(METHOD_HEAD)) {
+			return ActionType.SELECT;
+		}
+		if(httpMethod.equals(METHOD_POST)) {
+			return ActionType.INSERT; //upsert?
+		}
+		if(httpMethod.equals(METHOD_PATCH)) {
+			//XXXdone: PUT should be idempotent ... maybe should be used for INSERT? use PATCH instead of PUT?
+			return ActionType.UPDATE;
+		}
+		if(httpMethod.equals(METHOD_PUT)) {
+			// for backward compatibility
+			return ActionType.UPDATE;
+		}
+		else if(httpMethod.equals(METHOD_DELETE)) {
+			return ActionType.DELETE;
+		}
+		else {
+			throw new BadRequestException("unknown http method: "+httpMethod+" [Relation object]"); //+" [obj="+dbobj.getName()+"]");
 		}
 	}
 	
