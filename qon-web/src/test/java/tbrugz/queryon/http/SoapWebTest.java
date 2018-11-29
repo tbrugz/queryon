@@ -8,14 +8,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.SQLException;
+//import java.util.List;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+//import javax.xml.soap.Detail;
 import javax.xml.stream.XMLStreamException;
+//import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.tools.common.ToolContext;
+import org.apache.cxf.tools.wsdlto.WSDLToJava;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -23,6 +28,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+/*import org.bitbucket.tbrugz.queryon.queryonservice.ListOfPUBLICDEPT;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTRequest;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTType;
+import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
+import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnServicePortType;*/
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -48,6 +58,8 @@ public class SoapWebTest {
 	public static final String basedir = "src/test/java";
 	public static final String outdir = "work/output";
 
+	public static final String generatedCodeDir = "target/test/java/";
+	
 	static final String soaplUrl = qonUrl + "/qonsoap";
 	
 	static DocumentBuilderFactory dbFactory;
@@ -153,7 +165,6 @@ public class SoapWebTest {
 	}
 	
 	// see: https://stackoverflow.com/questions/2917130/is-there-any-easy-way-to-perform-junit-test-for-wsdl-ws-i-compliance
-	@Ignore
 	@Test
 	public void parseAndValidateWSDLWithJaxWS() throws IOException, XMLStreamException, SAXException {
 		final URL url = new URL(soaplUrl+"?wsdl");
@@ -179,4 +190,46 @@ public class SoapWebTest {
 		log.info("request1: responde="+s);
 	}
 	
+	// https://cxf.apache.org/docs/wsdl-to-java.html
+	@Test
+	public void generateJavaFromWsdl() throws Exception {
+		String url = soaplUrl+"?wsdl";
+		String[] args = { "-d", generatedCodeDir, url };
+		
+		//WSDLToJava.main(args); //do not generate exceptions...
+		WSDLToJava w2j = new WSDLToJava(args);
+		w2j.run(new ToolContext());
+		
+		// XXX compile? add to (test) classpath?
+	}
+
+	// XXX best way to 'callGeneratedJavaFromWsdl'?
+	/*
+	@Test
+	public void callGeneratedJavaFromWsdl() throws IOException, XMLStreamException, SAXException {
+		String url = soaplUrl+"?wsdl";
+		QueryOnService qons = new QueryOnService(new URL(url));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		PUBLICDEPTRequest r = new PUBLICDEPTRequest();
+		r.setLimit(2);
+		ListOfPUBLICDEPT lopd = qonsp.getPUBLICDEPT(r);
+		List<PUBLICDEPTType> l = lopd.getPUBLICDEPT();
+		for(PUBLICDEPTType pd: l) {
+			log.info("id="+pd.getID()+" / name="+pd.getNAME());
+		}
+		
+		try {
+			r.setLimit(-1);
+			lopd = qonsp.getPUBLICDEPT(r);
+			Assert.fail("Exception should have been thrown");
+		}
+		catch(SOAPFaultException ex) {
+			String faultcode = ex.getFault().getFaultCode();
+			String faultstring = ex.getFault().getFaultString();
+			Detail detail = ex.getFault().getDetail();
+			String faultdetail = detail!=null?detail.getValue():null;
+			log.info("faultcode: "+faultcode+" // faultstring: "+faultstring+" // faultdetail: "+faultdetail);
+		}
+	}
+	*/
 }

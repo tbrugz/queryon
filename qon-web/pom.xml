@@ -22,6 +22,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <cxf.version>3.2.7</cxf.version>
   </properties>
 
   <build>
@@ -295,6 +296,12 @@
       <version>${shiro.version}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>qon-soap</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+    
     <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -350,9 +357,36 @@
     <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
-      <version>2.2.10</version>
+      <version>2.2.10</version> <!-- <version>2.3.1</version> -->
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-tools-wsdlto-core</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-tools-wsdlto-frontend-jaxws</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-tools-wsdlto-databinding-jaxb</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxws</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency> -->
+    
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
