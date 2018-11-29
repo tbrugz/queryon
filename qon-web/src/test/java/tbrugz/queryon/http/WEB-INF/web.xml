@@ -87,5 +87,19 @@
 		<servlet-name>GraphQlQonServlet</servlet-name>
 		<url-pattern>/graphql/*</url-pattern>
 	</servlet-mapping>
+	
+	<!-- <listener>
+		<listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
+	</listener>-->
+	
+	<servlet>
+		<servlet-name>QonSoapServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.soap.QonSoapServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>QonSoapServlet</servlet-name>
+		<url-pattern>/qonsoap</url-pattern>
+	</servlet-mapping>
 
 </web-app>

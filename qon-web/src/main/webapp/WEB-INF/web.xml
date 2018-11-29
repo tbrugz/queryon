@@ -181,6 +181,16 @@
 		<url-pattern>/graphql/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>QonSoapServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.soap.QonSoapServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>QonSoapServlet</servlet-name>
+		<url-pattern>/qonsoap</url-pattern>
+	</servlet-mapping>
+
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
