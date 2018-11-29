@@ -86,6 +86,12 @@
 			<version>${project.parent.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-soap</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>

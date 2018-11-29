@@ -95,7 +95,13 @@
 			<artifactId>qon-graphql</artifactId>
 			<version>${project.parent.version}</version>
 			<scope>runtime</scope>
-		</dependency>		
+		</dependency>
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-soap</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-web</artifactId>
