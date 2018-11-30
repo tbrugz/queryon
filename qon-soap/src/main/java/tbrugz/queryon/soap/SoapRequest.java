@@ -77,6 +77,12 @@ public class SoapRequest extends RequestSpec {
 	}
 	
 	@Override
+	protected boolean isDistinct(HttpServletRequest req, boolean allowDistinct) {
+		String str = XmlUtils.getUniqueTagValueOfChildren(getRequestElement(), PARAM_DISTINCT);
+		return getBoolValue(str);
+	}
+	
+	@Override
 	protected SoapDumpSyntax getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {
 		SoapDumpSyntax dumpSyntax = new SoapDumpSyntax();
 		return dumpSyntax;
@@ -89,8 +95,12 @@ public class SoapRequest extends RequestSpec {
 	
 	//-----
 	
+	public static boolean getBoolValue(String s) {
+		return s!=null && (s.equals("true") || s.equals("1"));
+	}
+	
 	public String toStringDebug() {
-		return super.toString()+"[limit="+limit+";offset="+offset+";keyValues="+keyValues+";params="+params+"]";
+		return super.toString()+"[limit="+limit+";offset="+offset+";distinct="+distinct+";keyValues="+keyValues+";params="+params+"]";
 	}
 	
 	public static void setAttributesOnRequest(HttpServletRequest req, Element requestEl, String nsPrefix) {

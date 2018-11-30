@@ -425,6 +425,13 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("minOccurs", "0");
 			all.appendChild(el);
 		}
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", RequestSpec.PARAM_DISTINCT);
+			el.setAttribute("type", "xs:" + "boolean" );
+			el.setAttribute("minOccurs", "0");
+			all.appendChild(el);
+		}
 		return element;
 	}
 
