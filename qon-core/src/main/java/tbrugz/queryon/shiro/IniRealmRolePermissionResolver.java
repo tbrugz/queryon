@@ -14,6 +14,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 
 public class IniRealmRolePermissionResolver extends IniRealm implements RolePermissionResolver, AuthorizationInfoInformer {
 
+	@Override
 	public Collection<Permission> resolvePermissionsInRole(String roleString) {
 		SimpleRole sr = getRole(roleString);
 		if(sr==null) { return null; }

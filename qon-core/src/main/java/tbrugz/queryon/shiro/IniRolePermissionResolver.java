@@ -26,6 +26,7 @@ public class IniRolePermissionResolver implements RolePermissionResolver {
 		this.iniRealm = iniRealm;
 	}
 
+	@Override
 	public Collection<Permission> resolvePermissionsInRole(String roleString) {
 		if(iniRealm==null) {
 			System.out.println("IniRolePermissionResolver: null resolver, role = "+roleString);

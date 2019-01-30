@@ -87,6 +87,7 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
 		this.regexMapperRoleSuffix = regexMapperRoleSuffix;
 	}*/
 
+    @Override
     protected AuthorizationInfo queryForAuthorizationInfo(PrincipalCollection principals, LdapContextFactory ldapContextFactory) throws NamingException {
 
         String username = (String) getAvailablePrincipal(principals);
