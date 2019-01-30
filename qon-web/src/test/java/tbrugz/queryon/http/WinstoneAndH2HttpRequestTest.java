@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -30,14 +31,31 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -70,6 +88,8 @@ import static tbrugz.queryon.http.JettySetup.*;
 
 public class WinstoneAndH2HttpRequestTest {
 
+	private static final Log log = LogFactory.getLog(WinstoneAndH2HttpRequestTest.class);
+	
 	public static final String basedir = "src/test/java";
 	public static final String webappdir = "src/main/webapp";
 	//public static final String testResourcesDir = "src/test/resources";
@@ -1317,6 +1337,180 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetQueryWithNamedParametersNullBindArray3() throws Exception {
 		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND_ARRAY.csv?par2=2";
 		getContentFromUrl(baseUrl+url);
+	}
+	
+	static HttpResponse getGetResponse(HttpContext httpContext, HttpClient httpClient, String url) throws ClientProtocolException, IOException {
+		HttpGet httpCall = new HttpGet(url);
+		return httpClient.execute(httpCall, httpContext);
+	}
+	
+	static void setCookies(HttpRequestBase httpCall, CookieStore cookies) {
+		if(cookies!=null && !cookies.getCookies().isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			for(Cookie c: cookies.getCookies()) {
+				if(sb.length()>0) {
+					sb.append("; ");
+				}
+				sb.append(c.getName()+"="+c.getValue());
+				//httpCall.setHeader("Cookie", c.getName()+"="+c.getValue());
+			}
+			httpCall.setHeader("Cookie", sb.toString());
+		}
+	}
+
+	static HttpResponse getGetResponse(HttpClient httpClient, String url, CookieStore cookies) throws ClientProtocolException, IOException {
+		HttpGet httpCall = new HttpGet(url);
+		//CookieStore cs = (CookieStore)httpContext.getAttribute(HttpClientContext.COOKIE_STORE);
+		//cs.getCookies()
+		setCookies(httpCall, cookies);
+		log.debug("getGetResponse: request-headers: "+Arrays.asList(httpCall.getAllHeaders()) );
+		//httpCall.setHeader("Cookie", "JSESSIONID=1234");
+		return httpClient.execute(httpCall);
+	}
+	
+	static HttpResponse jspLogin(HttpClient httpClient, CookieStore cookies, String username, String password) throws ClientProtocolException, IOException {
+		HttpPost httpPost = new HttpPost(qonUrl+"/auth/login.jsp");
+		setCookies(httpPost, cookies);
+		ArrayList<NameValuePair> postParameters;
+		postParameters = new ArrayList<NameValuePair>();
+		postParameters.add(new BasicNameValuePair("username", username));
+		postParameters.add(new BasicNameValuePair("password", password));
+		httpPost.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+		return httpClient.execute(httpPost);
+	}
+
+	static HttpResponse jspLogout(HttpClient httpClient, CookieStore cookies) throws ClientProtocolException, IOException {
+		HttpPost httpPost = new HttpPost(qonUrl+"/auth/logout.jsp");
+		setCookies(httpPost, cookies);
+		return httpClient.execute(httpPost);
+	}
+	
+	@Test
+	public void testLoginOk() throws Exception {
+		// https://stackoverflow.com/a/6273665/616413
+		HttpClient httpClient = new DefaultHttpClient();
+		//CookieStore cookieStore = new BasicCookieStore();
+		//HttpContext httpContext = new BasicHttpContext();
+		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
+
+		{
+			HttpResponse response1 = jspLogin(httpClient, null, "jdoe", "jdoepw");
+			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+			// https://stackoverflow.com/a/16211729/616413
+			EntityUtils.consumeQuietly(response1.getEntity());
+		}
+	}
+
+	@Test
+	public void testLoginErr() throws Exception {
+		HttpClient httpClient = new DefaultHttpClient();
+
+		{
+			HttpResponse response2 = jspLogin(httpClient, null, "jdoe", "jdoez");
+			Assert.assertTrue(response2.getStatusLine().getStatusCode() >= 400);
+			EntityUtils.consumeQuietly(response2.getEntity());
+		}
+	}
+	
+	@Test
+	public void testLoginLogout() throws Exception {
+		// https://issues.apache.org/jira/browse/SHIRO-613 !!!
+		JsonParser parser = new JsonParser();
+		// https://stackoverflow.com/a/6273665/616413
+		//HttpClient httpClient = HttpClients.custom().build();
+		CookieStore cookieStore = new BasicCookieStore();
+		HttpClient httpClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+		//HttpContext httpContext = new BasicHttpContext();
+		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
+
+		// ...
+		
+		//String loginpage = getContentFromUrl(qonUrl+"/auth/login.jsp");
+		//System.out.println(loginpage);
+		
+		// ...
+
+		/*
+		BasicClientCookie cookie = new BasicClientCookie("ZZ", "1234");
+		cookie.setDomain("localhost");
+		cookie.setPath("/");
+		cookieStore.addCookie(cookie);
+		*/
+		
+		//System.out.println("\ncookieStore0:\n"+cookieStore);
+		
+		{
+			// XXX logout needed in the beginning? interaction between tests...
+			HttpResponse response3 = jspLogout(httpClient, cookieStore);
+			Assert.assertEquals(200, response3.getStatusLine().getStatusCode());
+			EntityUtils.consumeQuietly(response3.getEntity());
+		}
+		
+		//testLoginOk();
+		
+		{
+			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+"/auth/info.jsp", cookieStore);
+			String jsonStr = getContent(jsonResp);
+			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
+			//System.out.print("json:\n"+jsonStr+"\n");
+			JsonElement json = parser.parse(jsonStr);
+			Assert.assertEquals(false, json.getAsJsonObject().get("authenticated").getAsBoolean());
+			Assert.assertEquals("anonymous", json.getAsJsonObject().get("username").getAsString());
+			EntityUtils.consumeQuietly(jsonResp.getEntity());
+		}
+		
+		//Thread.sleep(1000);
+		//System.out.println("\ncookieStore1:\n"+cookieStore);
+		
+		{
+			HttpResponse response1 = jspLogin(httpClient, cookieStore, "jdoe", "jdoepw");
+			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+			// https://stackoverflow.com/a/16211729/616413
+			EntityUtils.consumeQuietly(response1.getEntity());
+		}
+
+		//Thread.sleep(1000);
+		//System.out.println("\ncookieStore2:\n"+cookieStore);
+		
+		{
+			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+"/auth/info.jsp", cookieStore);
+			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
+			String jsonStr = getContent(jsonResp);
+			//System.out.print("json:\n"+jsonStr+"\n");
+			JsonElement json = parser.parse(jsonStr);
+			Assert.assertEquals(true, json.getAsJsonObject().get("authenticated").getAsBoolean());
+			Assert.assertEquals("jdoe", json.getAsJsonObject().get("username").getAsString());
+			EntityUtils.consumeQuietly(jsonResp.getEntity());
+		}
+		
+		//Thread.sleep(1000);
+		//System.out.println("\ncookieStore3:\n"+cookieStore);
+		
+		{
+			HttpResponse response2 = jspLogin(httpClient, cookieStore, "jdoe", "jdoez");
+			Assert.assertTrue(response2.getStatusLine().getStatusCode() >= 400);
+			EntityUtils.consumeQuietly(response2.getEntity());
+		}
+		
+		//Thread.sleep(1000);
+		//System.out.println("\ncookieStore4:\n"+cookieStore);
+		
+		{
+			HttpResponse response3 = jspLogout(httpClient, cookieStore);
+			Assert.assertEquals(200, response3.getStatusLine().getStatusCode());
+			EntityUtils.consumeQuietly(response3.getEntity());
+		}
+		
+		{
+			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+"/auth/info.jsp", cookieStore);
+			String jsonStr = getContent(jsonResp);
+			//System.out.print("json:\n"+jsonStr+"\n");
+			JsonElement json = parser.parse(jsonStr);
+			Assert.assertEquals(false, json.getAsJsonObject().get("authenticated").getAsBoolean());
+			Assert.assertEquals("anonymous", json.getAsJsonObject().get("username").getAsString());
+			EntityUtils.consumeQuietly(jsonResp.getEntity());
+		}
+		
 	}
 	
 }

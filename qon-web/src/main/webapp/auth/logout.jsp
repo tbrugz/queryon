@@ -19,6 +19,8 @@ String returnUrl = request.getParameter("return");
 Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 
+//System.out.println("-[logout.jsp] currentUser.getSession().getId()/req.getId()=="+currentUser.getSession().getId()+"/"+request.getSession().getId());
+
 currentUser.logout();
 //session.invalidate();
 

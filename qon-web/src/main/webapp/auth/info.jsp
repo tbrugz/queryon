@@ -17,6 +17,8 @@
 	Subject currentUser = ShiroUtils.getSubject(prop, request);
 	boolean responseWritten = false;
 	
+	//System.out.println("-[info.jsp  ] currentUser.getSession().getId()/req.getId()=="+currentUser.getSession().getId()+"/"+request.getSession().getId());
+	
 	// authenticated
 	boolean authenticated = currentUser.isAuthenticated();
 	out.write( (responseWritten?",":"") + "\n\t\"authenticated\": "+authenticated);

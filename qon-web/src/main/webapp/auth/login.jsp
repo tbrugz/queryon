@@ -38,10 +38,13 @@ String loginError = null;
 int clientErrorCode = 400;
 int otherErrorCode = 400;
 
+//System.out.println("-[login.jsp ] currentUser.getSession().getId()/req.getId()=="+currentUser.getSession().getId()+"/"+request.getSession().getId());
+
 if(username!=null) {
 	try {
 		ShiroUtils.authenticate(currentUser, username, password);
 		//System.out.println("login.jsp: auth: "+username);
+		//System.out.println("-[login.jsp] currentUser.getPrincipal()=="+currentUser.getPrincipal());
 		if(returnUrl!=null) {
 			out.write("<script>window.location.href = '"+returnUrl+"';</script>");
 		}
