@@ -35,6 +35,8 @@ String returnUrl = request.getParameter("return");
 
 Subject currentUser = SecurityUtils.getSubject();
 String loginError = null;
+int clientErrorCode = 400;
+int otherErrorCode = 400;
 
 if(username!=null) {
 	try {
@@ -47,15 +49,19 @@ if(username!=null) {
 	catch(UnknownAccountException e) {
 		//loginWarning = "<em class='warning'>Unknown account</em><br/>";
 		loginError = "Unknown account";
+		response.setStatus(clientErrorCode);
 	}
 	catch(IncorrectCredentialsException e) {
 		loginError = "Incorrect password";
+		response.setStatus(clientErrorCode);
 	}
 	catch(AuthenticationException e) {
 		loginError = "<b>Authentication Exception</b>: "+e;
+		response.setStatus(clientErrorCode);
 	}
 	catch(ShiroException e) {
 		loginError = "<b>Shiro Exception:</b> "+e.getMessage();
+		response.setStatus(otherErrorCode);
 		/*out.write("<pre>");
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
