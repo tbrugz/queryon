@@ -71,6 +71,8 @@ import static tbrugz.queryon.http.JettySetup.*;
 public class WinstoneAndH2HttpRequestTest {
 
 	public static final String basedir = "src/test/java";
+	public static final String webappdir = "src/main/webapp";
+	//public static final String testResourcesDir = "src/test/resources";
 	
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;

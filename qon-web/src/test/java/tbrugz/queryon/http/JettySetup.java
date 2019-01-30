@@ -11,11 +11,13 @@ import org.apache.shiro.util.Factory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /*
  * https://wiki.eclipse.org/Jetty/Tutorial/Embedding_Jetty
- * http://git.eclipse.org/c/jetty/org.eclipse.jetty.project.git/tree/example-jetty-embedded/src/main/java/org/eclipse/jetty/embedded?h=jetty-8 
+ * http://git.eclipse.org/c/jetty/org.eclipse.jetty.project.git/tree/example-jetty-embedded/src/main/java/org/eclipse/jetty/embedded?h=jetty-8
+ * https://github.com/jetty-project/embedded-jetty-jsp ?
  */
 public class JettySetup {
 	
@@ -46,13 +48,45 @@ public class JettySetup {
 		connector.setPort(port);
 		server.setConnectors(new Connector[]{ connector });
 
-		WebAppContext webapp = new WebAppContext();
 		String webRoot = WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http";
+		String webappRoot = WinstoneAndH2HttpRequestTest.webappdir;
+		//String resourcesRoot = WinstoneAndH2HttpRequestTest.testResourcesDir;
+		
+		WebAppContext webapp = new WebAppContext();
 		webapp.setDescriptor(webRoot+"/WEB-INF/web.xml");
-		webapp.setResourceBase(webRoot);
+		webapp.setResourceBase(webappRoot);
 		webapp.setContextPath("/");
 		webapp.setParentLoaderPriority(true);
+		
 		server.setHandler(webapp);
+		
+		// https://stackoverflow.com/questions/12281418/single-threaded-embedded-jetty
+		server.setThreadPool(new QueuedThreadPool(3)); //XXX needed by WinstoneAndH2HttpRequestTest.testLoginLogout() !?!
+		
+		/*
+		// context0 - test artifacts
+		ContextHandler context0 = new ContextHandler();
+		ResourceHandler rh0 = new ResourceHandler();
+		context0.setContextPath("/");
+		context0.setBaseResource(Resource.newResource(webRoot));
+		context0.setHandler(rh0);
+
+		// context1 - webapp/jsps
+		WebAppContext jspCtx = new WebAppContext();
+		//jspCtx.setDescriptor(webRoot+"/WEB-INF/web.xml");
+		jspCtx.setResourceBase(resourcesRoot);
+		jspCtx.setContextPath("/");
+		jspCtx.setParentLoaderPriority(true);
+		ContextHandler context1 = new ContextHandler();
+		ResourceHandler rh1 = new ResourceHandler();
+		context1.setContextPath("/");
+		context1.setBaseResource(Resource.newResource(resourcesRoot));
+		context1.setHandler(rh1);
+		
+		ContextHandlerCollection contexts = new ContextHandlerCollection();
+		contexts.setHandlers(new Handler[] { webapp, jspCtx, context1 });
+		server.setHandler(contexts);
+		*/
 		
 		/*Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run() {
@@ -69,6 +103,7 @@ public class JettySetup {
 		});*/
 		
 		server.start();
+		//log.info(server.dump());
 		log.info("setup(): started...");
 		//server.join();
 		server.setStopAtShutdown(true);
