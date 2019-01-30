@@ -278,12 +278,12 @@
       <version>2.2.1</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
       <version>1.2</version>
       <scope>provided</scope>
-    </dependency>
+    </dependency> -->
 
     <dependency>
       <groupId>org.apache.shiro</groupId>

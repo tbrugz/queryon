@@ -12,7 +12,7 @@
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.authc.AuthenticationToken"%>
-<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
+<!-- %@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %> -->
 <!DOCTYPE html>
 <html>
 <head>
