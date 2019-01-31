@@ -106,7 +106,8 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
         return buildAuthorizationInfo(roleNames);
     }
 
-    private Set<String> getRoleNamesForUser(String username, LdapContext ldapContext) throws NamingException {
+    @Override
+    protected Set<String> getRoleNamesForUser(String username, LdapContext ldapContext) throws NamingException {
         Set<String> roleNames;
         roleNames = new LinkedHashSet<String>();
 
