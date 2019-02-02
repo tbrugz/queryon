@@ -469,13 +469,13 @@
       <id>bitbucket-tbrugz</id>
       <url>https://bitbucket.org/tbrugz/mvn-repo/raw/tip/</url>
     </repository>
-    <repository>
+    <!--<repository>
       <id>pentaho-rep</id>
       <url>http://repo.pentaho.org/artifactory/repo/</url>
     </repository>
     <repository>
       <id>apache-snapshots</id>
       <url>https://repository.apache.org/content/groups/snapshots/</url>
-    </repository>
+    </repository>-->
   </repositories>
 </project>
