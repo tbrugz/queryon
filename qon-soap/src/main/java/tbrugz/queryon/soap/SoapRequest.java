@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
@@ -25,6 +26,7 @@ public class SoapRequest extends RequestSpec {
 	public static final String ATTR_NS_PREFIX = "ns_prefix";
 	
 	public static final String TAG_FIELD = "field";
+	public static final String ATTR_DIRECTION = "direction";
 	
 	//Element requestEl;
 	//String nsPrefix;
@@ -104,6 +106,29 @@ public class SoapRequest extends RequestSpec {
 		//log.info("fields[]: "+els);
 		if(els.size()==0) { return null; }
 		return Utils.join(els, ",");
+	}
+	
+	@Override
+	protected void processOrder(HttpServletRequest req) {
+		Element oFields = XmlUtils.getUniqueChild(getRequestElement(), PARAM_ORDER);
+		if(oFields==null) { return; }
+		NodeList nl = oFields.getElementsByTagName(TAG_FIELD);
+
+		if(nl.getLength()>0) {
+			for(int i=0;i<nl.getLength();i++) {
+				Element el = (Element) nl.item(i);
+				orderCols.add(el.getTextContent());
+				String dir = el.getAttribute(ATTR_DIRECTION);
+				if(dir!=null && ORDER_DESC.equalsIgnoreCase(dir)) {
+					orderAscDesc.add(ORDER_DESC);
+				}
+				else {
+					orderAscDesc.add(ORDER_ASC);
+				}
+			}
+		}
+		//log.info("orderCols: "+orderCols);
+		//log.info("orderAscDesc: "+orderAscDesc);
 	}
 	
 	//-----

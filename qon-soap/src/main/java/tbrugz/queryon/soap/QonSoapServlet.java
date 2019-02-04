@@ -251,6 +251,8 @@ public class QonSoapServlet extends BaseApiServlet {
 		{
 			//generic types
 			schema.appendChild(createFieldsType(doc));
+			schema.appendChild(createFieldWithDirectionType(doc));
+			schema.appendChild(createOrderType(doc));
 			
 			for(View v: vs) {
 				schema.appendChild(createElementRequest(doc, v));
@@ -446,6 +448,14 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", RequestSpec.PARAM_ORDER);
+			el.setAttribute("type", "xsd1:" + "orderType" );
+			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
+			all.appendChild(el);
+		}
 		return element;
 	}
 
@@ -458,6 +468,41 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xs:" + "string" );
+			el.setAttribute("minOccurs", "1");
+			all.appendChild(el);
+		}
+		return complexType;
+	}
+
+	Element createFieldWithDirectionType(Document doc) {
+		// https://stackoverflow.com/q/376582/616413
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", "fieldWithDirectionType");
+		
+		Element simpleContent = doc.createElement("xs:"+"simpleContent");
+		complexType.appendChild(simpleContent);
+		
+		Element extension = doc.createElement("xs:"+"extension");
+		extension.setAttribute("base", "xs:"+"string");
+		simpleContent.appendChild(extension);
+
+		Element attribute = doc.createElement("xs:"+"attribute");
+		attribute.setAttribute("name", "direction");
+		attribute.setAttribute("type", "xs:"+"string");
+		extension.appendChild(attribute);
+		
+		return complexType;
+	}
+	
+	Element createOrderType(Document doc) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", "orderType");
+		Element all = doc.createElement("xs:"+"sequence");
+		complexType.appendChild(all);
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "field");
+			el.setAttribute("type", "xsd1:" + "fieldWithDirectionType" );
 			el.setAttribute("minOccurs", "1");
 			all.appendChild(el);
 		}
