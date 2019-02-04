@@ -15,6 +15,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.sqldump.util.Utils;
 
 public class SoapRequest extends RequestSpec {
 	
@@ -22,6 +23,8 @@ public class SoapRequest extends RequestSpec {
 	
 	public static final String ATTR_REQUEST_ELEMENT = "request_element";
 	public static final String ATTR_NS_PREFIX = "ns_prefix";
+	
+	public static final String TAG_FIELD = "field";
 	
 	//Element requestEl;
 	//String nsPrefix;
@@ -92,6 +95,16 @@ public class SoapRequest extends RequestSpec {
 	protected DumpSyntaxInt getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {
 		return null;
 	}*/
+	
+	@Override
+	protected String getFields(HttpServletRequest req) {
+		Element eFields = XmlUtils.getUniqueChild(getRequestElement(), PARAM_FIELDS);
+		if(eFields==null) { return null; }
+		List<String> els = XmlUtils.getTagValuesOfDescendants(eFields, TAG_FIELD);
+		//log.info("fields[]: "+els);
+		if(els.size()==0) { return null; }
+		return Utils.join(els, ",");
+	}
 	
 	//-----
 	

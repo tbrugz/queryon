@@ -50,6 +50,18 @@ public class XmlUtils {
 		return null;
 	}
 
+	public static List<String> getTagValuesOfDescendants(Element el, String tagName) {
+		List<String> ret = new ArrayList<String>();
+		NodeList nl = el.getElementsByTagName(tagName);
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType() == Node.ELEMENT_NODE && tagName.equals(((Element)n).getTagName())) {
+				ret.add(((Element)n).getTextContent());
+			}
+		}
+		return ret;
+	}
+
 	public static Element getUniqueChild(Element el, String tagName) {
 		NodeList nl = el.getChildNodes();
 		int len = nl.getLength();

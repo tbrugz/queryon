@@ -249,6 +249,9 @@ public class QonSoapServlet extends BaseApiServlet {
 		// -- TYPES --
 		
 		{
+			//generic types
+			schema.appendChild(createFieldsType(doc));
+			
 		for(View v: vs) {
 			schema.appendChild(createElementRequest(doc, v));
 			Element entity = createElementType(doc, v);
@@ -432,9 +435,32 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("minOccurs", "0");
 			all.appendChild(el);
 		}
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", RequestSpec.PARAM_FIELDS);
+			el.setAttribute("type", "xsd1:" + "fieldsType" );
+			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
+			all.appendChild(el);
+		}
 		return element;
 	}
 
+	Element createFieldsType(Document doc) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", "fieldsType");
+		Element all = doc.createElement("xs:"+"sequence");
+		complexType.appendChild(all);
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "field");
+			el.setAttribute("type", "xs:" + "string" );
+			el.setAttribute("minOccurs", "1");
+			all.appendChild(el);
+		}
+		return complexType;
+	}
+	
 	Element createMessage(Document doc, String name, String elementName) {
 		Element element = doc.createElement("wsdl:"+"message");
 		element.setAttribute("name", name);
