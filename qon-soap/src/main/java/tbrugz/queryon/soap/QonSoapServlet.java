@@ -252,30 +252,30 @@ public class QonSoapServlet extends BaseApiServlet {
 			//generic types
 			schema.appendChild(createFieldsType(doc));
 			
-		for(View v: vs) {
-			schema.appendChild(createElementRequest(doc, v));
-			Element entity = createElementType(doc, v);
-			schema.appendChild(entity);
-			schema.appendChild(createListOfElement(doc, v));
-			//schemaNames.add(v.getSchemaName());
-			//relationNames.add(v.getQualifiedName());
-		}
-		for(Table t: ts) {
-			schema.appendChild(createElementRequest(doc, t));
-			Element entity = createElementType(doc, t);
-			schema.appendChild(entity);
-			schema.appendChild(createListOfElement(doc, t));
-			//schemaNames.add(t.getSchemaName());
-			//relationNames.add(t.getQualifiedName());
-		}
-		
-		/*Set<ExecutableObject> eos = model.getExecutables();
-		for(ExecutableObject eo: eos) {
-			Element action = createAction(doc, eo);
-			schema.appendChild(action);
-			Element actionImport = createActionImport(doc, eo);
-			schema.appendChild(actionImport);
-		}*/
+			for(View v: vs) {
+				schema.appendChild(createElementRequest(doc, v));
+				Element entity = createElementType(doc, v);
+				schema.appendChild(entity);
+				schema.appendChild(createListOfElement(doc, v));
+				//schemaNames.add(v.getSchemaName());
+				//relationNames.add(v.getQualifiedName());
+			}
+			for(Table t: ts) {
+				schema.appendChild(createElementRequest(doc, t));
+				Element entity = createElementType(doc, t);
+				schema.appendChild(entity);
+				schema.appendChild(createListOfElement(doc, t));
+				//schemaNames.add(t.getSchemaName());
+				//relationNames.add(t.getQualifiedName());
+			}
+			
+			/*Set<ExecutableObject> eos = model.getExecutables();
+			for(ExecutableObject eo: eos) {
+				Element action = createAction(doc, eo);
+				schema.appendChild(action);
+				Element actionImport = createActionImport(doc, eo);
+				schema.appendChild(actionImport);
+			}*/
 		}
 
 		definitions.appendChild(types);
@@ -416,16 +416,18 @@ public class QonSoapServlet extends BaseApiServlet {
 		// XXX request parameters...
 		{
 			Element el = doc.createElement("xs:"+"element");
-			el.setAttribute("name", "limit");
+			el.setAttribute("name", RequestSpec.PARAM_LIMIT);
 			el.setAttribute("type", "xs:" + "int" );
 			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
 			Element el = doc.createElement("xs:"+"element");
-			el.setAttribute("name", "offset");
+			el.setAttribute("name", RequestSpec.PARAM_OFFSET);
 			el.setAttribute("type", "xs:" + "int" );
 			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
@@ -433,6 +435,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", RequestSpec.PARAM_DISTINCT);
 			el.setAttribute("type", "xs:" + "boolean" );
 			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
