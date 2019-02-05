@@ -548,7 +548,8 @@ public class RequestSpec {
 			allowedFilters = new HashSet<String>();
 			allowedFilters.addAll(allowedFiltersList);
 		}
-		processRequestParameterMap(allowedFilters);
+		processFilters(allowedFilters);
+		processXtra();
 		
 		if(showDebugInfo) {
 			showDebugInfo(reqParams);
@@ -601,7 +602,7 @@ public class RequestSpec {
 		return prop.getProperty(QueryOn.PROP_SYNTAX_DEFAULT, defaultSyntax);
 	}
 	
-	protected void processRequestParameterMap(Set<String> allowedFilters) throws UnsupportedEncodingException {
+	protected void processFilters(Set<String> allowedFilters) throws UnsupportedEncodingException {
 		for(Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
@@ -722,6 +723,8 @@ public class RequestSpec {
 		}
 		*/
 	}
+
+	protected void processXtra() {}
 	
 	protected int getFinalOffset(HttpServletRequest req) {
 		String offsetStr = req.getParameter(PARAM_OFFSET);

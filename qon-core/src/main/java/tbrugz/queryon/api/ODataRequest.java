@@ -251,7 +251,7 @@ public class ODataRequest extends RequestSpec {
 	}
 	
 	@Override
-	protected void processRequestParameterMap(Set<String> allowedFilters) {
+	protected void processFilters(Set<String> allowedFilters) {
 		String filter = request.getParameter(PARAM_FILTER);
 		if(filter!=null) {
 			try {
@@ -285,7 +285,10 @@ public class ODataRequest extends RequestSpec {
 				throw new BadRequestException(e.getMessage(), e);
 			}
 		}
+	}
 		
+	@Override
+	protected void processXtra() {
 		try {
 			Gson gson = new Gson();
 			
@@ -312,7 +315,6 @@ public class ODataRequest extends RequestSpec {
 		catch(IOException e) {
 			throw new BadRequestException(e.getMessage());
 		}
-		
 	}
 	
 	String getValueForUpdate(Object o) {
