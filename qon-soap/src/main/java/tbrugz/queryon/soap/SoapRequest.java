@@ -1,8 +1,11 @@
 package tbrugz.queryon.soap;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import tbrugz.queryon.BadRequestException;
@@ -26,6 +30,8 @@ public class SoapRequest extends RequestSpec {
 	public static final String ATTR_NS_PREFIX = "ns_prefix";
 	
 	public static final String TAG_FIELD = "field";
+	public static final String TAG_FILTERS = "filters";
+	public static final String TAG_VALUE = "value";
 	public static final String ATTR_DIRECTION = "direction";
 	
 	//Element requestEl;
@@ -131,6 +137,47 @@ public class SoapRequest extends RequestSpec {
 		//log.info("orderAscDesc: "+orderAscDesc);
 	}
 	
+	@Override
+	protected void processFilters(Set<String> allowedFilters) throws UnsupportedEncodingException {
+		Element oFilters = XmlUtils.getUniqueChild(getRequestElement(), TAG_FILTERS);
+		if(oFilters==null) { return; }
+		//log.info("processFilters: "+oFilters);
+		NodeList nl = oFilters.getChildNodes();
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
+			Element el = (Element) n;
+			String tag = el.getTagName();
+			String field = XmlUtils.getUniqueTagValueOfChildren(el, TAG_FIELD);
+			//TODO: check allowedFilters
+			log.info("processFilters: tag=="+tag+" / field=="+field);
+			
+			Map<String, String> uniFilter = getUniFilter(tag);
+			if(uniFilter!=null) {
+				String value = XmlUtils.getUniqueTagValueOfChildren(el, TAG_VALUE);
+				uniFilter.put(field, value);
+				log.info("uniFilter: value = "+value);
+				continue;
+			}
+			Map<String, String[]> multiFilter = getMultiFilter(tag);
+			if(multiFilter!=null) {
+				List<String> values = XmlUtils.getTagValuesOfDescendants(el, TAG_VALUE);
+				multiFilter.put(field, values.toArray(new String[]{}));
+				log.info("multiFilter: values = "+values);
+				continue;
+			}
+			Set<String> setFilter = getSetFilter(tag);
+			if(setFilter!=null) {
+				setFilter.add(field);
+				log.info("setFilter: field = "+field);
+				continue;
+			}
+			
+			//log.warn("unknown filter: "+tag);
+			throw new BadRequestException("unknown filter: "+tag);
+		}
+	}
+	
 	//-----
 	
 	public static boolean getBoolValue(String s) {
@@ -144,6 +191,51 @@ public class SoapRequest extends RequestSpec {
 	public static void setAttributesOnRequest(HttpServletRequest req, Element requestEl, String nsPrefix) {
 		req.setAttribute(ATTR_REQUEST_ELEMENT, requestEl);
 		req.setAttribute(ATTR_NS_PREFIX, nsPrefix);
+	}
+	
+	Map<String, String> getUniFilter(String filter) {
+		switch (filter) {
+		case "filterEquals":
+			return filterEquals;
+		case "filterNotEquals":
+			return filterNotEquals;
+		case "filterGreaterThan":
+			return filterGreaterThan;
+		case "filterGreaterOrEqual":
+			return filterGreaterOrEqual;
+		case "filterLessThan":
+			return filterLessThan;
+		case "filterLessOrEqual":
+			return filterLessOrEqual;
+		default:
+			return null;
+		}
+	}
+
+	Map<String, String[]> getMultiFilter(String filter) {
+		switch (filter) {
+		case "filterIn":
+			return filterIn;
+		case "filterNotIn":
+			return filterNotIn;
+		case "filterLike":
+			return filterLike;
+		case "filterNotLike":
+			return filterNotLike;
+		default:
+			return null;
+		}
+	}
+
+	Set<String> getSetFilter(String filter) {
+		switch (filter) {
+		case "filterNull":
+			return filterNull;
+		case "filterNotNull":
+			return filterNotNull;
+		default:
+			return null;
+		}
 	}
 
 }

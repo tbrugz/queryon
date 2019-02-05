@@ -49,6 +49,10 @@ public class QonSoapServlet extends BaseApiServlet {
 	
 	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
 	
+	public static final String[] UNIQUE_FILTERS = { "filterEquals", "filterNotEquals", "filterGreaterThan", "filterGreaterOrEqual", "filterLessThan", "filterLessOrEqual" };
+	public static final String[] MULTI_FILTERS = { "filterIn", "filterNotIn", "filterLike", "filterNotLike" };
+	public static final String[] BOOLEAN_FILTERS = { "filterNull", "filterNotNull" };
+	
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	
@@ -103,14 +107,14 @@ public class QonSoapServlet extends BaseApiServlet {
 			
 			try {
 				Document doc = dBuilder.parse(req.getInputStream());
-				log.info("doc: "+doc);
+				log.debug("doc: "+doc);
 				
 				//StringWriter sw = new StringWriter();
 				//ODataServlet.serialize(dBuilder.getDOMImplementation(), doc, sw);
 				//log.info("xml::\n"+sw);
 				
 				Element el = doc.getDocumentElement();
-				log.info("el: "+el.getTagName() + " // " + el.getNamespaceURI() + " // "+el.getPrefix() + " // "+el.getLocalName());
+				log.debug("el: "+el.getTagName() + " // " + el.getNamespaceURI() + " // "+el.getPrefix() + " // "+el.getLocalName());
 				/*NamedNodeMap nnm = el.getAttributes();
 				int substrIdx = XmlUtils.XMLNS.length()+1;
 				for(int i=0;i<nnm.getLength();i++) {
@@ -127,12 +131,12 @@ public class QonSoapServlet extends BaseApiServlet {
 				}*/
 				prefixSoapenv = XmlUtils.searchForNamespace(el, NS_SOAP_ENVELOPE, false);
 				prefixQueryon = XmlUtils.searchForNamespace(el, NS_QON_PREFIX, true);
-				log.info("prefixSoapenv: "+prefixSoapenv + " / prefixQueryon: " + prefixQueryon);
+				log.debug("prefixSoapenv: "+prefixSoapenv + " / prefixQueryon: " + prefixQueryon);
 				if(prefixSoapenv!=null) {
 					NodeList nl = el.getElementsByTagName(prefixSoapenv+":"+"Body");
-					log.info("body:: nl.getLength(): "+nl.getLength());
+					//log.debug("body:: nl.getLength(): "+nl.getLength());
 					List<Element> els = XmlUtils.getElementsFromNodeList( nl.item(0).getChildNodes() );
-					log.info("body content:: els.size: "+els.size());
+					//log.debug("body content:: els.size: "+els.size());
 					if(els.size()==1) {
 						SoapRequest.setAttributesOnRequest(req, els.get(0), prefixQueryon);
 						doServiceIntern(req, resp);
@@ -253,6 +257,8 @@ public class QonSoapServlet extends BaseApiServlet {
 			schema.appendChild(createFieldsType(doc));
 			schema.appendChild(createFieldWithDirectionType(doc));
 			schema.appendChild(createOrderType(doc));
+			createFiltersTypes(doc, schema);
+			//XXX: add generic types
 			
 			for(View v: vs) {
 				schema.appendChild(createElementRequest(doc, v));
@@ -504,6 +510,70 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xsd1:" + "fieldWithDirectionType" );
 			el.setAttribute("minOccurs", "1");
+			all.appendChild(el);
+		}
+		return complexType;
+	}
+
+	void createFiltersTypes(Document doc, Element schema) {
+		schema.appendChild(createFilterType(doc, "uniqueValueFilterType", true, 1, 1));
+		schema.appendChild(createFilterType(doc, "multiValueFilterType", true, 1, null));
+		schema.appendChild(createFilterType(doc, "booleanValuedFilterType", false, null, null));
+
+		Element filtersContainer = null;
+		{
+			Element filters = doc.createElement("xs:"+"element");
+			filters.setAttribute("name", "filters");
+			Element complexType = doc.createElement("xs:"+"complexType");
+			filters.appendChild(complexType);
+			filtersContainer = doc.createElement("xs:"+"all");
+			complexType.appendChild(filtersContainer);
+			schema.appendChild(filters);
+		}
+		
+		for(String filter: UNIQUE_FILTERS) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", filter);
+			el.setAttribute("type", "xsd1:" + "uniqueValueFilterType" );
+			filtersContainer.appendChild(el);
+		}
+		for(String filter: MULTI_FILTERS) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", filter);
+			el.setAttribute("type", "xsd1:" + "multiValueFilterType" );
+			filtersContainer.appendChild(el);
+		}
+		for(String filter: BOOLEAN_FILTERS) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", filter);
+			el.setAttribute("type", "xsd1:" + "booleanValuedFilterType" );
+			filtersContainer.appendChild(el);
+		}
+	}
+	
+	Element createFilterType(Document doc, String name, boolean includeValues, Integer minValueOccurs, Integer maxValueOccurs) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", name);
+		Element all = doc.createElement("xs:"+"sequence");
+		complexType.appendChild(all);
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "field");
+			el.setAttribute("type", "xs:" + "string" );
+			el.setAttribute("minOccurs", "1");
+			el.setAttribute("maxOccurs", "1");
+			all.appendChild(el);
+		}
+		if(includeValues) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "value");
+			el.setAttribute("type", "xs:" + "string" ); // boolean, integer, float, date, string based on field type?
+			if(minValueOccurs!=null) {
+				el.setAttribute("minOccurs", String.valueOf(minValueOccurs));
+			}
+			if(maxValueOccurs!=null) {
+				el.setAttribute("maxOccurs", String.valueOf(maxValueOccurs));
+			}
 			all.appendChild(el);
 		}
 		return complexType;
