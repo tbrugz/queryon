@@ -8,14 +8,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.SQLException;
-//import java.util.List;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-//import javax.xml.soap.Detail;
 import javax.xml.stream.XMLStreamException;
-//import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,17 +25,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-/*import org.bitbucket.tbrugz.queryon.queryonservice.ListOfPUBLICDEPT;
-import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTRequest;
-import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTType;
-import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
-import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnServicePortType;*/
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -154,15 +145,17 @@ public class SoapWebTest {
 		//System.out.println(content);
 	}
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void getWsdlAsString() throws ClientProtocolException, IOException, SAXException {
 		String content = httpGetContent(soaplUrl+"?wsdl");
-		System.out.println(content);
-		FileWriter fw = new FileWriter(outdir+"/soaptest.wsdl");
+		//System.out.println(content);
+		String fileout = outdir+"/soaptest.wsdl";
+		FileWriter fw = new FileWriter(fileout);
 		fw.write(content);
 		fw.close();
 		//log.info(content);
+		log.info("wsdl generated at "+fileout);
 	}
 	
 	// see: https://stackoverflow.com/questions/2917130/is-there-any-easy-way-to-perform-junit-test-for-wsdl-ws-i-compliance
@@ -191,11 +184,32 @@ public class SoapWebTest {
 		log.info("request1: responde="+s);
 	}
 	
+	@Test
+	public void requestQueryWithParams() throws IOException, XMLStreamException, SAXException {
+		String body = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:quer=\"http://bitbucket.org/tbrugz/queryon/queryOnService.xsd\">\n" + 
+				"	   <soapenv:Header/>\n" + 
+				"	   <soapenv:Body>\n" + 
+				"	      <quer:QUERY.EMP_Q1Request>\n" + 
+				"	         <limit>2</limit>\n" + 
+				"	      </quer:QUERY.EMP_Q1Request>\n" + 
+				"	   </soapenv:Body>\n" + 
+				"	</soapenv:Envelope>";
+		InputStream is = httpPostContentStream(soaplUrl, body);
+		String s = IOUtil.readFile(new InputStreamReader(is));
+		log.info("request1: responde="+s);
+	}
+	
 	// https://cxf.apache.org/docs/wsdl-to-java.html
 	@Test
 	public void generateJavaFromWsdl() throws Exception {
+		//'-validate' fixed on java 8_b96 ? https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8016153
+		// java.version: 1.8.0_92 / java.version: 1.8.0_191
+		System.out.println("java.version: "+System.getProperty("java.version"));
 		String url = soaplUrl+"?wsdl";
-		String[] args = { "-d", generatedCodeDir, url };
+		//String[] args = { "-d", generatedCodeDir, url };
+		//String[] args = { "-verbose", "-mark-generated", "-d", generatedCodeDir, url };
+		String[] args = { "-verbose", "-all", "-d", generatedCodeDir, url };
+		//String[] args = { "-validate", "-verbose", "-d", generatedCodeDir, url };
 		
 		//WSDLToJava.main(args); //do not generate exceptions...
 		WSDLToJava w2j = new WSDLToJava(args);
@@ -204,33 +218,4 @@ public class SoapWebTest {
 		// XXX compile? add to (test) classpath?
 	}
 
-	// XXX best way to 'callGeneratedJavaFromWsdl'?
-	/*
-	@Test
-	public void callGeneratedJavaFromWsdl() throws IOException, XMLStreamException, SAXException {
-		String url = soaplUrl+"?wsdl";
-		QueryOnService qons = new QueryOnService(new URL(url));
-		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
-		PUBLICDEPTRequest r = new PUBLICDEPTRequest();
-		r.setLimit(2);
-		ListOfPUBLICDEPT lopd = qonsp.getPUBLICDEPT(r);
-		List<PUBLICDEPTType> l = lopd.getPUBLICDEPT();
-		for(PUBLICDEPTType pd: l) {
-			log.info("id="+pd.getID()+" / name="+pd.getNAME());
-		}
-		
-		try {
-			r.setLimit(-1);
-			lopd = qonsp.getPUBLICDEPT(r);
-			Assert.fail("Exception should have been thrown");
-		}
-		catch(SOAPFaultException ex) {
-			String faultcode = ex.getFault().getFaultCode();
-			String faultstring = ex.getFault().getFaultString();
-			Detail detail = ex.getFault().getDetail();
-			String faultdetail = detail!=null?detail.getValue():null;
-			log.info("faultcode: "+faultcode+" // faultstring: "+faultstring+" // faultdetail: "+faultdetail);
-		}
-	}
-	*/
 }

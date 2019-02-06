@@ -46,6 +46,7 @@ public class DirectMappingTest {
 	
 	@BeforeClass
 	public static void setup() throws Exception {
+		//setupH2(); //XXX?
 		JettySetup.setupServer();
 	}
 	
