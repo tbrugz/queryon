@@ -3,6 +3,7 @@ package tbrugz.queryon.soap;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -422,6 +424,49 @@ public class QonSoapServlet extends BaseApiServlet {
 		complexType.appendChild(all);
 		
 		// XXX request parameters...
+		
+		if(r instanceof Query) {
+			Query q = (Query) r;
+			List<String> namedParameters = q.getNamedParameterNames();
+			if(namedParameters!=null) {
+				Set<String> addedParams = new HashSet<>();
+				//log.info("query [np] "+q.getName()+": parameterCount=="+q.getParameterCount()+" / pnames=="+q.getNamedParameterNames()+" / ptypes=="+q.getParameterTypes());
+				for(int i=0;i<q.getParameterCount();i++) {
+					String param = namedParameters.get(i);
+					if(addedParams.contains(param)) { continue; }
+					addedParams.add(param);
+					
+					String type = "string";
+					List<String> pTypes = q.getParameterTypes();
+					if(pTypes!=null && i<pTypes.size()) {
+						type = getElementType(q.getParameterTypes().get(i));
+					}
+					Element el = doc.createElement("xs:"+"element");
+					el.setAttribute("name", param);
+					el.setAttribute("type", "xs:" + type );
+					el.setAttribute("minOccurs", "1");
+					el.setAttribute("maxOccurs", "1");
+					all.appendChild(el);
+				}
+			}
+			else {
+				//log.info("query [pp] "+q.getName()+" count=="+q.getParameterCount());
+				for(int i=0;i<q.getParameterCount();i++) {
+					String type = "string";
+					List<String> pTypes = q.getParameterTypes();
+					if(pTypes!=null && i<pTypes.size()) {
+						type = getElementType(q.getParameterTypes().get(i));
+					}
+					Element el = doc.createElement("xs:"+"element");
+					el.setAttribute("name", "parameter"+(i+1));
+					el.setAttribute("type", "xs:" + type );
+					el.setAttribute("minOccurs", "1");
+					el.setAttribute("maxOccurs", "1");
+					all.appendChild(el);
+				}
+			}
+		}
+		
 		{
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", RequestSpec.PARAM_LIMIT);

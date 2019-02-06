@@ -2,10 +2,15 @@ package tbrugz.queryon.soap;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,8 +39,19 @@ public class SoapRequest extends RequestSpec {
 	public static final String TAG_VALUE = "value";
 	public static final String ATTR_DIRECTION = "direction";
 	
+	public static final String[] KNOWN_TAGS = { TAG_FILTERS, PARAM_FIELDS, PARAM_LIMIT, PARAM_OFFSET, PARAM_DISTINCT, PARAM_ORDER };
+	static final List<String> knownTags = Arrays.asList(KNOWN_TAGS);
+	
+	static final Pattern soapPositionalParamTagPattern = Pattern.compile("parameter([1-9]+[0-9]*)", Pattern.DOTALL);
+	
+	Map<String, String> xtraParametersMap;
+	
 	//Element requestEl;
 	//String nsPrefix;
+	
+	static {
+		Collections.sort(knownTags);
+	}
 
 	public SoapRequest(/*Element requestEl, String nsPrefix,*/ DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
 		super(dsutils, req, prop, 0, null /* soap/xml */ /* SoapDumpSyntax.SOAP_ID / XMLDataDump.XML_SYNTAX_ID */, true, 0, null);
@@ -176,6 +192,38 @@ public class SoapRequest extends RequestSpec {
 			//log.warn("unknown filter: "+tag);
 			throw new BadRequestException("unknown filter: "+tag);
 		}
+	}
+	
+	@Override
+	protected void processParams(List<String> parts) {
+		xtraParametersMap = new HashMap<>();
+		Map<String, String> positionalValues = new TreeMap<>();
+		NodeList nl = getRequestElement().getChildNodes();
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
+			Element el = (Element) n;
+			String tagName = el.getTagName();
+			//log.info("processParams: found parameter '"+tagName+"'");
+			if(Collections.binarySearch(knownTags, tagName)<0) {
+				String tagValue = el.getTextContent();
+				log.info("processParams: will add '"+tagName+"' - value '"+tagValue+"'");
+				xtraParametersMap.put(tagName,tagValue);
+				if( //(action.atype==ActionType.SELECT || action.atype==ActionType.EXECUTE) &&
+					soapPositionalParamTagPattern.matcher(tagName).matches()) {
+					log.info("processParams: will add positional param '"+tagName+"' - value '"+tagValue+"'");
+					positionalValues.put(tagName, tagValue);
+				}
+			}
+		}
+		for(Map.Entry<String, String> e: positionalValues.entrySet()) {
+			params.add(e.getValue());
+		}
+	}
+	
+	@Override
+	public Map<String, String> getParameterMapUniqueValues() {
+		return xtraParametersMap;
 	}
 	
 	//-----
