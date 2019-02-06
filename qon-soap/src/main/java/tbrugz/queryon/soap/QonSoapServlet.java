@@ -462,6 +462,14 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "filters");
+			el.setAttribute("type", "xsd1:" + "filtersType" );
+			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
+			all.appendChild(el);
+		}
 		return element;
 	}
 
@@ -522,13 +530,11 @@ public class QonSoapServlet extends BaseApiServlet {
 
 		Element filtersContainer = null;
 		{
-			Element filters = doc.createElement("xs:"+"element");
-			filters.setAttribute("name", "filters");
-			Element complexType = doc.createElement("xs:"+"complexType");
-			filters.appendChild(complexType);
+			Element filtersType = doc.createElement("xs:"+"complexType");
+			filtersType.setAttribute("name", "filtersType");
 			filtersContainer = doc.createElement("xs:"+"all");
-			complexType.appendChild(filtersContainer);
-			schema.appendChild(filters);
+			filtersType.appendChild(filtersContainer);
+			schema.appendChild(filtersType);
 		}
 		
 		for(String filter: UNIQUE_FILTERS) {

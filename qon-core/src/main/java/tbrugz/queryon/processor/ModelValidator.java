@@ -17,7 +17,7 @@ public class ModelValidator extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(ModelValidator.class);
 	
-	boolean removeInvalid = true;
+	boolean removeInvalid = false;
 	
 	@Override
 	public void process() {
