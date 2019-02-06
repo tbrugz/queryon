@@ -44,6 +44,7 @@ public class ODataWebTest {
 	
 	@BeforeClass
 	public static void setup() throws Exception {
+		setupH2();
 		JettySetup.setupServer();
 	}
 	

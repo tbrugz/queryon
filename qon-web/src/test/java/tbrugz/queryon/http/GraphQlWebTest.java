@@ -44,6 +44,7 @@ public class GraphQlWebTest {
 	
 	@BeforeClass
 	public static void setup() throws Exception {
+		setupH2();
 		JettySetup.setupServer();
 	}
 	
@@ -213,7 +214,8 @@ public class GraphQlWebTest {
 	
 	@Test
 	public void getNamedParams1WithPositionals() throws IOException, ParserConfigurationException, SAXException {
-		String query = "{ list_NAMED_PARAMS_1(p1: \"1\", p2: \"2\", p3: \"3\") { C1 }}";
+		//String query = "{ list_NAMED_PARAMS_1(p1: \"1\", p2: \"2\", p3: \"3\") { C1 }}";
+		String query = "{ list_NAMED_PARAMS_1(par1: \"1\", par2: \"2\") { C1 }}";
 		String jsonStr = getContent(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
 		assertGraphqlOk(jsonStr);

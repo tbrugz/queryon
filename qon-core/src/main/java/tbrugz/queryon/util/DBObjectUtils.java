@@ -124,9 +124,9 @@ public class DBObjectUtils {
 		String finalSql = "select * from "+rel.getQualifiedName();
 		
 		log.debug("grabbing colums name & type from prepared statement's metadata [name="+rel.getQualifiedName()+"]");
-		PreparedStatement stmt = conn.prepareStatement(finalSql);
 		
 		try {
+			PreparedStatement stmt = conn.prepareStatement(finalSql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			if(rsmd!=null && update) {
 				//rel.setColumns(DataDumpUtils.getColumns(rsmd));

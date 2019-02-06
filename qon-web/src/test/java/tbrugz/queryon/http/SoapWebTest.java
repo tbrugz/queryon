@@ -67,6 +67,7 @@ public class SoapWebTest {
 	
 	@BeforeClass
 	public static void setup() throws Exception {
+		setupH2();
 		JettySetup.setupServer();
 		
 		dbFactory = DocumentBuilderFactory.newInstance();

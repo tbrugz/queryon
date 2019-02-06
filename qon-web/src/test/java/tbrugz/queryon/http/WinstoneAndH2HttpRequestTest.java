@@ -1166,6 +1166,9 @@ public class WinstoneAndH2HttpRequestTest {
 			if(path.indexOf("QUERY_WITH_PARAMS_NULL_BIND_ARRAY")>=0) {
 				queryString = "?par2=2";
 			}
+			if(path.indexOf("QUERY_WITH_POSITIONAL_PARAMS")>=0) {
+				queryString = "?p1=1&p2=2&p3=3";
+			}
 			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path+queryString;
 			//System.out.println("swaggerGsonCall: "+url);
 			JsonElement resp = parser.parse(getContentFromUrl(url));
