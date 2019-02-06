@@ -106,6 +106,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@BeforeClass
 	public static void setup() throws Exception {
 		//TestSetup.setupWinstone();
+		setupH2();
 		JettySetup.setupServer();
 		//System.out.println(">> user.dir: "+System.getProperty("user.dir"));
 		
