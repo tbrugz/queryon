@@ -26,7 +26,7 @@ import tbrugz.queryon.api.ODataServlet;
  * https://stackoverflow.com/questions/5181194/message-level-jax-ws-service
  * https://stackoverflow.com/questions/522395/getting-raw-xml-from-soapmessage-in-java?rq=1
  * 
- * http://localhost:8080/qon-soap/qonsoap
+ * http://localhost:8080/qon-soap/soap
  */
 @Deprecated
 @WebServiceProvider(serviceName = "qonsoap", portName = "qonsoap-port", targetNamespace = "http://bitbucket.org/tbrugz/queryon/soap")

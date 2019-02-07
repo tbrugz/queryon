@@ -99,7 +99,7 @@
 	
 	<servlet-mapping>
 		<servlet-name>QonSoapServlet</servlet-name>
-		<url-pattern>/qonsoap</url-pattern>
+		<url-pattern>/soap/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>
