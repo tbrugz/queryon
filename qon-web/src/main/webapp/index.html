@@ -654,7 +654,7 @@
 					row = content.querySelectorAll('tr')[rownum];
 					//update row values
 					var tds = row.querySelectorAll('td');
-					for(var i=0;i<tds.length;i++) {
+					for(var i=0;i<nv.newVals.length;i++) {
 						tds[i].innerHTML = nv.newVals[i];
 						if(tds[i].hasAttribute("null")) {
 							tds[i].removeAttribute("null"); 
