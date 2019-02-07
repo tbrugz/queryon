@@ -23,7 +23,7 @@
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.authc.AuthenticationToken"%>
-<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
+<!-- %@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" % -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,9 +71,9 @@ else {
 }
 
 %>
-<h3>Hi <shiro:guest>Guest</shiro:guest><shiro:user>
+<h3>Hi <!-- shiro:guest>Guest</shiro:guest --><!-- shiro:user-->
 <%= currentUser.getPrincipal() %>
-</shiro:user>!
+<!-- /shiro:user-->!
 </h3>
 
 <form method="post">
@@ -111,10 +111,11 @@ catch(RuntimeException e) {
 <h3>Roles you have:</h3>
 
 <ul>
+<!-- 
     <shiro:hasRole name="admin"><li>admin<br/></shiro:hasRole>
     <shiro:hasRole name="dev"><li>dev<br/></shiro:hasRole>
     <shiro:hasRole name="user"><li>user<br/></shiro:hasRole>
-    
+-->
 <%
 String[] roles = new String[]{"admin", "dev", "user"};
 for(String s: roles) {

@@ -19,9 +19,9 @@ Subject currentUser = ShiroUtils.getSubject(prop, request);
 Gson gson = new Gson();
 boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 
-if(! permitted) {
-	out.write(sqd.get("permitted")+": "+sqd.get("false")+",\n");
-}
+//if(! permitted) {
+out.write(sqd.get("permitted")+": "+permitted+",\n");
+//}
 
 %>
 "models-info": {
