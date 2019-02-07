@@ -266,7 +266,7 @@ public class RequestSpec {
 			}
 		}
 		
-		this.modelId = SchemaModelUtils.getModelId(req);
+		this.modelId = getModelId(req);
 		//TODO test if model with this id exists
 		
 		String varUrl = req.getPathInfo();
@@ -563,6 +563,10 @@ public class RequestSpec {
 			method = req.getMethod();
 		}
 		return method;
+	}
+	
+	protected String getModelId(HttpServletRequest req) {
+		return SchemaModelUtils.getModelId(req);
 	}
 	
 	protected DumpSyntaxInt getOutputSyntax(HttpServletRequest req, DumpSyntaxUtils dsutils, boolean allowGetDumpSyntaxByAccept, String defaultOutputSyntax) {

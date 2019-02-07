@@ -29,6 +29,7 @@ import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
@@ -77,7 +78,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		if(req.getMethod().equalsIgnoreCase(METHOD_GET)) {
 			if(req.getQueryString()!=null && req.getQueryString().startsWith("wsdl")) {
-				log.info("doGet: wsdl: queryString = "+req.getQueryString());
+				log.info("doGet: wsdl: pathInfo = "+req.getPathInfo()+" ; queryString = "+req.getQueryString());
 				try {
 					//DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 					//DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -98,7 +99,7 @@ public class QonSoapServlet extends BaseApiServlet {
 				return;
 			}
 			else {
-				log.info("doGet: pathInfo = "+req.getPathInfo());
+				log.info("doGet: [no-wsdl] pathInfo = "+req.getPathInfo()+" ; queryString = "+req.getQueryString());
 				throw new BadRequestException("GET method only supported for retrieving wsdl");
 			}
 			//super.doGet(req, resp);
@@ -211,6 +212,14 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	Document makeWsdl(DOMImplementation domImpl, HttpServletRequest req) throws ParserConfigurationException {
+		
+		String modelId = SoapRequest.getSoapModelId(req);
+		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
+		if(model==null) {
+			throw new BadRequestException("Invalid model ["+modelId+"]");
+		}
+		String serviceName = this.serviceName + (modelId!=null ? MiscUtils.initCaps(modelId) : "");
+		
 		Document doc = domImpl.createDocument(NS_WSDL, "wsdl:"+"definitions", null);
 		Element definitions = doc.getDocumentElement();
 		
@@ -239,12 +248,6 @@ public class QonSoapServlet extends BaseApiServlet {
 		//schema.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:tns", getXsdNamespace());
 		
 		types.appendChild(schema);
-		
-		String modelId = SchemaModelUtils.getModelId(req);
-		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
-		if(model==null) {
-			throw new BadRequestException("Invalid model");
-		}
 
 		//Set<String> schemaNames = new LinkedHashSet<String>();
 		//Set<String> relationNames = new LinkedHashSet<String>();
@@ -359,7 +362,9 @@ public class QonSoapServlet extends BaseApiServlet {
 		service.appendChild(port);
 
 		Element address = doc.createElement("soap:address");
-		address.setAttribute("location", host+contextPath+req.getServletPath());
+		address.setAttribute("location", host+contextPath+req.getServletPath()
+			+(modelId!=null?req.getPathInfo():"")
+			);
 		port.appendChild(address);
 		
 		definitions.appendChild(service);

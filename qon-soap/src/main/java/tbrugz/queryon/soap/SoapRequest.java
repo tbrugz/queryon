@@ -75,6 +75,11 @@ public class SoapRequest extends RequestSpec {
 	}
 	
 	@Override
+	protected String getModelId(HttpServletRequest req) {
+		return getSoapModelId(req);
+	}
+	
+	@Override
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
 		String tagName = getRequestElement().getTagName();
 		String nsPrefix = getNsPrefix();
@@ -239,6 +244,17 @@ public class SoapRequest extends RequestSpec {
 	public static void setAttributesOnRequest(HttpServletRequest req, Element requestEl, String nsPrefix) {
 		req.setAttribute(ATTR_REQUEST_ELEMENT, requestEl);
 		req.setAttribute(ATTR_NS_PREFIX, nsPrefix);
+	}
+	
+	public static String getSoapModelId(HttpServletRequest req) {
+		String modelId = null; //SchemaModelUtils.getModelId(req);
+		String pathInfo = req.getPathInfo();
+		if(pathInfo!=null && pathInfo.length()>0) {
+			modelId = pathInfo.substring(1);
+			//XXX serviceName could include initCaps(modelId)
+		}
+		//log.info("modelId="+modelId+" / req.getPathInfo()="+req.getPathInfo());
+		return modelId;
 	}
 	
 	Map<String, String> getUniFilter(String filter) {

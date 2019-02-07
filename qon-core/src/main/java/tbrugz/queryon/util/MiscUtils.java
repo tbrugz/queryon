@@ -141,4 +141,11 @@ public class MiscUtils {
 		}
 	}
 	*/
+	
+	public static final String initCaps(String s) {
+		if(s==null) { return null; }
+		if(s.length()<2) { return s.toUpperCase(); }
+		return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+	}
+	
 }
