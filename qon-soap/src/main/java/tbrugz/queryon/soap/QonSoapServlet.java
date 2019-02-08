@@ -456,18 +456,20 @@ public class QonSoapServlet extends BaseApiServlet {
 			}
 			else {
 				//log.info("query [pp] "+q.getName()+" count=="+q.getParameterCount());
-				for(int i=0;i<q.getParameterCount();i++) {
-					String type = "string";
-					List<String> pTypes = q.getParameterTypes();
-					if(pTypes!=null && i<pTypes.size()) {
-						type = getElementType(q.getParameterTypes().get(i));
+				if(q.getParameterCount()!=null) {
+					for(int i=0;i<q.getParameterCount();i++) {
+						String type = "string";
+						List<String> pTypes = q.getParameterTypes();
+						if(pTypes!=null && i<pTypes.size()) {
+							type = getElementType(q.getParameterTypes().get(i));
+						}
+						Element el = doc.createElement("xs:"+"element");
+						el.setAttribute("name", "parameter"+(i+1));
+						el.setAttribute("type", "xs:" + type );
+						el.setAttribute("minOccurs", "1");
+						el.setAttribute("maxOccurs", "1");
+						all.appendChild(el);
 					}
-					Element el = doc.createElement("xs:"+"element");
-					el.setAttribute("name", "parameter"+(i+1));
-					el.setAttribute("type", "xs:" + type );
-					el.setAttribute("minOccurs", "1");
-					el.setAttribute("maxOccurs", "1");
-					all.appendChild(el);
 				}
 			}
 		}
