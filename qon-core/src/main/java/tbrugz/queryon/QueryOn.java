@@ -1877,8 +1877,8 @@ public class QueryOn extends HttpServlet {
 			}
 			//TODOne: check UPDATE permission on each row, based on grants
 			//if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
-			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.UPDATE.name(), relation.getName(), col)) {
-				throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
+			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.UPDATE.name(), reqspec.object, col)) {
+				throw new ForbiddenException("no update permission on column: "+reqspec.object+"."+col, currentUser.isAuthenticated());
 			}
 			//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
 			sb.append((colsCount!=0?", ":"")+col+" = ?");
@@ -2046,9 +2046,9 @@ public class QueryOn extends HttpServlet {
 				throw new BadRequestException("[insert] unknown column: "+col);
 			}
 			//if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !QOnModelUtils.hasPermissionOnColumn(insertGrants, roles, col)) {
-			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.INSERT.name(), relation.getName(), col)) {
+			if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.INSERT.name(), reqspec.object, col)) {
 				//log.warn("user: "+currentUser+" ; principal: "+currentUser.getPrincipal()+" ; roles: "+roles);
-				throw new ForbiddenException("no insert permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
+				throw new ForbiddenException("no insert permission on column: "+reqspec.object+"."+col, currentUser.isAuthenticated());
 			}
 			//XXX timestamp '' ?
 			sbCols.append((colsCount!=0?", ":"")+col);
