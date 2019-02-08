@@ -2,6 +2,7 @@ package tbrugz.queryon.http;
 
 import static tbrugz.queryon.http.JettySetup.qonUrl;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,9 @@ public class SoapWebTest {
 	public static void setup() throws Exception {
 		setupH2();
 		JettySetup.setupServer();
+		
+		File dir = new File(outdir);
+		dir.mkdirs();
 		
 		dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();
