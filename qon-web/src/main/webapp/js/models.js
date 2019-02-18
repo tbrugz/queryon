@@ -4,7 +4,7 @@ var modelsInfo = null;
 function loadModels(callback) {
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", callback?callback:loadModelsContent);
-	oReq.open("GET", "info/model.jsp");
+	oReq.open("GET", "info/env.jsp");
 	oReq.send();
 }
 
