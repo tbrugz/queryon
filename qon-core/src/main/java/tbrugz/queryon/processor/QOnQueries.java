@@ -113,7 +113,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	public void onInit(ServletContext context) {
 		// TODO: do not depend on QOnQueriesProcessor / SQLQueries
 		this.servletContext = context;
-		process(context);
+		process();
 	}
 	
 	@Override

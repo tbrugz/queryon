@@ -55,10 +55,14 @@ public class SQLQueriesLoader extends SQLQueries implements WebProcessor {
 	@Override
 	public void setSubject(Subject currentUser) {
 	}
+	
+	@Override
+	public void setServletContext(ServletContext context) {
+		this.servletContext = context;
+	}
 
 	@Override
-	public void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp) {
-		this.servletContext = context;
+	public void process(RequestSpec reqspec, HttpServletResponse resp) {
 		try {
 			ProcessorServlet.setOutput(this, resp);
 		}

@@ -86,7 +86,8 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 		metadataAllowQueryExec = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_METADATA_ALLOW_QUERY_EXEC, metadataAllowQueryExec);
 	}
 	
-	public void process(ServletContext context) {
+	@Override
+	public void process() {
 		Set<View> origViews = new HashSet<View>();
 		origViews.addAll(model.getViews());
 		
@@ -96,7 +97,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			
 			String action = prop.getProperty(PROP_PREFIX+SUFFIX_ACTION, ACTION_READ);
 			if(ACTION_READ.equals(action)) {
-				readFromDatabase(context);
+				readFromDatabase(servletContext);
 			}
 			else if(ACTION_WRITE.equals(action)) {
 				//XXXdone: call SQLQueries processor before writeToDatabase() ?
@@ -470,17 +471,21 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 	public void setSubject(Subject currentUser) {
 		this.currentUser = currentUser;
 	}
+	
+	@Override
+	public void setServletContext(ServletContext context) {
+		this.servletContext = context;
+	}
 
 	@Override
-	public void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp) {
-		this.servletContext = context;
+	public void process(RequestSpec reqspec, HttpServletResponse resp) {
 		try {
 			ProcessorServlet.setOutput(this, resp);
 		}
 		catch(IOException e) {
 			throw new InternalServerException(e.getMessage(), e);
 		}
-		process(context);
+		process();
 	}
 	
 }

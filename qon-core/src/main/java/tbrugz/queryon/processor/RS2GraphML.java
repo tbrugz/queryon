@@ -72,6 +72,10 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 	public void setSubject(Subject currentUser) {
 		this.currentUser = currentUser;
 	}
+	
+	@Override
+	public void setServletContext(ServletContext context) {
+	}
 
 	@Override
 	public void process() {
@@ -79,7 +83,7 @@ public class RS2GraphML extends ResultSet2GraphML implements WebProcessor {
 	}
 	
 	@Override
-	public void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp) {
+	public void process(RequestSpec reqspec, HttpServletResponse resp) {
 		// test for SELECT permission on object...
 		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
 		ActionType atype = ActionType.SELECT;

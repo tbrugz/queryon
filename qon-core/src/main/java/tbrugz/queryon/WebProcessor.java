@@ -15,7 +15,9 @@ public interface WebProcessor {
 	//void setModel(SchemaModel model);
 	
 	void setSubject(Subject currentUser);
-
-	void process(ServletContext context, RequestSpec reqspec, HttpServletResponse resp);
+	
+	void setServletContext(ServletContext context);
+	
+	void process(RequestSpec reqspec, HttpServletResponse resp);
 
 }

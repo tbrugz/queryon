@@ -222,8 +222,9 @@ public class ProcessorServlet extends HttpServlet {
 					log.warn("error setting DBIdentifiable: reqspec="+reqspec); //+" [modelId="+reqspec.modelId+"]");
 				}
 				wp.setSubject(currentUser);
+				wp.setServletContext(context);
 				
-				wp.process(context, reqspec, resp);
+				wp.process(reqspec, resp);
 			}
 			else {
 				output = setOutput(pc, resp);
