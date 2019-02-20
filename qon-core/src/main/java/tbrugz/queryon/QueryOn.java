@@ -1361,6 +1361,9 @@ public class QueryOn extends HttpServlet {
 			resp.setIntHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT, params);
 			resp.setHeader(ResponseSpec.HEADER_VALIDATE_PARAMTYPES, Utils.join(paramsTypes, ","));
 			resp.setHeader(ResponseSpec.HEADER_VALIDATE_NAMED_PARAMETER_NAMES, Utils.join(sql.namedParameters, ","));
+			if(sql.bindNullOnMissingParameters!=null) {
+				resp.setHeader(ResponseSpec.HEADER_VALIDATE_OPTIONAL_PARAMS, MiscUtils.joinBooleanArray(sql.bindNullOnMissingParameters, ","));
+			}
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
 				//XXX: (also) return number of bind parameters? return as ResultSet? stmt.getParameterMetaData()...
@@ -1577,7 +1580,7 @@ public class QueryOn extends HttpServlet {
 				if(retObject instanceof Clob) {
 					Clob cret = (Clob) retObject;
 					//retObject = cret.getSubString(0L, (int) cret.length());
-					retObject = IOUtil.readFile(cret.getCharacterStream());
+					retObject = IOUtil.readFromReader(cret.getCharacterStream());
 				}
 				writeExecuteOutput(reqspec, resp, retObject.toString());
 			}

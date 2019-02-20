@@ -116,6 +116,17 @@ public class MiscUtils {
 		return ret;
 	}
 
+	public static String joinBooleanArray(boolean[] arr, String separtor) {
+		if(arr==null || arr.length==0) { return null; }
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<arr.length;i++) {
+			if(i>0) { sb.append(separtor); }
+			sb.append(arr[i]);
+		}
+		return sb.toString();
+	}
+	
 	/*
 	public static Object getFieldValue(Object o, String field) {
 		try {
