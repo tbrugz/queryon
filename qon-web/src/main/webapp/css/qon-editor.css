@@ -233,3 +233,6 @@ input[type=button] {
 	padding-right: 10px;
 }
 
+.parameter-label button {
+	padding: 3px;
+}

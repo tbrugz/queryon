@@ -115,7 +115,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		for (var i = 0; i < params.length; ++i) {
 			var item = params[i];
 			//console.log(item);
-			reqData[item.name] = item.value;
+			if(!item.disabled) {
+				reqData[item.name] = item.value;
+			}
 			//paramsStr += '/'+item.value;
 		}
 		
@@ -186,10 +188,11 @@ modelId = SchemaModelUtils.getModelId(request);
 			btnActionStop('btnValidate');
 			var paramNames = jqXHR.getResponseHeader('X-Validate-NamedParameterNames');
 			var paramCount = jqXHR.getResponseHeader('X-Validate-ParameterCount');
-			console.log('#params = ', paramCount, ' ; named-params = ', paramNames);
+			var paramOptionals = jqXHR.getResponseHeader('X-Validate-OptionalParameters');
+			console.log('#params = ', paramCount, ' ; named-params = ', paramNames, ' ; optional-params = ', paramOptionals);
 			//XXX set named parameters
 			//var container = document.getElementById('sqlparams');
-			setParameters(paramNames, paramCount);
+			setParameters(paramCount, paramNames, paramOptionals);
 			makeHrefs();
 			
 			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
@@ -457,28 +460,40 @@ modelId = SchemaModelUtils.getModelId(request);
 		}
 	}
 	
-	function setParameters(paramNamesStr, numparams) {
+	function setParameters(numparams, paramNamesStr, paramOptionalsStr) {
 		var paramNames = [];
+		var paramOptionals = [];
 		var positionalParameters = true;
 		if(paramNamesStr) {
 			//XXX: sort array?
-			paramNames = [...new Set(paramNamesStr.split(","))];
+			paramNames = [];
+			var namePartz = paramNamesStr.split(",");
+			var optionalPartz = paramOptionalsStr.split(",");
+			for(var i=0;i<namePartz.length;i++) {
+				if(paramNames.indexOf(namePartz[i])<0) {
+					paramNames.push(namePartz[i]);
+					paramOptionals.push(optionalPartz[i]==="true");
+				}
+			}
 			numparams = paramNames.length;
 			positionalParameters = false;
 		}
 		else {
 			for(var i=0;i<=numparams;i++) {
 				paramNames.push("p"+(i+1));
+				paramOptionals.push(false);
 			}
 		}
-		console.log('numparams: ',numparams,' ; paramNames: ',paramNames);
+		console.log('numparams: ',numparams,' ; paramNames: ',paramNames, ' ; paramOptinals: ', paramOptionals);
 		
 		var currentParamsWithValues = getParametersWithValues();
 		var paramsStr = '';
 		for(var i=0;i<numparams;i++) {
 			paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
 				" id='"+paramNames[i]+"' name='"+paramNames[i]+"'"+
-				"/>"+"</label>";
+				"/>"+
+				(paramOptionals[i]?"<button id='disableBtn"+paramNames[i]+"' value='"+paramNames[i]+"' title='disable "+paramNames[i]+"' onclick='disableParam(\""+paramNames[i]+"\")'>\u2400</button>":"")+
+				"</label>";
 		}
 		byId('sqlparams').innerHTML = paramsStr;
 		setParametersValues(currentParamsWithValues);
@@ -497,6 +512,14 @@ modelId = SchemaModelUtils.getModelId(request);
 				item.parentNode.removeChild(item);
 			}
 		}*/
+	}
+	
+	function disableParam(paramName) {
+		var elem = document.getElementById(paramName);
+		var elemBtn = document.getElementById("disableBtn"+paramName);
+		//console.log("disable "+paramName, elem); //, elemBtn);
+		elem.disabled = !elem.disabled;
+		elemBtn.classList.toggle('on');
 	}
 	
 	function validateEditComponents(saved) {
@@ -763,6 +786,7 @@ if(queryName!=null) {
 		if(roles==null) { roles = ""; }
 		versionSeq = qmap.get("version_seq");
 		queryLoaded = true;
+		//XXX set numOfParameters, parameterNames, parameterOptionals?
 	}
 	else {
 		query = "-- query not found";
@@ -897,7 +921,7 @@ if(remarks==null) { remarks = ""; }
 	editor.setAutoScrollEditorIntoView(true);
 	editor.getSession().on('change', onTextFieldChange);
 	
-	setParameters(null, <%= numOfParameters %>);
+	//setParameters(<%= numOfParameters %>, null, null);
 </script>
 <script type="text/javascript">
 	makeHrefs();
