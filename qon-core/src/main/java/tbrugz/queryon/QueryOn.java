@@ -1267,9 +1267,6 @@ public class QueryOn extends HttpServlet {
 			//e.printStackTrace();
 			throw e;
 		}
-		finally {
-			ConnectionUtil.closeConnection(conn);
-		}
 	}
 	
 	protected void preprocessParameters(RequestSpec reqspec, Relation relation, Constraint pk) {}
@@ -1328,9 +1325,6 @@ public class QueryOn extends HttpServlet {
 			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSql': "+e+" ; sql:\n"+finalSql);
 			throw e;
-		}
-		finally {
-			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	
@@ -1391,9 +1385,6 @@ public class QueryOn extends HttpServlet {
 			DBUtil.doRollback(conn);
 			throw e;
 		}
-		finally {
-			ConnectionUtil.closeConnection(conn);
-		}
 	}
 
 	void doExplain(Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
@@ -1424,9 +1415,6 @@ public class QueryOn extends HttpServlet {
 			log.info("doExplain: error explaining: "+e);
 			DBUtil.doRollback(conn);
 			throw e;
-		}
-		finally {
-			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	

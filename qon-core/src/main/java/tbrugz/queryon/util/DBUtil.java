@@ -168,6 +168,7 @@ public class DBUtil {
 		return true;
 	}
 	
+	@Deprecated
 	static void closeConnection(Connection conn) {
 		ConnectionUtil.closeConnection(conn);
 	}
