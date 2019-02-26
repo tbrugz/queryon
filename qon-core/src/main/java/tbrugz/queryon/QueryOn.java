@@ -768,7 +768,7 @@ public class QueryOn extends HttpServlet {
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
 					
-					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
+					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
 						doSelect(model, relation, reqspec, currentUser, conn, resp, true);
 					}
@@ -820,7 +820,7 @@ public class QueryOn extends HttpServlet {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					Query relation = getQuery(req, reqspec, conn);
 					
-					boolean sqlCommandExecuted = trySqlCommand(relation, reqspec, resp);
+					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
 						doSql(model, relation, reqspec, currentUser, conn, resp);
 					}
@@ -1165,7 +1165,12 @@ public class QueryOn extends HttpServlet {
 		
 	protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
-		doSelect(model, relation, reqspec, currentUser, conn, resp, validateQuery);
+		try {
+			doSelect(model, relation, reqspec, currentUser, conn, resp, validateQuery);
+		}
+		finally {
+			ConnectionUtil.closeConnection(conn);
+		}
 	}
 	
 	protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
@@ -1402,7 +1407,7 @@ public class QueryOn extends HttpServlet {
 			for(int i=0;i<reqspec.params.size();i++) {
 				sql.bindParameterValues.add(reqspec.params.get(i));
 			}
-			//log.info("doExplain: params: "+sql.bindParameterValues);
+			//log.info("doExplain: params [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
 			ResultSet rs = feat.explainPlan(sql.getFinalSql(), sql.bindParameterValues, conn);
 
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
@@ -1413,6 +1418,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			log.info("doExplain: error explaining: "+e);
+			//log.debug("doExplain: error explaining: "+e, e);
 			DBUtil.doRollback(conn);
 			throw e;
 		}
@@ -2671,12 +2677,11 @@ public class QueryOn extends HttpServlet {
 	 */
 	static final SqlCommand[] cmds = new SqlCommand[]{ new ShowSchemas(), new ShowTables(), new ShowColumns(), new ShowImportedKeys(), new ShowExportedKeys(), new ShowMetadata() };
 	
-	boolean trySqlCommand(Query relation, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	boolean trySqlCommand(Query relation, Connection conn, RequestSpec reqspec, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		String sql = relation.getQuery();
 
 		for(SqlCommand cmd: cmds) {
 			if(cmd.matches(sql)) {
-				Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 				ResultSet rs = null;
 				try {
 					rs = cmd.run(conn);
@@ -2690,7 +2695,6 @@ public class QueryOn extends HttpServlet {
 				}
 				finally {
 					if(rs!=null) { rs.close(); }
-					ConnectionUtil.closeConnection(conn);
 				}
 				return true;
 			}
