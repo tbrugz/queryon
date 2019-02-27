@@ -1045,6 +1045,15 @@ public class QueryOn extends HttpServlet {
 			super.service(req, resp);
 		}
 	}
+
+	/*protected Query getQuery(HttpServletRequest req, RequestSpec reqspec) throws SQLException {
+		return getQuery(req, reqspec, false, null);
+	}
+
+	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, boolean validate, Connection conn) throws SQLException {
+		//return getQuery(req, reqspec, true, conn);
+		// ...
+	}*/
 	
 	// XXX should use RequestSpec for parameters?
 	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Connection conn) throws SQLException {
@@ -1062,7 +1071,13 @@ public class QueryOn extends HttpServlet {
 		//XXXxx: validate first & return number of parameters?
 		//relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway (would need connection to validate SQL)
 		String finalSql = SQL.getFinalSqlNoUsername(sql);
-		DBObjectUtils.validateQuery(relation, finalSql, conn, true);
+		try {
+			DBObjectUtils.validateQueryParameters(relation, finalSql, conn, true);
+		}
+		catch(SQLException e) {
+			log.warn("Error validating query: "+e);
+			throw e;
+		}
 		
 		return relation;
 	}
@@ -1173,7 +1188,12 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
-	protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	/*protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(model.getSqlDialect());
+		doSelect(model, relation, reqspec, loStrategy, currentUser, conn, resp, validateQuery);
+	}*/
+	
+	protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec/*, LimitOffsetStrategy loStrategy*/, Subject currentUser, Connection conn, HttpServletResponse resp, boolean validateQuery) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		if(relation.getName()==null) {
 			throw new BadRequestException("select: relation name must not be null");
 		}
@@ -1288,7 +1308,13 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
-			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
+			try {
+				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
+			}
+			catch(SQLException e) {
+				log.warn("error validating query '"+relation+"': "+finalSql);
+			}
+			
 			sql.addOriginalParameters(reqspec);
 	
 			finalSql = sql.getFinalSql();
@@ -1402,7 +1428,12 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
-			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
+			try {
+				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
+			}
+			catch(SQLException e) {
+				log.warn("error validating query '"+relation+"': "+sql.getFinalSql());
+			}
 			
 			for(int i=0;i<reqspec.params.size();i++) {
 				sql.bindParameterValues.add(reqspec.params.get(i));

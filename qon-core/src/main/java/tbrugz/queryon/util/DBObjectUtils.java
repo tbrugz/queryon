@@ -36,8 +36,18 @@ public class DBObjectUtils {
 	}*/
 
 	public static void validateQuery(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
-		log.debug("grabbing colums name & type from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
 		PreparedStatement stmt = conn.prepareStatement(finalSql);
+		validateQueryColumns(rel, finalSql, conn, stmt, update);
+		validateQueryParameters(rel, finalSql, conn, stmt, update);
+	}
+
+	public static void validateQueryParameters(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
+		PreparedStatement stmt = conn.prepareStatement(finalSql);
+		validateQueryParameters(rel, finalSql, conn, stmt, update);
+	}
+	
+	static void validateQueryColumns(Query rel, String finalSql, Connection conn, PreparedStatement stmt, boolean update) throws SQLException {
+		log.debug("grabbing colums name & type from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
 		
 		try {
 			ResultSetMetaData rsmd = stmt.getMetaData();
@@ -54,6 +64,10 @@ public class DBObjectUtils {
 			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
 			throw e;
 		}
+	}
+		
+	static void validateQueryParameters(Query rel, String finalSql, Connection conn, PreparedStatement stmt, boolean update) throws SQLException {
+		log.debug("grabbing parameters from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
 		
 		try {
 			ParameterMetaData pmd = stmt.getParameterMetaData();
