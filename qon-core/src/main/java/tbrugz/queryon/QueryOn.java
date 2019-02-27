@@ -763,7 +763,7 @@ public class QueryOn extends HttpServlet {
 			case SELECT_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
@@ -786,7 +786,7 @@ public class QueryOn extends HttpServlet {
 			case VALIDATE_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					doValidate(relation, reqspec, currentUser, conn, resp);
 				}
 				catch(RuntimeException e) {
@@ -802,7 +802,7 @@ public class QueryOn extends HttpServlet {
 			case EXPLAIN_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					doExplain(relation, reqspec, currentUser, conn, resp);
 				}
 				catch(RuntimeException e) {
@@ -818,7 +818,7 @@ public class QueryOn extends HttpServlet {
 			case SQL_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
@@ -1056,7 +1056,7 @@ public class QueryOn extends HttpServlet {
 	}*/
 	
 	// XXX should use RequestSpec for parameters?
-	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Connection conn) throws SQLException {
+	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn) throws SQLException {
 		Query relation = new Query();
 		String name = req.getParameter("name");
 		/*if(name==null || name.equals("")) {
@@ -1070,9 +1070,10 @@ public class QueryOn extends HttpServlet {
 		relation.setQuery(sql);
 		//XXXxx: validate first & return number of parameters?
 		//relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway (would need connection to validate SQL)
-		String finalSql = SQL.getFinalSqlNoUsername(sql);
+		//String finalSql = SQL.getFinalSqlNoUsername(sql);
+		SQL sqlz = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 		try {
-			DBObjectUtils.validateQueryParameters(relation, finalSql, conn, true);
+			DBObjectUtils.validateQueryParameters(relation, sqlz.getFinalSql(), conn, true);
 		}
 		catch(SQLException e) {
 			log.warn("Error validating query: "+e);
