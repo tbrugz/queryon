@@ -85,7 +85,7 @@ public class SQL {
 	Integer applyedLimit;
 	//Integer applyedOffset; //XXX add applyedOffset?
 	boolean orderByApplyed = false;
-	List<Object> bindParameterValues = new ArrayList<Object>();
+	final List<Object> bindParameterValues = new ArrayList<Object>();
 	//XXX add 'final String initialSql;'?
 	
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit, String username) {
@@ -787,6 +787,7 @@ public class SQL {
 				//bindParameterValues.add(reqspec.params.get(i));
 			}
 		}
+		//log.debug("addOriginalParameters: bindParameterValues [#"+bindParameterValues.size()+"] = "+bindParameterValues);
 	}
 	
 	public static boolean hasGroupByOrAggregate(RequestSpec reqspec) {

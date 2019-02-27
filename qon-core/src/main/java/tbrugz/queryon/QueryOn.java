@@ -1435,11 +1435,12 @@ public class QueryOn extends HttpServlet {
 				log.warn("error validating query '"+relation+"': "+sql.getFinalSql());
 			}
 			
-			for(int i=0;i<reqspec.params.size();i++) {
+			sql.addOriginalParameters(reqspec);
+			/*for(int i=0;i<reqspec.params.size();i++) {
 				sql.bindParameterValues.add(reqspec.params.get(i));
-			}
+			}*/
 			//log.info("doExplain: params [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
-			ResultSet rs = feat.explainPlan(sql.getFinalSql(), sql.bindParameterValues, conn);
+			ResultSet rs = feat.explainPlan(sql.getFinalSql(), sql.getParameterValues(), conn);
 
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
 					null, //pk!=null?pk.getUniqueColumns():null,
