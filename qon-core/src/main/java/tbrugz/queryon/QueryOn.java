@@ -2195,7 +2195,7 @@ public class QueryOn extends HttpServlet {
 	void addPartParameter(RequestSpec reqspec, SQL sql, String ctype, String col, int colindex) throws IOException {
 		boolean isBinary = DBUtil.BLOB_COL_TYPES_LIST.contains(ctype.toUpperCase());
 		if(isBinary) {
-			sql.bindParameterValues.add(reqspec.updatePartValues.get(col).getInputStream());
+			sql.addParameter(reqspec.updatePartValues.get(col).getInputStream());
 		}
 		else {
 			//log.info("addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
@@ -2204,7 +2204,7 @@ public class QueryOn extends HttpServlet {
 				//log.info("1.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
 			}
 			else {*/
-				sql.bindParameterValues.add(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream() ));
+				sql.addParameter(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream() ));
 				//log.info("2.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
 			//}
 		}
@@ -2423,12 +2423,15 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	/*
+	 * add colTypes? maybe not: just strings are used in 'like' & 'not like'
+	 */
 	static void addMultiFilter(final Map<String, String[]> valueMap, Set<String> columns, SQL sql, String compareExpression, String relationName, List<String> warnings) {
 		for(String col: valueMap.keySet()) {
 			if(!validateFilterColumnNames || columns.contains(col)) {
 				String[] values = valueMap.get(col);
 				for(int i=0;i<values.length;i++) {
-					sql.bindParameterValues.add(values[i]);
+					sql.addParameter(values[i]);
 					sql.addFilter(SQL.sqlIdDecorator.get(col)+" "+compareExpression); //" like ?"
 				}
 				logFilter.debug("addMultiFilter: values="+Arrays.asList(values));

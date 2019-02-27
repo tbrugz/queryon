@@ -85,7 +85,7 @@ public class SQL {
 	Integer applyedLimit;
 	//Integer applyedOffset; //XXX add applyedOffset?
 	boolean orderByApplyed = false;
-	final List<Object> bindParameterValues = new ArrayList<Object>();
+	final List<Object> bindParameterValues = new ArrayList<Object>(); // XXX private?
 	//XXX add 'final String initialSql;'?
 	
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit, String username) {
@@ -686,6 +686,10 @@ public class SQL {
 		else {
 			bindParameterValues.add(value);
 		}
+	}
+	
+	public void addParameter(Object value) {
+		bindParameterValues.add(value);
 	}
 	
 	static void initDateFormats(DumpSyntaxUtils dsutils) {
