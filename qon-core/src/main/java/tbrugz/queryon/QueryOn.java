@@ -239,8 +239,6 @@ public class QueryOn extends HttpServlet {
 	//static final String SUFFIX_SQLDIALECT = ".sqldialect";
 	static final String PROP_GRABCLASS = "queryon.grabclass";
 	
-	static final String REQ_ATTR_CONTENTLOCATION = "attr.contentlocation";
-
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
 	public static final String ATTR_PROP = "prop";
@@ -1263,7 +1261,7 @@ public class QueryOn extends HttpServlet {
 		if(Utils.getPropBool(prop, PROP_HEADERS_ADDCONTENTLOCATION, false)) {
 			String contentLocation = reqspec.getCanonicalUrl(prop);
 			//log.info("content-location header: "+contentLocation);
-			reqspec.setAttribute(REQ_ATTR_CONTENTLOCATION, contentLocation);
+			reqspec.setAttribute(RequestSpec.ATTR_CONTENTLOCATION, contentLocation);
 		}
 		
 		if(reqspec.uniValueCol!=null) {
@@ -2567,7 +2565,7 @@ public class QueryOn extends HttpServlet {
 		//resp.addHeader(ResponseSpec.HEADER_CONTENT_TYPE, ds.getMimeType());
 		//XXX download? http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-type
 		//resp.addHeader("Content-disposition", "attachment;filename="+table.name+"."+ds.getDefaultFileExtension());
-		String contentLocation = (String) reqspec.getAttribute(REQ_ATTR_CONTENTLOCATION);
+		String contentLocation = (String) reqspec.getAttribute(RequestSpec.ATTR_CONTENTLOCATION);
 		if(contentLocation!=null) {
 			//log.debug(ResponseSpec.HEADER_CONTENT_LOCATION+": "+contentLocation);
 			resp.addHeader(ResponseSpec.HEADER_CONTENT_LOCATION, contentLocation);

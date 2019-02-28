@@ -77,6 +77,7 @@ public class RequestSpec {
 	public static final String HEADER_PARAM_ENCODING = "X-ParamEncoding";
 	public static final String PARAM_ENCODING_URLENCODE = "url";
 	
+	public static final String ATTR_CONTENTLOCATION = "content-location";
 	public static final String ATTR_SQL_INDEX_OF_INITIAL = "sql.index-of-initial";
 	
 	// select parameters
