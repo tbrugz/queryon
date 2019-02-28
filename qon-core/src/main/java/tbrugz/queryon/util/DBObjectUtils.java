@@ -51,11 +51,13 @@ public class DBObjectUtils {
 		
 		try {
 			ResultSetMetaData rsmd = stmt.getMetaData();
-			if(rsmd!=null && update) {
-				rel.setColumns(DataDumpUtils.getColumns(rsmd));
+			if(rsmd!=null) {
+				if(update) {
+					rel.setColumns(DataDumpUtils.getColumns(rsmd));
+				}
 			}
 			else {
-				log.warn("getMetaData() returned null: empty query? [query="+rel.getQualifiedName()+"] sql:\n"+finalSql);
+				log.warn("getMetaData() returned null: empty/invalid query? not a 'select'? [query="+rel.getQualifiedName()+"] sql:\n"+finalSql);
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);

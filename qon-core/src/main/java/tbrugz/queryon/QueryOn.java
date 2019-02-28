@@ -1377,6 +1377,7 @@ public class QueryOn extends HttpServlet {
 		try {
 			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
+			//DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
 
 			ParameterMetaData pmd = stmt.getParameterMetaData();
@@ -1399,23 +1400,29 @@ public class QueryOn extends HttpServlet {
 			}
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {
-				//XXX: (also) return number of bind parameters? return as ResultSet? stmt.getParameterMetaData()...
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
 				if(rsmd==null) {
-					String message = "can't get metadata of: "+sql.getFinalSql().trim();
-					throw new BadRequestException(message);
+					//String message = "can't get resultset metadata of: "+sql.getFinalSql().trim();
+					String message = "getMetaData() returned null: empty/invalid query? not a 'select'? sql:\n"+sql.getFinalSql().trim();
+					log.warn(message);
+					//throw new SQLException(message);
+					//throw new BadRequestException(message);
+					resp.setContentType(MIME_TEXT);
+					//resp.getWriter().write("Statement successfully validated");
 				}
-				// dumping ResultSetMetaData as a ResultSet ;)
-				ResultSet rs = new ResultSetMetadata2RsAdapter(rsmd);
-				dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
-						null, //pk!=null?pk.getUniqueColumns():null,
-						null, null, //fks, uks,
-						false, //applyLimitOffsetInResultSet,
-						resp);
+				else {
+					// dumping ResultSetMetaData as a ResultSet ;)
+					ResultSet rs = new ResultSetMetadata2RsAdapter(rsmd);
+					dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
+							null, //pk!=null?pk.getUniqueColumns():null,
+							null, null, //fks, uks,
+							false, //applyLimitOffsetInResultSet,
+							resp);
+				}
 			}
 			else {
 				resp.setContentType(MIME_TEXT);
-				resp.getWriter().write(String.valueOf(params));
+				//resp.getWriter().write("Statement successfully validated");
 			}
 		}
 		catch(SQLException e) {
