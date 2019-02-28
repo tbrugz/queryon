@@ -66,7 +66,7 @@ public class SQL {
 	
 	static boolean validateOrderColumnNames = true; //TODO: should not be static
 	
-	//final String initialSql;
+	final String initialSql;
 	String sql;
 	boolean sqlLoEncapsulated = false;
 	
@@ -89,7 +89,7 @@ public class SQL {
 	//XXX add 'final String initialSql;'?
 	
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit, String username) {
-		//this.initialSql = sql;
+		this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
 		//this.allowEncapsulation = processPatternBoolean(sql, allowEncapsulationBooleanPattern, true);
@@ -943,6 +943,16 @@ public class SQL {
 			}
 		}
 		return namedParameters;
+	}
+	
+	/*
+	public boolean hasSqlChanged() {
+		return initialSql.equals(getFinalSql());
+	}
+	*/
+	
+	public int indexOfInitialSql() {
+		return getFinalSql().indexOf(initialSql);
 	}
 	
 }

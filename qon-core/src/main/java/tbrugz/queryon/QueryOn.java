@@ -646,16 +646,16 @@ public class QueryOn extends HttpServlet {
 			doService(req, resp);
 		}
 		catch(InternalServerException e) {
-			WebUtils.writeException(resp, e, debugMode);
+			WebUtils.writeException(req, resp, e, debugMode);
 		}
 		catch(ForbiddenException e) {
-			WebUtils.writeException(resp, e, debugMode);
+			WebUtils.writeException(req, resp, e, debugMode);
 			// XXX if currentUser not authenticated, throw 401/Unauthorized ?
 			//int status = e.isAuthenticated() ? e.getCode() : HttpServletResponse.SC_UNAUTHORIZED;
 			//WebUtils.writeException(resp, e, status, debugMode);
 		}
 		catch(BadRequestException e) {
-			WebUtils.writeException(resp, e, debugMode);
+			WebUtils.writeException(req, resp, e, debugMode);
 		}
 		catch(RuntimeException e) {
 			//e.printStackTrace();
@@ -1076,7 +1076,9 @@ public class QueryOn extends HttpServlet {
 			DBObjectUtils.validateQueryParameters(relation, sqlz.getFinalSql(), conn, true);
 		}
 		catch(SQLException e) {
+			setSqlInfo(req, sqlz);
 			log.warn("Error validating query: "+e);
+			log.info("Error validating query: sqlz.getFinalSql()=="+sqlz.getFinalSql());
 			throw e;
 		}
 		
@@ -1200,6 +1202,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		String finalSql = null;
+		SQL sql = null;
 		try {
 			
 		if(log.isDebugEnabled()) {
@@ -1211,7 +1214,7 @@ public class QueryOn extends HttpServlet {
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
 		preprocessParameters(reqspec, relation, pk);
-		SQL sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
+		sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
 		finalSql = sql.getFinalSql();
 		
 		if(validateQuery) {
@@ -1288,6 +1291,7 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
+			setSqlInfo(reqspec.request, sql);
 			//XXX: create new SQLException including the query string? throw BadRequestException? InternalServerException?
 			//throw new InternalServerException("Exception in 'doSelect': "+e, e);
 			//e.printStackTrace();
@@ -1302,13 +1306,14 @@ public class QueryOn extends HttpServlet {
 			throw new BadRequestException("sql: relation name must not be null");
 		}
 		
+		SQL sql = null;
 		String finalSql = null;
 		try {
 			if(log.isDebugEnabled()) {
 				ConnectionUtil.showDBInfo(conn.getMetaData());
 			}
 			
-			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			try {
 				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
 			}
@@ -1356,6 +1361,7 @@ public class QueryOn extends HttpServlet {
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
 			log.warn("exception in 'doSql': "+e+" ; sql:\n"+finalSql);
+			setSqlInfo(reqspec.request, sql);
 			throw e;
 		}
 	}
@@ -1367,8 +1373,9 @@ public class QueryOn extends HttpServlet {
 	 * - run query with limit of 0 or 1? set parameters with what? null? random?
 	 */
 	void doValidate(Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		SQL sql = null;
 		try {
-			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
 
@@ -1413,6 +1420,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			log.info("doValidate: error validating: "+e);
+			setSqlInfo(reqspec.request, sql);
 			//log.debug("doValidate: error validating: "+e.getMessage(), e);
 			DBUtil.doRollback(conn);
 			throw e;
@@ -2791,6 +2799,15 @@ public class QueryOn extends HttpServlet {
 			return Math.min(defaultLimit, maxLimit);
 		}
 		return maxLimit;
+	}
+	
+	static void setSqlInfo(HttpServletRequest req, SQL sql) {
+		if(sql==null) { return; }
+		setSqlIndexOfInitial(req, sql.indexOfInitialSql());
+	}
+	
+	static void setSqlIndexOfInitial(HttpServletRequest req, int index) {
+		req.setAttribute(RequestSpec.ATTR_SQL_INDEX_OF_INITIAL, index);
 	}
 	
 	/*@SuppressWarnings("rawtypes")

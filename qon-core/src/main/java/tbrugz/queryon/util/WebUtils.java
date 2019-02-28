@@ -3,7 +3,10 @@ package tbrugz.queryon.util;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
 
 public class WebUtils {
@@ -26,6 +30,9 @@ public class WebUtils {
 	public static final String PARAM_UTF8 = "utf8";
 	
 	public final static String UTF8_CHECK = "\u2713";
+	
+	static final Pattern PATTERN_POSITION = Pattern.compile("position\\s*:\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
+	static final Pattern PATTERN_LINE = Pattern.compile("line\\s+(\\d+)", Pattern.CASE_INSENSITIVE);
 
 	public static String getRequestFullContext(HttpServletRequest req) {
 		String ret = req.getScheme() + "://" + req.getServerName() +
@@ -46,11 +53,11 @@ public class WebUtils {
 		return defaultValue;
 	}
 	
-	public static void writeException(HttpServletResponse resp, BadRequestException e, boolean debugMode) throws IOException {
-		writeException(resp, e, e.getCode(), debugMode);
+	public static void writeException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e, boolean debugMode) throws IOException {
+		writeException(req, resp, e, e.getCode(), debugMode);
 	}
 	
-	public static void writeException(HttpServletResponse resp, BadRequestException e, int status, boolean debugMode) throws IOException {
+	public static void writeException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e, int status, boolean debugMode) throws IOException {
 		//e.printStackTrace();
 		//log.warn("BRE: "+e.getMessage()+
 		//		(e.internalMessage!=null?" ; internal="+e.internalMessage:""));
@@ -60,6 +67,26 @@ public class WebUtils {
 		resp.reset();
 		resp.setStatus(status);
 		resp.setContentType(MIME_TEXT);
+		if(e.getCause() instanceof SQLException) {
+			Integer indexOfInitialSql = (Integer) req.getAttribute(RequestSpec.ATTR_SQL_INDEX_OF_INITIAL);
+			//log.info("indexOfInitialSql=="+indexOfInitialSql);
+			//log.info("indexOfInitialSql=="+indexOfInitialSql+" / position=="+position+" / line=="+line);
+			if(indexOfInitialSql!=null && indexOfInitialSql>=0) {
+				Integer position = getPosition(e.getCause());
+				//log.info("indexOfInitialSql=="+indexOfInitialSql+" / position=="+position);
+				if(position!=null) {
+					resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_POSITION, String.valueOf(position - indexOfInitialSql));
+				}
+				else if(indexOfInitialSql==0) {
+					Integer line = getLine(e.getCause());
+					//log.info("indexOfInitialSql=="+indexOfInitialSql+" / line=="+line);
+					if(line!=null) {
+						resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_LINE, String.valueOf(line));
+					}
+				}
+			}
+		}
+		
 		resp.getWriter().write(message);
 		
 		if(debugMode) {
@@ -92,10 +119,45 @@ public class WebUtils {
 	
 	public static void addSqlWarningsAsHeaders(SQLWarning sqlw, HttpServletResponse resp) {
 		while(sqlw!=null) {
-			log.warn("sqlw: "+sqlw);
+			log.warn("sqlwarning: "+sqlw);
 			resp.addHeader(ResponseSpec.HEADER_WARNING, sqlw.getMessage()+" ["+sqlw.getSQLState()+"]");
 			sqlw = sqlw.getNextWarning();
 		}
+	}
+
+	/*
+	 * useful for oracle, postgresql
+	 */
+	static Integer getPosition(Throwable t) {
+		if(t==null) { return null; }
+		//log.info("getPosition=="+t.getMessage()+" // "+t+" // "+t.getClass()+" // "+t.getCause());
+		Matcher m = PATTERN_POSITION.matcher(t.getMessage());
+		if(m.find()) {
+			String s = m.group(1);
+			return Integer.parseInt(s);
+		}
+		// testing toString(), not just getMessage()
+		m = PATTERN_POSITION.matcher(t.toString());
+		if(m.find()) {
+			String s = m.group(1);
+			return Integer.parseInt(s);
+		}
+		return getPosition(t.getCause());
+	}
+
+	/*
+	 * test for "line <n>" (mysql)
+	 * //XXX test for "line <n>, column <m>" (derby)
+	 */
+	static Integer getLine(Throwable t) {
+		if(t==null) { return null; }
+		//log.info("getPosition=="+t.getMessage()+" // "+t+" // "+t.getClass()+" // "+t.getCause());
+		Matcher m = PATTERN_LINE.matcher(t.getMessage());
+		if(m.find()) {
+			String s = m.group(1);
+			return Integer.parseInt(s);
+		}
+		return getLine(t.getCause());
 	}
 	
 }
