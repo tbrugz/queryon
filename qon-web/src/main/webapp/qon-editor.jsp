@@ -43,6 +43,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	<script type="text/javascript" src="js/qon-util.js"></script>
 	<script src="js/settings.js"></script>
 	<script type="text/javascript" src="js/table.js"></script>
+	<script type="text/javascript" src="js/editor.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
@@ -96,6 +97,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	}
 
 	function doRun() {
+		removeMarker(editor);
 		var sqlString = editor.getSelectedText();
 		if(!sqlString) { sqlString = editor.getValue(); }
 		
@@ -148,10 +150,11 @@ modelId = SchemaModelUtils.getModelId(request);
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnRun');
-			console.log(jqXHR);
+			//console.log(jqXHR);
 			errorMessage(jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
+			checkForPosition(jqXHR, editor);
 			closeResults();
 			updateUI();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
@@ -160,6 +163,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	//type: 'POST' - https://api.jquery.com/jQuery.ajax/
 
 	function doValidate() {
+		removeMarker(editor);
 		var sqlString = editor.getSelectedText();
 		var usingSelected = true;
 		if(!sqlString) {
@@ -208,10 +212,11 @@ modelId = SchemaModelUtils.getModelId(request);
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnValidate');
-			console.log(jqXHR);
+			//console.log(jqXHR);
 			errorMessage(jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
+			checkForPosition(jqXHR, editor);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 			updateUI();
@@ -219,6 +224,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	}
 
 	function doExplain() {
+		removeMarker(editor);
 		var sqlString = editor.getSelectedText();
 		var usingSelected = true;
 		if(!sqlString) {
@@ -236,7 +242,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		}
 		
 		var params = document.querySelectorAll('.parameter');
-		console.log(params);
+		//console.log(params);
 		for (var i = 0; i < params.length; ++i) {
 			var item = params[i];
 			reqData[item.name] = item.value;
@@ -271,10 +277,11 @@ modelId = SchemaModelUtils.getModelId(request);
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnExplain');
-			console.log(jqXHR);
+			//console.log(jqXHR);
 			errorMessage(jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
+			checkForPosition(jqXHR, editor);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 			updateUI();
@@ -339,7 +346,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		btnActionStart('btnSave');
 		request.done(function(data) {
 			btnActionStop('btnSave');
-			console.log(data);
+			//console.log(data);
 			closeMessages('messages');
 			byId('optimisticlock').value = version_seq;
 			infoMessage('query <b>'+name+'</b> successfully saved');
@@ -352,7 +359,7 @@ modelId = SchemaModelUtils.getModelId(request);
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('btnSave');
-			console.log(jqXHR);
+			//console.log(jqXHR);
 			errorMessage('error saving query: '+jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
@@ -380,7 +387,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		});
 
 		request.done(function(data) {
-			console.log(data);
+			//console.log(data);
 			closeMessages('messages');
 			infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully removed');
 			validateEditComponents(false);
@@ -388,7 +395,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
-			console.log(jqXHR);
+			//console.log(jqXHR);
 			errorMessage('error removing query: '+jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
@@ -406,7 +413,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		};
 		
 		var params = document.querySelectorAll('.parameter');
-		console.log(params);
+		//console.log(params);
 		
 		for (var i = 0; i < params.length; ++i) {
 			var item = params[i];
@@ -479,7 +486,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			positionalParameters = false;
 		}
 		else {
-			for(var i=0;i<=numparams;i++) {
+			for(var i=0;i<numparams;i++) {
 				paramNames.push("p"+(i+1));
 				paramOptionals.push(false);
 			}
@@ -560,6 +567,11 @@ modelId = SchemaModelUtils.getModelId(request);
 	function closeResults() {
 		document.getElementById("queryResult").innerHTML = "";
 		updateUI();
+	}
+	
+	function onEditorChange() {
+		removeMarker(editor);
+		onTextFieldChange();
 	}
 	
 	function onTextFieldChange() {
@@ -716,7 +728,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			btnActionStop('btnDownload');
 		}, "_blank");
 	}
-	
+
 	window.addEventListener('load', function() {
 		if(modelId==null) {
 			//document.getElementById('modelLabel').style.display = 'none';
@@ -919,7 +931,7 @@ if(remarks==null) { remarks = ""; }
 	// http://stackoverflow.com/questions/27534263/making-ace-editor-resizable
 	// https://github.com/ajaxorg/ace/wiki/Configuring-Ace
 	editor.setAutoScrollEditorIntoView(true);
-	editor.getSession().on('change', onTextFieldChange);
+	editor.getSession().on('change', onEditorChange);
 	
 	//setParameters(<%= numOfParameters %>, null, null);
 </script>
