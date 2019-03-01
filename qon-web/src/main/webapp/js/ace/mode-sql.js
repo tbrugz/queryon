@@ -8,9 +8,9 @@ var SqlHighlightRules = function() {
 
     var keywords = (
         "select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|" +
-        "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
+        "when|then|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant"
-            + "|set|distinct|with|then|between|like|is|into|values|alter|constraint|unique|in"
+            + "|set|distinct|with|between|like|is|into|values|alter|constraint|unique|in"
             + "|all|exists|full|partition|any|some|using|alias|aggregate|over|recursive"
             + "|replace|function|procedure|package|body|begin|return|for" // plsql keywords
     );
@@ -56,6 +56,9 @@ var SqlHighlightRules = function() {
             token : "string",           // ' string
             regex : "'.*?'"
         }, {
+            token : "string",           // ` string (apache drill)
+            regex : "`.*?`"
+        }, {
             token : "constant.numeric", // float
             regex : "[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b"
         }, {
@@ -83,16 +86,16 @@ oop.inherits(SqlHighlightRules, TextHighlightRules);
 exports.SqlHighlightRules = SqlHighlightRules;
 });
 
-define("ace/mode/sql",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/sql_highlight_rules","ace/range"], function(require, exports, module) {
+define("ace/mode/sql",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/sql_highlight_rules"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
 var SqlHighlightRules = require("./sql_highlight_rules").SqlHighlightRules;
-var Range = require("../range").Range;
 
 var Mode = function() {
     this.HighlightRules = SqlHighlightRules;
+    this.$behaviour = this.$defaultBehaviour;
 };
 oop.inherits(Mode, TextMode);
 
@@ -105,4 +108,11 @@ oop.inherits(Mode, TextMode);
 
 exports.Mode = Mode;
 
-});
+});                (function() {
+                    window.require(["ace/mode/sql"], function(m) {
+                        if (typeof module == "object" && typeof exports == "object" && module) {
+                            module.exports = m;
+                        }
+                    });
+                })();
+            
