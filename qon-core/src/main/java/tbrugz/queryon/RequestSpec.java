@@ -444,7 +444,21 @@ public class RequestSpec {
 		//	String[] value = req.getParameterValues(key);
 		
 		optimisticLock = request.getParameter(PARAM_OPTIMISTICLOCK);
+		
+		processBody(req);
 
+		// set filters, xtras...
+		Set<String> allowedFilters = null;
+		List<String> allowedFiltersList = Utils.getStringListFromProp(prop, PROP_FILTERS_ALLOWED, ",");
+		if(allowedFiltersList!=null) {
+			allowedFilters = new HashSet<String>();
+			allowedFilters.addAll(allowedFiltersList);
+		}
+		processFilters(allowedFilters);
+		processXtra();
+	}
+	
+	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
 		Map<Integer, Object> postionalParamsMap = new TreeMap<Integer, Object>();
 
 		Map<String,String[]> reqParams = req.getParameterMap();
@@ -471,6 +485,9 @@ public class RequestSpec {
 			//params.add(value);
 			paramMap.put(i, value);
 		}*/
+		
+		String bodyParamIndex = req.getParameter(PARAM_BODY_PARAM_INDEX);
+		String bodyParamName = req.getParameter(PARAM_BODY_PARAM_NAME);
 		
 		// http://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
 		if(isContentTypeMultiPart()) {
@@ -503,10 +520,8 @@ public class RequestSpec {
 			}
 			log.debug("multipart-content: length="+i);
 		}
-
-		String bodyParamIndex = req.getParameter(PARAM_BODY_PARAM_INDEX);
-		String bodyParamName = req.getParameter(PARAM_BODY_PARAM_NAME);
-		if(bodyParamIndex!=null) {
+		else if(bodyParamIndex!=null) {
+			// EXEC (POST)
 			try {
 				int pos = Integer.parseInt( bodyParamIndex );
 				if(postionalParamsMap.get(pos)!=null) {
@@ -515,6 +530,7 @@ public class RequestSpec {
 				else {
 					String value = getRequestBody(req);
 					postionalParamsMap.put(pos, value);
+					//System.out.println("setting parameter #"+pos+": "+value);
 				}
 			} catch (NumberFormatException e) {
 				log.warn("error parsing parameter index [bodyParamIndex="+bodyParamIndex+"]: "+e);
@@ -523,9 +539,11 @@ public class RequestSpec {
 			}
 		}
 		else if(bodyParamName!=null) {
+			// INSERT (POST) / UPDATE (PATCH)
 			try {
 				String value = getRequestBody(req);
 				updateValues.put(bodyParamName, value);
+				//System.out.println("updating parameter "+bodyParamName+": "+value);
 			} catch (IOException e) {
 				log.warn("error decoding http message body [bodyParamName="+bodyParamName+"]: "+e);
 			}
@@ -537,22 +555,15 @@ public class RequestSpec {
 			for(Map.Entry<Integer, Object> e: postionalParamsMap.entrySet()) {
 				int i = e.getKey();
 				params.add(e.getValue());
-				pCount++;
 				if(i!=pCount) {
-					log.debug("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
+					String message = "parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]";
+					//System.out.println(message);
+					log.warn("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
+					throw new BadRequestException(message);
 				}
+				pCount++;
 			}
 		}
-		
-		// set filters, aggregates, update values
-		Set<String> allowedFilters = null;
-		List<String> allowedFiltersList = Utils.getStringListFromProp(prop, PROP_FILTERS_ALLOWED, ",");
-		if(allowedFiltersList!=null) {
-			allowedFilters = new HashSet<String>();
-			allowedFilters.addAll(allowedFiltersList);
-		}
-		processFilters(allowedFilters);
-		processXtra();
 		
 		if(showDebugInfo) {
 			showDebugInfo(reqParams);
