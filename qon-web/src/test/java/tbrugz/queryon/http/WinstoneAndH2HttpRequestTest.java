@@ -43,18 +43,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
@@ -137,7 +134,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public static String getContent(HttpResponse response) throws IllegalStateException, IOException {
 		HttpEntity entity = response.getEntity();
 		InputStream instream = entity.getContent();
-		return IOUtil.readFile(new InputStreamReader(instream));
+		return IOUtil.readFromReader(new InputStreamReader(instream));
 	}
 
 	public static String getContentFromUrl(String url) throws ClientProtocolException, IOException {
@@ -593,10 +590,41 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	static String httpGetContent(String url) throws IllegalStateException, IOException {
+		return httpGetContent(url, 200);
+	}
+	
+	static String httpGetContent(String url, int expectedStatus) throws IllegalStateException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet http = new HttpGet(baseUrl+url);
 		HttpResponse response = httpclient.execute(http);
+		Assert.assertEquals(expectedStatus, response.getStatusLine().getStatusCode());
 		return getContent(response);
+	}
+	
+	static String httpPostContent(String url, String content) throws IllegalStateException, IOException {
+		return httpPostContent(url, content, 200);
+	}
+	
+	static String httpPostContent(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost http = new HttpPost(baseUrl+url);
+		http.setEntity(new StringEntity(content));
+		HttpResponse response = httpclient.execute(http);
+		String ret = getContent(response);
+		//System.out.println(ret);
+		Assert.assertEquals(expectedStatus, response.getStatusLine().getStatusCode());
+		return ret;
+	}
+
+	static String httpPatchContent(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPatch http = new HttpPatch(baseUrl+url);
+		http.setEntity(new StringEntity(content));
+		HttpResponse response = httpclient.execute(http);
+		String ret = getContent(response);
+		//System.out.println(ret);
+		Assert.assertEquals(expectedStatus, response.getStatusLine().getStatusCode());
+		return ret;
 	}
 	
 	@Test
@@ -837,6 +865,17 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertEquals("true", content);
 	}
 
+	@Test
+	public void testExecuteWithBodyParamIndex() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+		String content = httpPostContent("/IS_PRIME?bodyparamindex=1", "3", 200);
+		Assert.assertEquals("true", content);
+	}
+
+	@Test
+	public void testExecuteWithBodyParamIndexError() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+		String content = httpPostContent("/IS_PRIME?bodyparamindex=2", "3", 400);
+	}
+	
 	@Test
 	public void testGetRowsetSer() throws IOException, ClassNotFoundException, SQLException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -1516,5 +1555,46 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 		
 	}
+
+	// not recommended
+	/*
+	@Test
+	public void testGetQueryWithBodyParamIndex() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?_method=GET&bodyparamindex=1&p2=2&p3=3"; // p1=1&p2=2&p3=3
+		
+		String content = httpPostContent(url, "1");
+		System.out.println(content);
+		Assert.assertEquals("C1" + LF + 
+				"1" + LF +
+				"2" + LF +
+				"3" + LF,
+				content);
+	}
+	*/
 	
+	@Test
+	public void testPatchWithBodyParamName() throws IllegalStateException, IOException {
+		httpPatchContent("/EMP/1?bodyparamname=NAME", "newname", 200);
+		//httpPostContent("/EMP/1?bodyparamname=NAME&_method=PATCH", "newname", 200);
+	}
+
+	@Test
+	public void testPatchWithBodyParamNameError() throws IllegalStateException, IOException {
+		httpPatchContent("/EMP/1", "", 400);
+	}
+	
+	@Test
+	public void testPostWithBodyParamName() throws IllegalStateException, IOException {
+		httpPostContent("/EMP?v:ID=11&bodyparamname=NAME", "sonya", 201);
+	}
+	
+	@Test
+	public void testPostWithBodyParamNameError() throws IllegalStateException, IOException {
+		httpPostContent("/EMP?v:ID=11", "", 500); //500
+	}
+	
+	@Test
+	public void testPostWithBodyParamNameError2() throws IllegalStateException, IOException {
+		httpPostContent("/EMP?v:ID=11&bodyparamname=NAMEZ", "sonya", 400); //400
+	}
 }

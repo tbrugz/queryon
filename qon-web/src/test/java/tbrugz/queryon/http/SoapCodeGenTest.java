@@ -55,7 +55,7 @@ public class SoapCodeGenTest {
 
 	public static final String generatedCodeDir = "target/test/java/";
 	
-	static final String soaplUrl = qonUrl + "/qonsoap";
+	static final String soaplUrl = qonUrl + "/soap";
 	static final String wsdlUrl = soaplUrl+"?wsdl";
 	
 	static DocumentBuilderFactory dbFactory;

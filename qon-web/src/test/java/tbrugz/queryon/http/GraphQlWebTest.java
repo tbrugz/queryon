@@ -73,7 +73,7 @@ public class GraphQlWebTest {
 		HttpEntity entity = response.getEntity();
 		if(entity==null) { return ""; }
 		InputStream instream = entity.getContent();
-		return IOUtil.readFile(new InputStreamReader(instream));
+		return IOUtil.readFromReader(new InputStreamReader(instream));
 	}
 	
 	public static String getContent(String query) throws ClientProtocolException, IOException {

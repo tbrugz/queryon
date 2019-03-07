@@ -103,7 +103,7 @@ public class SoapWebTest {
 		HttpEntity entity = response.getEntity();
 		if(entity==null) { return ""; }
 		InputStream instream = entity.getContent();
-		return IOUtil.readFile(new InputStreamReader(instream));
+		return IOUtil.readFromReader(new InputStreamReader(instream));
 	}
 	
 	static InputStream httpGetContentStream(String url) throws ClientProtocolException, IOException {
@@ -184,7 +184,7 @@ public class SoapWebTest {
 				"	   </soapenv:Body>\n" + 
 				"	</soapenv:Envelope>";
 		InputStream is = httpPostContentStream(soaplUrl, body);
-		String s = IOUtil.readFile(new InputStreamReader(is));
+		String s = IOUtil.readFromReader(new InputStreamReader(is));
 		log.info("request1: responde="+s);
 	}
 	
@@ -199,7 +199,7 @@ public class SoapWebTest {
 				"	   </soapenv:Body>\n" + 
 				"	</soapenv:Envelope>";
 		InputStream is = httpPostContentStream(soaplUrl, body);
-		String s = IOUtil.readFile(new InputStreamReader(is));
+		String s = IOUtil.readFromReader(new InputStreamReader(is));
 		log.info("request1: responde="+s);
 	}
 	
