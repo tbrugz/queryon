@@ -1697,4 +1697,30 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertEquals("1 row updated", content);
 	}
 	
+	@Test
+	public void testUpdateWithJson() throws IllegalStateException, IOException {
+		HttpPatch request = new HttpPatch(baseUrl + "/EMP/1");
+		request.setEntity(new StringEntity("{\"NAME\":\"newname\"}") {});
+		request.setHeader("Content-Type", "application/json");
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpResponse response = client.execute(request);
+		
+		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+		String content = getContent(response);
+		Assert.assertEquals("1 row updated", content);
+	}
+
+	@Test
+	public void testInsertWithJson() throws IllegalStateException, IOException {
+		HttpPost request = new HttpPost(baseUrl + "/EMP");
+		request.setEntity(new StringEntity("{\"ID\": 10, \"NAME\":\"newname\"}") {});
+		request.setHeader("Content-Type", "application/json");
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpResponse response = client.execute(request);
+		
+		Assert.assertEquals(201, response.getStatusLine().getStatusCode());
+		String content = getContent(response);
+		Assert.assertEquals("1 row inserted", content);
+	}
+	
 }

@@ -286,7 +286,7 @@ public class ODataRequest extends RequestSpec {
 			}
 		}
 	}
-		
+	
 	@Override
 	protected void processXtra() {
 		try {
@@ -317,6 +317,7 @@ public class ODataRequest extends RequestSpec {
 		}
 	}
 	
+	/*
 	String getValueForUpdate(Object o) {
 		if(o instanceof Double) {
 			Double d = (Double) o;
@@ -324,6 +325,7 @@ public class ODataRequest extends RequestSpec {
 		}
 		return String.valueOf(o);
 	}
+	*/
 	
 	public <T> void setODataFilterUniParam(String prefix, String key, T value, Map<String, T> uniFilter, Set<String> allowedFilters) {
 		if(allowedFilters!=null && !allowedFilters.contains(prefix)) {

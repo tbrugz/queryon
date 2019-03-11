@@ -24,6 +24,8 @@ import javax.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.gson.Gson;
+
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -522,6 +524,19 @@ public class RequestSpec {
 				i++;
 			}
 			log.debug("multipart-content: length="+i);
+		}
+		else if(isContentTypeJson()) {
+			Gson gson = new Gson();
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = gson.fromJson(request.getReader(), Map.class);
+			if(map!=null) {
+				for(Map.Entry<String, Object> e: map.entrySet()) {
+					String value = getValueForUpdate( e.getValue() );
+					//log.debug("json body: "+e.getKey()+" / "+e.getValue()+" / "+value+" ["+e.getValue().getClass()+"]");
+					//XXX if matches 'p[1-9][0-9]*', add to params (POST/doExecute)?
+					updateValues.put(e.getKey(), value);
+				}
+			}
 		}
 		else if(bodyParamIndex!=null) {
 			// EXEC (POST)
@@ -1049,6 +1064,10 @@ public class RequestSpec {
 	boolean isContentTypeMultiPart() {
 		return contentType!=null && contentType.startsWith(MULTIPART);
 	}
+
+	boolean isContentTypeJson() {
+		return contentType!=null && contentType.startsWith(ResponseSpec.MIME_TYPE_JSON);
+	}
 	
 	// http://stackoverflow.com/a/2424824/616413
 	static String getSubmittedFileName(Part part) {
@@ -1207,6 +1226,14 @@ public class RequestSpec {
 
 	public String getModelId() {
 		return modelId;
+	}
+	
+	protected String getValueForUpdate(Object o) {
+		if(o instanceof Double) {
+			Double d = (Double) o;
+			if(d.doubleValue() % 1 == 0) { return String.valueOf(d.longValue()); }
+		}
+		return String.valueOf(o);
 	}
 
 }
