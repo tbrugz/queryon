@@ -461,7 +461,7 @@ public class RequestSpec {
 	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
 		Map<Integer, Object> postionalParamsMap = new TreeMap<Integer, Object>();
 
-		Map<String,String[]> reqParams = req.getParameterMap();
+		Map<String,String[]> reqParams = getParameterMap();
 		for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 			Matcher m = positionalParamPattern.matcher(entry.getKey());
 			if(m.matches()) {
@@ -477,8 +477,11 @@ public class RequestSpec {
 					postionalParamsMap.put(pos, values[0]);
 				}
 			}
-			
 		}
+		if(showDebugInfo) {
+			showDebugInfo(reqParams);
+		}
+		
 		/*for(int i=1;;i++) {
 			String value = req.getParameter("p"+i);
 			if(value==null) break;
@@ -495,9 +498,9 @@ public class RequestSpec {
 			for(Part p: req.getParts()) {
 				String name = p.getName();
 				String fileName = getSubmittedFileName(p);
-				//log.info("part["+i+"]: " + name + (fileName!=null?" / filename="+fileName:"") );
-				if(p.getContentType()!=null) {
-					boolean added = setUniParam("v:", name, p, updatePartValues);
+				//log.debug("part["+i+"]: " + name + (fileName!=null?" / filename="+fileName:"") + (" / content-type="+p.getContentType()) );
+				if(p.getContentType()!=null) { //XXX: really needed?
+					boolean added = setUniParam("v:", name, p, updatePartValues); // XXX: updating 'updatePartValues' but 'updateValues' may already have value...
 					boolean partParamAdded = false;
 					if(!added) {
 						//TODOne: mixed part & non-part parameters are probably not working...
@@ -505,7 +508,7 @@ public class RequestSpec {
 						if(m.matches()) {
 							int pos = Integer.parseInt( m.group(1) );
 							if(postionalParamsMap.get(pos)!=null) {
-								log.warn("parameter p"+pos+" already setted");
+								log.warn("parameter p"+pos+" already setted"); // maybe with req.getParameterMap()
 							}
 							else {
 								postionalParamsMap.put(pos, p);
@@ -565,9 +568,6 @@ public class RequestSpec {
 			}
 		}
 		
-		if(showDebugInfo) {
-			showDebugInfo(reqParams);
-		}
 	}
 	
 	protected String getMethod(HttpServletRequest req) {
@@ -621,7 +621,7 @@ public class RequestSpec {
 	}
 	
 	protected void processFilters(Set<String> allowedFilters) throws UnsupportedEncodingException {
-		for(Map.Entry<String,String[]> entry: request.getParameterMap().entrySet()) {
+		for(Map.Entry<String,String[]> entry: getParameterMap().entrySet()) {
 			String key = entry.getKey();
 			String[] value = entry.getValue();
 			
@@ -865,6 +865,10 @@ public class RequestSpec {
 		if(key.startsWith(prefix)) {
 			String col = key.substring(prefix.length());
 			uniFilter.put(col, value);
+			/*T prevValue = uniFilter.put(col, value);
+			if(prevValue!=null) {
+				log.warn("setUniParam: param '"+col+"' already had a value: "+prevValue);
+			}*/
 			return true;
 		}
 		return false;
@@ -1172,9 +1176,13 @@ public class RequestSpec {
 		return request.getParameterMap();
 	}*/
 
+	public Map<String, String[]> getParameterMap() {
+		return request.getParameterMap();
+	}
+	
 	public Map<String, String> getParameterMapUniqueValues() {
 		Map<String, String> ret = new HashMap<String, String>();
-		for(Map.Entry<String, String[]> e: request.getParameterMap().entrySet()) {
+		for(Map.Entry<String, String[]> e: getParameterMap().entrySet()) {
 			String[] vals = e.getValue();
 			ret.put(e.getKey(), vals!=null && vals.length>0 ? vals[0] : null);
 		}

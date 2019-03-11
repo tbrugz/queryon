@@ -168,7 +168,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		}
 		else if(req.getMethod().equals("POST")) {
 			//XXX test for Content-Type: application/json or application/graphql
-			String httpBody = IOUtil.readFile(req.getReader()).trim();
+			String httpBody = IOUtil.readFromReader(req.getReader()).trim();
 			Gson gson = new Gson();
 			try {
 				Map<String, Object> map = (Map<String, Object>) gson.fromJson(httpBody, Map.class);
