@@ -47,7 +47,11 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -138,13 +142,19 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	public static String getContentFromUrl(String url) throws ClientProtocolException, IOException {
+		return getContentFromUrl(url, 200);
+	}
+	
+	public static String getContentFromUrl(String url, int expectedStatus) throws ClientProtocolException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
-		if(response1.getStatusLine().getStatusCode()>=400) {
+		Assert.assertEquals(expectedStatus, response1.getStatusLine().getStatusCode());
+		//Assert.assertThat(response1.getStatusLine().getStatusCode(), Matchers.lessThanOrEqualTo(299));
+		/*if(response1.getStatusLine().getStatusCode()>=400) {
 			throw new RuntimeException(response1.getStatusLine().getStatusCode()+": "+content);
-		}
+		}*/
 		return content;
 	}
 	
@@ -310,7 +320,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testPatch_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PATCH");
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PATCH");
+		HttpPatch httpPut = new HttpPatch(baseUrl+"/EMP/1?v:NAME=newname");
 		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1?v:NAME=newname&method=PATCH");
 		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1");
 		//HttpPost httpPut = new HttpPost(baseUrl+"/EMP/1");
@@ -333,7 +343,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPatchEmpKeyVals() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP?k:ID=1&v:NAME=newname&_method=PATCH");
+		HttpPatch httpPut = new HttpPatch(baseUrl+"/EMP?k:ID=1&v:NAME=newname");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		//System.out.println("content: "+getContent(response1));
@@ -345,7 +355,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPatchPairKeyVals() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/PAIR?k:ID2=3&k:ID1=1&v:REMARKS=another+text&_method=PATCH");
+		HttpPatch httpPut = new HttpPatch(baseUrl+"/PAIR?k:ID2=3&k:ID1=1&v:REMARKS=another+text");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 
@@ -367,7 +377,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPatchEmpKeyVals_ByPath() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?v:NAME=newname&_method=PATCH");
+		HttpPatch httpPut = new HttpPatch(baseUrl+"/EMP/1?v:NAME=newname");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		//System.out.println("content: "+getContent(response1));
@@ -382,7 +392,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPatchDeptForbidden() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT?k:ID=1&v:PARENT_ID=2&_method=PATCH");
+		HttpPatch httpPut = new HttpPatch(baseUrl+"/DEPT?k:ID=1&v:PARENT_ID=2");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		
@@ -394,7 +404,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testDelete_Emp_Ok() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 
-		HttpGet httpGet = new HttpGet(baseUrl+"/EMP/5?_method=DELETE");
+		HttpDelete httpGet = new HttpDelete(baseUrl+"/EMP/5"); // ?_method=DELETE
 		HttpResponse response1 = httpclient.execute(httpGet);
 		//System.out.println("content: "+getContent(response1));
 		Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
@@ -421,7 +431,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testDelete_Emp_3rows() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//XXX: delete doesn't get parameters from querystring?
-		HttpGet httpDelete = new HttpGet(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&_method=DELETE&updatemax=5");
+		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&updatemax=5");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		String content = getContent(response2);
 		//System.out.println("content: "+content);
@@ -547,11 +557,38 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	Assert.assertEquals("Should have 2 (data) rows", 2, count);*/
 
+	static void basePostReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost httpGet = new HttpPost(baseUrl+url);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		//String resp = getContent(response1); System.out.println(resp);
+		
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		Document doc = dBuilder.parse(instream);
+		NodeList nl = doc.getElementsByTagName("row");
+		
+		int length = nl.getLength();
+		//System.out.println("nrows: "+nl.getLength());
+		EntityUtils.consume(entity1);
+		httpGet.releaseConnection();
+		Assert.assertEquals(expectedReturnRows, length);
+	}
+	
+	static HttpResponse getHttpResponse(String url) throws IOException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet httpGet = new HttpGet(baseUrl+url);
+		return httpclient.execute(httpGet);
+	}
+	
 	static void baseReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 		//String resp = getContent(response1); System.out.println(resp);
 		
 		HttpEntity entity1 = response1.getEntity();
@@ -582,6 +619,20 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		//String resp = getContent(response1); System.out.println(resp);
+		
+		HttpEntity entity1 = response1.getEntity();
+		InputStream instream = entity1.getContent();
+		return dBuilder.parse(instream);
+	}
+
+	static Document getPostXmlDocument(String url) throws IOException, SAXException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost httpGet = new HttpPost(baseUrl+url);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 		//String resp = getContent(response1); System.out.println(resp);
 		
 		HttpEntity entity1 = response1.getEntity();
@@ -726,15 +777,15 @@ public class WinstoneAndH2HttpRequestTest {
 		// limited by "queryon.limit.default=10"
 		String sql = getSql30rows();
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar, 10);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar, 10);
 	}
-	
+
 	@Test
 	public void testGetXmlSelectAny20() throws IOException, ParserConfigurationException, SAXException {
 		// limited by "queryon.limit.max=20"
 		String sql = getSql30rows();
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=25", 20);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&limit=25", 20);
 	}
 	
 	@Test
@@ -742,7 +793,7 @@ public class WinstoneAndH2HttpRequestTest {
 		// limited by "limit-default=5"
 		String sql = getSql30rows() + "/* limit-default=5 */";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar, 5);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar, 5);
 	}
 	
 	@Test
@@ -750,21 +801,21 @@ public class WinstoneAndH2HttpRequestTest {
 		// limited by "&limit=9"
 		String sql = getSql30rows() + "/* limit-default=5 */";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=9", 9);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&limit=9", 9);
 	}
 	
 	@Test
 	public void testGetXmlSelectAnyLimitMax() throws IOException, ParserConfigurationException, SAXException {
 		String sql = getSql30rows() + "/* limit-max=5 */";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar, 5);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar, 5);
 	}
 	
 	@Test
 	public void testGetXmlSelectAnyLimitMax9() throws IOException, ParserConfigurationException, SAXException {
 		String sql = getSql30rows() + "/* limit-max=5 */";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=9", 5);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&limit=9", 5);
 	}
 	
 	@Test
@@ -772,7 +823,7 @@ public class WinstoneAndH2HttpRequestTest {
 		// limited by "queryon.limit.max=20"
 		String sql = getSql30rows() + "/* limit-max=25 */";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar+"&limit=50", 20);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&limit=50", 20);
 	}
 
 	//----- limit-related tests - end
@@ -788,14 +839,14 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testExplainPlan() throws IOException, ParserConfigurationException, SAXException {
 		String sql = "select * from emp";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/ExplainAny.xml?_method=POST&name=test&sql="+sqlpar, 1);
+		basePostReturnCountTest("/ExplainAny.xml?name=test&sql="+sqlpar, 1);
 	}
 	
 	@Test
 	public void testExplainPlanWithParam() throws IOException, ParserConfigurationException, SAXException {
 		String sql = "select * from emp where id = ?";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		baseReturnCountTest("/ExplainAny.xml?_method=POST&name=test&sql="+sqlpar+"&p1=1", 1);
+		basePostReturnCountTest("/ExplainAny.xml?name=test&sql="+sqlpar+"&p1=1", 1);
 	}
 	
 	@Test
@@ -850,7 +901,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testPatchDeptOk() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpPut = new HttpGet(baseUrl+"/DEPT/1?v:NAME=Accounting&_method=PATCH");
+		HttpPatch httpPut = new HttpPatch(baseUrl+"/DEPT/1?v:NAME=Accounting");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
 		//System.out.println("content: "+getContent(response1));
@@ -909,7 +960,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String sqlpar = URLEncoder.encode(sql, utf8);
 
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpGet = new HttpGet(baseUrl+"/QueryAny.json?_method=POST&name=emp&sql="+sqlpar+"&table-as-data-element=true");
+		HttpPost httpGet = new HttpPost(baseUrl+"/QueryAny.json?name=emp&sql="+sqlpar+"&table-as-data-element=true");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String jsonStr = getContent(response1);
@@ -945,7 +996,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String sqlpar = URLEncoder.encode(sql, utf8);
 
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpGet = new HttpGet(baseUrl+"/QueryAny.json?_method=POST&name=emp&sql="+sqlpar);
+		HttpPost httpGet = new HttpPost(baseUrl+"/QueryAny.json?name=emp&sql="+sqlpar);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String jsonStr = getContent(response1);
@@ -965,11 +1016,11 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "select id, name, 'black' as name_CLASS from emp";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 
-		String url = "/QueryAny.htmlx?_method=POST&name=emp&sql="+sqlpar;
+		String url = "/QueryAny.htmlx?name=emp&sql="+sqlpar;
 		//String html = httpGetContent(url);
 		//System.out.println(html);
 		
-		Document doc = getXmlDocument(url);
+		Document doc = getPostXmlDocument(url);
 		NodeList nl = doc.getElementsByTagName("tr");
 		Assert.assertEquals("Should be 6 rows (5 data rows (db tables) + 1 header)", 6, nl.getLength());
 		
@@ -1315,23 +1366,23 @@ public class WinstoneAndH2HttpRequestTest {
 				content);
 	}
 
-	@Test(expected=RuntimeException.class)
+	@Test
 	public void testGetQueryWithNamedParametersUsingMixed() throws Exception {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?p1=1&par2=2";
-		getContentFromUrl(baseUrl+url);
+		getContentFromUrl(baseUrl+url, 400);
 	}
 	
 
-	@Test(expected=RuntimeException.class)
+	@Test
 	public void testGetQueryWithNamedParametersUsingMixed2() throws Exception {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&p2=2";
-		getContentFromUrl(baseUrl+url);
+		getContentFromUrl(baseUrl+url, 400);
 	}
 
-	@Test(expected=RuntimeException.class)
+	@Test
 	public void testGetQueryWithNamedParametersMissingParam() throws Exception {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1";
-		getContentFromUrl(baseUrl+url);
+		getContentFromUrl(baseUrl+url, 400);
 	}
 	
 	@Test
@@ -1352,10 +1403,10 @@ public class WinstoneAndH2HttpRequestTest {
 		getContentFromUrl(baseUrl+url);
 	}
 	
-	@Test(expected=RuntimeException.class)
+	@Test
 	public void testGetQueryWithNamedParametersNullBindError() throws Exception {
 		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?par1=1&p2=2";
-		getContentFromUrl(baseUrl+url);
+		getContentFromUrl(baseUrl+url, 400);
 	}
 
 	/*
@@ -1370,10 +1421,10 @@ public class WinstoneAndH2HttpRequestTest {
 		getContentFromUrl(baseUrl+url);
 	}
 
-	@Test(expected=RuntimeException.class)
+	@Test
 	public void testGetQueryWithNamedParametersNullBindArray2() throws Exception {
 		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND_ARRAY.csv";
-		getContentFromUrl(baseUrl+url);
+		getContentFromUrl(baseUrl+url, 400);
 	}
 
 	@Test
@@ -1590,11 +1641,52 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testPostWithBodyParamNameError() throws IllegalStateException, IOException {
-		httpPostContent("/EMP?v:ID=11", "", 500); //500
+		httpPostContent("/EMP?v:ID=11", "", 500); //XXX 500?
 	}
 	
 	@Test
 	public void testPostWithBodyParamNameError2() throws IllegalStateException, IOException {
 		httpPostContent("/EMP?v:ID=11&bodyparamname=NAMEZ", "sonya", 400); //400
 	}
+	
+	@Test
+	public void testExecFileUpload() throws IllegalStateException, IOException {
+		HttpPost post = new HttpPost(baseUrl + "/IS_PRIME");
+		//FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+		StringBody stringBody1 = new StringBody("3", ContentType.APPLICATION_OCTET_STREAM);
+		// 
+		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+		builder.setMode(HttpMultipartMode.STRICT);
+		//builder.addPart("upfile", fileBody);
+		builder.addPart("p1", stringBody1);
+		HttpEntity entity = builder.build();
+		//
+		post.setEntity(entity);
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpResponse response = client.execute(post);
+		
+		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+		String content = getContent(response);
+		Assert.assertEquals("true", content);
+	}
+
+	@Test
+	public void testUpdateWithFileUpload() throws IllegalStateException, IOException {
+		HttpPatch request = new HttpPatch(baseUrl + "/EMP/1");
+		StringBody stringBody1 = new StringBody("newname", ContentType.APPLICATION_OCTET_STREAM);
+		// 
+		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+		builder.setMode(HttpMultipartMode.STRICT);
+		builder.addPart("v:NAME", stringBody1);
+		HttpEntity entity = builder.build();
+		//
+		request.setEntity(entity);
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpResponse response = client.execute(request);
+		
+		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+		String content = getContent(response);
+		Assert.assertEquals("1 row updated", content);
+	}
+	
 }

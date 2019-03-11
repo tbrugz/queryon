@@ -8,11 +8,20 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.util.Factory;
+import org.eclipse.jetty.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.plus.webapp.EnvConfiguration;
+import org.eclipse.jetty.plus.webapp.PlusConfiguration;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.FragmentConfiguration;
+import org.eclipse.jetty.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.webapp.TagLibConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.webapp.WebInfConfiguration;
+import org.eclipse.jetty.webapp.WebXmlConfiguration;
 
 /*
  * https://wiki.eclipse.org/Jetty/Tutorial/Embedding_Jetty
@@ -57,6 +66,12 @@ public class JettySetup {
 		webapp.setResourceBase(webappRoot);
 		webapp.setContextPath("/");
 		webapp.setParentLoaderPriority(true);
+		// https://stackoverflow.com/a/18021180/616413
+		webapp.setConfigurations(new Configuration[] {
+				new AnnotationConfiguration(), new WebXmlConfiguration(),
+				new WebInfConfiguration(), new TagLibConfiguration(),
+				new PlusConfiguration(), new MetaInfConfiguration(),
+				new FragmentConfiguration(), new EnvConfiguration() });
 		
 		server.setHandler(webapp);
 		
