@@ -781,6 +781,14 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void testGetXmlSelectAnyMethodSwitch() throws IOException, ParserConfigurationException, SAXException {
+		String sql = getSql30rows();
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		HttpResponse resp = getHttpResponse("/QueryAny.xml?_method=POSTname=test&sql="+sqlpar);
+		Assert.assertEquals(400, resp.getStatusLine().getStatusCode());
+	}
+	
+	@Test
 	public void testGetXmlSelectAny20() throws IOException, ParserConfigurationException, SAXException {
 		// limited by "queryon.limit.max=20"
 		String sql = getSql30rows();

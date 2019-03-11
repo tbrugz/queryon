@@ -571,12 +571,12 @@ public class RequestSpec {
 	}
 	
 	protected String getMethod(HttpServletRequest req) {
-		//XXX: may method be changed? property?
 		String method = req.getParameter(PARAM_METHOD);
 		if(method==null) {
-			method = req.getMethod();
+			return req.getMethod();
 		}
-		return method;
+		//XXX: may method be changed? property?
+		throw new BadRequestException("Method switch not allowed [method: "+req.getMethod()+"/_method="+method+"]");
 	}
 	
 	protected String getModelId(HttpServletRequest req) {
