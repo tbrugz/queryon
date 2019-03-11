@@ -1722,5 +1722,33 @@ public class WinstoneAndH2HttpRequestTest {
 		String content = getContent(response);
 		Assert.assertEquals("1 row inserted", content);
 	}
+
+	@Test
+	public void testValidateAny() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select id, name from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/ValidateAny.xml?name=test&sql="+sqlpar, "");
+	}
+	
+	@Test
+	public void testValidateAnyError() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select id, namez from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/ValidateAny.xml?name=test&sql="+sqlpar, "", 400);
+	}
+	
+	@Test
+	public void testSqlAny() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "insert into emp (id, name) values (10, 'newname')";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/SqlAny.xml?name=test&sql="+sqlpar, "");
+	}
+
+	@Test
+	public void testSqlAnyError() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "insert into empz (id, name) values (10, 'newname')";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/SqlAny.xml?name=test&sql="+sqlpar, "", 400);
+	}
 	
 }
