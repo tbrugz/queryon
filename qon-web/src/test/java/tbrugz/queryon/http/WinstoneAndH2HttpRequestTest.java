@@ -1751,4 +1751,16 @@ public class WinstoneAndH2HttpRequestTest {
 		String ret = httpPostContent("/SqlAny.xml?name=test&sql="+sqlpar, "", 400);
 	}
 	
+	@Test
+	public void testGetBlobString() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(baseUrl+"/EMP?order=ID&limit=1&offset=1&valuefield=NAME");
+		Assert.assertEquals("mary", content);
+	}
+
+	@Test
+	public void testGetBlobInt() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(baseUrl+"/EMP?order=ID&limit=1&offset=3&valuefield=SALARY");
+		Assert.assertEquals("1200", content);
+	}
+	
 }

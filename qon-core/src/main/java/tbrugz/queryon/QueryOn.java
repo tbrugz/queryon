@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.sql.Blob;
@@ -20,6 +21,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2662,7 +2664,8 @@ public class QueryOn extends HttpServlet {
 		String mimeType = MIME_TEXT;
 		//XXXdone: get mimetype from column type (BLOB=application/octet-stream, CLOB=text/plain, ...) ? http://www.rfc-editor.org/rfc/rfc2046.txt
 		List<Class<?>> types = DataDumpUtils.getColumnTypes(rsmd);
-		if(Blob.class.equals( types.get(colIndex) )) {
+		Class<?> colType = types.get(colIndex);
+		if(Blob.class.equals( colType )) {
 			mimeType = "application/octet-stream";
 		}
 		
@@ -2712,14 +2715,25 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			try {
-				InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
-				if(is!=null) {
-					IOUtil.pipeStreams(is, resp.getOutputStream());
-					is.close();
+				if(String.class.equals( colType ) || Integer.class.equals( colType ) || Double.class.equals( colType ) || Date.class.equals( colType )) {
+					// "scalar" types / non-binary types
+					Reader r = rs.getCharacterStream(reqspec.uniValueCol);
+					if(r!=null) {
+						IOUtil.pipeCharacterStreams(r, resp.getWriter());
+						r.close();
+					}
 				}
 				else {
-					// null return: null
-					//throw new BadRequestException("Null stream [column="+reqspec.uniValueCol+"]");
+					// types: Blob, Array, ResultSet, Object
+					InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
+					if(is!=null) {
+						IOUtil.pipeStreams(is, resp.getOutputStream());
+						is.close();
+					}
+					else {
+						// null return: null
+						//throw new BadRequestException("Null stream [column="+reqspec.uniValueCol+"]");
+					}
 				}
 			}
 			catch(SQLException e) {
