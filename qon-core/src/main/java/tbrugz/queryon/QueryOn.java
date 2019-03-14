@@ -763,7 +763,7 @@ public class QueryOn extends HttpServlet {
 			case SELECT_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn, false);
 					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
@@ -786,7 +786,7 @@ public class QueryOn extends HttpServlet {
 			case VALIDATE_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn, true); //XXX: validate should be false?
 					doValidate(relation, reqspec, currentUser, conn, resp);
 				}
 				catch(RuntimeException e) {
@@ -802,7 +802,7 @@ public class QueryOn extends HttpServlet {
 			case EXPLAIN_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn, true); //XXX: validate should be false?
 					doExplain(relation, reqspec, currentUser, conn, resp);
 				}
 				catch(RuntimeException e) {
@@ -818,7 +818,7 @@ public class QueryOn extends HttpServlet {
 			case SQL_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn);
+					Query relation = getQuery(req, reqspec, currentUser, conn, false);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
@@ -1046,17 +1046,23 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 
-	/*protected Query getQuery(HttpServletRequest req, RequestSpec reqspec) throws SQLException {
+	/*
+	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec) throws SQLException {
 		return getQuery(req, reqspec, false, null);
 	}
 
 	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, boolean validate, Connection conn) throws SQLException {
 		//return getQuery(req, reqspec, true, conn);
 		// ...
-	}*/
+	}
+	
+	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn) throws SQLException {
+		return getQuery(req, reqspec, currentUser, conn, true);
+	}
+	*/
 	
 	// XXX should use RequestSpec for parameters?
-	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn) throws SQLException {
+	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn, boolean validateParameters) throws SQLException {
 		Query relation = new Query();
 		String name = req.getParameter("name");
 		/*if(name==null || name.equals("")) {
@@ -1072,14 +1078,16 @@ public class QueryOn extends HttpServlet {
 		//relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway (would need connection to validate SQL)
 		//String finalSql = SQL.getFinalSqlNoUsername(sql);
 		SQL sqlz = SQL.createSQL(relation, reqspec, getUsername(currentUser));
-		try {
-			DBObjectUtils.validateQueryParameters(relation, sqlz.getFinalSql(), conn, true);
-		}
-		catch(SQLException e) {
-			setSqlInfo(req, sqlz);
-			log.warn("Error validating query: "+e);
-			log.info("Error validating query: sqlz.getFinalSql()=="+sqlz.getFinalSql());
-			throw e;
+		if(validateParameters) {
+			try {
+				DBObjectUtils.validateQueryParameters(relation, sqlz.getFinalSql(), conn, true);
+			}
+			catch(SQLException e) {
+				setSqlInfo(req, sqlz);
+				log.warn("Error validating query: "+e);
+				log.info("Error validating query: sqlz.getFinalSql()=="+sqlz.getFinalSql());
+				throw e;
+			}
 		}
 		
 		return relation;
@@ -1152,20 +1160,18 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	ResultSet pivotResultSet(final ResultSet rs, Relation relation, SQL sql, RequestSpec reqspec, HttpServletResponse resp) throws SQLException {
-		int originalColCount = rs.getMetaData().getColumnCount();
 		boolean hasMeasures = reqspec.aggregate.size() > 0 || (reqspec.columns.size() > reqspec.oncols.size() + reqspec.onrows.size());
 		int pivotFlags = reqspec.pivotflags!=null?reqspec.pivotflags:
 			hasMeasures?RequestSpec.DEFAULT_PIVOTFLAGS_WITH_MEASURES:RequestSpec.DEFAULT_PIVOTFLAGS_WITHOUT_MEASURES;
 		
 		try {
-			//@SuppressWarnings("resource")
 			PivotResultSet prs = new PivotResultSet(rs, reqspec.onrows, reqspec.oncols, true, pivotFlags);
 			//log.info("reqspec.onrows="+reqspec.onrows+" ;; reqspec.oncols="+reqspec.oncols);
-			//rs = prs;
 			if(log.isDebugEnabled()) {
 				String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
 				log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
 			}
+			int originalColCount = rs.getMetaData().getColumnCount();
 			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
 					"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
 					"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());

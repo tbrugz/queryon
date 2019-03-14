@@ -1762,5 +1762,12 @@ public class WinstoneAndH2HttpRequestTest {
 		String content = getContentFromUrl(baseUrl+"/EMP?order=ID&limit=1&offset=3&valuefield=SALARY");
 		Assert.assertEquals("1200", content);
 	}
+
+	@Test
+	public void testGetTrySqlCommandColumns() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "$columns EMP";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		basePostReturnCountTest("/QueryAny.xml?sql="+sqlpar, 5); // 5 columns in EMP table
+	}
 	
 }
