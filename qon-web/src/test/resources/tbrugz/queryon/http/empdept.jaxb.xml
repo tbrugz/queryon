@@ -256,6 +256,22 @@ union all select cast(? as varchar)
         <type>FUNCTION</type>
         <remarks>IS_PRIME function</remarks>
     </executable>
+
+    <executable>
+        <name>INSERT_TASK</name>
+        <schemaName>PUBLIC</schemaName>
+        <params>
+            <dataType>VARCHAR</dataType>
+            <inout>IN</inout>
+        </params>
+        <params>
+            <dataType>VARCHAR</dataType>
+            <inout>IN</inout>
+        </params>
+        <type>SCRIPT</type>
+        <body>insert into task (subject, description) values (?, ?)</body>
+        <remarks>INSERT_TASK script</remarks>
+    </executable>
     
     <foreignKey>
         <name>EMP_DEPT_FK</name>

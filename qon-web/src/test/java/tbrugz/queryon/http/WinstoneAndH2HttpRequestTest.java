@@ -102,7 +102,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	static final int relationsInModel = 4;
 	static final int queriesInModel = 5;
-	static final int executablesInModel = 1;
+	static final int executablesInModel = 2;
 	
 	static final String LF = "\r\n";
 	
@@ -609,7 +609,6 @@ public class WinstoneAndH2HttpRequestTest {
 			Node n = nl.item(i);
 			if(n.getNodeType()!=Node.ELEMENT_NODE) { continue; }
 			Element e = (Element) n;
-			System.out.println(e.getTagName());
 			if(e.getTagName().equals("row")) {
 				length++;
 			}
@@ -687,7 +686,7 @@ public class WinstoneAndH2HttpRequestTest {
 		return ret;
 	}
 
-	static HttpResponse httpPostContentGetResponse(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
+	static HttpResponse httpPostContentGetResponse(String url, String content) throws IllegalStateException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost http = new HttpPost(baseUrl+url);
 		http.setEntity(new StringEntity(content));
@@ -1814,8 +1813,9 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testInsertWithAutoIncrement() throws IOException, ParserConfigurationException, SAXException {
-		HttpResponse ret = httpPostContentGetResponse("/TASK?v:SUBJECT=1st+Task", "", 201);
-		Header[] headers = ret.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
+		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=1st+Task", "");
+		Assert.assertEquals(201, response.getStatusLine().getStatusCode());
+		Header[] headers = response.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
 		Assert.assertEquals(1, headers.length);
 		Header head = headers[0];
 		Assert.assertEquals("1", head.getValue());
@@ -1839,6 +1839,26 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testExecutableCount() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/executable.xml", executablesInModel);
+	}
+
+	@Test
+	public void testExecuteScript() throws IOException, ParserConfigurationException, SAXException {
+		HttpResponse response = httpPostContentGetResponse("/INSERT_TASK?p1=2nd+Task&p2=some+description", "");
+		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+		
+		/*
+		Header[] headers = ret.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
+		Assert.assertEquals(1, headers.length);
+		Header head = headers[0];
+		Assert.assertEquals("1", head.getValue());
+		*/
+	}
+
+	@Test
+	public void testExecuteScriptNotFound() throws IOException, ParserConfigurationException, SAXException {
+		httpPostContent("/INSERT_TASK_Z?p1=2nd+Task&p2=some+description", "", 404);
+		//HttpResponse response = httpPostContentGetResponse("/INSERT_TASK_Z?p1=2nd+Task&p2=some+description", "");
+		//Assert.assertEquals(404, response.getStatusLine().getStatusCode());
 	}
 	
 }
