@@ -27,6 +27,14 @@ create table PAIR ( -- type=TABLE
 	constraint PAIR_PK primary key (ID1, ID2)
 );
 
+drop table if exists TASK;
+
+create table TASK (
+	ID INTEGER primary key auto_increment,
+	SUBJECT varchar not null,
+	DESCRIPTION text
+);
+
 --alter table EMP drop constraint EMP_DEPT_FK;
 alter table EMP
 	add constraint EMP_DEPT_FK foreign key (DEPARTMENT_ID)

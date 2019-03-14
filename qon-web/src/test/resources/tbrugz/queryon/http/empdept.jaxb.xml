@@ -119,6 +119,29 @@
         <type>TABLE</type>
     </table>
 
+    <table>
+        <name>TASK</name>
+        <schemaName>PUBLIC</schemaName>
+        <columns>
+            <name>ID</name>
+            <type>INTEGER</type>
+        </columns>
+        <columns>
+            <name>SUBJECT</name>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>DESCRIPTION</name>
+            <type>TEXT</type>
+        </columns>
+        <constraints>
+            <name>TASKS_PK</name>
+            <type>PK</type>
+            <uniqueColumns>ID</uniqueColumns>
+        </constraints>
+        <type>TABLE</type>
+    </table>
+
     <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <name>EMP_Q1</name>
         <schemaName>QUERY</schemaName>

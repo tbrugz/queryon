@@ -100,7 +100,9 @@ public class WinstoneAndH2HttpRequestTest {
 	//static String workDir = "work/test/";
 	static final String utf8 = "UTF-8";
 	
-	static int relationsInModel = 3;
+	static final int relationsInModel = 4;
+	static final int queriesInModel = 5;
+	static final int executablesInModel = 1;
 	
 	static final String LF = "\r\n";
 	
@@ -221,7 +223,7 @@ public class WinstoneAndH2HttpRequestTest {
 			Document doc = dBuilder.parse(instream);
 			//NodeList nl = doc.getElementsByTagName("tr");
 			Node tableNode = doc.getElementsByTagName("table").item(0);
-			Assert.assertEquals("Should be 4 rows (3 data rows (db tables) + 1 header)", relationsInModel+1, getElementChildNodes(tableNode).size());
+			Assert.assertEquals("Should be 5 rows ("+relationsInModel+" data rows (db tables) + 1 header)", relationsInModel+1, getElementChildNodes(tableNode).size());
 			/*for (int i = 0; i < nl.getLength(); i++) {
 				Node nNode = nl.item(i);
 				Element eElement = (Element) nNode;
@@ -537,9 +539,16 @@ public class WinstoneAndH2HttpRequestTest {
 		System.out.println("2nd record (1st col = '"+value+"'): "+record);
 		Assert.assertEquals("2st record' 1st col must be EMP", "EMP", value);
 		
-		Assert.assertTrue("Must have 3rd element", it.hasNext());
-		it.next();
-		Assert.assertFalse("Must not have 4th element", it.hasNext());
+		//int count = 2;
+		for(int i=3;i<=relationsInModel;i++) {
+			Assert.assertTrue("Must have "+i+"'th element", it.hasNext());
+			it.next();
+		}
+		//Assert.assertTrue("Must have 3rd element", it.hasNext());
+		//it.next();
+		//Assert.assertTrue("Must have 4th element", it.hasNext());
+		//it.next();
+		Assert.assertFalse("Must not have "+(relationsInModel+1)+"th element", it.hasNext());
 		
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
@@ -594,9 +603,20 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpEntity entity1 = response1.getEntity();
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
-		NodeList nl = doc.getElementsByTagName("row");
+		NodeList nl = doc.getDocumentElement().getChildNodes();
+		int length = 0;
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType()!=Node.ELEMENT_NODE) { continue; }
+			Element e = (Element) n;
+			System.out.println(e.getTagName());
+			if(e.getTagName().equals("row")) {
+				length++;
+			}
+		}
+		//NodeList nl = doc.getElementsByTagName("row");
+		//int length = nl.getLength();
 		
-		int length = nl.getLength();
 		//System.out.println("nrows: "+nl.getLength());
 		EntityUtils.consume(entity1);
 		httpGet.releaseConnection();
@@ -667,6 +687,13 @@ public class WinstoneAndH2HttpRequestTest {
 		return ret;
 	}
 
+	static HttpResponse httpPostContentGetResponse(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost http = new HttpPost(baseUrl+url);
+		http.setEntity(new StringEntity(content));
+		return httpclient.execute(http);
+	}
+	
 	static String httpPatchContent(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPatch http = new HttpPatch(baseUrl+url);
@@ -1768,6 +1795,50 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "$columns EMP";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		basePostReturnCountTest("/QueryAny.xml?sql="+sqlpar, 5); // 5 columns in EMP table
+	}
+
+	@Test
+	public void testGetTrySqlCommandMetadataProductname() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "$metadata getDatabaseProductName";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/QueryAny.csv?sql="+sqlpar, "");
+		//System.out.println(ret);
+		Assert.assertEquals("getDatabaseProductName"+LF+"H2"+LF, ret);
+	}
+
+	@Test
+	public void testManageReload() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(baseUrl+"/manage/reload");
+		Assert.assertEquals("queryon config reloaded", content);
+	}
+
+	@Test
+	public void testInsertWithAutoIncrement() throws IOException, ParserConfigurationException, SAXException {
+		HttpResponse ret = httpPostContentGetResponse("/TASK?v:SUBJECT=1st+Task", "", 201);
+		Header[] headers = ret.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
+		Assert.assertEquals(1, headers.length);
+		Header head = headers[0];
+		Assert.assertEquals("1", head.getValue());
+	}
+	
+	@Test
+	public void testGetViewCount() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/view.xml", queriesInModel);
+	}
+
+	@Test
+	public void testGetQueryCount() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/query.xml", queriesInModel);
+	}
+	
+	@Test
+	public void testGetRelationCount() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/relation.xml", relationsInModel + queriesInModel);
+	}
+
+	@Test
+	public void testExecutableCount() throws IOException, ParserConfigurationException, SAXException {
+		baseReturnCountTest("/executable.xml", executablesInModel);
 	}
 	
 }
