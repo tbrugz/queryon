@@ -121,7 +121,7 @@
 	}
 	
 	function testForAuthRequired() {
-		console.log("testForAuthRequired: settings[queryon.web.auth-required] = ", settings["queryon.web.auth-required"], " ; loaded = ", authInfo.loaded, " ; authenticated = ",authInfo.authenticated);
+		//console.log("testForAuthRequired: settings[queryon.web.auth-required] = ", settings["queryon.web.auth-required"], " ; loaded = ", authInfo.loaded, " ; authenticated = ",authInfo.authenticated);
 		
 		if(settings["queryon.web.auth-required"]=="true" && authInfo.loaded===true && authInfo.authenticated===false) {
 			var url = authGetLoginUrl();
@@ -267,13 +267,13 @@
 		if(offset>0) {
 			//may be "previous page"
 			prevOffset = offset-rsLimit<0?0:offset-rsLimit;
-			console.log('prev-offset',prevOffset);
+			//console.log('prev-offset',prevOffset);
 			limOffNav.innerHTML += " <input type='button' value='&#9668;' onclick='document.getElementById(\"offset\").value="+prevOffset+";makeHrefs();doRun(\"objects\", \"content\", \"messages\", doRunCallback);' title='previous page (offset = "+prevOffset+")' />";
 		}
 		if(rsLimit==rownum) {
 			//may be "next page"
 			nextOffset = offset+rsLimit;
-			console.log('next-offset',nextOffset);
+			//console.log('next-offset',nextOffset);
 			limOffNav.innerHTML += " <input type='button' value='&#9658;' onclick='document.getElementById(\"offset\").value="+nextOffset+";makeHrefs();doRun(\"objects\", \"content\", \"messages\", doRunCallback);' title='next page (offset = "+nextOffset+")' />";
 		}
 

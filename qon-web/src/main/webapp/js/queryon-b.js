@@ -22,7 +22,7 @@ function init(url, containerId, callback, modelId) {
 		success: function(data) {
 			var rels = getQonData(data); //data.relation;
 			if(rels) {
-				console.log('Load was performed. ', rels.length,' relations loaded');
+				console.log('Load was performed. ', rels.length,' relations loaded', (modelId?', model = '+modelId:''));
 			}
 			else {
 				console.log('Error loading relations', data);
@@ -51,7 +51,7 @@ function getDescription(obj) {
 
 function writeRelations(containerId, relations) {
 	if(!relations) { return; }
-	console.log('write relations [#'+relations.length+'] to '+containerId);
+	//console.log('write relations [#'+relations.length+'] to '+containerId);
 	for(var i=0;i<relations.length;i++) {
 		var id = getId(relations[i]);
 		$('#'+containerId).append("<option value='"+id+"'"+
