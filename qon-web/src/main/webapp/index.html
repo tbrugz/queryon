@@ -47,7 +47,7 @@
 	
 	var textareaDbColTypes = ["CLOB", "TEXT"];
 	
-	var doLoadQueries = function() {
+	var doLoadQueries = function(doUpdate, callback) {
 		var s = getParametersByName('s', location.search);
 		if(s) {
 			schemaNameFilter = s;
@@ -55,7 +55,7 @@
 			document.title += " - "+schemaNameFilter;
 		}
 		//console.log('schemaNameFilter',schemaNameFilter);
-		loadQueries(getCurrentModelId(), schemaNameFilter);
+		loadQueries(getCurrentModelId(), schemaNameFilter, doUpdate, callback);
 	}
 	
 	function loadModelsContentCallback() {
@@ -147,6 +147,7 @@
 	}
 	
 	onModelChanged = function(updateFragment) {
+		//console.log("onModelChanged - updateFragment == ", updateFragment);
 		doLoadQueries();
 		loadModelStatusContentCallback();
 		
@@ -963,7 +964,10 @@
 	
 	function updatePivotCols() {
 		var relation = getCurrentRelation('objects');
-		var cols = getColumnsFromRelation(relation);
+		var cols = [];
+		if(relation) {
+			cols = getColumnsFromRelation(relation);
+		}
 		var unusedcols = byId('unusedcols');
 		//XXX only add not-present cols
 		unusedcols.innerHTML = '';

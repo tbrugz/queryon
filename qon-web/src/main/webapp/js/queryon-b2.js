@@ -21,7 +21,7 @@ var processorUrl = 'processor';
 
 /* functions */
 
-function loadQueries(modelId, filterSchema) {
+function loadQueries(modelId, filterSchema, doUpdate, callback) {
 	init(queryOnUrl,'objects', function(containerId, rels) {
 		if(filterSchema) {
 			console.log('filtering rels', rels.length, 'filterSchema', filterSchema);
@@ -36,7 +36,13 @@ function loadQueries(modelId, filterSchema) {
 				}
 			}
 		}
-		writeRelations(containerId, rels); updateSelectedQueryState(); makeHrefs();
+		writeRelations(containerId, rels);
+		if(doUpdate != false) {
+			updateSelectedQueryState(); makeHrefs();
+		}
+		if(callback) {
+			callback();
+		}
 	}, modelId);
 }
 
@@ -74,35 +80,63 @@ function updateSelectedQueryStateParameters() {
 		hash = hash.substring(1);
 		var bigParts = hash.split('|');
 		var parts = bigParts[0].split('/');
-		var select = document.getElementById('objects');
-		var found = false;
-		//console.log("bigParts", bigParts, "parts", parts);
-		var relname = parts.splice(0, 1);
-		for(var i = 0;i<select.length;i++) {
-			if(select.options[i].value==relname) {
-				select.options[i].selected = true;
-				found = true;
-				onQueryChangedClean();
-				onQueryChanged();
-				//updateNavBar();
-				break;
-			}
+		var modelId = null;
+		if(bigParts.length>=3) {
+			modelId = bigParts[2];
 		}
+		var relname = parts.splice(0, 1)[0];
+		//console.log("updateSelectedQueryStateParameters: bigParts", bigParts, ", parts", parts, ", relname ", relname, ", modelId ", modelId);
 		
-		if(!found) {
-			console.log('query '+relname+' not found...', authInfo.authenticated);
-			if(! authInfo.authenticated) {
-				showInfoMessages('messages', 'Query <code>'+relname+'</code> not found. Maybe you should login');
+		if(modelId) {
+			var mSelect = document.getElementById('model');
+			var found = false;
+			for(var i = 0;i<mSelect.length;i++) {
+				if(mSelect.options[i].value==modelId) {
+					found = true;
+					//console.log("model found: modelId == ", modelId);
+					mSelect.options[i].selected = true;
+					doLoadQueries(false, function() {
+						updateSelectedQueryStateParametersCallback(relname, parts);
+						return bigParts;
+					});
+				}
 			}
-			/*else {
-				closeMessages('messages');
-			}*/
+			if(!found) {
+				console.log("model not found? modelId == ", modelId);
+			}
 		}
 		else {
-			setParametersValues(parts);
+			updateSelectedQueryStateParametersCallback(relname, parts);
+			return bigParts;
 		}
-		
-		return bigParts;
+	}
+}
+
+function updateSelectedQueryStateParametersCallback(relname, parts) {
+	var found = false;
+	var select = document.getElementById('objects');
+	for(var i = 0;i<select.length;i++) {
+		if(select.options[i].value==relname) {
+			select.options[i].selected = true;
+			found = true;
+			onQueryChangedClean();
+			onQueryChanged();
+			//updateNavBar();
+			break;
+		}
+	}
+	
+	if(!found) {
+		console.log('query "',relname,'" not found [',select.length,']... authenticated == ', authInfo.authenticated);
+		if(! authInfo.authenticated) {
+			showInfoMessages('messages', 'Query <code>'+relname+'</code> not found. Maybe you should login');
+		}
+		/*else {
+			closeMessages('messages');
+		}*/
+	}
+	else {
+		setParametersValues(parts);
 	}
 }
 
