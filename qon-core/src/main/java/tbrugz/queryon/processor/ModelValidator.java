@@ -37,6 +37,7 @@ public class ModelValidator extends AbstractSQLProc {
 			catch(SQLException e) {
 				if(removeInvalid) { it1.remove(); }
 				log.warn(e);
+				//log.info(e, e);
 				countErr++;
 			}
 			

@@ -1441,15 +1441,17 @@ public class QueryOn extends HttpServlet {
 	}
 
 	void doExplain(Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		SQL sql = null;
+		DBMSFeatures feat = null;
 		try {
 			final DBMSResources res = DBMSResources.instance();
-			final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
+			feat = res.getSpecificFeatures(conn.getMetaData());
 			
 			if(!feat.supportsExplainPlan()) {
 				throw new BadRequestException("Explain plan not available for database: "+feat.getClass().getSimpleName());
 			}
 			
-			SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			try {
 				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
 			}
@@ -1472,6 +1474,11 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			log.info("doExplain: error explaining: "+e);
+			/*String explainSql = feat.getExplainPlanQuery(sql.getFinalSql());
+			if(explainSql!=null) {
+				setSqlIndexOfInitial(reqspec.request, explainSql.indexOf(sql.getFinalSql()));
+			}*/
+			//log.info("doExplain: explainSql: "+explainSql+" // indexOf=="+explainSql.indexOf(sql.getFinalSql()));
 			//log.debug("doExplain: error explaining: "+e, e);
 			DBUtil.doRollback(conn);
 			throw e;
