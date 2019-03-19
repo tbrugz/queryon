@@ -806,11 +806,12 @@ public class WinstoneAndH2HttpRequestTest {
 		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar, 10);
 	}
 
+	// GET -> POST method switch NOT allowed
 	@Test
 	public void testGetXmlSelectAnyMethodSwitch() throws IOException, ParserConfigurationException, SAXException {
 		String sql = getSql30rows();
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		HttpResponse resp = getHttpResponse("/QueryAny.xml?_method=POSTname=test&sql="+sqlpar);
+		HttpResponse resp = getHttpResponse("/QueryAny.xml?_method=POST&name=test&sql="+sqlpar);
 		Assert.assertEquals(400, resp.getStatusLine().getStatusCode());
 	}
 	
@@ -859,7 +860,21 @@ public class WinstoneAndH2HttpRequestTest {
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&limit=50", 20);
 	}
+	
+	@Test
+	public void testGetXmlSelectAnyWithPars() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select * from emp where id = ?";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&p1=1", 1);
+	}
 
+	@Test
+	public void testGetXmlSelectAnyWithNamedPars() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "/* named-parameters=id,id */ select * from emp where id in (?, ?)";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&id=2", 1);
+	}
+	
 	//----- limit-related tests - end
 
 	@Test
@@ -881,6 +896,13 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "select * from emp where id = ?";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		basePostReturnCountTest("/ExplainAny.xml?name=test&sql="+sqlpar+"&p1=1", 1);
+	}
+
+	@Test
+	public void testExplainPlanWithNamedParam() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "/* named-parameters=parId */ select * from emp where id = ?";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		basePostReturnCountTest("/ExplainAny.xml?name=test&sql="+sqlpar+"&parId=1", 1);
 	}
 	
 	@Test
@@ -1778,6 +1800,13 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@Test
+	public void testSqlAnyWithPar() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "insert into emp (id, name) values (10, ?)";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/SqlAny.xml?name=test&sql="+sqlpar+"&p1=jane", "");
+	}
+
+	@Test
 	public void testGetBlobString() throws IOException, ParserConfigurationException, SAXException {
 		String content = getContentFromUrl(baseUrl+"/EMP?order=ID&limit=1&offset=1&valuefield=NAME");
 		Assert.assertEquals("mary", content);
@@ -1859,6 +1888,20 @@ public class WinstoneAndH2HttpRequestTest {
 		httpPostContent("/INSERT_TASK_Z?p1=2nd+Task&p2=some+description", "", 404);
 		//HttpResponse response = httpPostContentGetResponse("/INSERT_TASK_Z?p1=2nd+Task&p2=some+description", "");
 		//Assert.assertEquals(404, response.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testValidateAnyPositionedPars() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select id, name from emp where id in (?, ?)";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/ValidateAny.xml?name=test&sql="+sqlpar, "");
+	}
+	
+	@Test
+	public void testValidateAnyNamedPars() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "/* named-parameters=id,id2 */ select id, name from emp where id in (?, ?)";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		String ret = httpPostContent("/ValidateAny.xml?name=test&sql="+sqlpar, "");
 	}
 	
 }
