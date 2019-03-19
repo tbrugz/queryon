@@ -131,7 +131,8 @@ public class DBObjectUtils {
 		}
 		
 		if(update) {
-			List<String> namedParameterNames = SQL.getNamedParameterNames(finalSql, rel.getParameterCount());
+			List<String> namedParameterNames = SQL.getNamedParameterNames(finalSql);
+			SQL.validateNamedParametersWithParamCount(namedParameterNames, rel.getParameterCount());
 			rel.setNamedParameterNames(namedParameterNames);
 		}
 	}
@@ -275,6 +276,10 @@ public class DBObjectUtils {
 		
 		//log.debug("Parameter of mode '"+pmode+"' not understood");
 		return null;
+	}
+	
+	public static void updateQueryParameters(Query rel, Connection conn) throws SQLException {
+		validateQueryParameters(rel, rel.getQuery(), conn, true);
 	}
 	
 }

@@ -586,12 +586,16 @@ public class RequestSpec {
 	}
 	
 	protected String getMethod(HttpServletRequest req) {
-		String method = req.getParameter(PARAM_METHOD);
-		if(method==null) {
+		String switchMethod = req.getParameter(PARAM_METHOD);
+		if(switchMethod==null) {
 			return req.getMethod();
 		}
+		String origMethod = req.getMethod();
+		if(origMethod.equalsIgnoreCase(QueryOn.METHOD_POST) && switchMethod.equals(QueryOn.METHOD_PATCH)) {
+			return QueryOn.METHOD_PATCH;
+		}
 		//XXX: may method be changed? property?
-		throw new BadRequestException("Method switch not allowed [method: "+req.getMethod()+"/_method="+method+"]");
+		throw new BadRequestException("Method switch not allowed [method: "+req.getMethod()+"/_method="+switchMethod+"]");
 	}
 	
 	protected String getModelId(HttpServletRequest req) {

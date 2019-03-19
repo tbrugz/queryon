@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -89,6 +90,10 @@ public class SQL {
 	//XXX add 'final String initialSql;'?
 	
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit, String username) {
+		this(sql, relation, originalBindParameterCount, reqspecLimit, username, true);
+	}
+	
+	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit, String username, boolean validate) {
 		this.initialSql = sql;
 		this.sql = sql;
 		this.relation = relation;
@@ -96,7 +101,7 @@ public class SQL {
 		this.allowEncapsulation = allowEncapsulation(sql);
 		Integer limitDefault = processPatternInteger(sql, limitDefaultIntPattern);
 		this.limitMax = processPatternInteger(sql, limitMaxIntPattern);
-		this.originalBindParameterCount = originalBindParameterCount != null ? originalBindParameterCount : 0;
+		int bindParameterCountTmp = originalBindParameterCount != null ? originalBindParameterCount : 0;
 		
 		Integer limit = limitDefault!=null ? limitDefault : null;
 		limit = reqspecLimit!=null ? reqspecLimit : limit;
@@ -110,15 +115,31 @@ public class SQL {
 		//log.info("limit="+limit+" ; limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
 		
 		this.username = getFinalVariableValue(username);
-		this.namedParameters = getNamedParameterNames(sql, this.originalBindParameterCount);
+		this.namedParameters = getNamedParameterNames(sql);
+		//log.info("validate == "+validate+" ; bindParameterCountTmp == "+bindParameterCountTmp+" ; this.namedParameters == "+this.namedParameters+" ; bindNullOnMissingParameters() == "+Arrays.toString(bindNullOnMissingParameters()));
+		if(validate) {
+			this.originalBindParameterCount = bindParameterCountTmp;
+			validateNamedParametersWithParamCount(namedParameters, this.originalBindParameterCount);
+			//this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNullOnMissingParameters(), this.originalBindParameterCount);
+			//log.info("bindNullOnMissingParameters == "+Arrays.toString(bindNullOnMissingParameters));
+		}
+		else {
+			if(originalBindParameterCount == null && this.namedParameters!=null && this.namedParameters.size()>0) {
+				this.originalBindParameterCount = this.namedParameters.size();
+			}
+			else {
+				this.originalBindParameterCount = bindParameterCountTmp;
+			}
+		}
 		this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNullOnMissingParameters(), this.originalBindParameterCount);
-		//log.info("bindNullOnMissingParameters == "+Arrays.toString(bindNullOnMissingParameters));
 		
-		if(bindNullOnMissingParameters != null &&
-			bindNullOnMissingParameters.length != this.originalBindParameterCount) {
-			String message = "'"+PTRN_BIND_NULL_ON_MISSING_PARAMS+"' count [#"+bindNullOnMissingParameters.length+"] should be equal to 1 or bind parameters count [#"+this.originalBindParameterCount+"]";
-			log.warn(message);
-			throw new BadRequestException(message);
+		if(validate) {
+			if(bindNullOnMissingParameters != null &&
+					bindNullOnMissingParameters.length != this.originalBindParameterCount) {
+				String message = "'"+PTRN_BIND_NULL_ON_MISSING_PARAMS+"' count [#"+bindNullOnMissingParameters.length+"] should be equal to 1 or bind parameters count [#"+this.originalBindParameterCount+"]";
+				log.warn(message);
+				throw new BadRequestException(message);
+			}
 		}
 	}
 
@@ -161,10 +182,14 @@ public class SQL {
 	}
 	
 	public static SQL createSQL(Relation relation, RequestSpec reqspec, String username) {
+		return createSQL(relation, reqspec, username, true);
+	}
+	
+	public static SQL createSQL(Relation relation, RequestSpec reqspec, String username, boolean validateParameters) {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), reqspec!=null?reqspec.limit:null, username);
+			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), reqspec!=null?reqspec.limit:null, username, validateParameters);
 			//processSqlXtraMetadata(sql);
 			//sql.originalBindParameterCount = q.getParameterCount();
 			return sql;
@@ -929,20 +954,23 @@ public class SQL {
 		return processPatternBooleanArray(sql, SQL.bindNullOnMissingParamsPattern, false);
 	}
 	
-	public static List<String> getNamedParameterNames(String sql, int bindParameterCount) {
+	public static List<String> getNamedParameterNames(String sql) {
 		List<String> namedParameters = null;
 		String namedParamsStr = processPatternString(sql, namedParametersPattern, null);
 		if(namedParamsStr!=null) {
 			namedParameters = Utils.getStringList(namedParamsStr, ",");
-			
-			int namedParameterCount = namedParameters==null ? 0 : namedParameters.size();
-			if(namedParameterCount != bindParameterCount) {
-				String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+bindParameterCount+"]";
-				log.warn(message);
-				throw new IllegalStateException(message);
-			}
 		}
 		return namedParameters;
+	}
+	
+	public static void validateNamedParametersWithParamCount(List<String> namedParameters, int bindParameterCount) {
+		if(namedParameters==null) { return; }
+		int namedParameterCount = namedParameters==null ? 0 : namedParameters.size();
+		if(namedParameterCount != bindParameterCount) {
+			String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+bindParameterCount+"]";
+			log.warn(message);
+			throw new IllegalStateException(message);
+		}
 	}
 	
 	/*

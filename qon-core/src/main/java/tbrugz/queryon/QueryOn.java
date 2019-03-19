@@ -763,13 +763,14 @@ public class QueryOn extends HttpServlet {
 			case SELECT_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn, false);
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
 						+"."+reqspec.outputSyntax.getDefaultFileExtension());
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
+						DBObjectUtils.updateQueryParameters(relation, conn);
 						doSelect(model, relation, reqspec, currentUser, conn, resp, true);
 					}
 				}
@@ -786,7 +787,7 @@ public class QueryOn extends HttpServlet {
 			case VALIDATE_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn, true); //XXX: validate should be false?
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					doValidate(relation, reqspec, currentUser, conn, resp);
 				}
 				catch(RuntimeException e) {
@@ -802,7 +803,8 @@ public class QueryOn extends HttpServlet {
 			case EXPLAIN_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn, true); //XXX: validate should be false?
+					Query relation = getQuery(req, reqspec, currentUser, conn);
+					DBObjectUtils.updateQueryParameters(relation, conn);
 					doExplain(relation, reqspec, currentUser, conn, resp);
 				}
 				catch(RuntimeException e) {
@@ -818,10 +820,11 @@ public class QueryOn extends HttpServlet {
 			case SQL_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.modelId);
-					Query relation = getQuery(req, reqspec, currentUser, conn, false);
+					Query relation = getQuery(req, reqspec, currentUser, conn);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
+						DBObjectUtils.updateQueryParameters(relation, conn);
 						doSql(model, relation, reqspec, currentUser, conn, resp);
 					}
 				}
@@ -1062,7 +1065,7 @@ public class QueryOn extends HttpServlet {
 	*/
 	
 	// XXX should use RequestSpec for parameters?
-	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn, boolean validateParameters) throws SQLException {
+	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn) throws SQLException {
 		Query relation = new Query();
 		String name = req.getParameter("name");
 		/*if(name==null || name.equals("")) {
@@ -1077,9 +1080,12 @@ public class QueryOn extends HttpServlet {
 		//XXXxx: validate first & return number of parameters?
 		//relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway (would need connection to validate SQL)
 		//String finalSql = SQL.getFinalSqlNoUsername(sql);
-		SQL sqlz = SQL.createSQL(relation, reqspec, getUsername(currentUser));
-		if(validateParameters) {
+		/*if(validateParameters) {
+			//SQL sqlz = null;
 			try {
+				//sqlz = SQL.createSQL(relation, reqspec, getUsername(currentUser), validateParameters);
+				//DBObjectUtils.validateQueryParameters(relation, sqlz.getFinalSql(), conn, true);
+				//DBObjectUtils.validateQueryParameters(relation, relation.getQuery(), conn, true);
 				DBObjectUtils.validateQueryParameters(relation, sqlz.getFinalSql(), conn, true);
 			}
 			catch(SQLException e) {
@@ -1088,7 +1094,7 @@ public class QueryOn extends HttpServlet {
 				log.info("Error validating query: sqlz.getFinalSql()=="+sqlz.getFinalSql());
 				throw e;
 			}
-		}
+		}*/
 		
 		return relation;
 	}
@@ -1319,7 +1325,7 @@ public class QueryOn extends HttpServlet {
 				ConnectionUtil.showDBInfo(conn.getMetaData());
 			}
 			
-			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser), false);
 			try {
 				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
 			}
@@ -1328,13 +1334,13 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			sql.addOriginalParameters(reqspec);
-	
+			
 			finalSql = sql.getFinalSql();
 			PreparedStatement st = conn.prepareStatement(finalSql);
 			sql.bindParameters(st);
 			
 			boolean applyLimitOffsetInResultSet = true; //!sql.sqlLoEncapsulated;
-	
+			
 			ResultSet rs = null;
 			boolean hasResultSet = st.execute();
 			WebUtils.addSqlWarningsAsHeaders(st.getWarnings(), resp);
@@ -1342,7 +1348,7 @@ public class QueryOn extends HttpServlet {
 			if(hasResultSet) {
 				rs = st.getResultSet();
 			}
-	
+			
 			if(hasResultSet) {
 				if(reqspec.uniValueCol!=null) {
 					dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
@@ -1381,7 +1387,7 @@ public class QueryOn extends HttpServlet {
 	void doValidate(Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		SQL sql = null;
 		try {
-			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser), false);
 			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
 			//DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
 			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
@@ -1459,13 +1465,16 @@ public class QueryOn extends HttpServlet {
 				log.warn("error validating query '"+relation+"': "+sql.getFinalSql());
 			}
 			
+			// sets named parameters
+			reqspec.setNamedParameters(sql);
+			
 			sql.addOriginalParameters(reqspec);
 			/*for(int i=0;i<reqspec.params.size();i++) {
 				sql.bindParameterValues.add(reqspec.params.get(i));
 			}*/
 			//log.info("doExplain: params [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
 			ResultSet rs = feat.explainPlan(sql.getFinalSql(), sql.getParameterValues(), conn);
-
+			
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
 					null, //pk!=null?pk.getUniqueColumns():null,
 					null, null, //fks, uks,

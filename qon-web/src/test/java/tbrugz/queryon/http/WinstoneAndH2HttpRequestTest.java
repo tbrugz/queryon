@@ -1689,6 +1689,12 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testPatchWithBodyParamNameError() throws IllegalStateException, IOException {
 		httpPatchContent("/EMP/1", "", 400);
 	}
+
+	// POST-> PATCH method switch allowed
+	@Test
+	public void testPatchWithMethodSwitch() throws IllegalStateException, IOException {
+		httpPostContent("/EMP/1?v:NAME=newname&_method=PATCH", "", 200);
+	}
 	
 	@Test
 	public void testPostWithBodyParamName() throws IllegalStateException, IOException {
