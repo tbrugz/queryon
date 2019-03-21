@@ -788,7 +788,6 @@
 		//console.log("doConfirmInsert key",finalUrl,nv);
 		
 		var method = "POST";
-		nv.formData.append('_method',method);
 		
 		var messagesId = closeDialog?'messages':'dialog-messages';
 		doExecuteUpdateAjax(finalUrl, method, nv, null, cols, messagesId);

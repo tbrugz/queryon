@@ -576,8 +576,9 @@ public class RequestSpec {
 				if(i!=pCount) {
 					String message = "parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]";
 					//System.out.println(message);
-					log.warn("parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]");
-					throw new BadRequestException(message);
+					log.warn(message);
+					//XXX: executables may have OUT parameters, so some parameters may be missing from input
+					//throw new BadRequestException(message);
 				}
 				pCount++;
 			}

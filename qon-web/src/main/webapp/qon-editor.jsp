@@ -369,20 +369,23 @@ modelId = SchemaModelUtils.getModelId(request);
 	}
 
 	function doRemove() {
-		var data = {
-			"_method": "DELETE",
+		/*var data = {
+			//"_method": "DELETE",
 			"p1": document.getElementById('name').value
 			//"queryon.qon-queries.action": "remove",
 			//"queryon.qon-queries.querynames": document.getElementById('name').value,
 		};
 		if(modelId!=null) {
 			data["model"] = modelId;
-		}
+		}*/
+		var deleteUrl = qonUrl + "?" +
+				"p1=" + encodeURIComponent(document.getElementById('name').value) +
+				(modelId!=null ? "&model="+modelId : "");
 		
 		var request = $.ajax({
-			url : qonUrl,
-			type : "POST",
-			data : data,
+			url : deleteUrl,
+			type : "DELETE",
+			//data : data,
 			dataType : "html"
 		});
 
