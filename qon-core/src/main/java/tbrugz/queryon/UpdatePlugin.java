@@ -10,13 +10,15 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 
 public interface UpdatePlugin {
 
+	public void setModelId(String modelId);
+	
 	public void setProperties(Properties prop); // equals to AbstractProcessor's
 	
 	public void setSchemaModel(SchemaModel schemamodel); // equals to AbstractSchemaProcessor's
 	
 	public void setConnection(Connection conn); // equals to AbstractSQLProc's
 	
-	public void onInit(ServletContext context);
+	public void onInit(ServletContext context); // XXX throws SQLException ?
 	
 	/**
 	 * Inserts relation on model

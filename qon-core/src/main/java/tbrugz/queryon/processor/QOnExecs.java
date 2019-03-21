@@ -38,14 +38,13 @@ import tbrugz.sqldump.dbmodel.ExecutableParameter.INOUT;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
-import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: do not allow qon_execs to update schema_name or name... or reload all executables on save...
  */
-public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
+public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnExecs.class);
 	
@@ -56,7 +55,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 
 	static final String PIPE_SPLIT = "\\|";
 	
-	public static final String DEFAULT_EXECS_TABLE = "QON_EXECS";
+	public static final String DEFAULT_EXECS_TABLE = "qon_execs";
 	
 	public static final String TYPE_SCRIPT = "SCRIPT";
 
@@ -86,8 +85,9 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	}
 
 	int readFromDatabase(ServletContext context) throws SQLException {
-		String qonExecsTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
-		List<String> names = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_EXECS_NAMES, ",");
+		String qonExecsTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
+		String namesStr = getProperty(PROP_PREFIX, SUFFIX_EXECS_NAMES, null);
+		List<String> names = Utils.getStringList(namesStr, ",");
 		String sql = "select schema_name, name, remarks, roles_filter, exec_type"
 				+ ", package_name, parameter_count, parameter_names, parameter_types, parameter_inouts"
 				+ ", body"
@@ -421,7 +421,7 @@ public class QOnExecs extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	boolean isQonExecsRelation(Relation relation) {
-		String qonExecsTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
+		String qonExecsTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
 		//log.info("isQonExecsRelation: qonExecsTable: "+qonExecsTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
 		if( (! qonExecsTable.equalsIgnoreCase(relation.getName()))
 			&& (! qonExecsTable.equalsIgnoreCase(relation.getSchemaName()+"."+relation.getName())) ) {

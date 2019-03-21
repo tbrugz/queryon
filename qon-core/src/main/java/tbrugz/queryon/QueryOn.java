@@ -267,7 +267,7 @@ public class QueryOn extends HttpServlet {
 	String propertiesResource = null;
 	String propertiesFile = null;
 	
-	final List<UpdatePlugin> updatePlugins = new ArrayList<UpdatePlugin>();
+	final Map<String, List<UpdatePlugin>> updatePlugins = new HashMap<String, List<UpdatePlugin>>();
 	//String modelId;
 	
 	boolean doFilterStatusByPermission = true; //XXX: add prop for doFilterStatusByPermission ?
@@ -397,7 +397,7 @@ public class QueryOn extends HttpServlet {
 					if(id==null || id.trim().isEmpty() || id.equals("null")) {
 						String msg = "invalid model id: '"+id+"'";
 						log.warn(msg);
-						//throw new ServletException(msg);
+						throw new ServletException(msg);
 					}
 					else {
 						String modelWarningsKey = id+"."+ATTR_INIT_ERROR;
@@ -453,8 +453,7 @@ public class QueryOn extends HttpServlet {
 			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();
 			context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
 			
-			List<String> updatePluginsStrList = Utils.getStringListFromProp(prop, PROP_UPDATE_PLUGINS, ",");
-			setupUpdatePlugins(context, updatePluginsStrList);
+			setupUpdatePlugins(context);
 			
 			runOnStartupProcessors(context);
 			
@@ -523,41 +522,65 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 	}
-	
-	void setupUpdatePlugins(ServletContext context, List<String> updatePluginList) {
-		List<String> updatePluginsStr = new ArrayList<String>();
-		updatePlugins.clear();
-		if(updatePluginList==null) { return; }
-		
-		for(String upPluginStr: updatePluginList) {
-			UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
-			up.setProperties(prop);
-			updatePlugins.add(up);
-			updatePluginsStr.add(up.getClass().getSimpleName());
-		}
-		
-		log.info("update-plugins: "+updatePluginsStr);
 
+	void setupUpdatePlugins(ServletContext context) {
+		updatePlugins.clear();
+		List<String> defaultUpdatePluginsStrList = Utils.getStringListFromProp(prop, PROP_UPDATE_PLUGINS, ",");
+		
 		Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
 		for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
 			String modelId = entry.getKey();
-			try {
-				SchemaModel sm = entry.getValue();
-				Connection conn = DBUtil.initDBConn(prop, modelId, sm);
-				
-				for(UpdatePlugin up: updatePlugins) {
+			
+			List<String> updatePluginsStrList = Utils.getStringListFromProp(prop, "queryon."+modelId+".update-plugins", ",");
+			if(updatePluginsStrList==null) {
+				updatePluginsStrList = defaultUpdatePluginsStrList;
+			}
+			
+			SchemaModel sm = entry.getValue();
+			List<UpdatePlugin> plugins = setupUpdatePlugins(context, sm, modelId, updatePluginsStrList);
+			updatePlugins.put(modelId, plugins);
+		}
+	}
+	
+	List<UpdatePlugin> setupUpdatePlugins(ServletContext context, SchemaModel model, String modelId, List<String> updatePluginList) {
+		if(updatePluginList==null) { return null; }
+
+		List<UpdatePlugin> plugins = new ArrayList<UpdatePlugin>();
+		List<String> updatePluginsStr = new ArrayList<String>();
+		
+		for(String upPluginStr: updatePluginList) {
+			UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
+			up.setSchemaModel(model);
+			up.setModelId(modelId);
+			up.setProperties(prop);
+			plugins.add(up);
+			updatePluginsStr.add(up.getClass().getSimpleName());
+		}
+		
+		log.info("update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+updatePluginsStr);
+
+		try {
+			Connection conn = DBUtil.initDBConn(prop, modelId, model);
+			
+			for(UpdatePlugin up: plugins) {
+				try {
 					up.setConnection(conn);
-					up.setSchemaModel(sm);
 					up.onInit(context);
 				}
-				
-				ConnectionUtil.closeConnection(conn);
+				catch(RuntimeException e) {
+					String message = "Exception starting update-plugin "+up.getClass().getSimpleName()+" [model="+modelId+"]";
+					log.warn(message+": "+e);
+					log.debug(message+": "+e, e);
+				}
 			}
-			catch(Exception e) {
-				log.warn("Exception starting update-plugin [model="+modelId+"]: "+e);
-				log.debug("Exception starting update-plugin [model="+modelId+"]: "+e, e);
-			}
+			
+			ConnectionUtil.closeConnection(conn);
 		}
+		catch(Exception e) {
+			log.warn("Exception starting update-plugin [model="+modelId+"]: "+e);
+			log.debug("Exception starting update-plugin [model="+modelId+"]: "+e, e);
+		}
+		return plugins;
 	}
 	
 	void runOnStartupProcessors(ServletContext context) {
@@ -1883,12 +1906,13 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		//XXX: should 'onDelete' come before sql-delete? so SQL error/rollback has no influence on it?
-		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
-		for(UpdatePlugin up: updatePlugins) {
-			up.setProperties(prop);
-			up.setSchemaModel(model);
-			//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
-			up.onDelete(relation, reqspec);
+		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
+			if(plugins!=null) {
+			for(UpdatePlugin up: plugins) {
+				//up.setProperties(prop);
+				//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
+				up.onDelete(relation, reqspec);
+			}
 		}
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
@@ -2042,12 +2066,13 @@ public class QueryOn extends HttpServlet {
 		//XXX add ResultSet generatedKeys = st.getGeneratedKeys(); //?
 		
 		//XXX plugin should be called before execute()/bindParameters()?
-		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
-		for(UpdatePlugin up: updatePlugins) {
-			up.setProperties(prop);
-			up.setSchemaModel(model);
-			up.setConnection(conn);
-			up.onUpdate(relation, reqspec);
+		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
+			if(plugins!=null) {
+			for(UpdatePlugin up: plugins) {
+				//up.setProperties(prop);
+				up.setConnection(conn);
+				up.onUpdate(relation, reqspec);
+			}
 		}
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
@@ -2219,12 +2244,13 @@ public class QueryOn extends HttpServlet {
 			//log.info("generatedKeys[pk="+Arrays.toString(pkcols)+";#="+colCount+"]: "+ Utils.join(colVals, ", "));
 		}
 		
-		SchemaModel model = SchemaModelUtils.getModel(servletContext, reqspec.modelId);
-		for(UpdatePlugin up: updatePlugins) {
-			up.setProperties(prop);
-			up.setSchemaModel(model);
-			up.setConnection(conn);
-			up.onInsert(relation, reqspec);
+		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
+			if(plugins!=null) {
+			for(UpdatePlugin up: plugins) {
+				//up.setProperties(prop);
+				up.setConnection(conn);
+				up.onInsert(relation, reqspec);
+			}
 		}
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?

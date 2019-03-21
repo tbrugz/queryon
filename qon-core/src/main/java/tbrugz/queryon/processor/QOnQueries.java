@@ -7,9 +7,12 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -20,8 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
-import tbrugz.queryon.UpdatePlugin;
-import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -30,10 +31,12 @@ import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
+import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
-public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
+public class QOnQueries extends AbstractUpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
 	
@@ -50,10 +53,10 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 
 	static final String PIPE_SPLIT = "\\|";
 	
-	//ServletContext servletContext;
+	ServletContext servletContext;
 	
 	String getQonQueriesTable() {
-		return prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
+		return getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 	}
 	
 	boolean isQonQueriesRelation(Relation relation) {
@@ -111,9 +114,24 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 	
 	@Override
 	public void onInit(ServletContext context) {
-		// TODO: do not depend on QOnQueriesProcessor / SQLQueries
 		this.servletContext = context;
-		process();
+		
+		Set<View> origViews = new HashSet<View>();
+		origViews.addAll(model.getViews());
+		
+		try {
+			readFromDatabase(servletContext);
+		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
+			modelRollback(origViews);
+			DBUtil.doRollback(conn);
+			throw e;
+		} catch (ProcessingException pe) {
+			modelRollback(origViews);
+			throw pe;
+		} catch (SQLException e) {
+			modelRollback(origViews);
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
@@ -168,7 +186,6 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		log.info("onDelete: removed "+q+"? "+removed);
 	}
 	
-	@Override
 	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks,
 			String rolesFilterStr, ServletContext context) {
 		Query q = newQuery(schemaName, queryName, sql, remarks,
@@ -194,6 +211,7 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
 			DBUtil.doRollback(conn, sp);
 		}
+		DBUtil.releaseSavepoint(conn, sp);
 	
 		if(model.getViews().contains(q)) {
 			model.getViews().remove(q);
@@ -205,50 +223,41 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 		return 0;
 	}
 	
-	@Override
-	protected void addQueriesFromProperties() {
-		String queriesStr = prop.getProperty(PROP_QUERIES);
-		String[] queriesArr = queriesStr.split(",");
-		if(queriesArr.length!=1) {
-			throw new InternalServerException("queriesArr.length!=1: "+queriesArr.length);
+	@SuppressWarnings("unchecked")
+	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
+		String warnKey = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		if(warning==null) {
+			log.warn("warning key '"+warnKey+"' should not be null");
+			warnings = new LinkedHashMap<String, String>();
+			context.setAttribute(warnKey, warnings);
 		}
-		String qid = queriesArr[0];
-		qid = qid.trim();
-		
-		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname");
-		String queryName = prop.getProperty("sqldump.query."+qid+".name");
-		String sql = prop.getProperty("sqldump.query."+qid+".sql");
-		String remarks = prop.getProperty("sqldump.query."+qid+".remarks");
-		String roles = prop.getProperty("sqldump.query."+qid+".roles");
-		//queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
-		
-		Query q = newQuery(schemaName, queryName, sql, remarks,
-				Utils.getStringList(roles, PIPE_SPLIT));
-		addQueryToModel(q);
-		/*
-		
-		Query query = new Query();
-		query.setId(qid);
-		query.setName(queryName);
-		//add schemaName
-		query.setSchemaName(schemaName);
-		
-		query.setQuery(sql);
-		query.setRemarks(remarks);
-		setQueryRoles(query, roles);
-		*/
+		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
+	}
+
+	void clearWarnings(ServletContext context, String modelId) {
+		String warnKey = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = new LinkedHashMap<String, String>();
+		context.setAttribute(warnKey, warnings);
+	}
+	
+	@SuppressWarnings("unchecked")
+	void removeWarning(ServletContext context, String modelId, String schemaName, String queryName) {
+		String warnKey = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
+		warnings.remove((schemaName!=null?schemaName+".":"") + queryName);
 	}
 	
 	void putWarning(ServletContext context, String modelId, Relation r, String warning) {
-		super.putWarning(context, modelId, r.getSchemaName(), r.getName(), warning);
+		putWarning(context, modelId, r.getSchemaName(), r.getName(), warning);
 	}
 
 	void removeWarning(ServletContext context, String modelId, Relation r) {
-		super.removeWarning(context, modelId, r.getSchemaName(), r.getName());
+		removeWarning(context, modelId, r.getSchemaName(), r.getName());
 	}
 	
 	public static Map<String, String> readQueryFromDatabase(Properties prop, String modelId, String schemaName, String name) throws SQLException, ClassNotFoundException, NamingException {
-		String qonQueriesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_QUERIES_TABLE);
+		String qonQueriesTable = AbstractUpdatePlugin.getProperty(prop, modelId, QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 		String sql = "select schema_name, name, query, remarks, roles_filter, version_seq\n" +
 				"from "+qonQueriesTable+"\n" +
 				"where (disabled = 0 or disabled is null)\n" +
@@ -286,6 +295,65 @@ public class QOnQueries extends QOnQueriesProcessor implements UpdatePlugin {
 			ConnectionUtil.closeConnection(conn);
 		}
 		
+	}
+
+	@Override
+	public void process() {
+		throw new RuntimeException("process() should be called?");
+	}
+	
+	/*
+	 * see: QOnQueriesProcessor
+	 */
+	void readFromDatabase(ServletContext context) throws SQLException {
+		String qonQueriesTable = getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
+		String sql = "select schema_name, name, query, remarks, roles_filter from "+qonQueriesTable+
+				" where (disabled = 0 or disabled is null)"
+				;
+				//+" order by schema, name";
+		
+		clearWarnings(context, model.getModelId());
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+		}
+		catch(SQLException e) {
+			throw new SQLException("Error fetching queries, sql: "+sql, e);
+		}
+		
+		int count = 0;
+		while(rs.next()) {
+			String schema = rs.getString(1);
+			String queryName = rs.getString(2);
+			String query = rs.getString(3);
+			String remarks = rs.getString(4);
+			String rolesFilterStr = rs.getString(5);
+			
+			try {
+				PreparedStatement stinn = conn.prepareStatement( processQuery(query) );
+				count += addQueryFromDB(schema, queryName, stinn, query, remarks, rolesFilterStr, context);
+			}
+			catch(SQLException e) {
+				String message = "error reading query '"+queryName+"': "+e;
+				log.warn(message);
+				putWarning(context, model.getModelId(), schema, queryName, message);
+			}
+		}
+		
+		log.info("QOn processed ["+
+				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
+				"added/replaced "+count+" queries]");
+	}
+
+	protected String processQuery(String sql) {
+		return SQL.getFinalSqlNoUsername(sql);
+	}
+	
+	void modelRollback(Set<View> origViews) {
+		model.getViews().clear();
+		model.getViews().addAll(origViews);
 	}
 
 }

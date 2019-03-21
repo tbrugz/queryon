@@ -33,11 +33,10 @@ import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
-import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
+public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnTables.class);
 	
@@ -68,7 +67,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	
 	static final String PIPE_SPLIT = "\\|";
 	
-	public static final String DEFAULT_TABLES_TABLE = "QON_TABLES";
+	public static final String DEFAULT_TABLES_TABLE = "qon_tables";
 	
 	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
 
@@ -98,8 +97,9 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	int readFromDatabase(ServletContext context) throws SQLException {
-		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
-		List<String> tables = Utils.getStringListFromProp(prop, PROP_PREFIX+SUFFIX_TABLE_NAMES, ",");
+		String qonTablesTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		String qonTablesNames = getProperty(PROP_PREFIX, SUFFIX_TABLE_NAMES, null);
+		List<String> tables = Utils.getStringList(qonTablesNames, ",");
 		String sql = "select schema_name, name, column_names, pk_column_names, column_remarks, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
@@ -397,7 +397,7 @@ public class QOnTables extends AbstractSQLProc implements UpdatePlugin {
 	}
 	
 	boolean isQonTablesRelationUpdate(Relation relation) {
-		String qonTablesTable = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		String qonTablesTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
 		//log.info("isQonTablesRelation: "+qonTablesTable+" relation.getName(): "+relation.getName()+" ; relation.getSchemaName(): "+relation.getSchemaName()); 
 		if( (! qonTablesTable.equalsIgnoreCase(relation.getName()))
 			&& (! qonTablesTable.equalsIgnoreCase(relation.getSchemaName()+"."+relation.getName())) ) {
