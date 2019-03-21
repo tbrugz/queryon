@@ -1,3 +1,4 @@
+<%@page import="java.util.regex.Pattern"%>
 <%@page import="tbrugz.queryon.exception.InternalServerException"%>
 <%@page import="tbrugz.queryon.util.DumpSyntaxUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueriesProcessor"%>
@@ -32,7 +33,12 @@
 			"queryon.web.login.show",
 			//"sqldump.datadump.htmlx.dateformat",
 			//"sqldump.datadump.json.dateformat",
-		};
+	};
+	
+	Pattern[] exposedPatterns = {
+		Pattern.compile("queryon\\.qon-(?:queries|tables|execs)@[\\w]+\\.table"),
+	};
+
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
 	String[] defaultValues = { null, null,
 			QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
@@ -52,6 +58,17 @@
 			if(i>0) { out.write(",\n"); }
 			out.write(sqd.get(k)+": "+gson.toJson(prop.getProperty(k, defaultValues[i])));
 			i++;
+		}
+		for(int j=0;j<exposedPatterns.length;j++) {
+			Pattern p = exposedPatterns[j];
+			for(Object k: prop.keySet()) {
+				String key = (String) k;
+				if(p.matcher(key).matches()) {
+					if(i>0) { out.write(",\n"); }
+					out.write(sqd.get(key)+": "+gson.toJson(prop.getProperty(key)));
+					i++;
+				}
+			}
 		}
 	}
 	

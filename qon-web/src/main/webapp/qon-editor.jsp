@@ -81,7 +81,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			}
 		});
 		loadSettings(function() {
-			var table = settings['queryon.qon-queries.table'];
+			var table = getModelSetting('queryon.qon-queries', 'table', modelId);
 			if(table) {
 				qonUrl = 'q/'+table;
 			}

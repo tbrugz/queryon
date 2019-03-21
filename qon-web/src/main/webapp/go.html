@@ -39,7 +39,7 @@ loadSelectContent = function(oEvent) {
 	var txt = oEvent.target.responseText;
 	var execs = JSON.parse(txt);
 	var executables = getQonData(execs);
-	console.log('execs:', execs, 'executables: ', executables);
+	//console.log('execs:', execs, 'executables: ', executables);
 	var select = document.getElementById('objects');
 	select.innerHTML = '<option invalid="true">select executable</option>';
 	for(var i = 0 ; i < executables.length ; i++) {
@@ -52,6 +52,7 @@ loadSelectContent = function(oEvent) {
 	updateUIFromFragmentSelect();
 	onExecChanged();
 	updateUIFromFragmentParams();
+	makeHrefs();
 }
 
 onModelChanged = function() {
@@ -94,10 +95,14 @@ makeHrefs = function() {
 	//console.log('auth', authInfo);
 	if(authInfo.isDev) {
 		var ed = document.getElementById('url-editor');
-		if(settings && settings["queryon.qon-execs.table"]) {
-			var url = './#' + settings["queryon.qon-execs.table"].toUpperCase();
-			ed.style.display = 'initial';
-			ed.href = url;
+		if(settings) {
+			var modelId = getCurrentModelId();
+			var table = getModelSetting('queryon.qon-execs', 'table', modelId);
+			if(table) {
+				var url = './#' + table + (modelId?"||"+modelId:"");
+				ed.style.display = 'initial';
+				ed.href = url;
+			}
 		}
 	}
 }
