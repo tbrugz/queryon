@@ -979,6 +979,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	@Ignore("Executables may have gaps in parameter numbers (OUT parameters)")
 	public void testExecuteWithBodyParamIndexError() throws IOException, ParserConfigurationException, SAXException, TransformerException {
 		String content = httpPostContent("/IS_PRIME?bodyparamindex=2", "3", 400);
 	}
