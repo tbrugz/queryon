@@ -356,5 +356,10 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		model.getViews().addAll(origViews);
 	}
 
+	@Override
+	public boolean accepts(Relation relation) {
+		return isQonQueriesRelation(relation);
+	}
+
 }
 

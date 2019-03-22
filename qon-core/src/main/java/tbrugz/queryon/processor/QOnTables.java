@@ -430,4 +430,9 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		return (Table) dbid;
 	}*/
 	
+	@Override
+	public boolean accepts(Relation relation) {
+		return isQonTablesRelationUpdate(relation);
+	}
+	
 }

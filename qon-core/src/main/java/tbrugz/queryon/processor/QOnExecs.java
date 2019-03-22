@@ -444,4 +444,9 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 		return eo;
 	}
 	
+	@Override
+	public boolean accepts(Relation relation) {
+		return isQonExecsRelation(relation);
+	}
+
 }

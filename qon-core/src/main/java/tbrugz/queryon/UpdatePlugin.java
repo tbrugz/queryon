@@ -20,6 +20,8 @@ public interface UpdatePlugin {
 	
 	public void onInit(ServletContext context); // XXX throws SQLException ?
 	
+	public boolean accepts(Relation relation);
+	
 	/**
 	 * Inserts relation on model
 	 */

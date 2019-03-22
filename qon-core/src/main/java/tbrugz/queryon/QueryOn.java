@@ -1909,9 +1909,11 @@ public class QueryOn extends HttpServlet {
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
 			if(plugins!=null) {
 			for(UpdatePlugin up: plugins) {
-				//up.setProperties(prop);
-				//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
-				up.onDelete(relation, reqspec);
+				if(up.accepts(relation)) {
+					//up.setProperties(prop);
+					//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
+					up.onDelete(relation, reqspec);
+				}
 			}
 		}
 		
@@ -2069,9 +2071,11 @@ public class QueryOn extends HttpServlet {
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
 			if(plugins!=null) {
 			for(UpdatePlugin up: plugins) {
-				//up.setProperties(prop);
-				up.setConnection(conn);
-				up.onUpdate(relation, reqspec);
+				if(up.accepts(relation)) {
+					//up.setProperties(prop);
+					up.setConnection(conn);
+					up.onUpdate(relation, reqspec);
+				}
 			}
 		}
 		
@@ -2247,9 +2251,11 @@ public class QueryOn extends HttpServlet {
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
 			if(plugins!=null) {
 			for(UpdatePlugin up: plugins) {
-				//up.setProperties(prop);
-				up.setConnection(conn);
-				up.onInsert(relation, reqspec);
+				if(up.accepts(relation)) {
+					//up.setProperties(prop);
+					up.setConnection(conn);
+					up.onInsert(relation, reqspec);
+				}
 			}
 		}
 		
