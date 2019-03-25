@@ -69,20 +69,20 @@ public class WebUtils {
 		resp.setContentType(MIME_TEXT);
 		if(e.getCause() instanceof SQLException) {
 			Integer indexOfInitialSql = (Integer) req.getAttribute(RequestSpec.ATTR_SQL_INDEX_OF_INITIAL);
-			//log.info("indexOfInitialSql=="+indexOfInitialSql);
-			//log.info("indexOfInitialSql=="+indexOfInitialSql+" / position=="+position+" / line=="+line);
 			if(indexOfInitialSql!=null && indexOfInitialSql>=0) {
 				Integer position = getPosition(e.getCause());
 				//log.info("indexOfInitialSql=="+indexOfInitialSql+" / position=="+position);
 				if(position!=null) {
 					resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_POSITION, String.valueOf(position - indexOfInitialSql));
 				}
-				else if(indexOfInitialSql==0) {
-					Integer line = getLine(e.getCause());
-					//log.info("indexOfInitialSql=="+indexOfInitialSql+" / line=="+line);
-					if(line!=null) {
-						resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_LINE, String.valueOf(line));
-					}
+			}
+			
+			Integer lineOfInitialSql = (Integer) req.getAttribute(RequestSpec.ATTR_SQL_LINE_OF_INITIAL);
+			if(lineOfInitialSql!=null && lineOfInitialSql>=0) {
+				Integer line = getLine(e.getCause());
+				//log.info("lineOfInitialSql=="+lineOfInitialSql+" / line=="+line);
+				if(line!=null) {
+					resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_LINE, String.valueOf(line));
 				}
 			}
 		}

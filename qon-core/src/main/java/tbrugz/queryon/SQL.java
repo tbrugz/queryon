@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -978,9 +977,27 @@ public class SQL {
 		return initialSql.equals(getFinalSql());
 	}
 	*/
-	
-	public int indexOfInitialSql() {
-		return getFinalSql().indexOf(initialSql);
+
+	public static int indexOfInitialSql(String finalSql, String initialSql) {
+		return finalSql.indexOf(initialSql);
 	}
+
+	public static int lineOfInitialSql(String finalSql, String initialSql) {
+		int idx = indexOfInitialSql(finalSql, initialSql);
+		if(idx==-1) { return -1; }
+		String initialPart = finalSql.substring(0, idx);
+		int countNL = MiscUtils.countChars(initialPart, '\n');
+		return countNL+1;
+	}
+	
+	/*
+	public int indexOfInitialSql() {
+		return indexOfInitialSql(getFinalSql(), initialSql);
+	}
+
+	public int lineOfInitialSql() {
+		return lineOfInitialSql(getFinalSql(), initialSql);
+	}
+	*/
 	
 }

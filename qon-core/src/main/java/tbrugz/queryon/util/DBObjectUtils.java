@@ -279,7 +279,12 @@ public class DBObjectUtils {
 	}
 	
 	public static void updateQueryParameters(Query rel, Connection conn) throws SQLException {
-		validateQueryParameters(rel, rel.getQuery(), conn, true);
+		try {
+			validateQueryParameters(rel, rel.getQuery(), conn, true);
+		}
+		catch(SQLException e) {
+			log.warn("SQLException: "+e);
+		}
 	}
 	
 }

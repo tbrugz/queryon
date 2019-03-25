@@ -1506,11 +1506,11 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			log.info("doExplain: error explaining: "+e);
-			/*String explainSql = feat.getExplainPlanQuery(sql.getFinalSql());
+			String explainSql = feat.getExplainPlanQuery(sql.getFinalSql());
 			if(explainSql!=null) {
-				setSqlIndexOfInitial(reqspec.request, explainSql.indexOf(sql.getFinalSql()));
-			}*/
-			//log.info("doExplain: explainSql: "+explainSql+" // indexOf=="+explainSql.indexOf(sql.getFinalSql()));
+				//log.info("doExplain: explainSql: "+explainSql+" - indexOf == "+explainSql.indexOf(sql.getFinalSql()));
+				setSqlInfo(reqspec.request, explainSql, sql.getFinalSql());
+			}
 			//log.debug("doExplain: error explaining: "+e, e);
 			DBUtil.doRollback(conn);
 			throw e;
@@ -2903,11 +2903,22 @@ public class QueryOn extends HttpServlet {
 	
 	static void setSqlInfo(HttpServletRequest req, SQL sql) {
 		if(sql==null) { return; }
-		setSqlIndexOfInitial(req, sql.indexOfInitialSql());
+		setSqlInfo(req, sql.getFinalSql(), sql.initialSql);
+		//setSqlIndexOfInitial(req, sql.indexOfInitialSql());
+		//setSqlLineOfInitial(req, sql.lineOfInitialSql());
+	}
+
+	static void setSqlInfo(HttpServletRequest req, String finalSql, String initialSql) {
+		setSqlIndexOfInitial(req, SQL.indexOfInitialSql(finalSql, initialSql));
+		setSqlLineOfInitial(req, SQL.lineOfInitialSql(finalSql, initialSql));
 	}
 	
 	static void setSqlIndexOfInitial(HttpServletRequest req, int index) {
 		req.setAttribute(RequestSpec.ATTR_SQL_INDEX_OF_INITIAL, index);
+	}
+
+	static void setSqlLineOfInitial(HttpServletRequest req, int line) {
+		req.setAttribute(RequestSpec.ATTR_SQL_LINE_OF_INITIAL, line);
 	}
 	
 	/*@SuppressWarnings("rawtypes")
