@@ -229,7 +229,7 @@ function doRequest(url, btnId, callback) {
 			showErrorMessages("messages", oEvent.target.responseText
 					+(request.status==403?" (invalid session?)":"")
 					);
-			checkForPosition(request, editor);
+			checkForSqlWarnings(request, editor);
 		}
 		btnActionStop(btnId);
 		if(callback) {

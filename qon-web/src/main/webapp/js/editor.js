@@ -1,17 +1,29 @@
 
-function checkForPosition(request, editor) {
+function checkForSqlWarnings(request, editor) {
 	var range = null;
-	var position = request.getResponseHeader('X-Warning-SQL-Position');
+	var position = parseInt(request.getResponseHeader('X-Warning-SQL-Position'));
 	if(position) {
+		//console.log("checkForPosition:: position = ", position);
+		if(isTextSelected(editor)) {
+			diff = getCharCountPrecedingSelection(editor);
+			//console.log("isTextSelected:: checkForPosition position = ", position, "; diff = ", diff);
+			position += diff;
+		}
 		range = getRangeFromPosition(editor, position);
 	}
-	var line = request.getResponseHeader('X-Warning-SQL-Line');
+	var line = parseInt(request.getResponseHeader('X-Warning-SQL-Line'));
 	if(line) {
+		//console.log("checkForPosition:: line = ", line);
+		if(isTextSelected(editor)) {
+			diff = getRowCountPrecedingSelection(editor);
+			//console.log("isTextSelected:: checkForPosition line = ", line, "; diff = ", diff);
+			line += diff;
+		}
 		range = getRangeFromLine(editor, line);
 	}
 	
 	if(range) {
-		console.log("checkForPosition range==", range);
+		console.log("checkForPosition range = ", range);
 		editor.warningMarker = editor.session.addMarker(range, "editor-warning", "line");
 	}
 }
@@ -22,8 +34,7 @@ function getRangeFromPosition(editor, position) {
 	//console.log("position", position);
 	var Range = ace.require('ace/range').Range;
 
-	var sqlString = editor.getSelectedText();
-	if(!sqlString) { sqlString = editor.getValue(); }
+	var sqlString = editor.getValue();
 	
 	var partz = sqlString.split("\n")
 	var newpos = 0;
@@ -47,8 +58,7 @@ function getRangeFromLine(editor, line) {
 	line = parseInt(line)-1;
 	var Range = ace.require('ace/range').Range;
 	
-	var sqlString = editor.getSelectedText();
-	if(!sqlString) { sqlString = editor.getValue(); }
+	var sqlString = editor.getValue();
 	var partz = sqlString.split("\n")
 	
 	console.log(partz);
@@ -66,4 +76,23 @@ function getEditorText(editor) {
 	var sqlString = editor.getSelectedText();
 	if(!sqlString) { sqlString = editor.getValue(); }
 	return sqlString;
+}
+
+function isTextSelected(editor) {
+	var range = editor.getSelectionRange();
+	return ! ( (range.start.row == range.end.row) && (range.start.column == range.end.column) );
+}
+
+function getRowCountPrecedingSelection(editor) {
+	return editor.getSelectionRange().start.row;
+}
+
+function getCharCountPrecedingSelection(editor) {
+	var count = 0;
+	var start = editor.getSelectionRange().start;
+	for(var i=0;i<start.row;i++) {
+		count += editor.session.getLine(i).length + 1;
+	}
+	count += start.column;
+	return count;
 }

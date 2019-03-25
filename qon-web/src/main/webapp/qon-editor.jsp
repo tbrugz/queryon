@@ -154,7 +154,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			errorMessage(jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
-			checkForPosition(jqXHR, editor);
+			checkForSqlWarnings(jqXHR, editor);
 			closeResults();
 			updateUI();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
@@ -216,7 +216,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			errorMessage(jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
-			checkForPosition(jqXHR, editor);
+			checkForSqlWarnings(jqXHR, editor);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 			updateUI();
@@ -281,7 +281,7 @@ modelId = SchemaModelUtils.getModelId(request);
 			errorMessage(jqXHR.responseText
 					+(jqXHR.status==403?" (invalid session?)":"")
 					);
-			checkForPosition(jqXHR, editor);
+			checkForSqlWarnings(jqXHR, editor);
 			closeResults();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 			updateUI();
