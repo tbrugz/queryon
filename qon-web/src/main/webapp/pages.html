@@ -61,10 +61,7 @@ onLoadAfter = function() {
 	if(! modelsInfo) return;
 	//console.log("onLoadAfter2");
 	
-	var table = settings['queryon.qon-pages.table'];
-	if(table) {
-		qonUrl = 'q/'+table;
-	}
+	updateQonPagesUrl();
 	updateUI();
 	refreshAuthInfo();
 	updatePagesList();
@@ -74,8 +71,17 @@ loadAuthInfoCallback = onLoadAfter;
 //loadModelsContentCallback = onLoadAfter;
 
 onModelChanged = function() {
+	updateQonPagesUrl();
+	updateUI();
 	refreshAuthInfo();
 	updatePagesList();
+}
+
+function updateQonPagesUrl() {
+	var table = getModelSetting('queryon.qon-pages', 'table', getCurrentModelId());
+	if(table) {
+		qonUrl = 'q/'+table;
+	}
 }
 
 function loadModelsContentCallback() {
@@ -156,16 +162,17 @@ loadPagesList = function() {
 			}
 		}
 		else {
-			console.warn(evt);
+			console.log('Error loading pages. status = ',status);//,'; evt = ', evt);
 			showErrorMessages('messages', evt.target.responseText);
 		}
 	};
 	oReq.onerror = function(evt) {
-		console.warn(evt);
+		console.warn('Error loading pages. evt = ', evt);
 	}
 	oReq.open("GET", loadUrl);
 	oReq.send(null);
 	actionStart();
+	//console.log("get url:", loadUrl);
 	//btnActionStart('url-refresh');
 }
 

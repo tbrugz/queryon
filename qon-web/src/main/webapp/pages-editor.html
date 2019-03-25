@@ -55,12 +55,12 @@ onLoad = function() {
 	loadAce();
 	loadAuthInfo();
 	loadSettings(function() {
-		var table = settings['queryon.qon-pages.table'];
+		var modelId = getParameterByName('model', location.search);
+		var table = getModelSetting('queryon.qon-pages', 'table', modelId);
 		if(table) {
 			qonUrl = 'q/'+table;
 		}
 		console.log("qonUrl: ", qonUrl);
-		var modelId = getParameterByName('model', location.search);
 		if(modelId) {
 			byId('modelLabel').style.display = 'inline-block';
 			byId('model').value = modelId;
@@ -284,7 +284,8 @@ function refreshUI() {
 	var id = byId('id').value;
 	if(id) {
 		byId('pages-open').style.display = 'initial';
-		var modelId = getParameterByName('model', location.search);
+		//var modelId = getParameterByName('model', location.search);
+		var modelId = getCurrentModelId();
 		var url = pagesUrl + byId('path').value + ( modelId ? "?model="+modelId : "" );
 		url = url.replace(/\/+/, '/');
 		
