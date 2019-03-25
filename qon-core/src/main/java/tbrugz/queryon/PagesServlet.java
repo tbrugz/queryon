@@ -10,8 +10,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -22,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.processor.AbstractUpdatePlugin;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -47,7 +51,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	
 	public static final String ATTR_REQ_FORWARDED = "req.forwarded";
 	
-	String relation = null;
+	Map<String, String> relationMap = new HashMap<String, String>();
 	String notFoundUrl = null;
 	String indexFile = DEFAULT_INDEX; //XXX: add prop for index(.html) ?
 	
@@ -58,7 +62,14 @@ public class PagesServlet extends AbstractHttpServlet {
 		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		
 		// get qon_pages table
-		relation = prop.getProperty(PROP_PREFIX+SUFFIX_TABLE, DEFAULT_PAGES_TABLE);
+		Set<String> mids = SchemaModelUtils.getModelIds(config.getServletContext());
+		for(String modelId: mids) {
+			String relationName = AbstractUpdatePlugin.getProperty(prop, modelId, PROP_PREFIX, SUFFIX_TABLE, null);
+			if(relationName!=null) {
+				relationMap.put(modelId, relationName);
+			}
+		}
+		log.debug("modelIds: "+mids+" ; relationMap: "+relationMap);
 		
 		// get not found (404) url
 		notFoundUrl = prop.getProperty(PROP_PREFIX+SUFFIX_URL_404);
@@ -77,6 +88,13 @@ public class PagesServlet extends AbstractHttpServlet {
 		
 		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
 
+		// get relation
+		String modelId = SchemaModelUtils.getModelId(req);
+		String relation = relationMap.get(modelId);
+		if(relation==null) {
+			throw new BadRequestException("Pages relation undefined [model="+modelId+"]");
+		}
+		
 		// get id from URL parameter
 		String id = req.getParameter("id");
 		if(id!=null) {
@@ -85,7 +103,6 @@ public class PagesServlet extends AbstractHttpServlet {
 		}
 		
 		// get and dump page
-		String modelId = SchemaModelUtils.getModelId(req);
 		Connection conn = DBUtil.initDBConn(prop, modelId);
 		try {
 			getAndDumpPage(conn, relation, pathInfo, resp);

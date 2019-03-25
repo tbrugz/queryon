@@ -36,7 +36,7 @@
 	};
 	
 	Pattern[] exposedPatterns = {
-		Pattern.compile("queryon\\.qon-(?:queries|tables|execs)@[\\w]+\\.table"),
+		Pattern.compile("queryon\\.qon-(?:queries|tables|execs|pages)@[\\w]+\\.table"),
 	};
 
 	//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
