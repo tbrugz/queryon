@@ -584,20 +584,20 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	void runOnStartupProcessors(ServletContext context) {
-		//XXX option to reload properties & re-execute processors?
-		//XXX run for every model?
-		boolean run4EveryModel = true;
-		List<String> procsOnStartup = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
-		if(procsOnStartup!=null) {
-			for(String p: procsOnStartup) {
-				if(run4EveryModel) {
-					Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
-					for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
-						runProcessor(p, context, entry.getKey());
-					}
-				}
-				else {
-					runProcessor(p, context, null);
+		//XXXdone option to reload properties & re-execute processors? see: manage/reload
+		List<String> procsOnStartupDefault = Utils.getStringListFromProp(prop, PROP_PROCESSORS_ON_STARTUP, ",");
+		Map<String, SchemaModel> models = SchemaModelUtils.getModels(context);
+		for(Map.Entry<String,SchemaModel> entry: models.entrySet()) {
+			String modelId = entry.getKey();
+			
+			List<String> procsOnStartupList = Utils.getStringListFromProp(prop, "queryon."+modelId+".processors-on-startup", ",");
+			if(procsOnStartupList==null) {
+				procsOnStartupList = procsOnStartupDefault;
+			}
+			
+			if(procsOnStartupList!=null) {
+				for(String proc: procsOnStartupList) {
+					runProcessor(proc, context, modelId);
 				}
 			}
 		}
@@ -605,6 +605,7 @@ public class QueryOn extends HttpServlet {
 	
 	void runProcessor(String processorClass, ServletContext context, String modelId) {
 		try {
+			log.info("Running startup processor '"+processorClass+"' ["+modelId+"]");
 			ProcessorServlet.doProcess(processorClass, context, modelId);
 		}
 		catch(Exception e) {
