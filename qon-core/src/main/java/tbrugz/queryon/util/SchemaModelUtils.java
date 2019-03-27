@@ -215,6 +215,22 @@ public class SchemaModelUtils {
 		return modelReq;
 	}
 	
+	public static String getValidatedModelId(HttpServletRequest req, final String modelId, boolean allowDefault) {
+		String ret = modelId;
+		if(modelId==null && allowDefault) {
+			ret = (String) req.getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+		}
+		else {
+			Set<String> models = getModelIds(req.getServletContext());
+			if(!models.contains(modelId)) {
+				throw new BadRequestException( "Model id '"+modelId+"' undefined"
+						+(" [modelsIds: "+models+"]")
+						);
+			}
+		}
+		return ret;
+	}
+	
 	public static String getDefaultModelId(ServletContext context) {
 		return (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 	}

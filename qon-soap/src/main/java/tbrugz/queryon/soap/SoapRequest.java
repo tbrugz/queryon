@@ -25,6 +25,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class SoapRequest extends RequestSpec {
@@ -254,7 +255,7 @@ public class SoapRequest extends RequestSpec {
 			//XXX serviceName could include initCaps(modelId)
 		}
 		//log.info("modelId="+modelId+" / req.getPathInfo()="+req.getPathInfo());
-		return modelId;
+		return SchemaModelUtils.getValidatedModelId(req, modelId, true);
 	}
 	
 	Map<String, String> getUniFilter(String filter) {

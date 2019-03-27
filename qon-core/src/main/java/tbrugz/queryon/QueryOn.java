@@ -747,7 +747,7 @@ public class QueryOn extends HttpServlet {
 					if(dbobj==null) {
 						throw new NotFoundException("object not found: "+reqspec.object);
 					}
-					atype = getActionTypeFromDbObject(dbobj, reqspec.httpMethod);
+					atype = getActionType(reqspec, dbobj);
 					if(atype.equals(ActionType.EXECUTE)) {
 						otype = DBObjectType.EXECUTABLE.name();
 					}
@@ -964,9 +964,9 @@ public class QueryOn extends HttpServlet {
 		return null;
 	}
 	
-	ActionType getActionTypeFromDbObject(DBIdentifiable dbobj, String httpMethod) {
+	protected ActionType getActionType(RequestSpec reqspec, DBIdentifiable dbobj) {
 		if(dbobj instanceof Relation) {
-			return getRelationActionType(httpMethod);
+			return getRelationActionType(reqspec.httpMethod);
 		}
 		if(dbobj instanceof ExecutableObject) {
 			//XXX only if POST method?
@@ -2262,7 +2262,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		resp.setStatus(HttpServletResponse.SC_CREATED);
+		setResponseStatus(resp, HttpServletResponse.SC_CREATED);
 		writeUpdateCount(reqspec, resp, count, "inserted");
 		
 		}
@@ -2279,6 +2279,10 @@ public class QueryOn extends HttpServlet {
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	protected void setResponseStatus(HttpServletResponse resp, int status) {
+		resp.setStatus(status);
 	}
 	
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {

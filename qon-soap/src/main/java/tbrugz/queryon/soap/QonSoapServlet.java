@@ -258,7 +258,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		// -- TYPES --
 		
 		{
-			//generic types
+			// generic 'select' types
 			schema.appendChild(createFieldsType(doc));
 			schema.appendChild(createFieldWithDirectionType(doc));
 			schema.appendChild(createOrderType(doc));
@@ -647,26 +647,34 @@ public class QonSoapServlet extends BaseApiServlet {
 		return element;
 	}
 
-	Element createOperation(Document doc, String name, String prefix) {
+	Element createOperation(Document doc, String name, String namePrefix) {
+		return createOperation(doc, name, namePrefix, "");
+	}
+	
+	Element createOperation(Document doc, String name, String namePrefix, String typePrefix) {
 		Element operation = doc.createElement("wsdl:"+"operation");
-		operation.setAttribute("name", prefix + name);
+		operation.setAttribute("name", namePrefix + name);
 		
 		Element input = doc.createElement("wsdl:"+"input");
-		input.setAttribute("name", name+"Input");
-		input.setAttribute("message", "tns:"+name+"Input");
+		input.setAttribute("name", typePrefix+name+"Input");
+		input.setAttribute("message", "tns:"+typePrefix+name+"Input");
 		operation.appendChild(input);
 
 		Element output = doc.createElement("wsdl:"+"output");
-		output.setAttribute("name", name+"Output");
-		output.setAttribute("message", "tns:"+name+"Output");
+		output.setAttribute("name", typePrefix+name+"Output");
+		output.setAttribute("message", "tns:"+typePrefix+name+"Output");
 		operation.appendChild(output);
 		
 		return operation;
 	}
+
+	Element createBindingOperation(Document doc, String name, String namePrefix) {
+		return createBindingOperation(doc, name, namePrefix, "");
+	}
 	
-	Element createBindingOperation(Document doc, String name, String prefix) {
+	Element createBindingOperation(Document doc, String name, String namePrefix, String typePrefix) {
 		Element operation = doc.createElement("wsdl:"+"operation");
-		operation.setAttribute("name", prefix + name);
+		operation.setAttribute("name", namePrefix + name);
 		
 		Element soapOperation = doc.createElement("soap:operation");
 		//soapOperation.setAttribute("style", "document");
@@ -675,7 +683,7 @@ public class QonSoapServlet extends BaseApiServlet {
 
 		{
 			Element input = doc.createElement("wsdl:"+"input");
-			input.setAttribute("name", name+"Input");
+			input.setAttribute("name", typePrefix+name+"Input");
 			Element soapBody = doc.createElement("soap:body");
 			soapBody.setAttribute("use", "literal");
 			input.appendChild(soapBody);
@@ -684,7 +692,7 @@ public class QonSoapServlet extends BaseApiServlet {
 
 		{
 			Element output = doc.createElement("wsdl:"+"output");
-			output.setAttribute("name", name+"Output");
+			output.setAttribute("name", typePrefix+name+"Output");
 			Element soapBody = doc.createElement("soap:body");
 			soapBody.setAttribute("use", "literal");
 			output.appendChild(soapBody);
@@ -733,6 +741,10 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		
 		return "string";
+	}
+	
+	static String normalizeRelationName(Relation r) {
+		return normalize( r.getQualifiedName() );
 	}
 	
 	static String normalize(String s) {
