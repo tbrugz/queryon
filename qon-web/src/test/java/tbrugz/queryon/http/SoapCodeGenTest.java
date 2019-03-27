@@ -30,6 +30,7 @@ import org.bitbucket.tbrugz.queryon.queryonservice.MultiValueFilterType;
 import org.bitbucket.tbrugz.queryon.queryonservice.ObjectFactory;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTType;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPType;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Request;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Type;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSRequest;
@@ -290,11 +291,13 @@ public class SoapCodeGenTest {
 		{
 			ObjectFactory of = new ObjectFactory();
 			InsertPUBLICEMP ipe = of.createInsertPUBLICEMP();
-			ipe.setID(10);
-			ipe.setDEPARTMENTID(2);
-			ipe.setSUPERVISORID(1);
-			ipe.setNAME("jonas");
-			ipe.setSALARY(10000);
+			PUBLICEMPType pet = of.createPUBLICEMPType();
+			pet.setID(10);
+			pet.setDEPARTMENTID(2);
+			pet.setSUPERVISORID(1);
+			pet.setNAME("jonas");
+			pet.setSALARY(10000);
+			ipe.setPUBLICEMP(pet);
 			
 			UpdateInfoType uit = qonsp.insertPUBLICEMP(ipe);
 			Assert.assertEquals(1, uit.getUpdateCount());

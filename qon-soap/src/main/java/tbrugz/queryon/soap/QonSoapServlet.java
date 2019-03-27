@@ -652,12 +652,19 @@ public class QonSoapServlet extends BaseApiServlet {
 		Element all = doc.createElement("xs:"+"all");
 		complexType.appendChild(all);
 		
+		Element innerElem = doc.createElement("xs:"+"element");
+		innerElem.setAttribute("name", normalizeRelationName(r));
+		innerElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "Type" );
+		all.appendChild(innerElem);
+		
+		/*
 		for(int i=0;i<r.getColumnCount();i++) {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", r.getColumnNames().get(i));
 			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(i)) );
 			all.appendChild(el);
 		}
+		*/
 		
 		return element;
 	}

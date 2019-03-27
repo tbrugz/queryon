@@ -177,7 +177,13 @@ public class SoapRequest extends RequestSpec {
 	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
 		if(atype.equals(ActionType.INSERT)) {
 			//updateValues
-			NodeList nl = getRequestElement().getChildNodes();
+			String relationTag = getObject();
+			Element relationElem = XmlUtils.getUniqueChild(getRequestElement(), relationTag);
+			if(relationElem==null) {
+				throw new BadRequestException("Element not found: "+relationTag);
+			}
+			
+			NodeList nl = relationElem.getChildNodes();
 			for(int i=0;i<nl.getLength();i++) {
 				Node n = nl.item(i);
 				if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
@@ -243,7 +249,11 @@ public class SoapRequest extends RequestSpec {
 			String tagName = el.getTagName();
 			//log.info("processParams: found parameter '"+tagName+"'");
 			if(Collections.binarySearch(knownTags, tagName)<0) {
-				String tagValue = el.getTextContent();
+				String tagValue = getTextContent(el);
+				if(tagValue==null) {
+					log.info("processParams: won't add '"+tagName+"' with null value");
+					continue;
+				}
 				log.info("processParams: will add '"+tagName+"' - value '"+tagValue+"'");
 				xtraParametersMap.put(tagName,tagValue);
 				if( //(action.atype==ActionType.SELECT || action.atype==ActionType.EXECUTE) &&
@@ -256,6 +266,27 @@ public class SoapRequest extends RequestSpec {
 		for(Map.Entry<String, String> e: positionalValues.entrySet()) {
 			params.add(e.getValue());
 		}
+	}
+	
+	String getTextContent(Element el) {
+		if(el.hasChildNodes()) {
+			if(el.getChildNodes().getLength()==1) {
+				Node child = el.getFirstChild();
+				int type = child.getNodeType();
+				if(type==Node.TEXT_NODE) {
+					return el.getTextContent();
+				}
+				if(type==Node.ELEMENT_NODE) {
+					return getTextContent((Element)child);
+				}
+				log.warn("element '"+el.getTagName()+"' is of type "+type);
+			}
+			else {
+				log.info("element '"+el.getTagName()+"' has "+el.getChildNodes().getLength()+" child nodes");
+				return null;
+			}
+		}
+		return el.getTextContent();
 	}
 	
 	@Override
