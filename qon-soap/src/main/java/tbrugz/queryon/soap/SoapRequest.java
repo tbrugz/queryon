@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.util.Utils;
@@ -45,6 +46,7 @@ public class SoapRequest extends RequestSpec {
 	
 	static final Pattern soapPositionalParamTagPattern = Pattern.compile("parameter([1-9]+[0-9]*)", Pattern.DOTALL);
 	
+	ActionType atype;
 	Map<String, String> xtraParametersMap;
 	
 	//Element requestEl;
@@ -90,9 +92,21 @@ public class SoapRequest extends RequestSpec {
 		if(tagName!=null && tagName.startsWith(nsPrefix)) {
 			tagName = tagName.substring(nsPrefix.length()+1);
 		}
+		
 		if(tagName.endsWith(QonSoapServlet.SUFFIX_REQUEST_ELEMENT)) {
 			tagName = tagName.substring(0, tagName.length()-QonSoapServlet.SUFFIX_REQUEST_ELEMENT.length());
+			atype = ActionType.SELECT;
 		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_INSERT_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_INSERT_ELEMENT.length());
+			atype = ActionType.INSERT;
+		}
+		else {
+			String message = "unknown ActionType for tagName '"+tagName+"'";
+			log.warn(message);
+			throw new BadRequestException(message);
+		}
+		
 		log.info("tagName: "+getRequestElement().getTagName()+" -> "+tagName);
 		return tagName;
 	}
@@ -157,6 +171,23 @@ public class SoapRequest extends RequestSpec {
 		}
 		//log.info("orderCols: "+orderCols);
 		//log.info("orderAscDesc: "+orderAscDesc);
+	}
+	
+	@Override
+	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
+		if(atype.equals(ActionType.INSERT)) {
+			//updateValues
+			NodeList nl = getRequestElement().getChildNodes();
+			for(int i=0;i<nl.getLength();i++) {
+				Node n = nl.item(i);
+				if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
+				Element el = (Element) n;
+				String tag = el.getTagName();
+				String value =  el.getTextContent();
+				log.info("tag: "+tag+" ; value: "+value);
+				updateValues.put(tag, value);
+			}
+		}
 	}
 	
 	@Override

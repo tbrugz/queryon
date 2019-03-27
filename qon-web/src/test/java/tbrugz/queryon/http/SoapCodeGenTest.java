@@ -22,6 +22,7 @@ import org.apache.cxf.tools.wsdlto.WSDLToJava;
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
 import org.bitbucket.tbrugz.queryon.queryonservice.FieldsType;
 import org.bitbucket.tbrugz.queryon.queryonservice.FiltersType;
+import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfPUBLICDEPT;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfQUERYNAMEDPARAMS1;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfQUERYQUERYWITHPOSITIONALPARAMS;
@@ -33,6 +34,7 @@ import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Request;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Type;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSType;
+import org.bitbucket.tbrugz.queryon.queryonservice.UpdateInfoType;
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnServicePortType;
 */
 import org.junit.After;
@@ -277,6 +279,25 @@ public class SoapCodeGenTest {
 					log.info("id="+pd.getID()+" / name="+pd.getNAME());
 				}
 			}
+		}
+	}
+
+	@Test
+	public void callInsert() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			InsertPUBLICEMP ipe = of.createInsertPUBLICEMP();
+			ipe.setID(10);
+			ipe.setDEPARTMENTID(2);
+			ipe.setSUPERVISORID(1);
+			ipe.setNAME("jonas");
+			ipe.setSALARY(10000);
+			
+			UpdateInfoType uit = qonsp.insertPUBLICEMP(ipe);
+			Assert.assertEquals(1, uit.getUpdateCount());
 		}
 	}
 	
