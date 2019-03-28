@@ -39,6 +39,8 @@ import tbrugz.sqldump.util.Utils;
 public class QOnQueries extends AbstractUpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
+
+	public static final String ATTR_QUERIES_WARNINGS_PREFIX = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX;
 	
 	/*static final String PROP_PREFIX = "queryon.qon-queries";
 	
@@ -225,7 +227,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	
 	@SuppressWarnings("unchecked")
 	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
-		String warnKey = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
 		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
 		if(warning==null) {
 			log.warn("warning key '"+warnKey+"' should not be null");
@@ -236,14 +238,14 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	}
 
 	void clearWarnings(ServletContext context, String modelId) {
-		String warnKey = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
 		Map<String, String> warnings = new LinkedHashMap<String, String>();
 		context.setAttribute(warnKey, warnings);
 	}
 	
 	@SuppressWarnings("unchecked")
 	void removeWarning(ServletContext context, String modelId, String schemaName, String queryName) {
-		String warnKey = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
 		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
 		warnings.remove((schemaName!=null?schemaName+".":"") + queryName);
 	}
