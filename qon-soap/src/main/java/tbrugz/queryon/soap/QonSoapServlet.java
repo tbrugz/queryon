@@ -31,6 +31,7 @@ import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
@@ -420,6 +421,8 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", r.getColumnNames().get(i));
 			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(i)) );
+			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		return complexType;
@@ -901,6 +904,11 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		log.debug("writeUpdateCount: "+ count + " " + (count>1?"rows":"row") + " " + action);
 		//log.info("writeUpdateCount::\n"+sb.toString());
+	}
+
+	static boolean hasUniqueKey(Relation r) {
+		Constraint uk = SchemaModelUtils.getPK(r);
+		return uk!=null && uk.getUniqueColumns()!=null;
 	}
 	
 }
