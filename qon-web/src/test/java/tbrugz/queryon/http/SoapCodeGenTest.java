@@ -299,7 +299,7 @@ public class SoapCodeGenTest {
 			pet.setSUPERVISORID(1);
 			pet.setNAME("jonas");
 			pet.setSALARY(10000);
-			ipe.setPUBLICEMP(pet);
+			ipe.setEntity(pet);
 			
 			UpdateInfoType uit = qonsp.insertPUBLICEMP(ipe);
 			Assert.assertEquals(1, uit.getUpdateCount());
@@ -318,11 +318,11 @@ public class SoapCodeGenTest {
 			PUBLICEMPType pet = of.createPUBLICEMPType();
 			pet.setNAME("jonas simpson");
 			pet.setSALARY(10000);
-			upe.setPUBLICEMP(pet);
+			upe.setEntity(pet);
 			
 			PUBLICEMPKeyType kt = of.createPUBLICEMPKeyType();
 			kt.setID(5);
-			upe.setPUBLICEMPKey(kt);
+			upe.setFilterKey(kt);
 			
 			UpdateInfoType uit = qonsp.updatePUBLICEMP(upe);
 			Assert.assertEquals(1, uit.getUpdateCount());

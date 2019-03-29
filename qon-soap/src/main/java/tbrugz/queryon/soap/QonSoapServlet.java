@@ -707,13 +707,13 @@ public class QonSoapServlet extends BaseApiServlet {
 		complexType.appendChild(all);
 		
 		Element innerElem = doc.createElement("xs:"+"element");
-		innerElem.setAttribute("name", normalizeRelationName(r));
+		innerElem.setAttribute("name", "entity");
 		innerElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "Type" );
 		all.appendChild(innerElem);
 		
 		if(addKey) {
 			Element innerKeyElem = doc.createElement("xs:"+"element");
-			innerKeyElem.setAttribute("name", normalizeRelationName(r)+"Key");
+			innerKeyElem.setAttribute("name", "filterKey");
 			innerKeyElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "KeyType" );
 			all.appendChild(innerKeyElem);
 		}

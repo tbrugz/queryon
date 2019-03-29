@@ -40,6 +40,10 @@ public class SoapRequest extends RequestSpec {
 	public static final String TAG_FILTERS = "filters";
 	public static final String TAG_VALUE = "value";
 	public static final String ATTR_DIRECTION = "direction";
+
+	// update tags
+	public static final String TAG_ENTITY = "entity";
+	public static final String TAG_FILTERKEY = "filterKey";
 	
 	public static final String[] KNOWN_TAGS = { TAG_FILTERS, PARAM_FIELDS, PARAM_LIMIT, PARAM_OFFSET, PARAM_DISTINCT, PARAM_ORDER };
 	static final List<String> knownTags = Arrays.asList(KNOWN_TAGS);
@@ -181,10 +185,9 @@ public class SoapRequest extends RequestSpec {
 	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
 		if(atype.equals(ActionType.INSERT) || atype.equals(ActionType.UPDATE)) {
 			//updateValues
-			String relationTag = getObject();
-			Element relationElem = XmlUtils.getUniqueChild(getRequestElement(), relationTag);
+			Element relationElem = XmlUtils.getUniqueChild(getRequestElement(), TAG_ENTITY);
 			if(relationElem==null) {
-				throw new BadRequestException("Element not found: "+relationTag);
+				throw new BadRequestException("Element not found: "+TAG_ENTITY);
 			}
 			
 			NodeList nl = relationElem.getChildNodes();
@@ -200,10 +203,9 @@ public class SoapRequest extends RequestSpec {
 		}
 		
 		if(atype.equals(ActionType.UPDATE)) {
-			String relationKeyTag = getObject()+"Key";
-			Element relationKeyElem = XmlUtils.getUniqueChild(getRequestElement(), relationKeyTag);
+			Element relationKeyElem = XmlUtils.getUniqueChild(getRequestElement(), TAG_FILTERKEY);
 			if(relationKeyElem==null) {
-				throw new BadRequestException("Element not found: "+relationKeyTag);
+				throw new BadRequestException("Element not found: "+TAG_FILTERKEY);
 			}
 			
 			NodeList nl = relationKeyElem.getChildNodes();
