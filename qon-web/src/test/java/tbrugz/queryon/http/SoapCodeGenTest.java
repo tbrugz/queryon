@@ -30,12 +30,14 @@ import org.bitbucket.tbrugz.queryon.queryonservice.MultiValueFilterType;
 import org.bitbucket.tbrugz.queryon.queryonservice.ObjectFactory;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTType;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPKeyType;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPType;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Request;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Type;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSType;
 import org.bitbucket.tbrugz.queryon.queryonservice.UpdateInfoType;
+import org.bitbucket.tbrugz.queryon.queryonservice.UpdatePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnServicePortType;
 */
 import org.junit.After;
@@ -300,6 +302,29 @@ public class SoapCodeGenTest {
 			ipe.setPUBLICEMP(pet);
 			
 			UpdateInfoType uit = qonsp.insertPUBLICEMP(ipe);
+			Assert.assertEquals(1, uit.getUpdateCount());
+		}
+	}
+
+	@Test
+	public void callUpdate() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			UpdatePUBLICEMP upe = of.createUpdatePUBLICEMP();
+			
+			PUBLICEMPType pet = of.createPUBLICEMPType();
+			pet.setNAME("jonas simpson");
+			pet.setSALARY(10000);
+			upe.setPUBLICEMP(pet);
+			
+			PUBLICEMPKeyType kt = of.createPUBLICEMPKeyType();
+			kt.setID(5);
+			upe.setPUBLICEMPKey(kt);
+			
+			UpdateInfoType uit = qonsp.updatePUBLICEMP(upe);
 			Assert.assertEquals(1, uit.getUpdateCount());
 		}
 	}

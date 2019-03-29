@@ -101,6 +101,10 @@ public class SoapRequest extends RequestSpec {
 			tagName = tagName.substring(QonSoapServlet.PREFIX_INSERT_ELEMENT.length());
 			atype = ActionType.INSERT;
 		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_UPDATE_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_UPDATE_ELEMENT.length());
+			atype = ActionType.UPDATE;
+		}
 		else {
 			String message = "unknown ActionType for tagName '"+tagName+"'";
 			log.warn(message);
@@ -175,7 +179,7 @@ public class SoapRequest extends RequestSpec {
 	
 	@Override
 	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
-		if(atype.equals(ActionType.INSERT)) {
+		if(atype.equals(ActionType.INSERT) || atype.equals(ActionType.UPDATE)) {
 			//updateValues
 			String relationTag = getObject();
 			Element relationElem = XmlUtils.getUniqueChild(getRequestElement(), relationTag);
@@ -192,6 +196,25 @@ public class SoapRequest extends RequestSpec {
 				String value =  el.getTextContent();
 				log.info("tag: "+tag+" ; value: "+value);
 				updateValues.put(tag, value);
+			}
+		}
+		
+		if(atype.equals(ActionType.UPDATE)) {
+			String relationKeyTag = getObject()+"Key";
+			Element relationKeyElem = XmlUtils.getUniqueChild(getRequestElement(), relationKeyTag);
+			if(relationKeyElem==null) {
+				throw new BadRequestException("Element not found: "+relationKeyTag);
+			}
+			
+			NodeList nl = relationKeyElem.getChildNodes();
+			for(int i=0;i<nl.getLength();i++) {
+				Node n = nl.item(i);
+				if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
+				Element el = (Element) n;
+				String tag = el.getTagName();
+				String value =  el.getTextContent();
+				log.info("tag [key]: "+tag+" ; value: "+value);
+				keyValues.put(tag, value);
 			}
 		}
 	}

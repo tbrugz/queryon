@@ -289,11 +289,23 @@ public class QonSoapServlet extends BaseApiServlet {
 			}
 			for(Table t: ts) {
 				schema.appendChild(createElementRequest(doc, t));
+				// relation
 				Element entity = createElementType(doc, t);
 				schema.appendChild(entity);
+				// uk
+				// for each table, create <Relation>KeyType to be used by update & delete - could also be returned by insert, update & exec
+				Constraint uk = SchemaModelUtils.getPK(t);
+				boolean hasUk = uk!=null && uk.getUniqueColumns()!=null;
+				if(hasUk) {
+					schema.appendChild(createElementKeyType(doc, t, uk));
+				}
+				// listOfRelation
 				schema.appendChild(createListOfElement(doc, t));
-				
+				// insert/update/delete
 				schema.appendChild(createElementInsert(doc, t));
+				if(hasUk) {
+					schema.appendChild(createElementUpdate(doc, t));
+				}
 				
 				//schemaNames.add(t.getSchemaName());
 				//relationNames.add(t.getQualifiedName());
@@ -325,7 +337,11 @@ public class QonSoapServlet extends BaseApiServlet {
 			// insert
 			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Input", PREFIX_INSERT_ELEMENT + relName ));
 			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Output", "updateInfoType"));
-			//XXX update, delete
+			// update
+			if(hasUniqueKey(t)) {
+				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Input", PREFIX_UPDATE_ELEMENT + relName ));
+				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Output", "updateInfoType"));
+			}
 		}
 
 		// -- PORTTYPE/OPERATIONS --
@@ -340,6 +356,9 @@ public class QonSoapServlet extends BaseApiServlet {
 		for(Table t: ts) {
 			portType.appendChild(createOperation(doc, normalize( t.getQualifiedName() ), "get"));
 			portType.appendChild(createOperation(doc, normalize( t.getQualifiedName() ), "insert", "insert"));
+			if(hasUniqueKey(t)) {
+				portType.appendChild(createOperation(doc, normalizeRelationName(t), "update", "update"));
+			}
 		}
 		
 		definitions.appendChild(portType);
@@ -363,6 +382,9 @@ public class QonSoapServlet extends BaseApiServlet {
 		for(Table t: ts) {
 			binding.appendChild(createBindingOperation(doc, normalize( t.getQualifiedName() ), "get"));
 			binding.appendChild(createBindingOperation(doc, normalize( t.getQualifiedName() ), "insert", "insert"));
+			if(hasUniqueKey(t)) {
+				binding.appendChild(createBindingOperation(doc, normalizeRelationName(t), "update", "update"));
+			}
 		}
 		
 		
@@ -428,6 +450,27 @@ public class QonSoapServlet extends BaseApiServlet {
 		return complexType;
 	}
 
+	Element createElementKeyType(Document doc, Relation r, Constraint uk) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", normalizeRelationName(r) + "KeyType");
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		for(int i=0;i<uk.getUniqueColumns().size();i++) {
+			String ukColName = uk.getUniqueColumns().get(i);
+			int idx = r.getColumnNames().indexOf(ukColName);
+			if(idx==-1) {
+				log.warn("column "+ukColName+" not found in relation "+r.getQualifiedName());
+				continue;
+			}
+			
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", ukColName);
+			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(idx)) );
+			all.appendChild(el);
+		}
+		return complexType;
+	}
+	
 	Element createListOfElement(Document doc, Relation r) {
 		Element listElement = doc.createElement("xs:"+"element");
 		listElement.setAttribute("name", "listOf" + normalize( r.getQualifiedName() ));
@@ -648,8 +691,16 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	Element createElementInsert(Document doc, Relation r) {
+		return createElementUpdateType(doc, PREFIX_INSERT_ELEMENT, r, false);
+	}
+
+	Element createElementUpdate(Document doc, Relation r) {
+		return createElementUpdateType(doc, PREFIX_UPDATE_ELEMENT, r, true);
+	}
+	
+	Element createElementUpdateType(Document doc, String prefix, Relation r, boolean addKey) {
 		Element element = doc.createElement("xs:"+"element");
-		element.setAttribute("name", PREFIX_INSERT_ELEMENT + normalize( r.getQualifiedName() ));
+		element.setAttribute("name", prefix + normalizeRelationName(r));
 		Element complexType = doc.createElement("xs:"+"complexType");
 		element.appendChild(complexType);
 		Element all = doc.createElement("xs:"+"all");
@@ -659,6 +710,13 @@ public class QonSoapServlet extends BaseApiServlet {
 		innerElem.setAttribute("name", normalizeRelationName(r));
 		innerElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "Type" );
 		all.appendChild(innerElem);
+		
+		if(addKey) {
+			Element innerKeyElem = doc.createElement("xs:"+"element");
+			innerKeyElem.setAttribute("name", normalizeRelationName(r)+"Key");
+			innerKeyElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "KeyType" );
+			all.appendChild(innerKeyElem);
+		}
 		
 		/*
 		for(int i=0;i<r.getColumnCount();i++) {
