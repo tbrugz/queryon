@@ -969,7 +969,10 @@ public class QueryOn extends HttpServlet {
 			return getRelationActionType(reqspec.httpMethod);
 		}
 		if(dbobj instanceof ExecutableObject) {
-			//XXX only if POST method?
+			//XXX only if POST method? GET if there are no side-effects? DETERMINISTIC?
+			if(!reqspec.httpMethod.equals(METHOD_POST) && !reqspec.httpMethod.equals(METHOD_GET)) {
+				throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [Executable object]");
+			}
 			return ActionType.EXECUTE;
 		}
 		throw new BadRequestException("unknown object type: "+dbobj.getClass().getName()+" [obj="+dbobj.getName()+"]");

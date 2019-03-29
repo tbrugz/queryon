@@ -973,6 +973,11 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void testExecuteWithPatch() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+		String content = httpPatchContent("/IS_PRIME?p1=3", "", 400);
+	}
+
+	@Test
 	public void testExecuteWithBodyParamIndex() throws IOException, ParserConfigurationException, SAXException, TransformerException {
 		String content = httpPostContent("/IS_PRIME?bodyparamindex=1", "3", 200);
 		Assert.assertEquals("true", content);
