@@ -305,6 +305,7 @@ public class QonSoapServlet extends BaseApiServlet {
 				schema.appendChild(createElementInsert(doc, t));
 				if(hasUk) {
 					schema.appendChild(createElementUpdate(doc, t));
+					schema.appendChild(createElementDelete(doc, t));
 				}
 				
 				//schemaNames.add(t.getSchemaName());
@@ -337,10 +338,13 @@ public class QonSoapServlet extends BaseApiServlet {
 			// insert
 			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Input", PREFIX_INSERT_ELEMENT + relName ));
 			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Output", "updateInfoType"));
-			// update
 			if(hasUniqueKey(t)) {
+				// update
 				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Input", PREFIX_UPDATE_ELEMENT + relName ));
 				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Output", "updateInfoType"));
+				// delete
+				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Input", PREFIX_DELETE_ELEMENT + relName ));
+				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Output", "updateInfoType"));
 			}
 		}
 
@@ -358,6 +362,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			portType.appendChild(createOperation(doc, normalize( t.getQualifiedName() ), "insert", "insert"));
 			if(hasUniqueKey(t)) {
 				portType.appendChild(createOperation(doc, normalizeRelationName(t), "update", "update"));
+				portType.appendChild(createOperation(doc, normalizeRelationName(t), "delete", "delete"));
 			}
 		}
 		
@@ -384,6 +389,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			binding.appendChild(createBindingOperation(doc, normalize( t.getQualifiedName() ), "insert", "insert"));
 			if(hasUniqueKey(t)) {
 				binding.appendChild(createBindingOperation(doc, normalizeRelationName(t), "update", "update"));
+				binding.appendChild(createBindingOperation(doc, normalizeRelationName(t), "delete", "delete"));
 			}
 		}
 		
@@ -691,14 +697,18 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	Element createElementInsert(Document doc, Relation r) {
-		return createElementUpdateType(doc, PREFIX_INSERT_ELEMENT, r, false);
+		return createElementUpdateType(doc, PREFIX_INSERT_ELEMENT, r, true, false);
 	}
 
 	Element createElementUpdate(Document doc, Relation r) {
-		return createElementUpdateType(doc, PREFIX_UPDATE_ELEMENT, r, true);
+		return createElementUpdateType(doc, PREFIX_UPDATE_ELEMENT, r, true, true);
 	}
 	
-	Element createElementUpdateType(Document doc, String prefix, Relation r, boolean addKey) {
+	Element createElementDelete(Document doc, Relation r) {
+		return createElementUpdateType(doc, PREFIX_DELETE_ELEMENT, r, false, true);
+	}
+	
+	Element createElementUpdateType(Document doc, String prefix, Relation r, boolean addEntity, boolean addKey) {
 		Element element = doc.createElement("xs:"+"element");
 		element.setAttribute("name", prefix + normalizeRelationName(r));
 		Element complexType = doc.createElement("xs:"+"complexType");
@@ -706,10 +716,12 @@ public class QonSoapServlet extends BaseApiServlet {
 		Element all = doc.createElement("xs:"+"all");
 		complexType.appendChild(all);
 		
-		Element innerElem = doc.createElement("xs:"+"element");
-		innerElem.setAttribute("name", "entity");
-		innerElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "Type" );
-		all.appendChild(innerElem);
+		if(addEntity) {
+			Element innerElem = doc.createElement("xs:"+"element");
+			innerElem.setAttribute("name", "entity");
+			innerElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "Type" );
+			all.appendChild(innerElem);
+		}
 		
 		if(addKey) {
 			Element innerKeyElem = doc.createElement("xs:"+"element");

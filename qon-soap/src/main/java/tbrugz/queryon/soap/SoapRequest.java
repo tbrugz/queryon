@@ -109,6 +109,10 @@ public class SoapRequest extends RequestSpec {
 			tagName = tagName.substring(QonSoapServlet.PREFIX_UPDATE_ELEMENT.length());
 			atype = ActionType.UPDATE;
 		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_DELETE_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_DELETE_ELEMENT.length());
+			atype = ActionType.DELETE;
+		}
 		else {
 			String message = "unknown ActionType for tagName '"+tagName+"'";
 			log.warn(message);
@@ -202,7 +206,7 @@ public class SoapRequest extends RequestSpec {
 			}
 		}
 		
-		if(atype.equals(ActionType.UPDATE)) {
+		if(atype.equals(ActionType.UPDATE) || atype.equals(ActionType.DELETE)) {
 			Element relationKeyElem = XmlUtils.getUniqueChild(getRequestElement(), TAG_FILTERKEY);
 			if(relationKeyElem==null) {
 				throw new BadRequestException("Element not found: "+TAG_FILTERKEY);

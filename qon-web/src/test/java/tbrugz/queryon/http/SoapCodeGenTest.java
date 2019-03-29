@@ -20,6 +20,7 @@ import org.apache.cxf.tools.common.ToolContext;
 import org.apache.cxf.tools.wsdlto.WSDLToJava;
 /*
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
+import org.bitbucket.tbrugz.queryon.queryonservice.DeletePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice.FieldsType;
 import org.bitbucket.tbrugz.queryon.queryonservice.FiltersType;
 import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICEMP;
@@ -325,6 +326,24 @@ public class SoapCodeGenTest {
 			upe.setFilterKey(kt);
 			
 			UpdateInfoType uit = qonsp.updatePUBLICEMP(upe);
+			Assert.assertEquals(1, uit.getUpdateCount());
+		}
+	}
+
+	@Test
+	public void callDelete() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			DeletePUBLICEMP dpe = of.createDeletePUBLICEMP();
+			
+			PUBLICEMPKeyType kt = of.createPUBLICEMPKeyType();
+			kt.setID(5);
+			dpe.setFilterKey(kt);
+			
+			UpdateInfoType uit = qonsp.deletePUBLICEMP(dpe);
 			Assert.assertEquals(1, uit.getUpdateCount());
 		}
 	}
