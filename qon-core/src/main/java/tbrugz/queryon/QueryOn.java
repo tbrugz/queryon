@@ -1587,7 +1587,7 @@ public class QueryOn extends HttpServlet {
 				ResultSet generatedKeys = stmt.getGeneratedKeys();
 				if(generatedKeys!=null && generatedKeys.next()) {
 					List<String> colVals = getGeneratedKeys(generatedKeys);
-					resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
+					setGeneratedKeys(reqspec, resp, colVals);
 				}
 			}
 			catch(SQLException e) {
@@ -2243,13 +2243,7 @@ public class QueryOn extends HttpServlet {
 		ResultSet generatedKeys = st.getGeneratedKeys();
 		if (generatedKeys.next()) {
 			List<String> colVals = getGeneratedKeys(generatedKeys);
-			/*int colCount = generatedKeys.getMetaData().getColumnCount();
-			List<String> colVals = new ArrayList<String>();
-			for(int i=0;i<colCount;i++) {
-				colVals.add(generatedKeys.getString(i+1));
-			}*/
-			resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
-			//log.info("generatedKeys[pk="+Arrays.toString(pkcols)+";#="+colCount+"]: "+ Utils.join(colVals, ", "));
+			setGeneratedKeys(reqspec, resp, colVals);
 		}
 		
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
@@ -2290,6 +2284,10 @@ public class QueryOn extends HttpServlet {
 	
 	protected void setContentType(HttpServletResponse resp, String type) {
 		resp.setContentType(type);
+	}
+	
+	protected void setGeneratedKeys(RequestSpec reqspec, HttpServletResponse resp, List<String> generatedKey) {
+		resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(generatedKey, ", "));
 	}
 	
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {

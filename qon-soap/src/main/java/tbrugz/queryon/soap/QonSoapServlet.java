@@ -31,6 +31,7 @@ import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -1000,6 +1001,21 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	@Override
+	protected void setGeneratedKeys(RequestSpec reqspec, HttpServletResponse resp, List<String> generatedKey) {
+		reqspec.setAttribute(RequestSpec.ATTR_GENERATED_KEYS, generatedKey);
+	}
+	
+	protected List<String> getGeneratedKeys(RequestSpec reqspec) {
+		Object gk = reqspec.getAttribute(RequestSpec.ATTR_GENERATED_KEYS);
+		if(gk!=null) {
+			@SuppressWarnings("unchecked")
+			List<String> generatedKey = (List<String>) gk;
+			return generatedKey;
+		}
+		return null;
+	}
+	
+	@Override
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
 		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
@@ -1009,7 +1025,15 @@ public class QonSoapServlet extends BaseApiServlet {
 		sb.append(SoapDumpSyntax.getSoapHeader(envPrefix));
 		
 		sb.append("<"+qonPrefix+":"+"updateInfo"+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
-		//XXX generatedKey...
+		// generatedKey...
+		List<String> generatedKey = getGeneratedKeys(reqspec);
+		if(generatedKey!=null) {
+			sb.append("<generatedKey>");
+			for(String v: generatedKey) {
+				sb.append("<value>"+DataDumpUtils.xmlEscapeText(v)+"</value>\n");
+			}
+			sb.append("</generatedKey>\n");
+		}
 		sb.append("<updateCount>"+count+"</updateCount>\n");
 		sb.append("</"+qonPrefix+":"+"updateInfo"+">\n");
 		

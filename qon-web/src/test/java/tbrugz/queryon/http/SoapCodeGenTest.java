@@ -21,10 +21,12 @@ import org.apache.cxf.tools.wsdlto.WSDLToJava;
 /*
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
 import org.bitbucket.tbrugz.queryon.queryonservice.DeletePUBLICEMP;
+import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICINSERTTASK;
 import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICISPRIME;
 import org.bitbucket.tbrugz.queryon.queryonservice.FieldsType;
 import org.bitbucket.tbrugz.queryon.queryonservice.FiltersType;
 import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICEMP;
+import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICTASK;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfPUBLICDEPT;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfQUERYNAMEDPARAMS1;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfQUERYQUERYWITHPOSITIONALPARAMS;
@@ -34,6 +36,7 @@ import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTType;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPKeyType;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPType;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICTASKType;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Request;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Type;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSRequest;
@@ -309,6 +312,38 @@ public class SoapCodeGenTest {
 	}
 
 	@Test
+	public void callInsertTasks() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			
+			{
+				InsertPUBLICTASK ipt = of.createInsertPUBLICTASK();
+				PUBLICTASKType ptt = of.createPUBLICTASKType();
+				ptt.setSUBJECT("subject 1");
+				ptt.setDESCRIPTION("desc 1");
+				ipt.setEntity(ptt);
+				UpdateInfoType uit = qonsp.insertPUBLICTASK(ipt);
+				Assert.assertEquals(1, uit.getUpdateCount());
+				Assert.assertEquals("1", uit.getGeneratedKey().getValue());
+			}
+
+			{
+				InsertPUBLICTASK ipt = of.createInsertPUBLICTASK();
+				PUBLICTASKType ptt = of.createPUBLICTASKType();
+				ptt.setSUBJECT("subject 2");
+				ptt.setDESCRIPTION("desc 2");
+				ipt.setEntity(ptt);
+				UpdateInfoType uit = qonsp.insertPUBLICTASK(ipt);
+				Assert.assertEquals(1, uit.getUpdateCount());
+				Assert.assertEquals("2", uit.getGeneratedKey().getValue());
+			}
+		}
+	}
+
+	@Test
 	public void callUpdate() throws IOException, XMLStreamException, SAXException {
 		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
 		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
@@ -361,6 +396,23 @@ public class SoapCodeGenTest {
 			
 			UpdateInfoType uit = qonsp.executePUBLICISPRIME(eip);
 			Assert.assertEquals(0, uit.getUpdateCount());
+		}
+	}
+
+	@Test
+	public void callExecuteWithUpdateCount() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			ExecutePUBLICINSERTTASK obj = of.createExecutePUBLICINSERTTASK();
+			obj.setParameter1("subject 1");
+			obj.setParameter2("description 1");
+			
+			UpdateInfoType uit = qonsp.executePUBLICINSERTTASK(obj);
+			Assert.assertEquals(1, uit.getUpdateCount());
+			//Assert.assertEquals("1", uit.getGeneratedKey().getValue()); //?
 		}
 	}
 	
