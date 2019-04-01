@@ -33,6 +33,8 @@ import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -55,6 +57,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	public static final String PREFIX_INSERT_ELEMENT = "insert";
 	public static final String PREFIX_UPDATE_ELEMENT = "update";
 	public static final String PREFIX_DELETE_ELEMENT = "delete";
+	public static final String PREFIX_EXECUTE_ELEMENT = "execute";
 
 	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
 	
@@ -118,7 +121,7 @@ public class QonSoapServlet extends BaseApiServlet {
 				Document doc = dBuilder.parse(req.getInputStream());
 				log.debug("doc: "+doc);
 				
-				//StringWriter sw = new StringWriter();
+				//java.io.StringWriter sw = new java.io.StringWriter();
 				//ODataServlet.serialize(dBuilder.getDOMImplementation(), doc, sw);
 				//log.info("xml::\n"+sw);
 				
@@ -265,6 +268,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		Set<View> vs = model.getViews();
 		Set<Table> ts = model.getTables();
+		Set<ExecutableObject> eos = model.getExecutables();
 		
 		// -- TYPES --
 		
@@ -274,7 +278,6 @@ public class QonSoapServlet extends BaseApiServlet {
 			schema.appendChild(createFieldWithDirectionType(doc));
 			schema.appendChild(createOrderType(doc));
 			createFiltersTypes(doc, schema);
-			//XXX: add generic types
 			// generic insert/update/delete types
 			schema.appendChild(createGeneratedKeyType(doc));
 			schema.appendChild(createUpdateInfoType(doc));
@@ -312,13 +315,9 @@ public class QonSoapServlet extends BaseApiServlet {
 				//relationNames.add(t.getQualifiedName());
 			}
 			
-			/*Set<ExecutableObject> eos = model.getExecutables();
 			for(ExecutableObject eo: eos) {
-				Element action = createAction(doc, eo);
-				schema.appendChild(action);
-				Element actionImport = createActionImport(doc, eo);
-				schema.appendChild(actionImport);
-			}*/
+				schema.appendChild(createExecutableElementRequest(doc, eo));
+			}
 		}
 
 		definitions.appendChild(types);
@@ -347,6 +346,11 @@ public class QonSoapServlet extends BaseApiServlet {
 				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Output", "updateInfoType"));
 			}
 		}
+		for(ExecutableObject eo: eos) {
+			String eoName = normalizeExecutableName(eo);
+			definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Input", PREFIX_EXECUTE_ELEMENT + eoName));
+			definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", "updateInfoType")); //TODO - return + outParams
+		}
 
 		// -- PORTTYPE/OPERATIONS --
 
@@ -364,6 +368,9 @@ public class QonSoapServlet extends BaseApiServlet {
 				portType.appendChild(createOperation(doc, normalizeRelationName(t), "update", "update"));
 				portType.appendChild(createOperation(doc, normalizeRelationName(t), "delete", "delete"));
 			}
+		}
+		for(ExecutableObject eo: eos) {
+			portType.appendChild(createOperation(doc, normalizeExecutableName(eo), "execute", "execute"));
 		}
 		
 		definitions.appendChild(portType);
@@ -392,7 +399,9 @@ public class QonSoapServlet extends BaseApiServlet {
 				binding.appendChild(createBindingOperation(doc, normalizeRelationName(t), "delete", "delete"));
 			}
 		}
-		
+		for(ExecutableObject eo: eos) {
+			binding.appendChild(createBindingOperation(doc, normalizeExecutableName(eo), "execute", "execute"));
+		}
 		
 		definitions.appendChild(binding);
 		}
@@ -598,6 +607,33 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("minOccurs", "0");
 			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
+		}
+		return element;
+	}
+	
+	Element createExecutableElementRequest(Document doc, ExecutableObject eo) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo));
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		List<ExecutableParameter> eps = eo.getParams();
+		for(int i=0;i<eps.size();i++) {
+			ExecutableParameter ep = eps.get(i);
+			if(SchemaModelUtils.isInParameter(ep)) {
+				Element el = doc.createElement("xs:"+"element");
+				String pname = "parameter"+(i+1);
+				//XXX: allow named-parameters - QueryOn servlet refactoring needed...
+				/*String pname = ep.getName();
+				if(pname==null) {
+					pname = "p"+(i+1);
+				}*/
+				el.setAttribute("name", pname);
+				el.setAttribute("type", "xs:" + getElementType(ep.getDataType()) );
+				all.appendChild(el);
+			}
 		}
 		return element;
 	}
@@ -914,6 +950,10 @@ public class QonSoapServlet extends BaseApiServlet {
 		return normalize( r.getQualifiedName() );
 	}
 	
+	static String normalizeExecutableName(ExecutableObject eo) {
+		return normalize( eo.getQualifiedName() );
+	}
+	
 	static String normalize(String s) {
 		return s.replaceAll(" ", "_");
 		//return s.replaceAll("\\.", "_");
@@ -956,6 +996,10 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	@Override
+	protected void setContentType(HttpServletResponse resp, String type) {
+	}
+	
+	@Override
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
 		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
@@ -974,6 +1018,17 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		log.debug("writeUpdateCount: "+ count + " " + (count>1?"rows":"row") + " " + action);
 		//log.info("writeUpdateCount::\n"+sb.toString());
+	}
+	
+	@Override
+	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+		int updatecount = 0; 
+		String updateCountStr = resp.getHeader(ResponseSpec.HEADER_UPDATECOUNT);
+		if(updateCountStr!=null) {
+			updatecount = Integer.parseInt(updateCountStr);
+		}
+		
+		writeUpdateCount(reqspec, resp, updatecount, "updated (in execute)");
 	}
 
 	static boolean hasUniqueKey(Relation r) {

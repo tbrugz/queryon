@@ -1667,7 +1667,7 @@ public class QueryOn extends HttpServlet {
 				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
 			}
 			else {
-				resp.setContentType(MIME_TEXT);
+				setContentType(resp, MIME_TEXT);
 				if(retObject instanceof Clob) {
 					Clob cret = (Clob) retObject;
 					//retObject = cret.getSubString(0L, (int) cret.length());
@@ -1677,7 +1677,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 		else {
-			resp.setContentType(MIME_TEXT);
+			setContentType(resp, MIME_TEXT);
 			if(outParamCount==0) {
 				//XXX reqspec.getExecuteWithNoReturnSucessStatus(); //?
 				writeExecuteOutput(reqspec, resp, "execution successful - no return");
@@ -2286,6 +2286,10 @@ public class QueryOn extends HttpServlet {
 	
 	protected void setResponseStatus(HttpServletResponse resp, int status) {
 		resp.setStatus(status);
+	}
+	
+	protected void setContentType(HttpServletResponse resp, String type) {
+		resp.setContentType(type);
 	}
 	
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {

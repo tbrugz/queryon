@@ -21,6 +21,7 @@ import org.apache.cxf.tools.wsdlto.WSDLToJava;
 /*
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
 import org.bitbucket.tbrugz.queryon.queryonservice.DeletePUBLICEMP;
+import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICISPRIME;
 import org.bitbucket.tbrugz.queryon.queryonservice.FieldsType;
 import org.bitbucket.tbrugz.queryon.queryonservice.FiltersType;
 import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICEMP;
@@ -347,6 +348,32 @@ public class SoapCodeGenTest {
 			Assert.assertEquals(1, uit.getUpdateCount());
 		}
 	}
+
+	@Test
+	public void callExecute() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			ExecutePUBLICISPRIME eip = of.createExecutePUBLICISPRIME();
+			eip.setParameter1(3);
+			
+			UpdateInfoType uit = qonsp.executePUBLICISPRIME(eip);
+			Assert.assertEquals(0, uit.getUpdateCount());
+		}
+	}
+	
+	//@Test
+	//public void callXXX() throws IOException, XMLStreamException, SAXException {
+	//	QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+	//	QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+	//	
+	//	{
+	//		ObjectFactory of = new ObjectFactory();
+	//		XXXXX obj = of.create...
+	//	}
+	//}
 	
 	*/
 }

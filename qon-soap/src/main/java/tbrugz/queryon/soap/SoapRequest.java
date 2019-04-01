@@ -113,6 +113,10 @@ public class SoapRequest extends RequestSpec {
 			tagName = tagName.substring(QonSoapServlet.PREFIX_DELETE_ELEMENT.length());
 			atype = ActionType.DELETE;
 		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_EXECUTE_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_EXECUTE_ELEMENT.length());
+			atype = ActionType.EXECUTE;
+		}
 		else {
 			String message = "unknown ActionType for tagName '"+tagName+"'";
 			log.warn(message);
@@ -223,6 +227,10 @@ public class SoapRequest extends RequestSpec {
 				keyValues.put(tag, value);
 			}
 		}
+
+		if(atype.equals(ActionType.EXECUTE)) {
+			log.info("EXECUTE:: params: "+params+" ; xtraParametersMap: "+xtraParametersMap);
+		}
 	}
 	
 	@Override
@@ -268,6 +276,7 @@ public class SoapRequest extends RequestSpec {
 	
 	@Override
 	protected void processParams(List<String> parts) {
+		//XXX move this code to processBody?
 		xtraParametersMap = new HashMap<>();
 		Map<String, String> positionalValues = new TreeMap<>();
 		NodeList nl = getRequestElement().getChildNodes();
