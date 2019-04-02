@@ -23,6 +23,7 @@ import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
 import org.bitbucket.tbrugz.queryon.queryonservice.DeletePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICINSERTTASK;
 import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICISPRIME;
+import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICISPRIMEReturn;
 import org.bitbucket.tbrugz.queryon.queryonservice.FieldsType;
 import org.bitbucket.tbrugz.queryon.queryonservice.FiltersType;
 import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICEMP;
@@ -394,8 +395,11 @@ public class SoapCodeGenTest {
 			ExecutePUBLICISPRIME eip = of.createExecutePUBLICISPRIME();
 			eip.setParameter1(3);
 			
-			UpdateInfoType uit = qonsp.executePUBLICISPRIME(eip);
+			ExecutePUBLICISPRIMEReturn er = qonsp.executePUBLICISPRIME(eip);
+			UpdateInfoType uit = er.getUpdateInfo();
 			Assert.assertEquals(0, uit.getUpdateCount());
+			
+			Assert.assertEquals(true, er.isReturn());
 		}
 	}
 

@@ -259,6 +259,15 @@ public class SchemaModelUtils {
 		}
 		return ret;
 	}
+
+	public static int getNumberOfOutParameters(List<ExecutableParameter> list) {
+		if(list==null) { return 0; }
+		int ret = 0;
+		for(ExecutableParameter ep: list) {
+			ret += isOutParameter(ep) ? 1 : 0;
+		}
+		return ret;
+	}
 	
 	public static boolean isInParameter(ExecutableParameter ep) {
 		return (ep.getInout()==null || ep.getInout()==ExecutableParameter.INOUT.IN || ep.getInout()==ExecutableParameter.INOUT.INOUT);

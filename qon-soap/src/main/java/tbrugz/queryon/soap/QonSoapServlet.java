@@ -3,6 +3,8 @@ package tbrugz.queryon.soap;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -210,7 +212,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			log.info("request: "+ ((SoapRequest)reqspec).toStringDebug());
 		}
 		else {
-			log.info("request should be instanceof SoapRequest: "+ reqspec.getClass());
+			log.warn("request should be instanceof SoapRequest: "+ reqspec.getClass());
 		}
 	}
 	
@@ -282,6 +284,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			// generic insert/update/delete types
 			schema.appendChild(createGeneratedKeyType(doc));
 			schema.appendChild(createUpdateInfoType(doc));
+			schema.appendChild(createUpdateInfoElement(doc));
 			
 			for(View v: vs) {
 				schema.appendChild(createElementRequest(doc, v));
@@ -318,6 +321,9 @@ public class QonSoapServlet extends BaseApiServlet {
 			
 			for(ExecutableObject eo: eos) {
 				schema.appendChild(createExecutableElementRequest(doc, eo));
+				if(executableReturnsValues(eo)) {
+					schema.appendChild(createExecutableElementResponse(doc, eo));
+				}
 			}
 		}
 
@@ -337,20 +343,25 @@ public class QonSoapServlet extends BaseApiServlet {
 
 			// insert
 			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Input", PREFIX_INSERT_ELEMENT + relName ));
-			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Output", "updateInfoType"));
+			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Output", "updateInfo"));
 			if(hasUniqueKey(t)) {
 				// update
 				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Input", PREFIX_UPDATE_ELEMENT + relName ));
-				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Output", "updateInfoType"));
+				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Output", "updateInfo"));
 				// delete
 				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Input", PREFIX_DELETE_ELEMENT + relName ));
-				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Output", "updateInfoType"));
+				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Output", "updateInfo"));
 			}
 		}
 		for(ExecutableObject eo: eos) {
 			String eoName = normalizeExecutableName(eo);
 			definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Input", PREFIX_EXECUTE_ELEMENT + eoName));
-			definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", "updateInfoType")); //TODO - return + outParams
+			if(executableReturnsValues(eo)) {
+				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", PREFIX_EXECUTE_ELEMENT + eoName + "Return"));
+			}
+			else {
+				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", "updateInfo")); //TODOne - return + outParams
+			}
 		}
 
 		// -- PORTTYPE/OPERATIONS --
@@ -636,7 +647,55 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		return element;
 	}
+	
+	boolean executableReturnsValues(ExecutableObject eo) {
+		if(eo.getReturnParam()!=null) { return true; }
+		return SchemaModelUtils.getNumberOfOutParameters(eo.getParams()) > 0;
+	}
 
+	Element createExecutableElementResponse(Document doc, ExecutableObject eo) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return");
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		ExecutableParameter rp = eo.getReturnParam();
+		if(rp!=null) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "return");
+			el.setAttribute("type", "xs:" + getElementType(rp.getDataType()) );
+			all.appendChild(el);
+		}
+		
+		List<ExecutableParameter> eps = eo.getParams();
+		for(int i=0;i<eps.size();i++) {
+			ExecutableParameter ep = eps.get(i);
+			if(SchemaModelUtils.isOutParameter(ep)) {
+				Element el = doc.createElement("xs:"+"element");
+				String pname = "parameter"+(i+1);
+				//XXX: allow named-parameters - QueryOn servlet refactoring needed...
+				/*String pname = ep.getName();
+				if(pname==null) {
+					pname = "p"+(i+1);
+				}*/
+				el.setAttribute("name", pname);
+				el.setAttribute("type", "xs:" + getElementType(ep.getDataType()) );
+				all.appendChild(el);
+			}
+		}
+
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "updateInfo");
+			el.setAttribute("type", "xsd1:" + "updateInfoType" );
+			all.appendChild(el);
+		}
+		
+		return element;
+	}
+	
 	Element createFieldsType(Document doc) {
 		Element complexType = doc.createElement("xs:"+"complexType");
 		complexType.setAttribute("name", "fieldsType");
@@ -704,11 +763,8 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 
 	Element createUpdateInfoType(Document doc) {
-		Element infoElement = doc.createElement("xs:"+"element");
-		infoElement.setAttribute("name", "updateInfoType");
-		
 		Element complexType = doc.createElement("xs:"+"complexType");
-		infoElement.appendChild(complexType);
+		complexType.setAttribute("name", "updateInfoType");
 		
 		Element all = doc.createElement("xs:"+"all");
 		complexType.appendChild(all);
@@ -723,12 +779,18 @@ public class QonSoapServlet extends BaseApiServlet {
 		{
 			Element element = doc.createElement("xs:"+"element");
 			element.setAttribute("name", "updateCount");
-			//element.setAttribute("type", "xsd1:" + "updateCountType" );
 			element.setAttribute("type", "xs:" + "int" );
 			element.setAttribute("maxOccurs", "1");
 			all.appendChild(element);
 		}
 		
+		return complexType;
+	}
+
+	Element createUpdateInfoElement(Document doc) {
+		Element infoElement = doc.createElement("xs:"+"element");
+		infoElement.setAttribute("name", "updateInfo");
+		infoElement.setAttribute("type", "xsd1:" + "updateInfoType" );
 		return infoElement;
 	}
 	
@@ -1023,7 +1085,23 @@ public class QonSoapServlet extends BaseApiServlet {
 		StringBuilder sb = new StringBuilder();
 		sb.append(SoapDumpSyntax.getSoapHeader(envPrefix));
 		
-		sb.append("<"+qonPrefix+":"+"updateInfo"+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
+		appendUpdateInfo(sb, qonPrefix, reqspec, count, true);
+		
+		sb.append(SoapDumpSyntax.getSoapFooter(envPrefix));
+		resp.getWriter().write(sb.toString());
+		
+		log.debug("writeUpdateCount: "+ count + " " + (count>1?"rows":"row") + " " + action);
+		//log.info("writeUpdateCount::\n"+sb.toString());
+	}
+	
+	protected void appendUpdateInfo(StringBuilder sb, String qonPrefix, RequestSpec reqspec, int count, boolean addNS) {
+		if(addNS) {
+			sb.append("<"+qonPrefix+":"+"updateInfo"+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
+		}
+		else {
+			sb.append("<updateInfo>\n");
+		}
+		
 		// generatedKey...
 		List<String> generatedKey = getGeneratedKeys(reqspec);
 		if(generatedKey!=null) {
@@ -1034,13 +1112,13 @@ public class QonSoapServlet extends BaseApiServlet {
 			sb.append("</generatedKey>\n");
 		}
 		sb.append("<updateCount>"+count+"</updateCount>\n");
-		sb.append("</"+qonPrefix+":"+"updateInfo"+">\n");
 		
-		sb.append(SoapDumpSyntax.getSoapFooter(envPrefix));
-		resp.getWriter().write(sb.toString());
-		
-		log.debug("writeUpdateCount: "+ count + " " + (count>1?"rows":"row") + " " + action);
-		//log.info("writeUpdateCount::\n"+sb.toString());
+		if(addNS) {
+			sb.append("</"+qonPrefix+":"+"updateInfo"+">\n");
+		}
+		else {
+			sb.append("</updateInfo"+">\n");
+		}
 	}
 	
 	@Override
@@ -1051,12 +1129,64 @@ public class QonSoapServlet extends BaseApiServlet {
 			updatecount = Integer.parseInt(updateCountStr);
 		}
 		
-		writeUpdateCount(reqspec, resp, updatecount, "updated (in execute)");
+		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
+		String qonPrefix = "ns1";
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(SoapDumpSyntax.getSoapHeader(envPrefix));
+
+		String execReturnElemName = PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return";
+		
+		if(executableReturnsValues(eo)) {
+			sb.append("<"+qonPrefix+":"+execReturnElemName+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
+			ExecutableParameter ep = eo.getReturnParam();
+			if(ep!=null) {
+				sb.append("<return>");
+				Object o = getNextReturnObject(reqspec);
+				if(o!=null) {
+					sb.append(o);
+				}
+				sb.append("</return>"+"\n");
+			}
+			// TODO add outParams 
+		}
+		
+		appendUpdateInfo(sb, qonPrefix, reqspec, updatecount, false);
+
+		if(executableReturnsValues(eo)) {
+			sb.append("</"+qonPrefix+":"+execReturnElemName+">\n");
+		}
+		
+		sb.append(SoapDumpSyntax.getSoapFooter(envPrefix));
+		resp.getWriter().write(sb.toString());
+
+		log.debug("writeExecuteOutput: "+ updatecount + " " + (updatecount>1?"rows":"row") + " " + "updated (in execute)");
+		//log.info("writeExecuteOutput::\n"+sb.toString());
+	}
+	
+	@Override
+	protected void writeExecuteResultSetOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, ResultSet value)
+			throws IOException, SQLException {
+		writeExecuteOutput(reqspec, eo, resp, null);
+	}
+	
+	Object getNextReturnObject(RequestSpec reqspec) {
+		List<Object> ol = getReturnList(reqspec);
+		if(ol.size()>0) {
+			return ol.remove(0);
+		}
+		return null;
 	}
 
 	static boolean hasUniqueKey(Relation r) {
 		Constraint uk = SchemaModelUtils.getPK(r);
 		return uk!=null && uk.getUniqueColumns()!=null;
+	}
+	
+	@Override
+	protected boolean allowMultipleReturnObjects() {
+		return true;
 	}
 	
 }
