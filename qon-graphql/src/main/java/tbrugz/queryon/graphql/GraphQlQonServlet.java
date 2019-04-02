@@ -285,7 +285,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 
 	@Override
-	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
 		if(reqspec instanceof GqlRequest) {
 			GqlRequest req = (GqlRequest) reqspec;
 			req.executeOutput = value;

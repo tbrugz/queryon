@@ -1045,7 +1045,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	@Override
-	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
 		int updatecount = 0; 
 		String updateCountStr = resp.getHeader(ResponseSpec.HEADER_UPDATECOUNT);
 		if(updateCountStr!=null) {

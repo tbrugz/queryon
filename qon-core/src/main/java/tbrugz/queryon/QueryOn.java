@@ -1635,12 +1635,15 @@ public class QueryOn extends HttpServlet {
 		boolean gotReturn = false;
 		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
 			retObject = stmt.getObject(1);
+			pushReturnObject(reqspec, retObject);
 			gotReturn = true;
 		}
 		if(hasResultSet && !gotReturn) {
 			retObject = stmt.getResultSet();
+			pushReturnObject(reqspec, retObject);
 			gotReturn = true;
 		}
+		final boolean readJust1stOutParam = allowMultipleReturnObjects();
 		boolean warnedManyOutParams = false;
 		for(int i=0;i<pc;i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
@@ -1651,20 +1654,20 @@ public class QueryOn extends HttpServlet {
 						resp.addHeader(ResponseSpec.HEADER_WARNING, "Execute-TooManyReturnParams ReturnCount="+outParamCount);
 						warnedManyOutParams = true;
 					}
-					break; //got first result
+					if(readJust1stOutParam) { break; }
+					//break; //got first result
 					//log.info("ret["+i+";"+(i+paramOffset)+"]: "+stmt.getObject(i+paramOffset));
 				}
-				else {
-					retObject = stmt.getObject(i+paramOffset);
-					gotReturn = true;
-				}
+				retObject = stmt.getObject(i+paramOffset);
+				pushReturnObject(reqspec, retObject);
+				gotReturn = true;
 			}
 		}
 		resp.addHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, String.valueOf(outParamCount));
 		
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
-				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
+				writeExecuteResultSetOutput(reqspec, eo, resp, (ResultSet)retObject);
 			}
 			else {
 				setContentType(resp, MIME_TEXT);
@@ -1673,17 +1676,17 @@ public class QueryOn extends HttpServlet {
 					//retObject = cret.getSubString(0L, (int) cret.length());
 					retObject = IOUtil.readFromReader(cret.getCharacterStream());
 				}
-				writeExecuteOutput(reqspec, resp, retObject.toString());
+				writeExecuteOutput(reqspec, eo, resp, retObject.toString());
 			}
 		}
 		else {
 			setContentType(resp, MIME_TEXT);
 			if(outParamCount==0) {
 				//XXX reqspec.getExecuteWithNoReturnSucessStatus(); //?
-				writeExecuteOutput(reqspec, resp, "execution successful - no return");
+				writeExecuteOutput(reqspec, eo, resp, "execution successful - no return");
 			}
 			else {
-				writeExecuteOutput(reqspec, resp, "execution successful - null return");
+				writeExecuteOutput(reqspec, eo, resp, "execution successful - null return");
 			}
 		}
 
@@ -1696,6 +1699,28 @@ public class QueryOn extends HttpServlet {
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	protected boolean allowMultipleReturnObjects() {
+		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected List<Object> getReturnList(RequestSpec reqspec) {
+		List<Object> retlist = null;
+		Object rl = reqspec.getAttribute(RequestSpec.ATTR_RETURN_LIST);
+		if(rl==null) {
+			retlist = new ArrayList<Object>();
+			reqspec.setAttribute(RequestSpec.ATTR_RETURN_LIST, retlist);
+		}
+		else {
+			retlist = (List<Object>) rl;
+		}
+		return retlist;
+	}
+	
+	protected void pushReturnObject(RequestSpec reqspec, Object o) {
+		getReturnList(reqspec).add(o);
 	}
 	
 	void setStatementParameter(PreparedStatement stmt, int pos, Object o) throws SQLException, IOException {
@@ -2295,8 +2320,12 @@ public class QueryOn extends HttpServlet {
 		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
 	}
 
-	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
 		resp.getWriter().write(value);
+	}
+
+	protected void writeExecuteResultSetOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, ResultSet value) throws IOException, SQLException {
+		dumpResultSet(value, reqspec, null, reqspec.object, null, null, null, true, resp);
 	}
 	
 	void addPartParameter(RequestSpec reqspec, SQL sql, String ctype, String col, int colindex) throws IOException {
