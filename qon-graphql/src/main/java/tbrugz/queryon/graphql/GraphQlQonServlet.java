@@ -84,6 +84,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		Map<String, Object> executionSpecResult = executionResult.toSpecification();
 		Gson gson = new GsonBuilder().create();
 		resp.getWriter().write(gson.toJson(executionSpecResult));
+		//XXX: add xml-output option?
 		//writeResult(exec, executionResult, resp);
 	}
 	

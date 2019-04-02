@@ -184,7 +184,7 @@ public class SoapCodeGenTest {
 			r.setLimit(2);
 			r.setOffset(1);
 			FieldsType ft = new FieldsType();
-			ft.setField("NAME");
+			ft.getField().add("NAME");
 			r.setFields(ft);
 			ListOfPUBLICDEPT lopd = qonsp.getPUBLICDEPT(r);
 			log.info(">>> test1");

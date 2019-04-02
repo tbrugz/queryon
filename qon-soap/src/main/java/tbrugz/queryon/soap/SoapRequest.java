@@ -78,7 +78,7 @@ public class SoapRequest extends RequestSpec {
 	
 	@Override
 	protected String getMethod(HttpServletRequest req) {
-		return QueryOn.METHOD_GET; //XXX: add methods: POST (insert), PATCH (update), DELETE (delete), POST (execute)
+		return QueryOn.METHOD_POST; // GET (select), POST (insert), PATCH (update), DELETE (delete), POST (execute)
 	}
 	
 	@Override

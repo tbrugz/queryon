@@ -515,8 +515,6 @@ public class QonSoapServlet extends BaseApiServlet {
 		Element all = doc.createElement("xs:"+"all");
 		complexType.appendChild(all);
 		
-		// XXX request parameters...
-		
 		if(r instanceof Query) {
 			Query q = (Query) r;
 			List<String> namedParameters = q.getNamedParameterNames();
@@ -649,6 +647,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xs:" + "string" );
 			el.setAttribute("minOccurs", "1");
+			el.setAttribute("maxOccurs", "unbounded");
 			all.appendChild(el);
 		}
 		return complexType;

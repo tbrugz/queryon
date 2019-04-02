@@ -1020,18 +1020,21 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	public static boolean grantsAndRolesMatches(Subject subject, PrivilegeType privilege, List<Grant> grants) {
-		grants = QOnModelUtils.filterGrantsByPrivilegeType(grants, privilege);
-		if(grants==null || grants.size()==0) {
+		List<Grant> filteredGrants = QOnModelUtils.filterGrantsByPrivilegeType(grants, privilege);
+		if(filteredGrants==null || filteredGrants.size()==0) {
 			return true;
 		}
 		Set<String> roles = ShiroUtils.getSubjectRoles(subject);
-		//log.info("grantsAndRolesMatches:: grants: "+grants);
+		//log.info("grantsAndRolesMatches:: privilege: "+privilege+" / filteredGrants: "+filteredGrants);
 		//log.info("grantsAndRolesMatches:: roles: "+roles);
-		for(Grant grant: grants) {
-			if( privilege.equals(grant.getPrivilege()) && roles.contains(grant.getGrantee()) ) {
+		Set<String> mustHaveRoles = new HashSet<String>();
+		for(Grant grant: filteredGrants) {
+			if(roles.contains(grant.getGrantee())) {
 				return true;
 			}
+			mustHaveRoles.add(grant.getGrantee());
 		}
+		log.debug("grantsAndRolesMatches: user must have any of "+mustHaveRoles+" roles but only has "+roles+" roles [privilege="+privilege+"]");
 		
 		return false;
 	}
@@ -1580,7 +1583,7 @@ public class QueryOn extends HttpServlet {
 			hasResultSet = stmt.execute();
 
 			int updatecount = stmt.getUpdateCount();
-			//log.info("updateCount: "+updatecount);
+			//log.info("hasResultSet: "+hasResultSet+" ; updateCount: "+updatecount);
 			resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, updatecount);
 
 			try {
