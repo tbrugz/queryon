@@ -468,7 +468,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		}*/
 		for(int i=0;i<r.getColumnCount();i++) {
 			Element el = doc.createElement("xs:"+"element");
-			el.setAttribute("name", r.getColumnNames().get(i));
+			el.setAttribute("name", normalize(r.getColumnNames().get(i)));
 			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(i)) );
 			el.setAttribute("minOccurs", "0");
 			el.setAttribute("maxOccurs", "1");
@@ -491,7 +491,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			}
 			
 			Element el = doc.createElement("xs:"+"element");
-			el.setAttribute("name", ukColName);
+			el.setAttribute("name", normalize(ukColName));
 			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(idx)) );
 			all.appendChild(el);
 		}
@@ -543,7 +543,7 @@ public class QonSoapServlet extends BaseApiServlet {
 						type = getElementType(q.getParameterTypes().get(i));
 					}
 					Element el = doc.createElement("xs:"+"element");
-					el.setAttribute("name", param);
+					el.setAttribute("name", normalize(param));
 					el.setAttribute("type", "xs:" + type );
 					el.setAttribute("minOccurs", "1");
 					el.setAttribute("maxOccurs", "1");
@@ -1017,8 +1017,15 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 	
 	static String normalize(String s) {
-		return s.replaceAll(" ", "_");
-		//return s.replaceAll("\\.", "_");
+		// see: https://www.w3.org/TR/xml/#NT-Name
+		if(s==null || s.length()==0) { return ""; }
+		StringBuilder sb = new StringBuilder();
+		sb.append(s.substring(0, 1).replaceFirst("[^a-zA-Z\\_]", "_"));
+		if(s.length()>1) {
+			sb.append(s.substring(1).replaceAll("[^a-zA-Z0-9\\_\\.\\-]", "_"));
+		}
+		return sb.toString();
+		//return s.replaceAll("[^a-zA-Z0-9\\.\\-\\_]", "_");
 	}
 	
 	static String getServiceHost(HttpServletRequest req, boolean addScheme, boolean useCanonicalHost) {
