@@ -1601,8 +1601,8 @@ public class QueryOn extends HttpServlet {
 			sql = SQL.createExecuteSQLstr(eo);
 			stmt = conn.prepareCall(sql.toString());
 			//int inParamCount = 0;
-			if(reqspec.params.size() < eo.getParams().size()) {
-				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters ["+eo.getParams().size()+"]");
+			if(reqspec.params.size() < inParamCount) {
+				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [size()="+eo.getParams().size()+" ; inParamCount="+inParamCount+"]");
 			}
 			for(int i=0;i<eo.getParams().size();i++) {
 				ExecutableParameter ep = eo.getParams().get(i);
@@ -1646,19 +1646,14 @@ public class QueryOn extends HttpServlet {
 			pushReturnObject(reqspec, retObject);
 			gotReturn = true;
 		}
-		final boolean readJust1stOutParam = allowMultipleReturnObjects();
-		boolean warnedManyOutParams = false;
+		final boolean allowMultipleReturnObjects = allowMultipleReturnObjects();
 		for(int i=0;i<pc;i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
 			if(SchemaModelUtils.isOutParameter(ep)) {
-				if(gotReturn) {
-					if(outParamCount>1 && !warnedManyOutParams) {
-						log.warn("there are "+outParamCount+" out parameter. Only the first will be returned");
-						resp.addHeader(ResponseSpec.HEADER_WARNING, "Execute-TooManyReturnParams ReturnCount="+outParamCount);
-						warnedManyOutParams = true;
-					}
-					if(readJust1stOutParam) { break; }
-					//break; //got first result
+				if(gotReturn && outParamCount>1 && !allowMultipleReturnObjects) {
+					log.warn("there are "+outParamCount+" out parameter. Only the first will be returned [allowMultipleReturnObjects=="+allowMultipleReturnObjects+"]");
+					resp.addHeader(ResponseSpec.HEADER_WARNING, "Execute-TooManyReturnParams ReturnCount="+outParamCount);
+					break; //got first result
 					//log.info("ret["+i+";"+(i+paramOffset)+"]: "+stmt.getObject(i+paramOffset));
 				}
 				retObject = stmt.getObject(i+paramOffset);
@@ -1943,7 +1938,7 @@ public class QueryOn extends HttpServlet {
 			for(UpdatePlugin up: plugins) {
 				if(up.accepts(relation)) {
 					//up.setProperties(prop);
-					//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
+					up.setConnection(conn);
 					up.onDelete(relation, reqspec);
 				}
 			}
