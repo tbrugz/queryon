@@ -674,7 +674,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			ExecutableParameter ep = eps.get(i);
 			if(SchemaModelUtils.isOutParameter(ep)) {
 				Element el = doc.createElement("xs:"+"element");
-				String pname = "parameter"+(i+1);
+				String pname = "outputParameter"+(i+1);
 				//XXX: allow named-parameters - QueryOn servlet refactoring needed...
 				/*String pname = ep.getName();
 				if(pname==null) {
@@ -1147,8 +1147,8 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		if(executableReturnsValues(eo)) {
 			sb.append("<"+qonPrefix+":"+execReturnElemName+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
-			ExecutableParameter ep = eo.getReturnParam();
-			if(ep!=null) {
+			ExecutableParameter rp = eo.getReturnParam();
+			if(rp!=null) {
 				sb.append("<return>");
 				Object o = getNextReturnObject(reqspec);
 				if(o!=null) {
@@ -1156,7 +1156,19 @@ public class QonSoapServlet extends BaseApiServlet {
 				}
 				sb.append("</return>"+"\n");
 			}
-			// TODO add outParams 
+			List<ExecutableParameter> eps = eo.getParams();
+			for(int i=0;i<eps.size();i++) {
+				ExecutableParameter ep = eps.get(i);
+				if(SchemaModelUtils.isOutParameter(ep)) {
+					int pcount = i+1;
+					sb.append("<outputParameter"+pcount+">");
+					Object o = getNextReturnObject(reqspec);
+					if(o!=null) {
+						sb.append(o);
+					}
+					sb.append("</outputParameter"+pcount+">"+"\n");
+				}
+			}
 		}
 		
 		appendUpdateInfo(sb, qonPrefix, reqspec, updatecount, false);
