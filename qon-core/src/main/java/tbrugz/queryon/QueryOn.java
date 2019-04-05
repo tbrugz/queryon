@@ -1556,7 +1556,7 @@ public class QueryOn extends HttpServlet {
 				&& sql!=null && !sql.equals("")) {
 			
 			//log.debug("executing BODY: "+sql);
-			stmt = conn.prepareCall(sql.toString());
+			stmt = conn.prepareCall(sql);
 			try {
 				ParameterMetaData pmd = stmt.getParameterMetaData();
 				if(pc != pmd.getParameterCount()) {
@@ -1580,26 +1580,10 @@ public class QueryOn extends HttpServlet {
 					stmt.registerOutParameter(i+1, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
 				}
 			}
-			hasResultSet = stmt.execute();
-
-			int updatecount = stmt.getUpdateCount();
-			//log.info("hasResultSet: "+hasResultSet+" ; updateCount: "+updatecount);
-			resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, updatecount);
-
-			try {
-				ResultSet generatedKeys = stmt.getGeneratedKeys();
-				if(generatedKeys!=null && generatedKeys.next()) {
-					List<String> colVals = getGeneratedKeys(generatedKeys);
-					setGeneratedKeys(reqspec, resp, colVals);
-				}
-			}
-			catch(SQLException e) {
-				log.warn("doExecute: getGeneratedKeys: "+e.getMessage());
-			}
 		}
 		else {
 			sql = SQL.createExecuteSQLstr(eo);
-			stmt = conn.prepareCall(sql.toString());
+			stmt = conn.prepareCall(sql);
 			//int inParamCount = 0;
 			if(reqspec.params.size() < inParamCount) {
 				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [size()="+eo.getParams().size()+" ; inParamCount="+inParamCount+"]");
@@ -1631,8 +1615,30 @@ public class QueryOn extends HttpServlet {
 				//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
 				outParamCount++;
 			}
-			log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
-			hasResultSet = stmt.execute();
+		}
+
+		log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
+		hasResultSet = stmt.execute();
+
+		int updatecount = stmt.getUpdateCount();
+		//log.debug("hasResultSet: "+hasResultSet+" ; updateCount: "+updatecount);
+		if(updatecount!=-1) { 
+			resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, updatecount);
+		}
+
+		try {
+			ResultSet generatedKeys = stmt.getGeneratedKeys();
+			if(generatedKeys!=null && generatedKeys.next()) {
+				List<String> colVals = getGeneratedKeys(generatedKeys);
+				//log.debug("getGeneratedKeys: "+colVals);
+				setGeneratedKeys(reqspec, resp, colVals);
+			}
+			else {
+				//log.debug("getGeneratedKeys: no keys");
+			}
+		}
+		catch(SQLException e) {
+			log.warn("doExecute: getGeneratedKeys: "+e.getMessage());
 		}
 		
 		boolean gotReturn = false;
@@ -1661,7 +1667,7 @@ public class QueryOn extends HttpServlet {
 				gotReturn = true;
 			}
 		}
-		resp.addHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, String.valueOf(outParamCount));
+		resp.addIntHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, outParamCount);
 		
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
@@ -1692,7 +1698,10 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
-			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
+			String message = "Error executing procedure/fuction "+eo.getQualifiedName()+": ";
+			//log.warn(message+e);
+			log.debug(message+e.getMessage(), e);
+			throw new SQLException(message, e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
