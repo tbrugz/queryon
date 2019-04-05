@@ -72,6 +72,10 @@ td[null] {
 	background-color: #888;
 }
 
+td[coltype=Integer], td[coltype=Double], td[numeric=true] {
+	text-align: right;
+}
+
 /* predefined td classes */
 
 td.header {

@@ -110,6 +110,9 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				lsColDbTypes.add(md.getColumnTypeName(i+1));
 			}
 		}
+		
+		//dumpColType = true;
+		dumpIsNumeric = true;
 
 		/*for(int i=0;i<numCol;i++) {
 			lsColDbTypes.add(md.getColumnTypeName(i+1));
@@ -338,6 +341,8 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 						+(origVal==null?" null=\"true\"":"")
 						+attrsStr
 						+(i<onRowsColCount?" dimoncol=\"true\"":"")
+						//+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
+						+((dumpIsNumeric && DataDumpUtils.isNumericType(ctype))?" numeric=\"true\"":"")
 						+">"+ value +"</td>");
 				
 				//System.out.println("[i="+i+"] origVal=["+origVal+"] colName=["+colName+"] attr=["+attrs+"]");
