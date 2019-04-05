@@ -104,20 +104,33 @@ function createBlobLinks() {
 }
 
 function mergeDimensions() {
-	var iniTime = +new Date();
 	var content = document.getElementsByTagName('table')[0];
 	if(!content) {
 		//console.log('table.js: mergeDimensions: no table found...');
 		return;
 	}
 	var trs = content.querySelectorAll("tr");
+
+	mergeRowDimensions(content, trs);
+	mergeColumnDimensions(content, trs);
+}
+
+function getLastDimRow(trs) {
 	var lastDimRow = -1;
 	for(var i=0;i<trs.length;i++) {
 		var colname = trs[i].getAttribute("colname");
 		var measuresrow = trs[i].getAttribute("measuresrow");
 		if(!colname && !measuresrow) { lastDimRow = i; break; }
 	}
+	return lastDimRow
+}
+
+function mergeRowDimensions(content, trs) {
+	var iniTime = +new Date();
+	// rows...
+	var lastDimRow = getLastDimRow(trs);
 	//console.log("mergeDimensions: lastDimRow=",lastDimRow);
+	if(lastDimRow<=0) { return; }
 	
 	for(var i=lastDimRow ; i>=0 ; i--) {
 		var colname = trs[i].getAttribute("colname");
@@ -150,12 +163,90 @@ function mergeDimensions() {
 			}
 		}
 	}
-	//console.log("mergeDimensions: lastDimRow=",lastDimRow," ; elapsed="+((+new Date())-iniTime));
+	console.log("mergeDimensions: lastDimRow=",lastDimRow," ; elapsed=",((+new Date())-iniTime));
+}
+
+/*
+function mergeDimensions4test() {
+	var content = document.getElementsByTagName('table')[0];
+	if(!content) {
+		console.log('table.js: mergeDimensions: no table found...');
+		return;
+	}
+	var trs = content.querySelectorAll("tr");
+
+	mergeRowDimensions(content, trs);
+	mergeColumnDimensions(content, trs);
+}
+*/
+
+function mergeColumnDimensions(content, trs) {
+	var iniTime = +new Date();
+	
+	var lastDimRow = getLastDimRow(trs);
+	
+	// cols...
+	var lastDimCol = -1;
+	if(trs.length<=1) { return; }
+	var headerRows = (lastDimRow > 0) ? lastDimRow : 1;
+	var dimRow = trs[headerRows];
+	var dimRowCols = dimRow.querySelectorAll("td");
+	for(var i=0;i<dimRowCols.length;i++) {
+		var dimoncol = dimRowCols[i].getAttribute("dimoncol");
+		//console.log(i, dimoncol);
+		if(dimoncol) { lastDimCol = i; }
+	}
+	if(lastDimCol<=0) { return; }
+	//console.log("mergeDimensions: lastDimCol=",lastDimCol,"rows=",trs.length,"cols=",dimRowCols.length,"headerRows=",headerRows);
+
+	var allTds = [];
+	for(var i=lastDimCol ; i>=0 ; i--) {
+		//console.log("cols: i=", i);
+		allTds[i] = content.querySelectorAll("td:nth-of-type("+(i+1)+")");
+	}
+
+	loop1:
+	for(var i=lastDimCol ; i>=0 ; i--) {
+		//console.log("cols: i=", i);
+		var tds = allTds[i];
+		//var tds = content.querySelectorAll("td:nth-of-type("+(i+1)+")");
+		//console.log(i, "tds", tds);
+		loop2:
+		for(var j=tds.length-1;j>=0;j--) {
+			if( (typeof tds[j].innerText !== 'undefined') && tds[j-1] && (tds[j].innerText===tds[j-1].innerText) ) {
+				//XXXdone do not merge if upper row columns are not equally merged
+				for(var z=i; z>=1 ; z--) {
+					//var tdsParent = content.querySelectorAll("td:nth-of-type("+(z)+")");
+					var tdsParent = allTds[z];
+					if((typeof tdsParent[j] !== 'undefined') && (typeof tdsParent[j-1] !== 'undefined')) {
+						if( tdsParent[j].innerText === tdsParent[j-1].innerText ) {}
+						else {
+							//console.log("parent is not equal: ", tdsParent[j].innerText, tdsParent[j-1].innerText, "text=", tds[j].innerText);
+							continue loop2;
+						}
+					}
+				}
+				
+				var rspan = tds[j].getAttribute("rowspan");
+				//console.log(j, rspan, tds[j-1]);
+				if(!rspan) { rspan = "2"; }
+				else { rspan = ""+(parseInt(rspan)+1); }
+				tds[j-1].setAttribute("rowspan", rspan);
+				tds[j].remove();
+			}
+			else {
+				//continue loop1;
+			}
+		}
+	}
+	
+	console.log("mergeDimensions: lastDimCol(+1)=",(lastDimCol+1)," ; elapsed=",((+new Date())-iniTime));
 }
 
 function doTableOnLoad() {
 	createBlobLinks();
 	mergeDimensions();
+	console.log("table.js: doTableOnLoad() finished");
 }
 
 // http://stackoverflow.com/questions/9457891/how-to-detect-if-domcontentloaded-was-fired
