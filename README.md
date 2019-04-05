@@ -6,14 +6,14 @@ A REST-like API that follows the naked objects pattern. A bit like a 'naked data
 Depends on [sqldump](https://bitbucket.org/tbrugz/sqldump)
 
 Database objects are defined by a properties file. See
-[queryon.template.properties](https://bitbucket.org/tbrugz/queryon/src/tip/src/queryon.template.properties)
+[queryon.template.properties](qon-core/src/main/java/queryon.template.properties)
 for more info.
 
 More info about QueryOn:
 
-* the [API spec](web/doc/api.md)
-* [Query features](web/doc/queries.md)
-* "the [index](web/doc/index.md)" - in-app help index
+* the [API spec](qon-web/src/main/webapp/doc/api.md)
+* [Query features](qon-web/src/main/webapp/doc/queries.md)
+* "the [index](qon-web/src/main/webapp/doc/index.md)" - in-app help index
 
 -- [Telmo Brugnara](mailto:tbrugz@gmail.com)
 
