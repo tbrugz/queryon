@@ -104,6 +104,10 @@ td[dimoncol] {
 	background-color: #fff;
 }
 
+td[dimoncol][null] {
+	background-color: #888;
+}
+
 th[measure] {
 	background-color: #eee;
 }

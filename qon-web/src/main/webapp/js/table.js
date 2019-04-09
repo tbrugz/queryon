@@ -120,7 +120,9 @@ function getLastDimRow(trs) {
 	for(var i=0;i<trs.length;i++) {
 		var colname = trs[i].getAttribute("colname");
 		var measuresrow = trs[i].getAttribute("measuresrow");
-		if(!colname && !measuresrow) { lastDimRow = i; break; }
+		//console.log("i==", i, "colname", colname, "measuresrow", measuresrow);
+		if(!colname && !measuresrow) { break; }
+		else { lastDimRow = i; }
 	}
 	return lastDimRow
 }
@@ -131,6 +133,8 @@ function mergeRowDimensions(content, trs) {
 	var lastDimRow = getLastDimRow(trs);
 	//console.log("mergeDimensions: lastDimRow=",lastDimRow);
 	if(lastDimRow<=0) { return; }
+	
+	var merges = 0;
 	
 	for(var i=lastDimRow ; i>=0 ; i--) {
 		var colname = trs[i].getAttribute("colname");
@@ -160,10 +164,11 @@ function mergeRowDimensions(content, trs) {
 				else { cspan = ""+(parseInt(cspan)+1); }
 				ths[j-1].setAttribute("colspan", cspan);
 				ths[j].remove();
+				merges++;
 			}
 		}
 	}
-	console.log("mergeDimensions: lastDimRow=",lastDimRow," ; elapsed=",((+new Date())-iniTime));
+	console.log("mergeDimensions: lastDimRow=",lastDimRow," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
 }
 
 /*
@@ -204,6 +209,8 @@ function mergeColumnDimensions(content, trs) {
 		//console.log("cols: i=", i);
 		allTds[i] = content.querySelectorAll("td:nth-of-type("+(i+1)+")");
 	}
+	
+	var merges = 0;
 
 	loop1:
 	for(var i=lastDimCol ; i>=0 ; i--) {
@@ -215,24 +222,31 @@ function mergeColumnDimensions(content, trs) {
 		for(var j=tds.length-1;j>=0;j--) {
 			if( (typeof tds[j].innerText !== 'undefined') && tds[j-1] && (tds[j].innerText===tds[j-1].innerText) ) {
 				//XXXdone do not merge if upper row columns are not equally merged
-				for(var z=i; z>=1 ; z--) {
+				//var innerText = null;
+				for(var z=i; z>=0 ; z--) {
 					//var tdsParent = content.querySelectorAll("td:nth-of-type("+(z)+")");
 					var tdsParent = allTds[z];
 					if((typeof tdsParent[j] !== 'undefined') && (typeof tdsParent[j-1] !== 'undefined')) {
-						if( tdsParent[j].innerText === tdsParent[j-1].innerText ) {}
+						if( tdsParent[j].innerText === tdsParent[j-1].innerText ) {
+							//innerText = tdsParent[j].innerText;
+						}
 						else {
 							//console.log("parent is not equal: ", tdsParent[j].innerText, tdsParent[j-1].innerText, "text=", tds[j].innerText);
 							continue loop2;
 						}
 					}
+					else {
+						//console.log("undefined parents: row(i)=", i ,"col(j)=", j, "z=", z);
+					}
 				}
 				
 				var rspan = tds[j].getAttribute("rowspan");
-				//console.log(j, rspan, tds[j-1]);
 				if(!rspan) { rspan = "2"; }
 				else { rspan = ""+(parseInt(rspan)+1); }
+				//console.log("will merge: row(i)=", i ,"col(j)=", j, "rspan", rspan, "content=", tds[j].innerText);
 				tds[j-1].setAttribute("rowspan", rspan);
 				tds[j].remove();
+				merges++;
 			}
 			else {
 				//continue loop1;
@@ -240,7 +254,7 @@ function mergeColumnDimensions(content, trs) {
 		}
 	}
 	
-	console.log("mergeDimensions: lastDimCol(+1)=",(lastDimCol+1)," ; elapsed=",((+new Date())-iniTime));
+	console.log("mergeDimensions: lastDimCol(+1)=",(lastDimCol+1)," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
 }
 
 function doTableOnLoad() {
