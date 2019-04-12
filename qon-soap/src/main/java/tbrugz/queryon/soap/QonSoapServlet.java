@@ -3,6 +3,8 @@ package tbrugz.queryon.soap;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,11 @@ import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -50,6 +57,11 @@ public class QonSoapServlet extends BaseApiServlet {
 	public static final String NS_SOAP = "http://schemas.xmlsoap.org/wsdl/soap/";
 	public static final String NS_SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/"; // "http://www.w3.org/2003/05/soap-envelope"; "http://www.w3.org/2001/12/soap-envelope";
 	
+	public static final String PREFIX_INSERT_ELEMENT = "insert";
+	public static final String PREFIX_UPDATE_ELEMENT = "update";
+	public static final String PREFIX_DELETE_ELEMENT = "delete";
+	public static final String PREFIX_EXECUTE_ELEMENT = "execute";
+
 	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
 	
 	public static final String[] UNIQUE_FILTERS = { "filterEquals", "filterNotEquals", "filterGreaterThan", "filterGreaterOrEqual", "filterLessThan", "filterLessOrEqual" };
@@ -112,7 +124,7 @@ public class QonSoapServlet extends BaseApiServlet {
 				Document doc = dBuilder.parse(req.getInputStream());
 				log.debug("doc: "+doc);
 				
-				//StringWriter sw = new StringWriter();
+				//java.io.StringWriter sw = new java.io.StringWriter();
 				//ODataServlet.serialize(dBuilder.getDOMImplementation(), doc, sw);
 				//log.info("xml::\n"+sw);
 				
@@ -182,6 +194,11 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 	}
 	
+	@Override
+	protected ActionType getActionType(RequestSpec reqspec, DBIdentifiable dbobj) {
+		return ((SoapRequest) reqspec).atype;
+	}
+	
 	/*void processSoapMessage(Element requestEl, String nsPrefix, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		SoapRequest.setAttributesOnRequest(req, requestEl, nsPrefix);
 		SoapRequest reqspec = getRequestSpec(req);
@@ -195,7 +212,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			log.info("request: "+ ((SoapRequest)reqspec).toStringDebug());
 		}
 		else {
-			log.info("request should be instanceof SoapRequest: "+ reqspec.getClass());
+			log.warn("request should be instanceof SoapRequest: "+ reqspec.getClass());
 		}
 	}
 	
@@ -254,16 +271,20 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		Set<View> vs = model.getViews();
 		Set<Table> ts = model.getTables();
+		Set<ExecutableObject> eos = model.getExecutables();
 		
 		// -- TYPES --
 		
 		{
-			//generic types
+			// generic 'select' types
 			schema.appendChild(createFieldsType(doc));
 			schema.appendChild(createFieldWithDirectionType(doc));
 			schema.appendChild(createOrderType(doc));
 			createFiltersTypes(doc, schema);
-			//XXX: add generic types
+			// generic insert/update/delete types
+			schema.appendChild(createGeneratedKeyType(doc));
+			schema.appendChild(createUpdateInfoType(doc));
+			schema.appendChild(createUpdateInfoElement(doc));
 			
 			for(View v: vs) {
 				schema.appendChild(createElementRequest(doc, v));
@@ -275,20 +296,35 @@ public class QonSoapServlet extends BaseApiServlet {
 			}
 			for(Table t: ts) {
 				schema.appendChild(createElementRequest(doc, t));
+				// relation
 				Element entity = createElementType(doc, t);
 				schema.appendChild(entity);
+				// uk
+				// for each table, create <Relation>KeyType to be used by update & delete - could also be returned by insert, update & exec
+				Constraint uk = SchemaModelUtils.getPK(t);
+				boolean hasUk = uk!=null && uk.getUniqueColumns()!=null;
+				if(hasUk) {
+					schema.appendChild(createElementKeyType(doc, t, uk));
+				}
+				// listOfRelation
 				schema.appendChild(createListOfElement(doc, t));
+				// insert/update/delete
+				schema.appendChild(createElementInsert(doc, t));
+				if(hasUk) {
+					schema.appendChild(createElementUpdate(doc, t));
+					schema.appendChild(createElementDelete(doc, t));
+				}
+				
 				//schemaNames.add(t.getSchemaName());
 				//relationNames.add(t.getQualifiedName());
 			}
 			
-			/*Set<ExecutableObject> eos = model.getExecutables();
 			for(ExecutableObject eo: eos) {
-				Element action = createAction(doc, eo);
-				schema.appendChild(action);
-				Element actionImport = createActionImport(doc, eo);
-				schema.appendChild(actionImport);
-			}*/
+				schema.appendChild(createExecutableElementRequest(doc, eo));
+				if(executableReturnsValues(eo)) {
+					schema.appendChild(createExecutableElementResponse(doc, eo));
+				}
+			}
 		}
 
 		definitions.appendChild(types);
@@ -296,12 +332,36 @@ public class QonSoapServlet extends BaseApiServlet {
 		// -- MESSAGES --
 		
 		for(View v: vs) {
-			definitions.appendChild(createMessage(doc, normalize( v.getQualifiedName() )+"Input", normalize( v.getQualifiedName() )+SUFFIX_REQUEST_ELEMENT));
-			definitions.appendChild(createMessage(doc, normalize( v.getQualifiedName() )+"Output", "listOf" + normalize( v.getQualifiedName() )));
+			String relName = normalize( v.getQualifiedName() );
+			definitions.appendChild(createMessage(doc, relName+"Input", relName+SUFFIX_REQUEST_ELEMENT));
+			definitions.appendChild(createMessage(doc, relName+"Output", "listOf" + relName));
 		}
 		for(Table t: ts) {
-			definitions.appendChild(createMessage(doc, normalize( t.getQualifiedName() )+"Input", normalize( t.getQualifiedName() )+SUFFIX_REQUEST_ELEMENT));
-			definitions.appendChild(createMessage(doc, normalize( t.getQualifiedName() )+"Output", "listOf" + normalize( t.getQualifiedName() )));
+			String relName = normalize( t.getQualifiedName() );
+			definitions.appendChild(createMessage(doc, relName+"Input", relName+SUFFIX_REQUEST_ELEMENT));
+			definitions.appendChild(createMessage(doc, relName+"Output", "listOf" + relName));
+
+			// insert
+			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Input", PREFIX_INSERT_ELEMENT + relName ));
+			definitions.appendChild(createMessage(doc, PREFIX_INSERT_ELEMENT + relName + "Output", "updateInfo"));
+			if(hasUniqueKey(t)) {
+				// update
+				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Input", PREFIX_UPDATE_ELEMENT + relName ));
+				definitions.appendChild(createMessage(doc, PREFIX_UPDATE_ELEMENT + relName + "Output", "updateInfo"));
+				// delete
+				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Input", PREFIX_DELETE_ELEMENT + relName ));
+				definitions.appendChild(createMessage(doc, PREFIX_DELETE_ELEMENT + relName + "Output", "updateInfo"));
+			}
+		}
+		for(ExecutableObject eo: eos) {
+			String eoName = normalizeExecutableName(eo);
+			definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Input", PREFIX_EXECUTE_ELEMENT + eoName));
+			if(executableReturnsValues(eo)) {
+				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", PREFIX_EXECUTE_ELEMENT + eoName + "Return"));
+			}
+			else {
+				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", "updateInfo")); //TODOne - return + outParams
+			}
 		}
 
 		// -- PORTTYPE/OPERATIONS --
@@ -315,6 +375,14 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		for(Table t: ts) {
 			portType.appendChild(createOperation(doc, normalize( t.getQualifiedName() ), "get"));
+			portType.appendChild(createOperation(doc, normalize( t.getQualifiedName() ), "insert", "insert"));
+			if(hasUniqueKey(t)) {
+				portType.appendChild(createOperation(doc, normalizeRelationName(t), "update", "update"));
+				portType.appendChild(createOperation(doc, normalizeRelationName(t), "delete", "delete"));
+			}
+		}
+		for(ExecutableObject eo: eos) {
+			portType.appendChild(createOperation(doc, normalizeExecutableName(eo), "execute", "execute"));
 		}
 		
 		definitions.appendChild(portType);
@@ -337,8 +405,15 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		for(Table t: ts) {
 			binding.appendChild(createBindingOperation(doc, normalize( t.getQualifiedName() ), "get"));
+			binding.appendChild(createBindingOperation(doc, normalize( t.getQualifiedName() ), "insert", "insert"));
+			if(hasUniqueKey(t)) {
+				binding.appendChild(createBindingOperation(doc, normalizeRelationName(t), "update", "update"));
+				binding.appendChild(createBindingOperation(doc, normalizeRelationName(t), "delete", "delete"));
+			}
 		}
-		
+		for(ExecutableObject eo: eos) {
+			binding.appendChild(createBindingOperation(doc, normalizeExecutableName(eo), "execute", "execute"));
+		}
 		
 		definitions.appendChild(binding);
 		}
@@ -393,13 +468,36 @@ public class QonSoapServlet extends BaseApiServlet {
 		}*/
 		for(int i=0;i<r.getColumnCount();i++) {
 			Element el = doc.createElement("xs:"+"element");
-			el.setAttribute("name", r.getColumnNames().get(i));
+			el.setAttribute("name", normalize(r.getColumnNames().get(i)));
 			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(i)) );
+			el.setAttribute("minOccurs", "0");
+			el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		return complexType;
 	}
 
+	Element createElementKeyType(Document doc, Relation r, Constraint uk) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", normalizeRelationName(r) + "KeyType");
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		for(int i=0;i<uk.getUniqueColumns().size();i++) {
+			String ukColName = uk.getUniqueColumns().get(i);
+			int idx = r.getColumnNames().indexOf(ukColName);
+			if(idx==-1) {
+				log.warn("column "+ukColName+" not found in relation "+r.getQualifiedName());
+				continue;
+			}
+			
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", normalize(ukColName));
+			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(idx)) );
+			all.appendChild(el);
+		}
+		return complexType;
+	}
+	
 	Element createListOfElement(Document doc, Relation r) {
 		Element listElement = doc.createElement("xs:"+"element");
 		listElement.setAttribute("name", "listOf" + normalize( r.getQualifiedName() ));
@@ -428,8 +526,6 @@ public class QonSoapServlet extends BaseApiServlet {
 		Element all = doc.createElement("xs:"+"all");
 		complexType.appendChild(all);
 		
-		// XXX request parameters...
-		
 		if(r instanceof Query) {
 			Query q = (Query) r;
 			List<String> namedParameters = q.getNamedParameterNames();
@@ -447,7 +543,7 @@ public class QonSoapServlet extends BaseApiServlet {
 						type = getElementType(q.getParameterTypes().get(i));
 					}
 					Element el = doc.createElement("xs:"+"element");
-					el.setAttribute("name", param);
+					el.setAttribute("name", normalize(param));
 					el.setAttribute("type", "xs:" + type );
 					el.setAttribute("minOccurs", "1");
 					el.setAttribute("maxOccurs", "1");
@@ -524,7 +620,82 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		return element;
 	}
+	
+	Element createExecutableElementRequest(Document doc, ExecutableObject eo) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo));
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		List<ExecutableParameter> eps = eo.getParams();
+		for(int i=0;i<eps.size();i++) {
+			ExecutableParameter ep = eps.get(i);
+			if(SchemaModelUtils.isInParameter(ep)) {
+				Element el = doc.createElement("xs:"+"element");
+				String pname = "parameter"+(i+1);
+				//XXX: allow named-parameters - QueryOn servlet refactoring needed...
+				/*String pname = ep.getName();
+				if(pname==null) {
+					pname = "p"+(i+1);
+				}*/
+				el.setAttribute("name", pname);
+				el.setAttribute("type", "xs:" + getElementType(ep.getDataType()) );
+				all.appendChild(el);
+			}
+		}
+		return element;
+	}
+	
+	boolean executableReturnsValues(ExecutableObject eo) {
+		if(eo.getReturnParam()!=null) { return true; }
+		return SchemaModelUtils.getNumberOfOutParameters(eo.getParams()) > 0;
+	}
 
+	Element createExecutableElementResponse(Document doc, ExecutableObject eo) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return");
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		ExecutableParameter rp = eo.getReturnParam();
+		if(rp!=null) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "return");
+			el.setAttribute("type", "xs:" + getElementType(rp.getDataType()) );
+			all.appendChild(el);
+		}
+		
+		List<ExecutableParameter> eps = eo.getParams();
+		for(int i=0;i<eps.size();i++) {
+			ExecutableParameter ep = eps.get(i);
+			if(SchemaModelUtils.isOutParameter(ep)) {
+				Element el = doc.createElement("xs:"+"element");
+				String pname = "outputParameter"+(i+1);
+				//XXX: allow named-parameters - QueryOn servlet refactoring needed...
+				/*String pname = ep.getName();
+				if(pname==null) {
+					pname = "p"+(i+1);
+				}*/
+				el.setAttribute("name", pname);
+				el.setAttribute("type", "xs:" + getElementType(ep.getDataType()) );
+				all.appendChild(el);
+			}
+		}
+
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "updateInfo");
+			el.setAttribute("type", "xsd1:" + "updateInfoType" );
+			all.appendChild(el);
+		}
+		
+		return element;
+	}
+	
 	Element createFieldsType(Document doc) {
 		Element complexType = doc.createElement("xs:"+"complexType");
 		complexType.setAttribute("name", "fieldsType");
@@ -535,6 +706,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xs:" + "string" );
 			el.setAttribute("minOccurs", "1");
+			el.setAttribute("maxOccurs", "unbounded");
 			all.appendChild(el);
 		}
 		return complexType;
@@ -573,6 +745,99 @@ public class QonSoapServlet extends BaseApiServlet {
 			all.appendChild(el);
 		}
 		return complexType;
+	}
+
+	Element createGeneratedKeyType(Document doc) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", "generatedKeyType");
+		Element all = doc.createElement("xs:"+"sequence");
+		complexType.appendChild(all);
+		{
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "value");
+			el.setAttribute("type", "xs:"+"string" );
+			el.setAttribute("minOccurs", "1");
+			all.appendChild(el);
+		}
+		return complexType;
+	}
+
+	Element createUpdateInfoType(Document doc) {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", "updateInfoType");
+		
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		{
+			Element element = doc.createElement("xs:"+"element");
+			element.setAttribute("name", "generatedKey");
+			element.setAttribute("type", "xsd1:" + "generatedKeyType" );
+			element.setAttribute("maxOccurs", "1");
+			all.appendChild(element);
+		}
+		{
+			Element element = doc.createElement("xs:"+"element");
+			element.setAttribute("name", "updateCount");
+			element.setAttribute("type", "xs:" + "int" );
+			element.setAttribute("maxOccurs", "1");
+			all.appendChild(element);
+		}
+		
+		return complexType;
+	}
+
+	Element createUpdateInfoElement(Document doc) {
+		Element infoElement = doc.createElement("xs:"+"element");
+		infoElement.setAttribute("name", "updateInfo");
+		infoElement.setAttribute("type", "xsd1:" + "updateInfoType" );
+		return infoElement;
+	}
+	
+	Element createElementInsert(Document doc, Relation r) {
+		return createElementUpdateType(doc, PREFIX_INSERT_ELEMENT, r, true, false);
+	}
+
+	Element createElementUpdate(Document doc, Relation r) {
+		return createElementUpdateType(doc, PREFIX_UPDATE_ELEMENT, r, true, true);
+	}
+	
+	Element createElementDelete(Document doc, Relation r) {
+		return createElementUpdateType(doc, PREFIX_DELETE_ELEMENT, r, false, true);
+	}
+	
+	Element createElementUpdateType(Document doc, String prefix, Relation r, boolean addEntity, boolean addKey) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", prefix + normalizeRelationName(r));
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		if(addEntity) {
+			Element innerElem = doc.createElement("xs:"+"element");
+			innerElem.setAttribute("name", "entity");
+			innerElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "Type" );
+			all.appendChild(innerElem);
+		}
+		
+		if(addKey) {
+			Element innerKeyElem = doc.createElement("xs:"+"element");
+			innerKeyElem.setAttribute("name", "filterKey");
+			innerKeyElem.setAttribute("type", "xsd1:" + normalizeRelationName(r) + "KeyType" );
+			all.appendChild(innerKeyElem);
+		}
+		
+		/*
+		for(int i=0;i<r.getColumnCount();i++) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", r.getColumnNames().get(i));
+			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(i)) );
+			all.appendChild(el);
+		}
+		*/
+		
+		return element;
 	}
 
 	void createFiltersTypes(Document doc, Element schema) {
@@ -647,26 +912,34 @@ public class QonSoapServlet extends BaseApiServlet {
 		return element;
 	}
 
-	Element createOperation(Document doc, String name, String prefix) {
+	Element createOperation(Document doc, String name, String namePrefix) {
+		return createOperation(doc, name, namePrefix, "");
+	}
+	
+	Element createOperation(Document doc, String name, String namePrefix, String typePrefix) {
 		Element operation = doc.createElement("wsdl:"+"operation");
-		operation.setAttribute("name", prefix + name);
+		operation.setAttribute("name", namePrefix + name);
 		
 		Element input = doc.createElement("wsdl:"+"input");
-		input.setAttribute("name", name+"Input");
-		input.setAttribute("message", "tns:"+name+"Input");
+		input.setAttribute("name", typePrefix+name+"Input");
+		input.setAttribute("message", "tns:"+typePrefix+name+"Input");
 		operation.appendChild(input);
 
 		Element output = doc.createElement("wsdl:"+"output");
-		output.setAttribute("name", name+"Output");
-		output.setAttribute("message", "tns:"+name+"Output");
+		output.setAttribute("name", typePrefix+name+"Output");
+		output.setAttribute("message", "tns:"+typePrefix+name+"Output");
 		operation.appendChild(output);
 		
 		return operation;
 	}
+
+	Element createBindingOperation(Document doc, String name, String namePrefix) {
+		return createBindingOperation(doc, name, namePrefix, "");
+	}
 	
-	Element createBindingOperation(Document doc, String name, String prefix) {
+	Element createBindingOperation(Document doc, String name, String namePrefix, String typePrefix) {
 		Element operation = doc.createElement("wsdl:"+"operation");
-		operation.setAttribute("name", prefix + name);
+		operation.setAttribute("name", namePrefix + name);
 		
 		Element soapOperation = doc.createElement("soap:operation");
 		//soapOperation.setAttribute("style", "document");
@@ -675,7 +948,7 @@ public class QonSoapServlet extends BaseApiServlet {
 
 		{
 			Element input = doc.createElement("wsdl:"+"input");
-			input.setAttribute("name", name+"Input");
+			input.setAttribute("name", typePrefix+name+"Input");
 			Element soapBody = doc.createElement("soap:body");
 			soapBody.setAttribute("use", "literal");
 			input.appendChild(soapBody);
@@ -684,7 +957,7 @@ public class QonSoapServlet extends BaseApiServlet {
 
 		{
 			Element output = doc.createElement("wsdl:"+"output");
-			output.setAttribute("name", name+"Output");
+			output.setAttribute("name", typePrefix+name+"Output");
 			Element soapBody = doc.createElement("soap:body");
 			soapBody.setAttribute("use", "literal");
 			output.appendChild(soapBody);
@@ -735,9 +1008,24 @@ public class QonSoapServlet extends BaseApiServlet {
 		return "string";
 	}
 	
+	static String normalizeRelationName(Relation r) {
+		return normalize( r.getQualifiedName() );
+	}
+	
+	static String normalizeExecutableName(ExecutableObject eo) {
+		return normalize( eo.getQualifiedName() );
+	}
+	
 	static String normalize(String s) {
-		return s.replaceAll(" ", "_");
-		//return s.replaceAll("\\.", "_");
+		// see: https://www.w3.org/TR/xml/#NT-Name
+		if(s==null || s.length()==0) { return ""; }
+		StringBuilder sb = new StringBuilder();
+		sb.append(s.substring(0, 1).replaceFirst("[^a-zA-Z\\_]", "_"));
+		if(s.length()>1) {
+			sb.append(s.substring(1).replaceAll("[^a-zA-Z0-9\\_\\.\\-]", "_"));
+		}
+		return sb.toString();
+		//return s.replaceAll("[^a-zA-Z0-9\\.\\-\\_]", "_");
 	}
 	
 	static String getServiceHost(HttpServletRequest req, boolean addScheme, boolean useCanonicalHost) {
@@ -770,6 +1058,154 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		
 		return (addScheme?scheme+"://":"") + host;
+	}
+	
+	@Override
+	protected void setResponseStatus(HttpServletResponse resp, int status) {
+	}
+	
+	@Override
+	protected void setContentType(HttpServletResponse resp, String type) {
+	}
+	
+	@Override
+	protected void setGeneratedKeys(RequestSpec reqspec, HttpServletResponse resp, List<String> generatedKey) {
+		reqspec.setAttribute(RequestSpec.ATTR_GENERATED_KEYS, generatedKey);
+	}
+	
+	protected List<String> getGeneratedKeys(RequestSpec reqspec) {
+		Object gk = reqspec.getAttribute(RequestSpec.ATTR_GENERATED_KEYS);
+		if(gk!=null) {
+			@SuppressWarnings("unchecked")
+			List<String> generatedKey = (List<String>) gk;
+			return generatedKey;
+		}
+		return null;
+	}
+	
+	@Override
+	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
+		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
+		String qonPrefix = "ns1";
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(SoapDumpSyntax.getSoapHeader(envPrefix));
+		
+		appendUpdateInfo(sb, qonPrefix, reqspec, count, true);
+		
+		sb.append(SoapDumpSyntax.getSoapFooter(envPrefix));
+		resp.getWriter().write(sb.toString());
+		
+		log.debug("writeUpdateCount: "+ count + " " + (count>1?"rows":"row") + " " + action);
+		//log.info("writeUpdateCount::\n"+sb.toString());
+	}
+	
+	protected void appendUpdateInfo(StringBuilder sb, String qonPrefix, RequestSpec reqspec, int count, boolean addNS) {
+		if(addNS) {
+			sb.append("<"+qonPrefix+":"+"updateInfo"+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
+		}
+		else {
+			sb.append("<updateInfo>\n");
+		}
+		
+		// generatedKey...
+		List<String> generatedKey = getGeneratedKeys(reqspec);
+		if(generatedKey!=null) {
+			sb.append("<generatedKey>");
+			for(String v: generatedKey) {
+				sb.append("<value>"+DataDumpUtils.xmlEscapeText(v)+"</value>\n");
+			}
+			sb.append("</generatedKey>\n");
+		}
+		sb.append("<updateCount>"+count+"</updateCount>\n");
+		
+		if(addNS) {
+			sb.append("</"+qonPrefix+":"+"updateInfo"+">\n");
+		}
+		else {
+			sb.append("</updateInfo"+">\n");
+		}
+	}
+	
+	@Override
+	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
+		int updatecount = 0; 
+		String updateCountStr = resp.getHeader(ResponseSpec.HEADER_UPDATECOUNT);
+		if(updateCountStr!=null) {
+			updatecount = Integer.parseInt(updateCountStr);
+		}
+		
+		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
+		String qonPrefix = "ns1";
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(SoapDumpSyntax.getSoapHeader(envPrefix));
+
+		String execReturnElemName = PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return";
+		
+		if(executableReturnsValues(eo)) {
+			sb.append("<"+qonPrefix+":"+execReturnElemName+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
+			ExecutableParameter rp = eo.getReturnParam();
+			if(rp!=null) {
+				sb.append("<return>");
+				Object o = getNextReturnObject(reqspec);
+				if(o!=null) {
+					sb.append(o);
+				}
+				sb.append("</return>"+"\n");
+			}
+			List<ExecutableParameter> eps = eo.getParams();
+			for(int i=0;i<eps.size();i++) {
+				ExecutableParameter ep = eps.get(i);
+				if(SchemaModelUtils.isOutParameter(ep)) {
+					int pcount = i+1;
+					sb.append("<outputParameter"+pcount+">");
+					Object o = getNextReturnObject(reqspec);
+					if(o!=null) {
+						sb.append(o);
+					}
+					sb.append("</outputParameter"+pcount+">"+"\n");
+				}
+			}
+		}
+		
+		appendUpdateInfo(sb, qonPrefix, reqspec, updatecount, false);
+
+		if(executableReturnsValues(eo)) {
+			sb.append("</"+qonPrefix+":"+execReturnElemName+">\n");
+		}
+		
+		sb.append(SoapDumpSyntax.getSoapFooter(envPrefix));
+		resp.getWriter().write(sb.toString());
+
+		log.debug("writeExecuteOutput: "+ updatecount + " " + (updatecount>1?"rows":"row") + " " + "updated (in execute)");
+		//log.info("writeExecuteOutput::\n"+sb.toString());
+	}
+	
+	@Override
+	protected void writeExecuteResultSetOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, ResultSet value)
+			throws IOException, SQLException {
+		writeExecuteOutput(reqspec, eo, resp, null);
+	}
+	
+	Object getNextReturnObject(RequestSpec reqspec) {
+		List<Object> ol = getReturnList(reqspec);
+		if(ol.size()>0) {
+			return ol.remove(0);
+		}
+		return null;
+	}
+
+	static boolean hasUniqueKey(Relation r) {
+		Constraint uk = SchemaModelUtils.getPK(r);
+		return uk!=null && uk.getUniqueColumns()!=null;
+	}
+	
+	@Override
+	protected boolean allowMultipleReturnObjects() {
+		return true;
 	}
 	
 }

@@ -24,7 +24,9 @@ import org.w3c.dom.NodeList;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class SoapRequest extends RequestSpec {
@@ -38,12 +40,17 @@ public class SoapRequest extends RequestSpec {
 	public static final String TAG_FILTERS = "filters";
 	public static final String TAG_VALUE = "value";
 	public static final String ATTR_DIRECTION = "direction";
+
+	// update tags
+	public static final String TAG_ENTITY = "entity";
+	public static final String TAG_FILTERKEY = "filterKey";
 	
 	public static final String[] KNOWN_TAGS = { TAG_FILTERS, PARAM_FIELDS, PARAM_LIMIT, PARAM_OFFSET, PARAM_DISTINCT, PARAM_ORDER };
 	static final List<String> knownTags = Arrays.asList(KNOWN_TAGS);
 	
 	static final Pattern soapPositionalParamTagPattern = Pattern.compile("parameter([1-9]+[0-9]*)", Pattern.DOTALL);
 	
+	ActionType atype;
 	Map<String, String> xtraParametersMap;
 	
 	//Element requestEl;
@@ -71,7 +78,7 @@ public class SoapRequest extends RequestSpec {
 	
 	@Override
 	protected String getMethod(HttpServletRequest req) {
-		return QueryOn.METHOD_GET; //XXX: add methods: POST (insert), PATCH (update), DELETE (delete), POST (execute)
+		return QueryOn.METHOD_POST; // GET (select), POST (insert), PATCH (update), DELETE (delete), POST (execute)
 	}
 	
 	@Override
@@ -89,9 +96,33 @@ public class SoapRequest extends RequestSpec {
 		if(tagName!=null && tagName.startsWith(nsPrefix)) {
 			tagName = tagName.substring(nsPrefix.length()+1);
 		}
+		
 		if(tagName.endsWith(QonSoapServlet.SUFFIX_REQUEST_ELEMENT)) {
 			tagName = tagName.substring(0, tagName.length()-QonSoapServlet.SUFFIX_REQUEST_ELEMENT.length());
+			atype = ActionType.SELECT;
 		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_INSERT_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_INSERT_ELEMENT.length());
+			atype = ActionType.INSERT;
+		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_UPDATE_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_UPDATE_ELEMENT.length());
+			atype = ActionType.UPDATE;
+		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_DELETE_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_DELETE_ELEMENT.length());
+			atype = ActionType.DELETE;
+		}
+		else if(tagName.startsWith(QonSoapServlet.PREFIX_EXECUTE_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_EXECUTE_ELEMENT.length());
+			atype = ActionType.EXECUTE;
+		}
+		else {
+			String message = "unknown ActionType for tagName '"+tagName+"'";
+			log.warn(message);
+			throw new BadRequestException(message);
+		}
+		
 		log.info("tagName: "+getRequestElement().getTagName()+" -> "+tagName);
 		return tagName;
 	}
@@ -159,6 +190,50 @@ public class SoapRequest extends RequestSpec {
 	}
 	
 	@Override
+	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
+		if(atype.equals(ActionType.INSERT) || atype.equals(ActionType.UPDATE)) {
+			//updateValues
+			Element relationElem = XmlUtils.getUniqueChild(getRequestElement(), TAG_ENTITY);
+			if(relationElem==null) {
+				throw new BadRequestException("Element not found: "+TAG_ENTITY);
+			}
+			
+			NodeList nl = relationElem.getChildNodes();
+			for(int i=0;i<nl.getLength();i++) {
+				Node n = nl.item(i);
+				if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
+				Element el = (Element) n;
+				String tag = el.getTagName();
+				String value =  el.getTextContent();
+				log.info("tag: "+tag+" ; value: "+value);
+				updateValues.put(tag, value);
+			}
+		}
+		
+		if(atype.equals(ActionType.UPDATE) || atype.equals(ActionType.DELETE)) {
+			Element relationKeyElem = XmlUtils.getUniqueChild(getRequestElement(), TAG_FILTERKEY);
+			if(relationKeyElem==null) {
+				throw new BadRequestException("Element not found: "+TAG_FILTERKEY);
+			}
+			
+			NodeList nl = relationKeyElem.getChildNodes();
+			for(int i=0;i<nl.getLength();i++) {
+				Node n = nl.item(i);
+				if(n.getNodeType() != Node.ELEMENT_NODE) { continue; }
+				Element el = (Element) n;
+				String tag = el.getTagName();
+				String value =  el.getTextContent();
+				log.info("tag [key]: "+tag+" ; value: "+value);
+				keyValues.put(tag, value);
+			}
+		}
+
+		if(atype.equals(ActionType.EXECUTE)) {
+			log.info("EXECUTE:: params: "+params+" ; xtraParametersMap: "+xtraParametersMap);
+		}
+	}
+	
+	@Override
 	protected void processFilters(Set<String> allowedFilters) throws UnsupportedEncodingException {
 		Element oFilters = XmlUtils.getUniqueChild(getRequestElement(), TAG_FILTERS);
 		if(oFilters==null) { return; }
@@ -201,6 +276,7 @@ public class SoapRequest extends RequestSpec {
 	
 	@Override
 	protected void processParams(List<String> parts) {
+		//XXX move this code to processBody?
 		xtraParametersMap = new HashMap<>();
 		Map<String, String> positionalValues = new TreeMap<>();
 		NodeList nl = getRequestElement().getChildNodes();
@@ -211,7 +287,11 @@ public class SoapRequest extends RequestSpec {
 			String tagName = el.getTagName();
 			//log.info("processParams: found parameter '"+tagName+"'");
 			if(Collections.binarySearch(knownTags, tagName)<0) {
-				String tagValue = el.getTextContent();
+				String tagValue = getTextContent(el);
+				if(tagValue==null) {
+					log.info("processParams: won't add '"+tagName+"' with null value");
+					continue;
+				}
 				log.info("processParams: will add '"+tagName+"' - value '"+tagValue+"'");
 				xtraParametersMap.put(tagName,tagValue);
 				if( //(action.atype==ActionType.SELECT || action.atype==ActionType.EXECUTE) &&
@@ -224,6 +304,27 @@ public class SoapRequest extends RequestSpec {
 		for(Map.Entry<String, String> e: positionalValues.entrySet()) {
 			params.add(e.getValue());
 		}
+	}
+	
+	String getTextContent(Element el) {
+		if(el.hasChildNodes()) {
+			if(el.getChildNodes().getLength()==1) {
+				Node child = el.getFirstChild();
+				int type = child.getNodeType();
+				if(type==Node.TEXT_NODE) {
+					return el.getTextContent();
+				}
+				if(type==Node.ELEMENT_NODE) {
+					return getTextContent((Element)child);
+				}
+				log.warn("element '"+el.getTagName()+"' is of type "+type);
+			}
+			else {
+				log.info("element '"+el.getTagName()+"' has "+el.getChildNodes().getLength()+" child nodes");
+				return null;
+			}
+		}
+		return el.getTextContent();
 	}
 	
 	@Override
@@ -254,7 +355,7 @@ public class SoapRequest extends RequestSpec {
 			//XXX serviceName could include initCaps(modelId)
 		}
 		//log.info("modelId="+modelId+" / req.getPathInfo()="+req.getPathInfo());
-		return modelId;
+		return SchemaModelUtils.getValidatedModelId(req, modelId, true);
 	}
 	
 	Map<String, String> getUniFilter(String filter) {

@@ -747,7 +747,7 @@ public class QueryOn extends HttpServlet {
 					if(dbobj==null) {
 						throw new NotFoundException("object not found: "+reqspec.object);
 					}
-					atype = getActionTypeFromDbObject(dbobj, reqspec.httpMethod);
+					atype = getActionType(reqspec, dbobj);
 					if(atype.equals(ActionType.EXECUTE)) {
 						otype = DBObjectType.EXECUTABLE.name();
 					}
@@ -964,12 +964,15 @@ public class QueryOn extends HttpServlet {
 		return null;
 	}
 	
-	ActionType getActionTypeFromDbObject(DBIdentifiable dbobj, String httpMethod) {
+	protected ActionType getActionType(RequestSpec reqspec, DBIdentifiable dbobj) {
 		if(dbobj instanceof Relation) {
-			return getRelationActionType(httpMethod);
+			return getRelationActionType(reqspec.httpMethod);
 		}
 		if(dbobj instanceof ExecutableObject) {
-			//XXX only if POST method?
+			//XXX only if POST method? GET if there are no side-effects? DETERMINISTIC?
+			if(!reqspec.httpMethod.equals(METHOD_POST) && !reqspec.httpMethod.equals(METHOD_GET)) {
+				throw new BadRequestException("unknown http method: "+reqspec.httpMethod+" [Executable object]");
+			}
 			return ActionType.EXECUTE;
 		}
 		throw new BadRequestException("unknown object type: "+dbobj.getClass().getName()+" [obj="+dbobj.getName()+"]");
@@ -1017,18 +1020,21 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	public static boolean grantsAndRolesMatches(Subject subject, PrivilegeType privilege, List<Grant> grants) {
-		grants = QOnModelUtils.filterGrantsByPrivilegeType(grants, privilege);
-		if(grants==null || grants.size()==0) {
+		List<Grant> filteredGrants = QOnModelUtils.filterGrantsByPrivilegeType(grants, privilege);
+		if(filteredGrants==null || filteredGrants.size()==0) {
 			return true;
 		}
 		Set<String> roles = ShiroUtils.getSubjectRoles(subject);
-		//log.info("grantsAndRolesMatches:: grants: "+grants);
+		//log.info("grantsAndRolesMatches:: privilege: "+privilege+" / filteredGrants: "+filteredGrants);
 		//log.info("grantsAndRolesMatches:: roles: "+roles);
-		for(Grant grant: grants) {
-			if( privilege.equals(grant.getPrivilege()) && roles.contains(grant.getGrantee()) ) {
+		Set<String> mustHaveRoles = new HashSet<String>();
+		for(Grant grant: filteredGrants) {
+			if(roles.contains(grant.getGrantee())) {
 				return true;
 			}
+			mustHaveRoles.add(grant.getGrantee());
 		}
+		log.debug("grantsAndRolesMatches: user must have any of "+mustHaveRoles+" roles but only has "+roles+" roles [privilege="+privilege+"]");
 		
 		return false;
 	}
@@ -1550,7 +1556,7 @@ public class QueryOn extends HttpServlet {
 				&& sql!=null && !sql.equals("")) {
 			
 			//log.debug("executing BODY: "+sql);
-			stmt = conn.prepareCall(sql.toString());
+			stmt = conn.prepareCall(sql);
 			try {
 				ParameterMetaData pmd = stmt.getParameterMetaData();
 				if(pc != pmd.getParameterCount()) {
@@ -1574,29 +1580,13 @@ public class QueryOn extends HttpServlet {
 					stmt.registerOutParameter(i+1, DBUtil.getSQLTypeForColumnType(ep.getDataType()));
 				}
 			}
-			hasResultSet = stmt.execute();
-
-			int updatecount = stmt.getUpdateCount();
-			//log.info("updateCount: "+updatecount);
-			resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, updatecount);
-
-			try {
-				ResultSet generatedKeys = stmt.getGeneratedKeys();
-				if(generatedKeys!=null && generatedKeys.next()) {
-					List<String> colVals = getGeneratedKeys(generatedKeys);
-					resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
-				}
-			}
-			catch(SQLException e) {
-				log.warn("doExecute: getGeneratedKeys: "+e.getMessage());
-			}
 		}
 		else {
 			sql = SQL.createExecuteSQLstr(eo);
-			stmt = conn.prepareCall(sql.toString());
+			stmt = conn.prepareCall(sql);
 			//int inParamCount = 0;
-			if(reqspec.params.size() < eo.getParams().size()) {
-				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters ["+eo.getParams().size()+"]");
+			if(reqspec.params.size() < inParamCount) {
+				throw new BadRequestException("Number of request parameters ["+reqspec.params.size()+"] less than number of executable's parameters [size()="+eo.getParams().size()+" ; inParamCount="+inParamCount+"]");
 			}
 			for(int i=0;i<eo.getParams().size();i++) {
 				ExecutableParameter ep = eo.getParams().get(i);
@@ -1625,62 +1615,82 @@ public class QueryOn extends HttpServlet {
 				//log.info("[return] registerOutParameter ; type="+DBUtil.getSQLTypeForColumnType(eo.getReturnParam().getDataType()));
 				outParamCount++;
 			}
-			log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
-			hasResultSet = stmt.execute();
+		}
+
+		log.debug("sql exec: "+sql+" [executable="+eo+" ; return="+eo.getReturnParam()+" ; inParamCount="+inParamCount+" ; outParamCount="+outParamCount+"]");
+		hasResultSet = stmt.execute();
+
+		int updatecount = stmt.getUpdateCount();
+		//log.debug("hasResultSet: "+hasResultSet+" ; updateCount: "+updatecount);
+		if(updatecount!=-1) { 
+			resp.addIntHeader(ResponseSpec.HEADER_UPDATECOUNT, updatecount);
+		}
+
+		try {
+			ResultSet generatedKeys = stmt.getGeneratedKeys();
+			if(generatedKeys!=null && generatedKeys.next()) {
+				List<String> colVals = getGeneratedKeys(generatedKeys);
+				//log.debug("getGeneratedKeys: "+colVals);
+				setGeneratedKeys(reqspec, resp, colVals);
+			}
+			else {
+				//log.debug("getGeneratedKeys: no keys");
+			}
+		}
+		catch(SQLException e) {
+			log.warn("doExecute: getGeneratedKeys: "+e.getMessage());
 		}
 		
 		boolean gotReturn = false;
 		if(eo.getType()==DBObjectType.FUNCTION) { // is function !?! // eo.getReturnParam()!=null
 			retObject = stmt.getObject(1);
+			pushReturnObject(reqspec, retObject);
 			gotReturn = true;
 		}
 		if(hasResultSet && !gotReturn) {
 			retObject = stmt.getResultSet();
+			pushReturnObject(reqspec, retObject);
 			gotReturn = true;
 		}
-		boolean warnedManyOutParams = false;
+		final boolean allowMultipleReturnObjects = allowMultipleReturnObjects();
 		for(int i=0;i<pc;i++) {
 			ExecutableParameter ep = eo.getParams().get(i);
 			if(SchemaModelUtils.isOutParameter(ep)) {
-				if(gotReturn) {
-					if(outParamCount>1 && !warnedManyOutParams) {
-						log.warn("there are "+outParamCount+" out parameter. Only the first will be returned");
-						resp.addHeader(ResponseSpec.HEADER_WARNING, "Execute-TooManyReturnParams ReturnCount="+outParamCount);
-						warnedManyOutParams = true;
-					}
+				if(gotReturn && outParamCount>1 && !allowMultipleReturnObjects) {
+					log.warn("there are "+outParamCount+" out parameter. Only the first will be returned [allowMultipleReturnObjects=="+allowMultipleReturnObjects+"]");
+					resp.addHeader(ResponseSpec.HEADER_WARNING, "Execute-TooManyReturnParams ReturnCount="+outParamCount);
 					break; //got first result
 					//log.info("ret["+i+";"+(i+paramOffset)+"]: "+stmt.getObject(i+paramOffset));
 				}
-				else {
-					retObject = stmt.getObject(i+paramOffset);
-					gotReturn = true;
-				}
+				retObject = stmt.getObject(i+paramOffset);
+				pushReturnObject(reqspec, retObject);
+				gotReturn = true;
 			}
 		}
-		resp.addHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, String.valueOf(outParamCount));
+		resp.addIntHeader(ResponseSpec.HEADER_EXECUTE_RETURNCOUNT, outParamCount);
 		
 		if(retObject!=null) {
 			if(retObject instanceof ResultSet) {
-				dumpResultSet((ResultSet)retObject, reqspec, null, reqspec.object, null, null, null, true, resp);
+				writeExecuteResultSetOutput(reqspec, eo, resp, (ResultSet)retObject);
 			}
 			else {
-				resp.setContentType(MIME_TEXT);
+				setContentType(resp, MIME_TEXT);
 				if(retObject instanceof Clob) {
 					Clob cret = (Clob) retObject;
 					//retObject = cret.getSubString(0L, (int) cret.length());
 					retObject = IOUtil.readFromReader(cret.getCharacterStream());
 				}
-				writeExecuteOutput(reqspec, resp, retObject.toString());
+				writeExecuteOutput(reqspec, eo, resp, retObject.toString());
 			}
 		}
 		else {
-			resp.setContentType(MIME_TEXT);
+			setContentType(resp, MIME_TEXT);
 			if(outParamCount==0) {
 				//XXX reqspec.getExecuteWithNoReturnSucessStatus(); //?
-				writeExecuteOutput(reqspec, resp, "execution successful - no return");
+				writeExecuteOutput(reqspec, eo, resp, "execution successful - no return");
 			}
 			else {
-				writeExecuteOutput(reqspec, resp, "execution successful - null return");
+				writeExecuteOutput(reqspec, eo, resp, "execution successful - null return");
 			}
 		}
 
@@ -1688,11 +1698,36 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
-			throw new InternalServerException("Error executing procedure/fuction: "+e.getMessage(), e);
+			String message = "Error executing procedure/fuction "+eo.getQualifiedName()+": ";
+			//log.warn(message+e);
+			log.debug(message+e.getMessage(), e);
+			throw new SQLException(message, e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
 		}
+	}
+	
+	protected boolean allowMultipleReturnObjects() {
+		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected List<Object> getReturnList(RequestSpec reqspec) {
+		List<Object> retlist = null;
+		Object rl = reqspec.getAttribute(RequestSpec.ATTR_RETURN_LIST);
+		if(rl==null) {
+			retlist = new ArrayList<Object>();
+			reqspec.setAttribute(RequestSpec.ATTR_RETURN_LIST, retlist);
+		}
+		else {
+			retlist = (List<Object>) rl;
+		}
+		return retlist;
+	}
+	
+	protected void pushReturnObject(RequestSpec reqspec, Object o) {
+		getReturnList(reqspec).add(o);
 	}
 	
 	void setStatementParameter(PreparedStatement stmt, int pos, Object o) throws SQLException, IOException {
@@ -1912,7 +1947,7 @@ public class QueryOn extends HttpServlet {
 			for(UpdatePlugin up: plugins) {
 				if(up.accepts(relation)) {
 					//up.setProperties(prop);
-					//up.setConnection(conn); //XXX UpdatePlugin.onDelete may need connection?
+					up.setConnection(conn);
 					up.onDelete(relation, reqspec);
 				}
 			}
@@ -2240,13 +2275,7 @@ public class QueryOn extends HttpServlet {
 		ResultSet generatedKeys = st.getGeneratedKeys();
 		if (generatedKeys.next()) {
 			List<String> colVals = getGeneratedKeys(generatedKeys);
-			/*int colCount = generatedKeys.getMetaData().getColumnCount();
-			List<String> colVals = new ArrayList<String>();
-			for(int i=0;i<colCount;i++) {
-				colVals.add(generatedKeys.getString(i+1));
-			}*/
-			resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(colVals, ", "));
-			//log.info("generatedKeys[pk="+Arrays.toString(pkcols)+";#="+colCount+"]: "+ Utils.join(colVals, ", "));
+			setGeneratedKeys(reqspec, resp, colVals);
 		}
 		
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
@@ -2262,7 +2291,7 @@ public class QueryOn extends HttpServlet {
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		conn.commit();
-		resp.setStatus(HttpServletResponse.SC_CREATED);
+		setResponseStatus(resp, HttpServletResponse.SC_CREATED);
 		writeUpdateCount(reqspec, resp, count, "inserted");
 		
 		}
@@ -2281,13 +2310,29 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	protected void setResponseStatus(HttpServletResponse resp, int status) {
+		resp.setStatus(status);
+	}
+	
+	protected void setContentType(HttpServletResponse resp, String type) {
+		resp.setContentType(type);
+	}
+	
+	protected void setGeneratedKeys(RequestSpec reqspec, HttpServletResponse resp, List<String> generatedKey) {
+		resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(generatedKey, ", "));
+	}
+	
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(MIME_TEXT);
 		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
 	}
 
-	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
 		resp.getWriter().write(value);
+	}
+
+	protected void writeExecuteResultSetOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, ResultSet value) throws IOException, SQLException {
+		dumpResultSet(value, reqspec, null, reqspec.object, null, null, null, true, resp);
 	}
 	
 	void addPartParameter(RequestSpec reqspec, SQL sql, String ctype, String col, int colindex) throws IOException {

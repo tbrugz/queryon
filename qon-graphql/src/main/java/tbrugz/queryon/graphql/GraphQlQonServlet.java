@@ -84,6 +84,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		Map<String, Object> executionSpecResult = executionResult.toSpecification();
 		Gson gson = new GsonBuilder().create();
 		resp.getWriter().write(gson.toJson(executionSpecResult));
+		//XXX: add xml-output option?
 		//writeResult(exec, executionResult, resp);
 	}
 	
@@ -285,7 +286,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 
 	@Override
-	protected void writeExecuteOutput(RequestSpec reqspec, HttpServletResponse resp, String value) throws IOException {
+	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
 		if(reqspec instanceof GqlRequest) {
 			GqlRequest req = (GqlRequest) reqspec;
 			req.executeOutput = value;

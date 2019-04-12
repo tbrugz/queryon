@@ -215,6 +215,22 @@ public class SchemaModelUtils {
 		return modelReq;
 	}
 	
+	public static String getValidatedModelId(HttpServletRequest req, final String modelId, boolean allowDefault) {
+		String ret = modelId;
+		if(modelId==null && allowDefault) {
+			ret = (String) req.getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+		}
+		else {
+			Set<String> models = getModelIds(req.getServletContext());
+			if(!models.contains(modelId)) {
+				throw new BadRequestException( "Model id '"+modelId+"' undefined"
+						+(" [modelsIds: "+models+"]")
+						);
+			}
+		}
+		return ret;
+	}
+	
 	public static String getDefaultModelId(ServletContext context) {
 		return (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
 	}
@@ -240,6 +256,15 @@ public class SchemaModelUtils {
 		int ret = 0;
 		for(ExecutableParameter ep: list) {
 			ret += isInParameter(ep) ? 1 : 0;
+		}
+		return ret;
+	}
+
+	public static int getNumberOfOutParameters(List<ExecutableParameter> list) {
+		if(list==null) { return 0; }
+		int ret = 0;
+		for(ExecutableParameter ep: list) {
+			ret += isOutParameter(ep) ? 1 : 0;
 		}
 		return ret;
 	}
