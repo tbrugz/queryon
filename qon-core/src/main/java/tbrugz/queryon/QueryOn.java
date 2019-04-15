@@ -1130,7 +1130,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	public static SQL getSelectQuery(Relation relation, RequestSpec reqspec, Constraint pk, LimitOffsetStrategy loStrategy,
-			String username, Integer defaultLimit, int maxLimit, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+			String username, Integer defaultLimit, int maxLimit, HttpServletResponse resp, boolean strictMode) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		
 		SQL sql = SQL.createSQL(relation, reqspec, username);
 		
@@ -1149,6 +1149,9 @@ public class QueryOn extends HttpServlet {
 		if(warnings!=null && warnings.size()>0 && resp!=null) {
 			String warns = Utils.join(warnings, ", ");
 			resp.addHeader(ResponseSpec.HEADER_WARNING_UNKNOWN_COLUMN, warns);
+			if(strictMode) {
+				throw new BadRequestException(warns);
+			}
 		}
 		
 		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
@@ -1256,7 +1259,7 @@ public class QueryOn extends HttpServlet {
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
 		preprocessParameters(reqspec, relation, pk);
-		sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp);
+		sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp, isStrictMode());
 		finalSql = sql.getFinalSql();
 		
 		if(validateQuery) {
@@ -2159,7 +2162,11 @@ public class QueryOn extends HttpServlet {
 			for(int i=0;i<pk.getUniqueColumns().size() && i<reqspec.params.size();i++) {
 				String pkcol = pk.getUniqueColumns().get(i);
 				if(! MiscUtils.containsIgnoreCase(columns, pkcol)) {
-					log.warn("unknown PK column: "+pkcol);
+					String message = "unknown PK column: "+pkcol;
+					log.warn(message);
+					if(isStrictMode()) {
+						throw new BadRequestException(message);
+					}
 					continue;
 				}
 				String pkval = String.valueOf( reqspec.params.get(i) );
@@ -2790,9 +2797,9 @@ public class QueryOn extends HttpServlet {
 			//log.debug("rs: "+rs.getClass());
 			try {
 				if(!rs.isLast()) { // works better with h2, but not with oracle (so: try/catch)
-				//if(rs.next()) { // not working ok with h2, oracle
-				throw new BadRequestException("ResultSet has more than 1 row ["+queryName+"]");
-			}
+					//if(rs.next()) { // not working ok with h2, oracle
+					throw new BadRequestException("ResultSet has more than 1 row ["+queryName+"]");
+				}
 			}
 			catch(SQLException e) { // oracle?
 				log.warn("Error at 'isLast()/next()': "+e);
@@ -2975,5 +2982,9 @@ public class QueryOn extends HttpServlet {
 		}
 		return l;
 	}*/
+	
+	protected boolean isStrictMode() {
+		return false;
+	}
 	
 }

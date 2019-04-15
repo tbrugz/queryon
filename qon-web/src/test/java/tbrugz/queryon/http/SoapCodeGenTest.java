@@ -360,6 +360,27 @@ public class SoapCodeGenTest {
 		}
 	}
 
+	@Test(expected=SOAPFaultException.class)
+	public void callWithFilterNotNullError() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			PUBLICPAIRRequest r = new PUBLICPAIRRequest();
+			
+			//
+			ObjectFactory of = new ObjectFactory();
+			BooleanValuedFilterType bvft = of.createBooleanValuedFilterType();
+			bvft.setField("XYZ");
+			FiltersType ft = of.createFiltersType();
+			ft.setFilterNotNull(bvft);
+			r.setFilters(ft);
+			//
+			
+			qonsp.getPUBLICPAIR(r);
+		}
+	}
+	
 	@Test
 	public void callInsert() throws IOException, XMLStreamException, SAXException {
 		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));

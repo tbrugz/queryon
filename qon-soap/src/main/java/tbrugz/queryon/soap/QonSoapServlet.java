@@ -1210,4 +1210,9 @@ public class QonSoapServlet extends BaseApiServlet {
 		return true;
 	}
 	
+	@Override
+	protected boolean isStrictMode() {
+		return true;
+	}
+	
 }
