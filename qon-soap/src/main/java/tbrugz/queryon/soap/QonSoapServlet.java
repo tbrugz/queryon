@@ -68,6 +68,8 @@ public class QonSoapServlet extends BaseApiServlet {
 	public static final String[] MULTI_FILTERS = { "filterIn", "filterNotIn", "filterLike", "filterNotLike" };
 	public static final String[] BOOLEAN_FILTERS = { "filterNull", "filterNotNull" };
 	
+	public static final String XSD_UNBOUNDED = "unbounded"; 
+	
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	
@@ -512,7 +514,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		element.setAttribute("name", normalize( r.getQualifiedName() ));
 		element.setAttribute("type", "xsd1:" + normalize( r.getQualifiedName() ) + "Type" );
 		element.setAttribute("minOccurs", "0");
-		element.setAttribute("maxOccurs", "unbounded");
+		element.setAttribute("maxOccurs", XSD_UNBOUNDED);
 		sequence.appendChild(element);
 		
 		return listElement;
@@ -706,7 +708,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xs:" + "string" );
 			//el.setAttribute("minOccurs", "1");
-			el.setAttribute("maxOccurs", "unbounded");
+			el.setAttribute("maxOccurs", XSD_UNBOUNDED);
 			all.appendChild(el);
 		}
 		return complexType;
@@ -841,8 +843,8 @@ public class QonSoapServlet extends BaseApiServlet {
 	}
 
 	void createFiltersTypes(Document doc, Element schema) {
-		schema.appendChild(createFilterType(doc, "uniqueValueFilterType", true, 1, 1));
-		schema.appendChild(createFilterType(doc, "multiValueFilterType", true, 1, null));
+		schema.appendChild(createFilterType(doc, "uniqueValueFilterType", true, "1", "1"));
+		schema.appendChild(createFilterType(doc, "multiValueFilterType", true, "1", XSD_UNBOUNDED));
 		schema.appendChild(createFilterType(doc, "booleanValuedFilterType", false, null, null));
 
 		Element filtersContainer = null;
@@ -874,7 +876,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 	}
 	
-	Element createFilterType(Document doc, String name, boolean includeValues, Integer minValueOccurs, Integer maxValueOccurs) {
+	Element createFilterType(Document doc, String name, boolean includeValues, String minValueOccurs, String maxValueOccurs) {
 		Element complexType = doc.createElement("xs:"+"complexType");
 		complexType.setAttribute("name", name);
 		Element all = doc.createElement("xs:"+"sequence");
@@ -892,10 +894,10 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", "value");
 			el.setAttribute("type", "xs:" + "string" ); // boolean, integer, float, date, string based on field type?
 			if(minValueOccurs!=null) {
-				el.setAttribute("minOccurs", String.valueOf(minValueOccurs));
+				el.setAttribute("minOccurs", minValueOccurs);
 			}
 			if(maxValueOccurs!=null) {
-				el.setAttribute("maxOccurs", String.valueOf(maxValueOccurs));
+				el.setAttribute("maxOccurs", maxValueOccurs);
 			}
 			all.appendChild(el);
 		}

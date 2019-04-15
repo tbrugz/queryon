@@ -20,6 +20,7 @@ import org.apache.cxf.tools.common.ToolContext;
 import org.apache.cxf.tools.wsdlto.WSDLToJava;
 /*
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
+import org.bitbucket.tbrugz.queryon.queryonservice.BooleanValuedFilterType;
 import org.bitbucket.tbrugz.queryon.queryonservice.DeletePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICINSERTTASK;
 import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICISPRIME;
@@ -29,6 +30,7 @@ import org.bitbucket.tbrugz.queryon.queryonservice.FiltersType;
 import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice.InsertPUBLICTASK;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfPUBLICDEPT;
+import org.bitbucket.tbrugz.queryon.queryonservice.ListOfPUBLICPAIR;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfQUERYNAMEDPARAMS1;
 import org.bitbucket.tbrugz.queryon.queryonservice.ListOfQUERYQUERYWITHPOSITIONALPARAMS;
 import org.bitbucket.tbrugz.queryon.queryonservice.MultiValueFilterType;
@@ -37,11 +39,14 @@ import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICDEPTType;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPKeyType;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICEMPType;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICPAIRRequest;
+import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICPAIRType;
 import org.bitbucket.tbrugz.queryon.queryonservice.PUBLICTASKType;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Request;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYNAMEDPARAMS1Type;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSRequest;
 import org.bitbucket.tbrugz.queryon.queryonservice.QUERYQUERYWITHPOSITIONALPARAMSType;
+import org.bitbucket.tbrugz.queryon.queryonservice.UniqueValueFilterType;
 import org.bitbucket.tbrugz.queryon.queryonservice.UpdateInfoType;
 import org.bitbucket.tbrugz.queryon.queryonservice.UpdatePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnServicePortType;
@@ -274,7 +279,8 @@ public class SoapCodeGenTest {
 			ObjectFactory of = new ObjectFactory();
 			MultiValueFilterType mvft = of.createMultiValueFilterType();
 			mvft.setField("NAME");
-			mvft.setValue("HR");
+			mvft.getValue().add("HR");
+			mvft.getValue().add("Engineering");
 			FiltersType ft = of.createFiltersType();
 			ft.setFilterIn(mvft);
 			r.setFilters(ft);
@@ -284,9 +290,72 @@ public class SoapCodeGenTest {
 			log.info(">>> callWithFilterIn");
 			{
 				List<PUBLICDEPTType> l = lopd.getPUBLICDEPT();
+				int count = 0;
+				for(PUBLICDEPTType pd: l) {
+					log.info("id="+pd.getID()+" / name="+pd.getNAME());
+					count++;
+				}
+				Assert.assertEquals(2, count);
+			}
+		}
+	}
+
+	@Test
+	public void callWithFilterEquals() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			PUBLICDEPTRequest r = new PUBLICDEPTRequest();
+			
+			//
+			ObjectFactory of = new ObjectFactory();
+			UniqueValueFilterType uvft = of.createUniqueValueFilterType();
+			uvft.setField("NAME");
+			uvft.setValue("HR");
+			FiltersType ft = of.createFiltersType();
+			ft.setFilterEquals(uvft);
+			r.setFilters(ft);
+			//
+			
+			ListOfPUBLICDEPT lopd = qonsp.getPUBLICDEPT(r);
+			log.info(">>> callWithFilterEquals");
+			{
+				List<PUBLICDEPTType> l = lopd.getPUBLICDEPT();
 				for(PUBLICDEPTType pd: l) {
 					log.info("id="+pd.getID()+" / name="+pd.getNAME());
 				}
+			}
+		}
+	}
+
+	@Test
+	public void callWithFilterNotNull() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			PUBLICPAIRRequest r = new PUBLICPAIRRequest();
+			
+			//
+			ObjectFactory of = new ObjectFactory();
+			BooleanValuedFilterType bvft = of.createBooleanValuedFilterType();
+			bvft.setField("REMARKS");
+			FiltersType ft = of.createFiltersType();
+			ft.setFilterNotNull(bvft);
+			r.setFilters(ft);
+			//
+			
+			ListOfPUBLICPAIR lopd = qonsp.getPUBLICPAIR(r);
+			log.info(">>> callWithFilterNotNull");
+			{
+				List<PUBLICPAIRType> l = lopd.getPUBLICPAIR();
+				int count = 0;
+				for(PUBLICPAIRType pd: l) {
+					log.info("id1="+pd.getID1()+" / id2="+pd.getID2());
+					count++;
+				}
+				Assert.assertEquals(2, count);
 			}
 		}
 	}
