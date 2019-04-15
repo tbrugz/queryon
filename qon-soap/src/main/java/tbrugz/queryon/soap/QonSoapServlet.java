@@ -471,7 +471,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", normalize(r.getColumnNames().get(i)));
 			el.setAttribute("type", "xs:" + getElementType(r.getColumnTypes().get(i)) );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		return complexType;
@@ -545,8 +545,8 @@ public class QonSoapServlet extends BaseApiServlet {
 					Element el = doc.createElement("xs:"+"element");
 					el.setAttribute("name", normalize(param));
 					el.setAttribute("type", "xs:" + type );
-					el.setAttribute("minOccurs", "1");
-					el.setAttribute("maxOccurs", "1");
+					//el.setAttribute("minOccurs", "1");
+					//el.setAttribute("maxOccurs", "1");
 					all.appendChild(el);
 				}
 			}
@@ -562,8 +562,8 @@ public class QonSoapServlet extends BaseApiServlet {
 						Element el = doc.createElement("xs:"+"element");
 						el.setAttribute("name", "parameter"+(i+1));
 						el.setAttribute("type", "xs:" + type );
-						el.setAttribute("minOccurs", "1");
-						el.setAttribute("maxOccurs", "1");
+						//el.setAttribute("minOccurs", "1");
+						//el.setAttribute("maxOccurs", "1");
 						all.appendChild(el);
 					}
 				}
@@ -575,7 +575,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", RequestSpec.PARAM_LIMIT);
 			el.setAttribute("type", "xs:" + "int" );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
@@ -583,7 +583,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", RequestSpec.PARAM_OFFSET);
 			el.setAttribute("type", "xs:" + "int" );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
@@ -591,7 +591,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", RequestSpec.PARAM_DISTINCT);
 			el.setAttribute("type", "xs:" + "boolean" );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
@@ -599,7 +599,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", RequestSpec.PARAM_FIELDS);
 			el.setAttribute("type", "xsd1:" + "fieldsType" );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
@@ -607,7 +607,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", RequestSpec.PARAM_ORDER);
 			el.setAttribute("type", "xsd1:" + "orderType" );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		{
@@ -615,7 +615,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			el.setAttribute("name", "filters");
 			el.setAttribute("type", "xsd1:" + "filtersType" );
 			el.setAttribute("minOccurs", "0");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		return element;
@@ -705,7 +705,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xs:" + "string" );
-			el.setAttribute("minOccurs", "1");
+			//el.setAttribute("minOccurs", "1");
 			el.setAttribute("maxOccurs", "unbounded");
 			all.appendChild(el);
 		}
@@ -741,7 +741,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xsd1:" + "fieldWithDirectionType" );
-			el.setAttribute("minOccurs", "1");
+			//el.setAttribute("minOccurs", "1");
 			all.appendChild(el);
 		}
 		return complexType;
@@ -756,7 +756,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "value");
 			el.setAttribute("type", "xs:"+"string" );
-			el.setAttribute("minOccurs", "1");
+			//el.setAttribute("minOccurs", "1");
 			all.appendChild(el);
 		}
 		return complexType;
@@ -773,14 +773,14 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element element = doc.createElement("xs:"+"element");
 			element.setAttribute("name", "generatedKey");
 			element.setAttribute("type", "xsd1:" + "generatedKeyType" );
-			element.setAttribute("maxOccurs", "1");
+			//element.setAttribute("maxOccurs", "1");
 			all.appendChild(element);
 		}
 		{
 			Element element = doc.createElement("xs:"+"element");
 			element.setAttribute("name", "updateCount");
 			element.setAttribute("type", "xs:" + "int" );
-			element.setAttribute("maxOccurs", "1");
+			//element.setAttribute("maxOccurs", "1");
 			all.appendChild(element);
 		}
 		
@@ -883,8 +883,8 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "field");
 			el.setAttribute("type", "xs:" + "string" );
-			el.setAttribute("minOccurs", "1");
-			el.setAttribute("maxOccurs", "1");
+			//el.setAttribute("minOccurs", "1");
+			//el.setAttribute("maxOccurs", "1");
 			all.appendChild(el);
 		}
 		if(includeValues) {
