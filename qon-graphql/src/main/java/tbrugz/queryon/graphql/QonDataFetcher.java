@@ -22,8 +22,10 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.exception.ForbiddenException;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
+import tbrugz.queryon.model.UserInfo;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -73,6 +75,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			if(action==null) {
 				throw new NotFoundException("object not found (in actionMap): "+reqspec.getObject());
 			}
+			for(int i=0;i<GqlSchemaFactory.queryBeansQueries.length;i++) {
+				if( GqlSchemaFactory.queryBeansQueries[i].equals(reqspec.getObject()) ) {
+					return getBeanValue(GqlSchemaFactory.queryBeansQueries[i], GqlSchemaFactory.queryBeans[i]);
+				}
+			}
+			
 			DBIdentifiable dbobj = getDBIdentifiable(action.dbType, action.objectName);
 			if(dbobj==null) {
 				throw new NotFoundException("object not found: "+reqspec.getObject()+" [objectName="+action.objectName+"]");
@@ -173,6 +181,15 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		Map<String, String> map = new HashMap<>();
 		map.put(GqlSchemaFactory.FIELD_RETURN_VALUE, returnValue);
 		return map;
+	}
+	
+	@SuppressWarnings("unchecked")
+	T getBeanValue(String beanQuery, Class<?> beanClazz) {
+		if(beanQuery.equals(GqlSchemaFactory.QUERY_CURRENTUSER)) {
+			UserInfo ui = new UserInfo(ShiroUtils.getSubject(servlet.getProperties(), req));
+			return (T) ui;
+		}
+		throw new InternalServerException("unknown bean query: "+beanQuery);
 	}
 	
 }

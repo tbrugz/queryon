@@ -124,6 +124,13 @@ public class GraphQlWebTest {
 		JSONObject o = (JSONObject) obj;
 		Assert.assertNotNull("'errors' should NOT be null", o.get("errors"));
 	}
+
+	static Object getJsonData(String jsonStr) {
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		JSONObject o = (JSONObject) obj;
+		return o.get("data");
+	}
 	
 	//---------------------
 	
@@ -227,6 +234,19 @@ public class GraphQlWebTest {
 		String jsonStr = getContent(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
 		assertGraphqlOk(jsonStr);
+	}
+
+	@Test
+	public void getQueryCurrentUser() throws IOException, ParserConfigurationException, SAXException {
+		String query = "{ currentUser { authenticated username } }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+		assertGraphqlOk(jsonStr);
+		
+		JSONObject o = (JSONObject) getJsonData(jsonStr);
+		o = (JSONObject) o.get("currentUser");
+		Assert.assertEquals(false, o.get("authenticated"));
+		Assert.assertEquals("anonymous", o.get("username"));
 	}
 	
 }

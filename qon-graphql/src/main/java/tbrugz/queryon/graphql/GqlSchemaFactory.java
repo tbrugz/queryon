@@ -1,5 +1,9 @@
 package tbrugz.queryon.graphql;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +24,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.model.UserInfo;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -44,7 +49,7 @@ import tbrugz.sqldump.dbmodel.Table;
  */
 /*
  * XXXxx: add (gql)field-name->(qon)schema-object/method (needed by GqlRequestSpec)?
- * XXX: add "me" query (like /auth/info.jsp: authenticated, username, roles)
+ * XXXdone: add "me" query (like /auth/info.jsp: authenticated, username, roles)
  */
 public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
@@ -59,6 +64,12 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	static final String FIELD_UPDATE_COUNT = "updateCount";
 	static final String FIELD_RETURN_VALUE = "returnValue";
+	
+	static final String QUERY_CURRENTUSER = "currentUser"; 
+	
+	static final String[] queryBeansQueries = { QUERY_CURRENTUSER }; 
+	static final Class<?>[] queryBeans = { UserInfo.class }; 
+	static final String[] queryBeansRemarks = { "current user information" }; 
 	
 	public static class QonAction {
 		final ActionType atype;
@@ -108,6 +119,14 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		}
 		for(Relation t: sm.getTables()) {
 			addRelation(queryBuilder, t, df);
+		}
+		for(int i=0;i<queryBeans.length;i++) {
+			try {
+				//XXX: distinct schema/db/model & bean datafetchers?
+				addBean(queryBuilder, queryBeansQueries[i], queryBeans[i], queryBeansRemarks[i], df);
+			} catch (IntrospectionException e) {
+				log.warn("getSchema: addBean: "+e);
+			}
 		}
 		gqlSchemaBuilder.query(queryBuilder.build());
 		
@@ -177,6 +196,38 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		typeMap.put(name, gt);
 		queryBuilder.field(createQueryField(gt, r, df));
 		
+		}
+		catch(GraphQLException e) {
+			log.warn("GraphQLException: "+e);
+		}
+	}
+	
+	void addBean(GraphQLObjectType.Builder queryBuilder, String queryName, Class<?> clazz, String remarks, DataFetcher<?> df) throws IntrospectionException {
+		String name = normalizeName(clazz.getSimpleName());
+		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
+				.name(name);
+				//.name(queryName);
+		
+		try {
+			if(remarks!=null) {
+				builder.description(remarks);
+			}
+			BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+			
+			for(int i=0;i<pds.length;i++) {
+				String cName = normalizeName( pds[i].getName() );
+				if("class".equals(cName)) { continue; }
+				GraphQLScalarType glType = getGlType(pds[i].getReadMethod().getReturnType());
+				GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+						.name(cName)
+						.type(glType);
+				builder.field(f);
+			}
+			
+			GraphQLObjectType gt = builder.build();
+			typeMap.put(queryName, gt);
+			queryBuilder.field(createQueryField(gt, queryName, df));
 		}
 		catch(GraphQLException e) {
 			log.warn("GraphQLException: "+e);
@@ -302,6 +353,19 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			
 			if(df!=null) { f.dataFetcher(df); }
 		}
+		
+		return f.build();
+	}
+
+	GraphQLFieldDefinition createQueryField(GraphQLObjectType t, String queryFieldName, DataFetcher<?> df) {
+		//String qFieldName = queryFieldName!=null ? queryFieldName : "get_"+t.getName();
+		GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+			.name(queryFieldName)
+			//.type(GraphQLList.list(t));
+			.type(t);
+		amap.put(queryFieldName, new QonAction(ActionType.SELECT, DBObjectType.RELATION, t.getName()));
+
+		if(df!=null) { f.dataFetcher(df); }
 		
 		return f.build();
 	}
@@ -491,6 +555,28 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		*/
 		//XXX: date?
 		//log.info("unknown? "+upper);
+		return Scalars.GraphQLString;
+	}
+
+	public GraphQLScalarType getGlType(Class<?> clazz) {
+		if(clazz==null) { return Scalars.GraphQLString; }
+		
+		boolean isInt = clazz.isAssignableFrom(Integer.TYPE) || clazz.isAssignableFrom(Integer.class);
+		if(isInt) {
+			return Scalars.GraphQLInt;
+		}
+		boolean isFloat = clazz.isAssignableFrom(Float.TYPE) || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(Double.TYPE) || clazz.isAssignableFrom(Double.class);
+		if(isFloat) {
+			return Scalars.GraphQLFloat;
+		}
+		boolean isBoolean = clazz.isAssignableFrom(Boolean.TYPE) || clazz.isAssignableFrom(Boolean.class);
+		if(isBoolean) {
+			return Scalars.GraphQLBoolean;
+		}
+		/*
+		isBlob? isObject? date?
+		*/
+		//log.info("unknown class? "+clazz);
 		return Scalars.GraphQLString;
 	}
 	
