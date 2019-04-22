@@ -270,4 +270,16 @@ public class GraphQlWebTest {
 		assertGraphqlErrors(jsonStr);
 	}
 	
+	@Test
+	public void doLogout() throws IOException, ParserConfigurationException, SAXException {
+		String query = "mutation { logout { authenticated username } }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+		assertGraphqlOk(jsonStr);
+		
+		JSONObject o = (JSONObject) getJsonData(jsonStr);
+		o = (JSONObject) o.get("logout");
+		Assert.assertEquals(false, o.get("authenticated"));
+	}
+	
 }

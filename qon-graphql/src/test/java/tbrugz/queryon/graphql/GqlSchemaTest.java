@@ -152,6 +152,15 @@ public class GqlSchemaTest {
 		System.out.println(executionResult.getData().toString());
 		
 		//---
+
+		query = "mutation { logout { authenticated username } }";
+		executionResult = build.execute(query);
+		
+		Assert.assertNotNull(executionResult.getData());
+		Assert.assertEquals(0, executionResult.getErrors().size());
+		System.out.println(executionResult.getData().toString());
+
+		//---
 		/*
 		query = "{ DEPT(limit:10, fin_ID: [1]) { ID NAME } }";
 		executionResult = build.execute(query);

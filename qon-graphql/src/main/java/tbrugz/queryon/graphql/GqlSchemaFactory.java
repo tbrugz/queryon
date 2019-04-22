@@ -66,16 +66,18 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	static final String FIELD_UPDATE_COUNT = "updateCount";
 	static final String FIELD_RETURN_VALUE = "returnValue";
 	
-	static final String QUERY_CURRENTUSER = "currentUser"; 
-	static final String MUTATION_LOGIN = "login"; 
+	static final String QUERY_CURRENTUSER = "currentUser";
+	
+	static final String MUTATION_LOGIN = "login";
+	static final String MUTATION_LOGOUT = "logout";
 	
 	static final String[] queryBeansQueries = { QUERY_CURRENTUSER };
 	static final Class<?>[] queryBeans = { UserInfo.class };
 	static final String[] queryBeansRemarks = { "current user information" };
 
-	static final String[] mutationActions = { MUTATION_LOGIN };
-	static final Class<?>[] mutationParamBeans = { LoginInfo.class };
-	static final Class<?>[] mutationReturnBeans = { UserInfo.class };
+	static final String[] mutationActions = { MUTATION_LOGIN, MUTATION_LOGOUT };
+	static final Class<?>[] mutationParamBeans = { LoginInfo.class, null };
+	static final Class<?>[] mutationReturnBeans = { UserInfo.class, UserInfo.class };
 	
 	public static class QonAction {
 		final ActionType atype;
@@ -278,18 +280,20 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 					.name(actionName)
 					.type(retT);
 			
-			BeanInfo beanInfo = Introspector.getBeanInfo(paramClazz);
-			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
-			
-			for(int i=0;i<pds.length;i++) {
-				String cName = normalizeName( pds[i].getName() );
-				if("class".equals(cName)) { continue; }
-				GraphQLScalarType glType = getGlType(pds[i].getReadMethod().getReturnType());
+			if(paramClazz!=null) {
+				BeanInfo beanInfo = Introspector.getBeanInfo(paramClazz);
+				PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
 				
-				f.argument(GraphQLArgument.newArgument()
-						.name(cName)
-						.type(glType)
-						);
+				for(int i=0;i<pds.length;i++) {
+					String cName = normalizeName( pds[i].getName() );
+					if("class".equals(cName)) { continue; }
+					GraphQLScalarType glType = getGlType(pds[i].getReadMethod().getReturnType());
+					
+					f.argument(GraphQLArgument.newArgument()
+							.name(cName)
+							.type(glType)
+							);
+				}
 			}
 			
 			if(df!=null) { f.dataFetcher(df); }

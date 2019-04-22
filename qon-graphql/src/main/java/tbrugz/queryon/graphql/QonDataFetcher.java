@@ -199,7 +199,17 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			Subject currentUser = SecurityUtils.getSubject();
 			String username = reqspec.getParameterMapUniqueValues().get("username");
 			String password = reqspec.getParameterMapUniqueValues().get("password");
+			
 			ShiroUtils.authenticate(currentUser, username, password);
+
+			UserInfo ui = new UserInfo(currentUser);
+			return (T) ui;
+		}
+		if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGOUT)) {
+			//Subject currentUser = ShiroUtils.getSubject(prop, request);
+			Subject currentUser = SecurityUtils.getSubject();
+
+			currentUser.logout();
 
 			UserInfo ui = new UserInfo(currentUser);
 			return (T) ui;
