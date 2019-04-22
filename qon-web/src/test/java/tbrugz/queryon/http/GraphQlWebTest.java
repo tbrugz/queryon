@@ -248,5 +248,26 @@ public class GraphQlWebTest {
 		Assert.assertEquals(false, o.get("authenticated"));
 		Assert.assertEquals("anonymous", o.get("username"));
 	}
+
+	@Test
+	public void doLogin() throws IOException, ParserConfigurationException, SAXException {
+		String query = "mutation { login(username: \"jdoe\", password: \"jdoepw\") { authenticated username } }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+		assertGraphqlOk(jsonStr);
+		
+		JSONObject o = (JSONObject) getJsonData(jsonStr);
+		o = (JSONObject) o.get("login");
+		Assert.assertEquals(true, o.get("authenticated"));
+		Assert.assertEquals("jdoe", o.get("username"));
+	}
+
+	@Test
+	public void doLoginError() throws IOException, ParserConfigurationException, SAXException {
+		String query = "mutation { login(username: \"jdoe\", password: \"jdoezzz\") { authenticated username } }";
+		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+		assertGraphqlErrors(jsonStr);
+	}
 	
 }

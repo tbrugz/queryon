@@ -4,8 +4,8 @@ import org.apache.shiro.subject.Subject;
 
 public class UserInfo {
 	
-	boolean authenticated;
-	String username;
+	final boolean authenticated;
+	final String username;
 	//Set<String> roles;
 	
 	public UserInfo(Subject subject) {

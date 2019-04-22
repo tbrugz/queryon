@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
 import graphql.schema.DataFetcher;
@@ -77,7 +78,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			}
 			for(int i=0;i<GqlSchemaFactory.queryBeansQueries.length;i++) {
 				if( GqlSchemaFactory.queryBeansQueries[i].equals(reqspec.getObject()) ) {
-					return getBeanValue(GqlSchemaFactory.queryBeansQueries[i], GqlSchemaFactory.queryBeans[i]);
+					return getBeanValue(GqlSchemaFactory.queryBeansQueries[i], GqlSchemaFactory.queryBeans[i], reqspec);
+				}
+			}
+			for(int i=0;i<GqlSchemaFactory.mutationActions.length;i++) {
+				if( GqlSchemaFactory.mutationActions[i].equals(reqspec.getObject()) ) {
+					return getBeanValue(GqlSchemaFactory.mutationActions[i], GqlSchemaFactory.mutationReturnBeans[i], reqspec);
 				}
 			}
 			
@@ -184,11 +190,21 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	T getBeanValue(String beanQuery, Class<?> beanClazz) {
+	T getBeanValue(String beanQuery, Class<?> beanClazz, GqlRequest reqspec) {
 		if(beanQuery.equals(GqlSchemaFactory.QUERY_CURRENTUSER)) {
 			UserInfo ui = new UserInfo(ShiroUtils.getSubject(servlet.getProperties(), req));
 			return (T) ui;
 		}
+		if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGIN)) {
+			Subject currentUser = SecurityUtils.getSubject();
+			String username = reqspec.getParameterMapUniqueValues().get("username");
+			String password = reqspec.getParameterMapUniqueValues().get("password");
+			ShiroUtils.authenticate(currentUser, username, password);
+
+			UserInfo ui = new UserInfo(currentUser);
+			return (T) ui;
+		}
+		
 		throw new InternalServerException("unknown bean query: "+beanQuery);
 	}
 	

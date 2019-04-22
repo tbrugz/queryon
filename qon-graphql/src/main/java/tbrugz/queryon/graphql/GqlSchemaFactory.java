@@ -24,6 +24,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.model.LoginInfo;
 import tbrugz.queryon.model.UserInfo;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
@@ -66,10 +67,15 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	static final String FIELD_RETURN_VALUE = "returnValue";
 	
 	static final String QUERY_CURRENTUSER = "currentUser"; 
+	static final String MUTATION_LOGIN = "login"; 
 	
-	static final String[] queryBeansQueries = { QUERY_CURRENTUSER }; 
-	static final Class<?>[] queryBeans = { UserInfo.class }; 
-	static final String[] queryBeansRemarks = { "current user information" }; 
+	static final String[] queryBeansQueries = { QUERY_CURRENTUSER };
+	static final Class<?>[] queryBeans = { UserInfo.class };
+	static final String[] queryBeansRemarks = { "current user information" };
+
+	static final String[] mutationActions = { MUTATION_LOGIN };
+	static final Class<?>[] mutationParamBeans = { LoginInfo.class };
+	static final Class<?>[] mutationReturnBeans = { UserInfo.class };
 	
 	public static class QonAction {
 		final ActionType atype;
@@ -147,6 +153,15 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				addMutation(mutationBuilder, eo, executeType, df);
 				mutationCount++;
 			}
+			
+			for(int i=0;i<mutationActions.length;i++) {
+				try {
+					//XXX: distinct schema/db/model & bean datafetchers?
+					createBeanAction(mutationBuilder, mutationActions[i], mutationParamBeans[i], mutationReturnBeans[i], df);
+				} catch (IntrospectionException e) {
+					log.warn("IntrospectionException:: getSchema: createBeanAction: "+e);
+				}
+			}
 		
 			if(mutationCount>0) {
 				//add UpdateInfo type
@@ -203,10 +218,27 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	}
 	
 	void addBean(GraphQLObjectType.Builder queryBuilder, String queryName, Class<?> clazz, String remarks, DataFetcher<?> df) throws IntrospectionException {
-		String name = normalizeName(clazz.getSimpleName());
+		//log.info("addBean: "+name+" ; "+clazz.getSimpleName());
+		
+		try {
+			String name = normalizeClassName(clazz);
+			GraphQLObjectType gt = typeMap.get(name);
+			if(gt==null) {
+				gt = createBeanType(name, clazz, remarks);
+			}
+			
+			typeMap.put(name, gt);
+			queryBuilder.field(createQueryField(gt, queryName, df));
+		}
+		catch(GraphQLException e) {
+			log.warn("GraphQLException: "+e);
+		}
+	}
+
+	GraphQLObjectType createBeanType(String name, Class<?> clazz, String remarks) throws IntrospectionException {
+		//log.info("createBeanType: "+name+" ; "+clazz.getSimpleName());
 		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
 				.name(name);
-				//.name(queryName);
 		
 		try {
 			if(remarks!=null) {
@@ -226,14 +258,52 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			}
 			
 			GraphQLObjectType gt = builder.build();
-			typeMap.put(queryName, gt);
-			queryBuilder.field(createQueryField(gt, queryName, df));
+			return gt;
+		}
+		catch(GraphQLException e) {
+			log.warn("GraphQLException: "+e);
+			return null;
+		}
+	}
+	
+	void createBeanAction(GraphQLObjectType.Builder gqlBuilder, String actionName, Class<?> paramClazz, Class<?> returnClazz, DataFetcher<?> df) throws IntrospectionException {
+		try {
+			String retName = normalizeClassName(returnClazz);
+			GraphQLObjectType retT = typeMap.get(retName);
+			if(retT==null) {
+				retT = createBeanType(retName, returnClazz, null);
+			}
+			
+			GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
+					.name(actionName)
+					.type(retT);
+			
+			BeanInfo beanInfo = Introspector.getBeanInfo(paramClazz);
+			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+			
+			for(int i=0;i<pds.length;i++) {
+				String cName = normalizeName( pds[i].getName() );
+				if("class".equals(cName)) { continue; }
+				GraphQLScalarType glType = getGlType(pds[i].getReadMethod().getReturnType());
+				
+				f.argument(GraphQLArgument.newArgument()
+						.name(cName)
+						.type(glType)
+						);
+			}
+			
+			if(df!=null) { f.dataFetcher(df); }
+			
+			GraphQLFieldDefinition gfd = f.build();
+			gqlBuilder.field(gfd);
+			
+			amap.put(actionName, new QonAction(ActionType.EXECUTE, DBObjectType.EXECUTABLE, gfd.getName()));
 		}
 		catch(GraphQLException e) {
 			log.warn("GraphQLException: "+e);
 		}
 	}
-
+	
 	void addMutation(GraphQLObjectType.Builder mutationBuilder, Table t, GraphQLObjectType returnType, DataFetcher<?> df) {
 		String name = normalizeName(t.getName());
 		GraphQLObjectType gt = typeMap.get(name);
@@ -594,6 +664,10 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			//log.info("name normalized: '"+name+"' -> '"+ret+"'"+" [norm1="+Normalizer.normalize(name, Normalizer.Form.NFD)+"]");
 		}*/
 		return ret;
+	}
+	
+	static String normalizeClassName(Class<?> clazz) {
+		return normalizeName(clazz.getSimpleName());
 	}
 	
 	static boolean isNormalizedName(String name) {
