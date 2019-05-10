@@ -406,7 +406,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 		}
 		
 		if(countInserts+countUpdates>0) {
-			conn.commit();
+			DBUtil.doCommit(conn);
 		}
 		
 		log.info("QOn processed [updated/inserted "+countUpdates+"/"+countInserts+" queries in table "+qonQueriesTable+"]");
@@ -445,7 +445,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 		}
 
 		if(countAllDeletes>0) {
-			conn.commit();
+			DBUtil.doCommit(conn);
 		}
 		
 		log.info("QOn processed ["+countAllDeletes+" deleted queries in table "+qonQueriesTable+"]");

@@ -345,7 +345,8 @@ public class DiffServlet extends AbstractHttpServlet {
 					executeCount++;
 				}
 			}
-			conn.commit(); //XXX: commit after postHooks have run?
+			//XXX: commit after postHooks have run?
+			DBUtil.doCommit(conn);
 			log.info(executeCount+" diffs applyed");
 		}
 		catch(SQLException e) {

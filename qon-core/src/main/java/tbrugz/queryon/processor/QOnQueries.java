@@ -199,7 +199,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		Savepoint sp = null;
 		try {
 			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
-			sp = conn.setSavepoint();
+			sp = ConnectionUtil.setSavepointIfNotAutocommit(conn);
 			removeWarning(servletContext, model.getModelId(), q);
 			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}

@@ -1399,7 +1399,7 @@ public class QueryOn extends HttpServlet {
 					throw new BadRequestException("Update count ["+updateCount+"] greater than update-max ["+reqspec.maxUpdates+"]");
 				}
 				
-				conn.commit();
+				DBUtil.doCommit(conn);
 				writeUpdateCount(reqspec, resp, updateCount, "updated");
 			}
 		}
@@ -1697,7 +1697,7 @@ public class QueryOn extends HttpServlet {
 			}
 		}
 
-		conn.commit();
+		DBUtil.doCommit(conn);
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
@@ -1957,7 +1957,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
-		conn.commit();
+		DBUtil.doCommit(conn);
 		Integer status = reqspec.getDeleteSucessStatus();
 		if(status!=null) {
 			resp.setStatus(status);
@@ -2119,7 +2119,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
-		conn.commit();
+		DBUtil.doCommit(conn);
 		
 		Integer status = reqspec.getUpdateSucessStatus();
 		if(status!=null) {
@@ -2297,7 +2297,7 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
-		conn.commit();
+		DBUtil.doCommit(conn);
 		setResponseStatus(resp, HttpServletResponse.SC_CREATED);
 		writeUpdateCount(reqspec, resp, count, "inserted");
 		

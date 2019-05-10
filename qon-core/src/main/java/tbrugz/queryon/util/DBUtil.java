@@ -145,6 +145,12 @@ public class DBUtil {
 		}
 	}
 	
+	public static void doCommit(Connection conn) throws SQLException {
+		if(!conn.getAutoCommit()) {
+			conn.commit();
+		}
+	}
+	
 	public static boolean doRollback(Connection conn) {
 		boolean auto = false;
 		try {
@@ -161,7 +167,12 @@ public class DBUtil {
 		boolean auto = false;
 		try {
 			auto = conn.getAutoCommit();
-			conn.rollback(sp);
+			if(sp!=null) {
+				conn.rollback(sp);
+			}
+			else {
+				conn.rollback();
+			}
 		} catch (SQLException sqle) {
 			log.warn("Error in rollback [autocommit="+auto+"; savepoint="+sp+"]: "+sqle.getMessage(), sqle);
 			return false;
@@ -170,13 +181,17 @@ public class DBUtil {
 	}
 
 	public static boolean releaseSavepoint(Connection conn, Savepoint sp) {
+		//boolean autocommit = false;
 		try {
+			//autocommit = conn.getAutoCommit();
 			if(sp!=null) {
 				conn.releaseSavepoint(sp);
 			}
 		} catch (SQLFeatureNotSupportedException e) {
+			//log.debug("Error releasing savepoint [autocommit="+autocommit+"]: "+e);
 			log.debug("Error releasing savepoint: "+e);
 		} catch (SQLException e) {
+			//log.warn("Error releasing savepoint [autocommit="+autocommit+"]: "+e);
 			log.warn("Error releasing savepoint: "+e);
 			log.debug("Error releasing savepoint: "+e.getMessage(), e);
 			return false;
