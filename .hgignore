@@ -4,9 +4,8 @@ bin/*
 lib/*
 dist/*
 target/*
-work/output/*
+work/*
 tmp/*
-z_etc/*
 web/WEB-INF/classes/*
 web/swagger-ui/*
 
@@ -20,3 +19,6 @@ demo-dbn/src/main/resources/env.properties
 
 demo-minimal/.settings/*
 demo-dbn/.settings/*
+
+*/target/*
+*/work/*
