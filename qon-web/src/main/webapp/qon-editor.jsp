@@ -157,6 +157,7 @@ modelId = SchemaModelUtils.getModelId(request);
 					);
 			checkForSqlWarnings(jqXHR, editor);
 			closeResults();
+			closeMessages('status-container');
 			updateUI();
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
@@ -605,8 +606,9 @@ modelId = SchemaModelUtils.getModelId(request);
 		var messages = document.getElementById(messagesId);
 		
 		var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
+		var numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
 		//messages.innerHTML = 'rows = '+numOfRows+' ; time in millis: server = '+(completedTimeMilis-startTimeMilis)+' ; render = '+(renderedTimeMilis-completedTimeMilis)
-		messages.innerHTML = 'rows = '+numOfRows+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
+		messages.innerHTML = 'rows = '+numOfRows+' ; cols = '+numOfCols+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
 			+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	}
 	

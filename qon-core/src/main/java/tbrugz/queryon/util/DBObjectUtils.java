@@ -42,7 +42,6 @@ public class DBObjectUtils {
 	}
 
 	public static void validateQueryParameters(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
-		log.info("validateQueryParameters: finalSql["+finalSql.length()+"]: "+finalSql);
 		PreparedStatement stmt = conn.prepareStatement(finalSql);
 		validateQueryParameters(rel, finalSql, conn, stmt, update);
 	}
