@@ -116,7 +116,7 @@ function loadAce() {
 	editor.setAutoScrollEditorIntoView(true);
 	//editor.onclick = updateUI;
 	byId('editor').onclick = function() {
-		console.log('editor.onclick'); 
+		//console.log('editor.onclick'); 
 		updateUI();
 	};
 }
@@ -162,21 +162,28 @@ function doRequest(url, btnId, callback) {
 	
 	var sqlString = editor.getSelectedText();
 	if(!sqlString) { sqlString = editor.getValue(); }
+	//console.log("sqlString[", sqlString.length, "]", sqlString);
 	if(!sqlString) {
 		showErrorMessages("messages", "query cannot be null...");
 	}
 	var modelId = getCurrentModelId();
 	
-	var reqData = new FormData();
+	// FormData seems to add CR to each linebreak...
+	/* var reqData = new FormData();
 	reqData.set("sql", sqlString);
 	reqData.set("schema", "workspace-schema");
 	reqData.set("name", "workspace-name");
-	reqData.set("lostrategy", "RESULTSET_CONTROL");
+	reqData.set("lostrategy", "RESULTSET_CONTROL"); */
+	var reqData = {}
+	reqData.sql = sqlString;
+	reqData.schema = "workspace-schema";
+	reqData.name = "workspace-name";
+	reqData.lostrategy = "RESULTSET_CONTROL";
 	
 	if(modelId) {
 		//console.log("modelId", modelId);
-		reqData.set("model", modelId);
-		//reqData.model = modelId;
+		//reqData.set("model", modelId);
+		reqData.model = modelId;
 	}
 	
 	var params = document.querySelectorAll('.parameter');
@@ -186,8 +193,8 @@ function doRequest(url, btnId, callback) {
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
 		//console.log(item);
-		reqData.set(item.name, item.value);
-		//reqData[item.name] = item.value;
+		//reqData.set(item.name, item.value);
+		reqData[item.name] = item.value;
 		//paramsStr += '/'+item.value;
 	}
 	
@@ -236,7 +243,9 @@ function doRequest(url, btnId, callback) {
 			callback(request);
 		}
 	}
-	request.send(reqData);
+	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");	
+	//request.overrideMimeType('text/html; charset=UTF-8');
+	request.send(obj2encodedUrl(reqData));
 	btnActionStart(btnId);
 }
 

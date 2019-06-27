@@ -100,6 +100,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		removeMarker(editor);
 		var sqlString = editor.getSelectedText();
 		if(!sqlString) { sqlString = editor.getValue(); }
+		//console.log("sqlString[", sqlString.length, "]", sqlString);
 		
 		var reqData = {
 			schema : document.getElementById('schema').value,

@@ -31,3 +31,13 @@ function post(path, params, callback, target) {
 	form.submit();
 	if(callback) { callback(); }
 }
+
+// https://stackoverflow.com/questions/1714786/query-string-encoding-of-a-javascript-object
+function obj2encodedUrl(obj) {
+	var str = [];
+	for (var p in obj)
+		if (obj.hasOwnProperty(p)) {
+		str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+	}
+	return str.join("&");
+}
