@@ -50,7 +50,7 @@ function getRangeFromPosition(editor, position) {
 			break;
 		} 
 	}
-	console.log("getRangeFromPosition: row", row, "startColumn", startColumn, "endColumn", endColumn);
+	console.log("getRangeFromPosition: row", row, "startColumn", startColumn, "endColumn", endColumn, "position", position);
 	return new Range(row, startColumn, row, endColumn);
 }
 
