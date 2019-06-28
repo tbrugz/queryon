@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
 import graphql.schema.DataFetcher;
@@ -22,11 +21,12 @@ import graphql.schema.DataFetchingEnvironment;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
-import tbrugz.queryon.model.UserInfo;
+import tbrugz.queryon.model.BeanActions;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -78,12 +78,12 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			}
 			for(int i=0;i<GqlSchemaFactory.queryBeansQueries.length;i++) {
 				if( GqlSchemaFactory.queryBeansQueries[i].equals(reqspec.getObject()) ) {
-					return getBeanValue(GqlSchemaFactory.queryBeansQueries[i], GqlSchemaFactory.queryBeans[i], reqspec);
+					return getBeanValue(GqlSchemaFactory.queryBeansQueries[i], /*GqlSchemaFactory.queryBeans[i],*/ reqspec);
 				}
 			}
 			for(int i=0;i<GqlSchemaFactory.mutationActions.length;i++) {
 				if( GqlSchemaFactory.mutationActions[i].equals(reqspec.getObject()) ) {
-					return getBeanValue(GqlSchemaFactory.mutationActions[i], GqlSchemaFactory.mutationReturnBeans[i], reqspec);
+					return getBeanValue(GqlSchemaFactory.mutationActions[i], /*GqlSchemaFactory.mutationReturnBeans[i],*/ reqspec);
 				}
 			}
 			
@@ -190,29 +190,16 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	T getBeanValue(String beanQuery, Class<?> beanClazz, GqlRequest reqspec) {
+	T getBeanValue(String beanQuery/*, Class<?> beanClazz*/, RequestSpec reqspec) {
+		BeanActions beanActions = new BeanActions(servlet.getProperties());
 		if(beanQuery.equals(GqlSchemaFactory.QUERY_CURRENTUSER)) {
-			UserInfo ui = new UserInfo(ShiroUtils.getSubject(servlet.getProperties(), req));
-			return (T) ui;
+			return (T) beanActions.getCurrentUser(req);
 		}
-		if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGIN)) {
-			Subject currentUser = SecurityUtils.getSubject();
-			String username = reqspec.getParameterMapUniqueValues().get("username");
-			String password = reqspec.getParameterMapUniqueValues().get("password");
-			
-			ShiroUtils.authenticate(currentUser, username, password);
-
-			UserInfo ui = new UserInfo(currentUser);
-			return (T) ui;
+		else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGIN)) {
+			return (T) beanActions.doLogin(reqspec);
 		}
-		if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGOUT)) {
-			//Subject currentUser = ShiroUtils.getSubject(prop, request);
-			Subject currentUser = SecurityUtils.getSubject();
-
-			currentUser.logout();
-
-			UserInfo ui = new UserInfo(currentUser);
-			return (T) ui;
+		else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGOUT)) {
+			return (T) beanActions.doLogout(reqspec);
 		}
 		
 		throw new InternalServerException("unknown bean query: "+beanQuery);

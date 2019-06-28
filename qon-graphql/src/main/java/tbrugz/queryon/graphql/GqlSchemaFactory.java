@@ -78,6 +78,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	static final String[] mutationActions = { MUTATION_LOGIN, MUTATION_LOGOUT };
 	static final Class<?>[] mutationParamBeans = { LoginInfo.class, null };
 	static final Class<?>[] mutationReturnBeans = { UserInfo.class, UserInfo.class };
+	//XXX add mutationReturnBeansRemarks ?
 	
 	public static class QonAction {
 		final ActionType atype;
@@ -159,7 +160,7 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 			for(int i=0;i<mutationActions.length;i++) {
 				try {
 					//XXX: distinct schema/db/model & bean datafetchers?
-					createBeanAction(mutationBuilder, mutationActions[i], mutationParamBeans[i], mutationReturnBeans[i], df);
+					createBeanAction(mutationBuilder, mutationActions[i], mutationParamBeans[i], mutationReturnBeans[i], null, df);
 				} catch (IntrospectionException e) {
 					log.warn("IntrospectionException:: getSchema: createBeanAction: "+e);
 				}
@@ -268,12 +269,12 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 		}
 	}
 	
-	void createBeanAction(GraphQLObjectType.Builder gqlBuilder, String actionName, Class<?> paramClazz, Class<?> returnClazz, DataFetcher<?> df) throws IntrospectionException {
+	void createBeanAction(GraphQLObjectType.Builder gqlBuilder, String actionName, Class<?> paramClazz, Class<?> returnClazz, String remarks, DataFetcher<?> df) throws IntrospectionException {
 		try {
 			String retName = normalizeClassName(returnClazz);
 			GraphQLObjectType retT = typeMap.get(retName);
 			if(retT==null) {
-				retT = createBeanType(retName, returnClazz, null);
+				retT = createBeanType(retName, returnClazz, remarks);
 			}
 			
 			GraphQLFieldDefinition.Builder f = GraphQLFieldDefinition.newFieldDefinition()
