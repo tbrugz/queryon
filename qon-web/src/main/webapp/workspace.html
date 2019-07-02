@@ -275,10 +275,20 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	var messages = document.getElementById(messagesId);
 	
 	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
-	var numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
-	messages.innerHTML = 'rows = '+numOfRows+' ; cols = '+numOfCols+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
-		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
-	messages.style.display = 'initial';
+	var numOfCols = -1;
+	if(numOfRows>0) {
+		if(content.getElementsByTagName('tr')[0]) {
+			numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
+		}
+		messages.innerHTML = 'rows = '+numOfRows
+			+ ((numOfCols > 0) ? ' ; cols = ' + numOfCols : '')
+			+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
+			+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+		messages.style.display = 'initial';
+	}
+	else {
+		closeMessages(messagesId);
+	}
 }
 
 function closeResults() {
