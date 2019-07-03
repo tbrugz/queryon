@@ -6,7 +6,12 @@
 		<property name="version.swagger" value="2.2.10"/>
 		
 		<mkdir dir="${download.dir}/swagger-ui"/>
+		
+		<!-- 
+		curl -L -o qon-web/target/download/swagger-ui/v2.2.10.zip https://github.com/swagger-api/swagger-ui/archive/v2.2.10.zip
+		-->
 		<get src="https://github.com/swagger-api/swagger-ui/archive/v${version.swagger}.zip" dest="${download.dir}/swagger-ui" verbose="true" skipexisting="true"/>
+		
 		<mkdir dir="${download.dir}/swagger-ui/unzipped"/>
 		<unzip src="${download.dir}/swagger-ui/v${version.swagger}.zip" dest="${download.dir}/swagger-ui/unzipped"/>
 		<copy todir="${webapp.dir}/swagger-ui">
