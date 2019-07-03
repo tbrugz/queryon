@@ -2693,8 +2693,7 @@ public class QueryOn extends HttpServlet {
 			WebSyntax ws = (WebSyntax) ds;
 			ws.setLimit(limit);
 			ws.setOffset(reqspec.offset);
-			String url = reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
-			ws.setBaseHref(url);
+			ws.setBaseHref(getBaseHref(reqspec));
 		}
 		
 		resp.setContentType(ds.getMimeType());
@@ -2985,6 +2984,10 @@ public class QueryOn extends HttpServlet {
 	
 	protected boolean isStrictMode() {
 		return false;
+	}
+	
+	protected String getBaseHref(RequestSpec reqspec) {
+		return reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
 	}
 	
 }

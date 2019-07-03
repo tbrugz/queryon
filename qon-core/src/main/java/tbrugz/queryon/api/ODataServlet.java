@@ -155,7 +155,9 @@ public class ODataServlet extends QueryOn {
 			return;
 		}
 		
-		if("/$metadata".equals(req.getPathInfo())) {
+		String path = req.getPathInfo().substring(1); //removes 1st "/"
+		
+		if("$metadata".equals(path)) {
 			// http://services.odata.org/V4/(S(frp3ql3rlcjpvorgy0422buq))/TripPinServiceRW/$metadata#Photos
 			// EnumType, ComplexType, *EntityType, *Function, ?Action, EntityContainer(EntitySet, FunctionImport, ActionImport, Annotation), Annotations
 			try {
@@ -175,7 +177,7 @@ public class ODataServlet extends QueryOn {
 			}
 		}
 
-		log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
+		log.info(">> path: "+path+" ; method: "+req.getMethod());
 		
 		// ? header: Content-Type: application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
 		// x header: OData-Version: 4.0

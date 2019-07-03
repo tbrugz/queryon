@@ -50,6 +50,8 @@ public class ODataRequest extends RequestSpec {
 	protected String valueField;
 	protected boolean isCountRequest;
 	Map<String, String> xtraParametersMap;
+	
+	public static final String DEFAULT_OBJECT = "relation";
 
 	/*public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)
@@ -59,7 +61,7 @@ public class ODataRequest extends RequestSpec {
 
 	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop)
 			throws ServletException, IOException {
-		super(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
+		super(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, DEFAULT_OBJECT);
 	}
 	
 	@Override

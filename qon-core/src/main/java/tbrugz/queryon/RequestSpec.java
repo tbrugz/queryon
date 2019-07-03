@@ -1244,4 +1244,7 @@ public class RequestSpec {
 		return String.valueOf(o);
 	}
 
+	public DumpSyntaxInt getOutputSyntax() {
+		return outputSyntax;
+	}
 }

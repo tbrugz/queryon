@@ -14,6 +14,9 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	static final String DATA_ELEMENT = "value";
 	public static final String ODATA_ID = "odata";
 	
+	public static final String HEADER_ODATA_CONTEXT = "@odata.context";
+	public static final String HEADER_ODATA_NEXTLINK = "@odata.nextLink";
+	
 	String baseHref;
 	long limit, offset;
 	String fullQueryName;
@@ -107,9 +110,9 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 		// skip:      http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793698
 		String urlNext = DataDumpUtils.xmlEscapeText(baseHref + fullQueryName + ("?$skiptoken="+(offset+limit))); //skip= ? / skiptoken= ?
 		
-		out("\n"+padding+"\t\"@odata.context\": \""+context+"\",", w);
+		out("\n"+padding+"\t\""+HEADER_ODATA_CONTEXT+"\": \""+context+"\",", w);
 		if(!uniqueRow && limit>0) {
-			out("\n"+padding+"\t\"@odata.nextLink\": \""+urlNext+"\",", w);
+			out("\n"+padding+"\t\""+HEADER_ODATA_NEXTLINK+"\": \""+urlNext+"\",", w);
 		}
 	}
 	
