@@ -2734,7 +2734,9 @@ public class QueryOn extends HttpServlet {
 				hasNext = rs.next();
 			}
 		}
-		boolean hasMoreRows = false; //XXX: test if there are more rows... 
+		appendToResponse(reqspec, count, resp);
+		
+		boolean hasMoreRows = false; //XXX: test if there are more rows...
 		
 		if(count==0) {
 			// rfc2616-sec10.html : 10.2.5 204 No Content
@@ -2988,6 +2990,9 @@ public class QueryOn extends HttpServlet {
 	
 	protected String getBaseHref(RequestSpec reqspec) {
 		return reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
+	}
+	
+	protected void appendToResponse(RequestSpec reqspec, int count, HttpServletResponse resp) throws IOException {
 	}
 	
 }

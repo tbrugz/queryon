@@ -1,6 +1,9 @@
 package tbrugz.queryon.api;
 
+import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
@@ -8,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -34,13 +38,21 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.model.BeanActions;
+import tbrugz.queryon.model.UserInfo;
+import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -88,6 +100,12 @@ public class ODataServlet extends QueryOn {
 	static final String ODATA_VERSION = "4.0";
 	
 	static final String odataNS = "OData.QueryOn";
+	
+	// see: https://www.odata.org/getting-started/advanced-tutorial/#singleton
+	static final String QUERY_CURRENTUSER = "currentUser";
+	
+	static final String[] singletonQueries = { QUERY_CURRENTUSER };
+	static final Class<?>[] singletonQueryBeans = { UserInfo.class };
 	
 	//static String baseQonUrl = "/q";
 	//static String baseODataUrl = "/odata";
@@ -182,6 +200,20 @@ public class ODataServlet extends QueryOn {
 		// ? header: Content-Type: application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
 		// x header: OData-Version: 4.0
 		resp.setHeader("OData-Version", ODATA_VERSION);
+
+		for(String sq: singletonQueries) {
+			if(sq.equals(path)) {
+				log.debug("singletonQuery: "+sq);
+				RequestSpec reqspec = getRequestSpec(req);
+				Object bean = getBeanValue(sq, reqspec, req);
+				//String context = getBaseHref(reqspec)+"$metadata#"+sq;
+				String context = ODataJsonSyntax.getContext(getBaseHref(reqspec), sq);
+				DumpSyntaxInt ds = reqspec.getOutputSyntax();
+				
+				dumpBean(bean, context, ds.getMimeType(), (String) reqspec.getAttribute(RequestSpec.ATTR_CONTENTLOCATION), resp);
+				return;
+			}
+		}
 		
 		super.doService(req, resp);
 	}
@@ -266,7 +298,7 @@ public class ODataServlet extends QueryOn {
 	/*
 	 * see: https://stackoverflow.com/a/528512/616413
 	 */
-	Document makeMetadata(DOMImplementation domImpl, HttpServletRequest req) throws ParserConfigurationException {
+	Document makeMetadata(DOMImplementation domImpl, HttpServletRequest req) throws ParserConfigurationException, IntrospectionException {
 		Document doc = domImpl.createDocument("http://docs.oasis-open.org/odata/ns/edmx", "edmx:Edmx", null);
 		doc.getDocumentElement().setAttribute("Version", "4.0");
 
@@ -304,6 +336,15 @@ public class ODataServlet extends QueryOn {
 			//schemaNames.add(v.getSchemaName());
 			//relationNames.add(v.getQualifiedName());
 		}
+		//beans/singletons
+		for(int i=0;i<singletonQueries.length;i++) {
+			Class<?> beanClazz = singletonQueryBeans[i];
+			Element entity = createEntityType(doc, beanClazz);
+			schema.appendChild(entity);
+			Element singleton = createSingleton(doc, singletonQueries[i], beanClazz.getSimpleName());
+			entityContainer.appendChild(singleton);
+		}
+
 		//XXXdone add actions
 		Set<ExecutableObject> eos = model.getExecutables();
 		for(ExecutableObject eo: eos) {
@@ -343,12 +384,43 @@ public class ODataServlet extends QueryOn {
 		}
 		return entity;
 	}
+
+	Element createEntityType(Document doc, Class<?> clazz) throws IntrospectionException {
+		Element entity = doc.createElement("EntityType");
+		entity.setAttribute("Name", clazz.getSimpleName());
+		
+		BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+		PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+		
+		for(int i=0;i<pds.length;i++) {
+			String cName = pds[i].getName();
+			if("class".equals(cName)) { continue; }
+			
+			Element prop = doc.createElement("Property");
+			prop.setAttribute("Name", cName);
+			prop.setAttribute("Type", getPropertyType(pds[i].getReadMethod().getReturnType()) );
+			entity.appendChild(prop);
+		}
+
+		return entity;
+	}
 	
 	Element createEntitySet(Document doc, Relation r) {
+		return createEntitySet(doc, r.getQualifiedName());
+	}
+	
+	Element createEntitySet(Document doc, String qualifiedName) {
 		Element entitySet = doc.createElement("EntitySet");
-		entitySet.setAttribute("Name", r.getQualifiedName());
-		entitySet.setAttribute("EntityType", odataNS+"."+r.getQualifiedName());
+		entitySet.setAttribute("Name", qualifiedName);
+		entitySet.setAttribute("EntityType", odataNS+"."+qualifiedName);
 		return entitySet;
+	}
+
+	Element createSingleton(Document doc, String name, String type) {
+		Element singleton = doc.createElement("Singleton");
+		singleton.setAttribute("Name", name);
+		singleton.setAttribute("Type", odataNS+"."+type);
+		return singleton;
 	}
 	
 	Element createAction(Document doc, ExecutableObject eo) {
@@ -407,6 +479,48 @@ public class ODataServlet extends QueryOn {
 		
 		return "Edm.String";
 	}
+	
+	String getPropertyType(Class<?> clazz) {
+		if(Boolean.TYPE.equals(clazz)) {
+			return "Edm.Boolean";
+		}
+		if(String.class.equals(clazz)) {
+			return "Edm.String";
+		}
+		
+		log.warn("getPropertyType: unknown class: "+clazz);
+		return "Edm.String";
+	}
+	
+	Object getBeanValue(String beanQuery, RequestSpec reqspec, HttpServletRequest request) {
+		BeanActions beanActions = new BeanActions(prop);
+		if(beanQuery.equals(ODataServlet.QUERY_CURRENTUSER)) {
+			return beanActions.getCurrentUser(request);
+		}
+		
+		throw new InternalServerException("unknown bean query: "+beanQuery);
+	}
+	
+	void dumpBean(Object bean, String context, String mimeType, String contentLocation, HttpServletResponse resp) throws IOException {
+		// see: https://github.com/google/gson/issues/678
+		Gson gson = new Gson();
+		JsonObject ret = new JsonObject();
+		ret.addProperty(ODataJsonSyntax.HEADER_ODATA_CONTEXT, context);
+		JsonObject el = gson.toJsonTree(bean).getAsJsonObject();
+		
+		for (Map.Entry<String, JsonElement> entry : el.entrySet()) {
+			ret.add(entry.getKey(), entry.getValue());
+		}
+		
+		resp.setContentType(mimeType);
+		if(contentLocation!=null) {
+			resp.addHeader(ResponseSpec.HEADER_CONTENT_LOCATION, contentLocation);
+		}
+		
+		//JsonPrimitive elContext = new JsonPrimitive(context);
+		//el.getAsJsonObject().addProperty(ODataJsonSyntax.HEADER_ODATA_CONTEXT, context);
+		resp.getWriter().write(ret.toString());
+	}
 
 	/*
 	 * see: http://www.chipkillmar.net/2009/03/25/pretty-print-xml-from-a-dom/
@@ -419,6 +533,35 @@ public class ODataServlet extends QueryOn {
 		LSOutput lso = ls.createLSOutput();
 		lso.setCharacterStream(w);
 		lss.write(node, lso);
+	}
+	
+	@Override
+	protected void appendToResponse(RequestSpec reqspec, int count, HttpServletResponse resp) throws IOException {
+		if(reqspec.getObject().equals(ODataRequest.DEFAULT_OBJECT)) {
+			log.debug("appendToResponse: is relation! ["+reqspec.getObject()+"]");
+			Gson gson = new Gson();
+			StringBuilder sb = new StringBuilder();
+			for(int i=0;i<singletonQueries.length;i++) {
+				String name = singletonQueries[i];
+				//Class<?> beanClazz = singletonQueryBeans[i];
+				
+				Entity e = new Entity(null, name, "Singleton");
+				sb.append("\t\t");
+				if(count>0 || i>0) {
+					sb.append(",");
+				}
+				sb.append(gson.toJson(e));
+				sb.append("\n");
+			}
+			DumpSyntaxInt ds = reqspec.getOutputSyntax();
+			if(ds.acceptsOutputStream()) {
+				log.warn("appendToResponse: outputstream output not implemented [DumpSyntax: "+ds.getSyntaxId()+"]");
+				//resp.getOutputStream().write(b);
+			}
+			else {
+				resp.getWriter().write(sb.toString());
+			}
+		}
 	}
 
 }

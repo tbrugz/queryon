@@ -104,7 +104,8 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	
 	@Override
 	protected void dumpXtraHeader(Writer w) throws IOException {
-		String context = baseHref+"$metadata#"+fullQueryName;
+		//String context = baseHref+"$metadata#"+fullQueryName;
+		String context = getContext(baseHref, fullQueryName);
 		// nextLink:  http://docs.oasis-open.org/odata/odata-json-format/v4.0/errata03/os/odata-json-format-v4.0-errata03-os-complete.html#_Annotation_odata.nextLink
 		// skiptoken: http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793701
 		// skip:      http://docs.oasis-open.org/odata/odata/v4.0/os/part1-protocol/odata-v4.0-os-part1-protocol.html#_Toc372793698
@@ -114,6 +115,10 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 		if(!uniqueRow && limit>0) {
 			out("\n"+padding+"\t\""+HEADER_ODATA_NEXTLINK+"\": \""+urlNext+"\",", w);
 		}
+	}
+	
+	public static String getContext(String baseHref, String name) {
+		return baseHref+"$metadata#"+name;
 	}
 	
 }
