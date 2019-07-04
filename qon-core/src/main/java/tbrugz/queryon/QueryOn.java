@@ -2734,7 +2734,6 @@ public class QueryOn extends HttpServlet {
 				hasNext = rs.next();
 			}
 		}
-		appendToResponse(reqspec, count, resp);
 		
 		boolean hasMoreRows = false; //XXX: test if there are more rows...
 		
@@ -2990,9 +2989,6 @@ public class QueryOn extends HttpServlet {
 	
 	protected String getBaseHref(RequestSpec reqspec) {
 		return reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
-	}
-	
-	protected void appendToResponse(RequestSpec reqspec, int count, HttpServletResponse resp) throws IOException {
 	}
 	
 }

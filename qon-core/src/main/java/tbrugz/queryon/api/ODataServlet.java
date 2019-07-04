@@ -195,7 +195,7 @@ public class ODataServlet extends QueryOn {
 			}
 		}
 
-		log.info(">> path: "+path+" ; method: "+req.getMethod());
+		log.info(">> path: '"+path+"' ; method: "+req.getMethod());
 		
 		// ? header: Content-Type: application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
 		// x header: OData-Version: 4.0
@@ -247,6 +247,7 @@ public class ODataServlet extends QueryOn {
 		//XXX: sort objects?
 		list.addAll(getEntities(model.getViews(), "EntitySet"));
 		list.addAll(getEntities(model.getTables(), "EntitySet"));
+		list.addAll(getEntitiesFromStringList(Arrays.asList(singletonQueries), "Singleton"));
 		//list.addAll(getEntities(model.getExecutables(), "ActionImport")); //looks like ActionImport should not appear in the "Service Document"
 		rs = new ResultSetListAdapter<Entity>(objectName, statusUniqueColumns, statusXtraColumns, list, Entity.class);
 
@@ -266,6 +267,14 @@ public class ODataServlet extends QueryOn {
 		List<Entity> ret = new ArrayList<Entity>();
 		for(NamedDBObject o: list) {
 			ret.add(new Entity(o.getSchemaName(), o.getName(), kind));
+		}
+		return ret;
+	}
+
+	List<Entity> getEntitiesFromStringList(List<String> list, String kind) {
+		List<Entity> ret = new ArrayList<Entity>();
+		for(String o: list) {
+			ret.add(new Entity(null, o, kind));
 		}
 		return ret;
 	}
@@ -535,33 +544,4 @@ public class ODataServlet extends QueryOn {
 		lss.write(node, lso);
 	}
 	
-	@Override
-	protected void appendToResponse(RequestSpec reqspec, int count, HttpServletResponse resp) throws IOException {
-		if(reqspec.getObject().equals(ODataRequest.DEFAULT_OBJECT)) {
-			log.debug("appendToResponse: is relation! ["+reqspec.getObject()+"]");
-			Gson gson = new Gson();
-			StringBuilder sb = new StringBuilder();
-			for(int i=0;i<singletonQueries.length;i++) {
-				String name = singletonQueries[i];
-				//Class<?> beanClazz = singletonQueryBeans[i];
-				
-				Entity e = new Entity(null, name, "Singleton");
-				sb.append("\t\t");
-				if(count>0 || i>0) {
-					sb.append(",");
-				}
-				sb.append(gson.toJson(e));
-				sb.append("\n");
-			}
-			DumpSyntaxInt ds = reqspec.getOutputSyntax();
-			if(ds.acceptsOutputStream()) {
-				log.warn("appendToResponse: outputstream output not implemented [DumpSyntax: "+ds.getSyntaxId()+"]");
-				//resp.getOutputStream().write(b);
-			}
-			else {
-				resp.getWriter().write(sb.toString());
-			}
-		}
-	}
-
 }
