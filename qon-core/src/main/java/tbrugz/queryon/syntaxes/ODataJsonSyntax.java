@@ -118,7 +118,8 @@ public class ODataJsonSyntax extends JSONDataDump implements WebSyntax, Cloneabl
 	}
 	
 	public static String getContext(String baseHref, String name) {
-		return baseHref+"$metadata#"+name;
+		return baseHref + "$metadata" +
+			(name!=null && !name.equals("") ? "#" + name : "") ;
 	}
 	
 }

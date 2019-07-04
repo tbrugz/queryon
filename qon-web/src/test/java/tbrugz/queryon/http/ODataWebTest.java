@@ -91,8 +91,8 @@ public class ODataWebTest {
 	//---------------------
 	
 	@Test
-	public void getRelations() throws IOException, ParserConfigurationException, SAXException {
-		String url = odataUrl+"/relation";
+	public void getServiceDocument() throws IOException, ParserConfigurationException, SAXException {
+		String url = odataUrl+"/";
 		
 		String jsonStr = getContentFromUrl(url);
 		//System.out.println("content:\n"+jsonStr);
@@ -103,7 +103,7 @@ public class ODataWebTest {
 		JSONObject jobj = (JSONObject) obj;
 		
 		obj = jobj.get("@odata.context");
-		Assert.assertTrue(obj.toString().endsWith("/$metadata#relation"));
+		Assert.assertTrue(obj.toString().endsWith("/$metadata")); //#relation
 		
 		obj = jobj.get("value");
 		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
@@ -333,5 +333,31 @@ public class ODataWebTest {
 		
 		httpDel.releaseConnection();
 	}
-	
+
+	@Test
+	public void beanSingletonQueryCurrentUser() throws IOException, ParserConfigurationException, SAXException {
+		String url = odataUrl+"/currentUser";
+		
+		String jsonStr = getContentFromUrl(url);
+		System.out.println("content:\n"+jsonStr);
+
+		/*Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		JSONArray jarr = (JSONArray) jobj.get("value");
+		
+		jobj = (JSONObject) jarr.get(0);
+		Object prop = jobj.get("C1");
+		Assert.assertEquals("1", prop);
+		
+		jobj = (JSONObject) jarr.get(1);
+		prop = jobj.get("C1");
+		Assert.assertEquals("2", prop);
+		
+		jobj = (JSONObject) jarr.get(2);
+		prop = jobj.get("C1");
+		Assert.assertEquals("1", prop);*/
+	}
+
 }

@@ -728,11 +728,13 @@ public class QueryOn extends HttpServlet {
 			//StatusObject sobject = StatusObject.valueOf(reqspec.object)
 			//XXX should status object names have special syntax? like meta:table, meta:fk
 			
-			DBObjectType statusType = statusObject(reqspec.object);
-			//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
-			if(statusType!=null) {
+			boolean isStatusObject = isStatusObject(reqspec.object);
+			//DBObjectType statusType = null;
+			if(isStatusObject) {
+				//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
 				atype = ActionType.STATUS;
-				otype = statusType.name();
+				//statusType = statusObject(reqspec.object);
+				otype = reqspec.object.toUpperCase();
 				dbobj = null;
 			}
 			else {
@@ -885,7 +887,7 @@ public class QueryOn extends HttpServlet {
 				}
 				break;
 			case STATUS:
-				doStatus(model, statusType, reqspec, currentUser, resp);
+				doStatus(model, otype, reqspec, currentUser, resp);
 				break;
 			case MANAGE:
 				doManage(model, reqspec, req, resp);
@@ -1771,10 +1773,11 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	@SuppressWarnings("resource")
-	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	protected void doStatus(SchemaModel model, String statusTypeStr, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
+		DBObjectType statusType = DBObjectType.valueOf(statusTypeStr);
 		final String objectName = statusType.desc();
 		PrivilegeType privilege = PrivilegeType.SELECT;
 		//XXX: filter by schemaName, name? ResultSetFilterDecorator(rs, colpositions, colvalues)?
@@ -2900,7 +2903,22 @@ public class QueryOn extends HttpServlet {
 		return false;
 	}
 	
-	static DBObjectType statusObject(String name) {
+	protected boolean isStatusObject(String name) {
+		if(name==null) {
+			return false;
+		}
+		name = name.toUpperCase();
+		
+		try {
+			DBObjectType.valueOf(name);
+			return true;
+		}
+		catch(IllegalArgumentException e) {
+			return false;
+		}
+	}
+	
+	/*static DBObjectType statusObject(String name) {
 		if(name==null) {
 			return null;
 		}
@@ -2913,7 +2931,7 @@ public class QueryOn extends HttpServlet {
 		catch(IllegalArgumentException e) {
 			return null;
 		}
-	}
+	}*/
 	
 	public static String getObjectType(DBIdentifiable dbid) {
 		String ret = null;

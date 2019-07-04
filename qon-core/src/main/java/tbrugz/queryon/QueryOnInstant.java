@@ -80,7 +80,7 @@ public class QueryOnInstant extends QueryOn {
 	
 	@SuppressWarnings("resource")
 	@Override
-	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	protected void doStatus(SchemaModel model, String statusTypeStr, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		if(reqspec.params==null || reqspec.params.size()<1) {
 			throw new BadRequestException("no schema informed");
 		}
@@ -100,6 +100,7 @@ public class QueryOnInstant extends QueryOn {
 		ResultSet rs;
 		
 		//final DBObjectType type = DBObjectType.valueOf(reqspec.object.toUpperCase());
+		final DBObjectType statusType = DBObjectType.valueOf(statusTypeStr);
 		final String objectName = statusType.desc();
 		//log.info("doStatus: "+statusType+" ; "+objectName);
 		

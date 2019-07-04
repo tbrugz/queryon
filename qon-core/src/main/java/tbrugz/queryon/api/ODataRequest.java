@@ -51,7 +51,7 @@ public class ODataRequest extends RequestSpec {
 	protected boolean isCountRequest;
 	Map<String, String> xtraParametersMap;
 	
-	public static final String DEFAULT_OBJECT = "relation";
+	public static final String DEFAULT_OBJECT = null;
 
 	/*public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore,
 			String defaultOutputSyntax, boolean allowGetDumpSyntaxByAccept, int minUrlParts, String defaultObject)

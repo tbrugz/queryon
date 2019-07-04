@@ -154,6 +154,11 @@ public class ODataServlet extends QueryOn {
 	}
 	
 	@Override
+	protected boolean isStatusObject(String name) {
+		return "".equals(name);
+	}
+	
+	@Override
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		if(req.getPathInfo()==null || req.getPathInfo().isEmpty()
 				//|| req.getPathInfo().equals("/")
@@ -235,12 +240,13 @@ public class ODataServlet extends QueryOn {
 	 */
 	@SuppressWarnings("resource")
 	@Override
-	protected void doStatus(SchemaModel model, DBObjectType statusType, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
+	protected void doStatus(SchemaModel model, String statusTypeStr, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException, ClassNotFoundException, NamingException {
 		ResultSet rs = null;
 		List<FK> importedFKs = null;
 		List<Constraint> uks = null;
 		
-		final String objectName = statusType.desc();
+		//final DBObjectType statusType = DBObjectType.valueOf(statusTypeStr);
+		final String objectName = ""; // statusTypeStr
 		PrivilegeType privilege = PrivilegeType.SELECT;
 
 		List<Entity> list = new ArrayList<Entity>();
