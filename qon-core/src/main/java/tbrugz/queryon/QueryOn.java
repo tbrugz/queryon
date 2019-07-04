@@ -670,16 +670,16 @@ public class QueryOn extends HttpServlet {
 			doService(req, resp);
 		}
 		catch(InternalServerException e) {
-			WebUtils.writeException(req, resp, e, debugMode);
+			handleException(req, resp, e);
 		}
 		catch(ForbiddenException e) {
-			WebUtils.writeException(req, resp, e, debugMode);
+			handleException(req, resp, e);
 			// XXX if currentUser not authenticated, throw 401/Unauthorized ?
 			//int status = e.isAuthenticated() ? e.getCode() : HttpServletResponse.SC_UNAUTHORIZED;
 			//WebUtils.writeException(resp, e, status, debugMode);
 		}
 		catch(BadRequestException e) {
-			WebUtils.writeException(req, resp, e, debugMode);
+			handleException(req, resp, e);
 		}
 		catch(RuntimeException e) {
 			//e.printStackTrace();
@@ -689,6 +689,10 @@ public class QueryOn extends HttpServlet {
 			//e.printStackTrace();
 			throw e;
 		}
+	}
+	
+	protected void handleException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e) throws IOException {
+		WebUtils.writeException(req, resp, e, debugMode);
 	}
 	
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {

@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +43,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
@@ -54,7 +56,6 @@ import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmodel.Constraint;
-import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
@@ -70,9 +71,9 @@ public class ODataServlet extends QueryOn {
 	
 	public static class Entity {
 		//String schema;
-		String name;
-		String kind;
-		String url;
+		final String name;
+		final String kind;
+		final String url;
 		
 		public Entity(String schema, String name, String kind) {
 			//this.schema = schema;
@@ -90,6 +91,20 @@ public class ODataServlet extends QueryOn {
 		}
 		public String getUrl() {
 			return url;
+		}
+	}
+	
+	/**
+	 * see Error Response: http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+	 */
+	public class ErrorResponse {
+		final String code;
+		final String message;
+		//XXX: target, details, innererror
+		
+		public ErrorResponse(int code, String message) {
+			this.code = String.valueOf(code);
+			this.message = message;
 		}
 	}
 
@@ -550,4 +565,25 @@ public class ODataServlet extends QueryOn {
 		lss.write(node, lso);
 	}
 	
+	@Override
+	protected void handleException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e) throws IOException {
+		String message = e.getMessage();
+		if(message==null) { message = e.toString(); }
+		ErrorResponse error = new ErrorResponse(e.getCode(), message);
+	
+		writeErrorResponse(error, e.getCode(), resp);
+	}
+	
+	void writeErrorResponse(ErrorResponse error, int code, HttpServletResponse resp) throws IOException {
+		Gson gson = new Gson();
+		Map<String,Object> errMap = new HashMap<String, Object>();
+		errMap.put("error", error);
+		String json = gson.toJson(errMap);
+		
+		resp.reset();
+		resp.setStatus(code);
+		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
+		resp.getWriter().write(json);
+	}
+
 }
