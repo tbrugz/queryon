@@ -49,10 +49,6 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		decorators.put(SUFFIXES[2], )
 	}*/
 
-	//XXX: add HREF/LINK suffix
-	//static String[] ATTRS = {"style", "class"};
-	//static final int SUFFIX_NAME_SIZE =  SUFFIXES[0].length();
-	
 	//final List<String> finalColNames = new ArrayList<String>();
 	final List<String> rowSpecialAttr = new ArrayList<String>();
 	final List<Integer> rowSpecialAttrIdx = new ArrayList<Integer>();
@@ -76,8 +72,8 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
-		finalColNames.clear();
-		finalColTypes.clear();
+		//finalColNames.clear();
+		//finalColTypes.clear();
 		lsColDbTypes.clear();
 		rowSpecialAttr.clear();
 		rowSpecialAttrIdx.clear();
@@ -105,10 +101,15 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			}
 			
 			if(isFullColumn) {
-				finalColNames.add(colname);
-				finalColTypes.add(lsColTypes.get(i));
+				//finalColNames.add(colname);
+				//finalColTypes.add(lsColTypes.get(i));
 				lsColDbTypes.add(md.getColumnTypeName(i+1));
 			}
+			else { //if(!isFullColumn) {
+				finalColNames.remove(colname);
+				finalColTypes.remove(lsColTypes.get(i));
+			}
+
 		}
 		
 		//dumpColType = true;
@@ -119,7 +120,6 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		}*/
 	}
 	
-	//XXX
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		tablePrepend(fos);
@@ -252,8 +252,9 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t"+"<tr");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
+		appendBreaksIfNeeded(vals, null, sb);
+		sb.append("\t"+"<tr");
 		for(int i=0;i<rowSpecialAttrIdx.size();i++) {
 			int idx = rowSpecialAttrIdx.get(i);
 			String colName = rowSpecialAttr.get(i);
@@ -351,6 +352,13 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		}
 		sb.append("</tr>");
 		out(sb.toString()+"\n", fos);
+	}
+	
+	@Override
+	protected void appendBreakRow(List<Object> breakRowValues, String clazz, StringBuilder sb) {
+		sb.append("\t"+"<tr>");
+		sb.append("<th class=\"break\" colspan=\""+finalColNames.size()+"\">"+getBreakValuesRow(breakRowValues)+"</th>");
+		sb.append("</tr>\n");
 	}
 	
 	String decorateValue(Map<String,String> attrs, String key, String value) {
