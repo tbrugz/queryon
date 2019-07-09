@@ -257,9 +257,29 @@ function mergeColumnDimensions(content, trs) {
 	console.log("mergeDimensions: lastDimCol(+1)=",(lastDimCol+1)," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
 }
 
+function getCssRuleBySelectorText(selector) {
+	for(var i=0; i<document.styleSheets.length; i++) {
+		var sheet = document.styleSheets[i];
+		for(var j=0; j<sheet.cssRules.length; j++) {
+			if(sheet.cssRules[j].selectorText == selector) {
+				return sheet.cssRules[j];
+			}
+		}
+	}
+	return null;
+}
+
+function applyTableStyles() {
+	var row1 = document.getElementsByTagName('tr')[0];
+	if(!row1) { return; }
+	var rule = getCssRuleBySelectorText("th.break");
+	rule.style.top = row1.offsetHeight+"px";
+}
+
 function doTableOnLoad() {
 	createBlobLinks();
 	mergeDimensions();
+	applyTableStyles();
 	console.log("table.js: doTableOnLoad() finished");
 }
 
