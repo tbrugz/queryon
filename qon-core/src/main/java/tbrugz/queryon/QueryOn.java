@@ -149,9 +149,6 @@ public class QueryOn extends HttpServlet {
 	public static final String ACTION_EXPLAIN_ANY = "ExplainAny";
 	public static final String ACTION_SQL_ANY = "SqlAny";
 	
-	public static final String CONST_QUERY = "QUERY";
-	public static final String CONST_RELATION = "RELATION";
-	
 	public static final String MIME_TEXT = "text/plain";
 	
 	/*public enum StatusObject {
@@ -353,6 +350,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
+		String contextPath = null;
 		try {
 			prop.clear();
 			context.removeAttribute(ATTR_INIT_ERROR);
@@ -361,7 +359,7 @@ public class QueryOn extends HttpServlet {
 			String protocol = "http://"; //XXX https protocol??
 			//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
 			String path = protocol + InetAddress.getLocalHost().getHostName().toLowerCase();
-			String contextPath = getServletContext().getContextPath();
+			contextPath = getServletContext().getContextPath();
 			String rdfBase = path +
 					((!path.endsWith("/") && (!contextPath.startsWith("/"))?"/":"")) +
 					contextPath;
@@ -460,7 +458,7 @@ public class QueryOn extends HttpServlet {
 			
 			initModelsMetadata(models);
 		} catch (Exception e) {
-			String message = e.toString()+" [prop resource: "+propertiesResource+"]";
+			String message = e.toString()+" [prop resource: "+propertiesResource+"][contextPath: "+contextPath+"][servlet: "+this.getClass().getSimpleName()+"]";
 			log.error(message);
 			log.debug(message, e);
 			context.setAttribute(ATTR_INIT_ERROR, e);
@@ -1376,6 +1374,7 @@ public class QueryOn extends HttpServlet {
 			sql.addOriginalParameters(reqspec);
 			
 			finalSql = sql.getFinalSql();
+			log.debug("sql:\n"+finalSql);
 			PreparedStatement st = conn.prepareStatement(finalSql);
 			sql.bindParameters(st);
 			
@@ -2940,23 +2939,24 @@ public class QueryOn extends HttpServlet {
 	}*/
 	
 	public static String getObjectType(DBIdentifiable dbid) {
-		String ret = null;
+		//String ret = null;
 		if(dbid instanceof Table) {
-			ret = DBObjectType.TABLE.name();
+			return DBObjectType.TABLE.name();
 		}
 		else if(dbid instanceof Query) {
-			ret = QueryOn.CONST_QUERY;
+			return DBObjectType.QUERY.name();
 		}
 		else if(dbid instanceof View) {
-			ret = DBObjectType.VIEW.name();
+			return DBObjectType.VIEW.name();
 		}
 		else if(dbid instanceof Relation){
-			ret = QueryOn.CONST_RELATION;
+			return DBObjectType.RELATION.name();
 		}
 		else if(dbid instanceof ExecutableObject) {
-			ret = DBObjectType.EXECUTABLE.name();
+			return DBObjectType.EXECUTABLE.name();
 		}
-		return ret;
+		throw new IllegalArgumentException("unknown object for getObjectType(): "+dbid);
+		//return ret;
 	}
 	
 	public static String getUsername(Subject currentUser) {

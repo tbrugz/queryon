@@ -82,6 +82,9 @@ public class DBUtil {
 		if(colType.equalsIgnoreCase("DATE")) {
 			return Types.DATE;
 		}
+		if(colType.equalsIgnoreCase("INTEGER")) {
+			return Types.INTEGER;
+		}
 		if(colType.equalsIgnoreCase("NUMBER")) {
 			return Types.NUMERIC;
 		}
@@ -104,7 +107,8 @@ public class DBUtil {
 		if(colType.equalsIgnoreCase("VARCHAR2")) {
 			return Types.VARCHAR;
 		}
-		log.info("unknown sql type for column type: "+colType);
+		//XXX: BOOLEAN ?
+		log.warn("unknown sql type for column type: "+colType);
 		return Types.OTHER;
 	}
 	

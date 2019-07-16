@@ -4,7 +4,6 @@
 <%@page import="java.util.*"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
-<%@page import="org.apache.shiro.SecurityUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
 <%@page import="tbrugz.sqldump.datadump.DataDumpUtils"%>
 <%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%>
