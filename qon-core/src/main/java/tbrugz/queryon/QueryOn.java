@@ -1755,8 +1755,10 @@ public class QueryOn extends HttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
-	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks","constraints", "remarks", "grants"});
-	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "params", "returnParam","remarks", "grants"});
+	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks", "constraints", "remarks", "grants"});
+	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "parameterCount", "parameterTypes", "params", "returnParam", "remarks", "grants"});
+
+	static final List<String> relationAndExecutableCols =  Arrays.asList(new String[]{"parameterCount", "parameterTypes", "remarks", "grants", "dbObjectType" /*"class", "type", "relationType"*/});
 	
 	static final List<String> tableExclusiveColumns = Arrays.asList(new String[]{"PKConstraint"});
 	static final List<String> viewExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes"});
@@ -1806,6 +1808,7 @@ public class QueryOn extends HttpServlet {
 			ResultSet rsQ = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, queryAllColumns, lViews, Query.class);
 			List<Table> lTable = Utils.newList(model.getTables());
 			ResultSet rsT = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, queryAllColumns, lTable, Table.class);
+			
 			List<ResultSet> lrs = Utils.newList(rsQ, rsT);
 			rs = new UnionResultSet(lrs);
 			break;
@@ -1824,6 +1827,19 @@ public class QueryOn extends HttpServlet {
 		case FK: {
 			List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
 			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
+			break;
+		}
+		case ANY: {
+			List<View> lViews = Utils.newList(model.getViews());
+			ResultSet rsQ = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, relationAndExecutableCols, lViews, Query.class);
+			List<Table> lTable = Utils.newList(model.getTables());
+			ResultSet rsT = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, relationAndExecutableCols, lTable, Table.class);
+			List<ExecutableObject> lExec = Utils.newList(model.getExecutables());
+			ResultSet rsE = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, relationAndExecutableCols, lExec, ExecutableObject.class);
+			//XXX: add FKs?
+			
+			List<ResultSet> lrs = Utils.newList(rsQ, rsT, rsE);
+			rs = new UnionResultSet(lrs);
 			break;
 		}
 		default: {
