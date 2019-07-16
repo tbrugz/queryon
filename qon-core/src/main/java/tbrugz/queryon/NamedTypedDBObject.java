@@ -93,21 +93,31 @@ public class NamedTypedDBObject implements TypedDBObject {
 	}
 	
 	@Override
-	public DBObjectType getDBObjectType() {
+	public DBObjectType getDbObjectType() {
 		return type;
 	}
+	
+	@Override
+	public DBObjectType getDBObjectType() {
+		return getDbObjectType();
+	}
+	
 	public DBObjectType getType() {
 		return type;
 	}
+	
 	public String getSchemaName() {
 		return schemaName;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public String getFullObjectName() {
 		return fullObjectName;
 	}
+	
 	public String getMimeType() {
 		return mimetype;
 	}

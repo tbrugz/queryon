@@ -22,6 +22,7 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.ParametrizedDBObject;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -302,6 +303,14 @@ public class SchemaModelUtils {
 			}
 		}
 		return ret;
+	}
+	
+	public static boolean hasParameters(Relation relation) {
+		if(relation instanceof ParametrizedDBObject) {
+			ParametrizedDBObject pobj = (ParametrizedDBObject) relation;
+			return pobj.getParameterTypes()!=null && pobj.getParameterTypes().size() > 0;
+		}
+		return false;
 	}
 	
 }

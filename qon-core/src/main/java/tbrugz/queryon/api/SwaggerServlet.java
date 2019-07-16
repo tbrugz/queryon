@@ -665,7 +665,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			tags.add(schema);
 			oper.put("tags", tags);
 		}
-		String summary = "execute "+eo.getDBObjectType().toString().toLowerCase()+" ";
+		String summary = "execute "+eo.getDbObjectType().toString().toLowerCase()+" ";
 		oper.put("summary", summary + fullName );
 		oper.put("description", eo.getRemarks());
 		oper.put("operationId", "execute."+fullName);

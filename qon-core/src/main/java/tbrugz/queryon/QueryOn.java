@@ -87,6 +87,7 @@ import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.ModelUtils;
+import tbrugz.sqldump.dbmodel.ParametrizedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
@@ -2440,15 +2441,16 @@ public class QueryOn extends HttpServlet {
 		int paramsCount = reqspec.keyValues.size() + reqspec.params.size();
 		//log.info("filterByKey: "+reqspec.keyValues+" / "+reqspec.params);
 		if(paramsCount>0) {
-			if(relation.getParameterCount()!=null && relation.getParameterCount()>0) {
+			if(SchemaModelUtils.hasParameters(relation)) {
+				ParametrizedDBObject pobject = (ParametrizedDBObject) relation;
 				// query parameters already added in 'addOriginalParameters()'
-				if(relation.getParameterCount() > paramsCount) {
+				if(pobject.getParameterCount() > paramsCount) {
 					log.warn("#"+paramsCount+" parameters defined "+reqspec.params+"/"+reqspec.keyValues+
-							" but query '"+relation.getName()+"' expects more ["+relation.getParameterCount()+"] parameters");
+							" but query '"+relation.getName()+"' expects more ["+pobject.getParameterCount()+"] parameters");
 				}
-				else if(relation.getParameterCount() < paramsCount) {
+				else if(pobject.getParameterCount() < paramsCount) {
 					log.warn("#"+paramsCount+" parameters defined "+reqspec.params+"/"+reqspec.keyValues+
-							" but query '"+relation.getName()+"' expects less ["+relation.getParameterCount()+"] parameters");
+							" but query '"+relation.getName()+"' expects less ["+pobject.getParameterCount()+"] parameters");
 				}
 			}
 			else if(pk==null) {

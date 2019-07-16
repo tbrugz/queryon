@@ -31,11 +31,13 @@ import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ParametrizedDBObject;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
@@ -802,10 +804,11 @@ public class SQL {
 		}
 		bindParamsLoop = originalBindParameterCount;
 		
-		if(relation!=null && relation.getParameterTypes()!=null && relation.getParameterTypes().size()>0) {
+		if(SchemaModelUtils.hasParameters(relation)) {
+			ParametrizedDBObject pobject = (ParametrizedDBObject) relation;
 			//log.info("using addParameter: types="+relation.getParameterTypes());
 			for(int i=0;i<bindParamsLoop;i++) {
-				addParameter(reqspec.params.get(i), relation.getParameterTypes().get(i));
+				addParameter(reqspec.params.get(i), pobject.getParameterTypes().get(i));
 			}
 		}
 		else {
@@ -881,7 +884,7 @@ public class SQL {
 		}
 		//XXX: distinct-count
 		//XXX: var? stdev?
-		//XXX: see avaiable functions by DBMS?
+		//XXX: see available functions by DBMS?
 		// median, mode, rank, percentile_cont
 		throw new IllegalArgumentException("unknown aggregate function: "+f);
 	}
