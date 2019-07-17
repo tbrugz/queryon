@@ -32,6 +32,8 @@
     <servlet-api.version>3.0.1</servlet-api.version>
 
     <shiro.version>1.4.0</shiro.version>
+    <log4j.version>1.2.17</log4j.version>
+    <slf4j.version>1.6.6</slf4j.version>
 
     <h2.version>1.4.197</h2.version>
     <findbugs.version>2.5.2</findbugs.version>
@@ -368,7 +370,7 @@
     <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.6</version>
+      <version>${slf4j.version}</version>
       <scope>compile</scope>
     </dependency> -->
     <dependency>
@@ -395,19 +397,19 @@
     <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.6.6</version>
+      <version>${slf4j.version}</version>
       <optional>true</optional>
     </dependency> -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
+      <version>${log4j.version}</version>
       <optional>true</optional>
     </dependency>
     <!-- dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.6</version>
+      <version>${slf4j.version}</version>
     </dependency-->
 
     <!-- <dependency>
