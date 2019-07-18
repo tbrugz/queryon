@@ -191,6 +191,16 @@
 		<url-pattern>/soap/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>AuthServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.auth.AuthServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AuthServlet</servlet-name>
+		<url-pattern>/qauth/*</url-pattern>
+	</servlet-mapping>
+
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>

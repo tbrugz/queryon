@@ -1540,7 +1540,24 @@ public class WinstoneAndH2HttpRequestTest {
 		setCookies(httpPost, cookies);
 		return httpClient.execute(httpPost);
 	}
-	
+
+	static HttpResponse servletLogin(HttpClient httpClient, CookieStore cookies, String username, String password) throws ClientProtocolException, IOException {
+		HttpPost httpPost = new HttpPost(qonUrl+"/qauth/login");
+		setCookies(httpPost, cookies);
+		ArrayList<NameValuePair> postParameters;
+		postParameters = new ArrayList<NameValuePair>();
+		postParameters.add(new BasicNameValuePair("username", username));
+		postParameters.add(new BasicNameValuePair("password", password));
+		httpPost.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+		return httpClient.execute(httpPost);
+	}
+
+	static HttpResponse servletLogout(HttpClient httpClient, CookieStore cookies) throws ClientProtocolException, IOException {
+		HttpPost httpPost = new HttpPost(qonUrl+"/qauth/logout");
+		setCookies(httpPost, cookies);
+		return httpClient.execute(httpPost);
+	}
+
 	@Test
 	public void testLoginOk() throws Exception {
 		// https://stackoverflow.com/a/6273665/616413
@@ -1563,7 +1580,34 @@ public class WinstoneAndH2HttpRequestTest {
 
 		{
 			HttpResponse response2 = jspLogin(httpClient, null, "jdoe", "jdoez");
-			Assert.assertTrue(response2.getStatusLine().getStatusCode() >= 400);
+			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
+			EntityUtils.consumeQuietly(response2.getEntity());
+		}
+	}
+	
+	@Test
+	public void testServletLoginOk() throws Exception {
+		// https://stackoverflow.com/a/6273665/616413
+		HttpClient httpClient = new DefaultHttpClient();
+		//CookieStore cookieStore = new BasicCookieStore();
+		//HttpContext httpContext = new BasicHttpContext();
+		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
+
+		{
+			HttpResponse response1 = servletLogin(httpClient, null, "jdoe", "jdoepw");
+			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+			// https://stackoverflow.com/a/16211729/616413
+			EntityUtils.consumeQuietly(response1.getEntity());
+		}
+	}
+
+	@Test
+	public void testServletLoginErr() throws Exception {
+		HttpClient httpClient = new DefaultHttpClient();
+
+		{
+			HttpResponse response2 = servletLogin(httpClient, null, "jdoe", "jdoez");
+			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
 	}
@@ -1644,7 +1688,7 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		{
 			HttpResponse response2 = jspLogin(httpClient, cookieStore, "jdoe", "jdoez");
-			Assert.assertTrue(response2.getStatusLine().getStatusCode() >= 400);
+			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
 		
@@ -1714,7 +1758,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testPostWithBodyParamNameError2() throws IllegalStateException, IOException {
-		httpPostContent("/EMP?v:ID=11&bodyparamname=NAMEZ", "sonya", 400); //400
+		httpPostContent("/EMP?v:ID=11&bodyparamname=NAMEZ", "sonya", 400);
 	}
 	
 	@Test

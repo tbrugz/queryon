@@ -101,5 +101,15 @@
 		<servlet-name>QonSoapServlet</servlet-name>
 		<url-pattern>/soap/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>AuthServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.auth.AuthServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AuthServlet</servlet-name>
+		<url-pattern>/qauth/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>
