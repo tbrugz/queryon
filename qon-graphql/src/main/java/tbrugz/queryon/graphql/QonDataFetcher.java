@@ -100,7 +100,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			//	(mutation?ActionType.EXECUTE:ActionType.SELECT);
 			
 			Subject currentUser = ShiroUtils.getSubject(servlet.getProperties(), req);
-			ShiroUtils.checkPermission(currentUser, otype+":"+atype, action.objectName);
+			servlet.checkPermission(currentUser, otype, atype, action.objectName);
 			
 			log.info("get:: object: "+reqspec.getObject()+" ; objType/aType: "+otype+"/"+atype+" ; exec-id: "+env.getExecutionId());
 			//log.info("currentUser: "+currentUser.getPrincipal());

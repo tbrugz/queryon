@@ -229,6 +229,7 @@ public class QueryOn extends HttpServlet {
 	static final String PROP_VALIDATE_FILTERCOLNAME = "queryon.validate.x-filtercolumnname";
 	public static final String PROP_SCHEMAS_TO_IGNORE = "queryon.schemas-to-ignore";
 	static final String PROP_SQL_USEIDDECORATOR = "queryon.sql.use-id-decorator";
+	static final String PROP_AUTH_SHIRO_ALLOW_DISABLED = "queryon.auth.shiro.allow-disabled";
 	
 	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	static final String DEFAULT_XTRA_SYNTAXES = null;
@@ -276,6 +277,7 @@ public class QueryOn extends HttpServlet {
 	protected Integer defaultLimit;
 	protected int maxLimit;
 	protected boolean debugMode = false; //XXX add prop for debugMode
+	private Boolean shiroEnabled = null;
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
@@ -766,8 +768,9 @@ public class QueryOn extends HttpServlet {
 			Subject currentUser = ShiroUtils.getSubject(prop, req);
 			Connection conn = null;
 			
+			//log.info("is shiro enabled? [shiroEnabled="+isShiroEnabled()+";atype="+atype+"]");
 			//ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
-			boolean permitted = ShiroUtils.isPermitted(currentUser, otype+":"+atype, reqspec.object);
+			boolean permitted = isPermitted(currentUser, otype, atype, reqspec.object);
 			if(!permitted) {
 				if( (atype==ActionType.UPDATE || atype == ActionType.INSERT) && validateUpdateColumnPermissions) {
 					// should validate columns on doInsert/doUpdate
@@ -783,7 +786,7 @@ public class QueryOn extends HttpServlet {
 					log.warn("strange... rel is null");
 					rel = SchemaModelUtils.getRelation(model, reqspec, true); //XXX: option to search views based on property?
 				}
-				if(! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) {
+				if(currentUser!=null && ! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) {
 					checkGrantsAndRolesMatches(currentUser, PrivilegeType.SELECT, rel);
 				}
 				doSelect(model, rel, reqspec, currentUser, resp, false);
@@ -1859,11 +1862,11 @@ public class QueryOn extends HttpServlet {
 		}
 		//log.info("doFilterStatusByPermission: "+doFilterStatusByPermission+" / doFilterStatusByQueryGrants: "+doFilterStatusByQueryGrants+" / "
 		//		+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)+":"+doNotCheckGrantsPermission);
-		if(doFilterStatusByPermission) {
+		if(doFilterStatusByPermission && currentUser!=null) {
 			// filter by [(relation)Type]:SELECT|EXECUTE:[schemaName]:[name]
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[3]:"+privilege+":[1]:[2]");
 		}
-		if(doFilterStatusByQueryGrants && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) { // XXX: doNotCheckGrantsPermission: SELECT_ANY and/or EXECUTE_ANY ?
+		if(doFilterStatusByQueryGrants && currentUser!=null && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) { // XXX: doNotCheckGrantsPermission: SELECT_ANY and/or EXECUTE_ANY ?
 			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getSubjectRoles(currentUser), privilege, "name", "grants");
 		}
 		return rs;
@@ -2976,6 +2979,7 @@ public class QueryOn extends HttpServlet {
 	}
 	
 	public static String getUsername(Subject currentUser) {
+		if(currentUser==null) { return null; }
 		return String.valueOf(currentUser.getPrincipal());
 	}
 	
@@ -3029,6 +3033,43 @@ public class QueryOn extends HttpServlet {
 	
 	protected String getBaseHref(RequestSpec reqspec) {
 		return reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
+	}
+
+	public void checkPermission(Subject currentUser, String otype, ActionType atype, String objectName) {
+		if(! isPermitted(currentUser, otype, atype, objectName)) {
+			ShiroUtils.throwPermissionException(currentUser, otype+":"+atype, objectName);
+		}
+		/*if(isShiroEnabled() || currentUser!=null || !atype.equals(ActionType.SELECT)) {
+			ShiroUtils.checkPermission(currentUser, otype+":"+atype, objectName);
+		}*/
+	}
+
+	public boolean isPermitted(Subject currentUser, String otype, ActionType atype, String objectName) {
+		if(isShiroEnabled() || currentUser!=null ||
+			( !atype.equals(ActionType.SELECT) && !atype.equals(ActionType.STATUS ) )
+			) {
+			return ShiroUtils.isPermitted(currentUser, otype+":"+atype, objectName);
+		}
+		return true;
+	}
+	
+	// DO NOT call before/on init()
+	protected boolean isShiroEnabled() {
+		if(shiroEnabled!=null) {
+			return shiroEnabled;
+		}
+		
+		boolean shiroEnabledLocal = ShiroUtils.isShiroEnabled();
+		boolean authAllowDisabledShiro = Utils.getPropBool(prop, PROP_AUTH_SHIRO_ALLOW_DISABLED, false);
+
+		if( (!authAllowDisabledShiro) && (!shiroEnabledLocal) ) {
+			String msg = "shiro not available and disabling not allowed [authAllowDisabledShiro="+authAllowDisabledShiro+";shiroEnabledLocal="+shiroEnabledLocal+"]";
+			log.warn(msg);
+			throw new InternalServerException(msg);
+		}
+		
+		shiroEnabled = shiroEnabledLocal;
+		return shiroEnabled;
 	}
 	
 }

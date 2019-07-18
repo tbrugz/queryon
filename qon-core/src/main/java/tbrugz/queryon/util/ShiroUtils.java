@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
@@ -50,7 +51,13 @@ public class ShiroUtils {
 	}
 	
 	public static Subject getSubject(Properties prop, HttpServletRequest request) {
-		Subject currentUser = SecurityUtils.getSubject();
+		Subject currentUser = null;
+		try {
+			currentUser = SecurityUtils.getSubject();
+		}
+		catch(UnavailableSecurityManagerException e) {
+			return null;
+		}
 		if(currentUser.getPrincipal()==null) {
 			Object userIdentity = null;
 			String realmName = null;
@@ -91,11 +98,14 @@ public class ShiroUtils {
 	
 	public static void checkPermission(Subject subject, String permission, String object) {
 		if(! isPermitted(subject, permission, object)) {
+			throwPermissionException(subject, permission, object);
+			/*
 			if(object!=null) {
 				object = object.replaceAll("\\.", ":");
 			}
-			log.warn("no permission '"+permission+"' for subject '"+subject.getPrincipal()+"' on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
-			throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", subject.isAuthenticated());
+			log.warn("no permission '"+permission+"' for subject '"+ (subject!=null ? subject.getPrincipal() : null) +"' on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
+			throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", isAuthenticated(subject));
+			*/
 		}
 	}
 	
@@ -103,8 +113,13 @@ public class ShiroUtils {
 		if(object!=null) {
 			object = object.replaceAll("\\.", ":");
 		}
-		log.warn("no permission '"+permission+"' for subject '"+subject.getPrincipal()+"' on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
-		throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", subject.isAuthenticated());
+		log.warn("no permission '"+permission+"' for subject " + (subject!=null ? "'" + subject.getPrincipal() + "'" : "*null*") + " on object '"+object+"'"); // ; "+subject.getPrincipal()+"'");
+		throw new ForbiddenException("["+permission+(object!=null?":"+object:"")+"]: authorization required", isAuthenticated(subject));
+	}
+	
+	public static boolean isAuthenticated(Subject subject) {
+		if(subject==null) { return false; }
+		return subject.isAuthenticated();
 	}
 
 	public static boolean isPermitted(Subject subject, String permission) {
@@ -112,6 +127,14 @@ public class ShiroUtils {
 	}
 	
 	public static boolean isPermitted(Subject subject, String permission, String object) {
+		/*// null subject: shiro not enabled... SELECT & STATUS allowed
+		if(subject == null && (ActionType.SELECT.toString().equals(permission) || ActionType.STATUS.toString().equals(permission))) {
+			return true;
+		}*/
+		if(subject == null) {
+			log.debug("isPermitted: null subject");
+			return false;
+		}
 		if(object!=null) {
 			object = object.replaceAll("\\.", ":");
 			permission += ":"+object;
@@ -209,5 +232,38 @@ public class ShiroUtils {
 		//log.info("AuthorizationInfo:: "+o);
 		return (AuthorizationInfo) o;
 	}
+	
+	public static boolean isShiroEnabled() {
+		try {
+			//org.apache.shiro.mgt.SecurityManager sm =
+			SecurityUtils.getSecurityManager();
+		}
+		catch (UnavailableSecurityManagerException e) {
+			log.debug("isShiroEnabled: UnavailableSecurityManagerException: "+e.getMessage());
+			return false;
+		}
+		return true;
+	}
+	
+	/*
+	// shiro with no realms is not possible (shiro initialization error occurs)
+	public static boolean isShiroRealmsAvaiable() {
+		try {
+			org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
+			if(sm instanceof RealmSecurityManager) {
+				RealmSecurityManager rsm = (RealmSecurityManager) sm;
+				Collection<Realm> rs = rsm.getRealms();
+				if(rs!=null) {
+					return true;
+				}
+			}
+		}
+		catch (UnavailableSecurityManagerException e) {
+			log.info("isShiroRealmsAvaiable: UnavailableSecurityManagerException: "+e);
+			return false;
+		}
+		return false;
+	}
+	*/
 	
 }
