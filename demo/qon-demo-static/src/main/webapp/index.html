@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"> 
+	<title>QueryOn static demo</title>
+	<style type="text/css">
+	body {
+		margin: 0;
+		font-family: sans-serif;
+	}
+	h1 {
+		margin: 0;
+		padding: 1em;
+	}
+	code {
+		padding: 2px 5px 2px 5px;
+		background-color: #ddd;
+	}
+	.header {
+		background-color: #ccc;
+	}
+	.main {
+		padding: 1em;
+	}
+	</style>
+</head>
+<body>
+	<div class="header">
+		<h1>QueryOn <code>static</code> demo</h1>
+	</div>
+	<div class="main">
+		<ul>
+			<li>see <a href="q/relation.json">relation.json</a> (<a href="q/relation.json?metadata=false">without metadata</a>)
+			<li>see <a href="q/any.json">any.json</a>
+			<li>see <a href="swagger/">swagger</a> API spec
+			<li>see <a href="odata/">odata</a> API endpoint
+			<li><em>GraphQL</em> API endpoint at <code>graphql/</code>
+			<hr/>
+			<li>see <a href="q/sampleQuery.json">sampleQuery.json</a>
+				(or <a href="q/sampleQuery.html">sampleQuery.html</a>,
+				<a href="q/sampleQuery.csv">sampleQuery.csv</a>,
+				<a href="q/sampleQuery.md">sampleQuery.md</a>,
+				...)
+			<li>sample GraphQL query: <code id="gqlSample">query { list_sampleQuery { SCHEMA_NAME }}</code>
+				<button onclick="window.location.href = 'graphql?query='+encodeURIComponent(document.getElementById('gqlSample').innerHTML);">run query</button>
+				<!-- <code><a href="graphql?query=query+%7B+list_sampleQuery+%7B+SCHEMA_NAME+%7D%7D">query { list_sampleQuery { SCHEMA_NAME }}</a></code> -->
+		</ul>
+	</div>
+</body>
+</html>
