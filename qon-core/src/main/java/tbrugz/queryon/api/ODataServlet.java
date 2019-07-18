@@ -47,9 +47,9 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.queryon.auth.AuthActions;
+import tbrugz.queryon.auth.UserInfo;
 import tbrugz.queryon.exception.InternalServerException;
-import tbrugz.queryon.model.BeanActions;
-import tbrugz.queryon.model.UserInfo;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
@@ -523,7 +523,7 @@ public class ODataServlet extends QueryOn {
 	}
 	
 	Object getBeanValue(String beanQuery, RequestSpec reqspec, HttpServletRequest request) {
-		BeanActions beanActions = new BeanActions(prop);
+		AuthActions beanActions = new AuthActions(prop);
 		if(beanQuery.equals(ODataServlet.QUERY_CURRENTUSER)) {
 			return beanActions.getCurrentUser(request);
 		}

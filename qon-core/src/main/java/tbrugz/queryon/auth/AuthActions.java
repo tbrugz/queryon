@@ -1,4 +1,4 @@
-package tbrugz.queryon.model;
+package tbrugz.queryon.auth;
 
 import java.util.Map;
 import java.util.Properties;
@@ -10,11 +10,11 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.ShiroUtils;
 
-public class BeanActions {
+public class AuthActions {
 	
 	final Properties prop;
 	
-	public BeanActions(Properties prop) {
+	public AuthActions(Properties prop) {
 		this.prop = prop;
 	}
 	

@@ -21,12 +21,12 @@ import graphql.schema.DataFetchingEnvironment;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
+import tbrugz.queryon.auth.AuthActions;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
-import tbrugz.queryon.model.BeanActions;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -191,7 +191,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 	
 	@SuppressWarnings("unchecked")
 	T getBeanValue(String beanQuery/*, Class<?> beanClazz*/, RequestSpec reqspec) {
-		BeanActions beanActions = new BeanActions(servlet.getProperties());
+		AuthActions beanActions = new AuthActions(servlet.getProperties());
 		if(beanQuery.equals(GqlSchemaFactory.QUERY_CURRENTUSER)) {
 			return (T) beanActions.getCurrentUser(req);
 		}

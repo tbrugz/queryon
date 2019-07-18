@@ -1,4 +1,4 @@
-package tbrugz.queryon.model;
+package tbrugz.queryon.auth;
 
 public class LoginInfo {
 

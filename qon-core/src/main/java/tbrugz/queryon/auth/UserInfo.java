@@ -1,4 +1,4 @@
-package tbrugz.queryon.model;
+package tbrugz.queryon.auth;
 
 import org.apache.shiro.subject.Subject;
 
