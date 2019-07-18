@@ -1,5 +1,6 @@
 package tbrugz.queryon.model;
 
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -7,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
-import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.util.ShiroUtils;
 
 public class BeanActions {
@@ -23,10 +23,10 @@ public class BeanActions {
 		return ui;
 	}
 	
-	public UserInfo doLogin(RequestSpec reqspec) {
+	public UserInfo doLogin(Map<String, String> parameterMap) {
 		Subject currentUser = SecurityUtils.getSubject();
-		String username = reqspec.getParameterMapUniqueValues().get("username");
-		String password = reqspec.getParameterMapUniqueValues().get("password");
+		String username = parameterMap.get("username");
+		String password = parameterMap.get("password");
 		
 		ShiroUtils.authenticate(currentUser, username, password);
 
@@ -34,7 +34,7 @@ public class BeanActions {
 		return ui;
 	}
 	
-	public UserInfo doLogout(RequestSpec reqspec) {
+	public UserInfo doLogout() {
 		Subject currentUser = SecurityUtils.getSubject();
 
 		currentUser.logout();

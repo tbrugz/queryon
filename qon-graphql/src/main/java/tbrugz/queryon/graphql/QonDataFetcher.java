@@ -196,10 +196,10 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 			return (T) beanActions.getCurrentUser(req);
 		}
 		else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGIN)) {
-			return (T) beanActions.doLogin(reqspec);
+			return (T) beanActions.doLogin(reqspec.getParameterMapUniqueValues());
 		}
 		else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGOUT)) {
-			return (T) beanActions.doLogout(reqspec);
+			return (T) beanActions.doLogout();
 		}
 		
 		throw new InternalServerException("unknown bean query: "+beanQuery);
