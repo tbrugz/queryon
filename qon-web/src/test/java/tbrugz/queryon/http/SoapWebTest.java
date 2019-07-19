@@ -92,7 +92,7 @@ public class SoapWebTest {
 		@Override
 		public Parser resolveEntity(String publicId, String systemId)
 				throws SAXException, IOException, XMLStreamException {
-			System.out.println("publicId: "+publicId+" / systemId: "+systemId);
+			//System.out.println("publicId: "+publicId+" / systemId: "+systemId);
 			return null;
 		}
 	}
@@ -208,7 +208,7 @@ public class SoapWebTest {
 	public void generateJavaFromWsdl() throws Exception {
 		//'-validate' fixed on java 8_b96 ? https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8016153
 		// java.version: 1.8.0_92 / java.version: 1.8.0_191
-		System.out.println("java.version: "+System.getProperty("java.version"));
+		log.info("java.version: "+System.getProperty("java.version"));
 		String url = soaplUrl+"?wsdl";
 		//String[] args = { "-d", generatedCodeDir, url };
 		//String[] args = { "-verbose", "-mark-generated", "-d", generatedCodeDir, url };

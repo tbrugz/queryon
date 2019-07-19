@@ -5,11 +5,15 @@ package tbrugz.queryon.shiro;
 
 import java.util.Collection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.permission.RolePermissionResolver;
 import org.apache.shiro.realm.text.IniRealm;
 
 public class IniRolePermissionResolver implements RolePermissionResolver {
+
+	private static final Log log = LogFactory.getLog(IniRolePermissionResolver.class);
 
 	/*public Permission resolvePermission(String permissionString) {
 		return iniRealm.getPermissionResolver().resolvePermission(permissionString);
@@ -29,12 +33,12 @@ public class IniRolePermissionResolver implements RolePermissionResolver {
 	@Override
 	public Collection<Permission> resolvePermissionsInRole(String roleString) {
 		if(iniRealm==null) {
-			System.out.println("IniRolePermissionResolver: null resolver, role = "+roleString);
+			log.debug("IniRolePermissionResolver: null resolver, role = "+roleString);
 			return null;
 		}
 		RolePermissionResolver rpr = iniRealm.getRolePermissionResolver();
 		if(rpr==null) {
-			System.out.println("IniRolePermissionResolver: null rolePermissionResolver, role = "+roleString);
+			log.debug("IniRolePermissionResolver: null rolePermissionResolver, role = "+roleString);
 			return null;
 		}
 		return iniRealm.getRolePermissionResolver().resolvePermissionsInRole(roleString);

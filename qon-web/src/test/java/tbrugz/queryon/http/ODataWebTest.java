@@ -339,25 +339,15 @@ public class ODataWebTest {
 		String url = odataUrl+"/currentUser";
 		
 		String jsonStr = getContentFromUrl(url);
-		System.out.println("content:\n"+jsonStr);
+		//System.out.println("content:\n"+jsonStr);
 
-		/*Object obj = JSONValue.parse(jsonStr);
+		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
 		
 		JSONObject jobj = (JSONObject) obj;
-		JSONArray jarr = (JSONArray) jobj.get("value");
-		
-		jobj = (JSONObject) jarr.get(0);
-		Object prop = jobj.get("C1");
-		Assert.assertEquals("1", prop);
-		
-		jobj = (JSONObject) jarr.get(1);
-		prop = jobj.get("C1");
-		Assert.assertEquals("2", prop);
-		
-		jobj = (JSONObject) jarr.get(2);
-		prop = jobj.get("C1");
-		Assert.assertEquals("1", prop);*/
+
+		Object prop = jobj.get("username");
+		Assert.assertEquals("anonymous", prop);
 	}
 
 }

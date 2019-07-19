@@ -180,7 +180,7 @@ public class WinstoneAndH2HttpRequestTest {
 	 */
 	@Test
 	public void testGet01_OK() throws IOException {
-		System.out.println("user.dir = "+System.getProperty("user.dir"));
+		log.info("user.dir = "+System.getProperty("user.dir"));
 		//URL url = new URL("http://localhost:8889/table");
 		//String s = (String) url.getContent();
 		//url.openConnection().
@@ -191,7 +191,7 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpResponse response1 = httpclient.execute(httpGet);
 		
 		try {
-			System.out.println(response1.getStatusLine());
+			//System.out.println(response1.getStatusLine());
 			Assert.assertEquals("Must be OK", 200, response1.getStatusLine().getStatusCode());
 			HttpEntity entity1 = response1.getEntity();
 			EntityUtils.consume(entity1);
@@ -204,7 +204,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testGet02_404() throws IOException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpGet = new HttpGet(baseUrl+"/fks");
+		HttpGet httpGet = new HttpGet(baseUrl+"/xyz");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		try {
@@ -522,25 +522,25 @@ public class WinstoneAndH2HttpRequestTest {
 		//int count = 0;
 		CSVFormat format = CSVFormat.DEFAULT; // CSVFormat.newBuilder(CSVFormat.DEFAULT).withHeader().build();
 		CSVParser parser = new CSVParser(in, format);
-		System.out.println("headers: "+parser.getHeaderMap()); //is null
+		log.info("headers: "+parser.getHeaderMap()); //is null
 		Iterator<CSVRecord> it = parser.iterator();
 		
 		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
 		CSVRecord record = it.next();
 		String value = record.get(1);
-		System.out.println("0ed record (name = '"+value+"'): "+record);
+		log.info("0ed record (name = '"+value+"'): "+record);
 		Assert.assertEquals("0ed record' 1st col must be 'name'", "name", value);
 
 		Assert.assertTrue("Must have 1st element", it.hasNext());
 		record = it.next();
 		value = record.get(1);
-		System.out.println("1st record (1st col = '"+value+"'): "+record);
+		log.info("1st record (1st col = '"+value+"'): "+record);
 		Assert.assertEquals("1st record' 1st col name must be DEPT", "DEPT", value);
 		
 		Assert.assertTrue("Must have 2nd element", it.hasNext());
 		record = it.next();
 		value = record.get(1);
-		System.out.println("2nd record (1st col = '"+value+"'): "+record);
+		log.info("2nd record (1st col = '"+value+"'): "+record);
 		Assert.assertEquals("2st record' 1st col must be EMP", "EMP", value);
 		
 		//int count = 2;
@@ -1338,7 +1338,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("SUPERVISOR_ID" + LF + 
 				"1" + LF +
 				"2" + LF,
@@ -1350,7 +1350,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("SUPERVISOR_ID" + LF + 
 				"2" + LF +
 				"1" + LF,
@@ -1362,7 +1362,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID&aliases=supervisor";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("supervisor" + LF + 
 				"2" + LF +
 				"1" + LF,
@@ -1374,7 +1374,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID&agg:SALARY=sum";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY" + LF + 
 				"2,4200" + LF +
 				"1,3000" + LF,
@@ -1386,7 +1386,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/PUBLIC.EMP.csv?groupby=SUPERVISOR_ID&order=-SUPERVISOR_ID&agg:SALARY=sum&agg:SALARY=max&agg:SALARY=min&agg:SALARY=count";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY,max_SALARY,min_SALARY,count_SALARY" + LF + 
 				"2,4200,2000,1000,3" + LF +
 				"1,3000,2000,1000,2" + LF,
@@ -1398,7 +1398,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/PUBLIC.EMP.csv?onrows=SUPERVISOR_ID&groupbydims=true&agg:SALARY=sum&agg:SALARY=count";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY,count_SALARY" + LF + 
 				"1,3000,2" + LF +
 				"2,4200,3" + LF,
@@ -1410,7 +1410,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&par2=2";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("C1" + LF + 
 				"1" + LF +
 				"2" + LF +
@@ -1424,7 +1424,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?p1=1&p2=2&p3=3";
 		
 		String content = getContentFromUrl(baseUrl+url);
-		System.out.println(content);
+		//System.out.println(content);
 		Assert.assertEquals("C1" + LF + 
 				"1" + LF +
 				"2" + LF +
