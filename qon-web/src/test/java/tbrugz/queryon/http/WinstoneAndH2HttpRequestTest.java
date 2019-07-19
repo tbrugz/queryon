@@ -64,6 +64,7 @@ import org.json.simple.JSONValue;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -103,6 +104,9 @@ public class WinstoneAndH2HttpRequestTest {
 	static final int relationsInModel = 4;
 	static final int queriesInModel = 5;
 	static final int executablesInModel = 2;
+	
+	static final String LOGIN_JDOE = "jdoe";
+	static final String PASSWORD_JDOE = "jdoepw";
 	
 	static final String LF = "\r\n";
 	
@@ -1552,12 +1556,48 @@ public class WinstoneAndH2HttpRequestTest {
 		return httpClient.execute(httpPost);
 	}
 
+	static HttpResponse servletLoginWithJson(HttpClient httpClient, CookieStore cookies, String username, String password) throws ClientProtocolException, IOException {
+		HttpPost httpPost = new HttpPost(qonUrl+"/qauth/login");
+		setCookies(httpPost, cookies);
+		
+		StringEntity requestEntity = new StringEntity(
+			"{ \"username\": \""+username+"\", \"password\": \""+password+"\"}",
+			ContentType.APPLICATION_JSON);
+		
+		httpPost.setEntity(requestEntity);
+		return httpClient.execute(httpPost);
+	}
+	
 	static HttpResponse servletLogout(HttpClient httpClient, CookieStore cookies) throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(qonUrl+"/qauth/logout");
 		setCookies(httpPost, cookies);
 		return httpClient.execute(httpPost);
 	}
 
+	static void servletLoginOk() throws ClientProtocolException, IOException {
+		try {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpResponse resp = servletLogin(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
+			EntityUtils.consumeQuietly(resp.getEntity());
+		}
+		catch(Exception e) {
+			Assume.assumeNoException(e);
+		}
+	}
+
+	static void servletLogoutOk() throws ClientProtocolException, IOException {
+		try {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost(qonUrl+"/qauth/logout");
+			//setCookies(httpPost, null);
+			HttpResponse resp = httpClient.execute(httpPost);
+			EntityUtils.consumeQuietly(resp.getEntity());
+		}
+		catch(Exception e) {
+			Assume.assumeNoException(e);
+		}
+	}
+	
 	@Test
 	public void testLoginOk() throws Exception {
 		// https://stackoverflow.com/a/6273665/616413
@@ -1567,11 +1607,12 @@ public class WinstoneAndH2HttpRequestTest {
 		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
 		{
-			HttpResponse response1 = jspLogin(httpClient, null, "jdoe", "jdoepw");
+			HttpResponse response1 = jspLogin(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			// https://stackoverflow.com/a/16211729/616413
 			EntityUtils.consumeQuietly(response1.getEntity());
 		}
+		servletLogoutOk(); // session is sometimes kept - needed for test interaction issue
 	}
 
 	@Test
@@ -1579,7 +1620,7 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpClient httpClient = new DefaultHttpClient();
 
 		{
-			HttpResponse response2 = jspLogin(httpClient, null, "jdoe", "jdoez");
+			HttpResponse response2 = jspLogin(httpClient, null, LOGIN_JDOE, "jdoez");
 			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
@@ -1594,19 +1635,31 @@ public class WinstoneAndH2HttpRequestTest {
 		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
 		{
-			HttpResponse response1 = servletLogin(httpClient, null, "jdoe", "jdoepw");
+			HttpResponse response1 = servletLogin(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			// https://stackoverflow.com/a/16211729/616413
 			EntityUtils.consumeQuietly(response1.getEntity());
 		}
+		servletLogoutOk(); // session is sometimes kept - needed for test interaction issue
 	}
 
+	@Test
+	public void testServletJsonLoginOk() throws Exception {
+		HttpClient httpClient = new DefaultHttpClient();
+		{
+			HttpResponse response1 = servletLoginWithJson(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
+			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+			EntityUtils.consumeQuietly(response1.getEntity());
+		}
+		servletLogoutOk(); // session is sometimes kept - needed for test interaction issue
+	}
+	
 	@Test
 	public void testServletLoginErr() throws Exception {
 		HttpClient httpClient = new DefaultHttpClient();
 
 		{
-			HttpResponse response2 = servletLogin(httpClient, null, "jdoe", "jdoez");
+			HttpResponse response2 = servletLogin(httpClient, null, LOGIN_JDOE, "jdoez");
 			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
@@ -1663,7 +1716,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("\ncookieStore1:\n"+cookieStore);
 		
 		{
-			HttpResponse response1 = jspLogin(httpClient, cookieStore, "jdoe", "jdoepw");
+			HttpResponse response1 = jspLogin(httpClient, cookieStore, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			// https://stackoverflow.com/a/16211729/616413
 			EntityUtils.consumeQuietly(response1.getEntity());
@@ -1679,7 +1732,7 @@ public class WinstoneAndH2HttpRequestTest {
 			//System.out.print("json:\n"+jsonStr+"\n");
 			JsonElement json = parser.parse(jsonStr);
 			Assert.assertEquals(true, json.getAsJsonObject().get("authenticated").getAsBoolean());
-			Assert.assertEquals("jdoe", json.getAsJsonObject().get("username").getAsString());
+			Assert.assertEquals(LOGIN_JDOE, json.getAsJsonObject().get("username").getAsString());
 			EntityUtils.consumeQuietly(jsonResp.getEntity());
 		}
 		
@@ -1687,7 +1740,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("\ncookieStore3:\n"+cookieStore);
 		
 		{
-			HttpResponse response2 = jspLogin(httpClient, cookieStore, "jdoe", "jdoez");
+			HttpResponse response2 = jspLogin(httpClient, cookieStore, LOGIN_JDOE, "jdoez");
 			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
@@ -1923,7 +1976,9 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testExecutableCount() throws IOException, ParserConfigurationException, SAXException {
+		servletLoginOk();
 		baseReturnCountTest("/executable.xml", executablesInModel);
+		servletLogoutOk();
 	}
 
 	@Test
