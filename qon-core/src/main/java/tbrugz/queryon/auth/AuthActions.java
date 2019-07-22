@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 
 public class AuthActions {
@@ -20,6 +21,14 @@ public class AuthActions {
 	
 	public UserInfo getCurrentUser(HttpServletRequest req) {
 		UserInfo ui = new UserInfo(ShiroUtils.getSubject(prop, req));
+		return ui;
+	}
+
+	public ExtendedUserInfo getCurrentUserXtra(HttpServletRequest req) {
+		ExtendedUserInfo ui = new ExtendedUserInfo(
+				ShiroUtils.getSubject(prop, req),
+				SchemaModelUtils.getModelIds(req.getServletContext())
+				);
 		return ui;
 	}
 	

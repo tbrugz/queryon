@@ -37,6 +37,8 @@ public class AuthServlet extends AbstractHttpServlet {
 	public static final String ACTION_LOGIN = "login";
 	public static final String ACTION_LOGOUT = "logout";
 	
+	boolean currentUserWithExtraInfo = true;
+	
 	Properties prop;
 	
 	@Override
@@ -56,7 +58,13 @@ public class AuthServlet extends AbstractHttpServlet {
 
 		AuthActions beanActions = new AuthActions(prop);
 		if(pathInfo.equals(ACTION_CURRENT_USER)) {
-			UserInfo ui = beanActions.getCurrentUser(req);
+			UserInfo ui = null;
+			if(currentUserWithExtraInfo) {
+				ui = beanActions.getCurrentUserXtra(req);
+			}
+			else {
+				ui = beanActions.getCurrentUser(req);
+			}
 			writeBean(ui, resp);
 		}
 		else if(pathInfo.equals(ACTION_LOGIN)) {
