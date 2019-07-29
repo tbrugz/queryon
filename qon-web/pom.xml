@@ -531,6 +531,12 @@
       <version>${kmlutils.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>odata-client-core</artifactId>
+      <version>4.6.0</version>
+    </dependency>
 
     <!-- <dependency>
       <groupId>org.quartz-scheduler</groupId>

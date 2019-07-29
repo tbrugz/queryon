@@ -6,10 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,6 +23,17 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.olingo.client.api.ODataClient;
+import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.client.core.ODataClientFactory;
+import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.commons.api.edm.EdmEntityContainer;
+import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmSchema;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.format.ContentType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -36,6 +50,8 @@ import tbrugz.sqldump.util.IOUtil;
 
 public class ODataWebTest {
 
+	private static final Log log = LogFactory.getLog(ODataWebTest.class);
+	
 	public static final String basedir = "src/test/java";
 
 	//static String workDir = "work/test/";
@@ -348,6 +364,51 @@ public class ODataWebTest {
 
 		Object prop = jobj.get("username");
 		Assert.assertEquals("anonymous", prop);
+	}
+	
+	/*
+	 * see: https://olingo.apache.org/doc/odata4/tutorials/od4_basic_client_read.html
+	 */
+	ODataClient getODataClient() {
+		ODataClient client = ODataClientFactory.getClient();
+		client.getConfiguration().setDefaultPubFormat(ContentType.APPLICATION_JSON);
+		return client;
+	}
+	
+	@Test
+	public void odataMetadataRequest() {
+		//ODataClient client = ODataClientFactory.getClient();
+		//client.getConfiguration().setDefaultPubFormat(ContentType.APPLICATION_JSON);
+		Edm edm = getODataClient().getRetrieveRequestFactory().getMetadataRequest(odataUrl).execute().getBody();
+		EdmEntityContainer eec = edm.getEntityContainer();
+		List<EdmEntitySet> ees = eec.getEntitySets();
+		log.info("List<EdmEntitySet>: "+ees);
+		for(EdmEntitySet e: ees) {
+			log.info(" - "+e.getName());
+			//log.info(" - "+e.getName()+" / "+e.getEntityType());
+		}
+		
+		List<EdmSchema> es = edm.getSchemas();
+		log.info("List<EdmSchema>: "+es);
+		for(EdmSchema s: es) {
+			log.info(" - "+s.getAlias()+" / "+s.getNamespace());
+		}
+	}
+	
+	@Test
+	public void odataXMLMetadataRequest() {
+		XMLMetadata xmlMetadata = getODataClient().getRetrieveRequestFactory().getXMLMetadataRequest(odataUrl).execute().getBody();
+		log.info("EdmVersion: "+xmlMetadata.getEdmVersion());
+		List<CsdlSchema> schemas = xmlMetadata.getSchemas();
+		for(CsdlSchema s: schemas) {
+			log.info("CsdlSchema: "+s.getAlias()+" / "+s.getNamespace());
+			CsdlEntityContainer ec = s.getEntityContainer();
+			List<CsdlEntitySet> es = ec.getEntitySets();
+			for(CsdlEntitySet e: es) {
+				//log.info(" - "+e.getName());
+				log.info(" - "+e.getName()+" / "+e.getType()+" / "+e.getTypeFQN());
+			}
+		}
 	}
 
 }
