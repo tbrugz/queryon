@@ -110,6 +110,9 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	static final String LF = "\r\n";
 	
+	//static final String currentUserUrl = "/auth/info.jsp";
+	static final String currentUserUrl = "/qauth/currentUser";
+	
 	@BeforeClass
 	public static void setup() throws Exception {
 		//TestSetup.setupWinstone();
@@ -1405,6 +1408,19 @@ public class WinstoneAndH2HttpRequestTest {
 				content);
 	}
 
+	@Test @Ignore
+	public void testGetGroupByWithAggregatePivotAndMeasure() throws Exception {
+		String url = "/PUBLIC.EMP.csv?onrows=SUPERVISOR_ID&groupbydims=true&measures=SALARY&agg:SALARY=sum";
+		//String url = "/PUBLIC.EMP.csv?onrows=SUPERVISOR_ID&groupbydims=true&measures=SALARY";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		//System.out.println(content);
+		Assert.assertEquals("SUPERVISOR_ID,sum_SALARY,count_SALARY" + LF + 
+				"1,3000,2" + LF +
+				"2,4200,3" + LF,
+				content);
+	}
+	
 	@Test
 	public void testGetQueryWithNamedParameters() throws Exception {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&par2=2";
@@ -1702,7 +1718,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//testLoginOk();
 		
 		{
-			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+"/auth/info.jsp", cookieStore);
+			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+currentUserUrl, cookieStore);
 			String jsonStr = getContent(jsonResp);
 			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
 			//System.out.print("json:\n"+jsonStr+"\n");
@@ -1726,7 +1742,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("\ncookieStore2:\n"+cookieStore);
 		
 		{
-			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+"/auth/info.jsp", cookieStore);
+			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+currentUserUrl, cookieStore);
 			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
 			String jsonStr = getContent(jsonResp);
 			//System.out.print("json:\n"+jsonStr+"\n");
@@ -1755,7 +1771,7 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 		
 		{
-			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+"/auth/info.jsp", cookieStore);
+			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+currentUserUrl, cookieStore);
 			String jsonStr = getContent(jsonResp);
 			//System.out.print("json:\n"+jsonStr+"\n");
 			JsonElement json = parser.parse(jsonStr);
