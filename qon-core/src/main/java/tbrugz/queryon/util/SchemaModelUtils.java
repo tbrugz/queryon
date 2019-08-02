@@ -47,19 +47,23 @@ public class SchemaModelUtils {
 	}
 	
 	public static Relation getRelation(SchemaModel model, RequestSpec reqspec, boolean searchViews) {
+		return getRelation(model, reqspec.getObject(), searchViews);
+	}
+	
+	public static Relation getRelation(SchemaModel model, String object, boolean searchViews) {
 		//log.info("getRelation [provided '"+reqspec.object+"']");
 		Relation relation = null;
 		
 		// search for view first
 		if(searchViews) {
-			relation = getView(model, reqspec);
+			relation = getView(model, object);
 			if(relation!=null) { return relation; }
 		}
 		
-		String[] objectParts = reqspec.getObject().split("\\.");
+		String[] objectParts = object.split("\\.");
 		
 		if(objectParts.length>2) {
-			log.debug("getRelation: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.getObject()+"']");
+			log.debug("getRelation: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+object+"']");
 			//throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 			return null;
 		}
@@ -74,12 +78,16 @@ public class SchemaModelUtils {
 		return relation;
 	}
 
-	private static View getView(SchemaModel model, RequestSpec reqspec) {
-		String[] objectParts = reqspec.getObject().split("\\.");
+	/*private static View getView(SchemaModel model, RequestSpec reqspec) {
+		return getView(model, reqspec.getObject());
+	}*/
+	
+	private static View getView(SchemaModel model, String object) {
+		String[] objectParts = object.split("\\.");
 		
 		View view = null;
 		if(objectParts.length>2) {
-			log.debug("getView: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.getObject()+"']");
+			log.debug("getView: relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+object+"']");
 			//throw new BadRequestException("relation object must have 1 or 2 parts [provided "+objectParts.length+": '"+reqspec.object+"']");
 			return null;
 		}

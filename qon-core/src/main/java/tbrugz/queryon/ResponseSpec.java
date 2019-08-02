@@ -6,6 +6,7 @@ package tbrugz.queryon;
 public class ResponseSpec {
 
 	public static final String MIME_TYPE_TEXT_PLAIN = "text/plain";
+	public static final String MIME_TYPE_OCTET_SREAM = "application/octet-stream"; // https://www.iana.org/assignments/media-types/application/octet-stream
 	
 	public static final String MIME_TYPE_JSON = "application/json";
 	public static final String MIME_TYPE_XML = "application/xml";

@@ -22,7 +22,7 @@ public abstract class BaseApiServlet extends QueryOn {
 		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
 		dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
 		servletContext = context;
-		//servletUrlContext = DEFAULT_ODATA_CONTEXT;
+		//servletUrlContext = "xxx";
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);
 		
 		initFromProperties();

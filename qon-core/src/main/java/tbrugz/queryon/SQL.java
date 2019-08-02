@@ -740,7 +740,7 @@ public class SQL {
 		return false;
 	}
 	
-	void bindParameters(PreparedStatement st) throws SQLException, IOException {
+	public void bindParameters(PreparedStatement st) throws SQLException, IOException {
 		for(int i=0 ; i<bindParameterValues.size() ; i++) {
 			Object value = bindParameterValues.get(i);
 			if(value instanceof Long) {

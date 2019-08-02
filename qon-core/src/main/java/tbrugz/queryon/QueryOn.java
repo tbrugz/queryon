@@ -114,6 +114,7 @@ import tbrugz.sqldump.util.Utils;
  */
 @MultipartConfig
 public class QueryOn extends HttpServlet {
+	
 	private static final long serialVersionUID = 1L;
 
 	public enum ActionType {
@@ -722,9 +723,9 @@ public class QueryOn extends HttpServlet {
 					);
 			//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 			
-			SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.modelId);
+			SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.getModelId());
 			if(model==null) {
-				throw new InternalServerException("null model [modelId="+reqspec.modelId+"]");
+				throw new InternalServerException("null model [modelId="+reqspec.getModelId()+"]");
 			}
 			
 			final String otype;
@@ -794,7 +795,7 @@ public class QueryOn extends HttpServlet {
 				break;
 			case SELECT_ANY:
 				try {
-					conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
@@ -818,7 +819,7 @@ public class QueryOn extends HttpServlet {
 				break;
 			case VALIDATE_ANY:
 				try {
-					conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					doValidate(relation, reqspec, currentUser, conn, resp);
 				}
@@ -834,7 +835,7 @@ public class QueryOn extends HttpServlet {
 				break;
 			case EXPLAIN_ANY:
 				try {
-					conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					DBObjectUtils.updateQueryParameters(relation, conn);
 					doExplain(relation, reqspec, currentUser, conn, resp);
@@ -851,7 +852,7 @@ public class QueryOn extends HttpServlet {
 				break;
 			case SQL_ANY:
 				try {
-					conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
@@ -2432,7 +2433,7 @@ public class QueryOn extends HttpServlet {
 	protected void postService(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) {
 	}
 	
-	static boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
+	protected static boolean fullKeyDefined(RequestSpec reqspec, Constraint pk) {
 		if(pk==null) {
 			return false;
 		}
@@ -2800,7 +2801,7 @@ public class QueryOn extends HttpServlet {
 		List<Class<?>> types = DataDumpUtils.getColumnTypes(rsmd);
 		Class<?> colType = types.get(colIndex);
 		if(Blob.class.equals( colType )) {
-			mimeType = "application/octet-stream";
+			mimeType = ResponseSpec.MIME_TYPE_OCTET_SREAM; //"application/octet-stream";
 		}
 		
 		String filename = null;
@@ -3035,6 +3036,10 @@ public class QueryOn extends HttpServlet {
 		return reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
 	}
 
+	protected String getBaseHref(HttpServletRequest req) {
+		return WebUtils.getRequestFullContext(req) + "/" + servletUrlContext + "/";
+	}
+	
 	public void checkPermission(Subject currentUser, String otype, ActionType atype, String objectName) {
 		if(! isPermitted(currentUser, otype, atype, objectName)) {
 			ShiroUtils.throwPermissionException(currentUser, otype+":"+atype, objectName);

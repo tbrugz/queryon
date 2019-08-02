@@ -13,12 +13,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +42,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.auth.AuthActions;
@@ -52,7 +49,6 @@ import tbrugz.queryon.auth.UserInfo;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
-import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -67,7 +63,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 
-public class ODataServlet extends QueryOn {
+public class ODataServlet extends BaseApiServlet {
 	
 	public static class Entity {
 		//String schema;
@@ -153,19 +149,19 @@ public class ODataServlet extends QueryOn {
 	}
 	*/
 	
-	@Override
+	/*@Override
 	protected void doInitProperties(ServletConfig config) {
-	}
+	}*/
 	
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
-		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
-		dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
-		servletContext = context;
+		super.doInit(context);
+		//prop.putAll((Properties) context.getAttribute(ATTR_PROP));
+		//dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
+		//servletContext = context;
 		servletUrlContext = DEFAULT_ODATA_CONTEXT;
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);
-		
-		initFromProperties();
+		//initFromProperties();
 	}
 	
 	@Override

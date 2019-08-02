@@ -85,7 +85,7 @@ public class QueryOnInstant extends QueryOn {
 			throw new BadRequestException("no schema informed");
 		}
 		
-		final Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+		final Connection conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 
 		try {
 		final DBMSResources res = DBMSResources.instance();

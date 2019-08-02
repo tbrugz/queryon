@@ -284,9 +284,10 @@ public class RequestSpec {
 		}
 		
 		//String[] URIparts = varUrl!=null ? varUrl.split("/") : new String[]{} ;
-		String[] URIparts = varUrl.split("/");
+		/*String[] URIparts = varUrl.split("/");
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
-		if(!URIpartz.isEmpty() && "".equals(URIpartz.get(0))) { URIpartz.remove(0); }
+		if(!URIpartz.isEmpty() && "".equals(URIpartz.get(0))) { URIpartz.remove(0); }*/
+		List<String> URIpartz = getUrlParts(varUrl);
 		
 		//log.info("urlparts: "+URIpartz+" [#"+URIpartz.size()+"][minparts="+minUrlParts+"]");
 		if(URIpartz.size()<minUrlParts) {
@@ -461,6 +462,14 @@ public class RequestSpec {
 		}
 		processFilters(allowedFilters);
 		processXtra();
+	}
+	
+	public static List<String> getUrlParts(String url) {
+		if(url==null) { url = ""; }
+		String[] URIparts = url.split("/");
+		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
+		if(!URIpartz.isEmpty() && "".equals(URIpartz.get(0))) { URIpartz.remove(0); }
+		return URIpartz;
 	}
 	
 	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
