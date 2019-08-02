@@ -154,7 +154,11 @@ public class WebDavServlet extends BaseApiServlet {
 	protected void preprocessParameters(RequestSpec reqspec, Relation relation, Constraint pk) {
 		if(reqspec instanceof WebDavRequest) {
 			WebDavRequest wdreq = (WebDavRequest) reqspec;
-			wdreq.setUniqueKey(pk);
+			try {
+				wdreq.setUniqueKey(pk);
+			} catch (IOException e) {
+				throw new InternalServerException("Error setting UK: "+e.getMessage(), e);
+			}
 		}
 		else {
 			throw new IllegalArgumentException(reqspec + " not instanceof WebDavRequest");

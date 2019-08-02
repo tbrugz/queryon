@@ -2027,9 +2027,14 @@ public class QueryOn extends HttpServlet {
 		*/
 		boolean hasRelationInsertPermission = isPermitted || ShiroUtils.isPermitted(currentUser, ActionType.UPDATE_ANY.name());
 		
+		Constraint pk = SchemaModelUtils.getPK(relation);
+		preprocessParameters(reqspec, relation, pk);
+		
 		StringBuilder sb = new StringBuilder();
 		int colsCount = 0;
 		Set<String> updateCols = new HashSet<String>();
+
+		// standart parameters
 		{
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
 		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
@@ -2094,8 +2099,6 @@ public class QueryOn extends HttpServlet {
 		}
 		sql.applyUpdate(sb.toString());
 
-		Constraint pk = SchemaModelUtils.getPK(relation);
-		preprocessParameters(reqspec, relation, pk);
 		filterByKey(relation, reqspec, pk, sql);
 
 		// xtra filters

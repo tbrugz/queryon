@@ -244,5 +244,17 @@ public class WebDavWebTest {
 		log.info("s == "+s);
 		Assert.assertEquals("john", s);
 	}
+
+	@Test
+	public void sardinePutEmpId1_Name() throws IOException {
+		Sardine sardine = SardineFactory.begin();
+		String newValue = "paul";
+		sardine.put(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME", newValue.getBytes());
+		
+		InputStream is = sardine.get(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME"); //john
+		String s = StringUtils.readInputStream(is, 8192);
+		log.info("s == "+s);
+		Assert.assertEquals("paul", s);
+	}
 	
 }

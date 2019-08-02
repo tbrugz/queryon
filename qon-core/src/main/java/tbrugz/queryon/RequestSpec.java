@@ -1074,7 +1074,7 @@ public class RequestSpec {
 		return outputTypeStr;
 	}
 
-	static String getRequestBody(HttpServletRequest req) throws IOException {
+	protected static String getRequestBody(HttpServletRequest req) throws IOException {
 		InputStream is = req.getInputStream();
 		return StringUtils.readInputStream(is, 8192);
 	}

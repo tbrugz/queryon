@@ -24,7 +24,7 @@ public class WebDavRequest extends RequestSpec {
 		super(dsutils, req, prop, 0, "xml", false, 0, null);
 	}
 	
-	void setUniqueKey(Constraint uk) {
+	void setUniqueKey(Constraint uk) throws IOException {
 		int paramCount = getParams().size();
 		
 		if(paramCount > uk.getUniqueColumns().size()+1) {
@@ -36,10 +36,15 @@ public class WebDavRequest extends RequestSpec {
 			log.info("uk column count ["+uk.getUniqueColumns().size()+"] < paramCount ["+paramCount+"]");
 			//throw new BadRequestException("uk column count ["+uk.getUniqueColumns().size()+"] < urlPartCount ["+urlPartCount+"]");
 			String column = String.valueOf(getParams().remove(paramCount-1));
-			log.info("column = "+column+" / params = "+getParams());
+			//log.info("column = "+column+" / params = "+getParams());
 			columns.add(column);
 			if(httpMethod.equals(QueryOn.METHOD_GET)) {
 				uniValueCol = column;
+			}
+			else if(httpMethod.equals(QueryOn.METHOD_PUT)) {
+				String body = getRequestBody(request);
+				//log.info("setUniqueKey: PUT: "+column+" / "+body);
+				updateValues.put(column, body);
 			}
 		}
 		else if(paramCount == uk.getUniqueColumns().size()) {
@@ -54,11 +59,13 @@ public class WebDavRequest extends RequestSpec {
 				columns.add(uk.getUniqueColumns().get(paramCount));
 			}
 		}
-		//limit = null;
 	}
 	
 	List<String> getColumns() {
 		return columns;
 	}
+	
+	@Override
+	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {}
 
 }
