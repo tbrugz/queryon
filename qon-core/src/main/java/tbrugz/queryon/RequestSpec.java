@@ -1246,6 +1246,10 @@ public class RequestSpec {
 		return modelId;
 	}
 	
+	public int getOffset() {
+		return offset;
+	}
+	
 	protected String getValueForUpdate(Object o) {
 		if(o instanceof Double) {
 			Double d = (Double) o;

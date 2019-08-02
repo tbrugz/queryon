@@ -27,6 +27,7 @@ import tbrugz.queryon.SQL;
 import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -47,9 +48,13 @@ public class WebDavServlet extends BaseApiServlet {
 	
 	public static final int STATUS_MULTI_STATUS = 207;
 	
+	public final static int DEFAULT_LIMIT = 1000;
+	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		defaultLimit = DEFAULT_LIMIT;
+		maxLimit = defaultLimit;
 	}
 	
 	@Override
@@ -283,9 +288,8 @@ public class WebDavServlet extends BaseApiServlet {
 			if(log.isDebugEnabled()) {
 				ConnectionUtil.showDBInfo(conn.getMetaData());
 			}
-			//log.info("reqspec: "+reqspec);
 			
-			LimitOffsetStrategy loStrategy = LimitOffsetStrategy.RESULTSET_CONTROL; //LimitOffsetStrategy.getDefaultStrategy(sqlDialect);
+			LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(sqlDialect);
 			boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 			if(fullKeyDefined) {
 				log.warn("doListResources with fullKeyDefined == true?");
@@ -299,8 +303,13 @@ public class WebDavServlet extends BaseApiServlet {
 			PreparedStatement st = conn.prepareStatement(finalSql);
 			sql.bindParameters(st);
 			
-			//boolean applyLimitOffsetInResultSet = !sql.sqlLoEncapsulated;
+			boolean applyLimitOffsetInResultSet = !sql.sqlLoEncapsulated;
 			ResultSet rs = st.executeQuery();
+			
+			if(applyLimitOffsetInResultSet) {
+				rs = new ResultSetLimitOffsetDecorator(rs, getLimit(), reqspec.getOffset());
+			}
+			
 			List<String> keys = new ArrayList<String>();
 			
 			while(rs.next()) {
@@ -312,6 +321,13 @@ public class WebDavServlet extends BaseApiServlet {
 			log.warn("Exception: "+e);
 			throw new RuntimeException(e);
 		}
+	}
+	
+	int getLimit() {
+		if(defaultLimit!=null) {
+			return Math.min(defaultLimit, maxLimit);
+		}
+		return maxLimit;
 	}
 	
 	void writePaths(List<WebDavResource> resl, HttpServletResponse resp) throws IOException {

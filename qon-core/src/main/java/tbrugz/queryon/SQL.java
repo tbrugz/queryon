@@ -70,7 +70,7 @@ public class SQL {
 	
 	final String initialSql;
 	String sql;
-	boolean sqlLoEncapsulated = false;
+	public boolean sqlLoEncapsulated = false;
 	
 	final Relation relation;
 	final boolean allowEncapsulation;
