@@ -48,6 +48,7 @@ import tbrugz.sqldump.util.Utils;
  * XXXxx do a select on the inserted/updated row (req.getParameter("doselect"))? maybe use st.getGeneratedKeys() instead...
  */
 public class RequestSpec {
+	
 	static final Log log = LogFactory.getLog(RequestSpec.class);
 	
 	/*public class Filter {

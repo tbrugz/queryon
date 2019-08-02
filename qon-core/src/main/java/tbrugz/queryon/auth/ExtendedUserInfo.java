@@ -1,17 +1,18 @@
 package tbrugz.queryon.auth;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.ShiroUtils;
 
 public class ExtendedUserInfo extends UserInfo {
 	
-	static final String[] permissionsArr = { "SELECT_ANY", "INSERT_ANY", "UPDATE_ANY", "DELETE_ANY", "SQL_ANY", "MANAGE" };
+	static final ActionType[] permissionsArr = { ActionType.SELECT_ANY, ActionType.INSERT_ANY, ActionType.UPDATE_ANY, ActionType.DELETE_ANY,
+			ActionType.VALIDATE_ANY, ActionType.SQL_ANY, ActionType.MANAGE };
 	
 	final Set<String> roles;
 	final List<String> permissions;
@@ -22,7 +23,10 @@ public class ExtendedUserInfo extends UserInfo {
 		roles = ShiroUtils.getSubjectRoles(subject);
 		
 		List<String> permissionList = new ArrayList<String>();
-		permissionList.addAll(Arrays.asList(permissionsArr));
+		for(ActionType perm: permissionsArr) {
+			permissionList.add(perm.name());
+		}
+		// XXX add APPLYDIFF when instance has only 1 model?
 		for(String mid: modelIds) {
 			permissionList.add("TABLE:APPLYDIFF:"+mid); //XXX null _mid_?
 		}
