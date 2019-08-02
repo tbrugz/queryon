@@ -111,5 +111,15 @@
 		<servlet-name>AuthServlet</servlet-name>
 		<url-pattern>/qauth/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>WebDavServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.webdav.WebDavServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>WebDavServlet</servlet-name>
+		<url-pattern>/webdav/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>

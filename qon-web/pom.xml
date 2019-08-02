@@ -24,7 +24,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cxf.version>3.2.7</cxf.version>
     <jetty.version>8.1.22.v20160922</jetty.version>
-    <httpclient.version>4.5.7</httpclient.version>
+    <httpclient.version>4.5.9</httpclient.version>
   </properties>
 
   <build>
@@ -536,6 +536,14 @@
       <groupId>org.apache.olingo</groupId>
       <artifactId>odata-client-core</artifactId>
       <version>4.6.0</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.github.lookfirst</groupId>
+      <artifactId>sardine</artifactId>
+      <version>5.9</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- <dependency>
