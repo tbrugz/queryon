@@ -128,7 +128,7 @@ public class RequestSpec {
 	
 	protected final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
-	final String httpMethod;
+	protected final String httpMethod;
 	protected final String modelId;
 	protected String object;
 	protected int offset;
@@ -218,7 +218,7 @@ public class RequestSpec {
 	}
 	
 	// blob/download fields
-	final String uniValueCol;
+	protected String uniValueCol;
 	final String uniValueMimetype;
 	final String uniValueMimetypeCol;
 	final String uniValueFilename;

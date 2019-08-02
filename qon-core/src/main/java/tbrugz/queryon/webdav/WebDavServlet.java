@@ -80,7 +80,7 @@ public class WebDavServlet extends BaseApiServlet {
 		
 		String pathInfo = req.getPathInfo();
 		if(pathInfo==null) { pathInfo = ""; }
-		List<String> urlParts = RequestSpec.getUrlParts(pathInfo);
+		//List<String> urlParts = RequestSpec.getUrlParts(pathInfo);
 		//String baseHref = getBaseHref(req);
 		
 		if(pathInfo.isEmpty()) {
@@ -89,25 +89,30 @@ public class WebDavServlet extends BaseApiServlet {
 			//List<WebDavResource> resl = getResources(rels, baseHref);
 			List<WebDavResource> resl = getResourcesFromRelations(rels);
 			writePaths(resl, resp);
+			return;
 		}
-		else {
-			int partsSize = urlParts.size();
-			String object = urlParts.remove(0);
-			Relation r = SchemaModelUtils.getRelation(model, object, true);
+			WebDavRequest wdreq = getRequestSpec(req);
+			List<Object> urlParts = wdreq.getParams();
+			
+			//int partsSize = urlParts.size();
+			//String object = urlParts.remove(0);
+			Relation r = SchemaModelUtils.getRelation(model, wdreq.getObject(), true);
 			if(r==null) {
-				log.warn("null object: "+object);
+				log.warn("null object: "+wdreq.getObject());
 				throw new NotFoundException("resource '"+pathInfo+"' does not exists");
 			}
 			Constraint pk = SchemaModelUtils.getPK(r);
 			if(pk==null) {
-				log.warn("null PK: "+object);
-				throw new BadRequestException("object '"+object+"' has no unique key");
+				log.warn("null PK: "+wdreq.getObject());
+				throw new BadRequestException("object '"+wdreq.getObject()+"' has no unique key");
 			}
 			
 			int depth = req.getIntHeader(HEADER_DEPTH);
 			if(depth>1) {
 				throw new BadRequestException("depth > 1 ["+depth+"] not implemented");
 			}
+			
+			preprocessParameters(wdreq, r, pk);
 			
 			/*int positionalParametersNeeded = -1;
 			if(r instanceof ParametrizedDBObject) {
@@ -125,8 +130,6 @@ public class WebDavServlet extends BaseApiServlet {
 				Connection conn = null;
 				try {
 					conn = DBUtil.initDBConn(prop, modelId);
-					WebDavRequest wdreq = getRequestSpec(req);
-					wdreq.setPropFindRequest(pk, urlParts.size());
 					
 					if(urlParts.size() == 0) {
 						// list contents (1st key level)
@@ -143,18 +146,29 @@ public class WebDavServlet extends BaseApiServlet {
 						//resl = getResourcesFromKeys(r.getColumnNames());
 						// TODOne check if key exists...
 						checkUniqueResource(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
-						
-						resl = getResourcesFromRelationColumns(r);
+
+						if(wdreq.getColumns().size()>0) {
+							if(wdreq.getColumns().size()>1) {
+								throw new InternalServerException("getColumns() > 1 ["+wdreq.getColumns()+"]");
+							}
+							resl = getResourceFromRelationColumn(r, wdreq.getColumns().get(0));
+						}
+						else {
+							resl = getResourcesFromRelationColumns(r);
+						}
 						// XXX doList() - return columns with types, length?? - needs function to query char/varchar/text/blob column lengths
 					}
-					else if(urlParts.size() == positionalParametersNeeded + 1) {
+					/*else if(urlParts.size() == positionalParametersNeeded + 1) {
 						// full key defined - all parameters & column defined
 						// zzz doSelect() - return blob? -> NO! method should be GET
 						// TODOne check if key exists...
 						checkUniqueResource(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
-						String column = urlParts.get(urlParts.size()-1);
+						String column = String.valueOf(urlParts.get(urlParts.size()-1));
 						//log.info("column: "+column);
 						resl = getResourceFromRelationColumn(r, column);
+					}*/
+					else {
+						throw new IllegalStateException("urlParts.size() == "+urlParts.size()+" // positionalParametersNeeded + 1 == "+(positionalParametersNeeded + 1));
 					}
 					writePaths(resl, resp);
 				}
@@ -167,7 +181,17 @@ public class WebDavServlet extends BaseApiServlet {
 				//throw new BadRequestException("number of parameters ["+urlParts.size()+"] bigger than number of required parameters ["+positionalParametersNeeded+"]");
 			}
 			
-			log.info("object = "+object+" ; partsSize = "+partsSize+" / positionalParametersNeeded = "+positionalParametersNeeded);
+			log.info("object = "+wdreq.getObject()+" ; params = "+wdreq.getParams()+" ; column = "+wdreq.getColumns()+" / positionalParametersNeeded = "+positionalParametersNeeded);
+	}
+	
+	@Override
+	protected void preprocessParameters(RequestSpec reqspec, Relation relation, Constraint pk) {
+		if(reqspec instanceof WebDavRequest) {
+			WebDavRequest wdreq = (WebDavRequest) reqspec;
+			wdreq.setUniqueKey(pk);
+		}
+		else {
+			throw new IllegalArgumentException(reqspec + " not instanceof WebDavRequest");
 		}
 	}
 	

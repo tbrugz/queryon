@@ -3,6 +3,7 @@ package tbrugz.queryon.http;
 import static tbrugz.queryon.http.JettySetup.qonUrl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.github.sardine.SardineFactory;
 import com.github.sardine.impl.SardineException;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.util.StringUtils;
 
 public class WebDavWebTest {
 
@@ -232,6 +234,15 @@ public class WebDavWebTest {
 	@Test
 	public void callPropFindDeptId1() throws IOException {
 		callPropFind(webdavUrl+"/PUBLIC.DEPT/1");
+	}
+
+	@Test
+	public void sardineGetEmpId1_Name() throws IOException {
+		Sardine sardine = SardineFactory.begin();
+		InputStream is = sardine.get(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME"); //john
+		String s = StringUtils.readInputStream(is, 8192);
+		log.info("s == "+s);
+		Assert.assertEquals("john", s);
 	}
 	
 }
