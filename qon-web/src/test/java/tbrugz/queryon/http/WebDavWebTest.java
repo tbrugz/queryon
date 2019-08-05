@@ -271,5 +271,33 @@ public class WebDavWebTest {
 		log.info("equals? "+equals);
 		Assert.assertTrue(equals);
 	}
+
+	@Test
+	public void sardineDeleteEmpId1() throws IOException {
+		Sardine sardine = SardineFactory.begin();
+		
+		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.EMP");
+		assertListCount(resources, 5, false);
+		
+		sardine.delete(webdavUrl + "/" + "PUBLIC.EMP" + "/3");
+
+		List<DavResource> resources2 = sardine.list(webdavUrl + "/" + "PUBLIC.EMP");
+		assertListCount(resources2, 4, false);
+	}
+
+	@Test
+	public void sardineDeleteEmpId1_Salary() throws IOException {
+		Sardine sardine = SardineFactory.begin();
+		
+		InputStream is = sardine.get(webdavUrl + "/" + "PUBLIC.EMP" + "/3" + "/SALARY");
+		String s = StringUtils.readInputStream(is, 8192);
+		Assert.assertEquals("1000", s);
+		
+		sardine.delete(webdavUrl + "/" + "PUBLIC.EMP" + "/3" + "/SALARY");
+
+		InputStream is2 = sardine.get(webdavUrl + "/" + "PUBLIC.EMP" + "/3" + "/SALARY");
+		String s2 = StringUtils.readInputStream(is2, 8192);
+		Assert.assertEquals("", s2);
+	}
 	
 }

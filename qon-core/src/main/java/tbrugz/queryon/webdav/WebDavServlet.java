@@ -151,6 +151,32 @@ public class WebDavServlet extends BaseApiServlet {
 	}
 	
 	@Override
+	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
+			throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
+		if(reqspec instanceof WebDavRequest) {
+			WebDavRequest wdreq = (WebDavRequest) reqspec;
+			
+			Constraint pk = SchemaModelUtils.getPK(relation);
+			preprocessParameters(reqspec, relation, pk);
+			
+			// if 'column' defined, set column to null. Otherwise, delete row 
+			if(wdreq.getColumns().size()>0) {
+				if(wdreq.getColumns().size()>1) {
+					throw new InternalServerException("getColumns() > 1 ["+wdreq.getColumns()+"]");
+				}
+				boolean isPermitted = true; // permitted? since DELETE has no per-column permitions, yes
+				doUpdate(relation, reqspec, currentUser, isPermitted, resp);
+			}
+			else {
+				super.doDelete(relation, reqspec, currentUser, resp);
+			}
+		}
+		else {
+			throw new IllegalArgumentException(reqspec + " not instanceof WebDavRequest");
+		}
+	}
+	
+	@Override
 	protected void preprocessParameters(RequestSpec reqspec, Relation relation, Constraint pk) {
 		if(reqspec instanceof WebDavRequest) {
 			WebDavRequest wdreq = (WebDavRequest) reqspec;

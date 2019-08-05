@@ -47,6 +47,9 @@ public class WebDavRequest extends RequestSpec {
 				//updateValues.put(column, body);
 				updatePartValues.put(column, new SimplePart(request.getInputStream()));
 			}
+			else if(httpMethod.equals(QueryOn.METHOD_DELETE)) {
+				updateValues.put(column, null);
+			}
 		}
 		else if(paramCount == uk.getUniqueColumns().size()) {
 			// full key
