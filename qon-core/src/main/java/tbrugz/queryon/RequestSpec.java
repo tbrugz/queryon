@@ -198,7 +198,7 @@ public class RequestSpec {
 	
 	protected final Map<String, String> keyValues = new LinkedHashMap<String, String>();
 	protected final Map<String, String> updateValues = new HashMap<String, String>();
-	final Map<String, Part> updatePartValues = new HashMap<String, Part>();
+	protected final Map<String, Part> updatePartValues = new HashMap<String, Part>();
 	final String optimisticLock;
 
 	protected final List<String> orderCols = new ArrayList<String>();

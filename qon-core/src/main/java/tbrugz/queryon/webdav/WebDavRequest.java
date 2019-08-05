@@ -37,14 +37,15 @@ public class WebDavRequest extends RequestSpec {
 			//throw new BadRequestException("uk column count ["+uk.getUniqueColumns().size()+"] < urlPartCount ["+urlPartCount+"]");
 			String column = String.valueOf(getParams().remove(paramCount-1));
 			//log.info("column = "+column+" / params = "+getParams());
-			columns.add(column);
+			addColumnIfNotAlreadyAdded(column);
 			if(httpMethod.equals(QueryOn.METHOD_GET)) {
 				uniValueCol = column;
 			}
 			else if(httpMethod.equals(QueryOn.METHOD_PUT)) {
-				String body = getRequestBody(request);
+				//String body = getRequestBody(request);
 				//log.info("setUniqueKey: PUT: "+column+" / "+body);
-				updateValues.put(column, body);
+				//updateValues.put(column, body);
+				updatePartValues.put(column, new SimplePart(request.getInputStream()));
 			}
 		}
 		else if(paramCount == uk.getUniqueColumns().size()) {
@@ -56,8 +57,14 @@ public class WebDavRequest extends RequestSpec {
 			//full key not defined
 			if(httpMethod.equals(WebDavServlet.METHOD_PROPFIND)) {
 				distinct = true;
-				columns.add(uk.getUniqueColumns().get(paramCount));
+				addColumnIfNotAlreadyAdded(uk.getUniqueColumns().get(paramCount));
 			}
+		}
+	}
+	
+	void addColumnIfNotAlreadyAdded(String column) {
+		if(!columns.contains(column)) {
+			columns.add(column);
 		}
 	}
 	

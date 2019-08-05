@@ -241,7 +241,7 @@ public class WebDavWebTest {
 		Sardine sardine = SardineFactory.begin();
 		InputStream is = sardine.get(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME"); //john
 		String s = StringUtils.readInputStream(is, 8192);
-		log.info("s == "+s);
+		//log.info("s == "+s);
 		Assert.assertEquals("john", s);
 	}
 
@@ -253,8 +253,23 @@ public class WebDavWebTest {
 		
 		InputStream is = sardine.get(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME"); //john
 		String s = StringUtils.readInputStream(is, 8192);
-		log.info("s == "+s);
+		//log.info("s == "+s);
 		Assert.assertEquals("paul", s);
+	}
+
+	@Test
+	public void sardinePutTask1_Attach() throws IOException {
+		Sardine sardine = SardineFactory.begin();
+		byte[] binaryData = new byte[] { 0,1,2,3 };
+		sardine.put(webdavUrl + "/" + "TASK" + "/1" + "/ATTACH", binaryData);
+		
+		InputStream is = sardine.get(webdavUrl + "/" + "TASK" + "/1" + "/ATTACH");
+		
+		byte[] readBinaryData = new byte[binaryData.length];
+		is.read(readBinaryData);
+		boolean equals = Arrays.equals(binaryData, readBinaryData);
+		log.info("equals? "+equals);
+		Assert.assertTrue(equals);
 	}
 	
 }

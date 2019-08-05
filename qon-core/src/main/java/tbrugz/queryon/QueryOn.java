@@ -2033,11 +2033,11 @@ public class QueryOn extends HttpServlet {
 		StringBuilder sb = new StringBuilder();
 		int colsCount = 0;
 		Set<String> updateCols = new HashSet<String>();
-
+		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
+		
 		// standart parameters
 		{
 		Iterator<String> cols = reqspec.updateValues.keySet().iterator();
-		String otype = QueryOn.getObjectType((DBIdentifiable) relation);
 		for(; cols.hasNext();) {
 			String col = cols.next();
 			if(! MiscUtils.containsIgnoreCase(columns, col)) {
@@ -2078,7 +2078,7 @@ public class QueryOn extends HttpServlet {
 				updateCols.add(col);
 				//TODOne: check UPDATE permission on each row, based on grants
 				//if(validateUpdateColumnPermissions && !hasRelationUpdatePermission && !QOnModelUtils.hasPermissionOnColumn(updateGrants, roles, col)) {
-				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, ActionType.UPDATE.name(), relation.getName(), col)) {
+				if(validateUpdateColumnPermissions && !hasRelationInsertPermission && !ShiroUtils.isPermitted(currentUser, otype+":"+ActionType.UPDATE.name(), relation.getName(), col)) {
 					throw new ForbiddenException("no update permission on column: "+relation.getName()+"."+col, currentUser.isAuthenticated());
 				}
 				//XXX date ''? timestamp '' ? http://blog.tanelpoder.com/2012/12/29/a-tip-for-lazy-oracle-users-type-less-with-ansi-date-and-timestamp-sql-syntax/
@@ -2119,6 +2119,7 @@ public class QueryOn extends HttpServlet {
 		sql.bindParameters(st);
 
 		//log.debug("sql update: "+sql+"\nfinalSql: "+finalSql+(willTryLock?" [willTryOptimisticLock]":""));
+		log.debug("sql:\n"+finalSql+(willTryLock?" [willTryOptimisticLock]":""));
 		
 		int count = st.executeUpdate();
 		
