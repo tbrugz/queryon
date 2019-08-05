@@ -32,7 +32,8 @@ drop table if exists TASK;
 create table TASK (
 	ID INTEGER primary key auto_increment,
 	SUBJECT varchar not null,
-	DESCRIPTION text
+	DESCRIPTION text,
+	ATTACH blob
 );
 
 --alter table EMP drop constraint EMP_DEPT_FK;

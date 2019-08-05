@@ -1967,12 +1967,12 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testInsertWithAutoIncrement() throws IOException, ParserConfigurationException, SAXException {
-		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=1st+Task", "");
+		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=2nd+Task", "");
 		Assert.assertEquals(201, response.getStatusLine().getStatusCode());
 		Header[] headers = response.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
 		Assert.assertEquals(1, headers.length);
 		Header head = headers[0];
-		Assert.assertEquals("1", head.getValue());
+		Assert.assertEquals("2", head.getValue());
 	}
 	
 	@Test
