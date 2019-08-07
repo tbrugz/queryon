@@ -377,11 +377,17 @@ public class WebDavServlet extends BaseApiServlet {
 		return rels;
 	}
 	
-	/*@Override
+	@Override
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		log.warn("doOptions: "+req.getPathInfo());
-		resp.setHeader("Allow", "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"); //TRACE
-	}*/
+		// http://www.webdav.org/specs/rfc4918.html#http.headers.for.distributed.authoring
+		// http://www.webdav.org/specs/rfc4918.html#dav.compliance.classes
+		log.info("doOptions: "+req.getPathInfo());
+		resp.addHeader("Allow", "OPTIONS, GET, HEAD, PATCH, POST, PUT, DELETE"); // TRACE ?
+		resp.addHeader("Allow", METHOD_PROPFIND);
+		//resp.addHeader("Allow", "MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, REPORT, ACL");
+		resp.setHeader("DAV", "1"); // basic compliance
+		//resp.setHeader("DAV", "1, 2, 3"); // full compliance (locks included)
+	}
 	
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
