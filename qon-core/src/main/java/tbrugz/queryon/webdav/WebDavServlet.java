@@ -67,8 +67,8 @@ public class WebDavServlet extends BaseApiServlet {
 		String modelId = SchemaModelUtils.getModelId(req);
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
 		
-		String pathInfo = req.getPathInfo();
-		if(pathInfo==null) { pathInfo = ""; }
+		String pathInfo = getPathInfo(req);
+		//log.info("doPropFind: pathInfo = "+pathInfo);
 		
 		if(pathInfo.isEmpty()) {
 			log.info("doPropFind: list tables");
@@ -92,7 +92,8 @@ public class WebDavServlet extends BaseApiServlet {
 			throw new BadRequestException("object '"+wdreq.getObject()+"' has no unique key");
 		}
 		
-		int depth = req.getIntHeader(HEADER_DEPTH);
+		// http://www.webdav.org/specs/rfc4918.html#HEADER_Depth
+		int depth = getDepth(req);
 		if(depth>1) {
 			throw new BadRequestException("depth > 1 ["+depth+"] not implemented");
 		}
@@ -174,6 +175,29 @@ public class WebDavServlet extends BaseApiServlet {
 		else {
 			throw new IllegalArgumentException(reqspec + " not instanceof WebDavRequest");
 		}
+	}
+	
+	String getPathInfo(HttpServletRequest req) {
+		String pathInfo = req.getPathInfo();
+		if(pathInfo==null) {
+			return "";
+		}
+		if(pathInfo.startsWith("/")) {
+			pathInfo = pathInfo.substring(1);
+		}
+		return pathInfo;
+	}
+	
+	int getDepth(HttpServletRequest req) {
+		String depth = req.getHeader(HEADER_DEPTH);
+		if(depth==null) {
+			return 0; // assuming 0
+		}
+		if("infinity".equalsIgnoreCase(depth)) {
+			//return Integer.MAX_VALUE;
+			throw new BadRequestException("infinity depth ["+depth+"] not implemented");
+		}
+		return Integer.parseInt(depth);
 	}
 	
 	@Override
@@ -361,7 +385,7 @@ public class WebDavServlet extends BaseApiServlet {
 	
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//log.info("service: "+req.getPathInfo());
+		//log.info("service: pathInfo = "+req.getPathInfo()+" ; method = "+req.getMethod());
 		String method = req.getMethod();
 		try {
 			if (method.equals(METHOD_PROPFIND)) {
