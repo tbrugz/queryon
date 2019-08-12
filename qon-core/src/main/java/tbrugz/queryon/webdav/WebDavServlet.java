@@ -82,19 +82,12 @@ public class WebDavServlet extends BaseApiServlet {
 	}
 	
 	protected void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, IntrospectionException, SQLException, NamingException {
-		//String modelId = SchemaModelUtils.getModelId(req);
-		//SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
-		
-		//String pathInfo = getPathInfo(req);
-		//log.info("doPropFind: pathInfo = "+pathInfo);
-		//boolean multiModel = isMultiModel();
 		WebDavRequest wdreq = getRequestSpec(req);
 		List<Object> urlParts = wdreq.getParams();
 		
 		//log.info("urlParts = "+urlParts+" / "+wdreq.getObject());
 		
 		if(multiModel && wdreq.getModelId()==null) {
-		//if(urlParts.size()==0 && multiModel) {
 			log.info("doPropFind: list modelIds");
 			List<WebDavResource> resl = getResourcesFromKeys(SchemaModelUtils.getModelIds(req.getServletContext()));
 			writePaths(resl, resp);
@@ -156,10 +149,7 @@ public class WebDavServlet extends BaseApiServlet {
 					//resl = getResourcesFromKeys(r.getColumnNames());
 					checkUniqueResource(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
 
-					if(wdreq.getColumns().size()>0) {
-						if(wdreq.getColumns().size()>1) {
-							throw new InternalServerException("getColumns() > 1 ["+wdreq.getColumns()+"]");
-						}
+					if(wdreq.getColumn()!=null) {
 						//resl = getResourceFromRelationColumn(r, wdreq.getColumns().get(0));
 						resl = getResourcesFromRelationColumns(r, pk, wdreq.getColumn(), wdreq, conn);
 					}
@@ -168,7 +158,6 @@ public class WebDavServlet extends BaseApiServlet {
 						//resl = getResourcesFromRelationColumns(r);
 						resl = getResourcesFromRelationColumns(r, pk, null, wdreq, conn);
 					}
-					// XXXxx doList() - return columns with types, length?? - needs function to query char/varchar/text/blob column lengths
 				}
 				else {
 					throw new IllegalStateException("urlParts.size() == "+urlParts.size()+" // positionalParametersNeeded + 1 == "+(positionalParametersNeeded + 1));
@@ -181,7 +170,6 @@ public class WebDavServlet extends BaseApiServlet {
 		}
 		else {
 			throw new NotFoundException("resource '"+getPathInfo(req)+"' does not exists");
-			//throw new BadRequestException("number of parameters ["+urlParts.size()+"] bigger than number of required parameters ["+positionalParametersNeeded+"]");
 		}
 	}
 	
@@ -195,10 +183,7 @@ public class WebDavServlet extends BaseApiServlet {
 			preprocessParameters(reqspec, relation, pk);
 			
 			// if 'column' defined, set column to null. Otherwise, delete row 
-			if(wdreq.getColumns().size()>0) {
-				if(wdreq.getColumns().size()>1) {
-					throw new InternalServerException("getColumns() > 1 ["+wdreq.getColumns()+"]");
-				}
+			if(wdreq.getColumn()!=null) {
 				boolean isPermitted = true; // permitted? since DELETE has no per-column permitions, yes
 				doUpdate(relation, reqspec, currentUser, isPermitted, resp);
 			}

@@ -93,6 +93,7 @@ public class WebDavRequest extends RequestSpec {
 		}
 	}
 	
+	@Deprecated
 	List<String> getColumns() {
 		return columns;
 	}
