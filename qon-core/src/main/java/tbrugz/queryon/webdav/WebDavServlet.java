@@ -8,7 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
@@ -31,10 +33,13 @@ import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 public class WebDavServlet extends BaseApiServlet {
 
@@ -129,12 +134,15 @@ public class WebDavServlet extends BaseApiServlet {
 						if(wdreq.getColumns().size()>1) {
 							throw new InternalServerException("getColumns() > 1 ["+wdreq.getColumns()+"]");
 						}
-						resl = getResourceFromRelationColumn(r, wdreq.getColumns().get(0));
+						//resl = getResourceFromRelationColumn(r, wdreq.getColumns().get(0));
+						resl = getResourcesFromRelationColumns(r, pk, wdreq.getColumn(), wdreq, conn);
 					}
 					else {
-						resl = getResourcesFromRelationColumns(r);
+						// XXX do *not* return columns with NULL value? or with size = 0...
+						//resl = getResourcesFromRelationColumns(r);
+						resl = getResourcesFromRelationColumns(r, pk, null, wdreq, conn);
 					}
-					// XXX doList() - return columns with types, length?? - needs function to query char/varchar/text/blob column lengths
+					// XXXxx doList() - return columns with types, length?? - needs function to query char/varchar/text/blob column lengths
 				}
 				else {
 					throw new IllegalStateException("urlParts.size() == "+urlParts.size()+" // positionalParametersNeeded + 1 == "+(positionalParametersNeeded + 1));
@@ -273,7 +281,108 @@ public class WebDavServlet extends BaseApiServlet {
 		}
 		return ret;
 	}
-
+	
+	List<WebDavResource> getResourcesFromRelationColumns(Relation r, Constraint pk, String column, RequestSpec reqspec, Connection conn) throws SQLException, IOException {
+		// selects column_isnull, column_length for all relation columns...
+		List<WebDavResource> ret = new ArrayList<WebDavResource>();
+		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		List<String> selectCols = new ArrayList<String>();
+		List<String> lengthCols = new ArrayList<String>();
+		List<String> isNullCols = new ArrayList<String>();
+		Map<String, String> typeMap = new HashMap<String, String>();
+		
+		for(int i=0;i<r.getColumnCount();i++) {
+			String cname = r.getColumnNames().get(i);
+			if(column!=null && !cname.equals(column)) {
+				continue;
+			}
+			String ctype = r.getColumnTypes().get(i);
+			typeMap.put(cname, ctype);
+			
+			String lengthFunction = feat.sqlLengthFunctionByType(cname, ctype);
+			if(lengthFunction!=null) {
+				selectCols.add(lengthFunction+" as "+cname+"_LENGTH");
+				lengthCols.add(cname);
+			}
+			else {
+				String isNullFunction = feat.sqlIsNullFunction(cname);
+				if(isNullFunction!=null) {
+					selectCols.add(isNullFunction+" as "+cname+"_ISNULL");
+					isNullCols.add(cname);
+				}
+			}
+		}
+		
+		if(selectCols.size()==0) {
+			log.debug("no known functions for length or isnull for relation "+r.getQualifiedName());
+			//if(true) throw new RuntimeException("no known functions for length or isnull for relation "+r.getQualifiedName());
+			if(column!=null) {
+				return getResourceFromRelationColumn(r, column);
+			}
+			else {
+				return getResourcesFromRelationColumns(r);
+			}
+		}
+		
+		String projection = Utils.join(selectCols, ", ");
+		SQL sql = SQL.createSQL(r, reqspec, null);
+		filterByKey(r, reqspec, pk, sql);
+		sql.applyProjection(reqspec, projection);
+		
+		String finalSql = sql.getFinalSql();
+		log.debug("sql:\n"+finalSql);
+		
+		PreparedStatement st = conn.prepareStatement(finalSql);
+		sql.bindParameters(st);
+		
+		//boolean applyLimitOffsetInResultSet = !sql.sqlLoEncapsulated;
+		ResultSet rs = st.executeQuery();
+		
+		/*if(applyLimitOffsetInResultSet) {
+			rs = new ResultSetLimitOffsetDecorator(rs, getLimit(), reqspec.getOffset());
+		}*/
+		
+		//List<String> keys = new ArrayList<String>();
+		
+		if(rs.next()) {
+			for(int i=0;i<lengthCols.size();i++) {
+				String col = lengthCols.get(i);
+				int length = rs.getInt(col+"_LENGTH");
+				WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), length, false);
+				ret.add(res);
+			}
+			for(int i=0;i<isNullCols.size();i++) {
+				String col = isNullCols.get(i);
+				Object isNullObj = rs.getObject(col+"_ISNULL");
+				boolean isNull = getBooleanFromObject(isNullObj);
+				WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), isNull?0:1, false);
+				ret.add(res);
+			}
+			if(rs.next()) {
+				throw new InternalServerException("more than 1 row?");
+			}
+		}
+		else {
+			throw new InternalServerException("no rows?");
+		}
+		return ret;
+	}
+	
+	boolean getBooleanFromObject(Object o) {
+		if(o instanceof Boolean) {
+			return ((Boolean) o).booleanValue();
+		}
+		if(o instanceof Number) {
+			return ((Number) o).intValue() > 0;
+		}
+		if(o instanceof String) {
+			String s = ((String) o);
+			return s.equalsIgnoreCase("t") || s.equalsIgnoreCase("true") || s.equalsIgnoreCase("y") || s.equalsIgnoreCase("yes");
+		}
+		return false;
+	}
+	
 	protected void checkUniqueResource(Relation relation, Constraint pk, RequestSpec reqspec, Subject currentUser, Connection conn, String sqlDialect) {
 		List<WebDavResource> resl = doListResources(relation, pk, reqspec, currentUser, conn, sqlDialect);
 		if(resl.size()!=1) {

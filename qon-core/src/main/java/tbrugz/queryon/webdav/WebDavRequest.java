@@ -69,10 +69,20 @@ public class WebDavRequest extends RequestSpec {
 		if(!columns.contains(column)) {
 			columns.add(column);
 		}
+		if(columns.size()>1) {
+			throw new IllegalArgumentException("can't allow more than 1 column [col="+column+" ; columns="+columns+"]");
+		}
 	}
 	
 	List<String> getColumns() {
 		return columns;
+	}
+
+	String getColumn() {
+		if(columns.size()==1) {
+			return columns.get(0);
+		}
+		return null;
 	}
 	
 	@Override
