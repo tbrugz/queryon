@@ -283,6 +283,7 @@ public class SchemaModelUtils {
 	}
 	
 	public static boolean isOutParameter(ExecutableParameter ep) {
+		if(ep.getInout()==null) { return false; }
 		return (ep.getInout()==ExecutableParameter.INOUT.OUT || ep.getInout()==ExecutableParameter.INOUT.INOUT);
 	}
 	

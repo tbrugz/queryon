@@ -391,7 +391,7 @@ public class QueryOn extends HttpServlet {
 			log.info("syntaxes: "+StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );
 			
 			Map<String, SchemaModel> models = new LinkedHashMap<String, SchemaModel>();
-			List<String> modelIds = Utils.getStringListFromProp(prop, PROP_MODELS, ",");
+			List<String> modelIds = getDeclaredModels();
 			if(modelIds!=null) {
 				log.info("modelIds="+modelIds);
 				List<String> modelsGrabbed = new ArrayList<String>();
@@ -472,6 +472,10 @@ public class QueryOn extends HttpServlet {
 			context.setAttribute(ATTR_INIT_ERROR, e);
 			throw e;
 		}
+	}
+	
+	protected List<String> getDeclaredModels() {
+		return Utils.getStringListFromProp(prop, PROP_MODELS, ",");
 	}
 	
 	protected void initFromProperties() {
@@ -1526,7 +1530,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			log.info("doExplain: error explaining: "+e);
-			String explainSql = feat.getExplainPlanQuery(sql.getFinalSql());
+			String explainSql = feat.sqlExplainPlanQuery(sql.getFinalSql());
 			if(explainSql!=null) {
 				//log.info("doExplain: explainSql: "+explainSql+" - indexOf == "+explainSql.indexOf(sql.getFinalSql()));
 				setSqlInfo(reqspec.request, explainSql, sql.getFinalSql());
@@ -2455,7 +2459,7 @@ public class QueryOn extends HttpServlet {
 		return colVals;
 	}
 	
-	static void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
+	protected static void filterByKey(Relation relation, RequestSpec reqspec, Constraint pk, SQL sql) {
 		String filter = "";
 		// TODOxxx: what if parameters already defined in query?
 		if(reqspec.keyValues.size()>0 && reqspec.params.size()>0) {

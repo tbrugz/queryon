@@ -434,12 +434,16 @@ public class SQL {
 	
 	public void applyProjection(RequestSpec reqspec, Relation table) {
 		String columns = createSQLColumns(reqspec, table);
+		applyProjection(reqspec, columns);
+	}
+	
+	public void applyProjection(RequestSpec reqspec, String projectionClause) {
 		if(sql.contains(PARAM_PROJECTION_CLAUSE)) {
-			sql = sql.replace(PARAM_PROJECTION_CLAUSE, columns);
+			sql = sql.replace(PARAM_PROJECTION_CLAUSE, projectionClause);
 		}
 		else {
 			if(reqspec.columns.size()>0 || reqspec.distinct) {
-				addProjection(columns);
+				addProjection(projectionClause);
 				if(!(relation instanceof Query)) {
 					log.warn("relation of type "+relation.getRelationType()+" (not Query) with no "+PARAM_PROJECTION_CLAUSE+" ?");
 				}
