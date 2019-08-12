@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,9 +56,13 @@ public class WebDavServlet extends BaseApiServlet {
 	
 	public final static int DEFAULT_LIMIT = 1000;
 	
+	boolean multiModel;
+	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		multiModel = isMultiModel();
+		
 		defaultLimit = DEFAULT_LIMIT;
 		maxLimit = defaultLimit;
 	}
@@ -65,17 +70,40 @@ public class WebDavServlet extends BaseApiServlet {
 	@Override
 	protected WebDavRequest getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
 		//return new RequestSpec(dsutils, req, prop, /*prefixesToIgnore*/ 0, "xml", true, 0, null);
-		return new WebDavRequest(dsutils, req, prop);
+		return new WebDavRequest(dsutils, req, prop, multiModel);
+	}
+	
+	boolean isMultiModel() {
+		List<String> mids = getDeclaredModels();
+		if(mids==null) {
+			return false;
+		}
+		return mids.size()>1;
 	}
 	
 	protected void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, IntrospectionException, SQLException, NamingException {
-		String modelId = SchemaModelUtils.getModelId(req);
-		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
+		//String modelId = SchemaModelUtils.getModelId(req);
+		//SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), modelId);
 		
-		String pathInfo = getPathInfo(req);
+		//String pathInfo = getPathInfo(req);
 		//log.info("doPropFind: pathInfo = "+pathInfo);
+		//boolean multiModel = isMultiModel();
+		WebDavRequest wdreq = getRequestSpec(req);
+		List<Object> urlParts = wdreq.getParams();
 		
-		if(pathInfo.isEmpty()) {
+		//log.info("urlParts = "+urlParts+" / "+wdreq.getObject());
+		
+		if(multiModel && wdreq.getModelId()==null) {
+		//if(urlParts.size()==0 && multiModel) {
+			log.info("doPropFind: list modelIds");
+			List<WebDavResource> resl = getResourcesFromKeys(SchemaModelUtils.getModelIds(req.getServletContext()));
+			writePaths(resl, resp);
+			return;
+		}
+
+		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), wdreq.getModelId());
+		
+		if(wdreq.getObject().isEmpty()) {
 			log.info("doPropFind: list tables");
 			List<Relation> rels = getRelationsWithPk(model);
 			//List<WebDavResource> resl = getResources(rels, baseHref);
@@ -83,13 +111,11 @@ public class WebDavServlet extends BaseApiServlet {
 			writePaths(resl, resp);
 			return;
 		}
-		WebDavRequest wdreq = getRequestSpec(req);
-		List<Object> urlParts = wdreq.getParams();
 		
 		Relation r = SchemaModelUtils.getRelation(model, wdreq.getObject(), true);
 		if(r==null) {
 			log.warn("null object: "+wdreq.getObject());
-			throw new NotFoundException("resource '"+pathInfo+"' does not exists");
+			throw new NotFoundException("resource '"+getPathInfo(req)+"' does not exists");
 		}
 		Constraint pk = SchemaModelUtils.getPK(r);
 		if(pk==null) {
@@ -106,14 +132,14 @@ public class WebDavServlet extends BaseApiServlet {
 		preprocessParameters(wdreq, r, pk);
 		
 		int positionalParametersNeeded = pk.getUniqueColumns().size();
-		log.info("doPropFind: object = "+wdreq.getObject()+" ; params = "+wdreq.getParams()+" ; column = "+wdreq.getColumns()+" / positionalParametersNeeded = "+positionalParametersNeeded);
+		log.info("doPropFind: object = "+wdreq.getObject()+" ; params = "+wdreq.getParams()+" ; column = "+wdreq.getColumn()+" / positionalParametersNeeded = "+positionalParametersNeeded);
 		
 		if(urlParts.size() <= positionalParametersNeeded + 1) {
 			List<WebDavResource> resl = null;
 			Subject currentUser = ShiroUtils.getSubject(prop, req);
 			Connection conn = null;
 			try {
-				conn = DBUtil.initDBConn(prop, modelId);
+				conn = DBUtil.initDBConn(prop, wdreq.getModelId());
 				
 				if(urlParts.size() == 0) {
 					// list contents (1st key level)
@@ -154,7 +180,7 @@ public class WebDavServlet extends BaseApiServlet {
 			}
 		}
 		else {
-			throw new NotFoundException("resource '"+pathInfo+"' does not exists");
+			throw new NotFoundException("resource '"+getPathInfo(req)+"' does not exists");
 			//throw new BadRequestException("number of parameters ["+urlParts.size()+"] bigger than number of required parameters ["+positionalParametersNeeded+"]");
 		}
 	}
@@ -247,7 +273,7 @@ public class WebDavServlet extends BaseApiServlet {
 		return ret;
 	}
 	
-	List<WebDavResource> getResourcesFromKeys(List<String> keys) {
+	List<WebDavResource> getResourcesFromKeys(Collection<String> keys) {
 		List<WebDavResource> ret = new ArrayList<WebDavResource>();
 		for(String k: keys) {
 			ret.add(new WebDavResource(k, true));
@@ -331,7 +357,7 @@ public class WebDavServlet extends BaseApiServlet {
 		sql.applyProjection(reqspec, projection);
 		
 		String finalSql = sql.getFinalSql();
-		log.debug("sql:\n"+finalSql);
+		log.debug("getResourcesFromRelationColumns: sql:\n"+finalSql);
 		
 		PreparedStatement st = conn.prepareStatement(finalSql);
 		sql.bindParameters(st);
@@ -422,7 +448,7 @@ public class WebDavServlet extends BaseApiServlet {
 			//preprocessParameters(reqspec, relation, pk);
 			SQL sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, null, isStrictMode());
 			String finalSql = sql.getFinalSql();
-			log.debug("sql: "+finalSql);
+			log.debug("doListResources: sql:\n"+finalSql);
 			
 			PreparedStatement st = conn.prepareStatement(finalSql);
 			sql.bindParameters(st);

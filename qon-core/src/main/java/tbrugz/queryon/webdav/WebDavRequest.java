@@ -14,14 +14,19 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 
 public class WebDavRequest extends RequestSpec {
 
 	private static final Log log = LogFactory.getLog(WebDavRequest.class);
 	
-	public WebDavRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
-		super(dsutils, req, prop, 0, "xml", false, 0, null);
+	//final boolean multiModel;
+	
+	public WebDavRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, boolean multiModel) throws ServletException, IOException {
+		super(dsutils, req, prop, multiModel?1:0, "xml", false, 0, null);
+		//this.multiModel = multiModel;
+		//log.info("multiModel="+multiModel+" / modelId="+this.getModelId());
 	}
 	
 	void setUniqueKey(Constraint uk) throws IOException {
@@ -63,6 +68,20 @@ public class WebDavRequest extends RequestSpec {
 				addColumnIfNotAlreadyAdded(uk.getUniqueColumns().get(paramCount));
 			}
 		}
+	}
+	
+	@Override
+	protected String getModelId(HttpServletRequest req, int prefixesToIgnore) {
+		log.info("getModelId: prefixesToIgnore="+prefixesToIgnore+" [multimodel = "+(prefixesToIgnore > 0)+"]");
+		if(prefixesToIgnore > 0) {
+			List<String> partz = getUrlParts(req.getPathInfo());
+			log.info("getModelId: partz = "+partz);
+			if(partz.size()>0) {
+				return partz.get(0);
+			}
+			return null;
+		}
+		return SchemaModelUtils.getDefaultModelId(req.getServletContext());
 	}
 	
 	void addColumnIfNotAlreadyAdded(String column) {
