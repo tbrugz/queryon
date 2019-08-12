@@ -275,14 +275,10 @@ public class RequestSpec {
 			}
 		}
 		
-		this.modelId = getModelId(req);
+		this.modelId = getModelId(req, prefixesToIgnore);
 		//TODO test if model with this id exists
 		
 		String varUrl = req.getPathInfo();
-		if(varUrl==null) {
-			varUrl = "";
-			//throw new BadRequestException("URL (path-info) must not be null");
-		}
 		
 		//String[] URIparts = varUrl!=null ? varUrl.split("/") : new String[]{} ;
 		/*String[] URIparts = varUrl.split("/");
@@ -343,7 +339,7 @@ public class RequestSpec {
 			}
 		}
 		object = objectTmp;
-		log.debug("object: "+object+"; output-type: "+outputTypeStr+"; xtra URIpartz: "+URIpartz);
+		log.debug("object: "+object+"; output-type: "+outputTypeStr+"; varUrl: '"+varUrl+"'; prefixesToIgnore: "+prefixesToIgnore+"; xtra URIpartz: "+URIpartz);
 		
 		processParams(URIpartz);
 		
@@ -612,7 +608,7 @@ public class RequestSpec {
 		throw new BadRequestException("Method switch not allowed [method: "+req.getMethod()+"/_method="+switchMethod+"]");
 	}
 	
-	protected String getModelId(HttpServletRequest req) {
+	protected String getModelId(HttpServletRequest req, int prefixesToIgnore) {
 		return SchemaModelUtils.getModelId(req);
 	}
 	
@@ -806,22 +802,30 @@ public class RequestSpec {
 	}
 	
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
-		String objectTmp = null;
-		if(parts.size()>0) {
+		log.info("getObject: parts = "+parts+" ; prefixesToIgnore = "+prefixesToIgnore);
+		//String objectTmp = null;
+		/*if(parts.size()>0) {
 			objectTmp = parts.remove(0);
-		}
+		}*/
+		
 		/*if(objectTmp == null || objectTmp.equals("")) {
 			//first part may be empty
 			if(URIpartz.size()>0) {
 				objectTmp = URIpartz.remove(0);
 			}
 		}*/
+		
 		for(int i=0;i<prefixesToIgnore;i++) {
 			if(parts.size()>0) {
-				objectTmp = parts.remove(0);
+				parts.remove(0);
 			}
 		}
-		return objectTmp;
+		if(parts.size()>0) {
+			return parts.remove(0);
+		}
+		return null;
+		
+		//return objectTmp;
 	}
 	
 	//XXX rename to processUrlParts

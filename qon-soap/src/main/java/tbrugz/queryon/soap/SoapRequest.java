@@ -82,7 +82,7 @@ public class SoapRequest extends RequestSpec {
 	}
 	
 	@Override
-	protected String getModelId(HttpServletRequest req) {
+	protected String getModelId(HttpServletRequest req, int prefixesToIgnore) {
 		return getSoapModelId(req);
 	}
 	
