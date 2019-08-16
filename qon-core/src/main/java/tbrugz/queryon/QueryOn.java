@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.sql.Blob;
@@ -2185,12 +2186,14 @@ public class QueryOn extends HttpServlet {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 
+		Constraint pk = SchemaModelUtils.getPK(relation);
+		preprocessParameters(reqspec, relation, pk);
+			
 		SQL sql = SQL.createInsertSQL(relation);
 
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
 
-		Constraint pk = SchemaModelUtils.getPK(relation);
 		String[] pkcols = null;
 		if(pk!=null) {
 			//use url params to set PK cols values
@@ -2445,7 +2448,7 @@ public class QueryOn extends HttpServlet {
 		if(pk==null) {
 			return false;
 		}
-		//log.info("#cols: pk="+pk.getUniqueColumns().size()+", req="+reqspec.params.size());
+		//log.info("#cols: pk="+pk.getUniqueColumns().size()+" ; keyValues="+reqspec.keyValues.size()+", params="+reqspec.params.size());
 		int paramsCount = reqspec.keyValues.size() + reqspec.params.size();
 		return pk.getUniqueColumns().size() <= paramsCount;
 	}
@@ -2858,7 +2861,15 @@ public class QueryOn extends HttpServlet {
 			}
 			
 			try {
-				if(String.class.equals( colType ) || Integer.class.equals( colType ) || Double.class.equals( colType ) || Date.class.equals( colType )) {
+				// integer/double/date: just read the object/string... derby does not like getCharacterStream() on those
+				if(Integer.class.equals( colType ) || Double.class.equals( colType ) || Date.class.equals( colType )) {
+					Writer w = resp.getWriter();
+					String s = rs.getString(reqspec.uniValueCol);
+					if(s!=null) {
+						w.write(s);
+					}
+				}
+				else if(String.class.equals( colType )) {
 					// "scalar" types / non-binary types
 					Reader r = rs.getCharacterStream(reqspec.uniValueCol);
 					if(r!=null) {
