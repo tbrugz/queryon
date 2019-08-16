@@ -16,6 +16,8 @@ public class WebDavResource {
 	//final Date creationDate;
 	//final Date lastModified;
 
+	// creator-displayname: http://www.webdav.org/specs/rfc3253.html#PROPERTY_creator-displayname (Versioning Extensions to WebDAV)
+	// owner: http://www.webdav.org/specs/rfc3744.html#PROPERTY_owner (Access Control Protocol)
 	//String author;
 	//String name;
 	//String path;

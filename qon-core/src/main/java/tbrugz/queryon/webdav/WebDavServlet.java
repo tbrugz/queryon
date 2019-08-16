@@ -359,7 +359,7 @@ public class WebDavServlet extends BaseApiServlet {
 		if(rs.next()) {
 			for(int i=0;i<lengthCols.size();i++) {
 				String col = lengthCols.get(i);
-				int length = rs.getInt(col+"_LENGTH");
+				int length = rs.getInt(col+"_LENGTH"); // if null, returns 0
 				WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), length, false);
 				ret.add(res);
 			}
@@ -425,10 +425,10 @@ public class WebDavServlet extends BaseApiServlet {
 			}
 			
 			LimitOffsetStrategy loStrategy = LimitOffsetStrategy.getDefaultStrategy(sqlDialect);
-			boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
+			/*boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 			if(fullKeyDefined) {
 				log.warn("doListResources with fullKeyDefined == true?");
-			}
+			}*/
 			
 			//preprocessParameters(reqspec, relation, pk);
 			SQL sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, null, isStrictMode());
@@ -515,6 +515,7 @@ public class WebDavServlet extends BaseApiServlet {
 		String method = req.getMethod();
 		try {
 			if (method.equals(METHOD_PROPFIND)) {
+				log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 				doPropFind(req, resp);
 			}
 			else {

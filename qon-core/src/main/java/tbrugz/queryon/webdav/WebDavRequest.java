@@ -38,18 +38,18 @@ public class WebDavRequest extends RequestSpec {
 		
 		if(paramCount > uk.getUniqueColumns().size()) {
 			// full key & column defined
-			log.info("uk column count ["+uk.getUniqueColumns().size()+"] < paramCount ["+paramCount+"]");
+			log.debug("paramCount ["+paramCount+"] > uk column count ["+uk.getUniqueColumns().size()+"] [full key & column defined]");
+			if(paramCount > uk.getUniqueColumns().size() + 1) {
+				log.warn("paramCount ["+paramCount+"] > uk column count + 1 ["+(uk.getUniqueColumns().size()+1)+"]?");
+			}
 			//throw new BadRequestException("uk column count ["+uk.getUniqueColumns().size()+"] < urlPartCount ["+urlPartCount+"]");
 			String column = String.valueOf(getParams().remove(paramCount-1));
 			//log.info("column = "+column+" / params = "+getParams());
 			addColumnIfNotAlreadyAdded(column);
-			if(httpMethod.equals(QueryOn.METHOD_GET)) {
+			if(httpMethod.equals(QueryOn.METHOD_GET) || httpMethod.equals(QueryOn.METHOD_HEAD)) {
 				uniValueCol = column;
 			}
 			else if(httpMethod.equals(QueryOn.METHOD_PUT)) {
-				//String body = getRequestBody(request);
-				//log.info("setUniqueKey: PUT: "+column+" / "+body);
-				//updateValues.put(column, body);
 				updatePartValues.put(column, new SimplePart(request.getInputStream()));
 			}
 			else if(httpMethod.equals(QueryOn.METHOD_DELETE)) {
@@ -58,8 +58,7 @@ public class WebDavRequest extends RequestSpec {
 		}
 		else if(paramCount == uk.getUniqueColumns().size()) {
 			// full key
-			log.info("paramCount == "+paramCount+" ; uk.getUniqueColumns().size() =="+uk.getUniqueColumns().size()+" ; uk.getUniqueColumns() == "+uk.getUniqueColumns());
-			//throw new InternalServerException("urlPartCount == "+urlPartCount+" ; uk.getUniqueColumns().size() =="+uk.getUniqueColumns().size()+" ; uk.getUniqueColumns() == "+uk.getUniqueColumns());
+			log.debug("paramCount == "+paramCount+" ; uk.getUniqueColumns().size() =="+uk.getUniqueColumns().size()+" ; uk.getUniqueColumns() == "+uk.getUniqueColumns());
 		}
 		else {
 			//full key not defined
@@ -72,10 +71,10 @@ public class WebDavRequest extends RequestSpec {
 	
 	@Override
 	protected String getModelId(HttpServletRequest req, int prefixesToIgnore) {
-		log.info("getModelId: prefixesToIgnore="+prefixesToIgnore+" [multimodel = "+(prefixesToIgnore > 0)+"]");
+		//log.info("getModelId: prefixesToIgnore="+prefixesToIgnore+" [multimodel = "+(prefixesToIgnore > 0)+"]");
 		if(prefixesToIgnore > 0) {
 			List<String> partz = getUrlParts(req.getPathInfo());
-			log.info("getModelId: partz = "+partz);
+			//log.info("getModelId: partz = "+partz);
 			if(partz.size()>0) {
 				return partz.get(0);
 			}
