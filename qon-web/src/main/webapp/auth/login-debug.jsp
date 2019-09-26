@@ -71,9 +71,9 @@ else {
 }
 
 %>
-<h3>Hi <!-- shiro:guest>Guest</shiro:guest --><!-- shiro:user-->
+<h3>Hi
 <%= currentUser.getPrincipal() %>
-<!-- /shiro:user-->!
+!
 </h3>
 
 <form method="post">

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,6 +23,8 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class GqlSchemaTest {
 
+	static final Log log = LogFactory.getLog(GqlSchemaTest.class);
+	
 	static final String workDir = "work";
 	
 	SchemaModel getSchemaModel() {
@@ -47,7 +51,7 @@ public class GqlSchemaTest {
 		SchemaPrinter sp = new SchemaPrinter();
 		String schemaStr = sp.print(schema);
 		
-		//System.out.println(schemaStr);
+		//log.info(schemaStr);
 		new File(workDir).mkdirs();
 		FileWriter fw = new FileWriter(workDir+"/schema1.graphqls");
 		fw.write(schemaStr);
@@ -72,9 +76,9 @@ public class GqlSchemaTest {
 		query = "{ __type(name: \"DEPT\") { name description } }";
 		ExecutionResult executionResult = build.execute(query);
 
-		System.out.println(executionResult);
+		log.info(executionResult);
 		Assert.assertNotNull(executionResult.getData());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -86,14 +90,14 @@ public class GqlSchemaTest {
 		
 		Object data = executionResult.getData();
 		Assert.assertNotNull(data);
-		System.out.println(data.toString());
+		log.info(data.toString());
 		Assert.assertThat(data, CoreMatchers.instanceOf(Map.class));
 		Map<String, Object> m = (Map<String, Object>) data;
 		Assert.assertNotNull(m.get("__schema"));
 		m = (Map<String, Object>) m.get("__schema");
 		Assert.assertNotNull(m.get("queryType"));
 		m = (Map<String, Object>) m.get("queryType");
-		System.out.println("queryType = "+m);
+		log.info("queryType = "+m);
 		String name = (String) m.get("name");
 		Assert.assertEquals("QueryType", name);
 	}
@@ -110,10 +114,10 @@ public class GqlSchemaTest {
 		String query = "query { list_DEPT (limit:10, offset: 0) { ID NAME } }";
 		ExecutionResult executionResult = build.execute(query);
 
-		//System.out.println(executionResult);
+		//log.info(executionResult);
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		
 		//---
 		
@@ -122,7 +126,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 
 		//---
 		
@@ -131,7 +135,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 
 		//---
 		
@@ -140,7 +144,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		
 		//---
 
@@ -149,7 +153,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		
 		//---
 
@@ -158,7 +162,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 
 		//---
 		/*
@@ -167,7 +171,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 
 		//---
 
@@ -176,7 +180,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		*/
 
 		//---
@@ -186,7 +190,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		
 		//--- ERR
 		
@@ -195,7 +199,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNull(executionResult.getData());
 		Assert.assertEquals(1, executionResult.getErrors().size());
-		System.out.println(executionResult.getErrors().toString());
+		log.info(executionResult.getErrors().toString());
 		
 		//--- ERR
 		
@@ -204,7 +208,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNull(executionResult.getData());
 		Assert.assertEquals(1, executionResult.getErrors().size());
-		System.out.println(executionResult.getErrors().toString());
+		log.info(executionResult.getErrors().toString());
 
 	}
 	
@@ -219,13 +223,13 @@ public class GqlSchemaTest {
 		//---
 		
 		String query = "query { list_DEPT (limit:10, offset: 0) { ID (fin: [1,2]) NAME } }";
-		System.out.println("query: "+query);
+		log.info("query: "+query);
 		ExecutionResult executionResult = build.execute(query);
 
-		//System.out.println(executionResult);
+		//log.info(executionResult);
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 	}
 
 	@Test
@@ -243,7 +247,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		
 	}
 
@@ -262,7 +266,7 @@ public class GqlSchemaTest {
 		
 		Assert.assertNotNull(executionResult.getData());
 		Assert.assertEquals(0, executionResult.getErrors().size());
-		System.out.println(executionResult.getData().toString());
+		log.info(executionResult.getData().toString());
 		
 	}
 	
