@@ -20,7 +20,7 @@
 		
 		<dependency org="org.apache.shiro" name="shiro-core" rev="1.2.3" conf="default->default"/>
 		<dependency org="org.apache.shiro" name="shiro-web" rev="1.2.3" conf="default->default"/>
-		<dependency org="org.slf4j" name="slf4j-simple" rev="1.6.6" conf="default->default"/>
+		<!--<dependency org="org.slf4j" name="slf4j-simple" rev="1.6.6" conf="default->default"/>-->
 		
 
 		<!-- test dependencies -->
