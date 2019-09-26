@@ -562,7 +562,7 @@ function getColumnsRemarks() {
 	var arr = getScalarArrayFromValue(rel.columnRemarks);
 	var ret = [];
 	for(var i=0;i<arr.length;i++) {
-		ret.push(arr[i].trim());
+		ret.push(arr[i]?arr[i].trim():null);
 	}
 	return ret;
 }

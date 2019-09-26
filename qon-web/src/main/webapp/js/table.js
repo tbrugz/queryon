@@ -260,10 +260,18 @@ function mergeColumnDimensions(content, trs) {
 function getCssRuleBySelectorText(selector) {
 	for(var i=0; i<document.styleSheets.length; i++) {
 		var sheet = document.styleSheets[i];
-		for(var j=0; j<sheet.cssRules.length; j++) {
-			if(sheet.cssRules[j].selectorText == selector) {
-				return sheet.cssRules[j];
+		try {
+			if(sheet && sheet.cssRules) {
+				for(var j=0; j<sheet.cssRules.length; j++) {
+					if(sheet.cssRules[j].selectorText == selector) {
+						return sheet.cssRules[j];
+					}
+				}
 			}
+		}
+		catch(error) {
+			// firefox may generate an error...
+			console.warn("Error @ getCssRuleBySelectorText[",i,"]: ",error);
 		}
 	}
 	return null;
@@ -273,6 +281,7 @@ function applyTableStyles() {
 	var row1 = document.getElementsByTagName('tr')[0];
 	if(!row1) { return; }
 	var rule = getCssRuleBySelectorText("th.break");
+	if(!rule) { return; }
 	rule.style.top = row1.offsetHeight+"px";
 }
 
