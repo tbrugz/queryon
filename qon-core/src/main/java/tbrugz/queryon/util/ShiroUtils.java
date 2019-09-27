@@ -56,6 +56,9 @@ public class ShiroUtils {
 			currentUser = SecurityUtils.getSubject();
 		}
 		catch(UnavailableSecurityManagerException e) {
+			if(log.isDebugEnabled()) {
+				log.debug("getSubject: UnavailableSecurityManagerException: "+e.getMessage());
+			}
 			return null;
 		}
 		if(currentUser.getPrincipal()==null) {
@@ -84,14 +87,26 @@ public class ShiroUtils {
 				}
 				realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
 				authenticated = true;
+				if(log.isTraceEnabled()) {
+					log.trace("getSubject: Subject will be built from request.getRemoteUser() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
+				}
 			}
 			else {
-				//TODOne: get static info from properties...
+				// Adds principal do anonymous user so that we may check their perissions
+				// see: https://issues.apache.org/jira/browse/SHIRO-526
+				//XXX add property to set (or not) userIdentity/principal to anonymous user?
 				userIdentity = prop.getProperty(PROP_AUTH_ANONUSER, DEFAULT_AUTH_ANONUSER);
 				realmName = prop.getProperty(PROP_AUTH_ANONREALM, DEFAULT_AUTH_ANONREALM);
+				if(log.isTraceEnabled()) {
+					log.trace("getSubject: Anonymous Subject will be built [userIdentity="+userIdentity+"; realmName="+realmName+"]");
+				}
 			}
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
 			currentUser = new Subject.Builder().principals(principals).authenticated(authenticated).session(currentUser.getSession()).buildSubject();
+			if(log.isDebugEnabled()) {
+				log.debug("getSubject: Subject built [userIdentity="+userIdentity+"; realmName="+realmName+"; authenticated="+authenticated+
+						"; session="+(currentUser.getSession()!=null?currentUser.getSession().getId():null)+"]");
+			}
 		}
 		return currentUser;
 	}
