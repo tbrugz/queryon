@@ -36,6 +36,7 @@ import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
@@ -85,7 +86,7 @@ public class WebDavServlet extends BaseApiServlet {
 		WebDavRequest wdreq = getRequestSpec(req);
 		List<Object> urlParts = wdreq.getParams();
 		
-		//log.info("urlParts = "+urlParts+" / "+wdreq.getObject());
+		//log.info("urlParts = "+urlParts+" / object = "+wdreq.getObject());
 		
 		if(multiModel && wdreq.getModelId()==null) {
 			log.info("doPropFind: list modelIds");
@@ -96,9 +97,13 @@ public class WebDavServlet extends BaseApiServlet {
 
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), wdreq.getModelId());
 		
+		Subject currentUser = ShiroUtils.getSubject(prop, req);
+		log.info("currentUser = "+currentUser.getPrincipal()+" ; isAuthenticated = "+currentUser.isAuthenticated());
+		
 		if(wdreq.getObject().isEmpty()) {
 			log.info("doPropFind: list tables");
 			List<Relation> rels = getRelationsWithPk(model);
+			rels = filterRelationsByPermission(rels, currentUser, PrivilegeType.SELECT);
 			//List<WebDavResource> resl = getResources(rels, baseHref);
 			List<WebDavResource> resl = getResourcesFromRelations(rels);
 			writePaths(resl, resp);
@@ -129,20 +134,24 @@ public class WebDavServlet extends BaseApiServlet {
 		
 		if(urlParts.size() <= positionalParametersNeeded + 1) {
 			List<WebDavResource> resl = null;
-			Subject currentUser = ShiroUtils.getSubject(prop, req);
+			if(checkPermission(r, currentUser, PrivilegeType.SELECT)) {
 			Connection conn = null;
 			try {
 				conn = DBUtil.initDBConn(prop, wdreq.getModelId());
 				
 				if(urlParts.size() == 0) {
 					// list contents (1st key level)
+					//if(checkPermission(r, pk, urlParts.size(), currentUser, PrivilegeType.SELECT)) {
 					resl = doListResources(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
+					//}
 				}
 				else if(urlParts.size() < positionalParametersNeeded) {
 					// check if key exists...
 					checkResourcesExists(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
 					// list contents
+					//if(checkPermission(r, pk, urlParts.size(), currentUser, PrivilegeType.SELECT)) {
 					resl = doListResources(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
+					//}
 				}
 				else if(urlParts.size() == positionalParametersNeeded) {
 					// full key defined - all parameters defined
@@ -162,17 +171,43 @@ public class WebDavServlet extends BaseApiServlet {
 				else {
 					throw new IllegalStateException("urlParts.size() == "+urlParts.size()+" // positionalParametersNeeded + 1 == "+(positionalParametersNeeded + 1));
 				}
-				writePaths(resl, resp);
 			}
 			finally {
 				ConnectionUtil.closeConnection(conn);
 			}
+			}
+			writePaths(resl, resp);
 		}
 		else {
 			throw new NotFoundException("resource '"+getPathInfo(req)+"' does not exists");
 		}
 	}
 	
+	List<Relation> filterRelationsByPermission(List<Relation> rels, Subject subject, PrivilegeType privilege) {
+		List<Relation> ret = new ArrayList<Relation>();
+		for(Relation r: rels) {
+			String permission = r.getRelationType()+":"+privilege+":"+r.getSchemaName()+":"+r.getName();
+			if(subject.isPermitted(permission)) {
+				//log.debug("permitted: "+permission);
+				ret.add(r);
+			}
+			else {
+				//log.debug("not permitted: "+permission);
+			}
+		}
+		return ret;
+	}
+
+	boolean checkPermission(Relation r, Subject subject, PrivilegeType privilege) {
+		String permission = r.getRelationType()+":"+privilege+":"+r.getSchemaName()+":"+r.getName();
+		return subject.isPermitted(permission);
+	}
+	
+	/*boolean checkPermission(Relation r, Constraint pk, int pkCol, Subject subject, PrivilegeType privilege) {
+		String permission = r.getRelationType()+":"+privilege+":"+r.getSchemaName()+":"+r.getName()+":"+pk.getUniqueColumns().get(pkCol);
+		return subject.isPermitted(permission);
+	}*/
+
 	@Override
 	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
