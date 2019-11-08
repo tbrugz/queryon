@@ -37,6 +37,14 @@
       <version>${project.parent.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-ri</artifactId>
+      <version>${jaxws.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
     <!-- <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
