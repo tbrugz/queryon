@@ -41,11 +41,14 @@ artifacts
 demos - running
 ---------------
 
-* minimal demo (using H2) - see [demo-minimal/README.md](demo-minimal/README.md)
+* **demo-minimal**: demo using H2 with default web interface - see [demo-minimal/README.md](demo-minimal/README.md)
 
-* demo with 4 databases (H2, Mysql/Mariadb, Postgresql & Derby) - see [demo-dbn/README.md](demo-dbn/README.md)
+* **demo-dbn**: demo with 5 databases (H2, Mysql/Mariadb, Postgresql, Derby & SQLite) - see [demo-dbn/README.md](demo-dbn/README.md)
 
-Note: demos need maven ant tasks. Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
+* **demo-static**: demo using H2 without web ui - see [demo/qon-demo-static/README.md](demo/qon-demo-static/README.md)
+
+Note: *demo-minimal* & *demo-dbn* need maven ant tasks to populate database(s).
+Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
 
 
 license
@@ -67,3 +70,5 @@ license - notable exceptions
 * `/web/[js|css]/prism.[js|css]` - MIT License - <https://github.com/LeaVerou/prism/blob/gh-pages/LICENSE>
 * `/web/js/sigma/*` - MIT License - <https://github.com/jacomyal/sigma.js/blob/master/LICENSE.txt>
 * `/web/js/typeahead.bundle.js`- MIT License - <https://github.com/twitter/typeahead.js/blob/master/LICENSE>
+
+**/web**: `/qon-web/src/main/webapp/`
