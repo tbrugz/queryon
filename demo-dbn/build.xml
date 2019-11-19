@@ -8,6 +8,7 @@
 	<!--<property name="derby.version" value="10.11.1.1"/>-->
 	<property name="derby.version" value="10.10.2.0"/>
 	<property name="h2.version" value="1.4.197"/>
+	<property name="sqlite.version" value="3.28.0"/>
 
 	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
@@ -19,6 +20,7 @@
 		<dependency groupId="org.postgresql" artifactId="postgresql" version="9.4.1208.jre6" scope="runtime"/>
 		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
 		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.xerial" artifactId="sqlite-jdbc" version="${sqlite.version}" scope="runtime"/>
 	</artifact:dependencies>
 
 	<path id="sqlrun.classpath">
@@ -122,6 +124,12 @@
 		</java>
 	</target>
 
+	<target name="run-sqlrun-h2embed-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.h2embed-drop.properties"/>
+		</java>
+	</target>
+	
 	<target name="run-sqlrun-h2">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.h2.properties"/>
@@ -140,12 +148,6 @@
 		</java>
 	</target>
 
-	<target name="run-sqlrun-h2embed-dropdatabase">
-		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
-			<arg value="-propfile=scripts/sqlrun.h2embed-drop.properties"/>
-		</java>
-	</target>
-	
 	<target name="run-sqlrun-derby">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.derby.properties"/>
@@ -170,6 +172,26 @@
 		</java>
 	</target>
 
+	<!-- sqlite -->
+	
+	<target name="run-sqlrun-sqlite">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.sqlite.properties"/>
+		</java>
+	</target>
+
+	<target name="run-sqldiff-sqlite">
+		<java classpathref="sqlrun.classpath" classname="${sqldiff.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=scripts/sqldiff.sqlite.properties"/>
+		</java>
+	</target>
+
+	<target name="run-sqlrun-sqlite-dropdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.sqlite-drop.properties"/>
+		</java>
+	</target>
+	
 	<!-- see: http://www.h2database.com/javadoc/org/h2/tools/Server.html -->
 	<target name="start-db-h2" description="start H2 database">
 		<java classpathref="h2.classpath" classname="org.h2.tools.Server" fork="true">

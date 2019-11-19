@@ -4,8 +4,9 @@ demo DBn
 
 A QueryOn demo using four models with [H2 database](http://www.h2database.com/),
 [PostgreSQL](http://www.postgresql.org/),
-[MySQL](https://www.mysql.com/)/[Mariadb](https://mariadb.org/) &
-[Derby](https://db.apache.org/derby/)
+[MySQL](https://www.mysql.com/)/[Mariadb](https://mariadb.org/),
+[Derby](https://db.apache.org/derby/) &
+[SQLite](https://www.sqlite.org/)
 databases.
 
 
@@ -56,6 +57,7 @@ postgresql: create database `classicmodels`
 ant run-sqlrun-derby
 ant run-sqlrun-h2
 ant run-sqlrun-h2embed
+ant run-sqlrun-sqlite
 ant run-sqlrun-mysql
 ant run-sqlrun-pgsql
 ```
@@ -67,6 +69,7 @@ ant run-sqldiff-derby
 ant run-sqlrun-derby-afterdiff
 ant run-sqldiff-h2
 ant run-sqldiff-h2embed
+ant run-sqldiff-sqlite
 ant run-sqldiff-mysql
 ant run-sqldiff-pgsql
 ant run-sqlrun-pgsql-afterdiff
@@ -129,6 +132,7 @@ cleanup
 ant run-sqlrun-derby-dropdatabase
 ant run-sqlrun-h2-dropdatabase
 ant run-sqlrun-h2embed-dropdatabase
+ant run-sqlrun-sqlite-dropdatabase
 ant run-sqlrun-mysql-dropdatabase
 ant run-sqlrun-pgsql-dropdatabase
 ```
