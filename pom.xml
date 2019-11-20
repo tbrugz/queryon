@@ -57,6 +57,7 @@
     <module>demo/qon-demo-static</module>
     <module>demo-minimal</module>
     <module>demo-dbn</module>
+    <module>demo/qon-demo-pg</module>
   </modules>
 
   <licenses>

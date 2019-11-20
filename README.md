@@ -47,6 +47,9 @@ demos - running
 
 * **demo-static**: demo using H2 without web ui - see [demo/qon-demo-static/README.md](demo/qon-demo-static/README.md)
 
+* **demo-pg**: demo using PostgreSQL with default web interface & standard [environment variables](https://www.postgresql.org/docs/current/libpq-envars.html)
+  - see [demo/qon-demo-pg/README.md](demo/qon-demo-pg/README.md)
+
 Note: *demo-minimal* & *demo-dbn* need maven ant tasks to populate database(s).
 Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
 
