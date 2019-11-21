@@ -59,6 +59,7 @@
     <module>qon-graphql</module>
     <module>qon-soap</module>
     <module>qon-web</module>
+    <module>demo</module>
     <module>demo/qon-demo-static</module>
     <module>demo-minimal</module>
     <module>demo-dbn</module>
