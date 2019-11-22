@@ -1,0 +1,19 @@
+<project name="qon-demo-anydb">
+
+	<property name="warfile" value="target/qon-demo-anydb.war"/>
+	
+	<target name="update-war">
+		<fail message="Property 'driver' must be set" unless="driver" />
+		<available file="${driver}" property="driver.exists" />
+		<fail message="Driver file missing: ${driver}" unless="driver.exists" />
+		
+		<dirname property="driver.dir" file="${driver}"/>
+		<basename property="driver.filename" file="${driver}"/>
+		
+		<zip destfile="${warfile}" update="true">
+			<!--<zipfileset dir="WEB-INF/lib" includes="${driver}" />-->
+			<zipfileset fullpath="WEB-INF/lib/${driver.filename}" dir="${driver.dir}" includes="${driver.filename}"/>
+		</zip>
+	</target>
+
+</project>

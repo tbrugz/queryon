@@ -41,7 +41,7 @@ artifacts
 demos - running
 ---------------
 
-* **demo-minimal**: demo using H2 with default web interface - see [demo-minimal/README.md](demo-minimal/README.md)
+* **demo-minimal**: demo using H2 with default web interface ([qon-web](qon-web)) - see [demo-minimal/README.md](demo-minimal/README.md)
 
 * **demo-dbn**: demo with 5 databases (H2, Mysql/Mariadb, Postgresql, Derby & SQLite) - see [demo-dbn/README.md](demo-dbn/README.md)
 
@@ -49,6 +49,9 @@ demos - running
 
 * **demo-pg**: demo using PostgreSQL with default web interface & standard [environment variables](https://www.postgresql.org/docs/current/libpq-envars.html)
   - see [demo/qon-demo-pg/README.md](demo/qon-demo-pg/README.md)
+
+* **demo-anydb**: demo that can use any supported JDBC database (using default web interface)
+  - see [demo/qon-demo-anydb/README.md](demo/qon-demo-any/README.md)
 
 Note: *demo-minimal* & *demo-dbn* need maven ant tasks to populate database(s).
 Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`

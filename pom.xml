@@ -64,6 +64,7 @@
     <module>demo-minimal</module>
     <module>demo-dbn</module>
     <module>demo/qon-demo-pg</module>
+    <module>demo/qon-demo-anydb</module>
   </modules>
 
   <licenses>
