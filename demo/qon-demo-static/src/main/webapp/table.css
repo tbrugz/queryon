@@ -1,0 +1,141 @@
+
+body {
+	margin: 0 auto;
+	font: normal 10pt Tahoma, Geneva, sans-serif; 
+	background-color: #ddd;
+}
+table {
+	border-spacing: 0;
+	/* border-collapse: collapse; */
+}
+td {
+	border: 1px solid #bbb;
+	padding: 2px 5px 2px 5px;
+	height: 1.2em;
+}
+th {
+	border: 1px solid #bbb;
+	background-color: #fff;
+	padding: 1px 5px 1px 5px;
+	text-align: center;
+}
+th.break {
+	text-align: left;
+	position: sticky;
+	top: 19px;
+}
+caption {
+	font-weight: bold;
+	font-size: 14pt;
+	text-align: left;
+	background-color: #aaa;
+	border: 1px solid #ccc;
+	padding: 2px;
+}
+
+table > tbody > tr:nth-child(1) {
+	position: -webkit-sticky;
+	position: -moz-sticky;
+	position: -ms-sticky;
+	position: -o-sticky;
+	position: sticky;
+	top: 0px;
+}
+
+table > tbody > tr:nth-child(1) > th {
+	position: sticky;
+	top: 0px;
+	z-index: 3;
+}
+
+/*
+col & colgroup see:
+https://developer.mozilla.org/en-US/docs/Web/HTML/Element/col
+http://quirksmode.org/css/css2/columns.html
+*/
+/*
+col[type="Blob"] {
+	background-color: #cfc;
+}
+
+col[type="Integer"] {
+	text-align: right;
+}
+*/
+
+/* table tr:nth-child(2n) {} */
+	
+td[title] {
+	text-decoration: underline;
+	/* -moz-text-decoration-line: underline; */
+	/* border-bottom: 1px dashed #999; */
+	-moz-text-decoration-style: dashed;
+	-webkit-text-decoration-style: dashed;
+	text-decoration-style: dashed;
+}
+td[null] {
+	background-color: #888;
+}
+
+td[coltype=Integer], td[coltype=Double], td[numeric=true] {
+	text-align: right;
+}
+
+/* predefined td classes */
+
+td.header {
+	font-weight: bold;
+	background-color: #eee;
+}
+
+th.blank, td.blank {
+	border: 0;
+	background-color: #ddd;
+}
+
+th[dimoncol], td[dimoncol] {
+	position: sticky;
+	left: 0px;
+	z-index: 2;
+}
+
+th[dimoncol] {
+	z-index: 4;
+	top: 0px;
+}
+
+td[dimoncol] {
+	font-weight: bold;
+	background-color: #fff;
+}
+
+td[dimoncol][null] {
+	background-color: #888;
+}
+
+th[measure] {
+	background-color: #eee;
+}
+
+/* datadiff */
+
+tr.equal td {
+	background-color: #ddd;
+	/*background-color: #99f;*/
+}
+tr.add td {
+	background-color: #9f9;
+}
+tr.remove td {
+	background-color: #f99;
+}
+tr.change td {
+	background-color: #ff9;
+}
+tr.change td span.add {
+	background-color: #9f9;
+	margin-right: 4px;
+}
+tr.change td span.remove {
+	background-color: #f99;
+}

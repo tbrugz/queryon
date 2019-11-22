@@ -40,7 +40,9 @@
 				(or <a href="q/sampleQuery.html">sampleQuery.html</a>,
 				<a href="q/sampleQuery.csv">sampleQuery.csv</a>,
 				<a href="q/sampleQuery.md">sampleQuery.md</a>,
-				...)
+				...,
+				or <a href="q/sampleQuery.json?fin:SCHEMA_NAME=INFORMATION_SCHEMA&metadata=false">sampleQuery.json with filter &amp; no metadata</a>
+				)
 			<li>sample GraphQL query: <code id="gqlSample">query { list_sampleQuery { SCHEMA_NAME }}</code>
 				<button onclick="window.location.href = 'graphql?query='+encodeURIComponent(document.getElementById('gqlSample').innerHTML);">run query</button>
 				<!-- <code><a href="graphql?query=query+%7B+list_sampleQuery+%7B+SCHEMA_NAME+%7D%7D">query { list_sampleQuery { SCHEMA_NAME }}</a></code> -->

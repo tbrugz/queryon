@@ -617,7 +617,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(Exception e) {
 			log.warn("Exception executing processor on startup [proc="+processorClass+"; model="+modelId+"]: "+e);
-			log.info("Exception executing processor on startup [proc="+processorClass+"; model="+modelId+"]: "+e.getMessage(), e);
+			log.debug("Exception executing processor on startup [proc="+processorClass+"; model="+modelId+"]: "+e.getMessage(), e);
 			//XXX: fail on error?
 		}
 	}

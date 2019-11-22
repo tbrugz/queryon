@@ -26,8 +26,6 @@ running in jetty
 
 `QON_JDBC_DRIVER=<driver-class> QON_JDBC_URL=<jdbc-url> QON_JDBC_USER=<username> QON_JDBC_PASSWORD=<password> QON_SCHEMAS="<schema names (comma separated, defaults to 'public, queryon')>" mvn jetty:run`
 
-jdbc:h2:~/.queryon/classicmodels.h2;SCHEMA_SEARCH_PATH=classicmodels,queryon;DB_CLOSE_ON_EXIT=true
-
 Example with H2: `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC mvn jetty:run`
 
 Example with PostgreSQL: `QON_JDBC_URL="jdbc:postgresql://localhost/database" QON_JDBC_USER=postgres QON_JDBC_PASSWORD=s3cr3t QON_SCHEMAS=public mvn jetty:run`
