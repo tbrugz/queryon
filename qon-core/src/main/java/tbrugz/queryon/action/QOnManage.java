@@ -3,8 +3,10 @@ package tbrugz.queryon.action;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,43 +23,54 @@ import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.processors.SQLDialectTransformer;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.Utils;
 
 public class QOnManage {
 
 	private static final Log log = LogFactory.getLog(QOnManage.class);
 	
+	public static final String ACTION_DIFF = "diffmodel";
+	public static final String ACTION_RELOAD = "reload";
+	
 	public void diffModel(SchemaModel model, Connection conn, HttpServletResponse resp) throws IOException {
-		Properties pp = new Properties();
-		pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
-		//pp.put("sqldump.schemagrab.db-specific-features", "false");
-		//pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
+		//XXX param: schemas, validate?
 		
-		//sqldump properties...
-		//pp.put("sqldump.schemagrab.schemas", "public"); //XXX param: schemas, validate?
+		Properties grabProps = new Properties();
+		grabProps.put("sqldump.schemagrab.proceduresandfunctions", "false");
+		//grabProps.put("sqldump.schemagrab.db-specific-features", "false");
+		//grabProps.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
+		//grabProps.put("sqldump.schemagrab.schemas", "public");
+		grabProps.put("sqldump.schemagrab.schemas", Utils.join(getModelSchemas(model), ", "));
 		List<String> typesList = Arrays.asList(new String[]{"TABLE"});
-		DiffManyServlet.setPropForTypes(pp, typesList);
+		DiffManyServlet.setPropForTypes(grabProps, typesList);
 		
 		JDBCSchemaGrabber jsg = new JDBCSchemaGrabber();
 		jsg.setConnection(conn);
-		jsg.setProperties(pp);
+		jsg.setProperties(grabProps);
 		SchemaModel dbModel = jsg.grabSchema();
 		String dialect = dbModel.getSqlDialect();
 		
 		Processor transf = new SQLDialectTransformer();
 		transf.setSchemaModel(dbModel);
-		Properties p = new Properties();
-		p.setProperty("sqldump.schematransform.toansi", "true");
-		transf.setProperties(p);
-		transf.process();
+		
+		{
+			Properties transformProps = new Properties();
+			transformProps.setProperty("sqldump.schematransform.toansi", "true");
+			transf.setProperties(transformProps);
+			transf.process();
+		}
 
-		Properties p2 = new Properties();
-		p2.setProperty("sqldump.schematransform.todbid", dialect);
-		transf.setProperties(p2);
-		transf.process();
+		{
+			Properties transformProps = new Properties();
+			transformProps.setProperty("sqldump.schematransform.todbid", dialect);
+			transf.setProperties(transformProps);
+			transf.process();
+		}
 		
 		SchemaDiffer differ = new SchemaDiffer();
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
@@ -87,13 +100,25 @@ public class QOnManage {
 		SchemaDiff.logInfo(diff);
 		diff.compact();
 		SchemaDiff.logInfo(diff);
+		
 		int diffcount = diff.getDiffListSize();
 		resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
-		/*if(diffcount==0) {
-			resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-		}*/
-		CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
-		diff.outDiffs(cout);
+		if(diffcount==0) {
+			//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			resp.getWriter().write("-- no diffs found");
+		}
+		else {
+			CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
+			diff.outDiffs(cout);
+		}
+	}
+	
+	static Set<String> getModelSchemas(SchemaModel model) {
+		Set<String> names = new HashSet<String>();
+		for(Table t: model.getTables()) {
+			names.add( t.getSchemaName() );
+		}
+		return names;
 	}
 	
 }

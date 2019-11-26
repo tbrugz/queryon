@@ -2411,7 +2411,7 @@ public class QueryOn extends HttpServlet {
 		//log.info("doManage: params: "+reqspec.params);
 		
 		String action = String.valueOf( reqspec.params.get(0) );
-		if("reload".equals(action)) {
+		if(QOnManage.ACTION_RELOAD.equals(action)) {
 			doInit(req.getServletContext());
 			resp.getWriter().write("queryon config reloaded");
 			return;
@@ -2423,7 +2423,7 @@ public class QueryOn extends HttpServlet {
 		 * validate? diff? - generate diff script between (memory) model & database
 		 * for each table, grab table's metadata from database & compare
 		 */
-		if("diffmodel".equals(action)) {
+		if(QOnManage.ACTION_DIFF.equals(action)) {
 			Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 			QOnManage qm = new QOnManage();
 			try {
