@@ -906,13 +906,9 @@
 		updateState();
 	}
 	
-	function downloadByExtension(node) {
-		var elem = byId('download-ext');
-		if(elem.style.display=='block') {
-			elem.style.display='none';
-			return;
-		}
-		
+	function getDownloadHrefs() {
+		var ret = [];
+	
 		var select = document.getElementById('objects');
 		var objectName = null;
 		var modelId = getCurrentModelId();
@@ -920,36 +916,21 @@
 			objectName = select.options[select.selectedIndex].value;
 		}
 		
-		var closeJs = "setDisplayNone(\""+elem.id+"\");";
-		var str = "";
-		
-		str += "<input value='close' onclick='"+closeJs+"' type='button'>";
-		str += "<ul>";
 		var exts = settings["syntax.fileextensions"];
-		//console.log("downloadByExtension...", exts, node);
 		for(var i=0;i<exts.length;i++) {
 			if(downloadExtFilter.indexOf(exts[i])<0) { continue; }
 			var href = makeOneHref(objectName, exts[i], modelId);
 			href = urlAddNamedParameters(href);
 			href = urlAddFilterOrderOffset(href);
-			str += "<li><a href='"+href+"' target='_blank' onclick='"+closeJs+"' title='download "+exts[i]+"'>"+exts[i]+"</a>";
+			ret.push({
+				"href": href,
+				"label": exts[i],
+				"title": "download "+exts[i]
+			});
 		}
-		str += "</ul>";
+		//console.log("getDownloadHrefs...", exts, ret);
 		
-		elem.innerHTML = str;
-		elem.style.display = 'block';
-		if(node) {
-			var rect = node.getBoundingClientRect();
-			elem.style.top = (rect.top + 20) + "px";
-			elem.style.left = rect.left + "px";
-			//console.log(rect, node);
-			
-			if(elem.getBoundingClientRect().right > document.documentElement.clientWidth) {
-				//console.log("partially invisible...");
-				elem.style.left = (rect.right - elem.getBoundingClientRect().width) + "px";
-			}
-		}
-		
+		return ret;
 	}
 	
 	function togglePivotDialog() {
@@ -1357,7 +1338,7 @@
 	<span id="navbar-links">
 		<a id="url-permalink" href="" target="_blank" title="permanent link">permalink</a>
 		<!-- <a id="url-down" href="" title="download CSV">download</a> -->
-		<a id="url-down-by-extension" href="#" onclick="javascript:downloadByExtension(this);return false;" title="download (click to see avaiable formats)">download</a>
+		<a id="url-down-by-extension" href="#" onclick="createPopupBelow('download-ext', 'url-down-by-extension', getDownloadHrefs());return false;" title="download (click to see avaiable formats)">download</a>
 		<span id="navbar-actions">
 			<!-- span id="url-editor-new-cont"></span -->
 			<a id="url-editor" class="edit-link" href="" target="_blank" title="edit current query">edit</a>
@@ -1399,8 +1380,8 @@
 	</div>
 </div>
 
-<div id="download-ext" class="qonpopup" style="display: none;">
-</div>
+<!-- <div id="download-ext" class="qonpopup" style="display: none;">
+</div> -->
 
 <div id="status-container" class="status">
 </div>
