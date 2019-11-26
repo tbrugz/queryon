@@ -11,7 +11,8 @@ var authInfo = {
 };
 
 function loadAuthInfo() { //callback?
-	var url = "auth/info.jsp?ts=" + Date.now();
+	var url = "qauth/currentUser?ts=" + Date.now();
+	//var url = "auth/info.jsp?ts=" + Date.now();
 	
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
@@ -52,11 +53,15 @@ function refreshAuthInfo() {
 	var urlednew = document.getElementById("url-editor-new");
 	if(authInfo.isDev && urlednew) {
 		urlednew.style.display = 'inline';
-		//urlednew.href = qonEditorUrl + ( getCurrentModelId()?"?model="+getCurrentModelId():"" );
 		urlednew.href = qonEditorUrl + ( isMultiModel()?"?model="+getCurrentModelId():"" );
 	}
 	else if(urlednew){
 		urlednew.style.display = 'none';
+	}
+
+	var btnManage = document.getElementById("btn-manage");
+	if(btnManage) {
+		btnManage.style.display = authInfo.isAdmin ? 'inline' : 'none';
 	}
 }
 

@@ -26,6 +26,7 @@
 	<script src="js/auth.js"></script>
 	<script src="js/table.js"></script>
 	<script src="js/settings.js"></script>
+	<script src="js/ui.js"></script>
 	<script src="js/xtra.js"></script>
 	<script type="text/javascript">
 	
@@ -36,6 +37,11 @@
 	var downloadExtFilter = [ "csv", "ods", "json", "xml", "xls", "xlsx" ];
 	
 	var aggregateFunctions = [ "count", "sum", "min", "max", "avg" ];
+	
+	var manageActions = [
+		{ "href": "q/manage/reload", "label": "reload model" },
+		{ "href": "q/manage/diffmodel", "label": "diff model" }
+	];
 	
 	var pivotAllColsAreStatic = true;
 	
@@ -374,6 +380,8 @@
 			var allowInsert = relationHasGrantOfTypeAnyColumn(rel, 'INSERT') || authHasPermission('INSERT_ANY'); // check insert-any-column
 			var allowUpdate = relationHasGrantOfTypeAnyColumn(rel, 'UPDATE') || authHasPermission('UPDATE_ANY'); // check update-any-column
 			var allowDelete = relationHasGrantOfType(rel, 'DELETE') || authHasPermission('DELETE_ANY');
+			//console.log("allowInsert", allowInsert, "allowUpdate", allowUpdate, "allowDelete", allowDelete);
+			
 			//rows[0].innerHTML += "<th>actions</th>";
 			if(allowInsert) {
 				rows[0].innerHTML += "<th class='row1 collast'><input type=button title='insert' class='btn-insert' onclick='doOpenInsertDialog()' value='+'/></th>"
@@ -934,11 +942,6 @@
 		
 	}
 	
-	function setDisplayNone(id) {
-		var elem = byId(id);
-		if(elem) { elem.style.display="none"; }
-	}
-	
 	function togglePivotDialog() {
 		var btn = byId('btn-pivot-toggle');
 		var pivots = byId('pivots');
@@ -1329,7 +1332,9 @@
 	<span id="navbar-prop">
 		<span id="parameters"></span>
 		<label id="order-label">order: <input type="text" name="order" id="order" onchange="makeHrefs();"/></label>
-		<input type="button" value="+ filter" onclick="addFilterDialog();" title="add filter"/>
+		<button type="submit" value="" onclick="addFilterDialog();" title="add filter">
+			+<i class="fa fa-filter"></i>
+		</button>
 		<button id="btn-pivot-toggle" type="submit" value="" onclick="togglePivotDialog();" title="pivot query">
 			<i class="fa fa-cubes"></i>
 		</button>
@@ -1345,8 +1350,11 @@
 		<a id="url-down-by-extension" href="#" onclick="javascript:downloadByExtension(this);return false;" title="download (click to see avaiable formats)">download</a>
 		<span id="navbar-actions">
 			<!-- span id="url-editor-new-cont"></span -->
-			<a id="url-editor" class="edit-link" href="" target="_blank">edit</a>
-			<a id="url-editor-new" class="edit-link" href="" target="_blank">new</a>
+			<a id="url-editor" class="edit-link" href="" target="_blank" title="edit current query">edit</a>
+			<a id="url-editor-new" class="edit-link" href="" target="_blank" title="new query">new</a>
+			<button id="btn-manage" type="submit" class="invertiblecolors manageaction" title="manage QueryOn" onclick="createPopupBelow('popup-manage', 'btn-manage', manageActions);">
+				<i class="fa fa-cogs"></i> <!-- fa-sliders fa-wrench fa-server fa-tasks fa-cog fa-cogs -->
+			</button>
 		</span>
 	</span>
 	
@@ -1381,7 +1389,7 @@
 	</div>
 </div>
 
-<div id="download-ext" style="display: none;">
+<div id="download-ext" class="qonpopup" style="display: none;">
 </div>
 
 <div id="status-container" class="status">

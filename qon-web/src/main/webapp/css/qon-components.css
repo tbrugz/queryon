@@ -211,7 +211,7 @@
 	background-color: #555;
 }
 
-#download-ext {
+.qonpopup {
 	position: fixed;
 	top: 15px;
 	/*right: 15px;*/
@@ -222,11 +222,11 @@
 	border: 3px solid #bbb;
 }
 
-#download-ext li {
+.qonpopup li {
 	list-style: none;
 }
 
-#download-ext input {
+.qonpopup input {
 	float: right;
 	margin: 5px;
 }

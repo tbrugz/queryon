@@ -126,6 +126,18 @@ button.on {
 	color: #ddd;
 }
 
+button.manageaction {
+	color: rgba(220, 54, 0);
+	background-color: #444;
+	/* padding: 3px 9px 3px 9px; */
+}
+
+button.manageaction.on {
+	color: #ddd;
+	background-color: rgba(220, 54, 0);
+	/* background-color: rgba(255, 54, 0, 0.4); */
+}
+
 input[type=button] {
 	border: 0;
 	padding: 3px 9px 3px 9px;
