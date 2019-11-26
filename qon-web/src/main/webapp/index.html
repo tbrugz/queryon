@@ -38,22 +38,31 @@
 	
 	var aggregateFunctions = [ "count", "sum", "min", "max", "avg" ];
 	
-	var manageActions = [
-		{ "href": "q/manage/reload", "label": "reload model" },
-		{ "href": "q/manage/diffmodel", "label": "diff model" }
-	];
-	
 	var pivotAllColsAreStatic = true;
+
+	var textareaDbColTypes = ["CLOB", "TEXT"];
 	
-	var onLoad = function() {
+	function onLoad() {
 		loadModels(); //loadModelsCallback);
 		loadAuthInfo();
 		loadSettings(loadSettingsCallback);
 	}
 	
-	var textareaDbColTypes = ["CLOB", "TEXT"];
+	function getManageActions() {
+		var modelId = getCurrentModelId();
+		return [
+			{
+				"href": "q/manage/reload",
+				"label": "reload model" 
+			},
+			{
+				"href": "q/manage/diffmodel" + ( modelId ? "?model=" + modelId : ""),
+				"label": "diff model"
+			}
+		];
+	}
 	
-	var doLoadQueries = function(doUpdate, callback) {
+	function doLoadQueries(doUpdate, callback) {
 		var s = getParametersByName('s', location.search);
 		if(s) {
 			schemaNameFilter = s;
@@ -203,6 +212,7 @@
 		}
 		
 		setDisplayNone('download-ext');
+		setDisplayNone('popup-manage'); resetColors('btn-manage');
 	}
 	
 	function updateFromFilters() {
@@ -1352,7 +1362,7 @@
 			<!-- span id="url-editor-new-cont"></span -->
 			<a id="url-editor" class="edit-link" href="" target="_blank" title="edit current query">edit</a>
 			<a id="url-editor-new" class="edit-link" href="" target="_blank" title="new query">new</a>
-			<button id="btn-manage" type="submit" class="invertiblecolors manageaction" title="manage QueryOn" onclick="createPopupBelow('popup-manage', 'btn-manage', manageActions);">
+			<button id="btn-manage" type="submit" class="invertiblecolors manageaction" title="manage QueryOn" onclick="createPopupBelow('popup-manage', 'btn-manage', getManageActions());">
 				<i class="fa fa-cogs"></i> <!-- fa-sliders fa-wrench fa-server fa-tasks fa-cog fa-cogs -->
 			</button>
 		</span>

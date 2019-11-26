@@ -22,6 +22,19 @@ function invertColors(node) {
 	}
 }
 
+function resetColors(node) {
+	if(! (node instanceof Node)) {
+		node = byId(node);
+	}
+	if(node.classList.contains("invertiblecolors")) {
+		//console.log("invertiblecolors!");
+		var isOn = node.classList.contains("on");
+		if(isOn) {
+			node.classList.remove("on");
+		}
+	}
+}
+
 function createPopupBelow(id, btn, content) {
 	
 	var elem = byId(id);
