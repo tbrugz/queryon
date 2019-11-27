@@ -7,7 +7,7 @@
 	</parent>
 	
 	<artifactId>qon-demo-parent</artifactId>
-	<version>${project.parent.version}</version>
+	<version>0.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<!--<name>qon-demo-anydb</name>-->
 
