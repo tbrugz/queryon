@@ -20,7 +20,7 @@ building
 `mvn package`
 
 
-running in jetty
+running with jetty (java 8+)
 -------
 
 * PostgreSQL connection environment variables must be set to run **qon-demo-pg**:

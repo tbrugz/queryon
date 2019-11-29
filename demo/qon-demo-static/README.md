@@ -17,7 +17,7 @@ building
 `mvn package`
 
 
-running
+running with jetty (java 8+)
 -------
 
 * `mvn jetty:run`

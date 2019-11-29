@@ -19,7 +19,7 @@ building
 `mvn package`
 
 
-running in jetty
+running with jetty (java 8+)
 -------
 
 * Environment variables must be set to run **qon-demo-anydb**:

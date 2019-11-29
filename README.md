@@ -47,11 +47,9 @@ demos - running
 
 * **demo-static**: demo using H2 without web ui - see [demo/qon-demo-static/README.md](demo/qon-demo-static/README.md)
 
-* **demo-pg**: demo using PostgreSQL with default web interface & standard [environment variables](https://www.postgresql.org/docs/current/libpq-envars.html)
-  - see [demo/qon-demo-pg/README.md](demo/qon-demo-pg/README.md)
+* **demo-pg**: demo using PostgreSQL with default web interface & standard [environment variables](https://www.postgresql.org/docs/current/libpq-envars.html) - see [demo/qon-demo-pg/README.md](demo/qon-demo-pg/README.md)
 
-* **demo-anydb**: demo that can use any supported JDBC database (using default web interface)
-  - see [demo/qon-demo-anydb/README.md](demo/qon-demo-any/README.md)
+* **demo-anydb**: demo that can use any supported JDBC database (using default web interface) - see [demo/qon-demo-anydb/README.md](demo/qon-demo-anydb/README.md)
 
 Note: *demo-minimal* & *demo-dbn* need maven ant tasks to populate database(s).
 Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
@@ -77,4 +75,4 @@ license - notable exceptions
 * `/web/js/sigma/*` - MIT License - <https://github.com/jacomyal/sigma.js/blob/master/LICENSE.txt>
 * `/web/js/typeahead.bundle.js`- MIT License - <https://github.com/twitter/typeahead.js/blob/master/LICENSE>
 
-**/web**: `/qon-web/src/main/webapp/`
+(**/web**: `/qon-web/src/main/webapp/`)
