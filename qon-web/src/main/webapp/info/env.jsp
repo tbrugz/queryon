@@ -1,3 +1,7 @@
+<%@page import="tbrugz.sqldump.util.StringUtils"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="tbrugz.queryon.UpdatePlugin"%>
+<%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="java.util.TreeMap"%>
 <%@page import="com.google.gson.Gson"%>
 <%@page import="java.util.List"%>
@@ -37,8 +41,18 @@
 			}
 		}
 	}
+	
+	Map<String, List<String>> updatePluginsMap = new HashMap<String, List<String>>();
+	Map<String, List<UpdatePlugin>> updatePlugins = (Map<String, List<UpdatePlugin>>) application.getAttribute(QueryOn.ATTR_UPDATE_PLUGINS);
+	if(updatePlugins!=null) {
+		for(Map.Entry<String, List<UpdatePlugin>> e: updatePlugins.entrySet()) {
+			List<String> cnames = StringUtils.getClassSimpleNameListFromObjectList(e.getValue());
+			updatePluginsMap.put(e.getKey(), cnames);
+		}
+	}
 %>{
 	"models": [<%= models %>]
 	<% //, "types": [< %//= Utils.join(Arrays.asList(DBObjectType.values()), ", ", sqd) % >] %>
 	,"services": <%= gson.toJson(serviceEndpoints) %>
+	,"update-plugins": <%= gson.toJson(updatePluginsMap) %>
 }

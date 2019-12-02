@@ -2031,4 +2031,43 @@ public class WinstoneAndH2HttpRequestTest {
 		String ret = httpPostContent("/ValidateAny.xml?name=test&sql="+sqlpar, "");
 	}
 	
+	static String getPrettyStringFromJson(String content) {
+		Gson gsonpretty = new GsonBuilder().setPrettyPrinting().create();
+		Object jsonObj = gsonpretty.fromJson(content, Object.class);
+		return gsonpretty.toJson(jsonObj);
+	}
+	
+	static void checkJson(String content) {
+		Gson gson = new Gson();
+		Object jsonObj = gson.fromJson(content, Object.class);
+	}
+	
+	@Test
+	public void jspGetSchemas() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/info/schemas.jsp");
+		checkJson(content);
+		//System.out.println("jspGetSchemas: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void jspGetSettings() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/info/settings.jsp");
+		checkJson(content);
+		//System.out.println("jspGetSettings: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void jspGetStatus() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/info/status.jsp");
+		checkJson(content);
+		//System.out.println("jspGetStatus: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void jspGetEnv() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/info/env.jsp");
+		checkJson(content);
+		//System.out.println("jspGetEnv: "+getPrettyStringFromJson(content));
+	}
+	
 }
