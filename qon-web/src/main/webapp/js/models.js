@@ -1,5 +1,6 @@
 
 var modelsInfo = null;
+var updatePluginsInfo = null;
 
 function loadModels(callback) {
 	var oReq = new XMLHttpRequest();
@@ -15,6 +16,9 @@ function loadModelsContent(oEvent) {
 	if(json.models) {
 		modelsInfo = json.models;
 		//loadSelect(json.models, 'model');
+	}
+	if(json["update-plugins"]) {
+		updatePluginsInfo = json["update-plugins"];
 	}
 	//console.log('modelsInfo', modelsInfo);
 	/*if(json.models.length>1) {
@@ -51,6 +55,24 @@ function getModelCount() {
 
 function isMultiModel() {
 	return getModelCount()>1;
+}
+
+function getCurrentModelUpdatePlugins() {
+	if( updatePluginsInfo ) {
+		var keys = Object.keys(updatePluginsInfo);
+		if( keys.length == 0) {
+			return [];
+		}
+		if( keys.length == 1) {
+			return updatePluginsInfo[keys[0]];
+		}
+		return updatePluginsInfo[getCurrentModelId()];
+	}
+	return [];
+}
+
+function isQonQueriesPluginActive() {
+	return getCurrentModelUpdatePlugins().includes("QOnQueries");
 }
 
 getModel = function() {}

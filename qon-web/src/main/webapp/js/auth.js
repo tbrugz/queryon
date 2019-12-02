@@ -50,8 +50,9 @@ function refreshAuthInfo() {
 		user.style.display = 'inline';
 	}
 
+	/*
 	var urlednew = document.getElementById("url-editor-new");
-	if(authInfo.isDev && urlednew) {
+	if(authInfo.isDev && urlednew && isQonQueriesPluginActive()) {
 		urlednew.style.display = 'inline';
 		urlednew.href = qonEditorUrl + ( isMultiModel()?"?model="+getCurrentModelId():"" );
 	}
@@ -63,6 +64,7 @@ function refreshAuthInfo() {
 	if(btnManage) {
 		btnManage.style.display = authInfo.isAdmin ? 'inline' : 'none';
 	}
+	*/
 }
 
 function authGetLoginUrl() {

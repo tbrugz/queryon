@@ -187,7 +187,7 @@ function makeHrefs() {
 		//return;
 	}
 	else {
-		if(authInfo.isDev && urled) {
+		if(authInfo.isDev && urled && isQonQueriesPluginActive()) {
 			if(relationsHash[id].relationType=="query") {
 				urled.style.display = 'initial';
 				var name = id;
@@ -243,6 +243,22 @@ function makeHrefs() {
 	}
 	if(urldownByExt) {
 		//urldownByExt.href = urlAddFilterOrderOffset(urldownByExt.href);
+	}
+	
+	var urlednew = document.getElementById("url-editor-new");
+	if(urlednew) {
+		if(authInfo.isDev && isQonQueriesPluginActive()) {
+			urlednew.style.display = 'inline';
+			urlednew.href = qonEditorUrl + ( isMultiModel()?"?model="+getCurrentModelId():"" );
+		}
+		else {
+			urlednew.style.display = 'none';
+		}
+	}
+
+	var btnManage = document.getElementById("btn-manage");
+	if(btnManage) {
+		btnManage.style.display = authInfo.isAdmin ? 'inline' : 'none';
 	}
 	
 	//console.log('urled.href: ',urled.href);
