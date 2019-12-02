@@ -250,6 +250,7 @@ public class QueryOn extends HttpServlet {
 	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	public static final String ATTR_INIT_ERROR = "initerror";
 	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
+	public static final String ATTR_UPDATE_PLUGINS = "update-plugins";
 	
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_HEAD = "HEAD";
@@ -389,7 +390,7 @@ public class QueryOn extends HttpServlet {
 
 			DumpSyntaxRegistry.setSyntaxesResource(DEFAULT_SYNTAXES_RESOURCE);
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
-			log.info("syntaxes: "+StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );
+			log.info("syntaxes: "+StringUtils.getClassSimpleNameListT( DumpSyntaxRegistry.getSyntaxes()) );
 			
 			Map<String, SchemaModel> models = new LinkedHashMap<String, SchemaModel>();
 			List<String> modelIds = getDeclaredModels();
@@ -547,6 +548,8 @@ public class QueryOn extends HttpServlet {
 			List<UpdatePlugin> plugins = setupUpdatePlugins(context, sm, modelId, updatePluginsStrList);
 			updatePlugins.put(modelId, plugins);
 		}
+		
+		context.setAttribute(ATTR_UPDATE_PLUGINS, updatePlugins);
 	}
 	
 	List<UpdatePlugin> setupUpdatePlugins(ServletContext context, SchemaModel model, String modelId, List<String> updatePluginList) {
@@ -554,6 +557,7 @@ public class QueryOn extends HttpServlet {
 
 		List<UpdatePlugin> plugins = new ArrayList<UpdatePlugin>();
 		List<String> updatePluginsStr = new ArrayList<String>();
+		List<UpdatePlugin> activePlugins = new ArrayList<UpdatePlugin>();
 		
 		for(String upPluginStr: updatePluginList) {
 			UpdatePlugin up = (UpdatePlugin) Utils.getClassInstance(upPluginStr, DEFAULT_CLASSLOADING_PACKAGES);
@@ -564,7 +568,7 @@ public class QueryOn extends HttpServlet {
 			updatePluginsStr.add(up.getClass().getSimpleName());
 		}
 		
-		log.info("update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+updatePluginsStr);
+		log.info("initting update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+updatePluginsStr);
 
 		try {
 			Connection conn = DBUtil.initDBConn(prop, modelId, model);
@@ -573,6 +577,7 @@ public class QueryOn extends HttpServlet {
 				try {
 					up.setConnection(conn);
 					up.onInit(context);
+					activePlugins.add(up);
 				}
 				catch(RuntimeException e) {
 					String message = "Exception starting update-plugin "+up.getClass().getSimpleName()+" [model="+modelId+"]";
@@ -587,7 +592,10 @@ public class QueryOn extends HttpServlet {
 			log.warn("Exception starting update-plugin [model="+modelId+"]: "+e);
 			log.debug("Exception starting update-plugin [model="+modelId+"]: "+e, e);
 		}
-		return plugins;
+
+		log.info("active update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+StringUtils.getClassSimpleNameListFromObjectList(activePlugins));
+		
+		return activePlugins;
 	}
 	
 	void runOnStartupProcessors(ServletContext context) {

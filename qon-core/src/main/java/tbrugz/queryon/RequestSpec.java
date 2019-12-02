@@ -537,7 +537,7 @@ public class RequestSpec {
 		else if(isContentTypeJson()) {
 			Gson gson = new Gson();
 			@SuppressWarnings("unchecked")
-			Map<String, Object> map = gson.fromJson(request.getReader(), Map.class);
+			Map<String, Object> map = gson.fromJson(req.getReader(), Map.class);
 			if(map!=null) {
 				for(Map.Entry<String, Object> e: map.entrySet()) {
 					String value = getValueForUpdate( e.getValue() );
