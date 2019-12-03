@@ -26,8 +26,10 @@
 	response.setContentType(ResponseSpec.MIME_TYPE_JSON);
 	
 	// XXX add ServiceRegistry class?
-	String[] endpoints = { "QueryOn", "Swagger", "OData", "GraphQL", "Soap" };
-	String[] classNames = { "queryon.QueryOn", "SwaggerServlet", "ODataServlet", "GraphQlQonServlet", "QonSoapServlet" };
+	String[] endpoints = { "QueryOn", "QueryOnSchema", "Diff", "QonPages", "Swagger",
+			"OData", "GraphQL", "Soap" };
+	String[] classNames = { "queryon.QueryOn", "QueryOnSchemaInstant", "diff.DiffServlet", "PagesServlet", "SwaggerServlet",
+			"ODataServlet", "GraphQlQonServlet", "QonSoapServlet" };
 	Map<String, ? extends ServletRegistration> servletRegs = request.getServletContext().getServletRegistrations();
 
 	Map<String, String> serviceEndpoints = new TreeMap<String, String>(); // new LinkedHashMap<String, String>();

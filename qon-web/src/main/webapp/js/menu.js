@@ -99,6 +99,17 @@ function createMenuContent(addCloseBtn) {
 			&& (!li.classList.contains("auth") || !hasLoginLink)
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
 			
+			var service = li.getAttribute('services');
+			if(service) {
+				if(!isServiceActive(service)) {
+					console.log("service", service, "not active");
+					continue;
+				}
+				else {
+					//console.log("service", service, "active");
+				}
+			}
+			
 			var hrefElem = li.getElementsByTagName("a")[0];
 			if(!hrefElem) { continue; }
 			var href = hrefElem.getAttribute("href-orig");

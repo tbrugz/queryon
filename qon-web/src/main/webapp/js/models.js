@@ -1,5 +1,6 @@
 
 var modelsInfo = null;
+var servicesInfo = null;
 var updatePluginsInfo = null;
 
 function loadModels(callback) {
@@ -16,6 +17,9 @@ function loadModelsContent(oEvent) {
 	if(json.models) {
 		modelsInfo = json.models;
 		//loadSelect(json.models, 'model');
+	}
+	if(json.services) {
+		servicesInfo = json.services;
 	}
 	if(json["update-plugins"]) {
 		updatePluginsInfo = json["update-plugins"];
@@ -55,6 +59,10 @@ function getModelCount() {
 
 function isMultiModel() {
 	return getModelCount()>1;
+}
+
+function isServiceActive(service) {
+	return servicesInfo && servicesInfo[service];
 }
 
 function getCurrentModelUpdatePlugins() {
