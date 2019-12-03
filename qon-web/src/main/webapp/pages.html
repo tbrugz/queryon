@@ -61,7 +61,7 @@ onLoadAfter = function() {
 	if(! modelsInfo) return;
 	//console.log("onLoadAfter2");
 	
-	updateQonPagesUrl();
+	updateQonPagesUrls();
 	updateUI();
 	refreshAuthInfo();
 	updatePagesList();
@@ -71,22 +71,20 @@ loadAuthInfoCallback = onLoadAfter;
 //loadModelsContentCallback = onLoadAfter;
 
 onModelChanged = function() {
-	updateQonPagesUrl();
+	updateQonPagesUrls();
 	updateUI();
-	refreshAuthInfo();
 	updatePagesList();
 }
 
-function updateQonPagesUrl() {
+function updateQonPagesUrls() {
 	var table = getModelSetting('queryon.qon-pages', 'table', getCurrentModelId());
 	if(table) {
 		qonUrl = 'q/'+table;
 	}
+	byId('url-editor-new').href = qonEditorUrl + ( isMultiModel()?"?model="+getCurrentModelId():"" );
 }
 
 function loadModelsContentCallback() {
-	//loadModelsContent(oEvent);
-
 	if(modelsInfo) {
 		loadSelect(modelsInfo, 'model');
 	}
@@ -108,9 +106,18 @@ updateUI = function() {
 window.onresize = updateUI;
 
 makeHrefs = function() {
-	refreshAuthInfo();
-	byId('url-editor-new').style.display = authInfo.isDev?'inline':'none';
-	byId('url-upload').style.display = authInfo.isDev?'inline':'none';
+	var urlNew = byId('url-editor-new');
+	var urlUpload = byId('url-upload');
+	
+	if(authInfo && authInfo.isDev) {
+		urlNew.style.display = 'inline';
+		urlNew.href = qonEditorUrl + ( isMultiModel()?"?model="+getCurrentModelId():"" );
+		urlUpload.style.display = 'inline';
+	}
+	else {
+		urlNew.style.display = 'none';
+		urlUpload.style.display = 'none';
+	}
 }
 
 clearPagesList = function() {
