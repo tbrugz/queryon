@@ -113,6 +113,7 @@ function updateSelectedQueryStateParameters() {
 }
 
 function updateSelectedQueryStateParametersCallback(relname, parts) {
+	//console.log("updateSelectedQueryStateParametersCallback", relname, parts);
 	var found = false;
 	var select = document.getElementById('objects');
 	for(var i = 0;i<select.length;i++) {
@@ -138,6 +139,8 @@ function updateSelectedQueryStateParametersCallback(relname, parts) {
 	else {
 		setParametersValues(parts);
 	}
+	
+	loadModelStatusContentCallback();
 }
 
 function updateNavBar() {

@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.processor.UpdatePluginUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnExecs"%>
 <%@page import="tbrugz.queryon.processor.QOnTables"%>
 <%@page import="tbrugz.queryon.processor.QOnQueries"%>
@@ -60,6 +61,14 @@ if(models!=null && models.entrySet()!=null) {
 			if(eWarnings!=null && eWarnings.size()>0) {
 				out.write(",\n");
 				out.write(sqd.get(modelId+".execs-warnings")+": "+gson.toJson(eWarnings));
+				i++;
+			}
+
+			//qon-init-warnings
+			Map<String, String> iWarnings = (Map<String, String>) application.getAttribute(UpdatePluginUtils.ATTR_INIT_WARNINGS_PREFIX+"."+modelId);
+			if(iWarnings!=null && iWarnings.size()>0) {
+				out.write(",\n");
+				out.write(sqd.get(modelId+".init-warnings")+": "+gson.toJson(iWarnings));
 				i++;
 			}
 			

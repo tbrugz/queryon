@@ -2,6 +2,7 @@
 var modelStatus = null;
 
 function loadModelStatus(callback) {
+	//console.log("loadModelStatus", callback);
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", callback?callback:loadModelStatusContent);
 	oReq.open("GET", "info/status.jsp");
@@ -9,6 +10,7 @@ function loadModelStatus(callback) {
 }
 
 function loadModelStatusContent(oEvent) {
+	//console.log("loadModelStatusContent");
 	var txt = oEvent.target.responseText;
 	var json = JSON.parse(txt);
 	//console.log(json);
@@ -24,11 +26,11 @@ function loadModelStatusContent(oEvent) {
 
 function statusGetWarnings(modelId, type) {
 	if(modelId=="") { modelId = "null"; }
-	var types = ["queries", "tables", "execs"];
+	var types = ["init", "queries", "tables", "execs"];
 	if(types.indexOf(type)<0) {
 		console.warn("type [",type,"] must be one of [",types,"]");
 	}
-	return modelStatus[modelId+"."+type+"-warnings"];
+	return modelStatus ? modelStatus[modelId+"."+type+"-warnings"] : null;
 }
 
 function statusWarnings2Text(warnings) {

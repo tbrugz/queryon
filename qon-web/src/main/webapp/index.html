@@ -92,7 +92,7 @@
 	}
 	
 	function loadSettingsCallback() {
-		//console.log("loadSettingsCallback, ",settings);
+		//console.log("loadSettingsCallback", settings);
 		testForAuthRequired();
 		if(settings["queryon.web.appname"]) {
 			document.title = settings["queryon.web.appname"];
@@ -108,14 +108,20 @@
 	}
 	
 	function loadAuthInfoCallback() {
-		//console.log("loadAuthInfoCallback, ",settings);
+		//console.log("loadAuthInfoCallback", settings);
 		testForAuthRequired();
+		//loadModelStatusContentCallback();
 	}
 	
 	function loadModelStatusContentCallback() {
 		var modelId = getCurrentModelId();
-		var warnings = statusGetWarnings(modelId, "queries");
-		if(warnings) {
+		var qWarnings = statusGetWarnings(modelId, "queries");
+		var iWarnings = statusGetWarnings(modelId, "init");
+		var warnings = {};
+		Object.assign(warnings, qWarnings, iWarnings)
+		//console.log("loadModelStatusContentCallback: modelId: '", modelId,"' warnings:", warnings, "modelStatus:", modelStatus);
+		
+		if(warnings && Object.keys(warnings).length > 0) {
 			var tooltip = statusWarnings2Text(warnings);
 			byId('navbar-warn').innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" title="'+tooltip+'"></i>';
 			/*var relations = byId('objects');
