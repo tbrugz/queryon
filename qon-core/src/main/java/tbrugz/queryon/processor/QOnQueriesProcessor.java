@@ -10,9 +10,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -136,7 +134,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 				;
 				//+" order by schema, name";
 		
-		clearWarnings(context, model.getModelId());
+		UpdatePluginUtils.clearWarnings(context, getWarnKey(model.getModelId()));
 		
 		ResultSet rs = null;
 		try {
@@ -168,38 +166,13 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			catch(SQLException e) {
 				String message = "error reading query '"+queryName+"': "+e;
 				log.warn(message);
-				putWarning(context, model.getModelId(), schema, queryName, message);
+				UpdatePluginUtils.putWarning(context, getWarnKey(model.getModelId()), schema, queryName, message);
 			}
 		}
 		
 		log.info("QOn processed ["+
 				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
 				"added/replaced "+count+" queries]");
-	}
-	
-	void clearWarnings(ServletContext context, String modelId) {
-		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
-		Map<String, String> warnings = new LinkedHashMap<String, String>();
-		context.setAttribute(warnKey, warnings);
-	}
-	
-	@SuppressWarnings("unchecked")
-	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
-		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
-		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
-		if(warning==null) {
-			log.warn("warning key '"+warnKey+"' should not be null");
-			warnings = new LinkedHashMap<String, String>();
-			context.setAttribute(warnKey, warnings);
-		}
-		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
-	}
-
-	@SuppressWarnings("unchecked")
-	void removeWarning(ServletContext context, String modelId, String schemaName, String queryName) {
-		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
-		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
-		warnings.remove((schemaName!=null?schemaName+".":"") + queryName);
 	}
 	
 	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks, String rolesFilterStr, ServletContext context) {
@@ -244,7 +217,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 				String message = "resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']";
 				log.warn("resultset metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']");
 				log.debug("resultset metadata's sqlexception: "+e.getMessage().trim()+" [query='"+queryFullName+"']", e);
-				putWarning(context, model.getModelId(), schemaName, queryName, message);
+				UpdatePluginUtils.putWarning(context, getWarnKey(model.getModelId()), schemaName, queryName, message);
 			}
 		}
 		
@@ -294,7 +267,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			String message = "parameter metadata's sqlexception: "+e.toString().trim()+" [query='"+queryFullName+"']";
 			log.warn(message);
 			log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
-			putWarning(context, model.getModelId(), schemaName, queryName, message);
+			UpdatePluginUtils.putWarning(context, getWarnKey(model.getModelId()), schemaName, queryName, message);
 		}
 		
 		View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), query.getName());
@@ -486,6 +459,10 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			throw new InternalServerException(e.getMessage(), e);
 		}
 		process();
+	}
+	
+	String getWarnKey(String modelId) {
+		return ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
 	}
 	
 }

@@ -8,7 +8,6 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -200,16 +199,17 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		try {
 			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
 			sp = ConnectionUtil.setSavepointIfNotAutocommit(conn);
-			removeWarning(servletContext, model.getModelId(), q);
+			UpdatePluginUtils.removeWarning(servletContext, getWarnKey(model.getModelId()), q);
+			
 			DBObjectUtils.validateQuery(q, sql, conn, true);
 		}
 		catch(RuntimeException e) {
-			putWarning(servletContext, model.getModelId(), q, e.toString());
+			UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), q, e.toString());
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
 			DBUtil.doRollback(conn, sp);
 		}
 		catch(SQLException e) {
-			putWarning(servletContext, model.getModelId(), q, e.toString());
+			UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), q, e.toString());
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
 			DBUtil.doRollback(conn, sp);
 		}
@@ -223,39 +223,6 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			return 1;
 		}
 		return 0;
-	}
-	
-	@SuppressWarnings("unchecked")
-	void putWarning(ServletContext context, String modelId, String schemaName, String queryName, String warning) {
-		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
-		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
-		if(warning==null) {
-			log.warn("warning key '"+warnKey+"' should not be null");
-			warnings = new LinkedHashMap<String, String>();
-			context.setAttribute(warnKey, warnings);
-		}
-		warnings.put((schemaName!=null?schemaName+".":"") + queryName, warning);
-	}
-
-	void clearWarnings(ServletContext context, String modelId) {
-		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
-		Map<String, String> warnings = new LinkedHashMap<String, String>();
-		context.setAttribute(warnKey, warnings);
-	}
-	
-	@SuppressWarnings("unchecked")
-	void removeWarning(ServletContext context, String modelId, String schemaName, String queryName) {
-		String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
-		Map<String, String> warnings = (Map<String, String>) context.getAttribute(warnKey);
-		warnings.remove((schemaName!=null?schemaName+".":"") + queryName);
-	}
-	
-	void putWarning(ServletContext context, String modelId, Relation r, String warning) {
-		putWarning(context, modelId, r.getSchemaName(), r.getName(), warning);
-	}
-
-	void removeWarning(ServletContext context, String modelId, Relation r) {
-		removeWarning(context, modelId, r.getSchemaName(), r.getName());
 	}
 	
 	public static Map<String, String> readQueryFromDatabase(Properties prop, String modelId, String schemaName, String name) throws SQLException, ClassNotFoundException, NamingException {
@@ -314,7 +281,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 				;
 				//+" order by schema, name";
 		
-		clearWarnings(context, model.getModelId());
+		UpdatePluginUtils.clearWarnings(context, getWarnKey(model.getModelId()));
 		
 		ResultSet rs = null;
 		try {
@@ -340,7 +307,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			catch(SQLException e) {
 				String message = "error reading query '"+queryName+"': "+e;
 				log.warn(message);
-				putWarning(context, model.getModelId(), schema, queryName, message);
+				UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), schema, queryName, message);
 			}
 		}
 		
@@ -363,5 +330,9 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		return isQonQueriesRelation(relation);
 	}
 
+	String getWarnKey(String modelId) {
+		return ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
+	}
+	
 }
 

@@ -51,6 +51,7 @@ import tbrugz.queryon.action.QOnManage;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.processor.UpdatePluginUtils;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
@@ -570,8 +571,11 @@ public class QueryOn extends HttpServlet {
 		
 		log.info("initting update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+updatePluginsStr);
 
+		String warnKey = UpdatePluginUtils.ATTR_INIT_WARNINGS_PREFIX+"."+modelId;
+		
 		try {
 			Connection conn = DBUtil.initDBConn(prop, modelId, model);
+			UpdatePluginUtils.clearWarnings(context, warnKey);
 			
 			for(UpdatePlugin up: plugins) {
 				try {
@@ -583,14 +587,17 @@ public class QueryOn extends HttpServlet {
 					String message = "Exception starting update-plugin "+up.getClass().getSimpleName()+" [model="+modelId+"]";
 					log.warn(message+": "+e);
 					log.debug(message+": "+e, e);
+					UpdatePluginUtils.putWarning(servletContext, warnKey, null, "[init]", message);
 				}
 			}
 			
 			ConnectionUtil.closeConnection(conn);
 		}
 		catch(Exception e) {
-			log.warn("Exception starting update-plugin [model="+modelId+"]: "+e);
-			log.debug("Exception starting update-plugin [model="+modelId+"]: "+e, e);
+			String message = "Exception starting update-plugin [model="+modelId+"]: "+e;
+			log.warn(message);
+			log.info(message, e);
+			UpdatePluginUtils.putWarning(servletContext, warnKey, null, "[init]", message);
 		}
 
 		log.info("active update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+StringUtils.getClassSimpleNameListFromObjectList(activePlugins));
