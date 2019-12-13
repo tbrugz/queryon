@@ -393,12 +393,6 @@
       <version>2.2.2</version> <!-- 2.8.5 -->
       <scope>compile</scope>
     </dependency>
-    <!-- <dependency>
-      <groupId>org.pegdown</groupId>
-      <artifactId>pegdown</artifactId>
-      <version>1.6.0</version>
-      <scope>compile</scope>
-    </dependency> -->
     <!-- used by PatchDumper -->
     <!-- <dependency>
       <groupId>com.googlecode.java-diff-utils</groupId>

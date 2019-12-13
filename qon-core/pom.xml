@@ -300,6 +300,8 @@
       <version>2.2.2</version>
       <scope>compile</scope>
     </dependency> -->
+    
+    <!-- TODO: change to https://github.com/vsch/flexmark-java (java8+) (see https://github.com/sirthias/pegdown) -->
     <dependency>
       <groupId>org.pegdown</groupId>
       <artifactId>pegdown</artifactId>
