@@ -298,6 +298,7 @@ public class QueryOn extends HttpServlet {
 	
 	static {
 		//BaseResultSetCollectionAdapter.setCollectionValuesJoiner("|");
+		ParametrizedProperties.setUseSystemProperties(true);
 	}
 	
 	protected void doInitProperties(ServletConfig config) {
