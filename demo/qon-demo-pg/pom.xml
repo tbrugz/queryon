@@ -13,6 +13,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.thorntail>2.6.0.Final</version.thorntail>
+		
+		<!-- <thorntail.version>2.6.0.Final</thorntail.version> -->
+		<!-- <thorntail.detect.mode>never</thorntail.detect.mode> -->
 	</properties>
 	
 	<build>
@@ -130,9 +134,95 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>${postgresql.version}</version>
-			<scope>runtime</scope>
+			<!-- <scope>runtime</scope> -->
 		</dependency>
 
 	</dependencies>
+	
+	<profiles>
+	
+		<profile>
+			<id>thorntail</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>io.thorntail</groupId>
+						<artifactId>thorntail-maven-plugin</artifactId>
+						<version>${version.thorntail}</version>
+						<!-- <configuration>
+							<properties>
+								<queryon.connpropprefix>queryon.pgsqlds</queryon.connpropprefix>
+							</properties>
+						</configuration> -->
+						<executions>
+							<execution>
+								<id>package</id>
+								<goals>
+									<goal>package</goal>
+								</goals>
+								<configuration>
+									<fractions>
+										<fraction>undertow</fraction>
+										<!-- <fraction>logstash</fraction> -->
+										<!-- <fraction>!logging</fraction> -->
+									</fractions>
+								</configuration>
+							</execution>
+							<execution>
+								<id>run</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<properties>
+										<queryon.connpropprefix>queryon.pgsqlds</queryon.connpropprefix>
+										<!-- <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack> -->
+									</properties>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>io.thorntail</groupId>
+						<artifactId>bom</artifactId>
+						<version>${version.thorntail}</version>
+						<type>pom</type>
+						<scope>import</scope>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+			<dependencies>
+				<!--
+				https://docs.thorntail.io/2.6.0.Final/#_undertow
+				undertow depends on logging:
+				- https://issues.redhat.com/browse/THORN-1168
+				https://docs.thorntail.io/2.6.0.Final/#_logstash ??
+				-->
+				<dependency>
+					<groupId>io.thorntail</groupId>
+					<artifactId>undertow</artifactId>
+					<version>${version.thorntail}</version>
+				</dependency>
+				<dependency>
+					<groupId>io.thorntail</groupId>
+					<artifactId>datasources</artifactId>
+					<version>${version.thorntail}</version>
+				</dependency>
+				
+				<!-- <dependency>
+					<groupId>io.thorntail.servers</groupId>
+					<artifactId>[full|web|microprofile]</artifactId>
+					<artifactId>web</artifactId>
+					<version>${version.thorntail}</version>
+				</dependency> -->
+				
+			</dependencies>
+		</profile>
+		
+	</profiles>
 
 </project>

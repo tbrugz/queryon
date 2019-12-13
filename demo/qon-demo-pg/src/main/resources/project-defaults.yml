@@ -1,0 +1,24 @@
+
+thorntail:
+  datasources:
+    data-sources:
+      pgDS:
+        driver-name: pg
+        connection-url: jdbc:postgresql://${env.PGHOST}:${env.PGPORT}/${env.PGDATABASE}
+        user-name: ${env.PGUSER}
+        password: ${env.PGPASSWORD}
+    jdbc-drivers:
+      pg:
+        # see: https://access.redhat.com/documentation/en-us/jboss_enterprise_application_platform/6/html/administration_and_configuration_guide/example_postgresql_xa_datasource
+        driver-module-name: org.postgresql
+        driver-xa-datasource-class-name: org.postgresql.xa.PGXADataSource
+  logging:
+    # see: https://docs.wildfly.org/17/Admin_Guide.html#Logging
+    pattern-formatters:
+      COLOR_PATTERN:
+        pattern: "%d{yyyy-MM-dd HH:mm:ss,SSS} %K{level}%-5p %K{white}(%-20.20t) %K{cyan}[%-30.30c{1.}] %K{clear}%s%e%n"
+    loggers:
+      org.jboss.as.connector.subsystems.datasources:
+        level: DEBUG
+      tbrugz.sqldump.util.ConnectionUtil:
+        level: DEBUG

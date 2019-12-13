@@ -1,0 +1,3 @@
+
+Qon-Demo-PG is now ready on port ${thorntail.http.port} ;)
+
