@@ -81,3 +81,26 @@ docker run -p 8080:8080 -it \
 ```
 
 * open in browser: <http://localhost:8080/qon-demo-pg/>
+
+
+building and running with docker & thorntail (hollow)
+------
+
+* build image using Thorntail (after building with maven using hollow jar)
+
+`docker build -f thorntail.Dockerfile --tag=qon-pg-thorntail .`
+
+* run container
+
+```
+docker run -p 8080:8080 -it \
+	-e PGHOST=<hostname> \
+	-e PGUSER=<username> \
+	-e PGPASSWORD=<password> \
+	-e PGDATABASE=<database> \
+	-e PGPORT=<port> \
+	-e QON_SCHEMAS="<schema names (comma separated)>" \
+	qon-pg-thorntail
+```
+
+* open in browser: <http://localhost:8080/>

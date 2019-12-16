@@ -36,4 +36,12 @@ building and running docker image
 
 `docker run -p 8080:8080 -it qon-static`
 
+OR (mapping h2 database from host as a volume)
+
+```
+docker run -p 8080:8080 -it \
+	-v "$HOME/.queryon/qon-demo-static.mv.db":/opt/jboss/.queryon/qon-demo-static.mv.db \
+	qon-static
+```
+
 * open in browser: <http://localhost:8080/qon-demo-static/>
