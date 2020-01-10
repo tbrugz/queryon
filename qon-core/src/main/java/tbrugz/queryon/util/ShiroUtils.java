@@ -1,5 +1,6 @@
 package tbrugz.queryon.util;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
+import org.keycloak.KeycloakPrincipal;
 
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.shiro.AuthorizationInfoInformer;
@@ -89,6 +91,24 @@ public class ShiroUtils {
 				authenticated = true;
 				if(log.isTraceEnabled()) {
 					log.trace("getSubject: Subject will be built from request.getRemoteUser() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
+				}
+			}
+			else if(request!=null && request.getUserPrincipal()!=null) {
+				Principal principal = request.getUserPrincipal();
+				//log.debug("getUserPrincipal: getName() = "+principal.getName()+" / principal = "+principal+" / class = "+principal.getClass().getName());
+				
+				if(principal instanceof KeycloakPrincipal) {
+					// https://stackoverflow.com/questions/31864062/fetch-logged-in-username-in-a-webapp-secured-with-keycloak
+					KeycloakPrincipal<?> kp = (KeycloakPrincipal<?>) principal;
+					userIdentity = kp.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
+				}
+				else {
+					userIdentity = principal.getName();
+				}
+				realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
+				authenticated = true;
+				if(log.isTraceEnabled()) {
+					log.trace("getSubject: Subject will be built from request.getUserPrincipal() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
 				}
 			}
 			else {

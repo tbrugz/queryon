@@ -300,6 +300,11 @@
       <version>2.2.2</version>
       <scope>compile</scope>
     </dependency> -->
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+      <version>${keycloak.version}</version>
+    </dependency>
     
     <!-- TODO: change to https://github.com/vsch/flexmark-java (java8+) (see https://github.com/sirthias/pegdown) -->
     <dependency>

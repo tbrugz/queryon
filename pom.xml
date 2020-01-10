@@ -38,6 +38,7 @@
     <jaxb.version>2.3.1</jaxb.version>
     <jaxb.impl.version>2.3.0.1</jaxb.impl.version>
     <jaxws.version>2.3.2</jaxws.version>
+    <keycloak.version>4.8.3.Final</keycloak.version>
 
     <h2.version>1.4.197</h2.version>
     <postgresql.version>42.2.0.jre7</postgresql.version>
