@@ -27,7 +27,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 
-import tbrugz.queryon.auth.IdentityProvider;
+import tbrugz.queryon.auth.provider.IdentityProvider;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.shiro.AuthorizationInfoInformer;
 import tbrugz.sqldump.util.Utils;
@@ -128,18 +128,19 @@ public class ShiroUtils {
 			}
 			else if(request!=null) {
 				for(IdentityProvider ip: identityProviders) {
-					ip.setRequest(request);
+					ip.setInfo(request, prop);
 					if(ip.isAuthenticated()) {
 						authenticated = true;
 						userIdentity = ip.getIdentity();
-						realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
-						log.info("getSubject: Subject authenticated with provider '"+ip.getClass().getName()+"' [userIdentity="+userIdentity+"; realmName="+realmName+"]");
+						realmName = ip.getRealm();
+						//realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
+						log.debug("getSubject: Subject authenticated with provider '"+ip.getClass().getName()+"' [userIdentity="+userIdentity+"; realmName="+realmName+"]");
 						break;
 					}
 				}
-				if(log.isTraceEnabled()) {
+				/*if(log.isTraceEnabled()) {
 					log.trace("getSubject: Subject will be built from request.getUserPrincipal() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
-				}
+				}*/
 			}
 			
 			if(userIdentity == null) {

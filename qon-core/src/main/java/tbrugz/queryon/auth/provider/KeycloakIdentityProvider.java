@@ -1,6 +1,7 @@
-package tbrugz.queryon.auth;
+package tbrugz.queryon.auth.provider;
 
 import java.security.Principal;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,7 +16,7 @@ public class KeycloakIdentityProvider implements IdentityProvider {
 	HttpServletRequest request;
 	
 	@Override
-	public void setRequest(HttpServletRequest request) {
+	public void setInfo(HttpServletRequest request, Properties prop) {
 		this.request = request;
 	}
 	
@@ -45,6 +46,11 @@ public class KeycloakIdentityProvider implements IdentityProvider {
 			}*/
 		}
 		return null;
+	}
+	
+	@Override
+	public String getRealm() {
+		return "KeycloakRealm";
 	}
 
 }
