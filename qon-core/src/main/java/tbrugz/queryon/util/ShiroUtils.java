@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,14 +36,9 @@ public class ShiroUtils {
 	
 	static final String PROP_AUTH_IDENTITY_PROVIDERS = "queryon.auth.identity-providers";
 	
-	static final String PROP_AUTH_HTTPREALM = "queryon.auth.http-realm";
-
-	static final String PROP_AUTH_USERNAME_PATTERN = "queryon.auth.http-username-pattern";
-	
 	static final String PROP_AUTH_ANONUSER = "queryon.auth.anon-username";
 	static final String PROP_AUTH_ANONREALM = "queryon.auth.anon-realm";
 	
-	static final String DEFAULT_AUTH_HTTPREALM = "httpRealm";
 	static final String DEFAULT_AUTH_ANONUSER = "anonymous";
 	static final String DEFAULT_AUTH_ANONREALM = "anonRealm";
 	
@@ -86,6 +79,7 @@ public class ShiroUtils {
 	
 	public static Subject getSubject(Properties prop, HttpServletRequest request) {
 		Subject currentUser = null;
+		
 		try {
 			currentUser = SecurityUtils.getSubject();
 		}
@@ -100,33 +94,7 @@ public class ShiroUtils {
 			String realmName = null;
 			boolean authenticated = false;
 			
-			if(request!=null && request.getRemoteUser()!=null) {
-				userIdentity = request.getRemoteUser();
-				String usernamePattern = prop.getProperty(PROP_AUTH_USERNAME_PATTERN);
-				if(usernamePattern!=null) {
-					Matcher m = Pattern.compile(usernamePattern).matcher(String.valueOf(userIdentity));
-					if(m.find()) {
-						try {
-							userIdentity = m.group(1);
-						}
-						catch(IllegalStateException e) {
-							log.warn("getSubject: Exception: "+e+" [pattern: "+usernamePattern+"]");
-						}
-						catch(IndexOutOfBoundsException e) {
-							log.warn("getSubject: Exception: "+e+" [pattern: "+usernamePattern+"]");
-						}
-					}
-					/*else {
-						log.debug("userIdentity ["+userIdentity+"] does not match http pattern [pattern: "+usernamePattern+"]");
-					}*/
-				}
-				realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
-				authenticated = true;
-				if(log.isTraceEnabled()) {
-					log.trace("getSubject: Subject will be built from request.getRemoteUser() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
-				}
-			}
-			else if(request!=null) {
+			if(request!=null) {
 				for(IdentityProvider ip: identityProviders) {
 					ip.setInfo(request, prop);
 					if(ip.isAuthenticated()) {
