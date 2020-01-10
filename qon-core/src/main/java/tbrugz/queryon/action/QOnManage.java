@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -83,16 +84,26 @@ public class QOnManage {
 
 		// remove Table & Column remarks diff
 		int removed = 0;
-		for(TableDiff td: diff.getTableDiffs()) {
-			if(td.getChangeType().equals(ChangeType.REMARKS)) {
-				diff.getTableDiffs().remove(td);
-				removed++;
+		{
+			Iterator<TableDiff> it = diff.getTableDiffs().iterator();
+			while(it.hasNext()) {
+				TableDiff td = it.next();
+				if(td.getChangeType().equals(ChangeType.REMARKS)) {
+					//diff.getTableDiffs().remove(td);
+					it.remove();
+					removed++;
+				}
 			}
 		}
-		for(ColumnDiff cd: diff.getColumnDiffs()) {
-			if(cd.getChangeType().equals(ChangeType.REMARKS)) {
-				diff.getColumnDiffs().remove(cd);
-				removed++;
+		{
+			Iterator<ColumnDiff> it = diff.getColumnDiffs().iterator();
+			while(it.hasNext()) {
+				ColumnDiff cd = it.next();
+				if(cd.getChangeType().equals(ChangeType.REMARKS)) {
+					//diff.getColumnDiffs().remove(cd);
+					it.remove();
+					removed++;
+				}
 			}
 		}
 		log.info("diff: removed "+removed+" diffs");
