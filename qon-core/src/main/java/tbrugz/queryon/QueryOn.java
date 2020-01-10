@@ -504,6 +504,8 @@ public class QueryOn extends HttpServlet {
 		maxLimit = Utils.getPropInt(prop, QueryOn.PROP_MAX_LIMIT, RequestSpec.DEFAULT_LIMIT);
 		
 		SQLUtils.setProperties(prop);
+		
+		ShiroUtils.init(prop);
 	}
 	
 	boolean grabModel(Map<String, SchemaModel> models, String id) {

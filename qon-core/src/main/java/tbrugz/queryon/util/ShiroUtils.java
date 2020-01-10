@@ -1,10 +1,11 @@
 package tbrugz.queryon.util;
 
-import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -25,14 +26,17 @@ import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
-import org.keycloak.KeycloakPrincipal;
 
+import tbrugz.queryon.auth.IdentityProvider;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.shiro.AuthorizationInfoInformer;
+import tbrugz.sqldump.util.Utils;
 
 public class ShiroUtils {
 
 	static final Log log = LogFactory.getLog(ShiroUtils.class);
+	
+	static final String PROP_AUTH_IDENTITY_PROVIDERS = "queryon.auth.identity-providers";
 	
 	static final String PROP_AUTH_HTTPREALM = "queryon.auth.http-realm";
 
@@ -45,8 +49,36 @@ public class ShiroUtils {
 	static final String DEFAULT_AUTH_ANONUSER = "anonymous";
 	static final String DEFAULT_AUTH_ANONREALM = "anonRealm";
 	
+	static final List<IdentityProvider> identityProviders = new ArrayList<IdentityProvider>();
+	
 	// user for (unit) test (for now, at least)
 	static Map<Object, Set<String>> userRoles = new HashMap<Object, Set<String>>();
+	
+	public static void init(Properties prop) {
+		List<String> providers = Utils.getStringListFromProp(prop, PROP_AUTH_IDENTITY_PROVIDERS, ",");
+		if(providers!=null) {
+			for(String s: providers) {
+				try {
+					//Class<?> c = Utils.getClassWithinPackages(s);
+					Class<?> c = Class.forName(s);
+					IdentityProvider ip = (IdentityProvider) Utils.getClassInstance(c);
+					identityProviders.add(ip);
+					log.debug("Loaded identy provider '"+ip.getClass().getName()+"'");
+				}
+				catch(RuntimeException e) {
+					log.warn("Error loading identy provider '"+s+"': "+e);
+					log.debug("Error loading identy provider '"+s+"'", e);
+				}
+				catch (ClassNotFoundException e) {
+					log.warn("Error loading identy provider '"+s+"': "+e);
+					log.debug("Error loading identy provider '"+s+"'", e);
+				}
+			}
+		}
+		if(identityProviders.size()==0) {
+			log.debug("No identy provider loaded");
+		}
+	}
 	
 	static Subject getSubject(Properties prop) {
 		return getSubject(prop, null);
@@ -67,6 +99,7 @@ public class ShiroUtils {
 			Object userIdentity = null;
 			String realmName = null;
 			boolean authenticated = false;
+			
 			if(request!=null && request.getRemoteUser()!=null) {
 				userIdentity = request.getRemoteUser();
 				String usernamePattern = prop.getProperty(PROP_AUTH_USERNAME_PATTERN);
@@ -93,25 +126,23 @@ public class ShiroUtils {
 					log.trace("getSubject: Subject will be built from request.getRemoteUser() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
 				}
 			}
-			else if(request!=null && request.getUserPrincipal()!=null) {
-				Principal principal = request.getUserPrincipal();
-				//log.debug("getUserPrincipal: getName() = "+principal.getName()+" / principal = "+principal+" / class = "+principal.getClass().getName());
-				
-				if(principal instanceof KeycloakPrincipal) {
-					// https://stackoverflow.com/questions/31864062/fetch-logged-in-username-in-a-webapp-secured-with-keycloak
-					KeycloakPrincipal<?> kp = (KeycloakPrincipal<?>) principal;
-					userIdentity = kp.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
+			else if(request!=null) {
+				for(IdentityProvider ip: identityProviders) {
+					ip.setRequest(request);
+					if(ip.isAuthenticated()) {
+						authenticated = true;
+						userIdentity = ip.getIdentity();
+						realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
+						log.info("getSubject: Subject authenticated with provider '"+ip.getClass().getName()+"' [userIdentity="+userIdentity+"; realmName="+realmName+"]");
+						break;
+					}
 				}
-				else {
-					userIdentity = principal.getName();
-				}
-				realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
-				authenticated = true;
 				if(log.isTraceEnabled()) {
 					log.trace("getSubject: Subject will be built from request.getUserPrincipal() [userIdentity="+userIdentity+"; realmName="+realmName+"]");
 				}
 			}
-			else {
+			
+			if(userIdentity == null) {
 				// Adds principal do anonymous user so that we may check their perissions
 				// see: https://issues.apache.org/jira/browse/SHIRO-526
 				//XXX add property to set (or not) userIdentity/principal to anonymous user?
@@ -121,6 +152,7 @@ public class ShiroUtils {
 					log.trace("getSubject: Anonymous Subject will be built [userIdentity="+userIdentity+"; realmName="+realmName+"]");
 				}
 			}
+			
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
 			currentUser = new Subject.Builder().principals(principals).authenticated(authenticated).session(currentUser.getSession()).buildSubject();
 			if(log.isDebugEnabled()) {
