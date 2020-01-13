@@ -1,7 +1,7 @@
 
 body {
 	margin: 0 auto;
-	font: normal 10pt Tahoma, Geneva, sans-serif; 
+	font: normal 10pt Tahoma, Geneva, sans-serif;
 	background-color: #ddd;
 }
 table {
@@ -110,7 +110,11 @@ td[dimoncol] {
 }
 
 td[dimoncol][null] {
-	background-color: #888;
+	/* background-color: #888; */
+}
+
+td[dimoncol][null]:before {
+	content: "␀";
 }
 
 th[measure] {

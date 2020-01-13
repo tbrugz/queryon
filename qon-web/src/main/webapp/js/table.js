@@ -168,7 +168,7 @@ function mergeRowDimensions(content, trs) {
 			}
 		}
 	}
-	console.log("mergeDimensions: lastDimRow=",lastDimRow," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
+	console.log("mergeRowDimensions: lastDimRow=",lastDimRow," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
 }
 
 /*
@@ -192,17 +192,23 @@ function mergeColumnDimensions(content, trs) {
 	
 	// cols...
 	var lastDimCol = -1;
+	//console.log("mergeColumnDimensions: lastDimRow=",lastDimRow,"rows=",trs.length);
 	if(trs.length<=1) { return; }
+	
 	var headerRows = (lastDimRow > 0) ? lastDimRow : 1;
 	var dimRow = trs[headerRows];
-	var dimRowCols = dimRow.querySelectorAll("td");
+	var dimRowCols = dimRow.querySelectorAll("th,td");
 	for(var i=0;i<dimRowCols.length;i++) {
+		//console.log("dimRowCols[",i,"]: ",dimRowCols[i]);
+		/*if(dimRowCols[i].getAttribute("measuresrow")!=null) {
+			continue;
+		}*/
 		var dimoncol = dimRowCols[i].getAttribute("dimoncol");
 		//console.log(i, dimoncol);
 		if(dimoncol) { lastDimCol = i; }
 	}
 	if(lastDimCol<=0) { return; }
-	//console.log("mergeDimensions: lastDimCol=",lastDimCol,"rows=",trs.length,"cols=",dimRowCols.length,"headerRows=",headerRows);
+	//console.log("mergeColumnDimensions: lastDimCol=",lastDimCol,"rows=",trs.length,"cols=",dimRowCols.length,"headerRows=",headerRows);
 
 	var allTds = [];
 	for(var i=lastDimCol ; i>=0 ; i--) {
@@ -254,7 +260,7 @@ function mergeColumnDimensions(content, trs) {
 		}
 	}
 	
-	console.log("mergeDimensions: lastDimCol(+1)=",(lastDimCol+1)," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
+	console.log("mergeColumnDimensions: lastDimCol(+1)=",(lastDimCol+1)," ; #merges=",merges," ; elapsed=",((+new Date())-iniTime));
 }
 
 function getCssRuleBySelectorText(selector) {
