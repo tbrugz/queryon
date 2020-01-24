@@ -57,6 +57,7 @@
   
   <modules>
     <module>qon-core</module>
+    <module>qon-auth-keycloak</module>
     <module>qon-graphql</module>
     <module>qon-soap</module>
     <module>qon-web</module>
