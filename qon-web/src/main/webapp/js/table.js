@@ -276,8 +276,8 @@ function getCssRuleBySelectorText(selector) {
 			}
 		}
 		catch(error) {
-			// firefox may generate an error...
-			console.warn("Error @ getCssRuleBySelectorText[",i,"]: ",error);
+			// XXX firefox may generate an error...
+			//console.warn("Error @ getCssRuleBySelectorText[",i,"]: ",error);
 		}
 	}
 	return null;

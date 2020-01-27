@@ -128,7 +128,21 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	if(order) {
 		order = order.value;
 		if(order!=null && order!='') {
-			queryString += '&order='+order;
+			if(pivotQueryActive()) {
+				var orderCol = (order.substring(0,1) == "-") ? order.substring(1) : order;
+				var oncols = pivotGetColumns('oncols');
+				var onrows = pivotGetColumns('onrows');
+				if( !oncols.includes(orderCol) && !onrows.includes(orderCol) ) {
+					console.log("ignoring order [", order, "] as pivot query is not using this column");
+					// XXX what about multiple columns?
+				}
+				else {
+					queryString += '&order='+order;
+				}
+			}
+			else {
+				queryString += '&order='+order;
+			}
 		}
 	}
 	
@@ -156,16 +170,16 @@ function pivotQueryActive() {
 	return (pivots && pivots.style.display!='none');
 }
 
+function pivotGetColumns(containerId) {
+	var elems = byId(containerId).querySelectorAll('.col');
+	return getNodeListAttributeAsArray(elems, 'data-value');
+}
+
 function getPivotURL(url) {
 	if(pivotQueryActive()) {
-		var oncols = byId('oncols').querySelectorAll('.col');
-		var oncolsArr = getNodeListAttributeAsArray(oncols, 'data-value');
-		
-		var onrows = byId('onrows').querySelectorAll('.col');
-		var onrowsArr = getNodeListAttributeAsArray(onrows, 'data-value');
-
-		var measures = byId('measures').querySelectorAll('.col');
-		var measuresArr = getNodeListAttributeAsArray(measures, 'data-value');
+		var oncolsArr = pivotGetColumns('oncols');
+		var onrowsArr = pivotGetColumns('onrows');
+		var measuresArr = pivotGetColumns('measures');
 
 		var measuresAggs = byId('measures').querySelectorAll('.col select');
 		var measuresAggsArr = []
@@ -175,15 +189,15 @@ function getPivotURL(url) {
 		
 		//console.log(">> pivot: cols:", oncolsArr, "rows:", onrowsArr, "measures:", measuresArr, "measuresAggsArr:", measuresAggsArr);
 		
-		if(oncols.length>0 || onrows.length>0 || measures.length>0) {
+		if(oncolsArr.length>0 || onrowsArr.length>0 || measuresArr.length>0) {
 			var measuresStr = "";
 			for(var i=0;i<measuresArr.length;i++) {
 				measuresStr += "&agg:"+measuresArr[i]+"="+measuresAggsArr[i];
 			}
 			var newUrl = url +
-				(oncols.length>0?"&oncols="+oncolsArr.join():"") +
-				(onrows.length>0?"&onrows="+onrowsArr.join():"") +
-				(oncols.length>0 || onrows.length>0?"&groupbydims=true":"") +
+				(oncolsArr.length>0?"&oncols="+oncolsArr.join():"") +
+				(onrowsArr.length>0?"&onrows="+onrowsArr.join():"") +
+				(oncolsArr.length>0 || onrowsArr.length>0?"&groupbydims=true":"") +
 				measuresStr;
 			//console.log(">> pivot: newUrl:", newUrl);
 			return newUrl;
@@ -582,7 +596,7 @@ function getValuesFromColumn(containerId, columnName) {
 	var cols = getColumnNames(containerId);
 	var colPos = cols.indexOf(columnName);
 	if(colPos==-1) {
-		console.log("column "+columnName+" not found");
+		console.log("column", columnName, "not found");
 		return [];
 	}
 	
@@ -595,10 +609,10 @@ function getValuesFromColumn(containerId, columnName) {
 	
 	for(var i=0;i<rows.length;i++) {
 		var elem = rows[i];
-		/*if(!elem.children[colPos]) {
-			console.log("column "+columnName)
+		if(!elem.children[colPos]) {
+			//console.log("column ", columnName, "[", colPos, "] not found");
 			continue;
-		}*/
+		}
 		if(elem.children[colPos].tagName!="TD") continue;
 		
 		var value = elem.children[colPos].innerHTML;
