@@ -867,6 +867,9 @@
 		////history.replaceState(null, null, hash);
 		var state = id+getParameters();
 		var foo = urlAddFilterOrderOffset(null);
+		if(pivotQueryActive()) {
+			foo = getPivotURL(foo);
+		}
 		if(foo || modelId) { state += '|'+foo; }
 		if(modelId) { state += "|"+modelId; }
 		
@@ -908,6 +911,33 @@
 		if(offsetVal) {
 			document.getElementById('offset').value = offsetVal;
 		}
+		//pivot
+		var oncols = getParameterByName('oncols', qs);
+		var onrows = getParameterByName('onrows', qs);
+		var aggs = getParameterNamesStartWith('agg:', qs);
+		//console.log('updateSelectedQueryState: oncols: ', oncols, '; onrows: ', onrows, '; aggs: ', aggs);
+		if(oncols) {
+			var cols = oncols.split(',');
+			for(var i=0;i<cols.length;i++) {
+				pivotSimpleAddColumn(cols[i], null, 'oncols');
+			}
+		}
+		if(onrows) {
+			var rows = onrows.split(',');
+			for(var i=0;i<rows.length;i++) {
+				pivotSimpleAddColumn(rows[i], null, 'onrows');
+			}
+		}
+		for(var i=0;i<aggs.length;i++) {
+			var key = aggs[i].substring(4);
+			var value = getParameterByName(aggs[i], qs);
+			//console.log('updateSelectedQueryState: measure: aggs[i]: ', aggs[i], '; key: ', key, '; value: ', value);
+			pivotSimpleAddColumn(key, value, 'measures');
+		}
+		if(oncols || onrows || aggs.length > 0) {
+			togglePivotDialog();
+		}
+		
 		//console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
 		updateState();
 	}
@@ -1037,19 +1067,45 @@
 	}
 	
 	function dropHandler(event) {
-		var col = document.createElement('span');
 		var data = event.dataTransfer.getData(internalDNDType);
 		var origColParentId = event.dataTransfer.getData('text/parent-id');
 		var origColId = event.dataTransfer.getData('text/this-id');
 		var origColAgg = event.dataTransfer.getData('text/this-agg');
 		var origCol = null;
-		
 		if(!origColId) {
 			origColId = data + "_" + (++dndSequence);
 		}
 		else {
 			origCol = byId(origColId);
 		}
+		var dragto = event.target;
+		for(var i=0;i<5;i++) {
+			if(!dragto.classList.contains("ondim")) { dragto = dragto.parentElement; }
+		}
+		//if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
+		if(dragto==null) {
+			console.log("dragto is null!", event.target);
+			return;
+		}
+		//console.log('dropHandler origColId=', origColId, "data=", data, "origColParentId=", origColParentId, "origColAgg=", origColAgg, "dragto=", dragto); //, "event=", event);
+		
+		pivotDropColumn(data, origColParentId, origColId, origColAgg, origCol, dragto, event);
+		updateState();
+	}
+
+	function pivotSimpleAddColumn(columnName, originalAgg, dragtoId) {
+		var data = columnName;
+		var origColParentId = 'unusedcols';
+		var origColId = null;
+		var origColAgg = originalAgg;
+		var origCol = null;
+		var dragto = byId(dragtoId);
+		
+		pivotDropColumn(data, origColParentId, origColId, origColAgg, origCol, dragto, event);
+	}
+	
+	function pivotDropColumn(data, origColParentId, origColId, origColAgg, origCol, dragto, event) {
+		var col = document.createElement('span');
 		col.classList.add("col");
 		col.setAttribute("draggable", "true");
 		col.setAttribute("data-value", data);
@@ -1069,15 +1125,6 @@
 			}
 		}
 		//console.log('dropHandler2', origCol, col);
-		var dragto = event.target;
-		for(var i=0;i<5;i++) {
-			if(!dragto.classList.contains("ondim")) { dragto = dragto.parentElement; }
-		}
-		//if(dragto.classList.contains("col")) { dragto = dragto.parentElement; }
-		if(dragto==null) {
-			console.log("dragto is null!", event.target);
-			return;
-		}
 		
 		if(!pivotAllColsAreStatic || colContainer.id!='unusedcols') {
 			var removed = colContainer.removeChild(origCol);
@@ -1101,7 +1148,7 @@
 			for(var i=0;i<dragto.children.length;i++) {
 				var el = dragto.children[i];
 				var rect = el.getBoundingClientRect();
-				if(event.clientX < rect.left + (rect.width/2)) {
+				if(event && event.clientX < rect.left + (rect.width/2)) {
 					//console.log("before", el, event.clientX, rect.left);
 					el.parentNode.insertBefore(col, el);
 					inserted = true;
@@ -1332,7 +1379,7 @@
 		<button type="submit" value="" onclick="addFilterDialog();" title="add filter">
 			+<i class="fa fa-filter"></i>
 		</button>
-		<button id="btn-pivot-toggle" type="submit" value="" onclick="togglePivotDialog();" title="pivot query">
+		<button id="btn-pivot-toggle" type="submit" value="" onclick="togglePivotDialog();updateState();" title="pivot query">
 			<i class="fa fa-cubes"></i>
 		</button>
 		<!-- TODOne limit/offset or page/pagesize -->
