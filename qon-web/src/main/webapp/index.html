@@ -1185,6 +1185,32 @@
 		makeHrefs();
 	}
 	
+	function pivotSwitchDims() {
+		var oncols = byId('oncols');
+		var onrows = byId('onrows');
+		var colnodes = oncols.querySelectorAll('.col');
+		var rownodes = onrows.querySelectorAll('.col');
+		
+		// remove elements
+		while (oncols.firstChild) {
+			oncols.removeChild(oncols.firstChild);
+		}
+		while (onrows.firstChild) {
+			onrows.removeChild(onrows.firstChild);
+		}
+		
+		// add columns
+		for(var i=0;i<colnodes.length;i++) {
+			onrows.appendChild(colnodes[i]);
+		}
+		for(var i=0;i<rownodes.length;i++) {
+			oncols.appendChild(rownodes[i]);
+		}
+
+		makeHrefs();
+		updateState();
+	}
+	
 	window.onresize = updateUI;
 	
 	</script>
@@ -1324,6 +1350,11 @@
 		background-color: #444444; /* #555555; #3f5098; #525e93; */
 	}
 	
+	#pivottools {
+		float: right;
+		margin: 3px;
+	}
+	
 	.ondim {
 		min-width: 40em;
 		min-height: 1.4em;
@@ -1409,6 +1440,11 @@
 	</span>
 	
 	<div id="pivots" style="display: none" ondragstart="dragStartHandler(event)">
+		<div id="pivottools">
+			<button id="btn-pivot-switch" class="btn-animate-click" onclick="pivotSwitchDims();" title="switch col & row dims">
+				<i class="fa fa-exchange"></i>
+			</button>
+		</div>
 		<div class="pivotcols"><span class="dimlabel" id="unusedcolsLabel">All (unused) cols:</span> <div class="ondim" id="unusedcols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
 		<div class="pivotcols"><span class="dimlabel">Columns:</span> <button value="">+ col</button> <div class="ondim" id="oncols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
 		<div class="pivotcols"><span class="dimlabel">Rows:</span> <button value="">+ row</button> <div class="ondim" id="onrows" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>

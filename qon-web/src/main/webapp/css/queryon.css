@@ -299,6 +299,11 @@ input[type=button] {
 	cursor: pointer;
 }
 
+.btn-animate-click:active {
+	/* background-color: #578251; */
+	background-color: #999999;
+}
+
 option.unavaiable {
 	color: #bbb;
 }
