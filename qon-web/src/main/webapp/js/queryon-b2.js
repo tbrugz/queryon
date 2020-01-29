@@ -93,19 +93,33 @@ function updateSelectedQueryStateParameters() {
 			for(var i = 0;i<mSelect.length;i++) {
 				if(mSelect.options[i].value==modelId) {
 					found = true;
-					//console.log("model found: modelId == ", modelId);
-					mSelect.options[i].selected = true;
-					doLoadQueries(false, function() {
+					//console.log("model found: modelId ==", modelId, ", mSelect.value=", mSelect.value, ", relname =", relname, ", bigParts =", bigParts);
+					if(modelId != mSelect.value) {
+						console.log("modelId [", modelId, "] != mSelect.value [", mSelect.value, "], will load relations (again)");
+						mSelect.options[i].selected = true;
+						doLoadQueries(false, function() {
+							updateSelectedQueryStateParametersCallback(relname, parts);
+							console.log("recursion hazzard! modelId=", modelId);
+							updateSelectedQueryState(); // XXX: recursion hazzard!
+						});
+					}
+					else {
 						updateSelectedQueryStateParametersCallback(relname, parts);
 						return bigParts;
-					});
+					}
 				}
 			}
+			
 			if(!found) {
-				console.log("model not found? modelId == ", modelId);
+				console.log("model not found? modelId ==", modelId);
 			}
+			else {
+				//console.log("model found? modelId ==", modelId);
+			}
+			return null;
 		}
 		else {
+			//console.log("model null, bigParts =", bigParts);
 			updateSelectedQueryStateParametersCallback(relname, parts);
 			return bigParts;
 		}

@@ -879,7 +879,10 @@
 	
 	function updateSelectedQueryState() {
 		var bigParts = updateSelectedQueryStateParameters();
-		if(!bigParts) { return; }
+		if(!bigParts) {
+			//console.log("updateSelectedQueryState: no bigParts", bigParts);
+			return;
+		}
 		var qs = bigParts[1];
 		//filters...
 		//var filters = getParameterNamesStartWith('f[in|nin|lk|nlk|gt|ge|lt|le]:', qs);
@@ -1100,7 +1103,7 @@
 		var origColAgg = originalAgg;
 		var origCol = null;
 		var dragto = byId(dragtoId);
-		
+		//console.log("pivotSimpleAddColumn: columnName=", columnName, ", dragtoId=", dragtoId);
 		pivotDropColumn(data, origColParentId, origColId, origColAgg, origCol, dragto, event);
 	}
 	
@@ -1156,7 +1159,10 @@
 				}
 			}
 			if(!inserted) {
-				//console.log("NOT before", event.clientX);
+				if(event) {
+					//console.log("NOT before", event.clientX);
+				}
+				//console.log("appendChild: dragto=", dragto, ", col=", col);
 				dragto.appendChild(col);
 			}
 		}
