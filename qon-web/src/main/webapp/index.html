@@ -1099,7 +1099,7 @@
 	function pivotSimpleAddColumn(columnName, originalAgg, dragtoId) {
 		var data = columnName;
 		var origColParentId = 'unusedcols';
-		var origColId = null;
+		var origColId = columnName + "_" + (++dndSequence);
 		var origColAgg = originalAgg;
 		var origCol = null;
 		var dragto = byId(dragtoId);
