@@ -25,6 +25,7 @@
 	<script src="js/model-status.js"></script>
 	<script src="js/auth.js"></script>
 	<script src="js/table.js"></script>
+	<script src="js/table-drill.js"></script>
 	<script src="js/settings.js"></script>
 	<script src="js/ui.js"></script>
 	<script src="js/xtra.js"></script>
@@ -167,7 +168,7 @@
 		}
 	}
 	
-	onModelChanged = function(updateFragment) {
+	function onModelChanged(updateFragment) {
 		//console.log("onModelChanged - updateFragment == ", updateFragment);
 		doLoadQueries();
 		loadModelStatusContentCallback();
@@ -938,7 +939,11 @@
 			pivotSimpleAddColumn(key, value, 'measures');
 		}
 		if(oncols || onrows || aggs.length > 0) {
-			togglePivotDialog();
+			//togglePivotDialog();
+			showPivotDialog(true);
+		}
+		else {
+			showPivotDialog(false);
 		}
 		
 		//console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
@@ -970,6 +975,32 @@
 		//console.log("getDownloadHrefs...", exts, ret);
 		
 		return ret;
+	}
+
+	function showPivotDialog(bool) {
+		var btn = byId('btn-pivot-toggle');
+		var pivots = byId('pivots');
+		//var isOn = btn.classList.contains("on");
+		if(! bool) {
+			btn.classList.remove("on");
+			pivots.style.display='none';
+		}
+		else {
+			btn.classList.add("on");
+			pivots.style.display='block';
+			updatePivotCols();
+		}
+		
+		var allColsLabel = byId('unusedcolsLabel');
+		if(pivotAllColsAreStatic) {
+			allColsLabel.innerHTML = "All cols:";
+		}
+		else {
+			allColsLabel.innerHTML = "All (unused) cols:";
+		}
+		
+		//makeHrefs();
+		//updateUI();
 	}
 	
 	function togglePivotDialog() {
@@ -1217,6 +1248,117 @@
 		updateState();
 	}
 	
+	function pivotToggleDrillthrough() {
+		//cursor: crosshair
+		var table = byId('content');
+		invertColors('btn-pivot-drillthrough');
+		if(table.style.cursor == "crosshair") {
+			table.style.cursor = "auto";
+			
+			//byId('btn-pivot-drillthrough').classList.remove("on");
+			return;
+		}
+		//byId('btn-pivot-drillthrough').classList.add("on");
+		table.style.cursor = "crosshair";
+		// XXX change btn style
+	}
+	
+	function pivotClearUI() {
+		var oncols = byId('oncols');
+		var onrows = byId('onrows');
+		var measures = byId('measures');
+		
+		// remove elements
+		while (oncols.firstChild) {
+			oncols.removeChild(oncols.firstChild);
+		}
+		while (onrows.firstChild) {
+			onrows.removeChild(onrows.firstChild);
+		}
+		while (measures.firstChild) {
+			measures.removeChild(measures.firstChild);
+		}
+	}
+	
+	function makeDrillHash(dimVals) {
+		var hash = window.location.hash;
+		var bigparts = hash.split("|");
+		var params = bigparts[1].split("&");
+		var dimKeys = Object.keys(dimVals);
+		var newparams = [];
+		for(var i=0;i<params.length;i++) {
+			if(params[i].startsWith("onrows=") || params[i].startsWith("oncols=") || params[i].startsWith("groupbydims=") || params[i].startsWith("agg:")) {
+			}
+			else {
+				newparams.push(params[i]);
+			}
+		}
+		for(var i=0;i<dimKeys.length;i++) {
+			newparams.push("fin:" + dimKeys[i] + "=" + encodeURIComponent(dimVals[dimKeys[i]]) )
+		}
+		
+		bigparts[1] = newparams.join("&");
+		return bigparts.join("|");
+	}
+	
+	function clickOnTable(event) {
+		//console.log("clickOnTable event=", event);
+		//console.log("clickOnTable target=", event.target);
+		var content = byId('content');
+		if(content.style.cursor != "crosshair") {
+			return;
+		}
+		var table = content.querySelector('table tbody');
+		
+		var cell = event.target;
+		// element.tagName
+		if(cell.tagName != 'TD') {
+			var colname = cell.parentNode.getAttribute("colname");
+			console.log("...clickOnTable cell=", cell, "tag=", cell.tagName, ", not a TD, parentNode.colname = ", colname);
+			return;
+		}
+		if(cell.getAttribute("dimoncol") != null) {
+			// XXX get colname from table header...
+			console.log("...clickOnTable cell=", cell, "dimoncol=", cell.getAttribute("dimoncol"), ", not a data cell");
+			return;
+		}
+		if(content.style.cursor != "crosshair") {
+			console.log("...clickOnTable [not active] cell=", cell, "tag=", cell.tagName);
+			return;
+		}
+		//console.log("clickOnTable cell=", cell, "tag=", cell.tagName, "col.index=", getColumnIndex(cell), "row.index=", getRowIndex(cell));
+		var colDimVals = getColDimValues(table, getColumnIndex(cell));
+		var rowDimVals = getRowDimValues(table, getRowIndex(cell));
+		//console.log("... cOT getColDimValues=", colDimVals);
+		//console.log("... cOT getRowDimValues=", rowDimVals);
+		//console.log("... cOT rowIndex=", getRowIndex(cell), "getRowDimValues=", getRowDimValues(table, getRowIndex(cell)));
+		var dimVals = Object.assign({}, colDimVals, rowDimVals);
+		//console.log("dimVals=", dimVals);
+		
+		// make URL & history.pushState() & "applyState"
+		var newhash = makeDrillHash(dimVals);
+		//console.log("newhash=", newhash);
+		togglePivotDialog();
+		//updateState();
+		//pivotClearUI(); // ?
+		history.pushState(null, null, newhash);
+		updateSelectedQueryState();
+		doRun('objects', 'content', 'messages', function(request) {
+			doRunCallback(request);
+			pivotToggleDrillthrough();
+		});
+	}
+	
+	function onPopState(event) {
+		//console.log("location=", document.location, "; state=", JSON.stringify(event.state), "; event=", event);
+		console.log("onPopState: hash=", document.location.hash);
+		pivotClearUI();
+		updateSelectedQueryState();
+		doRun('objects', 'content', 'messages', doRunCallback);
+	}
+	
+	window.onpopstate = onPopState;
+	
 	window.onresize = updateUI;
 	
 	</script>
@@ -1361,6 +1503,16 @@
 		margin: 3px;
 	}
 	
+	#pivottools button {
+		min-width: 30px;
+	}
+	
+	#pivottools button.on {
+		background-color: #578251;/* #578251; #eaa845; #ddab60; #f90; */
+		/* background-color: #767676; */
+		color: #ddd;
+	}
+	
 	.ondim {
 		min-width: 40em;
 		min-height: 1.4em;
@@ -1450,6 +1602,9 @@
 			<button id="btn-pivot-switch" class="btn-animate-click" onclick="pivotSwitchDims();" title="switch col & row dims">
 				<i class="fa fa-exchange"></i>
 			</button>
+			<button id="btn-pivot-drillthrough" class="invertiblecolors" onclick="pivotToggleDrillthrough();" title="toggle drillthrough">
+				<i class="fa fa-bolt"></i> <!-- fa-arrow-down? fa-bolt? -->
+			</button>
 		</div>
 		<div class="pivotcols"><span class="dimlabel" id="unusedcolsLabel">All (unused) cols:</span> <div class="ondim" id="unusedcols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
 		<div class="pivotcols"><span class="dimlabel">Columns:</span> <button value="">+ col</button> <div class="ondim" id="oncols" ondragenter="dragEnterHandler(event)" ondragover="dragOverHandler(event)" ondrop="dropHandler(event)">&nbsp;</div> </div>
@@ -1480,6 +1635,10 @@
 
 <div id="status-container" class="status">
 </div>
+
+<script>
+	byId("content").addEventListener("click", clickOnTable);
+</script>
 
 </body>
 </html>
