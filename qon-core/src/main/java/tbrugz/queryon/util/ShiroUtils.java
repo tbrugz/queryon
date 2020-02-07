@@ -52,19 +52,27 @@ public class ShiroUtils {
 		if(providers!=null) {
 			for(String s: providers) {
 				try {
-					//Class<?> c = Utils.getClassWithinPackages(s);
 					Class<?> c = Class.forName(s);
-					IdentityProvider ip = (IdentityProvider) Utils.getClassInstance(c);
+					IdentityProvider ip = (IdentityProvider) c.newInstance();
 					identityProviders.add(ip);
-					log.debug("Loaded identy provider '"+ip.getClass().getName()+"'");
+					log.debug("Loaded identity provider '"+ip.getClass().getName()+"'");
 				}
+				//XXX add multicatch (java7)
 				catch(RuntimeException e) {
-					log.warn("Error loading identy provider '"+s+"': "+e);
-					log.debug("Error loading identy provider '"+s+"'", e);
+					log.warn("Error loading identity provider '"+s+"': "+e);
+					log.debug("Error loading identity provider '"+s+"'", e);
 				}
 				catch (ClassNotFoundException e) {
-					log.warn("Error loading identy provider '"+s+"': "+e);
-					log.debug("Error loading identy provider '"+s+"'", e);
+					log.warn("Error loading identity provider '"+s+"': "+e);
+					log.debug("Error loading identity provider '"+s+"'", e);
+				}
+				catch (InstantiationException e) {
+					log.warn("Error loading identity provider '"+s+"': "+e);
+					log.debug("Error loading identity provider '"+s+"'", e);
+				}
+				catch (IllegalAccessException e) {
+					log.warn("Error loading identity provider '"+s+"': "+e);
+					log.debug("Error loading identity provider '"+s+"'", e);
 				}
 			}
 		}
