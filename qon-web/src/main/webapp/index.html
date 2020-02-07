@@ -1326,6 +1326,7 @@
 			console.log("...clickOnTable [not active] cell=", cell, "tag=", cell.tagName);
 			return;
 		}
+		/*
 		//console.log("clickOnTable cell=", cell, "tag=", cell.tagName, "col.index=", getColumnIndex(cell), "row.index=", getRowIndex(cell));
 		var colDimVals = getColDimValues(table, getColumnIndex(cell));
 		var rowDimVals = getRowDimValues(table, getRowIndex(cell));
@@ -1333,6 +1334,8 @@
 		//console.log("... cOT getRowDimValues=", rowDimVals);
 		//console.log("... cOT rowIndex=", getRowIndex(cell), "getRowDimValues=", getRowDimValues(table, getRowIndex(cell)));
 		var dimVals = Object.assign({}, colDimVals, rowDimVals);
+		*/
+		var dimVals = getTableDimValues(table, cell);
 		//console.log("dimVals=", dimVals);
 		
 		// make URL & history.pushState() & "applyState"

@@ -38,7 +38,7 @@ function getRowIndex(cell) {
 	return idx;
 }
 
-function getColDimValues(table, col) {
+function getColDimValues(table, colN) {
 	var ret = {};
 	for(var i=0;i<table.children.length;i++) {
 		var row = table.children[i];
@@ -54,7 +54,7 @@ function getColDimValues(table, col) {
 				else { width = parseInt(width); }
 				idx += width;
 				//console.log("idx", idx);
-				if(col <= idx) {
+				if(colN <= idx) {
 					ret[dim] = cell.innerText;
 					break;
 				}
@@ -136,4 +136,12 @@ function getRowDimValues(table, rowN) {
 	
 	//console.log("keys=", keys, "keysValues=", keysValues, "rowN=", rowN, "ret=", ret);
 	return ret;
+}
+
+function getTableDimValues(table, cell) {
+	var colDimVals = getColDimValues(table, getColumnIndex(cell));
+	var rowDimVals = getRowDimValues(table, getRowIndex(cell));
+	//console.log("... cOT getColDimValues=", colDimVals);
+	//console.log("... cOT getRowDimValues=", rowDimVals);
+	return Object.assign({}, colDimVals, rowDimVals);
 }
