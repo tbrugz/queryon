@@ -76,7 +76,7 @@ public class QOnManage {
 		SchemaDiffer differ = new SchemaDiffer();
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
 		ColumnDiff.updateFeatures(feat);
-		log.info("feats: "+feat);
+		log.debug("feats: "+feat);
 		
 		differ.setTypesForDiff("TABLE");
 		SchemaDiff diff = differ.diffSchemas(dbModel, model);
@@ -89,7 +89,10 @@ public class QOnManage {
 			while(it.hasNext()) {
 				TableDiff td = it.next();
 				if(td.getChangeType().equals(ChangeType.REMARKS)) {
-					//diff.getTableDiffs().remove(td);
+					it.remove();
+					removed++;
+				}
+				if(td.getChangeType().equals(ChangeType.DROP)) {
 					it.remove();
 					removed++;
 				}
@@ -100,7 +103,10 @@ public class QOnManage {
 			while(it.hasNext()) {
 				ColumnDiff cd = it.next();
 				if(cd.getChangeType().equals(ChangeType.REMARKS)) {
-					//diff.getColumnDiffs().remove(cd);
+					it.remove();
+					removed++;
+				}
+				if(cd.getChangeType().equals(ChangeType.DROP)) {
 					it.remove();
 					removed++;
 				}

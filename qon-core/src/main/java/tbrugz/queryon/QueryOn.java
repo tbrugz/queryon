@@ -137,7 +137,12 @@ public class QueryOn extends HttpServlet {
 		// not actions but special (global) permissions:
 		INSERT_ANY,
 		UPDATE_ANY,
-		DELETE_ANY
+		DELETE_ANY,
+		;
+		
+		public boolean isModelRequired() {
+			return !this.equals(MANAGE);
+		}
 	}
 	
 	// 'status objects' (SO)
@@ -747,9 +752,6 @@ public class QueryOn extends HttpServlet {
 			//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 			
 			SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.getModelId());
-			if(model==null) {
-				throw new InternalServerException("null model [modelId="+reqspec.getModelId()+"]");
-			}
 			
 			final String otype;
 			final ActionType atype; //XXX: add ActionType to RequestSpec
@@ -774,6 +776,10 @@ public class QueryOn extends HttpServlet {
 					dbobj = null;
 				}
 				else {
+					if(model==null) {
+						throw new InternalServerException("null model [modelId="+reqspec.getModelId()+"]");
+					}
+					
 					dbobj = SchemaModelUtils.getDBIdentifiableBySchemaAndName(model, reqspec);
 					if(dbobj==null) {
 						throw new NotFoundException("object not found: "+reqspec.object);
@@ -787,7 +793,11 @@ public class QueryOn extends HttpServlet {
 					}
 				}
 			}
-		
+			
+			if(atype.isModelRequired() && model==null) {
+				throw new InternalServerException("null model [modelId="+reqspec.getModelId()+"]");
+			}
+			
 			//log.info("atype: "+atype+" ; otype: "+otype);
 			Subject currentUser = ShiroUtils.getSubject(prop, req);
 			Connection conn = null;
@@ -1241,11 +1251,13 @@ public class QueryOn extends HttpServlet {
 			if(log.isDebugEnabled()) {
 				String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
 				log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
+			//}
+			//if(log.isDebugEnabled()) {
+				int originalColCount = rs.getMetaData().getColumnCount();
+				log.debug("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
+						"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
+						"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
 			}
-			int originalColCount = rs.getMetaData().getColumnCount();
-			log.info("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
-					"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
-					"flags: "+pivotFlags);//+" ; nonPivotKeysCount: "+prs.getNonPivotKeysCount());
 			if(sql.applyedLimit!=null && prs.getOriginalRowCount()==sql.applyedLimit) {
 				String message = "Pivot Query data limited to "+prs.getOriginalRowCount()+" rows";
 				resp.addHeader(ResponseSpec.HEADER_WARNING, message);
@@ -2442,6 +2454,9 @@ public class QueryOn extends HttpServlet {
 		 * for each table, grab table's metadata from database & compare
 		 */
 		if(QOnManage.ACTION_DIFF.equals(action)) {
+			if(model==null) {
+				throw new InternalServerException("null model [modelId="+reqspec.getModelId()+"]");
+			}
 			Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 			QOnManage qm = new QOnManage();
 			try {
