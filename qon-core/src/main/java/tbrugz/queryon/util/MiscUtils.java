@@ -8,11 +8,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class MiscUtils {
 
+	/*
+	public static boolean endsWithAny(String value, Collection<String> coll) {
+		for(String s: coll) {
+			if(value.endsWith(s)) { return true; }
+		}
+		return false;
+	}
+	*/
+
+	static final Pattern PATTERN_MULTISLASH = Pattern.compile("\\/+", Pattern.CASE_INSENSITIVE);
+	
 	public static boolean containsIgnoreCase(Collection<String> coll, String value) {
 		if(coll.contains(value) || coll.contains(value.toUpperCase()) || coll.contains(value.toLowerCase())) {
 			return true;
@@ -165,6 +177,10 @@ public class MiscUtils {
 			if(s.charAt(i)==c) { count++; }
 		}
 		return count;
+	}
+	
+	public static String removeMultiSlash(String s) {
+		return PATTERN_MULTISLASH.matcher(s).replaceAll("/");
 	}
 	
 }

@@ -291,7 +291,6 @@ public class QueryOn extends HttpServlet {
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
 	protected ServletContext servletContext = null;
-	protected String servletUrlContext = "q";
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -446,7 +445,11 @@ public class QueryOn extends HttpServlet {
 			}
 			else {
 				String defaultModel = null; // XXX: use DEFAULT_MODELID? 
-				grabModel(models, defaultModel);
+				boolean grabbed = grabModel(models, defaultModel);
+				if(!grabbed) {
+					String modelWarningsKey = defaultModel+"."+ATTR_INIT_ERROR;
+					context.setAttribute(modelWarningsKey, "Error grabbing model '"+defaultModel+"'");
+				}
 				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [single-model]");
 			}
@@ -2765,7 +2768,7 @@ public class QueryOn extends HttpServlet {
 			WebSyntax ws = (WebSyntax) ds;
 			ws.setLimit(limit);
 			ws.setOffset(reqspec.offset);
-			ws.setBaseHref(getBaseHref(reqspec));
+			ws.setBaseHref(getBaseHref(reqspec.request));
 		}
 		
 		resp.setContentType(ds.getMimeType());
@@ -3084,12 +3087,11 @@ public class QueryOn extends HttpServlet {
 		return false;
 	}
 	
-	protected String getBaseHref(RequestSpec reqspec) {
-		return reqspec.getRequestFullContext() + "/" + servletUrlContext + "/"; // + (schemaName!=null?schemaName+".":"") + queryName;
-	}
-
 	protected String getBaseHref(HttpServletRequest req) {
-		return WebUtils.getRequestFullContext(req) + "/" + servletUrlContext + "/";
+		String sPath = req.getServletPath();
+		return WebUtils.getRequestFullContext(req) +
+				(sPath.startsWith("/") ? "" : "/") +
+				sPath + "/";
 	}
 	
 	public void checkPermission(Subject currentUser, String otype, ActionType atype, String objectName) {

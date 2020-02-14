@@ -49,6 +49,7 @@ import tbrugz.queryon.auth.UserInfo;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -107,7 +108,6 @@ public class ODataServlet extends BaseApiServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(ODataServlet.class);
 	
-	static final String DEFAULT_ODATA_CONTEXT = "odata";
 	static final String ODATA_VERSION = "4.0";
 	
 	static final String odataNS = "OData.QueryOn";
@@ -117,9 +117,6 @@ public class ODataServlet extends BaseApiServlet {
 	
 	static final String[] singletonQueries = { QUERY_CURRENTUSER };
 	static final Class<?>[] singletonQueryBeans = { UserInfo.class };
-	
-	//static String baseQonUrl = "/q";
-	//static String baseODataUrl = "/odata";
 	
 	/*@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -159,7 +156,7 @@ public class ODataServlet extends BaseApiServlet {
 		//prop.putAll((Properties) context.getAttribute(ATTR_PROP));
 		//dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
 		//servletContext = context;
-		servletUrlContext = DEFAULT_ODATA_CONTEXT;
+		
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);
 		//initFromProperties();
 	}
@@ -176,12 +173,11 @@ public class ODataServlet extends BaseApiServlet {
 				) {
 			//String redirUrl = "/relation";
 			//String redirUrl = "/object";
-			String redirUrl = "/";
+			String redirPath = "/";
 			if(req.getQueryString()!=null) {
-				redirUrl += "?"+req.getQueryString();
+				redirPath += "?"+req.getQueryString();
 			}
-			//redirUrl = baseODataUrl + redirUrl;
-			redirUrl = "/" + servletUrlContext + redirUrl;
+			String redirUrl = MiscUtils.removeMultiSlash("/" + req.getServletPath() + redirPath);
 			
 			log.info("forward: path="+req.getPathInfo()+" ; query="+req.getQueryString()+" ; redir="+redirUrl);
 			RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(redirUrl);
@@ -223,7 +219,7 @@ public class ODataServlet extends BaseApiServlet {
 				RequestSpec reqspec = getRequestSpec(req);
 				Object bean = getBeanValue(sq, reqspec, req);
 				//String context = getBaseHref(reqspec)+"$metadata#"+sq;
-				String context = ODataJsonSyntax.getContext(getBaseHref(reqspec), sq);
+				String context = ODataJsonSyntax.getContext(getBaseHref(req), sq);
 				DumpSyntaxInt ds = reqspec.getOutputSyntax();
 				
 				dumpBean(bean, context, ds.getMimeType(), (String) reqspec.getAttribute(RequestSpec.ATTR_CONTENTLOCATION), resp);
