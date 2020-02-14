@@ -53,6 +53,8 @@ public class WebDavServlet extends BaseApiServlet {
 	
 	public static final String HEADER_DEPTH = "Depth";
 	
+	public static final String DEPTH_INFINITY = "infinity";
+	
 	public static final int STATUS_MULTI_STATUS = 207;
 	
 	public final static int DEFAULT_LIMIT = 1000;
@@ -82,30 +84,50 @@ public class WebDavServlet extends BaseApiServlet {
 		return mids.size()>1;
 	}
 	
+	@Override
+	protected boolean isStatusObject(String name) {
+		return "".equals(name);
+	}
+	
 	protected void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, IntrospectionException, SQLException, NamingException {
 		WebDavRequest wdreq = getRequestSpec(req);
 		List<Object> urlParts = wdreq.getParams();
 		
 		//log.info("urlParts = "+urlParts+" / object = "+wdreq.getObject());
+		//propFindShowRequest(req);
 		
 		if(multiModel && wdreq.getModelId()==null) {
 			log.info("doPropFind: list modelIds");
 			List<WebDavResource> resl = getResourcesFromKeys(SchemaModelUtils.getModelIds(req.getServletContext()));
+			
+			resl.add(0, getBaseResourceCollection());
+			setBaseHrefToResourceList(resl, req.getRequestURI());
 			writePaths(resl, resp);
 			return;
 		}
 
+		//log.info("urlParts = "+urlParts+" / object = "+wdreq.getObject()+" / header[Authorization] = "+req.getHeader("Authorization"));
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), wdreq.getModelId());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		log.info("currentUser = "+currentUser.getPrincipal()+" ; isAuthenticated = "+currentUser.isAuthenticated());
 		
+		// http://www.webdav.org/specs/rfc4918.html#HEADER_Depth
+		int depth = getDepth(req);
+		if(depth>1) {
+			throw new BadRequestException("depth > 1 ["+depth+"] not implemented");
+		}
+		
 		if(wdreq.getObject().isEmpty()) {
 			log.info("doPropFind: list tables");
+			//XXX check for depth == 0
 			List<Relation> rels = getRelationsWithPk(model);
 			rels = filterRelationsByPermission(rels, currentUser, PrivilegeType.SELECT);
 			//List<WebDavResource> resl = getResources(rels, baseHref);
 			List<WebDavResource> resl = getResourcesFromRelations(rels);
+			
+			resl.add(0, getBaseResourceCollection());
+			setBaseHrefToResourceList(resl, req.getRequestURI());
 			writePaths(resl, resp);
 			return;
 		}
@@ -121,15 +143,10 @@ public class WebDavServlet extends BaseApiServlet {
 			throw new BadRequestException("object '"+wdreq.getObject()+"' has no unique key");
 		}
 		
-		// http://www.webdav.org/specs/rfc4918.html#HEADER_Depth
-		int depth = getDepth(req);
-		if(depth>1) {
-			throw new BadRequestException("depth > 1 ["+depth+"] not implemented");
-		}
-		
 		preprocessParameters(wdreq, r, pk);
 		
 		int positionalParametersNeeded = pk.getUniqueColumns().size();
+		String baseHref = req.getRequestURI();
 		log.info("doPropFind: object = "+wdreq.getObject()+" ; params = "+wdreq.getParams()+" ; column = "+wdreq.getColumn()+" / positionalParametersNeeded = "+positionalParametersNeeded);
 		
 		if(urlParts.size() <= positionalParametersNeeded + 1) {
@@ -143,6 +160,7 @@ public class WebDavServlet extends BaseApiServlet {
 					// list contents (1st key level)
 					//if(checkPermission(r, pk, urlParts.size(), currentUser, PrivilegeType.SELECT)) {
 					resl = doListResources(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
+					resl.add(0, getBaseResourceCollection());
 					//}
 				}
 				else if(urlParts.size() < positionalParametersNeeded) {
@@ -151,6 +169,7 @@ public class WebDavServlet extends BaseApiServlet {
 					// list contents
 					//if(checkPermission(r, pk, urlParts.size(), currentUser, PrivilegeType.SELECT)) {
 					resl = doListResources(r, pk, wdreq, currentUser, conn, model.getSqlDialect());
+					resl.add(0, getBaseResourceCollection());
 					//}
 				}
 				else if(urlParts.size() == positionalParametersNeeded) {
@@ -161,11 +180,14 @@ public class WebDavServlet extends BaseApiServlet {
 					if(wdreq.getColumn()!=null) {
 						//resl = getResourceFromRelationColumn(r, wdreq.getColumns().get(0));
 						resl = getResourcesFromRelationColumns(r, pk, wdreq.getColumn(), wdreq, conn);
+						// baseHref: remove after last slash
+						baseHref = baseHref.substring(0, baseHref.lastIndexOf("/")+1);
 					}
 					else {
 						// XXX do *not* return columns with NULL value? or with size = 0...
 						//resl = getResourcesFromRelationColumns(r);
 						resl = getResourcesFromRelationColumns(r, pk, null, wdreq, conn);
+						resl.add(0, getBaseResourceCollection());
 					}
 				}
 				else {
@@ -176,6 +198,9 @@ public class WebDavServlet extends BaseApiServlet {
 				ConnectionUtil.closeConnection(conn);
 			}
 			}
+			//log.info("getBaseHref= "+getBaseHref(req)+" ; getContextPath= "+req.getContextPath()+" ; getRequestURI="+req.getRequestURI()+" ; getServletPath="+req.getServletPath());
+			
+			setBaseHrefToResourceList(resl, baseHref);
 			writePaths(resl, resp);
 		}
 		else {
@@ -207,6 +232,14 @@ public class WebDavServlet extends BaseApiServlet {
 		String permission = r.getRelationType()+":"+privilege+":"+r.getSchemaName()+":"+r.getName()+":"+pk.getUniqueColumns().get(pkCol);
 		return subject.isPermitted(permission);
 	}*/
+	
+	@Override
+	protected void doStatus(SchemaModel model, String statusTypeStr, RequestSpec reqspec, Subject currentUser,
+			HttpServletResponse resp) throws IntrospectionException, SQLException, IOException, ServletException,
+			ClassNotFoundException, NamingException {
+		// do nothing on GET / HEAD for collecions... (?) at least do not throw 404 error
+		// http://www.webdav.org/specs/rfc4918.html#rfc.section.9.4
+	}
 
 	@Override
 	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
@@ -247,7 +280,7 @@ public class WebDavServlet extends BaseApiServlet {
 		if(depth==null) {
 			return 0; // assuming 0
 		}
-		if("infinity".equalsIgnoreCase(depth)) {
+		if(DEPTH_INFINITY.equalsIgnoreCase(depth)) {
 			//return Integer.MAX_VALUE;
 			throw new BadRequestException("infinity depth ["+depth+"] not implemented");
 		}
@@ -499,6 +532,26 @@ public class WebDavServlet extends BaseApiServlet {
 		}
 		return maxLimit;
 	}
+
+	WebDavResource getBaseResourceCollection() {
+		return getBaseResourceCollection("");
+	}
+	
+	private WebDavResource getBaseResourceCollection(String pathInfo) {
+		/*if(pathInfo==null || pathInfo.isEmpty()) {
+			pathInfo = ".";
+		}*/
+		if(pathInfo==null) {
+			pathInfo = "";
+		}
+		return new WebDavResource(pathInfo, true);
+	}
+	
+	void setBaseHrefToResourceList(List<WebDavResource> resl, String baseHref) {
+		for(WebDavResource res: resl) {
+			res.setBaseHref(baseHref);
+		}
+	}
 	
 	void writePaths(List<WebDavResource> resl, HttpServletResponse resp) throws IOException {
 		resp.setStatus(STATUS_MULTI_STATUS);
@@ -510,7 +563,12 @@ public class WebDavServlet extends BaseApiServlet {
 		if(resl!=null) {
 			for(WebDavResource r: resl) {
 				w.write(r.serialize("D"));
+				//System.out.print(r.serialize("D"));
 			}
+			log.debug("wrote "+resl.size()+" resources");
+		}
+		else {
+			log.debug("wrote _null_ resources");
 		}
 		w.write("</D:multistatus>\n");
 	}
@@ -554,6 +612,7 @@ public class WebDavServlet extends BaseApiServlet {
 				doPropFind(req, resp);
 			}
 			else {
+				log.debug(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod());
 				super.service(req, resp);
 			}
 		}
@@ -622,4 +681,10 @@ public class WebDavServlet extends BaseApiServlet {
 		return ResponseSpec.MIME_TYPE_TEXT_PLAIN;
 	}
 
+	/*
+	void propFindShowRequest(HttpServletRequest req) throws IOException {
+		String body = IOUtil.readFromReader(req.getReader()).trim();
+		log.info("depth = "+req.getHeader(HEADER_DEPTH)+" ; body:\n"+body);
+	}
+	*/
 }

@@ -38,7 +38,8 @@ public class WebDavWebTest {
 
 	//static String workDir = "work/test/";
 	//static String utf8 = "UTF-8";
-	static final String webdavUrl = qonUrl + "/webdav";
+	static final String webdavCtx = "/webdav";
+	static final String webdavUrl = qonUrl + webdavCtx;
 	
 	@BeforeClass
 	public static void setup() throws Exception {
@@ -111,29 +112,32 @@ public class WebDavWebTest {
 	public void sardineListRoot() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl);
-		assertListCount(resources, 4, true);
+		assertListCount(resources, 5, true);
 	}
 
 	@Test
 	public void sardineListEmp() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.EMP");
-		assertListCount(resources, 5, true);
+		assertListCount(resources, 6, true);
 	}
 
 	@Test
 	public void sardineListEmpId1_FullKey() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.EMP" + "/1");
-		assertListCount(resources, 5, false);
+		assertListCount(resources, 6, false);
 	}
 
 	@Test
 	public void sardineListEmpId1_Name() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME"); //john
+		/*for(DavResource r: resources) {
+			System.out.println(r.getPath());
+		}*/
 		assertListCount(resources, 1, false);
-		assertListIn(resources, Arrays.asList(new String[]{"NAME"}));
+		assertListIn(resources, Arrays.asList(new String[]{ webdavCtx + "/" + "PUBLIC.EMP" + "/1" + "/NAME" }));
 	}
 
 	@Test
@@ -167,30 +171,34 @@ public class WebDavWebTest {
 	public void sardineListPair() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PAIR");
-		assertListCount(resources, 2, true);
-		assertListIn(resources, Arrays.asList(new String[]{"1","4"}));
+		assertListCount(resources, 3, true);
+		assertListIn(resources, Arrays.asList(new String[]{webdavCtx + "/PAIR/", webdavCtx + "/PAIR" + "/1", webdavCtx + "/PAIR" + "/4"}));
 	}
 
 	@Test
 	public void sardineListPairId1() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.PAIR" + "/" + "1");
-		assertListCount(resources, 2, true);
+		assertListCount(resources, 3, true);
 	}
 
 	@Test
 	public void sardineListPairId4() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.PAIR" + "/" + "4");
-		assertListCount(resources, 1, true);
+		assertListCount(resources, 2, true);
 	}
 
 	@Test
 	public void sardineListPairId4and5_FullKey() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.PAIR" + "/" + "4" + "/" + "5");
-		assertListCount(resources, 3, false);
-		assertListIn(resources, Arrays.asList(new String[]{"ID1","ID2","REMARKS"}));
+		assertListCount(resources, 4, false);
+		assertListIn(resources, Arrays.asList(new String[]{
+				webdavCtx + "/PUBLIC.PAIR" + "/4" + "/5" + "/",
+				webdavCtx + "/PUBLIC.PAIR" + "/4" + "/5" + "/ID1",
+				webdavCtx + "/PUBLIC.PAIR" + "/4" + "/5" + "/ID2",
+				webdavCtx + "/PUBLIC.PAIR" + "/4" + "/5" + "/REMARKS"}));
 	}
 	
 	@Test
@@ -277,12 +285,12 @@ public class WebDavWebTest {
 		Sardine sardine = SardineFactory.begin();
 		
 		List<DavResource> resources = sardine.list(webdavUrl + "/" + "PUBLIC.EMP");
-		assertListCount(resources, 5, false);
+		assertListCount(resources, 6, false);
 		
 		sardine.delete(webdavUrl + "/" + "PUBLIC.EMP" + "/3");
 
 		List<DavResource> resources2 = sardine.list(webdavUrl + "/" + "PUBLIC.EMP");
-		assertListCount(resources2, 4, false);
+		assertListCount(resources2, 5, false);
 	}
 
 	@Test
