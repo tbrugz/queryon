@@ -424,10 +424,13 @@ public class WebDavServlet extends BaseApiServlet {
 		
 		//List<String> keys = new ArrayList<String>();
 		
+		//DavPrivilege davPrivilege = DavPrivilege.WRITE_CONTENT;
+		
 		if(rs.next()) {
 			for(int i=0;i<lengthCols.size();i++) {
 				String col = lengthCols.get(i);
 				int length = rs.getInt(col+"_LENGTH"); // if null, returns 0
+				//WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), length, Collections.singletonList(davPrivilege), false);
 				WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), length, false);
 				ret.add(res);
 			}
@@ -435,6 +438,7 @@ public class WebDavServlet extends BaseApiServlet {
 				String col = isNullCols.get(i);
 				Object isNullObj = rs.getObject(col+"_ISNULL");
 				boolean isNull = getBooleanFromObject(isNullObj);
+				//WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), isNull?0:1, Collections.singletonList(davPrivilege), false);
 				WebDavResource res = new WebDavResource(null, col, getContentType(typeMap.get(col)), isNull?0:1, false);
 				ret.add(res);
 			}
@@ -518,6 +522,7 @@ public class WebDavServlet extends BaseApiServlet {
 			while(rs.next()) {
 				keys.add(rs.getString(1));
 			}
+			//XXX if not all rows dumped (limited?), throw Exception...
 			return getResourcesFromKeys(keys);
 		}
 		catch(Exception e) {
@@ -562,8 +567,9 @@ public class WebDavServlet extends BaseApiServlet {
 				"<D:multistatus xmlns:D=\"DAV:\">\n");
 		if(resl!=null) {
 			for(WebDavResource r: resl) {
-				w.write(r.serialize("D"));
-				//System.out.print(r.serialize("D"));
+				String content = r.serialize("D");
+				w.write(content);
+				//System.out.print(content);
 			}
 			log.debug("wrote "+resl.size()+" resources");
 		}
@@ -599,6 +605,8 @@ public class WebDavServlet extends BaseApiServlet {
 		resp.addHeader("Allow", METHOD_PROPFIND);
 		//resp.addHeader("Allow", "MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, REPORT, ACL");
 		resp.setHeader("DAV", "1"); // basic compliance
+		//resp.setHeader("DAV", "1, access-control"); // basic compliance + access control (rfc3744)
+		//resp.setHeader("DAV", "1, 2, access-control"); // basic compliance + access control (rfc3744)
 		//resp.setHeader("DAV", "1, 2, 3"); // full compliance (locks included)
 	}
 	

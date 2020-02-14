@@ -2098,7 +2098,7 @@ public class QueryOn extends HttpServlet {
 			sql.addParameter(reqspec.updateValues.get(col), ctype);
 			colsCount++;
 		}
-		//log.debug("bindpars [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
+		//log.debug("bindpars [#"+sql.bindParameterValues.size()+"][#updateValues="+reqspec.updateValues.size()+"]: "+sql.bindParameterValues);
 		}
 		// blobs
 		{
@@ -2128,9 +2128,10 @@ public class QueryOn extends HttpServlet {
 				addPartParameter(reqspec, sql, ctype, col, colindex);
 				colsCount++;
 			}
+			//log.debug("bindpars [parts] [#"+sql.bindParameterValues.size()+"][#updatePartValues="+reqspec.updatePartValues.size()+"]: "+sql.bindParameterValues);
 		}
 
-		//log.debug("updateValues: "+reqspec.updateValues);
+		//log.debug("updateValues: "+reqspec.updateValues+" ; updatePartValues: "+reqspec.updatePartValues);
 
 		if("".equals(sb.toString())) {
 			throw new BadRequestException("[update] No valid columns");
