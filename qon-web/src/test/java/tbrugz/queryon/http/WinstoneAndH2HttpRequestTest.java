@@ -437,7 +437,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
-	public void testDelete_Emp_3rows() throws IOException, ParserConfigurationException, SAXException {
+	public void testDelete_Emp_rows() throws IOException, ParserConfigurationException, SAXException {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		//XXX: delete doesn't get parameters from querystring?
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&updatemax=5");
@@ -447,7 +447,7 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertEquals("Must be OK", 200, response2.getStatusLine().getStatusCode());
 		//XXX: response may change...
 		int rows = Integer.parseInt(content.split(" ")[0]);
-		Assert.assertEquals("Must have 3 rows deleted", 3, rows);
+		Assert.assertEquals("Must have 2 rows deleted", 2, rows);
 		httpDelete.releaseConnection();
 	}
 

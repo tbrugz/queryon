@@ -1,5 +1,5 @@
 
-drop schema if exists classicmodels;
+drop schema if exists classicmodels cascade;
 
 CREATE SCHEMA classicmodels;
 

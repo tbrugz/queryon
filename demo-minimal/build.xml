@@ -4,14 +4,16 @@
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
 	<property name="sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
+	
+	<property file="../demo/build.properties"/>
 
 	<artifact:dependencies pathId="sqlrun.deps">
-		<dependency groupId="commons-logging" artifactId="commons-logging" version="1.2" scope="runtime"/>
-		<dependency groupId="log4j" artifactId="log4j" version="1.2.17" scope="runtime"/>
-		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="0.9.16-SNAPSHOT" scope="runtime">
+		<dependency groupId="commons-logging" artifactId="commons-logging" version="${commons-logging.version}" scope="runtime"/>
+		<dependency groupId="log4j" artifactId="log4j" version="${log4j.version}" scope="runtime"/>
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="${sqldump.version}" scope="runtime">
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
-		<dependency groupId="com.h2database" artifactId="h2" version="1.4.197" scope="runtime"/>
+		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
 	</artifact:dependencies>
 
 	<path id="sqlrun.classpath">

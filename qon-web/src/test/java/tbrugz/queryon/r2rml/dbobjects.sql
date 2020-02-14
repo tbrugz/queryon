@@ -1,11 +1,11 @@
-drop table if exists "Addresses";
+drop table if exists "Addresses" cascade;
 CREATE TABLE "Addresses" (
 	"ID" INT, PRIMARY KEY("ID"), 
 	"city" CHAR(10), 
 	"state" CHAR(2)
 );
 
-drop table if exists "PeopleSimple";
+drop table if exists "PeopleSimple" cascade;
 CREATE TABLE "PeopleSimple" (
 	"ID" INT, PRIMARY KEY("ID"), 
 	"fname" CHAR(10), 
@@ -13,7 +13,7 @@ CREATE TABLE "PeopleSimple" (
 	FOREIGN KEY("addr") REFERENCES "Addresses"("ID")
 );
 
-drop table if exists "Department";
+drop table if exists "Department" cascade;
 CREATE TABLE "Department" (
 	"ID" INT, 
 	"name" CHAR(10), 
@@ -23,7 +23,7 @@ CREATE TABLE "Department" (
 	UNIQUE ("name", "city")
 );
 
-drop table if exists "People";
+drop table if exists "People" cascade;
 CREATE TABLE "People" (
 	"ID" INT, 
 	"fname" CHAR(10), 
@@ -37,7 +37,7 @@ CREATE TABLE "People" (
 
 ALTER TABLE "Department" ADD FOREIGN KEY("manager") REFERENCES "People"("ID");
 
-drop table if exists "Tweets";
+drop table if exists "Tweets" cascade;
 CREATE TABLE "Tweets" (
 	"tweeter" INT,
 	"when" TIMESTAMP,
@@ -45,7 +45,7 @@ CREATE TABLE "Tweets" (
 	FOREIGN KEY("tweeter") REFERENCES "People"("ID")
 );
 
-drop table if exists "Projects";
+drop table if exists "Projects" cascade;
 CREATE TABLE "Projects" (
 	"lead" INT,
 	FOREIGN KEY ("lead") REFERENCES "People"("ID"),
@@ -57,7 +57,7 @@ CREATE TABLE "Projects" (
 	FOREIGN KEY ("deptName", "deptCity") REFERENCES "Department"("name", "city")
 );
 
-drop table if exists "TaskAssignments";
+drop table if exists "TaskAssignments" cascade;
 CREATE TABLE "TaskAssignments" (
 	"worker" INT,
 	FOREIGN KEY ("worker") REFERENCES "People"("ID"),

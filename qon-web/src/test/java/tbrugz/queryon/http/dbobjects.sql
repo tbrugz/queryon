@@ -1,3 +1,5 @@
+drop table if exists EMP;
+
 drop table if exists DEPT;
 
 create table DEPT ( -- type=TABLE
@@ -6,8 +8,6 @@ create table DEPT ( -- type=TABLE
 	PARENT_ID INTEGER(10),
 	constraint DEPT_PK primary key (ID)
 );
-
-drop table if exists EMP;
 
 create table EMP ( -- type=TABLE
 	ID INTEGER(10) not null,

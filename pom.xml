@@ -40,7 +40,7 @@
     <jaxws.version>2.3.2</jaxws.version>
     <keycloak.version>4.8.3.Final</keycloak.version>
 
-    <h2.version>1.4.197</h2.version>
+    <h2.version>1.4.200</h2.version>
     <postgresql.version>42.2.0.jre7</postgresql.version>
     <mariadb.version>1.1.7</mariadb.version>
     <derby.version>10.10.2.0</derby.version>
