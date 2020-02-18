@@ -1209,8 +1209,12 @@ public class RequestSpec {
 		return null;
 	}
 
-	boolean isHeadMethod() {
+	public boolean isHeadMethod() {
 		return QueryOn.METHOD_HEAD.equals(httpMethod);
+	}
+
+	public boolean isGetMethod() {
+		return QueryOn.METHOD_GET.equals(httpMethod);
 	}
 	
 	/*public Map<String, String[]> getParameterMap() {
@@ -1248,6 +1252,10 @@ public class RequestSpec {
 
 	public String getModelId() {
 		return modelId;
+	}
+	
+	public String getMethod() {
+		return httpMethod;
 	}
 	
 	public int getOffset() {

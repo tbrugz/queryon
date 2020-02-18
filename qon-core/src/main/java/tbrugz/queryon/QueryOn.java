@@ -370,7 +370,7 @@ public class QueryOn extends HttpServlet {
 			String protocol = "http://"; //XXX https protocol??
 			//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
 			String path = protocol + InetAddress.getLocalHost().getHostName().toLowerCase();
-			contextPath = getServletContext().getContextPath();
+			contextPath = context.getContextPath();
 			String rdfBase = path +
 					((!path.endsWith("/") && (!contextPath.startsWith("/"))?"/":"")) +
 					contextPath;

@@ -29,6 +29,7 @@ import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.exception.MethodNotAllowedException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.util.DBUtil;
@@ -97,7 +98,7 @@ public class WebDavServlet extends BaseApiServlet {
 		//propFindShowRequest(req);
 		
 		if(multiModel && wdreq.getModelId()==null) {
-			log.info("doPropFind: list modelIds");
+			log.debug("doPropFind: list modelIds");
 			List<WebDavResource> resl = getResourcesFromKeys(SchemaModelUtils.getModelIds(req.getServletContext()));
 			
 			resl.add(0, getBaseResourceCollection());
@@ -110,7 +111,7 @@ public class WebDavServlet extends BaseApiServlet {
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), wdreq.getModelId());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
-		log.info("currentUser = "+currentUser.getPrincipal()+" ; isAuthenticated = "+currentUser.isAuthenticated());
+		log.debug("currentUser = "+currentUser.getPrincipal()+" ; isAuthenticated = "+currentUser.isAuthenticated());
 		
 		// http://www.webdav.org/specs/rfc4918.html#HEADER_Depth
 		int depth = getDepth(req);
@@ -119,7 +120,7 @@ public class WebDavServlet extends BaseApiServlet {
 		}
 		
 		if(wdreq.getObject().isEmpty()) {
-			log.info("doPropFind: list tables");
+			log.debug("doPropFind: list tables");
 			//XXX check for depth == 0
 			List<Relation> rels = getRelationsWithPk(model);
 			rels = filterRelationsByPermission(rels, currentUser, PrivilegeType.SELECT);
@@ -147,7 +148,7 @@ public class WebDavServlet extends BaseApiServlet {
 		
 		int positionalParametersNeeded = pk.getUniqueColumns().size();
 		String baseHref = req.getRequestURI();
-		log.info("doPropFind: object = "+wdreq.getObject()+" ; params = "+wdreq.getParams()+" ; column = "+wdreq.getColumn()+" / positionalParametersNeeded = "+positionalParametersNeeded);
+		log.debug("doPropFind: object = "+wdreq.getObject()+" ; params = "+wdreq.getParams()+" ; column = "+wdreq.getColumn()+" / positionalParametersNeeded = "+positionalParametersNeeded);
 		
 		if(urlParts.size() <= positionalParametersNeeded + 1) {
 			List<WebDavResource> resl = null;
@@ -239,6 +240,15 @@ public class WebDavServlet extends BaseApiServlet {
 			ClassNotFoundException, NamingException {
 		// do nothing on GET / HEAD for collecions... (?) at least do not throw 404 error
 		// http://www.webdav.org/specs/rfc4918.html#rfc.section.9.4
+		if(reqspec.isHeadMethod()) {
+			// nothing
+			return;
+		}
+		if(reqspec.isGetMethod()) {
+			// XXX list WebDavResources ?
+			return;
+		}
+		throw new MethodNotAllowedException("Method not allowed: "+reqspec.getMethod());
 	}
 
 	@Override
@@ -600,7 +610,7 @@ public class WebDavServlet extends BaseApiServlet {
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// http://www.webdav.org/specs/rfc4918.html#http.headers.for.distributed.authoring
 		// http://www.webdav.org/specs/rfc4918.html#dav.compliance.classes
-		log.info("doOptions: "+req.getPathInfo());
+		log.debug("doOptions: "+req.getPathInfo());
 		resp.addHeader("Allow", "OPTIONS, GET, HEAD, PATCH, POST, PUT, DELETE"); // TRACE ?
 		resp.addHeader("Allow", METHOD_PROPFIND);
 		//resp.addHeader("Allow", "MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, REPORT, ACL");
