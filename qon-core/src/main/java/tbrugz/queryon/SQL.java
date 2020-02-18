@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
@@ -478,7 +479,7 @@ public class SQL {
 				else {
 					String message = "column not found: '"+reqColumn+"' [relation: "+table.getQualifiedName()+"]";
 					log.warn(message);
-					throw new BadRequestException(message);
+					throw new NotFoundException(message);
 				}
 			}
 			if(sqlCols.size()>0) {
@@ -845,7 +846,7 @@ public class SQL {
 			else {
 				String message = "column not found: '"+reqColumn+"' [relation: "+relation.getQualifiedName()+"]";
 				log.warn(message);
-				throw new BadRequestException(message);
+				throw new NotFoundException(message);
 			}
 		}
 		String columnsWithAliases = getColumnsStr(sqlCols, reqspec.aliases);
