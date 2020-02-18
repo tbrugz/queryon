@@ -22,10 +22,10 @@ import org.apache.cxf.tools.wsdlto.WSDLToJava;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -107,7 +107,7 @@ public class SoapWebTest {
 	}
 	
 	static InputStream httpGetContentStream(String url) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpGet httpReq = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpReq);
 		HttpEntity entity1 = response1.getEntity();
@@ -116,7 +116,7 @@ public class SoapWebTest {
 	}
 	
 	static String httpGetContent(String url) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpGet httpReq = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpReq);
 		String content = getContent(response1);
@@ -128,7 +128,7 @@ public class SoapWebTest {
 	}
 
 	static InputStream httpPostContentStream(String url, String body) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpPost httpReq = new HttpPost(url);
 		httpReq.setEntity(new StringEntity(body));
 		HttpResponse response1 = httpclient.execute(httpReq);

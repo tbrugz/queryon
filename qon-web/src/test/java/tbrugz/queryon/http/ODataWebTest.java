@@ -17,12 +17,12 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.core.ODataClientFactory;
@@ -93,7 +93,7 @@ public class ODataWebTest {
 	}
 	
 	public static String getContentFromUrl(String url) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
@@ -293,7 +293,7 @@ public class ODataWebTest {
 	
 	@Test
 	public void createEmp() throws Exception {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpPost httpPost = new HttpPost(odataUrl+"/EMP");
 		String json = "{\"ID\": 10, \"NAME\": \"Bill\", \"SUPERVISOR_ID\": 1, \"DEPARTMENT_ID\": 1, \"SALARY\": 4000}";
 		httpPost.setEntity(new StringEntity(json));
@@ -306,7 +306,7 @@ public class ODataWebTest {
 	
 	@Test
 	public void updateEmp() throws Exception {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpPatch httpPatch = new HttpPatch(odataUrl+"/EMP(5)");
 		String json = "{\"SALARY\": 2500}";
 		httpPatch.setEntity(new StringEntity(json));
@@ -330,7 +330,7 @@ public class ODataWebTest {
 
 	@Test
 	public void deleteEmp() throws Exception {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpDelete httpDel = new HttpDelete(odataUrl+"/EMP(3)");
 		
 		HttpResponse response1 = httpclient.execute(httpDel);

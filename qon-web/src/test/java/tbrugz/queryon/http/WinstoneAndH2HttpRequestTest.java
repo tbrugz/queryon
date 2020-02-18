@@ -53,8 +53,9 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -155,8 +156,13 @@ public class WinstoneAndH2HttpRequestTest {
 		return getContentFromUrl(url, 200);
 	}
 	
+	public static CloseableHttpClient getHttpClient() {
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		return httpclient;
+	}
+	
 	public static String getContentFromUrl(String url, int expectedStatus) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
@@ -189,7 +195,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//String s = (String) url.getContent();
 		//url.openConnection().
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -207,7 +213,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testGet02_404() throws IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/xyz");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -220,7 +226,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testGet_HTML_Tables() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -245,7 +251,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testGet_HTML_FKs() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/fk");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -269,7 +275,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	@Ignore("maybe later")
 	public void testPost_Emp_400() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/EMP?v:ID=11");
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
@@ -280,7 +286,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPost_Emp_400b() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/EMP");
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
@@ -291,7 +297,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testPost_Emp_Created() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/EMP?v:ID=11&v:NAME=sonya");
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
@@ -302,7 +308,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testPost_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/EMP?v:ID=1&v:NAME=sonya");
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
@@ -313,7 +319,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPost_Emp_KeyOnPath_Created() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/EMP/11?v:NAME=sonya");
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
@@ -328,7 +334,7 @@ public class WinstoneAndH2HttpRequestTest {
 	 */
 	@Test
 	public void testPatch_Emp_OK() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		//HttpGet httpPut = new HttpGet(baseUrl+"/EMP?v:NAME=newname&feq:ID=1&method=PATCH");
 		HttpPatch httpPut = new HttpPatch(baseUrl+"/EMP/1?v:NAME=newname");
 		//HttpPut httpPut = new HttpPut(baseUrl+"/EMP/1?v:NAME=newname&method=PATCH");
@@ -352,7 +358,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPatchEmpKeyVals() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPatch httpPut = new HttpPatch(baseUrl+"/EMP?k:ID=1&v:NAME=newname");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -364,7 +370,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPatchPairKeyVals() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPatch httpPut = new HttpPatch(baseUrl+"/PAIR?k:ID2=3&k:ID1=1&v:REMARKS=another+text");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -375,7 +381,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testPatch_Emp_Error() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpPut = new HttpGet(baseUrl+"/EMP/1?_method=PATCH");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -386,7 +392,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPatchEmpKeyVals_ByPath() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPatch httpPut = new HttpPatch(baseUrl+"/EMP/1?v:NAME=newname");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -401,7 +407,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPatchDeptForbidden() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPatch httpPut = new HttpPatch(baseUrl+"/DEPT?k:ID=1&v:PARENT_ID=2");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -412,7 +418,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testDelete_Emp_Ok() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 
 		HttpDelete httpGet = new HttpDelete(baseUrl+"/EMP/5"); // ?_method=DELETE
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -429,7 +435,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testDelete_Emp_404() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP/7");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		//System.out.println("content: "+getContent(response2));
@@ -439,7 +445,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testDelete_Emp_rows() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		//XXX: delete doesn't get parameters from querystring?
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/EMP?feq:DEPARTMENT_ID=2&updatemax=5");
 		HttpResponse response2 = httpclient.execute(httpDelete);
@@ -454,7 +460,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testGet_XML_Tables() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.xml");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -474,7 +480,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testGet_JSON_Tables() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.json");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -497,7 +503,7 @@ public class WinstoneAndH2HttpRequestTest {
 	@SuppressWarnings("unused")
 	@Test
 	public void testGet_JGSON_Tables_PrettyPrint() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.json");
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String jsonStr = getContent(response1);
@@ -516,7 +522,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testGet_CSV_Tables() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.csv");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -575,7 +581,7 @@ public class WinstoneAndH2HttpRequestTest {
 	Assert.assertEquals("Should have 2 (data) rows", 2, count);*/
 
 	static void basePostReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpGet = new HttpPost(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -595,13 +601,13 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	static HttpResponse getHttpResponse(String url) throws IOException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		return httpclient.execute(httpGet);
 	}
 	
 	static void baseReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -631,7 +637,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	static void baseReturnCodeTest(String url, int expectedStatusCode) throws IOException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -642,7 +648,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	static Document getXmlDocument(String url) throws IOException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -655,7 +661,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	static Document getPostXmlDocument(String url) throws IOException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpGet = new HttpPost(baseUrl+url);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -672,7 +678,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	static String httpGetContent(String url, int expectedStatus) throws IllegalStateException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet http = new HttpGet(baseUrl+url);
 		HttpResponse response = httpclient.execute(http);
 		Assert.assertEquals(expectedStatus, response.getStatusLine().getStatusCode());
@@ -684,7 +690,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	static String httpPostContent(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost http = new HttpPost(baseUrl+url);
 		http.setEntity(new StringEntity(content));
 		HttpResponse response = httpclient.execute(http);
@@ -695,14 +701,14 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	static HttpResponse httpPostContentGetResponse(String url, String content) throws IllegalStateException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost http = new HttpPost(baseUrl+url);
 		http.setEntity(new StringEntity(content));
 		return httpclient.execute(http);
 	}
 	
 	static String httpPatchContent(String url, String content, int expectedStatus) throws IllegalStateException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPatch http = new HttpPatch(baseUrl+url);
 		http.setEntity(new StringEntity(content));
 		HttpResponse response = httpclient.execute(http);
@@ -928,7 +934,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testProcessorJaxbSer() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(qonUrl+"/processor/JAXBSchemaXMLSerializer");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -943,7 +949,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testDelete_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpDelete httpDelete = new HttpDelete(baseUrl+"/DEPT/1");
 		HttpResponse response2 = httpclient.execute(httpDelete);
 		//System.out.println("content: "+getContent(response2));
@@ -953,7 +959,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testPost_Dept_Forbidden() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpPost = new HttpPost(baseUrl+"/DEPT?v:ID=3&v:NAME=Accounting&PARENT_ID=0");
 		
 		HttpResponse response1 = httpclient.execute(httpPost);
@@ -964,7 +970,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testPatchDeptOk() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPatch httpPut = new HttpPatch(baseUrl+"/DEPT/1?v:NAME=Accounting");
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -999,7 +1005,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testGetRowsetSer() throws IOException, ClassNotFoundException, SQLException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpPut = new HttpGet(baseUrl+"/EMP.rowset.ser?fin:SALARY=2000"); //2 rows
 		
 		HttpResponse response1 = httpclient.execute(httpPut);
@@ -1029,7 +1035,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "select emp.*, cast(salary as char) as salary_char from emp where id = 1";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpGet = new HttpPost(baseUrl+"/QueryAny.json?name=emp&sql="+sqlpar+"&table-as-data-element=true");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -1065,7 +1071,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "select emp.*, cast(salary as char) as salary_char from emp where id = 1";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost httpGet = new HttpPost(baseUrl+"/QueryAny.json?name=emp&sql="+sqlpar);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -1122,7 +1128,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testGetAliasesCountError() throws Exception {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/EMP.csv?aliases=C1,C2");
 		HttpResponse response = httpclient.execute(httpGet);
 		//System.out.println("content: "+getContent(response));
@@ -1143,7 +1149,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetQueryAliases() throws Exception {
 		String url = "/QUERY.EMP_Q1.csv?aliases=C1,C2";
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
 		HttpResponse response = httpclient.execute(httpGet);
 		//System.out.println("content: "+getContent(response));
@@ -1166,7 +1172,7 @@ public class WinstoneAndH2HttpRequestTest {
 	//--------------------------- QueryOnSchema Tests -------------------------------
 	
 	static int getReturnCodeQosInstant(String query) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(qonSchemaInstantBaseUrl+query);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -1175,7 +1181,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	static int getReturnCodeQoSchema(String query) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(qonSchemaBaseUrl+query);
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -1232,7 +1238,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testGetCountFromCsv() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/PUBLIC.EMP.csv?count=true&header=false");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -1246,7 +1252,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testGetCountDistinctFromCsv() throws IOException, ParserConfigurationException, SAXException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/PUBLIC.EMP.csv?count=true&header=false&distinct=true&fields=SUPERVISOR_ID");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
@@ -1593,8 +1599,8 @@ public class WinstoneAndH2HttpRequestTest {
 
 	static void servletLoginOk() throws ClientProtocolException, IOException {
 		try {
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpResponse resp = servletLogin(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
+			CloseableHttpClient httpclient = getHttpClient();
+			HttpResponse resp = servletLogin(httpclient, null, LOGIN_JDOE, PASSWORD_JDOE);
 			EntityUtils.consumeQuietly(resp.getEntity());
 		}
 		catch(Exception e) {
@@ -1604,10 +1610,10 @@ public class WinstoneAndH2HttpRequestTest {
 
 	static void servletLogoutOk() throws ClientProtocolException, IOException {
 		try {
-			HttpClient httpClient = new DefaultHttpClient();
+			CloseableHttpClient httpclient = getHttpClient();
 			HttpPost httpPost = new HttpPost(qonUrl+"/qauth/logout");
 			//setCookies(httpPost, null);
-			HttpResponse resp = httpClient.execute(httpPost);
+			HttpResponse resp = httpclient.execute(httpPost);
 			EntityUtils.consumeQuietly(resp.getEntity());
 		}
 		catch(Exception e) {
@@ -1618,13 +1624,13 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testLoginOk() throws Exception {
 		// https://stackoverflow.com/a/6273665/616413
-		HttpClient httpClient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		//CookieStore cookieStore = new BasicCookieStore();
 		//HttpContext httpContext = new BasicHttpContext();
 		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
 		{
-			HttpResponse response1 = jspLogin(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
+			HttpResponse response1 = jspLogin(httpclient, null, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			// https://stackoverflow.com/a/16211729/616413
 			EntityUtils.consumeQuietly(response1.getEntity());
@@ -1634,10 +1640,10 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testLoginErr() throws Exception {
-		HttpClient httpClient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 
 		{
-			HttpResponse response2 = jspLogin(httpClient, null, LOGIN_JDOE, "jdoez");
+			HttpResponse response2 = jspLogin(httpclient, null, LOGIN_JDOE, "jdoez");
 			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
@@ -1646,13 +1652,13 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testServletLoginOk() throws Exception {
 		// https://stackoverflow.com/a/6273665/616413
-		HttpClient httpClient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		//CookieStore cookieStore = new BasicCookieStore();
 		//HttpContext httpContext = new BasicHttpContext();
 		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
 		{
-			HttpResponse response1 = servletLogin(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
+			HttpResponse response1 = servletLogin(httpclient, null, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			// https://stackoverflow.com/a/16211729/616413
 			EntityUtils.consumeQuietly(response1.getEntity());
@@ -1662,9 +1668,9 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testServletJsonLoginOk() throws Exception {
-		HttpClient httpClient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 		{
-			HttpResponse response1 = servletLoginWithJson(httpClient, null, LOGIN_JDOE, PASSWORD_JDOE);
+			HttpResponse response1 = servletLoginWithJson(httpclient, null, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response1.getEntity());
 		}
@@ -1673,10 +1679,10 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testServletLoginErr() throws Exception {
-		HttpClient httpClient = new DefaultHttpClient();
+		CloseableHttpClient httpclient = getHttpClient();
 
 		{
-			HttpResponse response2 = servletLogin(httpClient, null, LOGIN_JDOE, "jdoez");
+			HttpResponse response2 = servletLogin(httpclient, null, LOGIN_JDOE, "jdoez");
 			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}

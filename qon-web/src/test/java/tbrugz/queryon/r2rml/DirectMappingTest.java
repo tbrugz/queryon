@@ -16,8 +16,8 @@ import org.apache.any23.writer.TripleHandler;
 import org.apache.any23.writer.TripleHandlerException;
 import org.apache.any23.writer.TurtleWriter;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -25,6 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import tbrugz.queryon.http.AbstractWebTest;
 import tbrugz.queryon.http.JettySetup;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 import tbrugz.sqldump.SQLDump;
@@ -87,7 +88,7 @@ public class DirectMappingTest {
 	@Test
 	//@Ignore("properties count is frequantly changinf")
 	public void testGet_Turtle_Tables_withAny23() throws IOException, ParserConfigurationException, SAXException, ExtractionException, TripleHandlerException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+"/table.ttl");
 		
 		HttpResponse response1 = httpclient.execute(httpGet);

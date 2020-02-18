@@ -17,9 +17,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.After;
@@ -85,7 +85,7 @@ public class GraphQlWebTest {
 	}
 	
 	public static String getContent(String query, String variables, String operationName) throws ClientProtocolException, IOException {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
 		HttpPost httpReq = new HttpPost(graphqlUrl);
 		List<String> qparts = new ArrayList<String>();
 		if(query!=null) {
