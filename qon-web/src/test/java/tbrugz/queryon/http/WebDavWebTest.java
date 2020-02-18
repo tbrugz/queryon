@@ -15,11 +15,16 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.github.sardine.DavResource;
@@ -85,11 +90,31 @@ public class WebDavWebTest {
 		String response = pfm.getResponseBodyAsString();
 		log.info("response = "+response);
 	}
+
+	static String httpHeadContent(String url) throws IllegalStateException, IOException {
+		return httpHeadContent(url, 200);
+	}
+	
+	static String httpHeadContent(String url, int expectedStatus) throws IllegalStateException, IOException {
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		HttpHead http = new HttpHead(url);
+		HttpResponse response = httpclient.execute(http);
+		Assert.assertEquals(expectedStatus, response.getStatusLine().getStatusCode());
+		return WinstoneAndH2HttpRequestTest.getContent(response);
+	}
+	
+	/*void callHead(String url) throws HttpException, IOException {
+		HttpClient client = new HttpClient();
+		int code = client.executeMethod(pfm);
+		log.info("code = "+code);
+		String response = pfm.getResponseBodyAsString();
+		log.info("response = "+response);
+	}*/
 	
 	void assertListCount(List<DavResource> resources, int expected, boolean allShouldBeCollection) {
 		int count = 0;
 		for (DavResource res : resources) {
-			log.info(res+" ; name="+res.getName()+" , path="+res.getPath()+" , status="+res.getStatusCode()+" , directory="+res.isDirectory()+" , contentType="+res.getContentType());
+			log.info(res+" ; name="+res.getName()+" , path="+res.getPath()+" , status="+res.getStatusCode()+" , directory="+res.isDirectory()+" , contentType="+res.getContentType()+", contentLength="+res.getContentLength());
 			if(allShouldBeCollection) {
 				Assert.assertTrue("path '"+res.getName()+"' should be directory", res.isDirectory());
 			}
@@ -100,7 +125,7 @@ public class WebDavWebTest {
 
 	void assertListIn(List<DavResource> resources, List<String> expectedValues) {
 		for (DavResource res : resources) {
-			log.info(res+" ; name="+res.getName()+" , path="+res.getPath()+" , status="+res.getStatusCode()+" , directory="+res.isDirectory()+" , contentType="+res.getContentType());
+			log.info(res+" ; name="+res.getName()+" , path="+res.getPath()+" , status="+res.getStatusCode()+" , directory="+res.isDirectory()+" , contentType="+res.getContentType()+", contentLength="+res.getContentLength());
 			if(!expectedValues.contains(res.getPath())) {
 				Assert.fail("list should not contain '"+res.getPath()+"' path");
 			}
@@ -114,7 +139,7 @@ public class WebDavWebTest {
 		List<DavResource> resources = sardine.list(webdavUrl);
 		assertListCount(resources, 5, true);
 	}
-
+	
 	@Test
 	public void sardineListEmp() throws IOException {
 		Sardine sardine = SardineFactory.begin();
@@ -153,6 +178,14 @@ public class WebDavWebTest {
 		}
 	}
 
+	@Test @Ignore
+	public void sardineLocalTest() throws IOException {
+		Sardine sardine = SardineFactory.begin();
+		List<DavResource> resources = sardine.list("http://localhost:8080/qon-demo-minimal/webdav");
+		assertListCount(resources, 4, true);
+	}
+
+	
 	@Test
 	public void sardineListEmpUnknownResource() throws IOException {
 		Sardine sardine = SardineFactory.begin();
@@ -252,7 +285,55 @@ public class WebDavWebTest {
 		//log.info("s == "+s);
 		Assert.assertEquals("john", s);
 	}
+	
+	@Test
+	public void httpHeadRoot() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl, 200);
+		httpHeadContent(webdavUrl + "/", 200);
+	}
+	
+	@Test
+	public void httpPostRoot() throws IllegalStateException, IOException {
+		WinstoneAndH2HttpRequestTest.httpPostContent(webdavUrl + "/", "", 404); // XXX method not allowed (405)?
+	}
+	
+	@Test
+	public void httpHeadObject() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMP", 200);
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMP/", 200);
+	}
+	
+	@Test
+	public void httpHeadObjectError() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMPZ", 404);
+	}
 
+	@Test
+	public void httpPostObject() throws IllegalStateException, IOException {
+		WinstoneAndH2HttpRequestTest.httpPostContent(webdavUrl + "/" + "PUBLIC.EMP/", "", 404); // XXX method not allowed (405)?
+	}
+	
+	@Test
+	public void httpHeadPkError() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMP" + "/1", 200);
+	}
+	
+	@Test
+	@Ignore("implementation lacking")
+	public void httpHeadPk() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMP" + "/555", 404);
+	}
+
+	@Test
+	public void httpHeadColumn() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NAME", 200);
+	}
+
+	@Test
+	public void httpHeadColumnError() throws IllegalStateException, IOException {
+		httpHeadContent(webdavUrl + "/" + "PUBLIC.EMP" + "/1" + "/NONAME", 404);
+	}
+	
 	@Test
 	public void sardinePutEmpId1_Name() throws IOException {
 		Sardine sardine = SardineFactory.begin();

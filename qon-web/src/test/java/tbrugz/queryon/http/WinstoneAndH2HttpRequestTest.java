@@ -146,6 +146,7 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	public static String getContent(HttpResponse response) throws IllegalStateException, IOException {
 		HttpEntity entity = response.getEntity();
+		if(entity==null) { return null; }
 		InputStream instream = entity.getContent();
 		return IOUtil.readFromReader(new InputStreamReader(instream));
 	}
