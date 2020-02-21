@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.exception.MethodNotAllowedException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.processor.AbstractUpdatePlugin;
 import tbrugz.queryon.util.DBUtil;
@@ -79,7 +81,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	}
 	
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// get path
 		String pathInfo = req.getPathInfo();
 		if(pathInfo==null) { throw new BadRequestException("URL (path-info) must not be null"); }
@@ -103,8 +105,9 @@ public class PagesServlet extends AbstractHttpServlet {
 		}
 		
 		// get and dump page
-		Connection conn = DBUtil.initDBConn(prop, modelId);
+		Connection conn = null;
 		try {
+			conn = DBUtil.initDBConn(prop, modelId);
 			getAndDumpPage(conn, relation, pathInfo, resp);
 		}
 		catch(NotFoundException e) {
@@ -115,9 +118,17 @@ public class PagesServlet extends AbstractHttpServlet {
 				throw e;
 			}
 		}
+		catch (Exception e) {
+			throw new InternalServerException("Exception in PagesServlet: "+e.getMessage(), e);
+		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
-		} 
+		}
+	}
+	
+	@Override
+	protected void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		throw new MethodNotAllowedException("Method not allowed: "+req.getMethod());
 	}
 	
 	/*String getId(Connection conn, String relation, String pathInfo) throws SQLException {

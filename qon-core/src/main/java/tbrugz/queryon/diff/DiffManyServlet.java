@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.naming.NamingException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
@@ -24,6 +25,7 @@ import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.QueryOn.ActionType;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -62,7 +64,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	public static final String SYNTAX_PATCH = "patch";
 
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<3) {
@@ -129,6 +131,9 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			setupDumpProperties(pp, schemas, types);
 			
 			dump(pp, syntax, resp);
+		}
+		catch (Exception e) {
+			throw new InternalServerException(e.getMessage(), e);
 		}
 		finally {
 			resp.getWriter().flush();

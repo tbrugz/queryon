@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +31,7 @@ import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -82,7 +84,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	//TODO: filters: use bind parameters
 	
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<2 || partz.size()>3) {
 			throw new BadRequestException("Malformed URL");
@@ -245,8 +247,18 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		catch(BadRequestException e) {
 			throw e;
 		}
+		// java7+: multicatch
 		catch(RuntimeException e) {
-			throw new BadRequestException(e.getMessage(), e);
+			throw new InternalServerException(e.getMessage(), e);
+		}
+		catch (SQLException e) {
+			throw new InternalServerException(e.getMessage(), e);
+		}
+		catch (ClassNotFoundException e) {
+			throw new InternalServerException(e.getMessage(), e);
+		}
+		catch (NamingException e) {
+			throw new InternalServerException(e.getMessage(), e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);

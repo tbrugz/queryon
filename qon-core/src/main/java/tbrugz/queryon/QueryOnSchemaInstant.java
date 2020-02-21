@@ -64,7 +64,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	}
 
 	@Override
-	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
+	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) {
 		Connection conn = null;
 		try {
 			conn = DBUtil.initDBConn(prop, modelId);
@@ -75,6 +75,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			lastDialect = DBMSResources.instance().detectDbId(conn.getMetaData());
 			//log.debug("lastDialect: "+getLastDialect());
 			return dbid;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);

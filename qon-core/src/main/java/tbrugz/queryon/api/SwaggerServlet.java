@@ -1,5 +1,6 @@
 package tbrugz.queryon.api;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -76,7 +78,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 	String defaultSyntax;
 
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		log.info("request: path="+req.getPathInfo()+" ; query="+req.getQueryString());
 		Gson gson = new Gson();
 

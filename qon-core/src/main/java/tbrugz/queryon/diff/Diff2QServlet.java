@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,6 +21,7 @@ import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -38,7 +40,7 @@ public class Diff2QServlet extends DataDiffServlet {
 	static final Log log = LogFactory.getLog(Diff2QServlet.class);
 
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<2 || partz.size()>3) {
 			throw new BadRequestException("Malformed URL");
@@ -84,6 +86,15 @@ public class Diff2QServlet extends DataDiffServlet {
 			
 			resp.setContentType(ds.getMimeType());
 			runDiff(connSource, connTarget, sql, obj, keyCols, modelIdSource, modelIdTarget, ds, dmlTypes, limit, resp.getWriter());
+		}
+		catch (ClassNotFoundException e) {
+			throw new InternalServerException(e.getMessage(), e);
+		}
+		catch (SQLException e) {
+			throw new InternalServerException(e.getMessage(), e);
+		}
+		catch (NamingException e) {
+			throw new InternalServerException(e.getMessage(), e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(connSource);

@@ -48,7 +48,7 @@ public class AuthServlet extends AbstractHttpServlet {
 	}
 	
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String pathInfo = req.getPathInfo();
 		if(pathInfo==null || pathInfo.length()<1) { throw new BadRequestException("URL (path-info) must not be null or empty"); }
 		

@@ -141,7 +141,7 @@ public class QueryOnSchema extends HttpServlet {
 		*/
 	}
 	
-	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) throws SQLException, ClassNotFoundException, NamingException {
+	public DBIdentifiable getObject(DBObjectType type, String schemaName, String objectName, SchemaModel model, Properties prop, String modelId) {
 		Collection<? extends DBIdentifiable> dbids = ModelUtils.getCollectionByType(model, type);
 		//System.out.println(">>>>>>> "+dbids+" >>>>> "+(schemaName!=null?schemaName+".":"")+objectName);
 		//DBObjectType type4Filter = type4filter(type);

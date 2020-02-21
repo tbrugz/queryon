@@ -20,28 +20,34 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		//throw new BadRequestException("Only POST allowed", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		doPost(req, resp);
+		doProcess(req, resp);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		doProcess(req, resp);
+	}
+	
+	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			doProcess(req, resp);
+			super.service(req, resp);
 		} catch(BadRequestException e) {
-			log.warn("BadRequestException ["+this.getClass().getSimpleName()+"]: "+e.getMessage());
+			log.warn("BadRequestException ["+this.getClass().getSimpleName()+"]" + (resp.isCommitted()?"[committed]":"") + ": " + e.getMessage());
 			log.debug("BadRequestException ["+this.getClass().getSimpleName()+"][committed? "+resp.isCommitted()+"]: "+e.getMessage(), e);
 			resp.setStatus(e.getCode());
 			resp.setContentType(MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
+		}
+		/*catch (ServletException e) {
+			throw e;
 		} catch (Exception e) {
 			//e.printStackTrace();
 			throw new ServletException(e);
-		}
+		}*/
 	}
 
-	public abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception;
-	//ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException;
+	protected abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;
 	
 }

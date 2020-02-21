@@ -48,7 +48,7 @@ public class MarkdownServlet extends PagesServlet {
 	}
 	
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String xpendStr = req.getParameter("xpend");
 		if(xpendStr!=null) {
 			reqXpend = "true".equals(xpendStr);

@@ -82,7 +82,7 @@ public class DiffServlet extends AbstractHttpServlet {
 	}
 	
 	@Override
-	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<2) {
 			throw new BadRequestException("Malformed URL");
@@ -320,7 +320,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		log.info(count+" diffs dumped");
 	}
 	
-	void applyDiffs(List<Diff> diffs, Properties prop, String modelId, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException {
+	void applyDiffs(List<Diff> diffs, Properties prop, String modelId, HttpServletResponse resp) throws IOException {
 		Connection conn = null;
 		String sql = null;
 		try {
@@ -351,6 +351,12 @@ public class DiffServlet extends AbstractHttpServlet {
 		}
 		catch(SQLException e) {
 			throw new BadRequestException("Error: ["+e+"] ; sql =\n"+sql);
+		}
+		catch(ClassNotFoundException e) {
+			throw new InternalServerException("Error: ["+e+"] ; sql =\n"+sql);
+		}
+		catch(NamingException e) {
+			throw new InternalServerException("Error: ["+e+"] ; sql =\n"+sql);
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
