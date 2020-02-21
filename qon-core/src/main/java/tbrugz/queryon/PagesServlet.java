@@ -118,7 +118,10 @@ public class PagesServlet extends AbstractHttpServlet {
 				throw e;
 			}
 		}
-		catch (Exception e) {
+		catch(RuntimeException e) {
+			throw e;
+		}
+		catch(Exception e) {
 			throw new InternalServerException("Exception in PagesServlet: "+e.getMessage(), e);
 		}
 		finally {

@@ -132,6 +132,9 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			
 			dump(pp, syntax, resp);
 		}
+		catch (RuntimeException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new InternalServerException(e.getMessage(), e);
 		}

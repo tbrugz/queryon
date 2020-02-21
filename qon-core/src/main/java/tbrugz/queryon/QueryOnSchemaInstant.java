@@ -76,6 +76,9 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			//log.debug("lastDialect: "+getLastDialect());
 			return dbid;
 		}
+		catch (RuntimeException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
