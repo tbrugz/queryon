@@ -197,8 +197,11 @@
 			<arg value="9092"/>
 			<arg value="-webPort"/>
 			<arg value="8082"/>
+			<arg value="-ifNotExists"/>
 			<arg value="-baseDir"/>
 			<arg value="./data/h2"/>
+			<arg value="-tcpPassword"/>
+			<arg value="123"/>
 		</java>
 	</target>
 
@@ -207,6 +210,10 @@
 			<arg value="-tcpShutdown"/>
 			<arg value="tcp://localhost:9092"/>
 			<arg value="-tcpShutdownForce"/>
+			<arg value="-baseDir"/>
+			<arg value="./data/h2"/>
+			<arg value="-tcpPassword"/>
+			<arg value="123"/>
 		</java>
 	</target>
 
