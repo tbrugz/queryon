@@ -63,8 +63,8 @@
     <module>qon-web</module>
     <module>demo</module>
     <module>demo/qon-demo-static</module>
-    <module>demo-minimal</module>
-    <module>demo-dbn</module>
+    <module>demo/qon-demo-minimal</module>
+    <module>demo/qon-demo-dbn</module>
     <module>demo/qon-demo-pg</module>
     <module>demo/qon-demo-anydb</module>
   </modules>

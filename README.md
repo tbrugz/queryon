@@ -41,9 +41,9 @@ artifacts
 demos - running
 ---------------
 
-* **demo-minimal**: demo using H2 with default web interface ([qon-web](qon-web)) - see [demo-minimal/README.md](demo-minimal/README.md)
+* **demo-minimal**: demo using H2 with default web interface ([qon-web](qon-web)) - see [demo/qon-demo-minimal/README.md](demo/qon-demo-minimal/README.md)
 
-* **demo-dbn**: demo with 5 databases (H2, Mysql/Mariadb, Postgresql, Derby & SQLite) - see [demo-dbn/README.md](demo-dbn/README.md)
+* **demo-dbn**: demo with 5 databases (H2, Mysql/Mariadb, Postgresql, Derby & SQLite) - see [demo/qon-demo-dbn/README.md](demo/qon-demo-dbn/README.md)
 
 * **demo-static**: demo using H2 without web ui - see [demo/qon-demo-static/README.md](demo/qon-demo-static/README.md)
 

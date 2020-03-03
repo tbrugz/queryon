@@ -10,13 +10,13 @@ building
 
 * install queryon: 
 ```
-cd ..
+cd ../..
 mvn install -DskipTests
 ```
 
 * build demo-minimal: 
 ```
-cd demo-minimal
+cd demo/qon-demo-minimal
 mvn package
 ```
 

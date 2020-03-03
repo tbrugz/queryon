@@ -16,14 +16,14 @@ building
 * install queryon:
 
 ```
-cd ..
+cd ../..
 mvn install -DskipTests
 ```
 
 * build demo-DBn:
 
 ```
-cd demo-dbn
+cd demo/qon-demo-dbn
 mvn package
 ```
 
