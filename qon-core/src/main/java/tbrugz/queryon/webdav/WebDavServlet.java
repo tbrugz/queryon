@@ -111,7 +111,7 @@ public class WebDavServlet extends BaseApiServlet {
 		SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), wdreq.getModelId());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
-		log.debug("currentUser = "+currentUser.getPrincipal()+" ; isAuthenticated = "+currentUser.isAuthenticated());
+		//log.debug("currentUser = "+currentUser.getPrincipal()+" ; isAuthenticated = "+currentUser.isAuthenticated());
 		
 		// http://www.webdav.org/specs/rfc4918.html#HEADER_Depth
 		int depth = getDepth(req);

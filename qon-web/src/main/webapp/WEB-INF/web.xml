@@ -209,6 +209,7 @@
 	<servlet-mapping>
 		<servlet-name>WebDavServlet</servlet-name>
 		<url-pattern>/webdav/*</url-pattern>
+		<url-pattern>/anondav/*</url-pattern>
 	</servlet-mapping>
 
 	<filter>
