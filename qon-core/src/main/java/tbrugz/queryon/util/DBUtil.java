@@ -76,6 +76,9 @@ public class DBUtil {
 		if(colType.equalsIgnoreCase("BLOB")) {
 			return Types.BLOB;
 		}
+		if(colType.equalsIgnoreCase("BOOLEAN")) {
+			return Types.BOOLEAN;
+		}
 		if(colType.equalsIgnoreCase("CLOB")) {
 			return Types.CLOB;
 		}
@@ -107,7 +110,6 @@ public class DBUtil {
 		if(colType.equalsIgnoreCase("VARCHAR2")) {
 			return Types.VARCHAR;
 		}
-		//XXX: BOOLEAN ?
 		log.warn("unknown sql type for column type: "+colType);
 		return Types.OTHER;
 	}
@@ -296,5 +298,9 @@ public class DBUtil {
 		return pc;
 	}
 	*/
+	
+	/*public String getIsNullFunction(String columnName) {
+		return "case when "+columnName+" is null then 't' else 'f' end";
+	}*/
 	
 }

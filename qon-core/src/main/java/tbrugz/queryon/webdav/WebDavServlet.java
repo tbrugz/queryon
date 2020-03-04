@@ -635,14 +635,16 @@ public class WebDavServlet extends BaseApiServlet {
 			}
 		}
 		catch(InternalServerException e) {
-			log.warn("InternalServerException: "+e, e);
+			//log.warn("InternalServerException: "+e, e);
+			log.warn("ISE: "+e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			handleException(req, resp, e);
 		}
 		catch(BadRequestException e) {
-			log.warn("BadRequestException: "+e); //,e
+			//log.warn("BadRequestException: "+e); //,e
+			log.warn("BRE: "+e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
 			handleException(req, resp, e);
 		}
-		catch (RuntimeException e) {
+		catch(RuntimeException e) {
 			log.warn("RuntimeException: "+e, e);
 			throw e;
 		}
@@ -650,15 +652,15 @@ public class WebDavServlet extends BaseApiServlet {
 			log.warn("NamingException: "+e);
 			throw new ServletException(e);
 		}
-		catch (ClassNotFoundException e) {
+		catch(ClassNotFoundException e) {
 			log.warn("ClassNotFoundException: "+e);
 			throw new ServletException(e);
 		}
-		catch (IntrospectionException e) {
+		catch(IntrospectionException e) {
 			log.warn("IntrospectionException: "+e);
 			throw new ServletException(e);
 		}
-		catch (SQLException e) {
+		catch(SQLException e) {
 			log.warn("SQLException: "+e);
 			throw new ServletException(e);
 		}
