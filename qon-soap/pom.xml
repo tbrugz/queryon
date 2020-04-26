@@ -42,7 +42,7 @@
       <artifactId>jaxws-ri</artifactId>
       <version>${jaxws.version}</version>
       <type>pom</type>
-      <scope>test</scope>
+      <!--<scope>test</scope>-->
     </dependency>
 
     <!-- <dependency>
