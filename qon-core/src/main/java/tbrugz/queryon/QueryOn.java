@@ -217,6 +217,7 @@ public class QueryOn extends HttpServlet {
 	
 	//static final String DEFAULT_MODELID = "default";
 	
+	public static final String QON_PROP_PREFIX = "queryon";
 	public static final String CONN_PROPS_PREFIX = "queryon";
 	
 	static final String PROP_MODELS = "queryon.models";
@@ -243,10 +244,11 @@ public class QueryOn extends HttpServlet {
 	static final String DEFAULT_XTRA_SYNTAXES = null;
 	
 	static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
-	
+
+	static final String SUFFIX_GRABBERS = ".grabbers";
 	static final String SUFFIX_GRABCLASS = ".grabclass";
 	//static final String SUFFIX_SQLDIALECT = ".sqldialect";
-	static final String PROP_GRABCLASS = "queryon.grabclass";
+	//static final String PROP_GRABCLASS = "queryon.grabclass";
 	
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
@@ -651,14 +653,36 @@ public class QueryOn extends HttpServlet {
 	//XXX: move to SchemaModelUtils?
 	static SchemaModel modelGrabber(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		final String prefix = DBUtil.getDBConnPrefix(prop, modelId);
-		final String grabClassProp = prefix+SUFFIX_GRABCLASS;
-		String grabClassName = prop.getProperty(grabClassProp, prop.getProperty(PROP_GRABCLASS));
+
+		List<String> grabClassesNames = Utils.getStringListFromProp(prop, prefix+SUFFIX_GRABBERS, ",");
+		if(grabClassesNames!=null) {
+			SchemaModel sm = null;
+			int grabCount = 0;
+			for(String grabClassName: grabClassesNames) {
+				grabCount++;
+				log.info("grabbing model [#" + grabCount + "]: "+grabClassName+" [modelId="+modelId+"; prefix="+prefix+"]");
+				SchemaModel sm2 = modelGrabber(prop, grabClassName, modelId);
+				sm = SchemaModelUtils.mergeModels(sm, sm2);
+			}
+			return sm;
+		}
+		else {
+			String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS); //, prop.getProperty(PROP_GRABCLASS)
+			log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; prefix="+prefix+"]");
+			SchemaModel sm = modelGrabber(prop, grabClassName, modelId);
+			return sm;
+		}
+	}
+
+	static SchemaModel modelGrabber(Properties prop, String grabClassName, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
-			String message = "schema grabber class '"+grabClassName+"' not found [prop '"
-					+(!PROP_GRABCLASS.equals(grabClassProp)?grabClassProp+"' or '":"")
-					+PROP_GRABCLASS+"']";
+			String message = "schema grabber class '"+grabClassName+"' not found"
+					//+" [prop '"
+					//+(!PROP_GRABCLASS.equals(grabClassProp)?grabClassProp+"' or '":"")
+					//+PROP_GRABCLASS+"']"
+					;
 			log.warn(message);
 			throw new RuntimeException(message);
 		}
@@ -2467,6 +2491,7 @@ public class QueryOn extends HttpServlet {
 				qm.diffModel(model, conn, resp);
 			}
 			catch(Exception e) {
+				log.debug("Error diffing model: "+e.getMessage(), e);
 				throw new InternalServerException("Error diffing model", e);
 			}
 			finally {

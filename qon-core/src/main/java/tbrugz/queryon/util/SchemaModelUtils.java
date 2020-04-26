@@ -321,5 +321,25 @@ public class SchemaModelUtils {
 		}
 		return false;
 	}
+
+	public static SchemaModel mergeModels(SchemaModel sm, SchemaModel sm2) {
+		if(sm==null) {
+			return sm2;
+		}
+		if(sm2==null) {
+			return sm;
+		}
+
+		sm.getTables().addAll(sm2.getTables());
+		sm.getForeignKeys().addAll(sm2.getForeignKeys());
+		sm.getIndexes().addAll(sm2.getIndexes());
+		sm.getExecutables().addAll(sm2.getExecutables());
+		sm.getSequences().addAll(sm2.getSequences());
+		sm.getSynonyms().addAll(sm2.getSynonyms());
+		sm.getTriggers().addAll(sm2.getTriggers());
+		sm.getViews().addAll(sm2.getViews());
+		
+		return sm;
+	}
 	
 }
