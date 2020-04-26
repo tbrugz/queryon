@@ -195,16 +195,16 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		Set<String> trueProps = new HashSet<String>();
 		
 		String[] types = { "TABLE", "FK", "VIEW", "INDEX", "TRIGGER",
-				"SEQUENCE", "SYNONYM", "GRANT", "MATERIALIZED_VIEW", "FUNCTION",
-				"PACKAGE", "PACKAGE_BODY", "PROCEDURE", "TYPE" };
+				"SEQUENCE", "SYNONYM", "GRANT", "MATERIALIZED_VIEW", "CONSTRAINT",
+				"FUNCTION", "PACKAGE", "PACKAGE_BODY", "PROCEDURE", "TYPE" };
 				
 		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, AbstractDBMSFeatures.PROP_GRAB_VIEWS, AbstractDBMSFeatures.PROP_GRAB_INDEXES, AbstractDBMSFeatures.PROP_GRAB_TRIGGERS,
-				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, JDBCSchemaGrabber.PROP_SCHEMAGRAB_GRANTS, AbstractDBMSFeatures.PROP_GRAB_MATERIALIZED_VIEWS, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES,
-				AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES };
+				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, JDBCSchemaGrabber.PROP_SCHEMAGRAB_GRANTS, AbstractDBMSFeatures.PROP_GRAB_MATERIALIZED_VIEWS, AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA,
+				AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES };
 		/*
 		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks", "sqldump.dbspecificfeatures.grabviews", "sqldump.dbspecificfeatures.grabindexes", "sqldump.dbspecificfeatures.grabtriggers",
-				"sqldump.dbspecificfeatures.grabsequences", "sqldump.dbspecificfeatures.grabsynonyms", "sqldump.schemagrab.grants", null, "sqldump.dbspecificfeatures.grabexecutables",
-				"sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables" };
+				"sqldump.dbspecificfeatures.grabsequences", "sqldump.dbspecificfeatures.grabsynonyms", "sqldump.schemagrab.grants", null, "sqldump.dbspecificfeatures.grabextraconstraints",
+				"sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables", "sqldump.dbspecificfeatures.grabexecutables" };
 		*/
 		
 		for(int i=0;i<types.length; i++) {

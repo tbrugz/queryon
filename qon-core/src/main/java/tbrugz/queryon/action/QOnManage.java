@@ -43,13 +43,14 @@ public class QOnManage {
 		
 		Properties grabProps = new Properties();
 		grabProps.put("sqldump.schemagrab.proceduresandfunctions", "false");
-		//grabProps.put("sqldump.schemagrab.db-specific-features", "false");
+		grabProps.put("sqldump.schemagrab.db-specific-features", "true");
 		//grabProps.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
 		//grabProps.put("sqldump.schemagrab.schemas", "public");
 		grabProps.put("sqldump.schemagrab.schemas", Utils.join(getModelSchemas(model), ", "));
-		List<String> typesList = Arrays.asList(new String[]{"TABLE"});
+		List<String> typesList = Arrays.asList(new String[]{"TABLE", "FK", "CONSTRAINT"});
 		DiffManyServlet.setPropForTypes(grabProps, typesList);
-		
+		//log.debug("grab props: "+grabProps);
+
 		JDBCSchemaGrabber jsg = new JDBCSchemaGrabber();
 		jsg.setConnection(conn);
 		jsg.setProperties(grabProps);
