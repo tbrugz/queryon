@@ -24,7 +24,7 @@ running with jetty (java 8+)
 
 * Environment variables must be set to run **qon-demo-anydb**:
 
-`QON_JDBC_DRIVER=<driver-class> QON_JDBC_URL=<jdbc-url> QON_JDBC_USER=<username> QON_JDBC_PASSWORD=<password> QON_SCHEMAS="<schema names (comma separated, defaults to 'public, queryon')>" mvn jetty:run`
+`QON_JDBC_DRIVER=<driver-class> QON_JDBC_URL=<jdbc-url> QON_JDBC_USER=<username> QON_JDBC_PASSWORD=<password> QON_SCHEMAS="<schema names (comma separated, defaults to 'public, queryon')>" QON_JDBC_INITSQL="<some-sql>" mvn jetty:run`
 
 Example with H2: `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC mvn jetty:run`
 

@@ -161,6 +161,18 @@
 			<version>${sqlite.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!--
+		oracle driver might not be included in war and be freely redistributed (but is available on maven central)
+		license: https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc8/19.3.0.0/ojdbc8-19.3.0.0.pom
+		-->
+		<!--
+		<dependency>
+			<groupId>com.oracle.ojdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>19.3.0.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		-->
 
 	</dependencies>
 
