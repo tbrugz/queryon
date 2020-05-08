@@ -126,12 +126,12 @@
 		for using in java9+ , WildFly 17 (& others?)
 		see: https://stackoverflow.com/a/47412779
 		-->
-		<dependency>
+		<!--<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb.version}</version>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency>-->
 		
 		<!-- <dependency>
 			<groupId>org.slf4j</groupId>

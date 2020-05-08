@@ -22,7 +22,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cxf.version>3.2.7</cxf.version>
     <jetty.version>8.1.22.v20160922</jetty.version>
     <httpclient.version>4.5.9</httpclient.version>
   </properties>
