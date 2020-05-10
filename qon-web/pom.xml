@@ -22,8 +22,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jetty.version>8.1.22.v20160922</jetty.version>
-    <httpclient.version>4.5.9</httpclient.version>
   </properties>
 
   <build>
@@ -309,7 +307,7 @@
       <!-- needed by jsp files -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.2.2</version>
+      <version>${gson.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
