@@ -35,7 +35,7 @@
 				<!-- java 6, java 7 -->
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>8.1.16.v20140903</version>
+				<version>${jetty.java6.version}</version>
 
 				<configuration>
 					<!-- https://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
