@@ -603,7 +603,7 @@
     </profile>
   </profiles>
 
-  <repositories>
+  <!--<repositories>
     <repository>
       <id>central</id>
       <url>http://repo.maven.apache.org/maven2/</url>
@@ -611,19 +611,10 @@
     <repository>
       <id>aduana</id>
       <url>http://maven.ontotext.com/content/repositories/aduna/</url>
-      <!-- url>http://repo.aduna-software.org/maven2/releases/</url-->
     </repository>
     <repository>
       <id>bitbucket-tbrugz</id>
       <url>https://bitbucket.org/tbrugz/mvn-repo/raw/tip/</url>
     </repository>
-    <!-- repository>
-      <id>pentaho-rep</id>
-      <url>http://repo.pentaho.org/artifactory/repo/</url>
-    </repository-->
-    <!-- repository>
-      <id>apache-snapshots</id>
-      <url>https://repository.apache.org/content/groups/snapshots/</url>
-    </repository-->
-  </repositories>
+  </repositories>-->
 </project>
