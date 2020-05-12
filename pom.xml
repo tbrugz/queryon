@@ -35,7 +35,7 @@
     <shiro.web.version>1.3.2</shiro.web.version> <!-- ${shiro.version}? ; see: https://issues.apache.org/jira/browse/SHIRO-610 -->
     <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.6.6</slf4j.version>
-    <jaxb.version>2.3.0</jaxb.version>
+    <jaxb.version>2.3.2</jaxb.version>
     <jaxb.impl.version>2.3.0.1</jaxb.impl.version>
     <jaxws.version>2.3.2</jaxws.version>
     <keycloak.version>4.8.3.Final</keycloak.version>
@@ -341,17 +341,21 @@
           <artifactId>kmlutils</artifactId>
         </exclusion>
         <exclusion>
-         <groupId>org.codehaus.jettison</groupId>
-         <artifactId>jettison</artifactId>
+          <groupId>org.codehaus.jettison</groupId>
+          <artifactId>jettison</artifactId>
         </exclusion>
         <!-- <exclusion>
           <groupId>org.eclipse.persistence</groupId>
           <artifactId>org.eclipse.persistence.moxy</artifactId>
         </exclusion> -->
-        <exclusion>
+        <!--<exclusion>
           <groupId>org.eclipse.persistence</groupId>
           <artifactId>org.eclipse.persistence.asm</artifactId>
-        </exclusion>
+        </exclusion>-->
+        <!--<exclusion>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>-->
       </exclusions>
     </dependency>
     <dependency>
@@ -447,15 +451,16 @@
     </dependency>
 
     <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${jaxb.version}</version>
         <scope>compile</scope>
     </dependency>
     <!--<dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>2.3.2</version>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${jaxb.version}</version>
+        <scope>compile</scope>
     </dependency>-->
     <dependency>
         <groupId>com.sun.xml.bind</groupId>
@@ -469,6 +474,7 @@
         <version>${jaxb.impl.version}</version>
         <scope>test</scope>
     </dependency>
+
     <!--<dependency>
         <groupId>javax.activation</groupId>
         <artifactId>activation</artifactId>

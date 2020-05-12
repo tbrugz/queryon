@@ -66,11 +66,18 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- because of qon-soap: com.sun.xml.ws:jaxws-ri:pom:2.3.2 -->
     <dependency>
+        <groupId>jakarta.activation</groupId>
+        <artifactId>jakarta.activation-api</artifactId>
+        <version>1.2.1</version> 
+    </dependency>
+
+    <!--<dependency>
         <groupId>com.sun.activation</groupId>
         <artifactId>javax.activation</artifactId>
-        <version>1.2.0</version>
-    </dependency>
+        <version>1.2.0</version> 
+    </dependency>-->
 
     <dependency>
       <groupId>javax.servlet</groupId>
