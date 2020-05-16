@@ -128,7 +128,7 @@ function onTextFieldChange() {
 
 function doValidate() {
 	var url = queryOnUrl+"/ValidateAny";
-	doRequest(url, 'btnValidate', doValidateCallback);
+	doRequest(url, 'btnValidate', false, doValidateCallback);
 }
 
 function doValidateCallback(request) {
@@ -147,7 +147,7 @@ function doValidateCallback(request) {
 
 function doExplain() {
 	var url = queryOnUrl+"/ExplainAny";
-	doRequest(url);
+	doRequest(url, 'btnExplain');
 }
 
 function doRun() {
@@ -155,7 +155,15 @@ function doRun() {
 	doRequest(url, 'btnRun');
 }
 
-function doRequest(url, btnId, callback) {
+/*
+ * TODO: download in other formats (index.html: downloadExtFilter+html = [ "csv", "htmlx", "json", "md", "ods", "xls", "xlsx", "xml" ]);
+ */
+function doDownload() {
+	var url = queryOnUrl+"/SqlAny.csv";
+	doRequest(url, 'btnDownload', true);
+}
+
+function doRequest(url, btnId, download, callback) {
 	closeMessages("messages");
 	closeResults();
 	removeMarker(editor);
@@ -222,7 +230,19 @@ function doRequest(url, btnId, callback) {
 				}
 			}
 			else {
-				byId('queryResult').innerHTML = oEvent.target.responseText;
+				if(download) {
+					// https://stackoverflow.com/a/44435573/616413
+					var contentType = this.getResponseHeader('Content-Type');
+					var contentDisposition = this.getResponseHeader('Content-Disposition');
+					// https://stackoverflow.com/a/23054920/
+					//var fileName = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
+					console.log("url:", url, "; reqData.name:", reqData.name, "; Content-Type:", contentType, "; Content-Disposition:", contentDisposition);
+					var fileName = "workspace.csv";
+					saveBlob(oEvent.target.response, fileName);
+				}
+				else {
+					byId('queryResult').innerHTML = oEvent.target.responseText;
+				}
 				//console.log("oEvent.target.responseText=",oEvent.target.responseText,"request");
 				showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
 			}
@@ -289,6 +309,15 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	else {
 		closeMessages(messagesId);
 	}
+}
+
+// https://stackoverflow.com/questions/22724070/prompt-file-download-with-xmlhttprequest/44435573#44435573
+function saveBlob(content, fileName) {
+	var a = document.createElement('a');
+	blob = new File([content], fileName); //, { type: type });
+	a.href = window.URL.createObjectURL(blob);
+	a.download = fileName;
+	a.dispatchEvent(new MouseEvent('click'));
 }
 
 function closeResults() {
@@ -367,7 +396,7 @@ window.onresize = updateUI;
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate SQL (F8)">
 		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain SQL Plan">
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run SQL (F9)">
-		<!-- <input type="button" id="btnDownload" value="download" onclick="doDownload();" title="Download CSV" style="float: right;"/> -->
+		<input type="button" id="btnDownload" value="download" onclick="javascript:doDownload();" title="Download CSV" style="float: right;"/>
 	</div>
 </div>
 
