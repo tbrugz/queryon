@@ -70,7 +70,7 @@ function createPopupBelow(id, btn, content) {
 		var k = content[i];
 		//var onclick = "onclick='" + closeJs + (k.onclick ? k.onclick : "") + "' ";
 		str += "<li><a " +
-			(k.href ? "href='" + k.href + "' target='_blank' " : "") +
+			(k.href ? "href='" + k.href + "' target='_blank' " : "href='#'") +
 			"onclick='" + closeJs + (k.onclick ? k.onclick : "") + "' " + //onclick +
 			"title='" + (k.title ? k.title : "href = " + k.href ) + "'>" +
 			k.label + 

@@ -3,6 +3,7 @@
 <head>
 	<title>QueryOn - query editor</title>
 	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
 	<link href="css/qon-editor.css" rel="stylesheet">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script src="js/qon-base.js"></script>
@@ -12,6 +13,7 @@
 	<!-- <script src="js/settings.js"></script> -->
 	<script src="js/http-post.js"></script>
 	<script src="js/table.js"></script>
+	<script src="js/ui.js"></script>
 	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/editor.js"></script>
 <style>
@@ -155,18 +157,17 @@ function doRun() {
 	doRequest(url, 'btnRun');
 }
 
-/*
- * TODO: download in other formats (index.html: downloadExtFilter+html = [ "csv", "htmlx", "json", "md", "ods", "xls", "xlsx", "xml" ]);
- */
-function doDownload() {
-	var url = queryOnUrl+"/SqlAny.csv";
+function doDownload(ext) {
+	var url = queryOnUrl+"/SqlAny."+ext;
 	doRequest(url, 'btnDownload', true);
 }
 
 function doRequest(url, btnId, download, callback) {
 	closeMessages("messages");
-	closeResults();
 	removeMarker(editor);
+	if(!download) {
+		closeResults();
+	}
 	
 	var sqlString = editor.getSelectedText();
 	if(!sqlString) { sqlString = editor.getValue(); }
@@ -184,8 +185,8 @@ function doRequest(url, btnId, download, callback) {
 	reqData.set("lostrategy", "RESULTSET_CONTROL"); */
 	var reqData = {}
 	reqData.sql = sqlString;
-	reqData.schema = "workspace-schema";
-	reqData.name = "workspace-name";
+	reqData.schema = ""; //"workspace-schema";
+	reqData.name = "workspace"; //"workspace-name";
 	reqData.lostrategy = "RESULTSET_CONTROL";
 	
 	if(modelId) {
@@ -236,9 +237,10 @@ function doRequest(url, btnId, download, callback) {
 					var contentDisposition = this.getResponseHeader('Content-Disposition');
 					// https://stackoverflow.com/a/23054920/
 					//var fileName = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-					console.log("url:", url, "; reqData.name:", reqData.name, "; Content-Type:", contentType, "; Content-Disposition:", contentDisposition);
-					var fileName = "workspace.csv";
-					saveBlob(oEvent.target.response, fileName);
+					var ext = url.substring(url.lastIndexOf(".")+1);
+					console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType, "; Content-Disposition:", contentDisposition);
+					var fileName = reqData.name+"."+ext;
+					saveBlob(oEvent.target.response, fileName, contentType);
 				}
 				else {
 					byId('queryResult').innerHTML = oEvent.target.responseText;
@@ -312,9 +314,9 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 }
 
 // https://stackoverflow.com/questions/22724070/prompt-file-download-with-xmlhttprequest/44435573#44435573
-function saveBlob(content, fileName) {
+function saveBlob(content, fileName, contentType) {
 	var a = document.createElement('a');
-	blob = new File([content], fileName); //, { type: type });
+	blob = new File([content], fileName); //, { type: contentType });
 	a.href = window.URL.createObjectURL(blob);
 	a.download = fileName;
 	a.dispatchEvent(new MouseEvent('click'));
@@ -323,6 +325,33 @@ function saveBlob(content, fileName) {
 function closeResults() {
 	byId('queryResult').innerHTML = '';
 	byId('resultContainer').style.display = 'none';
+}
+
+/* see: index.html: downloadExtFilter (+html, +sql) */
+var defaultDownloadExts = [ "csv", "htmlx", "json", "md", "sql", "xml" ];
+var downloadExtFilter = [ "csv", "htmlx", "json", "md", "ods", "sql", "xls", "xlsx", "xml" ];
+
+function getDownloadHrefs() {
+	var ret = [];
+
+	//var exts = settings["syntax.fileextensions"];
+	var exts = defaultDownloadExts;
+	//var exts = downloadExtFilter;
+	//console.log("getDownloadHrefs... exts=", exts);
+	for(var i=0;i<exts.length;i++) {
+		if(downloadExtFilter.indexOf(exts[i])<0) { continue; }
+
+		//var href = queryOnUrl+"/SqlAny."+exts[i]; //XXX modelId!
+		ret.push({
+			//"onclick": href,
+			"onclick": "doDownload(\""+exts[i].trim()+"\");return false;",
+			"label": exts[i],
+			"title": "download "+exts[i]
+		});
+	}
+	console.log("getDownloadHrefs...", exts, ret);
+	
+	return ret;
 }
 
 function registerKeybindings() {
@@ -372,7 +401,7 @@ window.onresize = updateUI;
 <body onload="onLoad();" id="body">
 
 <div id="controls">
-<nav class="container" id="nav">
+<nav class="container">
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Workspace</code></span>
 
 	<!-- <label style="display: none">
@@ -396,7 +425,8 @@ window.onresize = updateUI;
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate SQL (F8)">
 		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain SQL Plan">
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run SQL (F9)">
-		<input type="button" id="btnDownload" value="download" onclick="javascript:doDownload();" title="Download CSV" style="float: right;"/>
+		<!--<input type="button" id="btnDownload0" value="download" onclick="javascript:doDownload('csv');" title="Download CSV" style="float: right;"/>-->
+		<input type="button" id="btnDownload" value="download" onclick="createPopupBelow('download-ext', 'btnDownload', getDownloadHrefs());" title="Download (click to see avaiable formats)" style="float: right;"/>
 	</div>
 </div>
 
