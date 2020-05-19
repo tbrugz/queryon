@@ -4,7 +4,7 @@
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
 	<property name="sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 
-	<property file="../demo/build.properties"/>
+	<property file="../build.properties"/>
 	
 	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="${commons-logging.version}" scope="runtime"/>

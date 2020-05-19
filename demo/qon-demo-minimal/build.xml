@@ -5,7 +5,7 @@
 	<property name="sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
 	
-	<property file="../demo/build.properties"/>
+	<property file="../build.properties"/>
 
 	<artifact:dependencies pathId="sqlrun.deps">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="${commons-logging.version}" scope="runtime"/>
@@ -14,6 +14,8 @@
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
 		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
+		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-core" version="${jaxb.version}" scope="runtime"/>
+		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-impl" version="${jaxb.version}" scope="runtime"/>
 	</artifact:dependencies>
 
 	<path id="sqlrun.classpath">
