@@ -37,17 +37,19 @@ ant unzip-data
 * init h2 & derby databases:
 
 ```
-ant start-db-h2
-ant start-db-derby
+ant start-db-h2        # separate terminal
+ant start-db-derby     # separate terminal
 ```
 
 * init mysql (mariadb) & postgresql
 
+**Hint**: See [how to create docker containers](../databases-in-docker.md) for these databases
+
 credentials: copy `src/main/resources/credentials.template.properties` to
-`credentials.properties` & edit.
+`src/main/resources/credentials.properties` & edit.
 
 environment vars (optional): copy `src/main/resources/env.template.properties` to
-`env.properties` & edit.
+`src/main/resources/env.properties` & edit.
 
 postgresql: create database `classicmodels`  
 (`ant run-sqlrun-pgsql-createdatabase`, or something like: `CREATE DATABASE classicmodels OWNER postgres`)
