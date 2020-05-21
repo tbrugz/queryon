@@ -52,6 +52,9 @@ environment vars (optional): copy `src/main/resources/env.template.properties` t
 postgresql: create database `classicmodels`  
 (`ant run-sqlrun-pgsql-createdatabase`, or something like: `CREATE DATABASE classicmodels OWNER postgres`)
 
+mysql: create database `classicmodels`  
+(`ant run-sqlrun-mysql-createdatabase`...)
+
 * create & load databases
 
 ```

@@ -67,6 +67,12 @@
 		<unzip src="${basedir}/data/ClassicModels-MySQL.zip" dest="${basedir}/data/ClassicModels-MySQL"/>
 	</target>
 
+	<target name="run-sqlrun-mysql-createdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.mysql-create.properties"/>
+		</java>
+	</target>
+
 	<target name="run-sqlrun-mysql">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<!-- -help -version -->
