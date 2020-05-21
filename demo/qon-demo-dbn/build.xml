@@ -86,6 +86,12 @@
 		</java>
 	</target>
 	
+	<target name="run-sqlrun-pgsql-createdatabase">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
+			<arg value="-propfile=scripts/sqlrun.pgsql-create.properties"/>
+		</java>
+	</target>
+
 	<!-- you must create database 'classicmodels' first -->
 	<target name="run-sqlrun-pgsql">
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">

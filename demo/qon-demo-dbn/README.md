@@ -49,7 +49,8 @@ credentials: copy `src/main/resources/credentials.template.properties` to
 environment vars (optional): copy `src/main/resources/env.template.properties` to
 `env.properties` & edit.
 
-postgresql: create database `classicmodels`
+postgresql: create database `classicmodels`  
+(`ant run-sqlrun-pgsql-createdatabase`, or something like: `CREATE DATABASE classicmodels OWNER postgres`)
 
 * create & load databases
 
@@ -59,7 +60,7 @@ ant run-sqlrun-h2
 ant run-sqlrun-h2embed
 ant run-sqlrun-sqlite
 ant run-sqlrun-mysql
-ant run-sqlrun-pgsql
+ant run-sqlrun-pgsql      # server must have access to 'scripts' directory
 ```
 
 * create queryon tables
