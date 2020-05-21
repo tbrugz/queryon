@@ -9,14 +9,10 @@ web/swagger-ui/*
 
 qon-web/src/main/webapp/swagger-ui/*
 
-demo-dbn/data/*
-demo-dbn/classicmodels/*
-demo-dbn/scripts/credentials.properties
-demo-dbn/src/main/resources/credentials.properties
-demo-dbn/src/main/resources/env.properties
-
-demo-minimal/.settings/*
-demo-dbn/.settings/*
+demo/qon-demo-dbn/data/*
+demo/qon-demo-dbn/classicmodels/*
+demo/qon-demo-dbn/src/main/resources/credentials.properties
+demo/qon-demo-dbn/src/main/resources/env.properties
 
 **/.classpath
 **/.project
