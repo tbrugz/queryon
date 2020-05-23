@@ -29,6 +29,7 @@
 /* Load records into the tables. There should be no warnings. */
 
 LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Customers.txt' INTO TABLE customers
+          CHARACTER SET latin1
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 
 SHOW WARNINGS LIMIT 10;
@@ -59,5 +60,6 @@ LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Payments.txt' INTO TA
 SHOW WARNINGS LIMIT 10;
 
 LOAD DATA LOCAL INFILE 'data/ClassicModels-MySQL/datafiles/Products.txt' INTO TABLE products
+          CHARACTER SET latin1
           FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n';
 

@@ -40,3 +40,12 @@ mariadb
   `sudo docker run --name <container-name> -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass mariadb:10.5`
 
 ref: <https://hub.docker.com/_/mariadb>
+
+
+mysql
+-----
+
+* creating container for mysql:
+  `sudo docker run --name <container-name> -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass mysql:8 --local-infile=1`
+
+ref: <https://hub.docker.com/_/mysql>
