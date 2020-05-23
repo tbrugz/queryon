@@ -9,7 +9,7 @@ general docker container management
 ------
 
 * starting an existing container: 
-  `sudo docker start <container-name>`
+  `sudo docker start -i <container-name>`
 
 * stoping a container:
   `sudo docker stop <container-name>`
@@ -28,7 +28,9 @@ postgresql
 ------
 
 * creating container for postgresql, mapping current directory (`$(pwd)`) as a volume:
-  `sudo docker run --name <container-name> -v $(pwd):$(pwd) -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres`
+  `sudo docker run --name <container-name> -v $(pwd):$(pwd) -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:12`
+
+ref: <https://hub.docker.com/_/postgres>
 
 
 mariadb
@@ -36,3 +38,5 @@ mariadb
 
 * creating container for mariadb:
   `sudo docker run --name <container-name> -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mypass mariadb:10.5`
+
+ref: <https://hub.docker.com/_/mariadb>
