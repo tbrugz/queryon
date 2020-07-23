@@ -548,7 +548,7 @@
     <dependency>
       <groupId>org.apache.olingo</groupId>
       <artifactId>odata-client-core</artifactId>
-      <version>4.6.0</version>
+      <version>4.7.1</version>
       <scope>test</scope>
     </dependency>
     
