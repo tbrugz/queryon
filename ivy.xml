@@ -16,7 +16,7 @@
 		<!--dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="default->default"/-->
 		
 		<!-- "optional" -->
-		<dependency org="log4j" name="log4j" rev="1.2.16"/>
+		<dependency org="log4j" name="log4j" rev="1.2.17"/>
 		
 		<dependency org="org.apache.shiro" name="shiro-core" rev="1.2.3" conf="default->default"/>
 		<dependency org="org.apache.shiro" name="shiro-web" rev="1.2.3" conf="default->default"/>

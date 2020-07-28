@@ -4,7 +4,7 @@
 ],
 "mapcenter": [ 0, 0 ],
 "showOptionsIfUnique": true,
-"gmapsKey": "AIzaSyBEPDT0O-gWQQknb5DKNlFAXcW-Ep9zbNs",
+"gmapsKey": "<some-google-maps-key>",
 "showGeomIdAsValueColumn": false,
 "showNonNumericColumnAsValueColumn": true
 }

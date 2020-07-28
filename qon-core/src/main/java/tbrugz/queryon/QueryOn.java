@@ -339,6 +339,7 @@ public class QueryOn extends HttpServlet {
 		}
 	}
 	
+	/*
 	void log4jInit() {
 		String log4jres = "/log4j.properties";
 		InputStream is = QueryOn.class.getResourceAsStream(log4jres);
@@ -361,6 +362,7 @@ public class QueryOn extends HttpServlet {
 			log.info("log4j not configured ['"+log4jres+"' not found]");
 		}
 	}
+	*/
 	
 	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
 		String contextPath = null;
