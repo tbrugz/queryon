@@ -120,21 +120,21 @@
         </configuration>
       </plugin>
 
-      <!-- <plugin>
+      <!--see: http://stackoverflow.com/questions/12497081/maven-war-inplace-clean-classes-and-lib-folder-->
+      <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.4.1</version>
-        see: http://stackoverflow.com/questions/12497081/maven-war-inplace-clean-classes-and-lib-folder
         <configuration>
             <filesets>
                 <fileset>
-                    <directory>web/WEB-INF/classes</directory>
+                    <directory>src/main/webapp/swagger-ui</directory>
                 </fileset>
                 <fileset>
-                    <directory>web/WEB-INF/lib</directory>
+                  <directory>src/main/webapp/swagger2-ui</directory>
                 </fileset>
             </filesets>
         </configuration>
-      </plugin> -->
+      </plugin>
 
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
@@ -162,6 +162,7 @@
 
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.0.0</version>
         <!-- <version>1.8</version> -->
         <executions>
           <execution>
@@ -169,7 +170,9 @@
             <configuration>
               <target>
                 <!-- <property name="maven.project.url" value="${project.url}"/> -->
-                <ant antfile="build.xml" target="download-deps"/>
+                <ant antfile="${basedir}/build.xml">
+                  <target name="download-deps"/>
+                </ant>
               </target>
             </configuration>
             <goals>
