@@ -2917,7 +2917,8 @@ public class QueryOn extends HttpServlet {
 				filename = rs.getString(reqspec.uniValueFilenameCol);
 			}
 			if(filename!=null) {
-				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=" + filename);
+				//XXX attachment OR inline?
+				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "inline; filename=" + filename);
 			}
 			if(reqspec.isHeadMethod()) {
 				log.debug("HEAD method: response body is empty"); 

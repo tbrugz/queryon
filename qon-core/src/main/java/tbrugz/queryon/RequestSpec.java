@@ -76,7 +76,7 @@ public class RequestSpec {
 	public static final String PARAM_METHOD = "_method";
 	
 	public static final String HEADER_ACCEPT = "Accept";
-	public static final String HEADER_CONTENT_DISPOSITION = "content-disposition";
+	//public static final String HEADER_CONTENT_DISPOSITION = "content-disposition";
 	public static final String HEADER_PARAM_ENCODING = "X-ParamEncoding";
 	public static final String PARAM_ENCODING_URLENCODE = "url";
 	
@@ -1093,7 +1093,7 @@ public class RequestSpec {
 	
 	// http://stackoverflow.com/a/2424824/616413
 	static String getSubmittedFileName(Part part) {
-		for (String cd : part.getHeader(HEADER_CONTENT_DISPOSITION).split(";")) {
+		for (String cd : part.getHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION).split(";")) {
 			if (cd.trim().startsWith("filename")) {
 				String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
 				return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1);
