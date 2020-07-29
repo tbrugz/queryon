@@ -54,6 +54,7 @@
     <sqlite.version>3.28.0</sqlite.version>
 
     <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
+    <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
 
     <findbugs.version>2.5.2</findbugs.version>
     <checkstyle.version>2.10</checkstyle.version>
@@ -86,9 +87,9 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:hg:https://bitbucket.org/tbrugz/queryon</connection>
-    <developerConnection>scm:hg:https://bitbucket.org/tbrugz/queryon</developerConnection>
-    <url>https://bitbucket.org/tbrugz/queryon</url>
+    <connection>scm:git:https://github.com/tbrugz/queryon</connection>
+    <developerConnection>scm:git:https://github.com/tbrugz/queryon</developerConnection>
+    <url>https://github.com/tbrugz/queryon</url>
   </scm>
   <developers>
     <developer>
