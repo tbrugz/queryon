@@ -299,13 +299,6 @@
       <version>1.6.0</version>
       <scope>compile</scope>
     </dependency>
-    <!-- used by PatchDumper -->
-    <!-- <dependency>
-      <groupId>com.googlecode.java-diff-utils</groupId>
-      <artifactId>diffutils</artifactId>
-      <version>1.2.1</version>
-      <scope>compile</scope>
-    </dependency> -->
 
     <!-- <dependency>
       <groupId>org.slf4j</groupId>

@@ -20,8 +20,6 @@
 		
 		<dependency org="org.apache.shiro" name="shiro-core" rev="1.2.3" conf="default->default"/>
 		<dependency org="org.apache.shiro" name="shiro-web" rev="1.2.3" conf="default->default"/>
-		<!--<dependency org="org.slf4j" name="slf4j-simple" rev="1.6.6" conf="default->default"/>-->
-		
 
 		<!-- test dependencies -->
 		<dependency org="com.h2database" name="h2" rev="1.4.197" conf="test->default"/>
@@ -35,8 +33,8 @@
 			<exclude module="commons-csv"/>
 		</dependency>
 		<dependency org="org.apache.commons" name="commons-csv" rev="1.0-SNAPSHOT" conf="test->default"/>
-		<dependency org="org.slf4j" name="slf4j-api" rev="1.6.6" conf="test->default"/>
-		<dependency org="org.slf4j" name="slf4j-jdk14" rev="1.6.6" conf="test->default"/>
+		<dependency org="org.slf4j" name="slf4j-api" rev="1.7.30" conf="test->default"/>
+		<dependency org="org.slf4j" name="slf4j-jdk14" rev="1.7.30" conf="test->default"/>
 		<dependency org="org.eclipse.jetty" name="jetty-server" rev="9.0.6.v20130930" conf="test->default"/>
 		<dependency org="org.eclipse.jetty" name="jetty-start" rev="9.0.6.v20130930" conf="test->default"/>
 		<dependency org="org.eclipse.jetty" name="jetty-ant" rev="9.0.6.v20130930" conf="test->default"/>
