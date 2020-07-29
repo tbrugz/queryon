@@ -123,7 +123,7 @@
       <!--see: http://stackoverflow.com/questions/12497081/maven-war-inplace-clean-classes-and-lib-folder-->
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>${maven-clean-plugin.version}</version>
         <configuration>
             <filesets>
                 <fileset>

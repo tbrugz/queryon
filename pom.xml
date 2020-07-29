@@ -52,7 +52,9 @@
     <mariadb.version>2.5.4</mariadb.version>
     <derby.version>10.12.1.1</derby.version>
     <sqlite.version>3.28.0</sqlite.version>
-    
+
+    <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
+
     <findbugs.version>2.5.2</findbugs.version>
     <checkstyle.version>2.10</checkstyle.version>
     <cobertura.version>2.5.2</cobertura.version>
@@ -159,6 +161,35 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4.1</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>1.6.0</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>3.2.5</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven-clean-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
         <configuration>
@@ -194,6 +225,16 @@
           </execution>
         </executions>
       </plugin-->
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <generateBackupPoms>false</generateBackupPoms>
+          <!--<allowMajorUpdates>false</allowMajorUpdates>-->
+        </configuration>
+      </plugin>
 
       <!-- <plugin>
         <groupId>org.apache.maven.plugins</groupId>
