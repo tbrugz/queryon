@@ -33,6 +33,7 @@ import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -144,12 +145,11 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	}
 	
 	void setupDumpProperties(Properties pp, String schemas, String types) {
-		pp.put("sqldump.schemagrab.proceduresandfunctions", "false");
-		pp.put("sqldump.schemagrab.db-specific-features", "true");
-		pp.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
+		pp.put(JDBCSchemaGrabber.PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, "false");
+		pp.put(JDBCSchemaGrabber.PROP_SCHEMAGRAB_DBSPECIFIC, "true");
 		
 		//sqldump properties...
-		pp.put("sqldump.schemagrab.schemas", schemas); //XXX param: schemas, validate?
+		pp.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemas); //XXX param: schemas, validate?
 
 		List<String> typesList = Utils.getStringList(types, ",");
 		setPropForTypes(pp, typesList);
@@ -198,7 +198,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 				"SEQUENCE", "SYNONYM", "GRANT", "MATERIALIZED_VIEW", "CONSTRAINT",
 				"FUNCTION", "PACKAGE", "PACKAGE_BODY", "PROCEDURE", "TYPE" };
 				
-		String[] props = { "sqldump.schemagrab.tables", "sqldump.schemagrab.fks" /* exportedfks?*/, AbstractDBMSFeatures.PROP_GRAB_VIEWS, AbstractDBMSFeatures.PROP_GRAB_INDEXES, AbstractDBMSFeatures.PROP_GRAB_TRIGGERS,
+		String[] props = { JDBCSchemaGrabber.PROP_SCHEMAGRAB_TABLES, JDBCSchemaGrabber.PROP_SCHEMAGRAB_FKS /* exportedfks?*/, AbstractDBMSFeatures.PROP_GRAB_VIEWS, AbstractDBMSFeatures.PROP_GRAB_INDEXES, AbstractDBMSFeatures.PROP_GRAB_TRIGGERS,
 				AbstractDBMSFeatures.PROP_GRAB_SEQUENCES, AbstractDBMSFeatures.PROP_GRAB_SYNONYMS, JDBCSchemaGrabber.PROP_SCHEMAGRAB_GRANTS, AbstractDBMSFeatures.PROP_GRAB_MATERIALIZED_VIEWS, AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA,
 				AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES, AbstractDBMSFeatures.PROP_GRAB_EXECUTABLES };
 		/*

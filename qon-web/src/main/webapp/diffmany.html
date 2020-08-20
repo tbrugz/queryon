@@ -25,13 +25,14 @@ var queryOnDiffManyUrl = 'diffmany/'
 var typemap = {
 	"TABLE": "TABLE",
 	"FK": "FK (needs TABLE)", //**
-	"VIEW": "VIEW",
+	"CONSTRAINT": "CONSTRAINT (needs TABLE)",
 	"INDEX": "INDEX (needs TABLE)", //**
+	"GRANT": "GRANT (needs TABLE)", //**
+	"VIEW": "VIEW",
 	"EXECUTABLE": null,
 	"TRIGGER": "TRIGGER", //"executable", ??
 	"SEQUENCE": "SEQUENCE",
 	"SYNONYM": "SYNONYM", //**
-	"GRANT": "GRANT (needs TABLE)", //**
 	"MATERIALIZED_VIEW": "MATERIALIZED_VIEW", //"view",
 	"FUNCTION": "FUNCTION",
 	"JAVA_SOURCE": "JAVA_SOURCE",
@@ -40,7 +41,6 @@ var typemap = {
 	"PROCEDURE": "PROCEDURE",
 	"TYPE": "TYPE", //"executable",
 	"TYPE_BODY": "TYPE_BODY", //"executable",
-	"CONSTRAINT": null,
 	"COLUMN": null
 };
 

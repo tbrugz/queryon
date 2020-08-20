@@ -237,7 +237,7 @@ function doRequest(url, btnId, download, callback) {
 					var contentDisposition = this.getResponseHeader('Content-Disposition');
 					// https://stackoverflow.com/a/23054920/
 					//var fileName = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-					var ext = url.substring(url.lastIndexOf(".")+1);
+					var ext = url.substring(url.lastIndexOf(".")+1); // what if query has parameters? they should be POST parameters... no worries
 					console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType, "; Content-Disposition:", contentDisposition);
 					var fileName = reqData.name+"."+ext;
 					saveBlob(oEvent.target.response, fileName, contentType);
