@@ -26,6 +26,7 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.processors.SQLDialectTransformer;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -42,11 +43,11 @@ public class QOnManage {
 		//XXX param: schemas, validate?
 		
 		Properties grabProps = new Properties();
-		grabProps.put("sqldump.schemagrab.proceduresandfunctions", "false");
-		grabProps.put("sqldump.schemagrab.db-specific-features", "true");
+		grabProps.put(JDBCSchemaGrabber.PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, "false");
+		grabProps.put(JDBCSchemaGrabber.PROP_SCHEMAGRAB_DBSPECIFIC, "true");
 		//grabProps.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
-		//grabProps.put("sqldump.schemagrab.schemas", "public");
-		grabProps.put("sqldump.schemagrab.schemas", Utils.join(getModelSchemas(model), ", "));
+		//grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, "public");
+		grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Utils.join(getModelSchemas(model), ", "));
 		List<String> typesList = Arrays.asList(new String[]{"TABLE", "FK", "CONSTRAINT"});
 		DiffManyServlet.setPropForTypes(grabProps, typesList);
 		//log.debug("grab props: "+grabProps);

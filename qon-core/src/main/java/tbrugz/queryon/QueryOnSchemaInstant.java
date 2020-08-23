@@ -6,6 +6,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,8 +43,11 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	private static final Log log = LogFactory.getLog(QueryOnSchemaInstant.class);
 	
 	boolean doSchemaGrabTableGrants = false,
-			doSchemaGrabTableIndexes = false,
-			doSchemaGrabTableTriggers = false;
+			//doSchemaGrabTableIndexes = false,
+			//doSchemaGrabTableTriggers = false,
+			doSchemaGrabTableCheckConstraints = true,
+			doSchemaGrabTableUniqueConstraints = true
+			;
 
 	@Override
 	void dumpObject(DBObjectType type, Properties prop, String modelId, SchemaModel model, String schemaName, String objectName, HttpServletResponse resp)
@@ -193,6 +198,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			newt.setRemarks(rs.getString("REMARKS"));
 			feat.addTableSpecificFeatures(newt, rs);
 
+			Collection<Table> newtcol = Collections.singletonList(newt);
 			//feat.addTableSpecificFeatures(newt, rs);
 			
 			//----
@@ -248,6 +254,15 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 				feat.grabDBTriggers(model, schemaName, name, null, dbmd.getConnection());
 			}
 			*/
+
+			//CONSTRAINTS (unique, check)
+			if(doSchemaGrabTableCheckConstraints) {
+				feat.grabDBCheckConstraints(newtcol, schemaName, tableName, null, dbmd.getConnection());
+			}
+			if(doSchemaGrabTableUniqueConstraints) {
+				feat.grabDBUniqueConstraints(newtcol, schemaName, tableName, null, dbmd.getConnection());
+			}
+
 			if(ret==null) {
 				ret = newt;
 			}
