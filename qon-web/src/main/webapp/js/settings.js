@@ -1,16 +1,16 @@
 var settings = {};
 
 function loadSettings(callbackOk) {
-	$.ajax({
-		url: 'info/settings.jsp',
-		dataType: "text",
-		success: function(data) {
-			var info = JSON.parse(data);
-			//console.log('settings',info);
-			settings = info;
-			if(callbackOk) { callbackOk(); }
-		}
-	});
+	var url = "info/settings.jsp";
+	var request = new XMLHttpRequest();
+	request.open("GET", url, true);
+	request.onload = function(oEvent) {
+		var info = JSON.parse(oEvent.target.responseText);
+		//console.log('settings',info);
+		settings = info;
+		if(callbackOk) { callbackOk(); }
+	}
+	request.send();
 }
 
 function getSetting(key) {
