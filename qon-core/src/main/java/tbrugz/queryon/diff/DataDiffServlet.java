@@ -336,12 +336,12 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	List<String> getKeyCols(Table table) {
 		List<String> keyCols = null;
-		Constraint ctt = table.getPKConstraint();
+		Constraint ctt = SchemaModelUtils.getPK(table);
 		if(ctt!=null) {
 			keyCols = ctt.getUniqueColumns();
 		}
 		if(keyCols==null) {
-			throw new BadRequestException("table '"+table+"' has no PK. diff disabled");
+			throw new BadRequestException("table '"+table+"' has no PK or UNIQUE constraints. diff disabled");
 		}
 		return keyCols;
 	}
