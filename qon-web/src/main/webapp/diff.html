@@ -359,6 +359,20 @@ doDiffUsingJS = function(viewType, inverse) {
 		if(document.getElementById('type').value=='TABLE') {
 			var fromUk = document.getElementById('content-from-uk').textContent;
 			var toUk = document.getElementById('content-to-uk').textContent;
+
+			{
+				var cols = arrayIntersect(fromCols, toCols);
+				//console.log('columns: ',cols);
+				var buf = '';
+				for(var e in cols) {
+					buf += '<label>'+cols[e]+'<input type="checkbox" class="diffcolumn" id="col:'+cols[e]+'" checked/></label>';
+				}
+				if(buf == '') {
+					buf += '<span class="diffwarn">no columns in common</span>';
+				}
+				byId('columns-container').innerHTML = buf;
+			}
+
 			if(toUk && fromUk) {
 				var ddc = byId('datadiff-container');
 				ddc.style.display = 'block';
@@ -368,13 +382,6 @@ doDiffUsingJS = function(viewType, inverse) {
 				var ddsbtn = document.getElementById('doDataDiffSqlBtn');
 				//ddsbtn.style.display = 'initial';
 				ddsbtn.href = getDataDiffUrl();
-				var cols = arrayIntersect(fromCols, toCols);
-				//console.log('columns: ',cols);
-				var buf = '';
-				for(var e in cols) {
-					buf += '<label>'+cols[e]+'<input type="checkbox" class="diffcolumn" id="col:'+cols[e]+'" checked/></label>';
-				}
-				byId('columns-container').innerHTML = buf;
 			}
 			else {
 				document.getElementById('ddldiff-message').style.display='initial';
@@ -894,6 +901,16 @@ toggleCode = function() {
 		text-decoration: none;
 		background-color: whitesmoke;
 	}*/
+	.diffwarn {
+		border: 1px solid #999;
+		/* background-color: whitesmoke;
+		background-color: #f99; */
+		background-color: #fb4;
+		padding: 3px 9px 3px 9px;
+		font-weight: bold;
+		font-style: italic;
+		margin: 0px 1px 0px 1px;
+	}
 	
 	#diffstats {
 		font-family: monospace;
@@ -930,22 +947,15 @@ toggleCode = function() {
 		background-color: #aaa;
 		line-height: 1.7em;
 	}
-	
-	#datadiff-container label {
-		padding: 3px;
-		border: 1px solid #999;
-		background: #ccc;
+	#datadiff-container > div > div {
+		margin-top: 2px;
 	}
 	
-	#ddldiff-message {
+	#datadiff-container label {
+		padding: 0 1px 0 2px;
 		border: 1px solid #999;
-		/* background-color: whitesmoke;
-		background-color: #f99; */
-		background-color: #fb4;
-		padding: 3px 9px 3px 9px;
-		font-weight: bold;
-		font-style: italic;
-		margin: 0px 1px 0px 1px;
+		background: #ccc;
+		display: inline-block;
 	}
 	
 	#dialog {
@@ -1078,7 +1088,7 @@ toggleCode = function() {
 		<div id="datadiff-controls" class="content-elem">
 			<input id="doDataDiffBtn" class="content-btn external" type="button" value="diff data (html)" onClick="doDataDiff();"/>
 			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" value="diff data (sql)" onClick="doDataDiff('sql');"/>
-			<span id="ddldiff-message" class="content-btn">relation has no PK or UK for data diffing</span>
+			<span id="ddldiff-message" class="content-btn diffwarn">relation has no PK or UK for data diffing</span>
 		</div>
 	</div>
 	

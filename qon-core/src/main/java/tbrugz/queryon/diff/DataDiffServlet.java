@@ -133,17 +133,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			connSource = DBUtil.initDBConn(prop, modelISource);
 			connTarget = DBUtil.initDBConn(prop, modelIdTarget);
 
-			Map<String,String[]> reqParams = req.getParameterMap();
 			final Map<String, String[]> cols2ignore = new HashMap<String, String[]>();
 			final Map<String, String[]> altUk = new HashMap<String, String[]>();
 			final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 			final Map<String, String[]> filterNotIn = new HashMap<String, String[]>();
+
+			Map<String,String[]> reqParams = req.getParameterMap();
 			for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
 				String key = entry.getKey();
 				String[] value = entry.getValue();
 				
 				RequestSpec.setMultiParam(PREFIX_IGNORECOL, key, value, cols2ignore);
 				RequestSpec.setMultiParam(PREFIX_ALTERNATE_UK, key, value, altUk);
+				//filters
 				RequestSpec.setMultiParam(PREFIX_FILTER_IN, key, value, filterIn);
 				RequestSpec.setMultiParam(PREFIX_FILTER_NOT_IN, key, value, filterNotIn);
 			}
@@ -168,15 +170,26 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			List<Column> cols = DataDiff.getCommonColumns(tSource, tTarget);
 			String[] colarr = cols2ignore.get(obj.getName());
 			if(colarr!=null) {
-				List<String> ignoreCols = Arrays.asList( colarr );
+				List<String> ignoreCols = new ArrayList<String>();
+				ignoreCols.addAll(Arrays.asList( colarr ));
+				List<String> ignoredCols = new ArrayList<String>();
+
 				int ignored = 0;
 				for(int i=cols.size()-1;i>=0;i--) {
-					if(ignoreCols.contains( cols.get(i).getName() )) {
+					String colName = cols.get(i).getName();
+					if(ignoreCols.contains( colName )) {
 						cols.remove(i);
+						ignoreCols.remove(colName);
+						ignoredCols.add(colName);
 						ignored++;
 					}
 				}
-				log.info("ignored cols ["+obj.getName()+"/#"+ignored+"]: "+Arrays.asList(colarr)+"");
+				if(ignoreCols.size()>0) {
+					String message = "ignorecols not found: "+ignoreCols+" [obj="+obj.getName()+"; #"+ignoreCols.size()+"]";
+					log.warn(message);
+					throw new IllegalArgumentException(message);
+				}
+				log.info("ignored cols ["+obj.getName()+"/#"+ignored+"]: "+ignoredCols);
 			}
 			String columnsForSelect = DataDiff.getColumnsForSelect(cols);
 			List<String> keyColsSource = getKeyCols(tSource);
@@ -192,6 +205,18 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			String[] tableAltUk = altUk.get(obj.getName());
 			if(tableAltUk!=null) {
 				keyCols = Arrays.asList(tableAltUk);
+				List<String> commonCols = getColumnNames(DataDiff.getCommonColumns(tSource, tTarget));
+				
+				for(int i=keyCols.size()-1;i>=0;i--) {
+					String colName = keyCols.get(i);
+					if(!commonCols.contains( colName )) {
+						String message = "keyCols/altuk: column not found: "+colName+" [commonCols="+commonCols+" ; keyCols="+keyCols+"]";
+						log.warn(message);
+						throw new IllegalArgumentException(message);
+					}
+				}
+
+				log.info("keyCols/altuk: "+keyCols);
 			}
 			Table table = tSource;
 			
@@ -204,18 +229,23 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			String sqlTarget = null;
 			
 			List<String> filters = new ArrayList<String>();
-			{
+			List<Object> parameters = new ArrayList<Object>();
+			/*{
 				String sqlFilterIn = createSqlFilter(filterIn, "in", obj.getName());
 				if(sqlFilterIn!=null) { filters.add(sqlFilterIn); }
 			}
 			{
 				String sqlFilterNotIn = createSqlFilter(filterNotIn, "not in", obj.getName());
 				if(sqlFilterNotIn!=null) { filters.add(sqlFilterNotIn); }
-			}
+			}*/
+
+			addSqlInFilter(filterIn, "in", obj.getName(), filters, parameters);
+			addSqlInFilter(filterNotIn, "not in", obj.getName(), filters, parameters);
+
 			String whereClause = Utils.join(filters, " and ");
 			if("".equals(whereClause)) { whereClause = null; }
 			else {
-				log.info("whereClause: "+whereClause);
+				log.debug("whereClause: "+whereClause);
 			}
 			
 			if(tableAltUk!=null) {
@@ -240,7 +270,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				log.debug("filename: "+filename+" mimetype: "+ds.getMimeType());
 				firstObject = false;
 			}
-			runDiff(connSource, connTarget, sqlSource, sqlTarget, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, limit, resp.getWriter());
+			runDiff(connSource, connTarget, sqlSource, sqlTarget, parameters, table, keyCols, modelISource, modelIdTarget, ds, dmlTypes, limit, resp.getWriter());
 			
 			}
 		}
@@ -266,10 +296,10 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 
-	void runDiff(Connection connSource, Connection connTarget, String sqlSource, String sqlTarget, NamedDBObject table, List<String> keyCols,
+	void runDiff(Connection connSource, Connection connTarget, String sqlSource, String sqlTarget, List<Object> parameters, NamedDBObject table, List<String> keyCols,
 			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Integer limit, Writer writer) throws SQLException, IOException {
-		ResultSet rsSource = runQuery(connSource, sqlSource, modelIdSource, getQualifiedName(table));
-		ResultSet rsTarget = runQuery(connTarget, sqlTarget, modelIdTarget, getQualifiedName(table));
+		ResultSet rsSource = runQuery(connSource, sqlSource, parameters, modelIdSource, getQualifiedName(table));
+		ResultSet rsTarget = runQuery(connTarget, sqlTarget, parameters, modelIdTarget, getQualifiedName(table));
 		
 		// testing column types equality
 		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData());
@@ -346,9 +376,15 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		return keyCols;
 	}
 	
-	ResultSet runQuery(Connection conn, String sql, String modelId, String tableName) {
+	ResultSet runQuery(Connection conn, String sql, List<Object> parameters, String modelId, String tableName) {
 		try {
+			log.debug("runQuery:\nsql: "+sql+"\nparameters: "+parameters);
 			PreparedStatement stmt = conn.prepareStatement(sql);
+			if(parameters!=null) {
+				for(int i=0;i<parameters.size();i++) {
+					stmt.setObject(i+1, parameters.get(i));
+				}
+			}
 			return stmt.executeQuery();
 		}
 		catch(SQLException e) {
@@ -391,12 +427,23 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		return dmlTypes;
 	}
+
+	/* see: Table.getColumnNames() */
+	static List<String> getColumnNames(List<Column> columns) {
+		if(columns==null) { return null; }
+		List<String> ret = new ArrayList<String>();
+		for(Column c: columns) {
+			ret.add(c.getName());
+		}
+		return ret;
+	}
 	
 	void setupProperties(Properties prop) {
 		loopLimit = Utils.getPropLong(prop, PROP_LIMIT_MAX, Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT, DEFAULT_LOOP_LIMIT));
 		//log.info("loopLimit = "+loopLimit);
 	}
 	
+	/*
 	static final Pattern allowedNumbers = Pattern.compile("[\\d]+");
 	static final Pattern allowedStrings = Pattern.compile("[\\w]*");
 	
@@ -427,5 +474,24 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		return Utils.join(filters, "\n and ");
 	}
-	
+	*/
+
+	void addSqlInFilter(final Map<String, String[]> valueMap, String compareExpression, String relationName,
+			List<String> filters, List<Object> parameters) {
+		if(valueMap==null || valueMap.size()==0) { return; }
+		
+		for(String col: valueMap.keySet()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" (");
+			String[] values = valueMap.get(col);
+			for(int i=0;i<values.length;i++) {
+				sb.append((i>0?", ":"") + "?");
+				String value = values[i];
+				parameters.add(value);
+			}
+			sb.append(")");
+			filters.add(sb.toString());
+		}
+	}
+
 }

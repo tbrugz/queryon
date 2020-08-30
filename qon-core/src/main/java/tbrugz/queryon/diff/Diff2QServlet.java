@@ -105,7 +105,7 @@ public class Diff2QServlet extends DataDiffServlet {
 	
 	void runDiff(Connection connSource, Connection connTarget, String sql, NamedDBObject table, List<String> keyCols,
 			String modelIdSource, String modelIdTarget, DiffSyntax ds, List<DataDiffType> ddTypes, Integer limit, Writer writer) throws SQLException, IOException {
-		runDiff(connSource, connTarget, sql, sql, table, keyCols, modelIdSource, modelIdTarget, ds, ddTypes, limit, writer);
+		runDiff(connSource, connTarget, sql, sql, null, table, keyCols, modelIdSource, modelIdTarget, ds, ddTypes, limit, writer);
 	}
 
 }
