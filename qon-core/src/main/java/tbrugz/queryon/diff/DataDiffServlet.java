@@ -71,17 +71,16 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	static final String PREFIX_IGNORECOL = "ignorecol:";
 	static final String PREFIX_ALTERNATE_UK = "altuk:";
+
 	static final String PREFIX_FILTER_IN = "fin:";
 	static final String PREFIX_FILTER_NOT_IN = "fnin:";
+	static final String PREFIX_FILTER_GT = "fgt:";
+	static final String PREFIX_FILTER_GE = "fge:";
+	static final String PREFIX_FILTER_LT = "flt:";
+	static final String PREFIX_FILTER_LE = "fle:";
 	
 	//final boolean instant = true;
 	long loopLimit = DEFAULT_LOOP_LIMIT;
-	
-	//XXXdone: add param columnsToIgnore - for each table: ignorecol:TABLE2=COL2&ignorecol:TABLE2=COL3
-	//XXXdone: add alternateUk - for each table: ?altuk:TABLE2=COL2&altuk:TABLE2=COL3
-	//XXXdone: add dml operations: INSERT,UPDATE,DELETE
-	//XXXdone: add filters (fin, fnin)
-	//TODO: filters: use bind parameters
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -137,6 +136,10 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			final Map<String, String[]> altUk = new HashMap<String, String[]>();
 			final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 			final Map<String, String[]> filterNotIn = new HashMap<String, String[]>();
+			final Map<String, String> filterGt = new HashMap<String, String>();
+			final Map<String, String> filterGe = new HashMap<String, String>();
+			final Map<String, String> filterLt = new HashMap<String, String>();
+			final Map<String, String> filterLe = new HashMap<String, String>();
 
 			Map<String,String[]> reqParams = req.getParameterMap();
 			for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
@@ -148,6 +151,10 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				//filters
 				RequestSpec.setMultiParam(PREFIX_FILTER_IN, key, value, filterIn);
 				RequestSpec.setMultiParam(PREFIX_FILTER_NOT_IN, key, value, filterNotIn);
+				RequestSpec.setUniParam(PREFIX_FILTER_GT, key, value[0], filterGt);
+				RequestSpec.setUniParam(PREFIX_FILTER_GE, key, value[0], filterGe);
+				RequestSpec.setUniParam(PREFIX_FILTER_LT, key, value[0], filterLt);
+				RequestSpec.setUniParam(PREFIX_FILTER_LE, key, value[0], filterLe);
 			}
 			String dmlOps = req.getParameter(PARAM_DATADIFFTYPES);
 			List<DataDiffType> dmlTypes = getDataDiffTypes(dmlOps);
@@ -241,6 +248,10 @@ public class DataDiffServlet extends AbstractHttpServlet {
 
 			addSqlInFilter(filterIn, "in", obj.getName(), filters, parameters);
 			addSqlInFilter(filterNotIn, "not in", obj.getName(), filters, parameters);
+			addSqlFilter(filterGt, ">", obj.getName(), filters, parameters);
+			addSqlFilter(filterGe, ">=", obj.getName(), filters, parameters);
+			addSqlFilter(filterLt, "<", obj.getName(), filters, parameters);
+			addSqlFilter(filterLe, "<=", obj.getName(), filters, parameters);
 
 			String whereClause = Utils.join(filters, " and ");
 			if("".equals(whereClause)) { whereClause = null; }
@@ -490,6 +501,19 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				parameters.add(value);
 			}
 			sb.append(")");
+			filters.add(sb.toString());
+		}
+	}
+
+	void addSqlFilter(final Map<String, String> valueMap, String compareExpression, String relationName,
+			List<String> filters, List<Object> parameters) {
+		if(valueMap==null || valueMap.size()==0) { return; }
+		
+		for(String col: valueMap.keySet()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" ?");
+			String value = valueMap.get(col);
+			parameters.add(value);
 			filters.add(sb.toString());
 		}
 	}
