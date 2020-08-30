@@ -9,9 +9,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
@@ -78,6 +80,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	static final String PREFIX_FILTER_GE = "fge:";
 	static final String PREFIX_FILTER_LT = "flt:";
 	static final String PREFIX_FILTER_LE = "fle:";
+	static final String PREFIX_FILTER_NULL = "fnull:";
+	static final String PREFIX_FILTER_NOT_NULL = "fnotnull:";
 	
 	//final boolean instant = true;
 	long loopLimit = DEFAULT_LOOP_LIMIT;
@@ -140,6 +144,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			final Map<String, String> filterGe = new HashMap<String, String>();
 			final Map<String, String> filterLt = new HashMap<String, String>();
 			final Map<String, String> filterLe = new HashMap<String, String>();
+			final Set<String> filterNull = new HashSet<String>();
+			final Set<String> filterNotNull = new HashSet<String>();
 
 			Map<String,String[]> reqParams = req.getParameterMap();
 			for(Map.Entry<String,String[]> entry: reqParams.entrySet()) {
@@ -155,6 +161,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				RequestSpec.setUniParam(PREFIX_FILTER_GE, key, value[0], filterGe);
 				RequestSpec.setUniParam(PREFIX_FILTER_LT, key, value[0], filterLt);
 				RequestSpec.setUniParam(PREFIX_FILTER_LE, key, value[0], filterLe);
+				RequestSpec.setBooleanParam(PREFIX_FILTER_NULL, key, filterNull);
+				RequestSpec.setBooleanParam(PREFIX_FILTER_NOT_NULL, key, filterNotNull);
 			}
 			String dmlOps = req.getParameter(PARAM_DATADIFFTYPES);
 			List<DataDiffType> dmlTypes = getDataDiffTypes(dmlOps);
@@ -252,6 +260,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			addSqlFilter(filterGe, ">=", obj.getName(), filters, parameters);
 			addSqlFilter(filterLt, "<", obj.getName(), filters, parameters);
 			addSqlFilter(filterLe, "<=", obj.getName(), filters, parameters);
+			addSqlBoolFilter(filterNull, "is null", obj.getName(), filters);
+			addSqlBoolFilter(filterNotNull, "is not null", obj.getName(), filters);
 
 			String whereClause = Utils.join(filters, " and ");
 			if("".equals(whereClause)) { whereClause = null; }
@@ -514,6 +524,17 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression+" ?");
 			String value = valueMap.get(col);
 			parameters.add(value);
+			filters.add(sb.toString());
+		}
+	}
+
+	void addSqlBoolFilter(final Set<String> valueSet, String compareExpression, String relationName,
+			List<String> filters) {
+		if(valueSet==null || valueSet.size()==0) { return; }
+		
+		for(String col: valueSet) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(SQL.sqlIdDecorator.get(col)+" "+compareExpression);
 			filters.add(sb.toString());
 		}
 	}
