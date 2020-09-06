@@ -82,6 +82,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	static final String PREFIX_FILTER_LE = "fle:";
 	static final String PREFIX_FILTER_NULL = "fnull:";
 	static final String PREFIX_FILTER_NOT_NULL = "fnotnull:";
+	static final String PREFIX_FILTER_LIKE = "flk:";
+	static final String PREFIX_FILTER_NOT_LIKE = "fnlk:";
 	
 	//final boolean instant = true;
 	long loopLimit = DEFAULT_LOOP_LIMIT;
@@ -140,6 +142,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			final Map<String, String[]> altUk = new HashMap<String, String[]>();
 			final Map<String, String[]> filterIn = new HashMap<String, String[]>();
 			final Map<String, String[]> filterNotIn = new HashMap<String, String[]>();
+			final Map<String, String[]> filterLike = new HashMap<String, String[]>();
+			final Map<String, String[]> filterNotLike = new HashMap<String, String[]>();
 			final Map<String, String> filterGt = new HashMap<String, String>();
 			final Map<String, String> filterGe = new HashMap<String, String>();
 			final Map<String, String> filterLt = new HashMap<String, String>();
@@ -157,6 +161,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 				//filters
 				RequestSpec.setMultiParam(PREFIX_FILTER_IN, key, value, filterIn);
 				RequestSpec.setMultiParam(PREFIX_FILTER_NOT_IN, key, value, filterNotIn);
+				RequestSpec.setMultiParam(PREFIX_FILTER_LIKE, key, value, filterLike);
+				RequestSpec.setMultiParam(PREFIX_FILTER_NOT_LIKE, key, value, filterNotLike);
 				RequestSpec.setUniParam(PREFIX_FILTER_GT, key, value[0], filterGt);
 				RequestSpec.setUniParam(PREFIX_FILTER_GE, key, value[0], filterGe);
 				RequestSpec.setUniParam(PREFIX_FILTER_LT, key, value[0], filterLt);
@@ -256,6 +262,8 @@ public class DataDiffServlet extends AbstractHttpServlet {
 
 			addSqlInFilter(filterIn, "in", obj.getName(), filters, parameters);
 			addSqlInFilter(filterNotIn, "not in", obj.getName(), filters, parameters);
+			addSqlLikeFilter(filterLike, "like", obj.getName(), filters, parameters);
+			addSqlLikeFilter(filterNotLike, "not like", obj.getName(), filters, parameters);
 			addSqlFilter(filterGt, ">", obj.getName(), filters, parameters);
 			addSqlFilter(filterGe, ">=", obj.getName(), filters, parameters);
 			addSqlFilter(filterLt, "<", obj.getName(), filters, parameters);
@@ -512,6 +520,20 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			}
 			sb.append(")");
 			filters.add(sb.toString());
+		}
+	}
+
+	void addSqlLikeFilter(final Map<String, String[]> valueMap, String compareExpression, String relationName,
+			List<String> filters, List<Object> parameters) {
+		if(valueMap==null || valueMap.size()==0) { return; }
+		
+		for(String col: valueMap.keySet()) {
+			String[] values = valueMap.get(col);
+			for(int i=0;i<values.length;i++) {
+				String filter = SQL.sqlIdDecorator.get(col)+" "+compareExpression+" ?";
+				filters.add(filter);
+				parameters.add(values[i]);
+			}
 		}
 	}
 

@@ -1188,7 +1188,7 @@ public class RequestSpec {
 		ret.put("flt", filterLessThan);
 		ret.put("fle", filterLessOrEqual);
 		ret.put("fin", filterIn);
-		ret.put("fnin", filterLike);
+		ret.put("fnin", filterNotIn);
 		ret.put("flk", filterLike);
 		ret.put("fnlk", filterNotLike);
 		return ret;
