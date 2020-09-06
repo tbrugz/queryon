@@ -631,6 +631,7 @@ getDataDiffUrl = function(syntax) {
 	var opUpd = byId('update').checked;
 	var opDel = byId('delete').checked;
 	var opEq = byId('equals').checked;
+	//var opsArr = []; // join()
 	if(!opIns || !opUpd || !opDel || !opEq) {
 		dmlops = "&dmlops=" + (opIns?"INSERT,":"") + (opUpd?"UPDATE,":"") + (opDel?"DELETE,":"") + (opEq?"EQUALS,":"");
 	}
@@ -650,6 +651,7 @@ getDataDiffUrl = function(syntax) {
 		//console.log(item);
 		filtersStr += '&'+item.name+"="+encodeURIComponent(item.value);
 	}
+	//console.log("filtersStr:", filtersStr);
 
 	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
 		+ document.getElementById('object').value
@@ -914,6 +916,9 @@ updateFromFilters = function() {
 		border: 1px solid #999;
 		background-color: whitesmoke;
 	}
+	input.content-btn.mainaction {
+		background-color: #92DA88;
+	}
 	label.content-btn {
 		border: 1px solid #999;
 		background-color: whitesmoke;
@@ -1098,7 +1103,7 @@ updateFromFilters = function() {
 
 	<div id="ddldiff-container">
 		<div id="ddldiff-controls" class="content-elem">
-			<input id="getDdlDiffBtn" class="content-btn" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
+			<input id="getDdlDiffBtn" class="content-btn mainaction" type="button" value="get DDL diff" onclick="getDDLdiff();"/>
 			<input id="applyDdlDiffBtn" class="content-btn" type="button" value="apply DDL diff" onclick="getDDLdiff('true');" style="background-color: rgb(253, 114, 95);"/>
 		</div>
 		<!-- TODO (if has changes?,) option to call DiffServlet-Apply ... -->
@@ -1131,8 +1136,8 @@ updateFromFilters = function() {
 	
 		</div>
 		<div id="datadiff-controls" class="content-elem">
-			<input id="doDataDiffBtn" class="content-btn external" type="button" value="diff data (html)" onClick="doDataDiff();"/>
-			<input id="doDataDiffSqlBtn" class="content-btn external" type="button" value="diff data (sql)" onClick="doDataDiff('sql');"/>
+			<input id="doDataDiffBtn" class="content-btn external mainaction" type="button" value="diff data (html)" onClick="doDataDiff();"/>
+			<input id="doDataDiffSqlBtn" class="content-btn external mainaction" type="button" value="diff data (sql)" onClick="doDataDiff('sql');"/>
 			<span id="ddldiff-message" class="content-btn diffwarn">relation has no PK or UK for data diffing</span>
 		</div>
 	</div>
