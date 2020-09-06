@@ -33,8 +33,16 @@ if(typeof Bloodhound != 'undefined') {
 	bhvalues.initialize();
 }
 
-function addFilterDialog(selectedCol) {
+function addFilterDialog(selectedCol, columns) {
 	var select = document.getElementById('objects');
+	if(select == null) {
+		// diff.html
+		select = document.getElementById('object');
+	}
+	if(select == null) {
+		log.warn("element #objects/#object not found");
+		return;
+	}
 	var id = select.options[select.selectedIndex].value;
 	if(!id) {
 		alert('no object selected!');
@@ -44,7 +52,7 @@ function addFilterDialog(selectedCol) {
 	dialogCont.style.display = 'block';
 	var dialog = document.getElementById('dialog');
 	dialog.style.display = 'block';
-	var cols = getColumnNames('content');
+	var cols = columns ? columns : getColumnNames('content');
 
 	var selectHTML = "<select name='fin-column' id='fin-column' onchange='refreshAutocomplete()'>";
 	for(var i=0;i<cols.length;i++) {
@@ -144,7 +152,8 @@ function addFilterIn() {
 	var col = sel.value;
 	var operator = document.getElementById('fil-operator').value;
 	var value = document.getElementById('fin-value').value;
-	var colType = filterGetColumnTypes()[sel.selectedIndex];
+	var colTypes = filterGetColumnTypes();
+	var colType = colTypes ? colTypes[sel.selectedIndex] : null;
 
 	addFilterWithValues(col, operator, value, colType);
 }

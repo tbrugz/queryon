@@ -22,6 +22,8 @@
 	<script src="js/jsdifflib/difflib.js"></script>
 	<script src="js/jsdifflib/diffview.js"></script>
 	<script src="js/menu.js"></script>
+	<script src="js/filter.js"></script>
+	<script src="js/queryon-b.js"></script> <!-- XXX filter.js needs it, but maybe should not -->
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
@@ -301,6 +303,9 @@ doClear = function() {
 	mblock = document.getElementById('content-to-msg');
 	mblock.innerHTML = '';
 	mblock.style.display = 'none';
+
+	var filters = document.getElementById('filters');
+	filters.innerHTML = '';
 	
 	document.getElementById('ddldiff-container').style.display = 'none';
 	document.getElementById('datadiff-container').style.display = 'none';
@@ -610,6 +615,16 @@ getDDLdiff = function(apply) {
 	});
 }
 
+getDiffColumns = function() {
+	var ret = [];
+	var cols = document.querySelectorAll('#columns-container input');
+	var objName = byId('object')[byId('object').selectedIndex].innerText;
+	for(var i=0; i<cols.length; i++) {
+		ret.push(cols[i].id.substring(cols[i].id.indexOf(":")+1));
+	}
+	return ret;
+}
+
 getDataDiffUrl = function(syntax) {
 	var dmlops = "";
 	var opIns = byId('insert').checked;
@@ -628,6 +643,13 @@ getDataDiffUrl = function(syntax) {
 		}
 	}
 	//console.log("ignorecols",ignorecols);
+	var filters = document.querySelectorAll('.filter');
+	var filtersStr = "";
+	for (var i = 0; i < filters.length; ++i) {
+		var item = filters[i];
+		//console.log(item);
+		filtersStr += '&'+item.name+"="+encodeURIComponent(item.value);
+	}
 
 	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
 		+ document.getElementById('object').value
@@ -635,7 +657,9 @@ getDataDiffUrl = function(syntax) {
 		+ '?modelSource='+document.getElementById('modelSource').value
 		+ '&modelTarget='+document.getElementById('modelTarget').value
 		+ dmlops
-		+ (ignorecols.length>0 ? "&" + ignorecols.join("&") : "");
+		+ (ignorecols.length>0 ? "&" + ignorecols.join("&") : "")
+		+ filtersStr
+		;
 	;
 }
 
@@ -650,7 +674,7 @@ function updateState() {
 	select = document.getElementById('modelTarget');
 	var modelTarget = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	select = document.getElementById('schema');
-	var schema = select.options[select.selectedIndex].value;
+	var schema = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	select = document.getElementById('type');
 	var type = select.options[select.selectedIndex].value;
 	select = document.getElementById('object');
@@ -791,6 +815,11 @@ toggleCode = function() {
 		t.style.display='none';
 		btn.innerHTML = '[+]';
 	}
+}
+
+updateFromFilters = function() {
+	//updateState();
+	//makeHrefs();
 }
 
 	</script>
@@ -948,7 +977,7 @@ toggleCode = function() {
 		line-height: 1.7em;
 	}
 	#datadiff-container > div > div {
-		margin-top: 2px;
+		margin-top: 3px;
 	}
 	
 	#datadiff-container label {
@@ -957,7 +986,16 @@ toggleCode = function() {
 		background: #ccc;
 		display: inline-block;
 	}
-	
+
+	#filters-container {
+		background-color: #666;
+		padding: 7px;
+		margin-top: 5px;
+	}
+	#filters .filter-label {
+		display: block;
+	}
+
 	#dialog {
 		right: 20%;
 	}
@@ -1084,6 +1122,13 @@ toggleCode = function() {
 				Columns to diff:
 				<span id="columns-container"></span>
 			</div>
+			<div id="filters-container">
+				<button type="submit" value="" onclick="addFilterDialog(null, getDiffColumns());" title="add filter">
+					+<i class="fa fa-filter"></i>
+				</button>
+				<div id="filters"></div>
+			</div>
+	
 		</div>
 		<div id="datadiff-controls" class="content-elem">
 			<input id="doDataDiffBtn" class="content-btn external" type="button" value="diff data (html)" onClick="doDataDiff();"/>

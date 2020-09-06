@@ -583,6 +583,7 @@ function getColumnsRemarks() {
 
 function getColumnsTypesFromHash() {
 	var rel = getCurrentRelation('objects');
+	if(rel==null) { return null; }
 	var arr = getScalarArrayFromValue(rel.columnTypes);
 	var ret = [];
 	for(var i=0;i<arr.length;i++) {
@@ -675,6 +676,7 @@ function doDelete(selectId, key, containerId, messagesId, callback, callbackErro
 
 function getCurrentRelation(selectId) {
 	var select = document.getElementById(selectId);
+	if(!select) { return null; }
 	var id = select.options[select.selectedIndex].value;
 	return relationsHash[id];
 }
