@@ -3,7 +3,7 @@ queryon
 =======
 
 A REST-like API that follows the naked objects pattern. A bit like a 'naked database objects' API.
-Depends on [sqldump](https://bitbucket.org/tbrugz/sqldump)
+Depends on [sqldump](https://github.com/tbrugz/sqldump)
 
 Database objects are defined by a properties file. See
 [queryon.template.properties](qon-core/src/main/java/queryon.template.properties)
@@ -27,7 +27,7 @@ Building:
 
 	mvn install
 
-Important: QueryOn usually depends on the latest version of [sqldump](https://bitbucket.org/tbrugz/sqldump),
+Important: QueryOn usually depends on the latest version of [sqldump](https://github.com/tbrugz/sqldump),
 so you may need to build it first - and publish it to your local maven repo (or you may get it from the
 [sonatype snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/))
 
