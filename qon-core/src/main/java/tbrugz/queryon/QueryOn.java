@@ -268,6 +268,8 @@ public class QueryOn extends HttpServlet {
 	public static final String METHOD_DELETE = "DELETE";
 	
 	public static final String UTF8 = "UTF-8";
+
+	public static final String QON_PROJECT_URL = "https://github.com/tbrugz/queryon";
 	
 	protected final Properties prop = new ParametrizedProperties();
 	protected DumpSyntaxUtils dsutils;

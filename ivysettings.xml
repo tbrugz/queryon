@@ -7,7 +7,7 @@
 	<resolvers>
 		<!--ibiblio name="aduana" root="http://repo.aduna-software.org/maven2/releases/" m2compatible="true" /-->
 		<ibiblio name="apache-snapshots" root="https://repository.apache.org/content/groups/snapshots/" m2compatible="true" />
-		<ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/tip/" m2compatible="true" />
+		<ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/master/" m2compatible="true" />
 		<filesystem name="local-mvn-publish" m2compatible="true">
 			<artifact pattern="${mvn.repository.dir}/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" />
 		</filesystem>

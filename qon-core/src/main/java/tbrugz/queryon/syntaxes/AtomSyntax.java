@@ -15,6 +15,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.QueryOn;
+
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.XMLDataDump;
 import tbrugz.sqldump.util.SQLUtils;
@@ -38,7 +40,7 @@ public class AtomSyntax extends XMLDataDump implements WebSyntax {
 	static final String ATOM_PREFIX = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<feed xmlns=\"http://www.w3.org/2005/Atom\">";
 	static final String ATOM_SUFFIX = "</feed>";
 	
-	static final String ATOM_GENERATOR = "QueryOn: Atom Syntax - https://bitbucket.org/tbrugz/queryon";
+	static final String ATOM_GENERATOR = "QueryOn: Atom Syntax - "+QueryOn.QON_PROJECT_URL;
 	
 	static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 	
