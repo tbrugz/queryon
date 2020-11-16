@@ -165,6 +165,13 @@
 			<version>${sqlite.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>8.4.1.jre8</version>
+			<scope>runtime</scope>
+		</dependency>
+		
 		<!--
 		oracle driver might not be included in war and be freely redistributed (but is available on maven central)
 		license: https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc8/19.3.0.0/ojdbc8-19.3.0.0.pom

@@ -2250,7 +2250,7 @@ public class QueryOn extends HttpServlet {
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		preprocessParameters(reqspec, relation, pk);
-			
+		
 		SQL sql = SQL.createInsertSQL(relation);
 
 		Set<String> columns = new HashSet<String>();
@@ -2379,10 +2379,15 @@ public class QueryOn extends HttpServlet {
 		}
 		
 		// http://stackoverflow.com/questions/1915166/how-to-get-the-insert-id-in-jdbc
-		ResultSet generatedKeys = st.getGeneratedKeys();
-		if (generatedKeys.next()) {
-			List<String> colVals = getGeneratedKeys(generatedKeys);
-			setGeneratedKeys(reqspec, resp, colVals);
+		try {
+			ResultSet generatedKeys = st.getGeneratedKeys();
+			if(generatedKeys!=null && generatedKeys.next()) {
+				List<String> colVals = getGeneratedKeys(generatedKeys);
+				setGeneratedKeys(reqspec, resp, colVals);
+			}
+		}
+		catch(SQLException e) {
+			log.warn("doInsert: getGeneratedKeys: "+e.getMessage());
 		}
 		
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
