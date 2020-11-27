@@ -1777,10 +1777,10 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
-			String message = "Error executing procedure/fuction "+eo.getQualifiedName()+": ";
-			//log.warn(message+e);
-			log.debug(message+e.getMessage(), e);
-			throw new SQLException(message, e);
+			String message = "Error executing procedure/function "+eo.getQualifiedName()+": ";
+			//log.warn("doExecute: "+message+e);
+			log.debug("doExecute: "+message+e.getMessage(), e);
+			throw new SQLException(message+e.getMessage(), e);
 		}
 		finally {
 			ConnectionUtil.closeConnection(conn);
@@ -2413,7 +2413,7 @@ public class QueryOn extends HttpServlet {
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
-			//e.printStackTrace();
+			log.debug("doInsert: SQLException: "+e, e);
 			//throw new InternalServerException("SQL Error: "+e, e);
 			throw e;
 		}

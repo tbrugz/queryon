@@ -45,8 +45,8 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	boolean doSchemaGrabTableGrants = false,
 			//doSchemaGrabTableIndexes = false,
 			//doSchemaGrabTableTriggers = false,
-			doSchemaGrabTableCheckConstraints = true,
-			doSchemaGrabTableUniqueConstraints = true
+			doSchemaGrabTableCheckConstraints = true, //XXX use properties
+			doSchemaGrabTableUniqueConstraints = true //XXX use properties
 			;
 
 	@Override
@@ -198,6 +198,14 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			newt.setRemarks(rs.getString("REMARKS"));
 			feat.addTableSpecificFeatures(newt, rs);
 
+			if(ret==null) {
+				ret = newt;
+			}
+			else {
+				rs.close();
+				throw new IllegalStateException("more than 1 table with same name? ["+fullTableName+"]");
+			}
+
 			Collection<Table> newtcol = Collections.singletonList(newt);
 			//feat.addTableSpecificFeatures(newt, rs);
 			
@@ -263,13 +271,6 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 				feat.grabDBUniqueConstraints(newtcol, schemaName, tableName, null, dbmd.getConnection());
 			}
 
-			if(ret==null) {
-				ret = newt;
-			}
-			else {
-				rs.close();
-				throw new IllegalStateException("more than 1 table with same name? ["+fullTableName+"]");
-			}
 			//----
 			/*boolean added = tables.add(newt);
 			if(!added) {
