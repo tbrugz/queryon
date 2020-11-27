@@ -32,6 +32,8 @@ Example with PostgreSQL: `QON_JDBC_URL="jdbc:postgresql://localhost/database" QO
 
 Example with MySQL: `QON_JDBC_URL="jdbc:mysql://localhost/classicmodels" QON_JDBC_USER=mysql QON_JDBC_PASSWORD=s3cr3t mvn jetty:run`
 
+Example with MSSQL Server: `QON_JDBC_URL="jdbc:sqlserver://localhost;database=AdvertureWorks;encrypt=false" QON_JDBC_USER=sa QON_JDBC_PASSWORD=yourStrongPassword. mvn jetty:run`
+
 * navigate to <http://localhost:8888>
 
 

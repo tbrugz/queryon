@@ -58,9 +58,9 @@ mssql server
 -----
 
 * creating container for mssql server:
-  `docker run --name <container-name> -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrongPassword' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest`
+  `docker run --name <container-name> -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrongPassword.' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest`
 
 * using sqlcmd to connect to mssql server:
-  `docker exec -it <container-name> /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P yourStrongPassword`
+  `docker exec -it <container-name> /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P yourStrongPassword.`
 
 ref: <https://hub.docker.com/_/microsoft-mssql-server>
