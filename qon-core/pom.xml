@@ -260,10 +260,16 @@
       <scope>provided</scope>
     </dependency> -->
 
+    <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jaxb.version}</version>
+        <scope>compile</scope>
+    </dependency>
     <!--<dependency>
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
-        <version>${jaxb.version>}</version>
+        <version>${jaxb.version}</version>
         <scope>compile</scope>
     </dependency>-->
 
