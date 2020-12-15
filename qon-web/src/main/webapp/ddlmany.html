@@ -194,8 +194,8 @@ getDDLdiff = function(apply) {
 			var content = data;
 			if(content=='') {
 				content = (syntax=='patch')?
-					'# no changes':
-					'-- no changes';
+					'# no content':
+					'-- no content';
 			}
 			block.innerHTML = safeTags(content);
 			block.style.display = 'block';
@@ -235,11 +235,11 @@ function updateState() {
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
 
-	var select = document.getElementById('syntax');
-	var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	//var select = document.getElementById('syntax');
+	//var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	
 	if(model && schema) {
-		history.replaceState(null, null, "#"+model+"/"+schemas+"/"+types+"/"+syntax);
+		history.replaceState(null, null, "#"+model+"/"+schemas+"/"+types); //+"/"+syntax);
 	}
 }
 
@@ -267,10 +267,10 @@ function refreshSelectsState() {
 			setSelectMultiOptions(type, tVals);
 		}
 		//syntax
-		if(parts[3]) {
+		/*if(parts[3]) {
 			var syntax = document.getElementById('syntax');
 			syntax.value = parts[3];
-		}
+		}*/
 	}
 }
 
