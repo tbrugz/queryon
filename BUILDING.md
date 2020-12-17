@@ -25,3 +25,5 @@ other useful maven goals
 * `mvn versions:display-plugin-updates -DallowAnyUpdates=false -DallowMajorUpdates=false`
 
 * `mvn javadoc:test-javadoc`
+
+* `mvn org.owasp:dependency-check-maven:6.0.3:check` / `mvn org.owasp:dependency-check-maven:6.0.3:aggregate`
