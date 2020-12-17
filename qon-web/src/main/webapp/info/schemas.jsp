@@ -23,13 +23,13 @@ public String normalize(String s) {
 	SchemaModel sm = SchemaModelUtils.getModel(application, modelId);
 	Set<String> names = new TreeSet<String>();
 	if(sm!=null) {
-	Set<Table> ts = sm.getTables();
-	for(Table t: ts) { names.add(normalize(t.getSchemaName())); }
-	Set<View> vs = sm.getViews();
-	for(View v: vs) { names.add(normalize(v.getSchemaName())); }
-	Set<ExecutableObject> eos = sm.getExecutables();
-	for(ExecutableObject eo: eos) { names.add(normalize(eo.getSchemaName())); }
-	//XXX: add FKs, indexes, sequences, synonyms, triggers ??
+		Set<Table> ts = sm.getTables();
+		for(Table t: ts) { names.add(normalize(t.getSchemaName())); }
+		Set<View> vs = sm.getViews();
+		for(View v: vs) { names.add(normalize(v.getSchemaName())); }
+		Set<ExecutableObject> eos = sm.getExecutables();
+		for(ExecutableObject eo: eos) { names.add(normalize(eo.getSchemaName())); }
+		//XXX: add FKs, indexes, sequences, synonyms, triggers ??
 	}
 
 	Map<String, List<String>> schemasByModel = (Map<String, List<String>>) application.getAttribute(QueryOn.ATTR_SCHEMAS_MAP);
@@ -67,13 +67,7 @@ public String normalize(String s) {
 	}
 
 	List<DBObjectType> objtypes = new ArrayList<DBObjectType>();
-	{
-		/*Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-		Connection conn = DBUtil.initDBConn(prop, modelId);
-		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
-		feat.get
-		conn.close();*/
-		
+	if(sm!=null) {
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sm.getSqlDialect());
 		//System.out.println("feat: "+feat+" dialect: "+sm.getSqlDialect());
 		List<DBObjectType> ots = feat.getSupportedObjectTypes();

@@ -71,7 +71,7 @@ $.ajax({
 	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
-		//console.log(json);
+		//console.log("env.jsp", json);
 		if(json.models) {
 			loadSelect(json.models, 'model');
 		}
@@ -85,6 +85,7 @@ $.ajax({
 		/*if(json.types) {
 			loadSelect(json.types, 'type');
 		}*/
+		updateUIModelsContainer();
 	}
 });
 
@@ -103,6 +104,7 @@ loadSchemas = function(model) {
 				//XXX: merge model's schemas?
 				//mergeSelect(json.schemas, 'schema', null, function(data) { return data+' ('+model+')'; } );
 				joinSchemas();
+				updateUIModelsContainer();
 			}
 		}
 	});
@@ -146,13 +148,17 @@ onSyntaxChanged = function() {
 	updateState();
 }
 
-doDiff = function() {
+doDdlMany = function() {
 	doClear();
 	getDDLdiff();
 }
 
 doClear = function() {
 	document.getElementById('content-container').style.display = 'none';
+}
+
+isMultiModel = function() {
+	return Object.keys(schemasByModel).length > 1;
 }
 
 getDDLdiff = function(apply) {
@@ -171,8 +177,9 @@ getDDLdiff = function(apply) {
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ types + '/'
 		+ syntax
-		+'?model='+document.getElementById('model').value
-		+'&action=debugDumpModel'
+		+ '?'
+		+ (isMultiModel() ? ('model='+document.getElementById('model').value) : '' )
+		+ '&action=debugDumpModel'
 		;
 	console.log("getDDLdiff: url=", url);
 	btnActionStart('go-button');
@@ -271,6 +278,15 @@ function refreshSelectsState() {
 			var syntax = document.getElementById('syntax');
 			syntax.value = parts[3];
 		}*/
+	}
+}
+
+updateUIModelsContainer = function() {
+	if(isMultiModel()) {
+		document.getElementById('models-container').style.display = 'inline-block';
+	}
+	else {
+		document.getElementById('models-container').style.display = 'none';
 	}
 }
 
@@ -474,7 +490,7 @@ setSelectMultiOptions = function(select, values) {
 	</label>
 	
 	<span id="navbar-prop">
-		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doDiff();"/>
+		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doDdlMany();"/>
 		<input type="button" value="clear" onclick="doClear();"/>
 	</span>
 
