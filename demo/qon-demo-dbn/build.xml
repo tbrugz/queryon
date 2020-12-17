@@ -154,9 +154,14 @@
 	</target>
 
 	<target name="run-sqlrun-h2-dropdatabase">
+		<!-- see also: run-removedatabase-h2 -->
 		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true">
 			<arg value="-propfile=scripts/sqlrun.h2-drop.properties"/>
 		</java>
+	</target>
+
+	<target name="run-removedatabase-h2">
+		<delete dir="${basedir}/data/h2"/>
 	</target>
 
 	<target name="run-sqlrun-derby">
