@@ -20,9 +20,7 @@ Subject currentUser = ShiroUtils.getSubject(prop, request);
 Gson gson = new Gson();
 boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 
-//if(! permitted) {
 out.write(sqd.get("permitted")+": "+permitted+",\n");
-//}
 
 %>
 "models-info": {
@@ -32,7 +30,7 @@ out.write(sqd.get("permitted")+": "+permitted+",\n");
 Map<String, SchemaModel> models = (Map<String, SchemaModel>) application.getAttribute(QueryOn.ATTR_MODEL_MAP);
 int i = 0;
 if(models!=null && models.entrySet()!=null) {
-	if(ShiroUtils.isPermitted(currentUser, "MANAGE")) {
+	if(permitted) {
 		for(Map.Entry<String, SchemaModel> entry: models.entrySet()) {
 			if(i>0) { out.write(",\n"); }
 			String modelId = entry.getKey()!=null?entry.getKey():"null";
