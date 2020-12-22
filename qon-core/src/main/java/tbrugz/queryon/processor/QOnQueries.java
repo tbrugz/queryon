@@ -1,5 +1,8 @@
 package tbrugz.queryon.processor;
 
+import com.google.gson.Gson;
+
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +18,7 @@ import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
+import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -34,6 +39,7 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.queryon.util.WebUtils;
 
 public class QOnQueries extends AbstractUpdatePlugin {
 
@@ -53,6 +59,8 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";*/
 
 	static final String PIPE_SPLIT = "\\|";
+
+	static final String ACTION_READ_QUERY = "readQuery";
 	
 	ServletContext servletContext;
 	
@@ -227,14 +235,23 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	
 	public static Map<String, String> readQueryFromDatabase(Properties prop, String modelId, String schemaName, String name) throws SQLException, ClassNotFoundException, NamingException {
 		String qonQueriesTable = AbstractUpdatePlugin.getProperty(prop, modelId, QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
+		Connection conn = null;
+		conn = DBUtil.initDBConn(prop, modelId);
+		try {
+			return readQueryFromDatabase(conn, qonQueriesTable, schemaName, name);
+		}	
+		finally {
+			ConnectionUtil.closeConnection(conn);
+		}
+	}
+
+	public static Map<String, String> readQueryFromDatabase(Connection conn, String qonQueriesTable, String schemaName, String name) throws SQLException {
 		String sql = "select schema_name, name, query, remarks, roles_filter, version_seq\n" +
 				"from "+qonQueriesTable+"\n" +
 				"where (disabled = 0 or disabled is null)\n" +
 				"and schema_name = ? and name = ?";
 		
-		Connection conn = null;
 		try {
-			conn = DBUtil.initDBConn(prop, modelId);
 			ResultSet rs = null;
 			PreparedStatement st = conn.prepareStatement(sql);
 			st.setString(1, schemaName);
@@ -259,9 +276,6 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		}
 		catch(SQLException e) {
 			throw new SQLException("Error fetching queries ["+e.getMessage()+"; sql: "+sql+"]", e);
-		}
-		finally {
-			ConnectionUtil.closeConnection(conn);
 		}
 		
 	}
@@ -334,5 +348,38 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		return ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
 	}
 	
-}
+	@Override
+	public void executePluginAction(RequestSpec reqspec, HttpServletResponse resp) throws IOException, SQLException {
+		log.info("executePluginAction: params: "+reqspec.getParams());
+		//params: QOnQueries, <action>, <object>
+		if(reqspec.getParams().size() != 3) {
+			throw new BadRequestException("Must have 3 parameters");
+		}
 
+		if(ACTION_READ_QUERY.equals(reqspec.getParams().get(1))) {
+			String tablename = getQonQueriesTable();
+			String fullObjectName = reqspec.getParams().get(2).toString();
+
+			String[] partz = fullObjectName.split("\\.");
+			if(partz.length>2) {
+				throw new BadRequestException("Malformed object name: "+fullObjectName);
+			}
+			String schemaName = null;
+			String objectName = partz[0];
+			if(partz.length==2) {
+				schemaName = partz[0];
+				objectName = partz[1];
+			}
+
+			Map<String, String> map = readQueryFromDatabase(conn, tablename, schemaName, objectName);
+			if(map==null) {
+				throw new NotFoundException("Query not found: "+fullObjectName);
+			}
+			WebUtils.writeJsonResponse(map, resp);
+		}
+		else {
+			throw new BadRequestException("Unknown action '"+reqspec.getParams().get(1)+"'");
+		}
+	}
+
+}

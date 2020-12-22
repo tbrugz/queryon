@@ -26,6 +26,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.queryon.util.WebUtils;
 
 public class AuthServlet extends AbstractHttpServlet {
 
@@ -65,13 +66,13 @@ public class AuthServlet extends AbstractHttpServlet {
 			else {
 				ui = beanActions.getCurrentUser(req);
 			}
-			writeBean(ui, resp);
+			WebUtils.writeJsonResponse(ui, resp);
 		}
 		else if(pathInfo.equals(ACTION_LOGIN)) {
 			checkHttpMethod(req, QueryOn.METHOD_POST);
 			try {
 				UserInfo ui = beanActions.doLogin(getParameterMap(req));
-				writeBean(ui, resp);
+				WebUtils.writeJsonResponse(ui, resp);
 			}
 			catch(Exception e) { // ShiroException | AuthenticationException
 				resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -134,11 +135,13 @@ public class AuthServlet extends AbstractHttpServlet {
 		return ret;
 	}
 	
+	/*
 	void writeBean(Object bean, HttpServletResponse resp) throws IOException {
 		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
 		Gson gson = new Gson();
 		resp.getWriter().write(gson.toJson(bean));
 	}
+	*/
 
 	@Override
 	public String getDefaultUrlMapping() {

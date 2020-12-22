@@ -140,6 +140,10 @@ public class ShiroUtils {
 		return currentUser;
 	}
 	
+	public static void checkPermission(Subject subject, String permission) {
+		checkPermission(subject, permission, null);
+	}
+
 	public static void checkPermission(Subject subject, String permission, String object) {
 		if(! isPermitted(subject, permission, object)) {
 			throwPermissionException(subject, permission, object);

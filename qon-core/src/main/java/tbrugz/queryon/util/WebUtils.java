@@ -1,5 +1,7 @@
 package tbrugz.queryon.util;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -159,5 +161,11 @@ public class WebUtils {
 		}
 		return getLine(t.getCause());
 	}
-	
+
+	public static void writeJsonResponse(Object bean, HttpServletResponse resp) throws IOException {
+		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
+		Gson gson = new Gson();
+		resp.getWriter().write(gson.toJson(bean));
+	}
+
 }

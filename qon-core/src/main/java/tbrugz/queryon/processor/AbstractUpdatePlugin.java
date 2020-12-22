@@ -1,12 +1,20 @@
 package tbrugz.queryon.processor;
 
+import java.io.IOException;
 import java.util.Properties;
+import java.sql.SQLException;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.util.Utils;
 
 public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements UpdatePlugin {
 
@@ -35,5 +43,12 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 		if(ret!=null) { return ret; }
 		return prop.getProperty(prefix+suffix, defaultValue);
 	}
-	
+
+	/**
+	 * Executes "direct" plugin action
+	 */
+	public void executePluginAction(RequestSpec reqspec, HttpServletResponse resp) throws IOException, SQLException {
+		throw new UnsupportedOperationException(Utils.join(reqspec.getParams(), "/"));
+	}
+
 }

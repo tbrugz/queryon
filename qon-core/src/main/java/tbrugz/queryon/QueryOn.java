@@ -134,12 +134,20 @@ public class QueryOn extends AbstractHttpServlet {
 		VALIDATE_ANY,
 		EXPLAIN_ANY,
 		MANAGE,
+		PLUGIN_ACTION,
 		// not actions but special (global) permissions:
 		INSERT_ANY,
 		UPDATE_ANY,
 		DELETE_ANY,
 		;
 		
+		public String slug() {
+			switch(this) {
+				case PLUGIN_ACTION: return "PluginAction";
+			}
+			return this.name();
+		}
+
 		public boolean isModelRequired() {
 			return !this.equals(MANAGE);
 		}
@@ -295,7 +303,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
 	protected ServletContext servletContext = null;
-	
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -963,6 +971,10 @@ public class QueryOn extends AbstractHttpServlet {
 			case MANAGE:
 				doManage(model, reqspec, req, resp);
 				break;
+			case PLUGIN_ACTION: {
+				doPluginAction(model, reqspec, currentUser, resp);
+				}
+				break;
 			default:
 				throw new BadRequestException("Unknown action type: "+atype); 
 			}
@@ -1030,6 +1042,9 @@ public class QueryOn extends AbstractHttpServlet {
 				throw new BadRequestException(object+": method must be POST");
 			}
 			return ActionType.SQL_ANY;
+		}
+		if(ActionType.PLUGIN_ACTION.slug().equals(object)) {
+			return ActionType.PLUGIN_ACTION;
 		}
 		if(ActionType.MANAGE.name().toLowerCase().equals(object)) {
 			return ActionType.MANAGE;
@@ -2039,7 +2054,7 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		//XXX: should 'onDelete' come before sql-delete? so SQL error/rollback has no influence on it?
 		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
-			if(plugins!=null) {
+		if(plugins!=null) {
 			for(UpdatePlugin up: plugins) {
 				if(up.accepts(relation)) {
 					//up.setProperties(prop);
@@ -2511,7 +2526,43 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		throw new BadRequestException("unknown action: "+action);
 	}
-	
+
+	void doPluginAction(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {
+		if(reqspec.params.size()<1) {
+			throw new BadRequestException("parameters needed");
+		}
+		
+		//log.info("doPluginAction: method: "+reqspec.getMethod()+" ; params: "+reqspec.params);
+		String pluginParam = String.valueOf( reqspec.params.get(0) );
+		List<UpdatePlugin> plugins = updatePlugins.get(reqspec.modelId);
+		boolean executed = false;
+		if(plugins!=null) {
+			for(UpdatePlugin up: plugins) {
+				String pluginClass = up.getClass().getSimpleName();
+				if(pluginParam.equals(pluginClass)) {
+					ShiroUtils.checkPermission(currentUser, ActionType.PLUGIN_ACTION+":"+pluginParam);
+					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
+					try {
+						up.setConnection(conn);
+						up.executePluginAction(reqspec, resp);
+						executed = true;
+					}
+					catch(RuntimeException e) {
+						log.warn("doPluginAction: Error: "+e);
+						throw new BadRequestException("Plugin action error: "+e);
+					}
+					finally {
+						ConnectionUtil.closeConnection(conn);
+					}
+				}
+			}
+		}
+
+		if(!executed) {
+			throw new NotFoundException("Unknown plugin '"+pluginParam+"'");
+		}
+	}
+
 	protected void postService(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) {
 	}
 	

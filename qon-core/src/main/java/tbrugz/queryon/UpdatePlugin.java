@@ -1,9 +1,12 @@
 package tbrugz.queryon;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.sql.Connection;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -36,5 +39,11 @@ public interface UpdatePlugin {
 	 * Deletes relation from model
 	 */
 	public void onDelete(Relation relation, RequestSpec reqspec);
-	
+
+	/**
+	 * Executes "direct" plugin action
+	 */
+	public void executePluginAction(RequestSpec reqspec, HttpServletResponse resp)
+		throws IOException, SQLException;
+
 }
