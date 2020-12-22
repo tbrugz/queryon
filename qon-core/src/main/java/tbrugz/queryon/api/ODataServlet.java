@@ -578,4 +578,9 @@ public class ODataServlet extends BaseApiServlet {
 		resp.getWriter().write(json);
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/odata/*";
+	}
+
 }

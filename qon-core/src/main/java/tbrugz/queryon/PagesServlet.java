@@ -277,4 +277,9 @@ public class PagesServlet extends AbstractHttpServlet {
 		}
 	}*/
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/p/*";
+	}
+
 }

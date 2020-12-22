@@ -318,4 +318,9 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	}
 	*/
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/graphql/*";
+	}
+
 }

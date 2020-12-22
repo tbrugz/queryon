@@ -786,4 +786,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		return "file".equals(type) || "object".equals(type);
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/swagger/*";
+	}
+
 }

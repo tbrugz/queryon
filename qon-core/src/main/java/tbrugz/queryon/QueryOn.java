@@ -115,7 +115,7 @@ import tbrugz.sqldump.util.Utils;
  * ?TODO: prevent sql injection
  */
 @MultipartConfig
-public class QueryOn extends HttpServlet {
+public class QueryOn extends AbstractHttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -3166,5 +3166,15 @@ public class QueryOn extends HttpServlet {
 		shiroEnabled = shiroEnabledLocal;
 		return shiroEnabled;
 	}
-	
+
+	@Override
+	protected void doProcess(HttpServletRequest req, HttpServletResponse resp) {
+		throw new UnsupportedOperationException("doProcess");
+	};
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/q/*";
+	}
+
 }

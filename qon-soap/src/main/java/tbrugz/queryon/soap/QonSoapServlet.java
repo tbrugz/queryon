@@ -1215,4 +1215,9 @@ public class QonSoapServlet extends BaseApiServlet {
 		return true;
 	}
 	
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/soap/*";
+	}
+
 }

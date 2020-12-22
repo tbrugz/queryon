@@ -31,7 +31,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 /*
  * XXX: add POST method?
  */
-public class QueryOnSchema extends HttpServlet {
+public class QueryOnSchema extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnSchema.class);
@@ -193,4 +193,14 @@ public class QueryOnSchema extends HttpServlet {
 		return lastDialect;
 	}
 	
+	@Override
+	protected void doProcess(HttpServletRequest req, HttpServletResponse resp) {
+		throw new UnsupportedOperationException("doProcess");
+	};
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/qoschema/*";
+	}
+
 }

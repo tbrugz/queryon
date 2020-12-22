@@ -108,4 +108,9 @@ public class Diff2QServlet extends DataDiffServlet {
 		runDiff(connSource, connTarget, sql, sql, null, table, keyCols, modelIdSource, modelIdTarget, ds, ddTypes, limit, writer);
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/diff2q/*";
+	}
+
 }

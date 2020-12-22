@@ -415,4 +415,10 @@ public class DiffServlet extends AbstractHttpServlet {
 		}
 		return hooks;
 	}
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/qdiff/*";
+	}
+
 }

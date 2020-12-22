@@ -561,4 +561,9 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/datadiff/*";
+	}
+
 }

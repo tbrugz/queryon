@@ -707,4 +707,10 @@ public class WebDavServlet extends BaseApiServlet {
 		log.info("depth = "+req.getHeader(HEADER_DEPTH)+" ; body:\n"+body);
 	}
 	*/
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/webdav/*";
+	}
+
 }

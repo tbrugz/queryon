@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
@@ -286,4 +287,14 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		return ret;
 	}
 	
+	@Override
+	protected void doProcess(HttpServletRequest req, HttpServletResponse resp) {
+		throw new UnsupportedOperationException("doProcess");
+	};
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/qos/*";
+	}
+
 }

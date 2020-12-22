@@ -446,4 +446,10 @@ public class QueryOnInstant extends QueryOn {
 		return ret;
 	}
 	*/
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/qoi/*";
+	}
+
 }

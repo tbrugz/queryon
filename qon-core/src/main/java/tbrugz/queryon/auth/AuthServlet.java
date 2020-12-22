@@ -140,4 +140,9 @@ public class AuthServlet extends AbstractHttpServlet {
 		resp.getWriter().write(gson.toJson(bean));
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/qauth/*";
+	}
+
 }

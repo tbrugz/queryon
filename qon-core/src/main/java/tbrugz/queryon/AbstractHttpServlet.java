@@ -50,4 +50,6 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 
 	protected abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;
 	
+	public abstract String getDefaultUrlMapping();
+
 }

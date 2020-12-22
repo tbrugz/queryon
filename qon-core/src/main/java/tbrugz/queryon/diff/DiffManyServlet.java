@@ -266,4 +266,9 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		}
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/diffmany/*";
+	}
+
 }
