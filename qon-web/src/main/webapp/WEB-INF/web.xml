@@ -212,6 +212,16 @@
 		<url-pattern>/anondav/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>InfoServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.InfoServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>InfoServlet</servlet-name>
+		<url-pattern>/qinfo/*</url-pattern>
+	</servlet-mapping>
+
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>

@@ -69,7 +69,7 @@ public class AuthServlet extends AbstractHttpServlet {
 			WebUtils.writeJsonResponse(ui, resp);
 		}
 		else if(pathInfo.equals(ACTION_LOGIN)) {
-			checkHttpMethod(req, QueryOn.METHOD_POST);
+			WebUtils.checkHttpMethod(req, QueryOn.METHOD_POST);
 			try {
 				UserInfo ui = beanActions.doLogin(getParameterMap(req));
 				WebUtils.writeJsonResponse(ui, resp);
@@ -87,11 +87,11 @@ public class AuthServlet extends AbstractHttpServlet {
 		}
 	}
 	
-	void checkHttpMethod(HttpServletRequest req, String method) {
+	/*void checkHttpMethod(HttpServletRequest req, String method) {
 		if(!req.getMethod().equalsIgnoreCase(method)) {
 			throw new BadRequestException("method not allowed: "+req.getMethod());
 		}
-	}
+	}*/
 	
 	static boolean isContentTypeJson(String contentType) {
 		return contentType!=null && contentType.startsWith(ResponseSpec.MIME_TYPE_JSON);

@@ -167,5 +167,11 @@ public class WebUtils {
 		Gson gson = new Gson();
 		resp.getWriter().write(gson.toJson(bean));
 	}
+	
+	public static void checkHttpMethod(HttpServletRequest req, String method) {
+		if(!req.getMethod().equalsIgnoreCase(method)) {
+			throw new BadRequestException("method not allowed: "+req.getMethod());
+		}
+	}
 
 }
