@@ -79,19 +79,19 @@ public class InfoServlet extends AbstractHttpServlet {
 		log.info("pathInfo = "+pathInfo);
 		WebUtils.checkHttpMethod(req, QueryOn.METHOD_GET);
 		
-		if(pathInfo.equals("auth")) {
+		if(pathInfo.equals(INFO_AUTH)) {
 			WebUtils.writeJsonResponse(getAuth(req), resp);
 		}
-		else if(pathInfo.equals("env")) {
+		else if(pathInfo.equals(INFO_ENV)) {
 			WebUtils.writeJsonResponse(getEnv(), resp);
 		}
-		else if(pathInfo.equals("schemas")) {
+		else if(pathInfo.equals(INFO_SCHEMAS)) {
 			WebUtils.writeJsonResponse(getSchemas(req), resp);
 		}
-		else if(pathInfo.equals("settings")) {
+		else if(pathInfo.equals(INFO_SETTINGS)) {
 			WebUtils.writeJsonResponse(getSettings(), resp);
 		}
-		else if(pathInfo.equals("status")) {
+		else if(pathInfo.equals(INFO_STATUS)) {
 			WebUtils.writeJsonResponse(getStatus(req), resp);
 		}
 		else {
@@ -335,14 +335,13 @@ public class InfoServlet extends AbstractHttpServlet {
 		boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 		ret.put("permitted", permitted);
 		if(permitted) {
-		
-		Map<String, SchemaModel> models = (Map<String, SchemaModel>) getServletContext().getAttribute(QueryOn.ATTR_MODEL_MAP);
-		if(models!=null && models.entrySet()!=null) {
-			if(permitted) {
+			Map<String, SchemaModel> models = (Map<String, SchemaModel>) getServletContext().getAttribute(QueryOn.ATTR_MODEL_MAP);
+			if(models!=null && models.entrySet()!=null) {
 				for(Map.Entry<String, SchemaModel> entry: models.entrySet()) {
 					String modelId = entry.getKey();
+					if(modelId==null) { modelId = "null"; }
 					//XXX: filter properties if user not logged...
-					modelsInfo.put(entry.getKey(), entry.getValue().getMetadata());
+					modelsInfo.put(modelId, entry.getValue().getMetadata());
 					
 					//qon-tables-warnings
 					Map<String, String> tWarnings = (Map<String, String>) getServletContext().getAttribute(QOnTables.ATTR_TABLES_WARNINGS_PREFIX+"."+modelId);
@@ -369,14 +368,11 @@ public class InfoServlet extends AbstractHttpServlet {
 					}
 				}
 			}
-		}
-
-		Throwable initError = (Throwable) getServletContext().getAttribute(QueryOn.ATTR_INIT_ERROR);
-		if(initError!=null) {
-			modelsInfo.put("init-error", initError.toString());
-		}
-		
-		ret.put("models-info", modelsInfo);
+			Throwable initError = (Throwable) getServletContext().getAttribute(QueryOn.ATTR_INIT_ERROR);
+			if(initError!=null) {
+				modelsInfo.put("init-error", initError.toString());
+			}
+			ret.put("models-info", modelsInfo);
 		}
 		return ret;
 	}

@@ -166,6 +166,9 @@ public class WinstoneAndH2HttpRequestTest {
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
+		/*if(expectedStatus != response1.getStatusLine().getStatusCode()) {
+			System.out.println(">> content:: "+content);
+		}*/
 		Assert.assertEquals(expectedStatus, response1.getStatusLine().getStatusCode());
 		//Assert.assertThat(response1.getStatusLine().getStatusCode(), Matchers.lessThanOrEqualTo(299));
 		/*if(response1.getStatusLine().getStatusCode()>=400) {
@@ -2077,4 +2080,39 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("jspGetEnv: "+getPrettyStringFromJson(content));
 	}
 	
+	@Test
+	public void infoGetSchemas() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/qinfo/schemas");
+		checkJson(content);
+		//System.out.println("infoGetSchemas: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void infoGetSettings() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/qinfo/settings");
+		checkJson(content);
+		//System.out.println("infoGetSettings: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void infoGetStatus() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/qinfo/status");
+		checkJson(content);
+		System.out.println("infoGetStatus: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void infoGetEnv() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/qinfo/env");
+		checkJson(content);
+		//System.out.println("infoGetEnv: "+getPrettyStringFromJson(content));
+	}
+
+	@Test
+	public void infoGetAuth() throws IOException, ParserConfigurationException, SAXException {
+		String content = getContentFromUrl(qonUrl + "/qinfo/auth");
+		checkJson(content);
+		//System.out.println("infoGetAuth: "+getPrettyStringFromJson(content));
+	}
+
 }

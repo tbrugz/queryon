@@ -122,4 +122,14 @@
 		<url-pattern>/webdav/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>InfoServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.InfoServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>InfoServlet</servlet-name>
+		<url-pattern>/qinfo/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>
