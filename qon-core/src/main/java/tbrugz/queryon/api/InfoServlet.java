@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +26,8 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.PagesServlet;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.UpdatePlugin;
+import tbrugz.queryon.auth.AuthActions;
+import tbrugz.queryon.auth.UserInfo;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.processor.QOnExecs;
 import tbrugz.queryon.processor.QOnQueries;
@@ -61,15 +62,12 @@ public class InfoServlet extends AbstractHttpServlet {
 	public static final String INFO_SETTINGS = "settings";
 	public static final String INFO_STATUS = "status";
 
-	//StringQuoterDecorator sqd;
-	//Gson gson;
-
+	/*
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		//sqd = new StringQuoterDecorator("\"");
-		//gson = new Gson();
 	}
+	*/
 	
 	@Override
 	protected void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -81,7 +79,10 @@ public class InfoServlet extends AbstractHttpServlet {
 		log.info("pathInfo = "+pathInfo);
 		WebUtils.checkHttpMethod(req, QueryOn.METHOD_GET);
 		
-		if(pathInfo.equals("env")) {
+		if(pathInfo.equals("auth")) {
+			WebUtils.writeJsonResponse(getAuth(req), resp);
+		}
+		else if(pathInfo.equals("env")) {
 			WebUtils.writeJsonResponse(getEnv(), resp);
 		}
 		else if(pathInfo.equals("schemas")) {
@@ -105,15 +106,9 @@ public class InfoServlet extends AbstractHttpServlet {
 
 	public Map<String, Object> getEnv() {
 		Map<String, Object> ret = new TreeMap<String, Object>();
-		//String models = null;
 		
 		Set<String> modelSet = SchemaModelUtils.getModelIds(getServletContext());
 		ret.put("models", modelSet);
-		//System.out.println(modelSet);
-		/*if(modelSet!=null && modelSet.size()>0 && modelSet.iterator().next()!=null) {
-			models = Utils.join(modelSet, ", ", sqd);
-		}*/
-		//response.setContentType(ResponseSpec.MIME_TYPE_JSON);
 		
 		// XXX add ServiceRegistry class?
 		String[] endpoints = { "QueryOn", "QueryOnSchema", "Diff", "QonPages", "Swagger",
@@ -150,13 +145,6 @@ public class InfoServlet extends AbstractHttpServlet {
 		ret.put("update-plugins", updatePluginsMap);
 
 		return ret;
-		
-		/*
-	"models": [<%= models %>]
-	<% //, "types": [< %//= Utils.join(Arrays.asList(DBObjectType.values()), ", ", sqd) % >] %>
-	,"services": <%= gson.toJson(serviceEndpoints) %>
-	,"update-plugins": <%= gson.toJson(updatePluginsMap) %>		
-		 */
 	}
 	
 	static String normalize(String s) {
@@ -167,7 +155,6 @@ public class InfoServlet extends AbstractHttpServlet {
 	public Map<String, Object> getSchemas(HttpServletRequest request) {
 		Map<String, Object> ret = new TreeMap<String, Object>();
 
-		//StringQuoterDecorator sqd = new StringQuoterDecorator("\"");
 		String modelId = SchemaModelUtils.getModelId(request);
 
 		SchemaModel sm = SchemaModelUtils.getModel(getServletContext(), modelId);
@@ -232,11 +219,6 @@ public class InfoServlet extends AbstractHttpServlet {
 		ret.put("objecttypes", objtypes);
 		
 		return ret;
-		/*
-	"modelschemas": [<%= String.valueOf(Utils.join(names, ", ", sqd)) %>],
-	"schemas": [<%= String.valueOf(Utils.join(schemas, ", ", sqd)) %>],
-	"objecttypes": [<%= String.valueOf(Utils.join(objtypes, ", ", sqd)) %>]
-		*/
 	}
 	
 	public Map<String, Object> getSettings() throws IOException {
@@ -340,13 +322,6 @@ public class InfoServlet extends AbstractHttpServlet {
 		}
 		catch(RuntimeException e) {} 
 		
-		//p2.load(application.getResourceAsStream("/queryon-version.properties"));
-		/*for(Map.Entry<String, String> entry: p2.entrySet()) {
-			if(i>0) { out.write(",\n"); }
-			out.write(sqd.get((String)entry.getKey())+": "+sqd.get((String)entry.getValue()));
-			i++;
-		}*/
-		
 		return ret;
 	}
 	
@@ -357,76 +332,60 @@ public class InfoServlet extends AbstractHttpServlet {
 
 		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
 		Subject currentUser = ShiroUtils.getSubject(prop, request);
-		//Gson gson = new Gson();
 		boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 		ret.put("permitted", permitted);
 		if(permitted) {
 		
 		Map<String, SchemaModel> models = (Map<String, SchemaModel>) getServletContext().getAttribute(QueryOn.ATTR_MODEL_MAP);
-		//int i = 0;
 		if(models!=null && models.entrySet()!=null) {
 			if(permitted) {
 				for(Map.Entry<String, SchemaModel> entry: models.entrySet()) {
-					//if(i>0) { out.write(",\n"); }
-					//String modelId = entry.getKey()!=null?entry.getKey():"null";
 					String modelId = entry.getKey();
-					//out.write(sqd.get(entry.getKey()!=null?entry.getKey():"null")+": "+sqd.get(String.valueOf(entry.getValue().getMetadata())));
 					//XXX: filter properties if user not logged...
-					//out.write(sqd.get(modelId)+": "+gson.toJson(entry.getValue().getMetadata()));
 					modelsInfo.put(entry.getKey(), entry.getValue().getMetadata());
 					
 					//qon-tables-warnings
 					Map<String, String> tWarnings = (Map<String, String>) getServletContext().getAttribute(QOnTables.ATTR_TABLES_WARNINGS_PREFIX+"."+modelId);
 					if(tWarnings!=null && tWarnings.size()>0) {
-						//out.write(",\n");
-						//out.write(sqd.get(modelId+".tables-warnings")+": "+gson.toJson(tWarnings));
 						modelsInfo.put(modelId+".tables-warnings", tWarnings);
-						//i++;
 					}
 					
 					//qon-queries-warnings
 					Map<String, String> qWarnings = (Map<String, String>) getServletContext().getAttribute(QOnQueries.ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId);
 					if(qWarnings!=null && qWarnings.size()>0) {
-						//out.write(",\n");
-						//out.write(sqd.get(modelId+".queries-warnings")+": "+gson.toJson(qWarnings));
 						modelsInfo.put(modelId+".queries-warnings", qWarnings);
-						//i++;
 					}
 
 					//qon-execs-warnings
 					Map<String, String> eWarnings = (Map<String, String>) getServletContext().getAttribute(QOnExecs.ATTR_EXECS_WARNINGS_PREFIX+"."+modelId);
 					if(eWarnings!=null && eWarnings.size()>0) {
-						//out.write(",\n");
-						//out.write(sqd.get(modelId+".execs-warnings")+": "+gson.toJson(eWarnings));
 						modelsInfo.put(modelId+".execs-warnings", eWarnings);
-						//i++;
 					}
 
 					//qon-init-warnings
 					Map<String, String> iWarnings = (Map<String, String>) getServletContext().getAttribute(UpdatePluginUtils.ATTR_INIT_WARNINGS_PREFIX+"."+modelId);
 					if(iWarnings!=null && iWarnings.size()>0) {
-						//out.write(",\n");
-						//out.write(sqd.get(modelId+".init-warnings")+": "+gson.toJson(iWarnings));
 						modelsInfo.put(modelId+".init-warnings", iWarnings);
-						//i++;
 					}
-					
-					//i++;
 				}
 			}
 		}
 
 		Throwable initError = (Throwable) getServletContext().getAttribute(QueryOn.ATTR_INIT_ERROR);
 		if(initError!=null) {
-			//if(i>0) { out.write(",\n"); }
-			//out.write(sqd.get("init-error")+": "+gson.toJson(initError.toString()));
 			modelsInfo.put("init-error", initError.toString());
-			//i++;
 		}
 		
 		ret.put("models-info", modelsInfo);
 		}
 		return ret;
+	}
+	
+	public UserInfo getAuth(HttpServletRequest request) {
+		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		AuthActions beanActions = new AuthActions(prop);
+		UserInfo ui = beanActions.getCurrentUserXtra(request);
+		return ui;
 	}
 
 }
