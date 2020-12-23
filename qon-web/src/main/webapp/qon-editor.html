@@ -1,28 +1,3 @@
-<%@page import="tbrugz.queryon.util.MiscUtils"%>
-<%@page import="tbrugz.queryon.util.WebUtils"%>
-<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@page import="java.util.*"%>
-<%@page import="tbrugz.queryon.util.ShiroUtils"%>
-<%@page import="tbrugz.queryon.processor.QOnQueries"%>
-<%@page import="org.apache.shiro.subject.Subject"%>
-<%@page import="tbrugz.sqldump.datadump.DataDumpUtils"%>
-<%@page import="tbrugz.sqldump.dbmodel.DBIdentifiable"%>
-<%@page import="tbrugz.sqldump.dbmodel.Table"%>
-<%@page import="tbrugz.sqldump.dbmodel.Query"%>
-<%@page import="tbrugz.sqldump.dbmodel.View"%>
-<%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
-<%@page import="tbrugz.queryon.QueryOn"%>
-<%@page import="tbrugz.queryon.util.SchemaModelUtils"%><%
-Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
-Subject currentUser = ShiroUtils.getSubject(prop, request);
-if(!currentUser.isPermitted("SELECT_ANY")) {
-	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-	out.write("permission denied");
-	return;
-}
-modelId = SchemaModelUtils.getModelId(request);
-//System.out.println("modelId: "+modelId+" ; "+(modelId==null));
-%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -40,7 +15,9 @@ modelId = SchemaModelUtils.getModelId(request);
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
 	<script type="text/javascript" src="js/http-post.js"></script>
 	<script type="text/javascript" src="js/qon-util.js"></script>
-	<script src="js/settings.js"></script>
+	<script type="text/javascript" src="js/settings.js"></script>
+	<script type="text/javascript" src="js/auth.js"></script>
+	<script type="text/javascript" src="js/models.js"></script>
 	<script type="text/javascript" src="js/table.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
 <script type="text/javascript">
@@ -48,12 +25,17 @@ modelId = SchemaModelUtils.getModelId(request);
 	var queryOnUrl = 'q';
 	//var processorUrl = 'processor';
 	var qonUrl = 'q/QON_QUERIES';
+	var qonPluginUrl = 'q/PluginAction/QOnQueries/readQuery';
 	var isQuerySaved = false;
-	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;
+	//var modelId = null;
 	var rolesInfo = {};
 	var queryAltered = false;
 	var lastExecutedQuery = null;
 	var utf8par = "utf8=✓";
+
+	function getModelId() {
+		return byId('model').value
+	}
 	
 	function onLoad() {
 		$.ajax({
@@ -80,19 +62,68 @@ modelId = SchemaModelUtils.getModelId(request);
 			}
 		});
 		loadSettings(function() {
+			var modelId = getParameterByName('model', location.search);
+			if(modelId) {
+				byId('modelLabel').style.display = 'inline-block';
+				byId('model').value = modelId;
+			}
 			var table = getModelSetting('queryon.qon-queries', 'table', modelId);
 			if(table) {
 				qonUrl = 'q/'+table;
 			}
+
 			//console.log("modelId: ", modelId, "qonUrl: ", qonUrl);
-			/*var modelId = getParameterByName('model', location.search);
-			if(modelId) {
-				byId('modelLabel').style.display = 'inline-block';
-				byId('model').value = modelId;
-			}*/
-			//updateUI();
+
+			var queryName = getParameterByName('name', location.search);
+			var querySchema = getParameterByName('schema', location.search);
+			if(queryName) {
+				loadQuery(querySchema, queryName);
+			}
+
+			updateUI();
 		});
-		updateUI();
+		loadAuthInfo();
+		//updateUI();
+	}
+
+	function loadAuthInfoCallback() { refreshAuthInfo(); }
+
+	function loadQuery(querySchema, queryName) {
+		var loadUrl = qonPluginUrl;
+		var modelQs = (getModelId()?'?model='+getModelId():'');
+		loadUrl += "/" + (querySchema?querySchema+'.':'') + queryName + modelQs;
+
+		var oReq = new XMLHttpRequest();
+		oReq.onload = function(evt) {
+			var req = evt.target
+			var status = req.status;
+			//actionStop();
+			if(status>=200 && status<300) {
+				var response = JSON.parse(req.responseText);
+				//console.log("loadQuery: ", response);
+				byId('schema').value = response.schema_name;
+				byId('name').value = response.name;
+				byId('remarks').value = response.remarks;
+				byId('optimisticlock').value = response.version_seq;
+				byId('roles').value = response.roles_filter;
+				editor.setValue(response.query, 1);
+				queryAltered = false;
+
+				makeHrefs();
+				validateEditComponents(true);
+			}
+			else {
+				console.log("Error loading pages. status = ", status);//,'; evt = ', evt);
+				//showErrorMessages('messages', evt.target.responseText);
+				errorMessage(evt.target.responseText);
+			}
+		};
+		oReq.onerror = function(evt) {
+			console.warn('Error loading pages. evt = ', evt);
+		}
+		oReq.open("GET", loadUrl);
+		oReq.send(null);
+		//actionStart();
 	}
 
 	function doRun() {
@@ -106,8 +137,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			name : document.getElementById('name').value,
 			sql: sqlString,
 		};
-		if(modelId!=null) {
-			reqData.model = document.getElementById('model').value; // or modelId
+		if(getModelId()) {
+			reqData.model = getModelId();
 		}
 		
 		var params = document.querySelectorAll('.parameter');
@@ -177,8 +208,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			name : document.getElementById('name').value,
 			sql: sqlString
 		}
-		if(modelId!=null) {
-			reqData.model = document.getElementById('model').value; // or modelId
+		if(getModelId()) {
+			reqData.model = getModelId();
 		}
 		
 		var request = $.ajax({
@@ -238,8 +269,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			name : document.getElementById('name').value,
 			sql: sqlString
 		}
-		if(modelId!=null) {
-			reqData.model = document.getElementById('model').value; // or modelId
+		if(getModelId()) {
+			reqData.model = getModelId();
 		}
 		
 		var params = document.querySelectorAll('.parameter');
@@ -314,8 +345,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			"optimisticlock": encodeURIComponent(optimisticlock),
 			"v:VERSION_SEQ": encodeURIComponent(version_seq)
 		}
-		if(modelId!=null) {
-			reqData.model = document.getElementById('model').value; // or modelId
+		if(getModelId()) {
+			reqData.model = getModelId();
 		}
 		
 		var method = "POST"; //post: insert ; patch: update
@@ -353,7 +384,10 @@ modelId = SchemaModelUtils.getModelId(request);
 			infoMessage('query <b>'+name+'</b> successfully saved');
 			//XXX: reload query after save?
 			validateEditComponents(true);
-			history.replaceState(null, null, "?" + (schema!=''?"schema="+schema+"&":"") + "name=" + name + (modelId!=null?"&model="+modelId:"") + ("&" + utf8par) );
+			var modelId = getModelId();
+			history.replaceState(null, null, "?" + (schema!=''?"schema="+schema+"&":"") + "name=" + name +
+				(modelId?"&model="+modelId:"") +
+				("&" + utf8par) );
 			queryAltered = false;
 			updateUI();
 		});
@@ -379,6 +413,7 @@ modelId = SchemaModelUtils.getModelId(request);
 		if(modelId!=null) {
 			data["model"] = modelId;
 		}*/
+		var modelId = getModelId();
 		var deleteUrl = qonUrl + "?" +
 				"p1=" + encodeURIComponent(document.getElementById('name').value) +
 				(modelId!=null ? "&model="+modelId : "");
@@ -395,7 +430,8 @@ modelId = SchemaModelUtils.getModelId(request);
 			closeMessages('messages');
 			infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully removed');
 			validateEditComponents(false);
-			history.replaceState(null, null, "qon-editor.jsp" +(modelId!=null?"?model="+modelId:""));
+			var modelId = getModelId();
+			history.replaceState(null, null, "qon-editor.html" +(modelId!=null?"?model="+modelId:""));
 		});
 
 		request.fail(function(jqXHR, textStatus, errorThrown) {
@@ -613,7 +649,7 @@ modelId = SchemaModelUtils.getModelId(request);
 	
 	function updateUI() {
 		document.getElementById('resultContainer').style.top = (document.getElementById('spec').offsetHeight - 2) + 'px';
-		if(editor) { editor.resize(); }
+		//if(editor) { editor.resize(); }
 	}
 	
 	function refreshRolesInfo() {
@@ -734,18 +770,18 @@ modelId = SchemaModelUtils.getModelId(request);
 		}, "_blank");
 	}
 
-	window.addEventListener('load', function() {
+	/*window.addEventListener('load', function() {
 		if(modelId==null) {
 			//document.getElementById('modelLabel').style.display = 'none';
 			var ml = document.getElementById('modelLabel');
-			ml.innerHTML = '';
+			//ml.innerHTML = '';
 			ml.style.display = 'none';
 		}
-		
-	});
+	});*/
 	
 	window.addEventListener("beforeunload", confirmExit);
-	
+	window.addEventListener('resize', updateUI);
+
 </script>
 <script type="text/javascript">
 	$(document).jkey('f8',function(){
@@ -763,110 +799,20 @@ modelId = SchemaModelUtils.getModelId(request);
 </script>
 </head>
 <body onload="onLoad();">
-<%!
-SchemaModel model = null;
-String modelId = null;
-String schemaName = null;
-String queryName = null;
-String query = "";
-String remarks = "";
-String roles = "";
-String versionSeq = null;
-int numOfParameters = 0;
-boolean queryLoaded = false;
-%>
-
-<%
-model = SchemaModelUtils.getModel(application, modelId);
-boolean convert2utf8 = WebUtils.convertParametersToUtf8(request);
-schemaName = request.getParameter("schema");
-queryName = request.getParameter("name");
-query = "";
-remarks = "";
-roles = "";
-
-if(convert2utf8) {
-	schemaName = MiscUtils.latin1ToUtf8(schemaName);
-	queryName = MiscUtils.latin1ToUtf8(queryName);
-}
-
-numOfParameters = 0;
-queryLoaded = false;
-
-if(queryName!=null) {
-	Map<String, String> qmap = QOnQueries.readQueryFromDatabase(prop, modelId, schemaName, queryName);
-	if(qmap!=null) {
-		schemaName = qmap.get("schema_name");
-		query = qmap.get("query");
-		remarks = qmap.get("remarks");
-		roles = qmap.get("roles_filter");
-		if(roles==null) { roles = ""; }
-		versionSeq = qmap.get("version_seq");
-		queryLoaded = true;
-		//XXX set numOfParameters, parameterNames, parameterOptionals?
-	}
-	else {
-		query = "-- query not found";
-	}
-	/*
-	View v = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getViews(), schemaName, queryName);
-	if(v == null) {
-		v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), queryName);
-	}
-	if(v != null) {
-		if(v instanceof Query) {
-			//XXX: check permission for q.getQuery()? add new action on QueryOn servlet? 
-			Query q = (Query) v;
-			query = q.getQuery();
-		}
-		else {
-			query = "select * from "+v.getFinalQualifiedName();
-		}
-		
-		schemaName = v.getSchemaName();
-		remarks = v.getRemarks();
-		roles = QOnQueries.getGrantsStr(v.getGrants());
-		if(roles==null) { roles = ""; }
-		queryLoaded = true;
-		if(v.getParameterCount()!=null) {
-			numOfParameters = v.getParameterCount();
-		}
-	}
-	else {
-		Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, queryName);
-		if(t != null) {
-			query = "select * from "+t.getFinalQualifiedName();
-			schemaName = t.getSchemaName();
-			remarks = t.getRemarks();
-		}
-		else {
-			query = "-- query not found";
-		}
-	}
-	*/
-}
-if(query==null || query.equals("")) {
-	query = "select *\nfrom table";
-}
-if(schemaName==null) { schemaName = ""; }
-if(queryName==null) { queryName = ""; }
-if(remarks==null) { remarks = ""; }
-//System.out.println("qon-editor.jsp: name: "+queryName+" ; query: "+query);
-%>
 
 <div id="spec">
 <div class="container" id="objectid-container">
 	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Editor</code></span>
-	<label>schema: <input type="text" id="schema" name="schema" value="<%= schemaName %>" onchange="onTextFieldChange();makeHrefs()"/></label>
-	<label>name: <input type="text" id="name" name="name" value="<%= queryName %>" onchange="onTextFieldChange();makeHrefs()"/></label>
-	<label>remarks: <input type="text" id="remarks" name="remarks" value="<%= remarks %>" size="60" onchange="onTextFieldChange();"/></label>
+	<label>schema: <input type="text" id="schema" name="schema" onchange="onTextFieldChange();makeHrefs()"/></label>
+	<label>name: <input type="text" id="name" name="name" onchange="onTextFieldChange();makeHrefs()"/></label>
+	<label>remarks: <input type="text" id="remarks" name="remarks" size="60" onchange="onTextFieldChange();"/></label>
 	<label id="rolesLabel">
 		<span id="rolesLabelText">roles:</span>
-		<input type="text" id="roles" name="roles" value="<%= roles %>"/>
+		<input type="text" id="roles" name="roles"/>
 		<span id="rolesCount" title="# of current allowed roles"></span>
 		<input type="button" id="rolesBtn" value="+/- roles" title="Add/Remove roles" onclick="showRolesDialog()"/>
 	</label>
-	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly" value="<%= modelId %>"/></label>
+	<label id="modelLabel">model: <input type="text" id="model" name="model" readonly="readonly"/></label>
 	
 	<span id="xtra-actions">
 	<span id="actions-container">
@@ -875,17 +821,20 @@ if(remarks==null) { remarks = ""; }
 		<a id="removebutton" href="#" onclick="if(window.confirm('Do you really want to remove query '+document.getElementById('name').value+'?')){doRemove();}" title="Remove Query">remove</a>
 	</span>
 	<span id="help"><a href="reader.html#doc/queries.md" title="Editor's help" target="_blank">?</a></span>
-	<span id="username"><%= currentUser.getPrincipal() %></span>
+	<span id="authinfo">
+		<span id="username"></span>
+		<span id="authaction" style="display: none;"></span>
+	</span>
 	</span>
 </div>
 
-<div id="editor"><%= DataDumpUtils.xmlEscapeText( query ) %></div>
+<div id="editor"></div>
 
 <div class="container">
 	<div id="sqlparams">
 	</div>
 	
-	<input type="hidden" id="optimisticlock" value="<%= versionSeq!=null?String.valueOf(versionSeq):"" %>" />
+	<input type="hidden" id="optimisticlock"/>
 	
 	<div id="button-container">
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate Query (F8)">
@@ -938,16 +887,6 @@ if(remarks==null) { remarks = ""; }
 	editor.setAutoScrollEditorIntoView(true);
 	editor.getSession().on('change', onEditorChange);
 	
-	//setParameters(<%= numOfParameters %>, null, null);
-</script>
-<script type="text/javascript">
-	makeHrefs();
-	validateEditComponents(<%= queryLoaded %>);
-	
-	window.onresize = updateUI;
-	
-	// see: http://stackoverflow.com/questions/19329530/onresize-for-div-elements
-	//byId('editor').onresize = function() { console.log('editor.onresize..'); updateUI(); };
 	byId('editor').onclick = function() {
 		//console.log('editor.onclick'); 
 		updateUI();

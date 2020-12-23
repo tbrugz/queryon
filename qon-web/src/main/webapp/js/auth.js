@@ -46,13 +46,18 @@ function refreshAuthInfo() {
 	var user = document.getElementById('username');
 	user.innerHTML = authInfo.username || '';
 	var auth = document.getElementById('authaction');
-	if(! authInfo.authenticated) {
-		auth.innerHTML = '<a href="'+authGetLoginUrl()+'">login</a>';
-		user.style.display = 'none';
+	if(auth) {
+		if(! authInfo.authenticated) {
+			auth.innerHTML = '<a href="'+authGetLoginUrl()+'">login</a>';
+			user.style.display = 'none';
+		}
+		else {
+			auth.innerHTML = '<a href="'+authGetLogoutUrl()+'">logout</a>';
+			user.style.display = 'inline';
+		}
 	}
 	else {
-		auth.innerHTML = '<a href="'+authGetLogoutUrl()+'">logout</a>';
-		user.style.display = 'inline';
+		console.log("element 'authaction' not avaiable");
 	}
 
 	/*
