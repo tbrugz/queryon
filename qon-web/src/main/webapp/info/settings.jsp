@@ -31,6 +31,8 @@
 			"queryon.web.auth-required",
 			"queryon.web.appname",
 			"queryon.web.login.show",
+			"queryon.web.login-message",
+
 			//"sqldump.datadump.htmlx.dateformat",
 			//"sqldump.datadump.json.dateformat",
 	};
@@ -43,7 +45,8 @@
 	String[] defaultValues = { null, null,
 			QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE, QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
 			null, null,
-			null, null, "true"//, null, null
+			null, null, "true", null,
+			//, null, null
 			};
 	
 	if(exposedKeys.length!=defaultValues.length) {

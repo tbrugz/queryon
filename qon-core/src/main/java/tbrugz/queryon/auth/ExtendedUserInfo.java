@@ -27,8 +27,10 @@ public class ExtendedUserInfo extends UserInfo {
 			permissionList.add(perm.name());
 		}
 		// XXX add APPLYDIFF when instance has only 1 model?
-		for(String mid: modelIds) {
-			permissionList.add("TABLE:APPLYDIFF:"+mid); //XXX null _mid_?
+		if(modelIds!=null) {
+			for(String mid: modelIds) {
+				permissionList.add("TABLE:APPLYDIFF:"+mid); //XXX null _mid_?
+			}
 		}
 		
 		permissions = new ArrayList<String>();

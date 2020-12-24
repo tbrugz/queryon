@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>QueryOn - login</title>
+	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-login.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<script src="js/qon-util.js"></script>
+	<script src="js/settings.js"></script>
+	<script>
+var queryOnUrl = 'q/';
+//var urlSettings = "../qinfo/settings";
+var urlLogin = "qauth/login";
+
+onLoad = function() {
+	//console.log("onLoad...");
+	loadSettings(loadSettingsCallback);
+	// loadAuthInfo(); //?
+}
+
+loadSettingsCallback = function() {
+	//console.log("loadSettingsCallback:", settings);
+	var appname = settings["queryon.web.appname"];
+	var loginMessage = settings["queryon.web.login-message"];
+	if(appname) {
+		byId('appname').innerHTML = appname;
+	}
+	else {
+		byId('appname').innerHTML = "QueryOn";
+	}
+	if(loginMessage) {
+		byId('loginMessage').innerHTML = loginMessage;
+		byId('loginMessageContainer').style.display = 'block';
+	}
+	else {
+		byId('loginMessageContainer').style.display = 'none';
+	}
+}
+
+doLogin = function() {
+	// FormData is always multipart/form-data
+	// https://stackoverflow.com/questions/7542586/new-formdata-application-x-www-form-urlencoded
+	/*var formData = new FormData();
+	formData.append("username", byId("username").value);
+	formData.append("password", byId("password").value);*/
+
+	var payload = "username=" + encodeURIComponent(byId("username").value) +
+		"&password=" + encodeURIComponent(byId("password").value);
+
+	var request = new XMLHttpRequest();
+	request.onload = function(evt) {
+		var req = evt.target
+		var status = req.status;
+		//console.log("doLogin:", status, req.responseText);
+		byId('loginStatusContainer').style.display = 'block';
+		if(status>=200 && status<300) {
+			var redirect = getParameterByName('return', location.search);
+			console.log("doLogin: sucess; redirect=", redirect);
+			byId('loginStatus').innerHTML = "Login Sucessful";
+			byId('loginStatus').className ='information';
+			if(redirect) {
+				location.href = redirect;
+			}
+			/*else {
+				alert("Login sucessful!");
+			}*/
+		}
+		else {
+			byId('loginStatus').innerHTML = req.responseText;
+			byId('loginStatus').className ='warning';
+		}
+	}
+	request.open("POST", urlLogin);
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	//request.send(formData);
+	request.send(payload);
+}
+	</script>
+</head>
+<body onload="onLoad();">
+
+<div class="container">
+<div>
+
+	<div class="title">Login to <span id="appname"></span></div>
+	<hr/>
+	<div id="loginStatusContainer" style="display: none;">
+		<em id="loginStatus"></em>
+		<hr/>
+	</div>
+	<div id="loginMessageContainer" style="display: none;">
+		<div id="loginMessage"></div>
+		<hr/>
+	</div>
+	<form id="loginform">
+		<label>Username: <input type="text" id="username" name="username"/></label>
+		<label>Password: <input type="password" id="password" name="password"/></label>
+		<!-- <input type="checkbox" name="rememberMe" value="true"/>Remember Me? <br/> -->
+		<hr/>
+		<input type="button" value="Submit" onclick="doLogin();">
+	</form>
+	
+</div>
+</div>
+
+</body>

@@ -76,7 +76,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		
 		pathInfo = pathInfo.substring(1);
 		//log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo()+" ; req.getQueryString() = "+req.getQueryString());
-		log.info("pathInfo = "+pathInfo);
+		log.debug("pathInfo = "+pathInfo);
 		WebUtils.checkHttpMethod(req, QueryOn.METHOD_GET);
 		
 		if(pathInfo.equals(INFO_AUTH)) {
@@ -239,6 +239,8 @@ public class InfoServlet extends AbstractHttpServlet {
 				"queryon.web.auth-required",
 				"queryon.web.appname",
 				"queryon.web.login.show",
+				"queryon.web.login-message",
+
 				//"sqldump.datadump.htmlx.dateformat",
 				//"sqldump.datadump.json.dateformat",
 		};
@@ -253,7 +255,8 @@ public class InfoServlet extends AbstractHttpServlet {
 				QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE,
 				QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
 				null, null,
-				null, null, "true"//, null, null
+				null, null, "true", null,
+				//, null, null
 				};
 		
 		if(exposedKeys.length!=defaultValues.length) {

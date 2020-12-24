@@ -37,6 +37,8 @@ public class AuthServlet extends AbstractHttpServlet {
 	public static final String ACTION_CURRENT_USER = "currentUser";
 	public static final String ACTION_LOGIN = "login";
 	public static final String ACTION_LOGOUT = "logout";
+
+	public static final String PARAM_RETURN = "return";
 	
 	boolean currentUserWithExtraInfo = true;
 	
@@ -55,7 +57,7 @@ public class AuthServlet extends AbstractHttpServlet {
 		
 		pathInfo = pathInfo.substring(1);
 		//log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo()+" ; req.getQueryString() = "+req.getQueryString());
-		log.info("pathInfo = "+pathInfo);
+		log.debug("pathInfo = "+pathInfo);
 
 		AuthActions beanActions = new AuthActions(prop);
 		if(pathInfo.equals(ACTION_CURRENT_USER)) {
@@ -81,6 +83,12 @@ public class AuthServlet extends AbstractHttpServlet {
 		}
 		else if(pathInfo.equals(ACTION_LOGOUT)) {
 			beanActions.doLogout();
+			Map<String, String> params = getParameterMap(req);
+			String location = params.get(PARAM_RETURN);
+			if(location!=null) {
+				//log.info("logout, redirect: "+location);
+				resp.sendRedirect(location);
+			}
 		}
 		else {
 			throw new BadRequestException("unknown action: "+pathInfo);
