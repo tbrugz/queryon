@@ -1,0 +1,18 @@
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-files
+
+# TODO: datasources
+
+logging:
+    level:
+        org.apache.shiro: DEBUG
+        #org.apache.shiro.config.Ini: TRACE
+        #org.apache.shiro.realm.text.IniRealm: TRACE
+        org.springframework.boot.context.config.ConfigFileApplicationListener: DEBUG
+        #org.springframework.web: DEBUG
+
+# https://stackoverflow.com/a/50743050/616413 - Embedded tomcat giving failed to scan jars from classloader hierarchy
+#server:
+    #port: 8888
+    #tomcat:
+    #    additional-tld-skip-patterns: '*.jar'
