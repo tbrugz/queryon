@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;

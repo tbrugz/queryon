@@ -124,6 +124,9 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		ServletContext context = req.getServletContext();
 		Properties prop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
 		DumpSyntaxUtils dsutils = (DumpSyntaxUtils) context.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+		if(dsutils==null) {
+			throw new BadRequestException("Service not initialized");
+		}
 
 		//schemes: "http", "https", "ws", "wss"
 		//consumes: A list of MIME types the APIs can consume

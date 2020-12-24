@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /*
  * TODO: init params: add current-server, current-port and/or current-context to path
  */
-public class Cool303RedirectionServlet extends HttpServlet {
+public class Cool303RedirectionServlet extends AbstractHttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	static final Log log = LogFactory.getLog(Cool303RedirectionServlet.class);
@@ -44,6 +43,16 @@ public class Cool303RedirectionServlet extends HttpServlet {
 		
 		log.info("redir to: "+redirTo);
 		resp.setHeader("Location", redirTo);
+	}
+
+	@Override
+	protected void doProcess(HttpServletRequest req, HttpServletResponse resp) {
+		throw new UnsupportedOperationException("doProcess");
+	}
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/id/*";
 	}
 
 }

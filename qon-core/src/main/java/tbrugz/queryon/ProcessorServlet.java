@@ -13,7 +13,6 @@ import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,7 +36,7 @@ import tbrugz.sqldump.util.Utils;
 /*
  * XXXdone: allow only POST method? (not idempotent)
  */
-public class ProcessorServlet extends HttpServlet {
+public class ProcessorServlet extends AbstractHttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(ProcessorServlet.class);
@@ -100,7 +99,8 @@ public class ProcessorServlet extends HttpServlet {
 	 * XXX add all request parameters as properties?
 	 * XXXdone option to write processor's output?
 	 */
-	void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
+	@Override
+	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		String s = req.getPathInfo();
 		if(s==null) {
 			throw new BadRequestException("null pathinfo");
@@ -113,8 +113,16 @@ public class ProcessorServlet extends HttpServlet {
 		String procClasses = parts[1];
 
 		String[] classParts = procClasses.split(",");
-		for(String procClass: classParts) {
-			doProcess(procClass, config.getServletContext(), SchemaModelUtils.getModelId(req), req, resp);
+		try {
+			for(String procClass: classParts) {
+				doProcess(procClass, config.getServletContext(), SchemaModelUtils.getModelId(req), req, resp);
+			}
+		} catch (ClassNotFoundException e) {
+			throw new ServletException(e);
+		} catch (SQLException e) {
+			throw new ServletException(e);
+		} catch (NamingException e) {
+			throw new ServletException(e);
 		}
 	}
 
@@ -299,5 +307,10 @@ public class ProcessorServlet extends HttpServlet {
 		}
 		return ret;
 	}
-	
+
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/processor/*";
+	}
+
 }
