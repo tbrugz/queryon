@@ -6,18 +6,8 @@
 /* globals */
 
 var queryOnUrl = 'q';
-var qonEditorUrl = 'qon-editor.jsp';
+var qonEditorUrl = 'qon-editor.html';
 var processorUrl = 'processor';
-/*var authInfo = {
-		// similar to 'auth/info.jsp'
-		authenticated: false,
-		username: null, //''
-		roles: [ ],
-		permissions: [ ],
-		isAdmin: false,
-		isDev: false
-};*/
-//var settings = {};
 
 /* functions */
 

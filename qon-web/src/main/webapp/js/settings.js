@@ -1,7 +1,7 @@
 var settings = {};
 
 function loadSettings(callbackOk) {
-	var url = "info/settings.jsp";
+	var url = "qinfo/settings";
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
 	request.onload = function(oEvent) {

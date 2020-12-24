@@ -5,7 +5,7 @@ function loadModelStatus(callback) {
 	//console.log("loadModelStatus", callback);
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", callback?callback:loadModelStatusContent);
-	oReq.open("GET", "info/status.jsp");
+	oReq.open("GET", "qinfo/status");
 	oReq.send();
 }
 

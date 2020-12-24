@@ -33,7 +33,7 @@ var queryOnDataDiffUrl = 'datadiff/';
 var doRemoveTrailingWhitespace = true;
 
 /*
- * TODO: get object types by database type (info/objtypes.jsp ?)
+ * TODO: get object types by database type (info/objtypes ?)
  * XXX: show hourglass (?) icon on 'select's & DDL divs
  * XXX: clear way of showing if there are differences between objects (#lines added, changed, removed)
  * XXX: option (xtra button) to show table's row count; compare tables' content
@@ -91,7 +91,7 @@ updateUI = function() {
 }
 
 $.ajax({
-	url: 'info/env.jsp',
+	url: 'qinfo/env',
 	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
@@ -116,7 +116,7 @@ $.ajax({
 
 //TODOne: schemas by model?
 loadSchemas = function(model) {
-	var url = 'info/schemas.jsp'+(model?'?model='+model:'');
+	var url = 'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,

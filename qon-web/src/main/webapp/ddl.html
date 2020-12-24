@@ -76,25 +76,6 @@ loadAuthInfoCallback = function() {
 	refreshAuthInfo();
 }
 
-/*$.ajax({
-	url: 'info/model.jsp',
-	dataType: "text",
-	success: function(data) {
-		var json = JSON.parse(data);
-		//console.log(json);
-		if(json.models) {
-			loadSelect(json.models, 'model');
-		}
-		if(json.models.length>1) {
-			document.getElementById('model').parentNode.style.display = 'inline-block';
-		}
-		for(var i=0;i<json.models.length;i++) {
-			loadSchemas(json.models[i]);
-		}
-		updateSelectedQueryState();
-	}
-});*/
-
 loadModelsContentCallback = function() {
 	//modelsInfo
 	if(modelsInfo) {
@@ -114,7 +95,7 @@ loadModelsContentCallback = function() {
 
 //TODOne: schemas by model?
 loadSchemas = function(model) {
-	var url = 'info/schemas.jsp'+(model?'?model='+model:'');
+	var url = 'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,

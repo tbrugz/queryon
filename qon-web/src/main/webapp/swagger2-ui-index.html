@@ -38,7 +38,8 @@
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
-        url = "../swagger";
+        var path = location.pathname.substring(0, location.pathname.lastIndexOf("/")+1);
+        url = path + "../swagger";
         //url = "http://petstore.swagger.io/v2/swagger.json";
       }
 

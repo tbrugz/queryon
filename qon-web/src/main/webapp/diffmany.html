@@ -67,7 +67,7 @@ makeHrefs = function() {
 }
 
 $.ajax({
-	url: 'info/env.jsp',
+	url: 'qinfo/env',
 	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
@@ -92,7 +92,7 @@ $.ajax({
 
 //TODOne: schemas by model?
 loadSchemas = function(model) {
-	var url = 'info/schemas.jsp'+(model?'?model='+model:'');
+	var url = 'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,

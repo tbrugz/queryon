@@ -1,18 +1,18 @@
 
 var authInfo = {
-		// similar to 'auth/info.jsp'
-		authenticated: false,
-		username: null, //''
-		roles: [ ],
-		permissions: [ ],
-		isAdmin: false,
-		isDev: false,
-		loaded: false  // should be set to 'true' after loading from ajax
+	// similar to 'qauth/info'
+	authenticated: false,
+	username: null, //''
+	roles: [ ],
+	permissions: [ ],
+	isAdmin: false,
+	isDev: false,
+	loaded: false  // should be set to 'true' after loading from ajax
 };
 
 function loadAuthInfo() { //callback?
 	//var url = "qauth/currentUser?ts=" + Date.now();
-	var url = "auth/info.jsp?ts=" + Date.now();
+	var url = "qinfo/auth?ts=" + Date.now();
 	
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
@@ -78,11 +78,11 @@ function refreshAuthInfo() {
 }
 
 function authGetLoginUrl() {
-	return 'auth/login.jsp?return='+encodeURIComponent(window.location.href);
+	return 'login.html?return='+encodeURIComponent(window.location.href);
 }
 
 function authGetLogoutUrl() {
-	return 'auth/logout.jsp?return='+encodeURIComponent(window.location.href);
+	return 'qauth/logout?return='+encodeURIComponent(window.location.href);
 }
 
 function authHasPermission(permission) {
