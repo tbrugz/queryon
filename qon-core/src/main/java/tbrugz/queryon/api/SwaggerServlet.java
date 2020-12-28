@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.gson.Gson;
 
 import tbrugz.queryon.AbstractHttpServlet;
+import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
