@@ -45,6 +45,10 @@ public class JettySetup {
 	private static Server server = null;
 	
 	public static void setupServer() throws Exception {
+		setupServer("/WEB-INF/web.xml");
+	}
+	
+	public static void setupServer(String webxmlPath) throws Exception {
 		log.info("setup()");
 		if(server!=null && server.isRunning()) { return; }
 		server = new Server();
@@ -57,12 +61,12 @@ public class JettySetup {
 		connector.setPort(port);
 		server.setConnectors(new Connector[]{ connector });
 
-		String webRoot = WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http";
-		String webappRoot = WinstoneAndH2HttpRequestTest.webappdir;
+		final String webRoot = WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http";
+		final String webappRoot = WinstoneAndH2HttpRequestTest.webappdir;
 		//String resourcesRoot = WinstoneAndH2HttpRequestTest.testResourcesDir;
 		
 		WebAppContext webapp = new WebAppContext();
-		webapp.setDescriptor(webRoot+"/WEB-INF/web.xml");
+		webapp.setDescriptor(webRoot+webxmlPath);
 		webapp.setResourceBase(webappRoot);
 		webapp.setContextPath("/");
 		webapp.setParentLoaderPriority(true);
