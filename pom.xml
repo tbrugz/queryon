@@ -115,24 +115,6 @@
   </distributionManagement>
 
   <build>
-    <!-- directory>target</directory>
-    <outputDirectory>target/classes</outputDirectory>
-    <finalName>${artifactId}-${version}</finalName>
-    <testOutputDirectory>target/test-classes</testOutputDirectory-->
-    <!-- <sourceDirectory>src</sourceDirectory> -->
-    <!-- scriptSourceDirectory>src/main/scripts</scriptSourceDirectory-->
-    <!-- <testSourceDirectory>src_test</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src_resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>src_test</directory>
-      </testResource>
-    </testResources> -->
 
     <!-- pluginManagement>
       <plugins>
