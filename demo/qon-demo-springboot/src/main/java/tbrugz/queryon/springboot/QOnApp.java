@@ -54,7 +54,9 @@ public class QOnApp extends SpringBootServletInitializer {
 	@Bean
 	public ServletRegistrationBean servletQueryOnBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOn();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
+		ServletRegistrationBean bean = new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
+		bean.setLoadOnStartup(1);
+		return bean;
 	}
 
 	@Bean
