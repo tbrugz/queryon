@@ -23,8 +23,8 @@ public class WebDavRequest extends RequestSpec {
 	
 	//final boolean multiModel;
 	
-	public WebDavRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, boolean multiModel) throws ServletException, IOException {
-		super(dsutils, req, prop, multiModel?1:0, "xml", false, 0, null);
+	public WebDavRequest(HttpServletRequest req, Properties prop, boolean multiModel) throws ServletException, IOException {
+		super(req, prop, multiModel?1:0, "xml", false, 0, null);
 		//this.multiModel = multiModel;
 		//log.info("multiModel="+multiModel+" / modelId="+this.getModelId());
 	}

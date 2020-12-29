@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -38,7 +37,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
@@ -69,6 +67,7 @@ import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -143,9 +142,11 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		public String slug() {
 			switch(this) {
-				case PLUGIN_ACTION: return "PluginAction";
+				case PLUGIN_ACTION:
+					return "PluginAction";
+				default:
+					return this.name();
 			}
-			return this.name();
 		}
 
 		public boolean isModelRequired() {
@@ -265,7 +266,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
 	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	public static final String ATTR_INIT_ERROR = "initerror";
-	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
+	public static final String ATTR_DUMP_SYNTAX_UTILS = QOnContextUtils.ATTR_DUMP_SYNTAX_UTILS;
 	public static final String ATTR_UPDATE_PLUGINS = "update-plugins";
 	
 	public static final String METHOD_GET = "GET";
@@ -280,7 +281,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String QON_PROJECT_URL = "https://github.com/tbrugz/queryon";
 	
 	protected final Properties prop = new ParametrizedProperties();
-	protected DumpSyntaxUtils dsutils;
+	//protected DumpSyntaxUtils dsutils;
 	//SchemaModel model;
 	//final Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 	
@@ -471,12 +472,12 @@ public class QueryOn extends AbstractHttpServlet {
 			context.setAttribute(ATTR_MODEL_MAP, models);
 			servletContext = context;
 			//model = SchemaModelUtils.getDefaultModel(context);
-			dsutils = new DumpSyntaxUtils(prop);
+			DumpSyntaxUtils dsutils = new DumpSyntaxUtils(prop);
 			
-			initFromProperties();
+			initFromProperties(dsutils);
 			
 			context.setAttribute(ATTR_PROP, prop);
-			context.setAttribute(ATTR_DUMP_SYNTAX_UTILS, dsutils);
+			QOnContextUtils.setDumpSyntaxUtils(context, dsutils);
 			
 			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();
 			context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
@@ -504,7 +505,7 @@ public class QueryOn extends AbstractHttpServlet {
 		return Utils.getStringListFromProp(prop, PROP_MODELS, ",");
 	}
 	
-	protected void initFromProperties() {
+	protected void initFromProperties(DumpSyntaxUtils dsutils) {
 		//log.debug("quote:: "+DBMSResources.instance().getIdentifierQuoteString());
 		validateFilterColumnNames = Utils.getPropBool(prop, PROP_VALIDATE_FILTERCOLNAME, validateFilterColumnNames);
 		
@@ -765,7 +766,7 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
-		return new RequestSpec(dsutils, req, prop);
+		return new RequestSpec(req, prop);
 	}
 	
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

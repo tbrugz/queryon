@@ -22,6 +22,7 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -211,7 +212,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			if(pc instanceof WebProcessor) {
 				WebProcessor wp = (WebProcessor) pc;
 
-				DumpSyntaxUtils dsutils = (DumpSyntaxUtils) context.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+				DumpSyntaxUtils dsutils = QOnContextUtils.getDumpSyntaxUtils(context);
 				RequestSpec reqspec = null;
 				DBIdentifiable dbobj = null;
 				Subject currentUser = null;

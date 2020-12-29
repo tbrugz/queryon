@@ -59,9 +59,9 @@ public class ODataRequest extends RequestSpec {
 		super(dsutils, req, prop, prefixesToIgnore, defaultOutputSyntax, allowGetDumpSyntaxByAccept, minUrlParts, defaultObject);
 	}*/
 
-	public ODataRequest(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop)
+	public ODataRequest(HttpServletRequest req, Properties prop)
 			throws ServletException, IOException {
-		super(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, DEFAULT_OBJECT);
+		super(req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, DEFAULT_OBJECT);
 	}
 	
 	@Override

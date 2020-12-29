@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="java.util.regex.Pattern"%>
 <%@page import="tbrugz.queryon.exception.InternalServerException"%>
 <%@page import="tbrugz.queryon.util.DumpSyntaxUtils"%>
@@ -76,7 +77,7 @@
 	}
 	
 	//syntaxes
-	DumpSyntaxUtils dsutils = (DumpSyntaxUtils) application.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+	DumpSyntaxUtils dsutils = QOnContextUtils.getDumpSyntaxUtils(application);
 	if(dsutils!=null) {
 		if(i>0) { out.write(",\n"); }
 		out.write(sqd.get("syntax.fileextensions") + ": " + gson.toJson( dsutils.syntaxExtensions ) );

@@ -7,7 +7,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import tbrugz.queryon.QueryOn;
-import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.QOnContextUtils;
 
 public abstract class BaseApiServlet extends QueryOn {
 
@@ -20,12 +20,11 @@ public abstract class BaseApiServlet extends QueryOn {
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
 		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
-		dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
 		servletContext = context;
 		//servletUrlContext = "xxx";
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);
 		
-		initFromProperties();
+		initFromProperties(QOnContextUtils.getDumpSyntaxUtils(context));
 	}
 	
 }

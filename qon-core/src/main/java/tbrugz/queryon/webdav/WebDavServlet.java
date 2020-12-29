@@ -74,7 +74,7 @@ public class WebDavServlet extends BaseApiServlet {
 	@Override
 	protected WebDavRequest getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
 		//return new RequestSpec(dsutils, req, prop, /*prefixesToIgnore*/ 0, "xml", true, 0, null);
-		return new WebDavRequest(dsutils, req, prop, multiModel);
+		return new WebDavRequest(req, prop, multiModel);
 	}
 	
 	boolean isMultiModel() {

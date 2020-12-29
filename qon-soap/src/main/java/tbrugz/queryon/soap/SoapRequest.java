@@ -60,8 +60,8 @@ public class SoapRequest extends RequestSpec {
 		Collections.sort(knownTags);
 	}
 
-	public SoapRequest(/*Element requestEl, String nsPrefix,*/ DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
-		super(dsutils, req, prop, 0, null /* soap/xml */ /* SoapDumpSyntax.SOAP_ID / XMLDataDump.XML_SYNTAX_ID */, true, 0, null);
+	public SoapRequest(/*Element requestEl, String nsPrefix, DumpSyntaxUtils dsutils,*/ HttpServletRequest req, Properties prop) throws ServletException, IOException {
+		super(req, prop, 0, null /* soap/xml */ /* SoapDumpSyntax.SOAP_ID / XMLDataDump.XML_SYNTAX_ID */, true, 0, null);
 		//this.requestEl = req""uestEl;
 		//this.nsPrefix = nsPrefix; 
 	}

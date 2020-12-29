@@ -154,8 +154,6 @@ public class ODataServlet extends BaseApiServlet {
 	protected void doInit(ServletContext context) throws ServletException {
 		super.doInit(context);
 		//prop.putAll((Properties) context.getAttribute(ATTR_PROP));
-		//dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
-		//servletContext = context;
 		
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);
 		//initFromProperties();
@@ -233,7 +231,7 @@ public class ODataServlet extends BaseApiServlet {
 	@Override
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
 		//return new ODataRequest(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
-		return new ODataRequest(dsutils, req, prop);
+		return new ODataRequest(req, prop);
 	}
 	
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"name"});

@@ -177,7 +177,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	@Override
 	protected SoapRequest getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
 		//SoapRequest.setAttributes(req, requestEl, nsPrefix);
-		return new SoapRequest(/*requestEl, nsPrefix,*/ dsutils, req, prop);
+		return new SoapRequest(/*requestEl, nsPrefix, dsutils, */req, prop);
 	}
 	
 	protected void doServiceIntern(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

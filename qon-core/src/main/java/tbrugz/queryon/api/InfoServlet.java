@@ -36,6 +36,7 @@ import tbrugz.queryon.processor.QOnTables;
 import tbrugz.queryon.processor.UpdatePluginUtils;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.queryon.util.WebUtils;
@@ -288,7 +289,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		}
 		
 		//syntaxes
-		DumpSyntaxUtils dsutils = (DumpSyntaxUtils) getServletContext().getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+		DumpSyntaxUtils dsutils = QOnContextUtils.getDumpSyntaxUtils(getServletContext());
 		if(dsutils!=null) {
 			//if(i>0) { out.write(",\n"); }
 			//out.write(sqd.get("syntax.fileextensions") + ": " + gson.toJson( dsutils.syntaxExtensions ) );

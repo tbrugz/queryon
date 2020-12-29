@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
-import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -71,7 +70,6 @@ public class QueryOnInstant extends QueryOn {
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
 		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
-		dsutils = (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
 	}
 	
 	@Override

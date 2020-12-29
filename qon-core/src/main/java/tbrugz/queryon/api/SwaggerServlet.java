@@ -32,6 +32,7 @@ import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -124,7 +125,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		
 		ServletContext context = req.getServletContext();
 		Properties prop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
-		DumpSyntaxUtils dsutils = (DumpSyntaxUtils) context.getAttribute(QueryOn.ATTR_DUMP_SYNTAX_UTILS);
+		DumpSyntaxUtils dsutils = QOnContextUtils.getDumpSyntaxUtils(context);
 		if(dsutils==null) {
 			throw new BadRequestException("Service not initialized");
 		}

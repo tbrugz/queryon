@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
@@ -234,12 +235,21 @@ public class RequestSpec {
 	//final String defaultOutputSyntax;
 	//final boolean allowGetDumpSyntaxByAccept;
 	
+	public RequestSpec(HttpServletRequest req, Properties prop) throws ServletException, IOException {
+		this(QOnContextUtils.getDumpSyntaxUtils(req.getServletContext()), req, prop, 0);
+	}
+
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop) throws ServletException, IOException {
 		this(dsutils, req, prop, 0);
 	}
 
 	public RequestSpec(DumpSyntaxUtils dsutils, HttpServletRequest req, Properties prop, int prefixesToIgnore) throws ServletException, IOException {
 		this(dsutils, req, prop, prefixesToIgnore, QueryOn.DEFAULT_OUTPUT_SYNTAX, true, 1, null);
+	}
+	
+	public RequestSpec(final HttpServletRequest req, final Properties prop, final int prefixesToIgnore,
+			final String defaultOutputSyntax, final boolean allowGetDumpSyntaxByAccept, final int minUrlParts, final String defaultObject) throws ServletException, IOException {
+		this(QOnContextUtils.getDumpSyntaxUtils(req.getServletContext()), req, prop, prefixesToIgnore, defaultOutputSyntax, allowGetDumpSyntaxByAccept, minUrlParts, defaultObject);
 	}
 	
 	public RequestSpec(final DumpSyntaxUtils dsutils, final HttpServletRequest req, final Properties prop, final int prefixesToIgnore,
