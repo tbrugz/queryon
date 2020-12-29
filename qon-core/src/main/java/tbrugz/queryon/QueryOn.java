@@ -303,7 +303,7 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
-	protected ServletContext servletContext = null;
+	//protected ServletContext servletContext = null;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -470,7 +470,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			//log.debug("charset: "+Charset.defaultCharset());
 			context.setAttribute(ATTR_MODEL_MAP, models);
-			servletContext = context;
+			//servletContext = context;
 			//model = SchemaModelUtils.getDefaultModel(context);
 			DumpSyntaxUtils dsutils = new DumpSyntaxUtils(prop);
 			
@@ -613,7 +613,7 @@ public class QueryOn extends AbstractHttpServlet {
 					String message = "Exception starting update-plugin "+up.getClass().getSimpleName()+" [model="+modelId+"]";
 					log.warn(message+": "+e);
 					log.debug(message+": "+e, e);
-					UpdatePluginUtils.putWarning(servletContext, warnKey, null, "[init]", message);
+					UpdatePluginUtils.putWarning(context, warnKey, null, "[init]", message);
 				}
 			}
 			
@@ -623,7 +623,7 @@ public class QueryOn extends AbstractHttpServlet {
 			String message = "Exception starting update-plugin [model="+modelId+"]: "+e;
 			log.warn(message);
 			log.info(message, e);
-			UpdatePluginUtils.putWarning(servletContext, warnKey, null, "[init]", message);
+			UpdatePluginUtils.putWarning(context, warnKey, null, "[init]", message);
 		}
 
 		log.info("active update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+StringUtils.getClassSimpleNameListFromObjectList(activePlugins));

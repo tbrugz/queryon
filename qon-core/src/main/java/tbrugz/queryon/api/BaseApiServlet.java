@@ -20,7 +20,7 @@ public abstract class BaseApiServlet extends QueryOn {
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
 		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
-		servletContext = context;
+		//servletContext = context;
 		//servletUrlContext = "xxx";
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);
 		
