@@ -1,0 +1,17 @@
+
+**/target/
+**/work/
+
+qon-web/src/main/webapp/swagger-ui/
+qon-web/src/main/webapp/swagger2-ui/
+
+demo/qon-demo-dbn/data/*
+demo/qon-demo-dbn/classicmodels/*
+demo/qon-demo-dbn/src/main/resources/credentials.properties
+demo/qon-demo-dbn/src/main/resources/env.properties
+
+**/.classpath
+**/.project
+**/.settings
+**/derby.log
+

@@ -23,7 +23,7 @@
 	</target>
 
 	<target name="download-swagger">
-		<property name="version.swagger" value="3.28.0"/>
+		<property name="version.swagger" value="3.38.0"/>
 		
 		<mkdir dir="${download.dir}/swagger-ui"/>
 		
