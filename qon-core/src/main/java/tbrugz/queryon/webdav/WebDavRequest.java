@@ -13,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
-import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 

@@ -285,8 +285,8 @@ public class QueryOn extends AbstractHttpServlet {
 	//SchemaModel model;
 	//final Map<String, SchemaModel> models = new HashMap<String, SchemaModel>();
 	
-	String propertiesResource = null;
-	String propertiesFile = null;
+	//String propertiesResource = null;
+	//String propertiesFile = null;
 	
 	final Map<String, List<UpdatePlugin>> updatePlugins = new HashMap<String, List<UpdatePlugin>>();
 	//String modelId;
@@ -308,7 +308,7 @@ public class QueryOn extends AbstractHttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		doInitProperties(config);
+		//doInitConfig(config);
 		//modelId = config.getInitParameter(INITP_MODEL_ID);
 		doInit(config.getServletContext());
 	}
@@ -318,7 +318,7 @@ public class QueryOn extends AbstractHttpServlet {
 		ParametrizedProperties.setUseSystemProperties(true);
 	}
 	
-	protected void doInitProperties(ServletConfig config) {
+	/*protected void doInitConfig(ServletConfig config) {
 		//log4jInit();
 		propertiesResource = config.getInitParameter(INITP_PROPERTIES_RESOURCE);
 		propertiesFile = null;
@@ -348,7 +348,7 @@ public class QueryOn extends AbstractHttpServlet {
 		else {
 			log.info("queryon resource config: "+propertiesResource+" [using "+INITP_PROPERTIES_RESOURCE+"]");
 		}
-	}
+	}*/
 	
 	/*
 	void log4jInit() {
@@ -377,6 +377,8 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
 		String contextPath = null;
+		String propertiesResource = null;
+		String propertiesFile = null;
 		try {
 			prop.clear();
 			context.removeAttribute(ATTR_INIT_ERROR);
@@ -396,6 +398,37 @@ public class QueryOn extends AbstractHttpServlet {
 			log.info("path= ["+path+"] "+PROP_CONTEXT_PATH+"= ["+contextPath+"] ; "+RDFAbstractSyntax.PROP_RDF_BASE+"= ["+rdfBase+"]");
 			
 			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
+
+			{
+				ServletConfig config = getServletConfig();
+				propertiesResource = config.getInitParameter(INITP_PROPERTIES_RESOURCE);
+
+				if(propertiesResource==null) {
+					propertiesFile = config.getInitParameter(INITP_PROPERTIES_FILE);
+					if(propertiesFile==null) {
+						propertiesFile = System.getProperty(SYSPROP_PROPERTIES_PATH);
+						if(propertiesFile==null) {
+							propertiesFile = System.getenv(ENV_PROPERTIES_PATH);
+							if(propertiesFile==null) {
+								propertiesResource = DEFAULT_PROPERTIES_RESOURCE;
+								log.info("queryon resource config: "+propertiesResource+" [using DEFAULT_PROPERTIES_RESOURCE]");
+							}
+							else {
+								log.info("queryon file config: "+propertiesFile+" [using env '"+ENV_PROPERTIES_PATH+"']");
+							}
+						}
+						else {
+							log.info("queryon file config: "+propertiesFile+" [using sysprop '"+SYSPROP_PROPERTIES_PATH+"']");
+						}
+					}
+					else {
+						log.info("queryon file config: "+propertiesFile+" [using "+INITP_PROPERTIES_FILE+"]");
+					}
+				}
+				else {
+					log.info("queryon resource config: "+propertiesResource+" [using "+INITP_PROPERTIES_RESOURCE+"]");
+				}
+			}
 			
 			if(propertiesResource!=null) {
 				log.info("loading properties: "+propertiesResource);
@@ -488,7 +521,10 @@ public class QueryOn extends AbstractHttpServlet {
 			
 			initModelsMetadata(models);
 		} catch (Exception e) {
-			String message = e.toString()+" [prop resource: "+propertiesResource+"][contextPath: "+contextPath+"][servlet: "+this.getClass().getSimpleName()+"]";
+			String message = e.toString()+" "+
+				(propertiesResource!=null?"[prop resource: "+propertiesResource+"]":"")+
+				(propertiesFile!=null?"[prop file: "+propertiesFile+"]":"")+
+				"[contextPath: "+contextPath+"][servlet: "+this.getClass().getSimpleName()+"]";
 			log.error(message);
 			log.debug(message, e);
 			context.setAttribute(ATTR_INIT_ERROR, e);

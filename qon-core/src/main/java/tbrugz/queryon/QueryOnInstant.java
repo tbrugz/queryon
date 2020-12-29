@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -72,9 +71,9 @@ public class QueryOnInstant extends QueryOn {
 		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
 	}
 	
-	@Override
-	protected void doInitProperties(ServletConfig config) {
-	}
+	/*@Override
+	protected void doInitConfig(ServletConfig config) {
+	}*/
 	
 	@SuppressWarnings("resource")
 	@Override

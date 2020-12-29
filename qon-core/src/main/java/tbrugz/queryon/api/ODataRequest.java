@@ -25,7 +25,6 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.api.ODataFilterParser.Filter;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
-import tbrugz.queryon.util.DumpSyntaxUtils;
 
 public class ODataRequest extends RequestSpec {
 	

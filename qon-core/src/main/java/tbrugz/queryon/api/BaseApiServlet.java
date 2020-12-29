@@ -2,7 +2,6 @@ package tbrugz.queryon.api;
 
 import java.util.Properties;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -13,9 +12,9 @@ public abstract class BaseApiServlet extends QueryOn {
 
 	private static final long serialVersionUID = 1L;
 
-	@Override
-	protected void doInitProperties(ServletConfig config) {
-	}
+	/*@Override
+	protected void doInitConfig(ServletConfig config) {
+	}*/
 	
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
