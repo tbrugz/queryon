@@ -264,8 +264,10 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	@Deprecated
 	public static final String ATTR_PROP = QOnContextUtils.ATTR_PROP;
-	public static final String ATTR_MODEL_MAP = "modelmap";
-	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
+	@Deprecated
+	public static final String ATTR_MODEL_MAP = SchemaModelUtils.ATTR_MODEL_MAP;
+	@Deprecated
+	public static final String ATTR_DEFAULT_MODEL = SchemaModelUtils.ATTR_DEFAULT_MODEL;
 	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	public static final String ATTR_INIT_ERROR = "initerror";
 	@Deprecated
@@ -493,7 +495,7 @@ public class QueryOn extends AbstractHttpServlet {
 					defaultModel = modelsGrabbed.get(0);
 					log.warn("null default model [prop '"+PROP_MODELS_DEFAULT+"'], defaultModel set to '"+defaultModel+"'");
 				}*/
-				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
+				SchemaModelUtils.setDefaultModelId(context, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [grabbed: "+modelsGrabbed+"]");
 			}
 			else {
@@ -503,11 +505,11 @@ public class QueryOn extends AbstractHttpServlet {
 					String modelWarningsKey = defaultModel+"."+ATTR_INIT_ERROR;
 					context.setAttribute(modelWarningsKey, "Error grabbing model '"+defaultModel+"'");
 				}
-				context.setAttribute(ATTR_DEFAULT_MODEL, defaultModel);
+				SchemaModelUtils.setDefaultModelId(context, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [single-model]");
 			}
 			//log.debug("charset: "+Charset.defaultCharset());
-			context.setAttribute(ATTR_MODEL_MAP, models);
+			SchemaModelUtils.setModels(context, models);
 			//servletContext = context;
 			//model = SchemaModelUtils.getDefaultModel(context);
 			DumpSyntaxUtils dsutils = new DumpSyntaxUtils(prop);

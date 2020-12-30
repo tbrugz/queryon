@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.SchemaModelUtils"%>
 <%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.processor.UpdatePluginUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnExecs"%>
@@ -28,7 +29,7 @@ out.write(sqd.get("permitted")+": "+permitted+",\n");
 <%
 //XXX: allow (or not) "dburl" value? see QOnModelUtils.setModelMetadata
 //XXX: for each model: add known object types...!?!
-Map<String, SchemaModel> models = (Map<String, SchemaModel>) application.getAttribute(QueryOn.ATTR_MODEL_MAP);
+Map<String, SchemaModel> models = SchemaModelUtils.getModels(getServletContext());
 int i = 0;
 if(models!=null && models.entrySet()!=null) {
 	if(permitted) {

@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -35,6 +34,9 @@ public class SchemaModelUtils {
 	
 	private static final Log log = LogFactory.getLog(SchemaModelUtils.class);
 	
+	public static final String ATTR_MODEL_MAP = "modelmap";
+	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
+
 	public static final String PARAM_MODEL = "model";
 	
 	public static class ByNameComparator implements Comparator<Relation> {
@@ -177,10 +179,10 @@ public class SchemaModelUtils {
 	
 	@SuppressWarnings("unchecked")
 	public static SchemaModel getModel(ServletContext context, String modelId) {
-		Map<String, SchemaModel> models = (Map<String, SchemaModel>) context.getAttribute(QueryOn.ATTR_MODEL_MAP);
+		Map<String, SchemaModel> models = (Map<String, SchemaModel>) context.getAttribute(ATTR_MODEL_MAP);
 		if(models==null || models.size()==0) { return null; }
 		if(modelId==null) {
-			modelId = (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+			modelId = (String) context.getAttribute(ATTR_DEFAULT_MODEL);
 		}
 		/*if(models.get(modelId)==null) {
 			modelId = QueryOn.DEFAULT_MODEL_KEY;
@@ -190,7 +192,11 @@ public class SchemaModelUtils {
 	
 	@SuppressWarnings("unchecked")
 	public static Map<String, SchemaModel> getModels(ServletContext context) {
-		return (Map<String, SchemaModel>) context.getAttribute(QueryOn.ATTR_MODEL_MAP);
+		return (Map<String, SchemaModel>) context.getAttribute(ATTR_MODEL_MAP);
+	}
+
+	public static void setModels(ServletContext context, Map<String, SchemaModel> models) {
+		context.setAttribute(ATTR_MODEL_MAP, models);
 	}
 	
 	public static Set<String> getModelIds(ServletContext context) {
@@ -210,7 +216,7 @@ public class SchemaModelUtils {
 	public static String getModelId(HttpServletRequest req, String param, boolean allowDefault) {
 		String modelReq = req.getParameter(param);
 		if(modelReq==null && allowDefault) {
-			modelReq = (String) req.getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+			modelReq = (String) req.getServletContext().getAttribute(ATTR_DEFAULT_MODEL);
 		}
 		else {
 			Set<String> models = getModelIds(req.getServletContext());
@@ -227,7 +233,7 @@ public class SchemaModelUtils {
 	public static String getValidatedModelId(HttpServletRequest req, final String modelId, boolean allowDefault) {
 		String ret = modelId;
 		if(modelId==null && allowDefault) {
-			ret = (String) req.getServletContext().getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+			ret = (String) req.getServletContext().getAttribute(ATTR_DEFAULT_MODEL);
 		}
 		else {
 			Set<String> models = getModelIds(req.getServletContext());
@@ -241,7 +247,11 @@ public class SchemaModelUtils {
 	}
 	
 	public static String getDefaultModelId(ServletContext context) {
-		return (String) context.getAttribute(QueryOn.ATTR_DEFAULT_MODEL);
+		return (String) context.getAttribute(ATTR_DEFAULT_MODEL);
+	}
+	
+	public static void setDefaultModelId(ServletContext context, String modelId) {
+		context.setAttribute(ATTR_DEFAULT_MODEL, modelId);
 	}
 	
 	public static Constraint getPK(Relation relation) {

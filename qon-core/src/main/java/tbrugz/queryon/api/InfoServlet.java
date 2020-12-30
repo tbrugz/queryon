@@ -339,7 +339,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 		ret.put("permitted", permitted);
 		if(permitted) {
-			Map<String, SchemaModel> models = (Map<String, SchemaModel>) getServletContext().getAttribute(QueryOn.ATTR_MODEL_MAP);
+			Map<String, SchemaModel> models = SchemaModelUtils.getModels(getServletContext());
 			if(models!=null && models.entrySet()!=null) {
 				for(Map.Entry<String, SchemaModel> entry: models.entrySet()) {
 					String modelId = entry.getKey();
