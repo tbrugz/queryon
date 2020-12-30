@@ -74,6 +74,7 @@ import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
+import tbrugz.sqldump.EmptyModelGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxBuilder;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
@@ -279,6 +280,8 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String UTF8 = "UTF-8";
 
 	public static final String QON_PROJECT_URL = "https://github.com/tbrugz/queryon";
+
+	static final String EMPTY_MODEL_GRABCLASS = EmptyModelGrabber.class.getSimpleName(); //"tbrugz.sqldump.EmptyModelGrabber";
 	
 	protected final Properties prop = new ParametrizedProperties();
 	//protected DumpSyntaxUtils dsutils;
@@ -717,7 +720,18 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		else {
 			String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS); //, prop.getProperty(PROP_GRABCLASS)
-			log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; prefix="+prefix+"]");
+			if(grabClassName==null) {
+				log.info("grab class not defined [modelId="+modelId+"; prefix="+prefix+"]. Using "+EMPTY_MODEL_GRABCLASS); //EmptyModelGrabber
+				grabClassName = EMPTY_MODEL_GRABCLASS;
+				/*log.info("grab class not defined [prop '"+prefix+SUFFIX_GRABCLASS+"']. Using empty model");
+				DBMSResources.instance().setup(prop);
+				SchemaModel sm = new SchemaModel();
+				setModelProperties(sm, prop, modelId);
+				return sm;*/
+			}
+			else {
+				log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; prefix="+prefix+"]");
+			}
 			SchemaModel sm = modelGrabber(prop, grabClassName, modelId);
 			return sm;
 		}
@@ -747,6 +761,7 @@ public class QueryOn extends AbstractHttpServlet {
 			schemaGrabber.setConnection(conn);
 		}
 		SchemaModel sm = schemaGrabber.grabSchema();
+		//setModelProperties(sm, prop, modelId);
 		sm.setModelId(modelId);
 		//String dialect = prop.getProperty(prefix+SUFFIX_SQLDIALECT);
 		String dialect = prop.getProperty(PROP_SQLDIALECT);
@@ -769,6 +784,16 @@ public class QueryOn extends AbstractHttpServlet {
 			ConnectionUtil.closeConnection(conn);
 		}
 	}
+
+	/*protected static void setModelProperties(SchemaModel sm, Properties prop, String modelId) {
+		sm.setModelId(modelId);
+		//String dialect = prop.getProperty(prefix+SUFFIX_SQLDIALECT);
+		String dialect = prop.getProperty(PROP_SQLDIALECT);
+		if(dialect!=null) {
+			log.info("setting sql-dialect: "+dialect);
+			sm.setSqlDialect(dialect);
+		}
+	}*/
 
 	protected void doFacade(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
