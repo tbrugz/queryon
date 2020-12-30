@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.sqldump.dbmd.DBMSFeatures"%>
 <%@page import="tbrugz.sqldump.def.DBMSResources"%>
 <%@page import="org.apache.commons.logging.*"
@@ -41,7 +42,7 @@ public String normalize(String s) {
 	List<String> schemas = schemasByModel.get(modelId);
 
 	if(schemas==null) {
-		Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(application);
 		//out.write(DBUtil.getDBConnPrefix(prop, modelId));
 		if(prop!=null) {
 			try {

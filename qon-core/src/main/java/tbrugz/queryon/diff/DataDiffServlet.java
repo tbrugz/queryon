@@ -34,6 +34,7 @@ import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.queryon.util.WebUtils;
@@ -95,7 +96,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		}
 		log.info("partz: "+partz);
 		
-		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
 		String modelISource = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_SOURCE, false);
 		String modelIdTarget = SchemaModelUtils.getModelId(req, DiffServlet.PARAM_MODEL_TARGET, false);

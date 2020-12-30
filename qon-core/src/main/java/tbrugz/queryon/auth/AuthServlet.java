@@ -26,6 +26,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.WebUtils;
 
 public class AuthServlet extends AbstractHttpServlet {
@@ -47,7 +48,7 @@ public class AuthServlet extends AbstractHttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		prop = QOnContextUtils.getProperties(getServletContext());
 	}
 	
 	@Override

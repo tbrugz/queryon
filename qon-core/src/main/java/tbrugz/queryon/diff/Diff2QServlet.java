@@ -18,12 +18,12 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.NamedTypedDBObject;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.queryon.util.WebUtils;
@@ -48,7 +48,7 @@ public class Diff2QServlet extends DataDiffServlet {
 		log.info("partz: "+partz);
 		
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
-		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), obj.getFullObjectName());

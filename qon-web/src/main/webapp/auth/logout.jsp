@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="org.apache.shiro.subject.Subject"%>
@@ -16,7 +17,7 @@
 <%
 String returnUrl = request.getParameter("return");
 
-Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Properties prop = QOnContextUtils.getProperties(application);
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 
 //System.out.println("-[logout.jsp] currentUser.getSession().getId()/req.getId()=="+currentUser.getSession().getId()+"/"+request.getSession().getId());

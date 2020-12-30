@@ -25,7 +25,6 @@ import com.google.gson.Gson;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
@@ -124,7 +123,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		swagger.put("basePath", contextPath + "/q");
 		
 		ServletContext context = req.getServletContext();
-		Properties prop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		DumpSyntaxUtils dsutils = QOnContextUtils.getDumpSyntaxUtils(context);
 		if(dsutils==null) {
 			throw new BadRequestException("Service not initialized");

@@ -139,7 +139,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			throw new BadRequestException("processor class not found: "+procClass);
 		}
 		
-		Properties appprop = (Properties) context.getAttribute(QueryOn.ATTR_PROP);
+		Properties appprop = QOnContextUtils.getProperties(context);
 		if(appprop==null) {
 			throw new ServletException("properties attribute is null!");
 		}

@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="java.util.Properties"%>
@@ -39,7 +40,7 @@ String username = request.getParameter("username");
 String password = request.getParameter("password");
 org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
 
-Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Properties prop = QOnContextUtils.getProperties(application);
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 
 if(username!=null) {

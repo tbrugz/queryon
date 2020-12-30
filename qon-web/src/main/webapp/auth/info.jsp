@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.ResponseSpec"%>
 <%@page import="tbrugz.queryon.util.JsonDecorator"%>
 <%@page import="tbrugz.queryon.util.SchemaModelUtils"%>
@@ -13,7 +14,7 @@
 	Gson gson = new Gson();
 
 	StringDecorator quoter = new JsonDecorator();
-	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+	Properties prop = QOnContextUtils.getProperties(application);
 	Subject currentUser = ShiroUtils.getSubject(prop, request);
 	boolean responseWritten = false;
 	

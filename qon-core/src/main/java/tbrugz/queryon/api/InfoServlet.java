@@ -182,7 +182,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		List<String> schemas = schemasByModel.get(modelId);
 
 		if(schemas==null) {
-			Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+			Properties prop = QOnContextUtils.getProperties(getServletContext());
 			//out.write(DBUtil.getDBConnPrefix(prop, modelId));
 			if(prop!=null) {
 				try {
@@ -265,7 +265,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		}
 		
 		int i = 0;
-		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		if(prop!=null) {
 			for(;i<exposedKeys.length;) {
 				String k = exposedKeys[i];
@@ -334,7 +334,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		Map<String, Object> ret = new TreeMap<String, Object>();
 		Map<String, Object> modelsInfo = new TreeMap<String, Object>();
 
-		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		Subject currentUser = ShiroUtils.getSubject(prop, request);
 		boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");
 		ret.put("permitted", permitted);
@@ -382,7 +382,7 @@ public class InfoServlet extends AbstractHttpServlet {
 	}
 	
 	public UserInfo getAuth(HttpServletRequest request) {
-		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		AuthActions beanActions = new AuthActions(prop);
 		UserInfo ui = beanActions.getCurrentUserXtra(request);
 		return ui;

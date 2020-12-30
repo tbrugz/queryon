@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.util.ShiroUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="java.util.Properties"%>
@@ -7,7 +8,7 @@
 String role = request.getParameter("role");
 if(role==null) { response.setStatus(400); }
 else {
-	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+	Properties prop = QOnContextUtils.getProperties(application);
 	Subject currentUser = ShiroUtils.getSubject(prop, request);
 	//Subject currentUser = SecurityUtils.getSubject();
 	out.write(currentUser.hasRole(role)?"1":"0");

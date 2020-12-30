@@ -21,12 +21,12 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldiff.SQLDiff;
@@ -78,7 +78,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		String types = partz.get(1);   // comma separated types to diff
 		String syntax = partz.get(2);  // valid:: json, xml, patch, sql
 		
-		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), ActionType.SELECT_ANY.name());

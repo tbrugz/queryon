@@ -29,6 +29,7 @@ import tbrugz.queryon.exception.MethodNotAllowedException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.processor.AbstractUpdatePlugin;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
@@ -61,7 +62,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		
-		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
 		// get qon_pages table
 		Set<String> mids = SchemaModelUtils.getModelIds(config.getServletContext());
@@ -88,7 +89,7 @@ public class PagesServlet extends AbstractHttpServlet {
 		pathInfo = pathInfo.substring(1);
 		log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo()+" ; req.getQueryString() = "+req.getQueryString());
 		
-		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 
 		// get relation
 		String modelId = SchemaModelUtils.getModelId(req);

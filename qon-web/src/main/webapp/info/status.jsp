@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.processor.UpdatePluginUtils"%>
 <%@page import="tbrugz.queryon.processor.QOnExecs"%>
 <%@page import="tbrugz.queryon.processor.QOnTables"%>
@@ -15,7 +16,7 @@
 {
 <%
 response.setContentType(ResponseSpec.MIME_TYPE_JSON);
-Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Properties prop = QOnContextUtils.getProperties(application);
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 Gson gson = new Gson();
 boolean permitted = ShiroUtils.isPermitted(currentUser, "MANAGE");

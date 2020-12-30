@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.util.MiscUtils"%>
 <%@page import="tbrugz.queryon.util.WebUtils"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -13,7 +14,7 @@
 <%@page import="tbrugz.sqldump.dbmodel.SchemaModel"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="tbrugz.queryon.util.SchemaModelUtils"%><%
-Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Properties prop = QOnContextUtils.getProperties(getServletContext());
 Subject currentUser = ShiroUtils.getSubject(prop, request);
 if(!currentUser.isPermitted("SELECT_ANY")) {
 	response.setStatus(HttpServletResponse.SC_FORBIDDEN);

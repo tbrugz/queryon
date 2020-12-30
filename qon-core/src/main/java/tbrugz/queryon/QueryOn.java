@@ -262,11 +262,13 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
-	public static final String ATTR_PROP = "prop";
+	@Deprecated
+	public static final String ATTR_PROP = QOnContextUtils.ATTR_PROP;
 	public static final String ATTR_MODEL_MAP = "modelmap";
 	public static final String ATTR_DEFAULT_MODEL = "defaultmodel";
 	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	public static final String ATTR_INIT_ERROR = "initerror";
+	@Deprecated
 	public static final String ATTR_DUMP_SYNTAX_UTILS = QOnContextUtils.ATTR_DUMP_SYNTAX_UTILS;
 	public static final String ATTR_UPDATE_PLUGINS = "update-plugins";
 	
@@ -512,7 +514,7 @@ public class QueryOn extends AbstractHttpServlet {
 			
 			initFromProperties(dsutils);
 			
-			context.setAttribute(ATTR_PROP, prop);
+			QOnContextUtils.setProperties(context, prop);
 			QOnContextUtils.setDumpSyntaxUtils(context, dsutils);
 			
 			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();

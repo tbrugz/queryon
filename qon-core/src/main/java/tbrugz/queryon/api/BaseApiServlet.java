@@ -1,7 +1,5 @@
 package tbrugz.queryon.api;
 
-import java.util.Properties;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -18,7 +16,7 @@ public abstract class BaseApiServlet extends QueryOn {
 	
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
-		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
+		prop.putAll(QOnContextUtils.getProperties(context));
 		//servletContext = context;
 		//servletUrlContext = "xxx";
 		//log.info("context: "+servletContext.getContextPath()+" ; servletUrlContext: "+servletUrlContext);

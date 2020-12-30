@@ -22,12 +22,12 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QOnPrivilegeType;
-import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldiff.RenameDetector;
@@ -77,7 +77,7 @@ public class DiffServlet extends AbstractHttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
-		Properties prop = (Properties) config.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		initProperties(prop);
 	}
 	
@@ -91,7 +91,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
 		
-		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
 		// TODOne: diff authorization
 		// XXX add <type>:DIFF authorization instead of <type>:SHOW ?

@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -115,7 +116,7 @@ public class QueryOnSchema extends AbstractHttpServlet {
 		NamedTypedDBObject obj = NamedTypedDBObject.getObject(partz);
 		
 		String modelId = SchemaModelUtils.getModelId(req);
-		Properties prop = (Properties) req.getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(req.getServletContext());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
 		ShiroUtils.checkPermission(currentUser, obj.getType()+":"+QOnPrivilegeType.SHOW, obj.getFullObjectName());

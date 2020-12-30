@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -25,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -68,7 +68,7 @@ public class QueryOnInstant extends QueryOn {
 	
 	@Override
 	protected void doInit(ServletContext context) throws ServletException {
-		prop.putAll((Properties) context.getAttribute(ATTR_PROP));
+		prop.putAll(QOnContextUtils.getProperties(context));
 	}
 	
 	/*@Override

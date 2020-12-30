@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 
+import tbrugz.queryon.util.QOnContextUtils;
+
 /*
  * see: https://github.com/sirthias/pegdown
  */
@@ -40,7 +42,7 @@ public class MarkdownServlet extends PagesServlet {
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		Properties prop = (Properties) getServletContext().getAttribute(QueryOn.ATTR_PROP);
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		//doXpend = Utils.getPropBool(prop, PROP_XPEND, doXpend);
 		prepend = prop.getProperty(PROP_PREPEND);
 		append = prop.getProperty(PROP_APPEND);

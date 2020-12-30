@@ -55,7 +55,7 @@
 	}
 	
 	int i = 0;
-	Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+	Properties prop = QOnContextUtils.getProperties(application);
 	if(prop!=null) {
 		for(;i<exposedKeys.length;) {
 			String k = exposedKeys[i];

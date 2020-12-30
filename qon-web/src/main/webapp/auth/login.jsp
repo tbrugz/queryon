@@ -1,3 +1,4 @@
+<%@page import="tbrugz.queryon.util.QOnContextUtils"%>
 <%@page import="tbrugz.queryon.util.WebUtils"%>
 <%@page import="tbrugz.queryon.QueryOn"%>
 <%@page import="java.util.Properties"%>
@@ -25,7 +26,7 @@
 <%
 
 String defaultAppname = "QueryOn";
-Properties prop = (Properties) application.getAttribute(QueryOn.ATTR_PROP);
+Properties prop = QOnContextUtils.getProperties(application);
 String appname = prop.getProperty(WebUtils.PROP_WEB_APPNAME, defaultAppname);
 String loginMessage = prop.getProperty(WebUtils.PROP_WEB_LOGINMESSAGE);
 
