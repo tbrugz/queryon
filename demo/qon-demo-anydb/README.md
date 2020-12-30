@@ -2,7 +2,7 @@
 qon-demo-anydb
 ==============
 
-A QueryOn demo that can use any supported JDBC database. JDBC drivers for H2, PosrgreSQL, MySQL/MariaDB, Derby & SQLite already included.
+A QueryOn demo that can use any supported JDBC database. JDBC drivers for H2, PosrgreSQL, MySQL/MariaDB, Derby, SQLite & MSSQL Server already included.
 
 
 building
@@ -32,9 +32,17 @@ Example with PostgreSQL: `QON_JDBC_URL="jdbc:postgresql://localhost/database" QO
 
 Example with MySQL: `QON_JDBC_URL="jdbc:mysql://localhost/classicmodels" QON_JDBC_USER=mysql QON_JDBC_PASSWORD=s3cr3t mvn jetty:run`
 
-Example with MSSQL Server: `QON_JDBC_URL="jdbc:sqlserver://localhost;database=AdvertureWorks;encrypt=false" QON_JDBC_USER=sa QON_JDBC_PASSWORD=yourStrongPassword. mvn jetty:run`
+Example with MSSQL Server: `QON_JDBC_URL="jdbc:sqlserver://localhost;database=AdvertureWorks;encrypt=false" QON_JDBC_USER=sa QON_JDBC_PASSWORD=yourStrongPassword. mvn jetty:run -Djetty.http.port=9999`
 
-* navigate to <http://localhost:8888>
+Example with external `queryon.properties`: `QON_PROPERTIES_PATH=~/queryon.properties mvn jetty:run`  
+(any queryon configuration may go into the file. See [queryon.template.properties](../../qon-core/src/main/java/queryon.template.properties). Using minimal sqlite database config below)
+
+```
+queryon.dburl=jdbc:sqlite:${user.dir}/queryon.sqlite.db
+```
+
+
+* navigate to <http://localhost:8080> (or <http://localhost:9999> in the MSSQL Server example)
 
 
 building and running with docker & wildfly

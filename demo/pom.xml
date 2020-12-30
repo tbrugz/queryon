@@ -33,9 +33,9 @@
 					<!-- <webApp>
 						<contextPath>/qon</contextPath>
 					</webApp> -->
-					<httpConnector>
+					<!--<httpConnector>
 						<port>8888</port>
-					</httpConnector>
+					</httpConnector>-->
 					<!--<connectors>
 						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
 							<port>8888</port>

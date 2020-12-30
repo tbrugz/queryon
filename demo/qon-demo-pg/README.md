@@ -29,7 +29,7 @@ running with jetty (java 8+)
 
 Example: `PGHOST=localhost PGUSER=postgres PGPASSWORD=s3cr3t PGDATABASE=classicmodels QON_SCHEMAS="public, queryon, classicmodels, test" mvn jetty:run`
 
-* navigate to <http://localhost:8888>
+* navigate to <http://localhost:8080>
 
 
 running with thorntail

@@ -22,7 +22,7 @@ running with jetty (java 8+)
 
 * `mvn jetty:run`
 
-* navigate to <http://localhost:8888>
+* navigate to <http://localhost:8080>
 
 
 building and running docker image
