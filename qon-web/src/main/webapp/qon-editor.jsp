@@ -510,7 +510,6 @@ modelId = SchemaModelUtils.getModelId(request);
 		byId('sqlparams').innerHTML = paramsStr;
 		setParametersValues(currentParamsWithValues);
 		
-		//$("#sqlparams").html('');
 		/*if(numparams > params.length) {
 			for(var i=params.length+1;i<=numparams;i++) {
 				$("#sqlparams").append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");

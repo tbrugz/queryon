@@ -544,21 +544,6 @@
 		}
 		byId('sqlparams').innerHTML = paramsStr;
 		setParametersValues(currentParamsWithValues);
-		
-		//$("#sqlparams").html('');
-		/*if(numparams > params.length) {
-			for(var i=params.length+1;i<=numparams;i++) {
-				$("#sqlparams").append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>");
-			}
-		}
-		else if(numparams < params.length) {
-			for (var i = params.length; i > numparams; --i) {
-				var item = params[i-1];
-				console.log(item);
-				item = item.parentNode;
-				item.parentNode.removeChild(item);
-			}
-		}*/
 	}
 	
 	function disableParam(paramName) {
@@ -591,12 +576,18 @@
 	
 	function errorMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='error message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+		byId('messages').innerHTML = "<div class='error message'>" + message +
+			"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/>" +
+			"</div>";
+		//$('#messages').html("<div class='error message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 
 	function infoMessage(message) {
 		// XXX encode 'message'?
-		$('#messages').html("<div class='info message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+		byId('messages').innerHTML = "<div class='info message'>" + message +
+			"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/>" +
+			"</div>";
+		//$('#messages').html("<div class='info message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
 	}
 	
 	function closeMessages(elemId) {

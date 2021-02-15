@@ -13,7 +13,6 @@ function init(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
 	byId(containerId).innerHTML = defaultNullObjectOption;
-	//$('#'+containerId).append('<option value="" selected>select object</option>');
 	var url = baseUrl+'/relation.json'+(modelId?'?model='+modelId:'');
 	//console.log('url: ', url, 'baseUrl: ', baseUrl);
 	$.ajax({
@@ -257,8 +256,6 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 			showErrorMessages(messagesId, jqXHR.responseText ? jqXHR.responseText : "No response from server");
 			//if(! jqXHR.responseText) { console.warn("Error", jqXHR); }
 			if(errorCallback) { errorCallback(errorThrown); }
-			//$('#'+messagesId).html(jqXHR.responseText+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
-			//$('#'+messagesId).attr('class','error');
 		}
 	});
 	
@@ -412,41 +409,6 @@ function getParameters(positionalsOnly) {
 	}
 	return paramsStr;
 }
-
-/*
-function showInfoMessages(messagesId, text) {
-	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
-	$('#'+messagesId).attr('class','info');
-	updateUI();
-}
-
-function showWarnMessages(messagesId, text) {
-	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
-	$('#'+messagesId).attr('class','warn');
-	updateUI();
-}
-
-function showErrorMessages(messagesId, text) {
-	$('#'+messagesId).html("<span>"+text+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>");
-	$('#'+messagesId).attr('class','error');
-	//$('#'+messagesId).addClass('error'); //when to remove?
-	updateUI();
-}
-
-function appendMessages(messagesId, text) {
-	$('#'+messagesId+" span").append(text);
-	updateUI();
-}
-
-function changeMessagesClass(messagesId, clazz) {
-	$('#'+messagesId).attr('class',clazz);
-}
-
-function closeMessages(messagesId) {
-	document.getElementById(messagesId).innerHTML = '';
-	updateUI();
-}
-*/
 
 // see: http://stackoverflow.com/questions/827368/using-the-get-parameter-of-a-url-in-javascript
 function getQueryVariable(variable) {

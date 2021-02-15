@@ -1,4 +1,6 @@
 
+/*
+
 var tables;
 var views;
 var fks;
@@ -106,7 +108,8 @@ function loadTableHtml(tableid, filter) {
 	$.ajax({
 		url: baseUrl+'/'+tableid+filter+'.html',
 		success: function(data) {
-			$('#main-content').html(data);
+			byId('main-content').innerHTML = data;
+			//$('#main-content').html(data);
 			window.location.replace('#main-content');
 			//window.location = '#main-content';
 		}
@@ -122,7 +125,8 @@ function loadTableJson(tableid, filter) {
 		url: baseUrl+'/'+tableid+filter+'.json',
 		success: function(data) {
 			//console.log('success: '+tablename);
-			$('#xtraTitle').html(': '+tableid);
+			byId('xtraTitle').innerHTML = ': '+tableid;
+			//$('#xtraTitle').html(': '+tableid);
 			var buf = '<table>';
 			data = data[tablename];
 
@@ -165,12 +169,14 @@ function loadTableJson(tableid, filter) {
 			}
 			buf += '</table>';
 			if(filter=='') {
-				$('#main-content').html(buf);
+				byId('main-content').innerHTML = buf;
+				//$('#main-content').html(buf);
 				window.location.replace('#main-content');
 			}
 			else {
 				var divid = 'table_'+stringToId(tableid+'_'+filter);
-				$('#main-content').append('<div id="'+divid+'" class="detail"><h4>'+tableid+' '+filter+'</h4>'+buf+'</div>');
+				byId('main-content').innerHTML += '<div id="'+divid+'" class="detail"><h4>'+tableid+' '+filter+'</h4>'+buf+'</div>';
+				//$('#main-content').append('<div id="'+divid+'" class="detail"><h4>'+tableid+' '+filter+'</h4>'+buf+'</div>');
 				window.location.replace('#'+divid);
 			}
 		}
@@ -181,20 +187,12 @@ function stringToId(str) {
 	return str.replace(/[\/\-\.]/g, '');
 }
 
-/*function getColumns(columns) {  
-	columns = columns.replace(/[\[\]]/g, '');
-	var cols = columns.split(',');
-	for(var j=0;j<cols.length;j++) {
-		cols[j] = cols[j].trim();
-	}
-	return cols;
-}*/
-
 function matchFkTable(fks, col) {
 	if(fks!=null) {
 		for(var i=0;i<fks.length;i++) {
 			var cols = getScalarArrayFromValue(fks[i].fkColumns);
-			var idx = $.inArray(col, cols);
+			var idx = cols.indexOf(col);
+			//var idx = $.inArray(col, cols);
 			if(idx>=0) {
 				console.log('idx', idx, fks[i].pkTable);
 				return fks[i].pkTableSchemaName+'.'+fks[i].pkTable;
@@ -203,3 +201,5 @@ function matchFkTable(fks, col) {
 	}
 	return null;
 }
+
+*/
