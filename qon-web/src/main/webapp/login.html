@@ -16,6 +16,9 @@ onLoad = function() {
 	//console.log("onLoad...");
 	loadSettings(loadSettingsCallback);
 	// loadAuthInfo(); //?
+	// see: https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit_event
+	const form = document.getElementById('loginform');
+	form.addEventListener('submit', doLogin);
 }
 
 loadSettingsCallback = function() {
@@ -37,12 +40,13 @@ loadSettingsCallback = function() {
 	}
 }
 
-doLogin = function() {
+doLogin = function(event) {
 	// FormData is always multipart/form-data
 	// https://stackoverflow.com/questions/7542586/new-formdata-application-x-www-form-urlencoded
 	/*var formData = new FormData();
 	formData.append("username", byId("username").value);
 	formData.append("password", byId("password").value);*/
+	event.preventDefault();
 
 	var payload = "username=" + encodeURIComponent(byId("username").value) +
 		"&password=" + encodeURIComponent(byId("password").value);
@@ -92,12 +96,13 @@ doLogin = function() {
 		<div id="loginMessage"></div>
 		<hr/>
 	</div>
-	<form id="loginform">
+	<form id="loginform" method="POST">
 		<label>Username: <input type="text" id="username" name="username"/></label>
 		<label>Password: <input type="password" id="password" name="password"/></label>
 		<!-- <input type="checkbox" name="rememberMe" value="true"/>Remember Me? <br/> -->
 		<hr/>
-		<input type="button" value="Submit" onclick="doLogin();">
+		<input type="submit" value="Login">
+		<!--<input type="button" value="Submit" onclick="doLogin();">-->
 	</form>
 	
 </div>
