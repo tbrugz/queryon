@@ -78,6 +78,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		rowSpecialAttr.clear();
 		rowSpecialAttrIdx.clear();
 
+		List<Integer> finalColsToRemove = new ArrayList<Integer>();
 		for(int i=0;i<numCol;i++) {
 			boolean isFullColumn = true;
 			String colname = lsColNames.get(i);
@@ -106,10 +107,20 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				lsColDbTypes.add(md.getColumnTypeName(i+1));
 			}
 			else { //if(!isFullColumn) {
-				finalColNames.remove(colname);
-				finalColTypes.remove(lsColTypes.get(i));
+				finalColsToRemove.add(i);
 			}
 
+		}
+
+		for(int i=finalColsToRemove.size()-1;i>=0;i--) {
+			finalColNames.remove((int)finalColsToRemove.get(i));
+			finalColTypes.remove((int)finalColsToRemove.get(i));
+		}
+
+		if(finalColNames.size() != finalColTypes.size() || finalColNames.size() != lsColDbTypes.size()) {
+			log.warn("finalColName [#"+finalColNames.size()+";"+finalColNames+"],"+
+				" finalColTypes [#"+finalColTypes.size()+";"+finalColTypes+"]"+
+				" & lsColDbTypes [#"+lsColDbTypes.size()+";"+lsColDbTypes+"] should have the same size");
 		}
 		
 		//dumpColType = true;
