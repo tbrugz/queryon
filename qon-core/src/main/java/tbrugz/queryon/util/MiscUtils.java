@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class MiscUtils {
@@ -181,6 +184,15 @@ public class MiscUtils {
 	
 	public static String removeMultiSlash(String s) {
 		return PATTERN_MULTISLASH.matcher(s).replaceAll("/");
+	}
+	
+	public static DocumentBuilderFactory getDocumentBuilderFactory() {
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		// https://rules.sonarsource.com/java/RSPEC-2755
+		// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java
+		docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+		return docFactory;
 	}
 	
 }

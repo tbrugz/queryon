@@ -189,7 +189,7 @@ public class ODataServlet extends BaseApiServlet {
 			// http://services.odata.org/V4/(S(frp3ql3rlcjpvorgy0422buq))/TripPinServiceRW/$metadata#Photos
 			// EnumType, ComplexType, *EntityType, *Function, ?Action, EntityContainer(EntitySet, FunctionImport, ActionImport, Annotation), Annotations
 			try {
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilderFactory docFactory = MiscUtils.getDocumentBuilderFactory();
 				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 				DOMImplementation domImpl = docBuilder.getDOMImplementation();
 				

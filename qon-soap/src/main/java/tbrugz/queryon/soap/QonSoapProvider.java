@@ -21,6 +21,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Node;
 
 import tbrugz.queryon.api.ODataServlet;
+import tbrugz.queryon.util.MiscUtils;
 
 /*
  * https://stackoverflow.com/questions/5181194/message-level-jax-ws-service
@@ -69,7 +70,7 @@ public class QonSoapProvider implements Provider<SOAPMessage> {
 	}
 	
 	void serialize(Node node, Writer writer) throws ParserConfigurationException {
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory docFactory = MiscUtils.getDocumentBuilderFactory();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		DOMImplementation domImpl = docBuilder.getDOMImplementation();
 		

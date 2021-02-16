@@ -81,7 +81,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		serviceName = "queryOnService";
 		
 		try {
-			dbFactory = DocumentBuilderFactory.newInstance();
+			dbFactory = MiscUtils.getDocumentBuilderFactory();
 			dBuilder = dbFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
 			throw new ServletException(e); 
