@@ -427,7 +427,7 @@ function getColumnsFromRelation(relation) {
 	//console.log("getColumnsFromRelation",relation);
 	var cols = getScalarArrayFromValue(relation.columnNames);
 	
-	//XXX: ignore *_STYLE, *_CLASS, *_TITLE & *_HREF" ??
+	//to ignore *_STYLE, *_CLASS, *_TITLE & *_HREF", call removeHtmlxSpecialCols()
 
 	for(var i=cols.length-1;i>=0;i--) {
 		cols[i] = cols[i].replace("[","").replace("]","").trim();
@@ -436,6 +436,32 @@ function getColumnsFromRelation(relation) {
 	return cols;
 }
 
+function removeHtmlxSpecialCols(colsPar) {
+	var cols = colsPar.slice();
+	var suffixes = ["_STYLE", "_CLASS", "_TITLE", "_HREF"];
+	for(var i=cols.length-1;i>=0;i--) {
+		for(var j=0;j<suffixes.length;j++) {
+			if( cols[i].endsWith(suffixes[j]) ) {
+				var root = cols[i].substring(0, cols[i].length - suffixes[j].length);
+				//console.log("[",i,"]", cols[i], suffixes[j], root, ">>", cols);
+				if ( cols.indexOf(root) >=0 ) {
+					var removed = cols.splice(i, 1);
+					//console.log("[",i,"] removed!", removed);
+				}
+			}
+		}
+	}
+	var spCols = ["ROW_STYLE", "ROW_CLASS"];
+	for(var i=cols.length-1;i>=0;i--) {
+		if ( spCols.indexOf(cols[i]) >=0 ) {
+			var removed = cols.splice(i, 1);
+			//console.log("[",i,"] removed!", removed);
+		}
+	}
+	return cols;
+}
+
+/*
 // obsolete?
 function getColumnsFromContainer(containerId) {
 	var cols = [];
@@ -456,6 +482,7 @@ function getColumnsFromContainer(containerId) {
 	}
 	return cols;
 }
+*/
 
 /* returns only htmlx visible column names */
 function getColumnNamesFromColgroup(containerId) {
@@ -478,19 +505,18 @@ function getColumnNames(containerId) {
 	var cols = null;
 	var relation = getCurrentRelation('objects');
 	
-	if(pivotQueryActive()) {
+	cols = getColumnsFromRelation(relation);
+	// remove _STYLE...
+	cols = removeHtmlxSpecialCols(cols);
+	//if(pivotQueryActive()) {
 		// pivot query changes colgroup...
-		cols = getColumnsFromRelation(relation);
-	}
+	//}
 	if(cols==null || cols.length==0) {
 		cols = getColumnNamesFromColgroup(containerId);
 	}
-	if(cols==null || cols.length==0) {
-		cols = getColumnsFromRelation(relation);
-	}
-	if(cols==null || cols.length==0) {
-		cols = getColumnsFromContainer('content');
-	}
+	/*if(cols==null || cols.length==0) {
+		cols = getColumnsFromContainer(containerId);
+	}*/
 	return cols;
 }
 
