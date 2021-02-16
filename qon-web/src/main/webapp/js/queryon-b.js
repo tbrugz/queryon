@@ -245,7 +245,10 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 			container.innerHTML = data;
 			//console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
 			closeMessages(messagesId);
-			addSortHrefs(containerId, order);
+			if(!pivotQueryActive()) {
+				addSortHrefs(containerId, order);
+			}
+			
 			showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 			if(callback) { callback(request); }
 			//var doneTimeMilis = Date.now();
