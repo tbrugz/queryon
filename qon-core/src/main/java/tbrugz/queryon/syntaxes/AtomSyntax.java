@@ -42,7 +42,7 @@ public class AtomSyntax extends XMLDataDump implements WebSyntax {
 	
 	static final String ATOM_GENERATOR = "QueryOn: Atom Syntax - "+QueryOn.QON_PROJECT_URL;
 	
-	static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+	final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 	
 	long limit, offset;
 	String baseHref = null;

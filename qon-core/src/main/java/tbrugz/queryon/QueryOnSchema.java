@@ -66,16 +66,14 @@ public class QueryOnSchema extends AbstractHttpServlet {
 			resp.setStatus(e.getCode());
 			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
 			resp.getWriter().write(e.getMessage());
-		}
-		catch(ServletException e) {
-			//e.printStackTrace();
+		} catch(ServletException e) {
 			throw e;
 		} catch (ClassNotFoundException e) {
 			throw new ServletException(e);
 		} catch (SQLException e) {
 			throw new ServletException(e);
 		} catch (NamingException e) {
-			e.printStackTrace();
+			log.warn("NamingException: "+e);
 			throw new ServletException(e);
 		}
 	}

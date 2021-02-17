@@ -70,10 +70,11 @@ public class ShellHook implements ApplyHook {
 			log.info("returning: "+exitValue);
 			return ret;
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.warn("IOException: "+e);
 			throw new RuntimeException(e);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			log.warn("InterruptedException: "+e);
+			//throw e;
 			throw new RuntimeException(e);
 		}
 	}

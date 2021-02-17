@@ -190,7 +190,7 @@ public class QueryOn extends AbstractHttpServlet {
 			try {
 				prop.load(LimitOffsetStrategy.class.getResourceAsStream(PROPFILE_DBMS_SPECIFIC));
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.warn("LimitOffsetStrategy: "+e);
 				throw new ExceptionInInitializerError(e);
 			}
 		}

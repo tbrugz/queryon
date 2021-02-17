@@ -214,7 +214,6 @@ public class RequestSpec {
 			syntaxProperties.load(RequestSpec.class.getResourceAsStream(SYNTAXES_INFO_RESOURCE));
 		} catch (Exception e) {
 			log.warn("Error loading resource '"+SYNTAXES_INFO_RESOURCE+"'", e);
-			e.printStackTrace();
 		}
 	}
 	
