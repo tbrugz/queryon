@@ -27,3 +27,14 @@ other useful maven goals
 * `mvn javadoc:test-javadoc`
 
 * `mvn org.owasp:dependency-check-maven:6.0.3:check` / `mvn org.owasp:dependency-check-maven:6.0.3:aggregate`
+
+* `mvn se.kth.castor:depclean-maven-plugin:1.1.0:depclean -Dcreate.pom.debloated=true -Dcreate.result.json=true -Dignore.scopes=test`
+  (see <https://castor-software.github.io/depclean/>)
+
+
+maven goals that need external services
+-----
+
+* `mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.8.0.2131:sonar -Dsonar.projectKey=tbrugz_queryon -Dsonar.organization=tbrugz -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=<TOKEN>`
+  (see <https://sonarcloud.io/documentation/analysis/scan/sonarscanner-for-maven/>)(needs node.js v10+)
+
