@@ -972,7 +972,7 @@ public class SQL {
 	
 	public static void validateNamedParametersWithParamCount(List<String> namedParameters, int bindParameterCount) {
 		if(namedParameters==null) { return; }
-		int namedParameterCount = namedParameters==null ? 0 : namedParameters.size();
+		int namedParameterCount = namedParameters.size();
 		if(namedParameterCount != bindParameterCount) {
 			String message = "'named-parameters' count [#"+namedParameterCount+"] should be equal to bind parameters count [#"+bindParameterCount+"]";
 			log.warn(message);

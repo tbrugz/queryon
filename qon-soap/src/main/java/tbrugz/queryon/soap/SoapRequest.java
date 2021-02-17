@@ -89,11 +89,15 @@ public class SoapRequest extends RequestSpec {
 	@Override
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
 		String tagName = getRequestElement().getTagName();
+		if(tagName==null) {
+			throw new BadRequestException("null tagName");
+		}
 		String nsPrefix = getNsPrefix();
 		if(nsPrefix==null) {
 			throw new BadRequestException("null prefix");
 		}
-		if(tagName!=null && tagName.startsWith(nsPrefix)) {
+
+		if(tagName.startsWith(nsPrefix)) {
 			tagName = tagName.substring(nsPrefix.length()+1);
 		}
 		

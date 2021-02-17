@@ -1052,9 +1052,12 @@ public class RequestSpec {
 	}
 	
 	static String getSyntax(String lastUriPart, DumpSyntaxUtils dsutils, Properties prop) {
+		if(lastUriPart==null) {
+			return null;
+		}
+
 		String outputTypeStr = null;
-		
-		int lastDotIndex = lastUriPart!=null ? lastUriPart.lastIndexOf('.') : -1;
+		int lastDotIndex = lastUriPart.lastIndexOf('.');
 		String outputTypeStrTmp = null;
 		DumpSyntaxInt ds = null;
 		if(lastDotIndex > -1) {

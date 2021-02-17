@@ -220,7 +220,7 @@ public class SchemaModelUtils {
 		}
 		else {
 			Set<String> models = getModelIds(req.getServletContext());
-			if(!models.contains(modelReq)) {
+			if(models==null || !models.contains(modelReq)) {
 				throw new BadRequestException( "Model id '"+modelReq+"' undefined"
 						+(PARAM_MODEL.equals(param)?"":" [param="+param+"]")
 						+(" [modelsIds: "+models+"]")
@@ -237,7 +237,7 @@ public class SchemaModelUtils {
 		}
 		else {
 			Set<String> models = getModelIds(req.getServletContext());
-			if(!models.contains(modelId)) {
+			if(models==null || !models.contains(modelId)) {
 				throw new BadRequestException( "Model id '"+modelId+"' undefined"
 						+(" [modelsIds: "+models+"]")
 						);

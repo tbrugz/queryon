@@ -267,21 +267,21 @@ public class QueryOnInstant extends QueryOn {
 		}
 	}
 	
-	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypesList) throws SQLException {
+	static List<Relation> grabRelationNames(String schemaName, DatabaseMetaData dbmd, List<TableType> tableTypes) throws SQLException {
 		List<Relation> ret = new ArrayList<Relation>();
 		long initTime = System.currentTimeMillis();
 		String[] ttypes = null;
-		if(tableTypesList!=null) { ttypes = tableTypeArr2StringArr(tableTypesList); }
+		if(tableTypes!=null) { ttypes = tableTypeArr2StringArr(tableTypes); }
 		ResultSet rs = dbmd.getTables(null, schemaName, null, ttypes);
 		long elapsed = (System.currentTimeMillis()-initTime);
 		//taking too long? monitor generated SQL? jdbc connection proxy?
-		log.debug("grabRelationNames: schema = "+schemaName+" ; types = "+Arrays.toString(ttypes)+" ; dbmd = "+dbmd.getClass().getSimpleName()+" ; elapsed = "+elapsed);
+		log.debug("grabRelationNames: schema = "+schemaName+" ; types = "+tableTypes+" ; dbmd = "+dbmd.getClass().getSimpleName()+" ; elapsed = "+elapsed);
 		int count = 0, countAll = 0;
 
 		while(rs.next()) {
 			countAll++;
 			Table newt = newTable(rs, schemaName);
-			if(!tableTypesList.contains(newt.getType())) {
+			if(tableTypes!=null && !tableTypes.contains(newt.getType())) {
 				//log.warn("error adding table: "+newt.getName()+" ["+newt.getType()+"]");
 				continue;
 			}

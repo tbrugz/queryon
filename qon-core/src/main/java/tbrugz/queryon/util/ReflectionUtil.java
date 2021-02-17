@@ -31,9 +31,11 @@ public class ReflectionUtil {
 			}
 			catch(NoSuchMethodException e) {
 				log.debug("... NoSuchMethodException: "+e);
+				return null;
 			}
 			catch(RuntimeException e) {
 				log.debug("... RuntimeException: "+e);
+				return null;
 			}
 		}
 		return callProtectedMethod(o, m, args);
