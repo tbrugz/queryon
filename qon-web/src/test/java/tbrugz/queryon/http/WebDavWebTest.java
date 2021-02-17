@@ -4,18 +4,19 @@ import static tbrugz.queryon.http.JettySetup.qonUrl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.naming.NamingException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -71,7 +72,7 @@ public class WebDavWebTest {
 		SQLRun.main(params);
 	}
 	
-	class PropFindMethod extends EntityEnclosingMethod {
+	/*class PropFindMethod extends EntityEnclosingMethod {
 		PropFindMethod(String uri) {
 			super(uri);
 		}
@@ -80,14 +81,30 @@ public class WebDavWebTest {
 		public String getName() {
 			return "PROPFIND";
 		}
+	}*/
+	
+	class HttpPropFind extends HttpGet {
+		public final static String METHOD_NAME = "PROPFIND";
+
+		public HttpPropFind(final String uri) {
+			super();
+			setURI(URI.create(uri));
+		}
+
+		@Override
+		public String getMethod() {
+			return METHOD_NAME;
+		}
 	}
 
 	void callPropFind(String url) throws HttpException, IOException {
-		HttpClient client = new HttpClient();
-		PropFindMethod pfm = new PropFindMethod(url);
-		int code = client.executeMethod(pfm);
+		HttpClient client = HttpClients.createDefault();
+		HttpPropFind pfm = new HttpPropFind(url);
+		HttpResponse response1 = client.execute(pfm);
+		int code = response1.getStatusLine().getStatusCode();
 		log.info("code = "+code);
-		String response = pfm.getResponseBodyAsString();
+		String response = AbstractWebTest.getContent(response1);
+		//String response = pfm.getResponseBodyAsString();
 		log.info("response = "+response);
 	}
 
@@ -263,17 +280,17 @@ public class WebDavWebTest {
 	}
 	
 	@Test
-	public void callPropFindRoot() throws IOException {
+	public void callPropFindRoot() throws HttpException, IOException {
 		callPropFind(webdavUrl);
 	}
 
 	@Test
-	public void callPropFindDept() throws IOException {
+	public void callPropFindDept() throws HttpException, IOException {
 		callPropFind(webdavUrl+"/PUBLIC.DEPT");
 	}
 
 	@Test
-	public void callPropFindDeptId1() throws IOException {
+	public void callPropFindDeptId1() throws HttpException, IOException {
 		callPropFind(webdavUrl+"/PUBLIC.DEPT/1");
 	}
 
