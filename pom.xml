@@ -66,6 +66,24 @@
     <jdepend-maven-plugin.version>2.0</jdepend-maven-plugin.version>
 
     <checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
+
+    <sonar.exclusions>
+      qon-web/src/main/webapp/css/diffview.css,
+      qon-web/src/main/webapp/css/nv.d3.css,
+      qon-web/src/main/webapp/css/prism.css,
+      qon-web/src/main/webapp/js/ace/**,
+      qon-web/src/main/webapp/js/jsdifflib/**,
+      qon-web/src/main/webapp/js/sigma/**,
+      qon-web/src/main/webapp/js/d3.min.js,
+      qon-web/src/main/webapp/js/jquery*.js,
+      qon-web/src/main/webapp/js/markdown.js,
+      qon-web/src/main/webapp/js/nv.d3.min.js,
+      qon-web/src/main/webapp/js/prism.js,
+      qon-web/src/main/webapp/js/typeahead.bundle.js,
+      qon-web/src/main/webapp/map/js/jscolor/**,
+      qon-web/src/main/webapp/swagger-ui/**,
+      qon-web/src/main/webapp/swagger2-ui/**
+    </sonar.exclusions>
   </properties>
   
   <modules>
