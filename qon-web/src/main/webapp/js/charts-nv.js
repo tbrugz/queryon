@@ -11,12 +11,12 @@ function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, 
 		}
 		
 		try {
-			data = getQonData(data);
+			var qondata = getQonData(data);
 			//seriesData = sinAndCos();
-			seriesData = rows2cols(data, columns);
-			xlabelsData = null;
+			var seriesData = rows2cols(qondata, columns);
+			var xlabelsData = null;
 			if(xaxis) {
-				xlabelsData = rows2arr(data, xaxis);
+				xlabelsData = rows2arr(qondata, xaxis);
 			}
 			
 			//console.log("seriesData", seriesData, "containerId", containerId);

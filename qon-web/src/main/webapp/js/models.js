@@ -83,6 +83,6 @@ function isQonQueriesPluginActive() {
 	return getCurrentModelUpdatePlugins().includes("QOnQueries");
 }
 
-getModel = function() {}
+function getModel() {}
 
 //document.addEventListener("DOMContentLoaded", loadModels);
