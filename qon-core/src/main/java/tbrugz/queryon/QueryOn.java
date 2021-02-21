@@ -141,12 +141,31 @@ public class QueryOn extends AbstractHttpServlet {
 		DELETE_ANY,
 		;
 		
+		public String objectType() {
+			switch(this) {
+				case PLUGIN_ACTION:
+					return "PLUGIN";
+				default:
+					return name();
+			}
+		}
+
 		public String slug() {
 			switch(this) {
+				case SELECT_ANY:
+					return "QueryAny"; //ACTION_QUERY_ANY = "QueryAny";
+				case VALIDATE_ANY:
+					return "ValidateAny";
+				case EXPLAIN_ANY:
+					return "ExplainAny";
+				case SQL_ANY:
+					return "SqlAny";
+				case MANAGE:
+					return name().toLowerCase();
 				case PLUGIN_ACTION:
 					return "PluginAction";
 				default:
-					return this.name();
+					return name();
 			}
 		}
 
@@ -162,10 +181,10 @@ public class QueryOn extends AbstractHttpServlet {
 
 	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.queryon", "tbrugz.queryon.processor", "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors", "tbrugz", "" };
 	
-	public static final String ACTION_QUERY_ANY = "QueryAny";
+	/*public static final String ACTION_QUERY_ANY = "QueryAny";
 	public static final String ACTION_VALIDATE_ANY = "ValidateAny";
 	public static final String ACTION_EXPLAIN_ANY = "ExplainAny";
-	public static final String ACTION_SQL_ANY = "SqlAny";
+	public static final String ACTION_SQL_ANY = "SqlAny";*/
 	
 	public static final String MIME_TEXT = "text/plain";
 	
@@ -868,16 +887,17 @@ public class QueryOn extends AbstractHttpServlet {
 			//DBObjectType statusType = null;
 			if(isStatusObject) {
 				//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
+				otype = reqspec.object.toUpperCase();
 				atype = ActionType.STATUS;
 				//statusType = statusObject(reqspec.object);
-				otype = reqspec.object.toUpperCase();
 				dbobj = null;
 			}
 			else {
 				ActionType atypeTmp = getPrivilegedAction(reqspec.object, reqspec.httpMethod);
 				if(atypeTmp!=null) {
 					atype = atypeTmp;
-					otype = atype.name();
+					//otype = (reqspec.getParams().size()>0) ? String.valueOf(reqspec.getParams().get(0)) : atype.name();
+					otype = atype.objectType();
 					dbobj = null;
 				}
 				else {
@@ -1084,26 +1104,26 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	ActionType getPrivilegedAction(String object, String httpMethod) {
-		if(ACTION_QUERY_ANY.equals(object)) {
+		if(ActionType.SELECT_ANY.slug().equals(object)) {
 			if(! METHOD_POST.equals(httpMethod)) {
 				// XXX use 405: SC_METHOD_NOT_ALLOWED?
 				throw new BadRequestException(object+": method must be POST");
 			}
 			return ActionType.SELECT_ANY;
 		}
-		if(ACTION_VALIDATE_ANY.equals(object)) {
+		if(ActionType.VALIDATE_ANY.slug().equals(object)) {
 			if(! METHOD_POST.equals(httpMethod)) {
 				throw new BadRequestException(object+": method must be POST");
 			}
 			return ActionType.VALIDATE_ANY;
 		}
-		if(ACTION_EXPLAIN_ANY.equals(object)) {
+		if(ActionType.EXPLAIN_ANY.slug().equals(object)) {
 			if(! METHOD_POST.equals(httpMethod)) {
 				throw new BadRequestException(object+": method must be POST");
 			}
 			return ActionType.EXPLAIN_ANY;
 		}
-		if(ACTION_SQL_ANY.equals(object)) {
+		if(ActionType.SQL_ANY.slug().equals(object)) {
 			if(! METHOD_POST.equals(httpMethod)) {
 				throw new BadRequestException(object+": method must be POST");
 			}
@@ -1112,7 +1132,7 @@ public class QueryOn extends AbstractHttpServlet {
 		if(ActionType.PLUGIN_ACTION.slug().equals(object)) {
 			return ActionType.PLUGIN_ACTION;
 		}
-		if(ActionType.MANAGE.name().toLowerCase().equals(object)) {
+		if(ActionType.MANAGE.slug().equals(object)) {
 			return ActionType.MANAGE;
 		}
 		return null;
@@ -2606,7 +2626,9 @@ public class QueryOn extends AbstractHttpServlet {
 			for(UpdatePlugin up: plugins) {
 				String pluginClass = up.getClass().getSimpleName();
 				if(pluginParam.equals(pluginClass)) {
-					ShiroUtils.checkPermission(currentUser, ActionType.PLUGIN_ACTION+":"+pluginParam);
+					String pluginAction = (reqspec.params.size()>1) ? String.valueOf( reqspec.params.get(1) ) : null;
+					ShiroUtils.checkPermission(currentUser, ActionType.PLUGIN_ACTION.objectType()+":"+pluginParam+
+						(pluginAction!=null ? ":" + pluginAction : "") );
 					Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 					try {
 						up.setConnection(conn);
@@ -2615,7 +2637,7 @@ public class QueryOn extends AbstractHttpServlet {
 					}
 					catch(RuntimeException e) {
 						log.warn("doPluginAction: Error: "+e);
-						throw new BadRequestException("Plugin action error: "+e);
+						throw new BadRequestException("Plugin action error: "+e.getMessage(), e);
 					}
 					finally {
 						ConnectionUtil.closeConnection(conn);
