@@ -58,7 +58,7 @@ public class AuthServlet extends AbstractHttpServlet {
 		
 		pathInfo = pathInfo.substring(1);
 		//log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo()+" ; req.getQueryString() = "+req.getQueryString());
-		log.debug("pathInfo = "+pathInfo);
+		log.debug("pathInfo = "+pathInfo+" ; method = "+req.getMethod());
 
 		AuthActions beanActions = new AuthActions(prop);
 		if(pathInfo.equals(ACTION_CURRENT_USER)) {

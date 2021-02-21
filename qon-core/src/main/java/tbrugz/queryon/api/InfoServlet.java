@@ -77,7 +77,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		
 		pathInfo = pathInfo.substring(1);
 		//log.info("pathInfo = "+pathInfo+" ; req.getPathInfo() = "+req.getPathInfo()+" ; req.getQueryString() = "+req.getQueryString());
-		log.debug("pathInfo = "+pathInfo);
+		log.debug("pathInfo = "+pathInfo+" ; method = "+req.getMethod());
 		WebUtils.checkHttpMethod(req, QueryOn.METHOD_GET);
 		
 		if(pathInfo.equals(INFO_AUTH)) {

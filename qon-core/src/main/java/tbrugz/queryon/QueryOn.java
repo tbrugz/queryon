@@ -172,6 +172,18 @@ public class QueryOn extends AbstractHttpServlet {
 		public boolean isModelRequired() {
 			return !this.equals(MANAGE);
 		}
+
+		public boolean isSpecificAuthEnabled() {
+			switch(this) {
+				case MANAGE:
+					return true;
+				case PLUGIN_ACTION:
+					return true;
+				default:
+					return false;
+			}
+		}
+
 	}
 	
 	// 'status objects' (SO)
@@ -321,10 +333,10 @@ public class QueryOn extends AbstractHttpServlet {
 	boolean doFilterStatusByQueryGrants = true; //XXX: add prop for doFilterStatusByQueryGrants ?
 	static boolean validateFilterColumnNames = true;
 	//boolean xSetRequestUtf8 = false;
-	protected boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
+	protected final boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
 	protected Integer defaultLimit;
 	protected int maxLimit;
-	protected boolean debugMode = false; //XXX add prop for debugMode
+	protected final boolean debugMode = false; //XXX add prop for debugMode
 	private Boolean shiroEnabled = null;
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
@@ -929,13 +941,19 @@ public class QueryOn extends AbstractHttpServlet {
 			
 			//log.info("is shiro enabled? [shiroEnabled="+isShiroEnabled()+";atype="+atype+"]");
 			//ShiroUtils.checkPermission(currentUser, otype+":"+atype, reqspec.object);
-			boolean permitted = isPermitted(currentUser, otype, atype, reqspec.object);
-			if(!permitted) {
-				if( (atype==ActionType.UPDATE || atype == ActionType.INSERT) && validateUpdateColumnPermissions) {
-					// should validate columns on doInsert/doUpdate
-				}
-				else {
-					ShiroUtils.throwPermissionException(currentUser, otype+":"+atype, reqspec.object);
+			boolean permitted = false;
+			if(atype.isSpecificAuthEnabled()) {
+				log.debug("ActionType ["+atype+"]: will use specific authorization");
+			}
+			else {
+				permitted = isPermitted(currentUser, otype, atype, reqspec.object);
+				if(!permitted) {
+					if( (atype==ActionType.UPDATE || atype == ActionType.INSERT) && validateUpdateColumnPermissions) {
+						// should validate columns on doInsert/doUpdate
+					}
+					else {
+						ShiroUtils.throwPermissionException(currentUser, otype+":"+atype, reqspec.object);
+					}
 				}
 			}
 			switch (atype) {
@@ -1055,7 +1073,7 @@ public class QueryOn extends AbstractHttpServlet {
 				doStatus(model, otype, reqspec, currentUser, resp);
 				break;
 			case MANAGE:
-				doManage(model, reqspec, req, resp);
+				doManage(model, reqspec, currentUser, req, resp);
 				break;
 			case PLUGIN_ACTION: {
 				doPluginAction(model, reqspec, currentUser, resp);
@@ -2567,7 +2585,7 @@ public class QueryOn extends AbstractHttpServlet {
 		log.debug("col["+colindex+"] "+col+": "+ctype+" [isBinary="+isBinary+"]");
 	}
 	
-	void doManage(SchemaModel model, RequestSpec reqspec, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {
+	void doManage(SchemaModel model, RequestSpec reqspec, Subject currentUser, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, ClassNotFoundException, SQLException, NamingException {
 		//TODO: only reloads model for now...
 		// - reload-config, reload-model, rerun-processors
 		
@@ -2579,6 +2597,8 @@ public class QueryOn extends AbstractHttpServlet {
 		//log.info("doManage: params: "+reqspec.params);
 		
 		String action = String.valueOf( reqspec.params.get(0) );
+		ShiroUtils.checkPermission(currentUser, ActionType.MANAGE.objectType()+":"+action);
+
 		if(QOnManage.ACTION_RELOAD.equals(action)) {
 			doInit(req.getServletContext());
 			resp.getWriter().write("queryon config reloaded");
