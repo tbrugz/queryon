@@ -2098,7 +2098,7 @@ public class WinstoneAndH2HttpRequestTest {
 	public void infoGetStatus() throws IOException, ParserConfigurationException, SAXException {
 		String content = getContentFromUrl(qonUrl + "/qinfo/status");
 		checkJson(content);
-		System.out.println("infoGetStatus: "+getPrettyStringFromJson(content));
+		//System.out.println("infoGetStatus: "+getPrettyStringFromJson(content));
 	}
 
 	@Test
