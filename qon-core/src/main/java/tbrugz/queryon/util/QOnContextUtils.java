@@ -1,5 +1,7 @@
 package tbrugz.queryon.util;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -14,6 +16,7 @@ public class QOnContextUtils {
 
 	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
 	public static final String ATTR_PROP = "prop";
+	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
 	
 	public static DumpSyntaxUtils getDumpSyntaxUtils(ServletContext context) {
 		return (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
@@ -29,6 +32,14 @@ public class QOnContextUtils {
 
 	public static void setProperties(ServletContext context, Properties prop) {
 		context.setAttribute(ATTR_PROP, prop);
+	}
+
+	public static Map<String, List<String>> getSchemasByModel(ServletContext context) {
+		return (Map<String, List<String>>) context.getAttribute(ATTR_SCHEMAS_MAP);
+	}
+
+	public static void setSchemasByModel(ServletContext context, Map<String, List<String>> schemasByModel) {
+		context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
 	}
 
 }

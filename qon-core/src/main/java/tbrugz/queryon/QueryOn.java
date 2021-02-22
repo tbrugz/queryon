@@ -310,7 +310,8 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String ATTR_MODEL_MAP = SchemaModelUtils.ATTR_MODEL_MAP;
 	@Deprecated
 	public static final String ATTR_DEFAULT_MODEL = SchemaModelUtils.ATTR_DEFAULT_MODEL;
-	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
+	@Deprecated
+	public static final String ATTR_SCHEMAS_MAP = QOnContextUtils.ATTR_SCHEMAS_MAP;
 	public static final String ATTR_INIT_ERROR = "initerror";
 	@Deprecated
 	public static final String ATTR_DUMP_SYNTAX_UTILS = QOnContextUtils.ATTR_DUMP_SYNTAX_UTILS;
@@ -562,7 +563,7 @@ public class QueryOn extends AbstractHttpServlet {
 			QOnContextUtils.setDumpSyntaxUtils(context, dsutils);
 			
 			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();
-			context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
+			QOnContextUtils.setSchemasByModel(context, schemasByModel);
 			
 			setupUpdatePlugins(context);
 			

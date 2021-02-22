@@ -172,11 +172,10 @@ public class InfoServlet extends AbstractHttpServlet {
 		
 		ret.put("modelschemas", names);
 
-		@SuppressWarnings("unchecked")
-		Map<String, List<String>> schemasByModel = (Map<String, List<String>>) getServletContext().getAttribute(QueryOn.ATTR_SCHEMAS_MAP);
+		Map<String, List<String>> schemasByModel = QOnContextUtils.getSchemasByModel(getServletContext());
 		if(schemasByModel==null) {
 			schemasByModel = new HashMap<String, List<String>>();
-			getServletContext().setAttribute(QueryOn.ATTR_SCHEMAS_MAP, schemasByModel);
+			QOnContextUtils.setSchemasByModel(getServletContext(), schemasByModel);
 		}
 
 		List<String> schemas = schemasByModel.get(modelId);
