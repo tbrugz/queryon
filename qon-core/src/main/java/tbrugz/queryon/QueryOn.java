@@ -184,6 +184,17 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 		}
 
+		public boolean isMethodAllowed(String httpMethod) {
+			switch(this) {
+				case SELECT_ANY:
+				case VALIDATE_ANY:
+				case EXPLAIN_ANY:
+				case SQL_ANY:
+					return METHOD_POST.equals(httpMethod);
+				default:
+					return true;
+			}
+		}
 	}
 	
 	// 'status objects' (SO)
@@ -1122,36 +1133,14 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	ActionType getPrivilegedAction(String object, String httpMethod) {
-		if(ActionType.SELECT_ANY.slug().equals(object)) {
-			if(! METHOD_POST.equals(httpMethod)) {
-				// XXX use 405: SC_METHOD_NOT_ALLOWED?
-				throw new BadRequestException(object+": method must be POST");
+		for(ActionType at: ActionType.values()) {
+			if(at.slug().equals(object)) {
+				if(! at.isMethodAllowed(httpMethod)) {
+					// XXX use 405: SC_METHOD_NOT_ALLOWED?
+					throw new BadRequestException(object+": method "+httpMethod+" not allowed");
+				}
+				return at;
 			}
-			return ActionType.SELECT_ANY;
-		}
-		if(ActionType.VALIDATE_ANY.slug().equals(object)) {
-			if(! METHOD_POST.equals(httpMethod)) {
-				throw new BadRequestException(object+": method must be POST");
-			}
-			return ActionType.VALIDATE_ANY;
-		}
-		if(ActionType.EXPLAIN_ANY.slug().equals(object)) {
-			if(! METHOD_POST.equals(httpMethod)) {
-				throw new BadRequestException(object+": method must be POST");
-			}
-			return ActionType.EXPLAIN_ANY;
-		}
-		if(ActionType.SQL_ANY.slug().equals(object)) {
-			if(! METHOD_POST.equals(httpMethod)) {
-				throw new BadRequestException(object+": method must be POST");
-			}
-			return ActionType.SQL_ANY;
-		}
-		if(ActionType.PLUGIN_ACTION.slug().equals(object)) {
-			return ActionType.PLUGIN_ACTION;
-		}
-		if(ActionType.MANAGE.slug().equals(object)) {
-			return ActionType.MANAGE;
 		}
 		return null;
 	}
