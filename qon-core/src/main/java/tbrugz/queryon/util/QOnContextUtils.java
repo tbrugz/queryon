@@ -9,6 +9,8 @@ import javax.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.UpdatePlugin;
+
 public class QOnContextUtils {
 
 	@SuppressWarnings("unused")
@@ -17,6 +19,7 @@ public class QOnContextUtils {
 	public static final String ATTR_DUMP_SYNTAX_UTILS = "dsutils";
 	public static final String ATTR_PROP = "prop";
 	public static final String ATTR_SCHEMAS_MAP = "schemasmap";
+	public static final String ATTR_UPDATE_PLUGINS = "update-plugins";
 	
 	public static DumpSyntaxUtils getDumpSyntaxUtils(ServletContext context) {
 		return (DumpSyntaxUtils) context.getAttribute(ATTR_DUMP_SYNTAX_UTILS);
@@ -40,6 +43,14 @@ public class QOnContextUtils {
 
 	public static void setSchemasByModel(ServletContext context, Map<String, List<String>> schemasByModel) {
 		context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
+	}
+
+	public static Map<String, List<UpdatePlugin>> getUpdatePlugins(ServletContext context) {
+		return (Map<String, List<UpdatePlugin>>) context.getAttribute(ATTR_UPDATE_PLUGINS);
+	}
+
+	public static void setUpdatePlugins(ServletContext context, Map<String, List<UpdatePlugin>> updatePlugins) {
+		context.setAttribute(ATTR_UPDATE_PLUGINS, updatePlugins);
 	}
 
 }

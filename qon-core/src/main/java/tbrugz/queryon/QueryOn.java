@@ -315,7 +315,8 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String ATTR_INIT_ERROR = "initerror";
 	@Deprecated
 	public static final String ATTR_DUMP_SYNTAX_UTILS = QOnContextUtils.ATTR_DUMP_SYNTAX_UTILS;
-	public static final String ATTR_UPDATE_PLUGINS = "update-plugins";
+	@Deprecated
+	public static final String ATTR_UPDATE_PLUGINS = QOnContextUtils.ATTR_UPDATE_PLUGINS;
 	
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_HEAD = "HEAD";
@@ -662,7 +663,7 @@ public class QueryOn extends AbstractHttpServlet {
 			updatePlugins.put(modelId, plugins);
 		}
 		
-		context.setAttribute(ATTR_UPDATE_PLUGINS, updatePlugins);
+		QOnContextUtils.setUpdatePlugins(context, updatePlugins);
 	}
 	
 	List<UpdatePlugin> setupUpdatePlugins(ServletContext context, SchemaModel model, String modelId, List<String> updatePluginList) {

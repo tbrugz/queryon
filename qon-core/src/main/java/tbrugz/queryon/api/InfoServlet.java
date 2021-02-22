@@ -133,9 +133,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		ret.put("services", serviceEndpoints);
 		
 		Map<String, List<String>> updatePluginsMap = new HashMap<String, List<String>>();
-		@SuppressWarnings("unchecked")
-		Map<String, List<UpdatePlugin>> updatePlugins =
-				(Map<String, List<UpdatePlugin>>) getServletContext().getAttribute(QueryOn.ATTR_UPDATE_PLUGINS);
+		Map<String, List<UpdatePlugin>> updatePlugins = QOnContextUtils.getUpdatePlugins(getServletContext());
 		if(updatePlugins!=null) {
 			for(Map.Entry<String, List<UpdatePlugin>> e: updatePlugins.entrySet()) {
 				List<String> cnames = StringUtils.getClassSimpleNameListFromObjectList(e.getValue());
