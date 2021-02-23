@@ -450,6 +450,7 @@ function removeHtmlxSpecialCols(colsPar) {
 				if ( cols.indexOf(root) >=0 ) {
 					var removed = cols.splice(i, 1);
 					//console.log("[",i,"] removed!", removed);
+					break;
 				}
 			}
 		}
