@@ -71,6 +71,16 @@ create table qon_pages (
 	constraint qon_pages_pk primary key (id),
 	constraint qon_pages_path_uk unique (path)
 )
+
+create table qon_access_log (
+	remote_addr varchar(100),
+	status_code integer,
+	username varchar(100),
+	method varchar(20),
+	timestamp_ini timestamp,
+	elapsed_ms integer,
+	url varchar(1000)
+)
 ```
 
 
