@@ -769,8 +769,14 @@ public class QueryOn extends AbstractHttpServlet {
 		else {
 			String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS); //, prop.getProperty(PROP_GRABCLASS)
 			if(grabClassName==null) {
-				log.info("grab class not defined [modelId="+modelId+"; prefix="+prefix+"]. Using "+EMPTY_MODEL_GRABCLASS); //EmptyModelGrabber
-				grabClassName = EMPTY_MODEL_GRABCLASS;
+				grabClassName = prop.getProperty(QON_PROP_PREFIX+SUFFIX_GRABCLASS);
+				if(grabClassName==null) {
+					log.info("grab class not defined [modelId="+modelId+"; prefix="+prefix+"]. Using "+EMPTY_MODEL_GRABCLASS); //EmptyModelGrabber
+					grabClassName = EMPTY_MODEL_GRABCLASS;
+				}
+				else {
+					log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; prefix="+QON_PROP_PREFIX+" (default)]");
+				}
 				/*log.info("grab class not defined [prop '"+prefix+SUFFIX_GRABCLASS+"']. Using empty model");
 				DBMSResources.instance().setup(prop);
 				SchemaModel sm = new SchemaModel();

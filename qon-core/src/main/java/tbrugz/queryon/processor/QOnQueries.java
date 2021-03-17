@@ -323,7 +323,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			}
 		}
 		
-		log.info("QOn processed ["+
+		log.info("QOnQueries processed ["+
 				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
 				"added/replaced "+count+" queries]");
 	}

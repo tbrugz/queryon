@@ -170,7 +170,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			}
 		}
 		
-		log.info("QOn processed ["+
+		log.info("QOnQueries(Processor) processed ["+
 				(model.getModelId()!=null?"model="+model.getModelId()+"; ":"")+
 				"added/replaced "+count+" queries]");
 	}
@@ -382,7 +382,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			DBUtil.doCommit(conn);
 		}
 		
-		log.info("QOn processed [updated/inserted "+countUpdates+"/"+countInserts+" queries in table "+qonQueriesTable+"]");
+		log.info("QOnQueries(Processor) processed [updated/inserted "+countUpdates+"/"+countInserts+" queries in table "+qonQueriesTable+"]");
 	}
 	
 	void removeFromDatabase() throws SQLException {
@@ -421,7 +421,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			DBUtil.doCommit(conn);
 		}
 		
-		log.info("QOn processed ["+countAllDeletes+" deleted queries in table "+qonQueriesTable+"]");
+		log.info("QOnQueries(Processor) processed ["+countAllDeletes+" deleted queries in table "+qonQueriesTable+"]");
 	}
 	
 	public static String getGrantsStr(List<Grant> grants) {
