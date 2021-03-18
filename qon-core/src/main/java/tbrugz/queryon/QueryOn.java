@@ -270,7 +270,6 @@ public class QueryOn extends AbstractHttpServlet {
 	//static final String DEFAULT_MODELID = "default";
 	
 	public static final String QON_PROP_PREFIX = "queryon";
-	public static final String CONN_PROPS_PREFIX = "queryon";
 	
 	static final String PROP_MODELS = "queryon.models";
 	static final String PROP_MODELS_DEFAULT = "queryon.models.default";
@@ -749,10 +748,16 @@ public class QueryOn extends AbstractHttpServlet {
 			//XXX: fail on error?
 		}
 	}
+
+	static String getModelPrefix(Properties prop, String modelId) {
+		String prefix = QON_PROP_PREFIX+(modelId!=null?"."+modelId:"");
+		//log.info("getModelPrefix: modelId = "+modelId+" ; prefix = "+prefix);
+		return prefix;
+	}
 	
 	//XXX: move to SchemaModelUtils?
 	static SchemaModel modelGrabber(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
-		final String prefix = DBUtil.getDBConnPrefix(prop, modelId);
+		final String prefix = getModelPrefix(prop, modelId);
 
 		List<String> grabClassesNames = Utils.getStringListFromProp(prop, prefix+SUFFIX_GRABBERS, ",");
 		if(grabClassesNames!=null) {

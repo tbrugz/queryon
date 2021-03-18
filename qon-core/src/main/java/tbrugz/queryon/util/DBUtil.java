@@ -31,6 +31,9 @@ import tbrugz.sqldump.util.ConnectionUtil;
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);
 	
+	static final String CONN_PROPS_PREFIX = QueryOn.QON_PROP_PREFIX;
+	//static final String CONN_PROPS_PREFIX = "queryon";
+
 	public static DateFormat isoDateFormat;
 	
 	public static final String[] BLOB_COL_TYPES = { "BLOB", "RAW", "LONG RAW", "BYTEA" };
@@ -115,14 +118,14 @@ public class DBUtil {
 	}
 	
 	public static String getDBConnPrefix(Properties prop, String modelId) {
-		String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
+		String prefix = CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
 		String ret = prop.getProperty(prefix+".connpropprefix", prefix);
 		//log.info("getDBConnPrefix: modelId = "+modelId+" ; ret = "+ret);
 		return ret;
 	}
 	
 	public static Connection initDBConn(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
-		//String prefix = QueryOn.CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
+		//String prefix = CONN_PROPS_PREFIX+(modelId!=null?"."+modelId:"");
 		//prefix = prop.getProperty(prefix+".connpropprefix", prefix);
 		boolean autocommit = false;
 		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+getDBConnPrefix(prop, modelId)+" ; autocommit = "+autocommit);
