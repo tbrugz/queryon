@@ -11,7 +11,7 @@ public class UtilTest {
 	public void testReplaceMultiSlash() {
 		String s1 = "//a/b//ccc";
 		String s2 = MiscUtils.removeMultiSlash(s1);
-		System.out.println("s1: "+s1+" ; s2: "+s2);
+		//System.out.println("s1: "+s1+" ; s2: "+s2);
 		Assert.assertEquals("/a/b/ccc", s2);
 	}
 	

@@ -283,8 +283,8 @@
 	<filter-mapping>
 		<filter-name>AccessLogFilter</filter-name>
 		<servlet-name>QueryOn</servlet-name>
-		<!- - <url-pattern>/q/*</url-pattern> - ->
 	</filter-mapping>
 	-->
+	<!-- <url-pattern>/q/*</url-pattern> -->
 
 </web-app>

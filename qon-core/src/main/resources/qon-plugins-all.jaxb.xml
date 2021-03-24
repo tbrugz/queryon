@@ -7,7 +7,7 @@
     - admin
     - dev
     - user
-     -->
+    -->
     <table>
         <name>QON_TABLES</name>
         <schemaName>QUERYON</schemaName>
@@ -433,6 +433,16 @@
             <uniqueColumns>PATH</uniqueColumns>
         </constraints>
         <grants>
+            <grantee>user</grantee>
+            <privilege>SELECT</privilege>
+            <table>QON_PAGES</table>
+        </grants>
+        <grants>
+            <grantee>dev</grantee>
+            <privilege>SELECT</privilege>
+            <table>QON_PAGES</table>
+        </grants>
+        <grants>
             <grantee>dev</grantee>
             <privilege>INSERT</privilege>
             <table>QON_PAGES</table>
@@ -451,5 +461,70 @@
         <type>TABLE</type>
     </table>
     
+    <!--
+    <table>
+        <name>QON_ACCESS_LOG</name>
+        <schemaName>QUERYON</schemaName>
+        <columns>
+            <name>server_name</name>
+            <type>VARCHAR</type>
+            <columSize>100</columSize>
+        </columns>
+        <columns>
+            <name>remote_addr</name>
+            <type>VARCHAR</type>
+            <columSize>100</columSize>
+            <nullable>false</nullable>
+        </columns>
+        <columns>
+            <name>status_code</name>
+            <type>INTEGER</type>
+            <nullable>false</nullable>
+        </columns>
+        <columns>
+            <name>username</name>
+            <type>VARCHAR</type>
+            <columSize>100</columSize>
+        </columns>
+        <columns>
+            <name>request_method</name>
+            <type>VARCHAR</type>
+            <columSize>20</columSize>
+            <nullable>false</nullable>
+        </columns>
+        <columns>
+            <name>timestamp_ini</name>
+            <type>TIMESTAMP</type>
+            <nullable>false</nullable>
+        </columns>
+        <columns>
+            <name>elapsed_ms</name>
+            <type>INTEGER</type>
+            <nullable>false</nullable>
+        </columns>
+        <columns>
+            <name>request_uri</name>
+            <type>VARCHAR</type>
+            <columSize>1000</columSize>
+            <nullable>false</nullable>
+        </columns>
+        <columns>
+            <name>query_string</name>
+            <type>VARCHAR</type>
+            <columSize>1000</columSize>
+        </columns>
+        <columns>
+            <name>header_referer</name>
+            <type>VARCHAR</type>
+            <columSize>1000</columSize>
+        </columns>
+        <columns>
+            <name>header_useragent</name>
+            <type>VARCHAR</type>
+            <columSize>1000</columSize>
+        </columns>
+    </table>
+    -->
+
     <!-- <sqlDialect>?</sqlDialect> -->
 </schemaModel>

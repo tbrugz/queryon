@@ -1,6 +1,7 @@
 package tbrugz.queryon.filter;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,6 +30,14 @@ import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.sqldump.util.ConnectionUtil;
 
+/*
+ * Access Logger: logs access (http requests) to database table
+ *
+ * see:
+ * https://en.wikipedia.org/wiki/Common_Gateway_Interface
+ * https://httpd.apache.org/docs/current/mod/mod_log_config.html
+ * https://javaee.github.io/javaee-spec/javadocs/javax/servlet/http/HttpServletRequest.html
+ */
 public class AccessLogFilter implements Filter {
 
 	static final Log log = LogFactory.getLog(AccessLogFilter.class);
@@ -36,8 +45,15 @@ public class AccessLogFilter implements Filter {
 	// statuscode, url, username, timestamp
 	// headers(xx)
 	
-	public static final String METHOD = "method";
-	public static final String URL = "url";
+	public static final String SERVER_NAME = "server_name";
+	public static final String REQUEST_METHOD = "request_method";
+	public static final String REQUEST_URI = "request_uri";
+	public static final String QUERY_STRING = "query_string";
+	public static final String HEADER_REFERER = "header_referer";
+	public static final String HEADER_USERAGENT = "header_useragent";
+	// XXX ? PROTOCOL / SERVER_PROTOCOL (http/1.1, ...) - https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletRequest.html#getProtocol
+	// request: getScheme()? getServerPort()?
+	// request: getContentLength()? getContentType()?
 	public static final String USERNAME = "username";
 	public static final String REMOTE_ADDR = "remote_addr";
 	
@@ -49,7 +65,13 @@ public class AccessLogFilter implements Filter {
 	
 	String modelId = null;
 	String tableName = DEFAUL_TABLE_NAME;
-	final boolean grabQueryString = true;
+	String serverHostName = null;
+
+	final boolean grabQueryString = true,
+		grabServerName = true,
+		grabHeaderReferer = false,
+		grabHeaderUserAgent = false
+		;
 	
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -61,6 +83,14 @@ public class AccessLogFilter implements Filter {
 		String tmpTableName = filterConfig.getInitParameter("tableName");
 		if(tmpTableName!=null) {
 			tableName = tmpTableName;
+		}
+		if(grabServerName) {
+			try {
+				serverHostName = InetAddress.getLocalHost().getHostName().toLowerCase();
+			}
+			catch(java.net.UnknownHostException e) {
+				throw new ServletException(e);
+			}
 		}
 		log.info("modelId="+modelId+" ; tableName="+tableName);
 	}
@@ -95,12 +125,7 @@ public class AccessLogFilter implements Filter {
 		//String scheme = req.getScheme(); // http/https/ftp...
 		String method = req.getMethod();
 		String url = req.getRequestURI();
-		if(grabQueryString) {
-			String queryString = req.getQueryString();
-			if(queryString!=null) {
-				url += "?" + queryString;
-			}
-		}
+		String queryString = grabQueryString ? req.getQueryString() : null;
 		Principal userPrincipal = req.getUserPrincipal();
 		String username = req.getRemoteUser();
 		String remoteAddr = req.getRemoteAddr();
@@ -114,8 +139,20 @@ public class AccessLogFilter implements Filter {
 		
 		// make map
 		Map<String, Object> attr = new HashMap<String, Object>();
-		attr.put(METHOD, method);
-		attr.put(URL, url);
+		if(grabServerName) {
+			String serverName = req.getServerName();
+			if(serverName!=null) {
+				attr.put(SERVER_NAME, serverName);
+			}
+			else {
+				attr.put(SERVER_NAME, serverHostName);
+			}
+		}
+		attr.put(REQUEST_METHOD, method);
+		attr.put(REQUEST_URI, url);
+		if(grabQueryString) {
+			attr.put(QUERY_STRING, queryString);
+		}
 		if(userPrincipal!=null) {
 			attr.put(USERNAME, userPrincipal.getName());
 		}
@@ -123,6 +160,12 @@ public class AccessLogFilter implements Filter {
 			attr.put(USERNAME, username);
 		}
 		attr.put(REMOTE_ADDR, remoteAddr);
+		if(grabHeaderReferer) {
+			attr.put(HEADER_REFERER, req.getHeader("Referer"));
+		}
+		if(grabHeaderUserAgent) {
+			attr.put(HEADER_USERAGENT, req.getHeader("User-Agent"));
+		}
 		attr.put(STATUS_CODE, status);
 		attr.put(TIMESTAMP_INI, new Date(tsIni));
 		attr.put(ELAPSED_MS, elapsed);

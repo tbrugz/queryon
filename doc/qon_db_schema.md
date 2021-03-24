@@ -1,7 +1,8 @@
 
 sql ansi
 --------
-```
+
+```sql
 create table qon_queries (
 	schema_name varchar(100),
 	name varchar(100) not null,
@@ -73,13 +74,17 @@ create table qon_pages (
 )
 
 create table qon_access_log (
+	server_name varchar(100),      -- optional
 	remote_addr varchar(100),
 	status_code integer,
 	username varchar(100),
-	method varchar(20),
+	request_method varchar(20),
 	timestamp_ini timestamp,
 	elapsed_ms integer,
-	url varchar(1000)
+	request_uri varchar(1000),
+	query_string varchar(1000),    -- optional
+	header_referer varchar(1000),  -- optional
+	header_useragent varchar(1000) -- optional
 )
 ```
 
@@ -89,7 +94,7 @@ oracle
 
 (see: http://stackoverflow.com/questions/11296361/how-to-create-id-with-auto-increment-on-oracle)
 
-```
+```sql
 create sequence qon_pages_seq;
 
 create or replace trigger qon_pages_trg_ins
