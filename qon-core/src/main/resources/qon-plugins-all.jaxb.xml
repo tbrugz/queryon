@@ -471,6 +471,15 @@
             <columSize>100</columSize>
         </columns>
         <columns>
+            <name>server_port</name>
+            <type>INTEGER</type>
+        </columns>
+        <columns>
+            <name>server_protocol</name>
+            <type>VARCHAR</type>
+            <columSize>20</columSize>
+        </columns>
+        <columns>
             <name>remote_addr</name>
             <type>VARCHAR</type>
             <columSize>100</columSize>

@@ -75,6 +75,8 @@ create table qon_pages (
 
 create table qon_access_log (
 	server_name varchar(100),      -- optional
+	server_port integer,           -- optional
+	server_protocol varchar(20),   -- optional
 	remote_addr varchar(100),
 	status_code integer,
 	username varchar(100),

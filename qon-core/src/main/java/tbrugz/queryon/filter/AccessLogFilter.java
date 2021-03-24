@@ -46,13 +46,14 @@ public class AccessLogFilter implements Filter {
 	// headers(xx)
 	
 	public static final String SERVER_NAME = "server_name";
+	public static final String SERVER_PORT = "server_port";
 	public static final String REQUEST_METHOD = "request_method";
 	public static final String REQUEST_URI = "request_uri";
 	public static final String QUERY_STRING = "query_string";
+	public static final String SERVER_PROTOCOL = "server_protocol";
 	public static final String HEADER_REFERER = "header_referer";
 	public static final String HEADER_USERAGENT = "header_useragent";
-	// XXX ? PROTOCOL / SERVER_PROTOCOL (http/1.1, ...) - https://javaee.github.io/javaee-spec/javadocs/javax/servlet/ServletRequest.html#getProtocol
-	// request: getScheme()? getServerPort()?
+	// request: getScheme()?
 	// request: getContentLength()? getContentType()?
 	public static final String USERNAME = "username";
 	public static final String REMOTE_ADDR = "remote_addr";
@@ -69,6 +70,8 @@ public class AccessLogFilter implements Filter {
 
 	final boolean grabQueryString = true,
 		grabServerName = true,
+		grabServerPort = false,
+		grabServerProtocol = false,
 		grabHeaderReferer = false,
 		grabHeaderUserAgent = false
 		;
@@ -148,10 +151,16 @@ public class AccessLogFilter implements Filter {
 				attr.put(SERVER_NAME, serverHostName);
 			}
 		}
+		if(grabServerPort) {
+			attr.put(SERVER_PORT, req.getServerPort());
+		}
 		attr.put(REQUEST_METHOD, method);
 		attr.put(REQUEST_URI, url);
 		if(grabQueryString) {
 			attr.put(QUERY_STRING, queryString);
+		}
+		if(grabServerProtocol) {
+			attr.put(SERVER_PROTOCOL, req.getProtocol());
 		}
 		if(userPrincipal!=null) {
 			attr.put(USERNAME, userPrincipal.getName());
