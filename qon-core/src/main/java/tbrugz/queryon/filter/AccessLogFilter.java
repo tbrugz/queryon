@@ -216,7 +216,8 @@ public class AccessLogFilter implements Filter {
 				PreparedStatement st = conn.prepareStatement(insert);
 				Iterator<String> keys = propMap.keySet().iterator();
 				for(int i=1;i<=propMap.size();i++) {
-					st.setObject(i, propMap.get(keys.next()));
+					Object o = propMap.get(keys.next());
+					setValue(st, i, o);
 				}
 				int count = st.executeUpdate();
 				if(count==1) {
@@ -256,8 +257,18 @@ public class AccessLogFilter implements Filter {
 			sb.append(")");
 			return sb.toString();
 		}
+
+		// XXX move to utility class?
+		void setValue(PreparedStatement st, int i, Object value) throws java.sql.SQLException {
+			if(value instanceof Date) {
+				//st.setObject(i, value); // error on postgresql
+				//st.setDate(i, new java.sql.Date( ((Date) value).getTime() )); // removes time on postgresql
+				st.setTimestamp(i, new java.sql.Timestamp( ((Date) value).getTime() )); // ok for postgresql, h2, oracle
+			}
+			else {
+				st.setObject(i, value);
+			}
+		}
 	}
 
 }
-
-
