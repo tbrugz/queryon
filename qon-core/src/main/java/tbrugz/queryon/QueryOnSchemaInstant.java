@@ -28,6 +28,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -47,6 +48,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			//doSchemaGrabTableIndexes = false,
 			//doSchemaGrabTableTriggers = false,
 			doSchemaGrabTableCheckConstraints = true, //XXX use properties
+			doSchemaGrabTableForeignKeys = true, //XXX use properties
 			doSchemaGrabTableUniqueConstraints = true //XXX use properties
 			;
 
@@ -230,7 +232,12 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			newt.getConstraints().addAll(JDBCSchemaGrabber.grabRelationPKs(dbmd, newt));
 
 			//FKs
-			//model.getForeignKeys().addAll(JDBCSchemaGrabber.grabRelationFKs(dbmd, feat, newt, true, false));
+			if(doSchemaGrabTableForeignKeys) {
+				// add FKs to Table
+				List<FK> fks = JDBCSchemaGrabber.grabRelationFKs(dbmd, feat, newt, true, false);
+				log.debug("grabbed "+fks.size()+" Fks");
+				newt.getForeignKeys().addAll(fks);
+			}
 			
 			//GRANTs
 			if(doSchemaGrabTableGrants) {
