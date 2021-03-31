@@ -47,7 +47,6 @@ modelId = SchemaModelUtils.getModelId(request);
 <script type="text/javascript">
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
-	//var processorUrl = 'processor';
 	var qonUrl = 'q/QON_QUERIES';
 	var isQuerySaved = false;
 	var modelId = <%= (modelId==null?"null":"'"+modelId+"'")%>;

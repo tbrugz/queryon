@@ -182,6 +182,7 @@ function doRequest(url, btnId, download, callback) {
 	//console.log("sqlString[", sqlString.length, "]", sqlString);
 	if(!sqlString) {
 		showErrorMessages("messages", "query cannot be null...");
+		return;
 	}
 	var modelId = getCurrentModelId();
 	

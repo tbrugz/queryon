@@ -7,7 +7,7 @@
 
 var queryOnUrl = 'q';
 var qonEditorUrl = 'qon-editor.html';
-var processorUrl = 'processor';
+//var processorUrl = 'processor';
 
 /* functions */
 
