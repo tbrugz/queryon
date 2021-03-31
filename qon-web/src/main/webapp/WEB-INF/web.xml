@@ -32,36 +32,71 @@
 		</multipart-config> -->
 	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>QueryOn</servlet-name>
+		<url-pattern>/q/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>QueryOnSchema</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOnSchemaInstant</servlet-class>
 	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>QueryOnSchema</servlet-name>
+		<url-pattern>/qos/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>QueryOnInstant</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOnInstant</servlet-class>
 	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>QueryOnInstant</servlet-name>
+		<url-pattern>/qoi/*</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>DiffServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.DiffServlet</servlet-class>
 	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>DiffServlet</servlet-name>
+		<url-pattern>/qdiff/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>DataDiffServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.DataDiffServlet</servlet-class>
 	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>DataDiffServlet</servlet-name>
+		<url-pattern>/datadiff/*</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>Diff2QServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.Diff2QServlet</servlet-class>
 	</servlet>
 	
+	<servlet-mapping>
+		<servlet-name>Diff2QServlet</servlet-name>
+		<url-pattern>/diff2q/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>DiffManyServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.DiffManyServlet</servlet-class>
 	</servlet>
 	
+	<servlet-mapping>
+		<servlet-name>DiffManyServlet</servlet-name>
+		<url-pattern>/diffmany/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>Cool303</servlet-name>
 		<servlet-class>tbrugz.queryon.Cool303RedirectionServlet</servlet-class>
@@ -71,25 +106,50 @@
 		</init-param>
 	</servlet>
 	
+	<servlet-mapping>
+		<servlet-name>Cool303</servlet-name>
+		<url-pattern>/id/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>PagesServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.PagesServlet</servlet-class>
 	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>PagesServlet</servlet-name>
+		<url-pattern>/p/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>MarkdownServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.MarkdownServlet</servlet-class>
 	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>MarkdownServlet</servlet-name>
+		<url-pattern>/md/*</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>ProcessorServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
 	</servlet>
 	
+	<servlet-mapping>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<url-pattern>/processor/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>SwaggerServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.api.SwaggerServlet</servlet-class>
 	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<url-pattern>/swagger/*</url-pattern>
+	</servlet-mapping>
 	
 	<!-- <servlet>
 		<servlet-name>QuartzInitializer</servlet-name>
@@ -100,66 +160,6 @@
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet> -->
-	
-	<servlet-mapping>
-		<servlet-name>QueryOn</servlet-name>
-		<url-pattern>/q/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>QueryOnSchema</servlet-name>
-		<url-pattern>/qos/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>QueryOnInstant</servlet-name>
-		<url-pattern>/qoi/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>DiffServlet</servlet-name>
-		<url-pattern>/qdiff/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>DataDiffServlet</servlet-name>
-		<url-pattern>/datadiff/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>Diff2QServlet</servlet-name>
-		<url-pattern>/diff2q/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>DiffManyServlet</servlet-name>
-		<url-pattern>/diffmany/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>Cool303</servlet-name>
-		<url-pattern>/id/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>ProcessorServlet</servlet-name>
-		<url-pattern>/processor/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>PagesServlet</servlet-name>
-		<url-pattern>/p/*</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>MarkdownServlet</servlet-name>
-		<url-pattern>/md/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>SwaggerServlet</servlet-name>
-		<url-pattern>/swagger/*</url-pattern>
-	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>ODataServlet</servlet-name>
