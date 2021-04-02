@@ -44,6 +44,14 @@
 	display: inline-block;
 	vertical-align: top;
 }
+.labelBtn {
+	border: 1px solid #999;
+	padding: 3px 9px 3px 9px;
+	background-color: #999;
+}
+.labelBtn input[type=number] {
+	width: 4em;
+}
 </style>
 <script type="text/javascript">
 
@@ -202,6 +210,10 @@ function doRequest(url, btnId, download, callback) {
 		//console.log("modelId", modelId);
 		//reqData.set("model", modelId);
 		reqData.model = modelId;
+	}
+	var updatemax = byId('updatemax').value;
+	if(isInteger(updatemax)) {
+		reqData.updatemax = updatemax;
 	}
 	
 	var params = document.querySelectorAll('.parameter');
@@ -433,6 +445,7 @@ window.onresize = updateUI;
 	<div id="button-container">
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate SQL (F8)">
 		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain SQL Plan">
+		<label class="labelBtn" title="Max number of rows that may be updated/deleted by a DML command execution (DDL commands do not generate update-count)">max-updates: <input type="number" step="1" id="updatemax"> </label>
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run SQL (F9)">
 		<!--<input type="button" id="btnDownload0" value="download" onclick="javascript:doDownload('csv');" title="Download CSV" style="float: right;"/>-->
 		<input type="button" id="btnDownload" value="download" onclick="createPopupBelow('download-ext', 'btnDownload', getDownloadHrefs());" title="Download (click to see avaiable formats)" style="float: right;"/>
