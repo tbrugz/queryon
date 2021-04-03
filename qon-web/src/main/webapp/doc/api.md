@@ -84,12 +84,12 @@ Some parameters are specific to a syntax. Below you can find more about them:
 * `escape` - escapes (or not) the column's XML content (default is `true`)
 
 More info about syntax-based parameters may be found at
-[syntaxinfo.properties](https://bitbucket.org/tbrugz/queryon/src/default/src_resources/tbrugz/queryon/syntaxes/syntaxinfo.properties)
+[syntaxinfo.properties](https://github.com/tbrugz/queryon/blob/master/qon-core/src/main/resources/tbrugz/queryon/syntaxes/syntaxinfo.properties)
 
 
 More information
 ----------------
 
 Details about the implementation of the parameters may be found on the
-[RequestSpec](https://bitbucket.org/tbrugz/queryon/src/default/src/tbrugz/queryon/RequestSpec.java)
+[RequestSpec](https://github.com/tbrugz/queryon/blob/master/qon-core/src/main/java/tbrugz/queryon/RequestSpec.java)
 class

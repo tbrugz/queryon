@@ -15,7 +15,7 @@
 
   <name>queryon</name>
   <description>Web application that creates a REST API based on database objects (tables, views, queries) from a RDBMS</description>
-  <url>https://bitbucket.org/tbrugz/queryon</url>
+  <url>https://github.com/tbrugz/queryon</url>
 
   <!--
   http://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html

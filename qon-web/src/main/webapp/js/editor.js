@@ -107,7 +107,10 @@ var downloadExtFilter = [ "csv", "htmlx", "json", "md", "ods", "sql", "xls", "xl
 function getDownloadHrefs() {
 	var ret = [];
 
-	var exts = (typeof settings !== "undefined") ? settings["syntax.fileextensions"] : defaultDownloadExts;
+	var exts = (typeof settings !== "undefined") ? settings["syntax.fileextensions"] : null;
+	if(!exts) {
+		exts = defaultDownloadExts;
+	}
 	//console.log("getDownloadHrefs... exts=", exts);
 	for(var i=0;i<exts.length;i++) {
 		if(downloadExtFilter.indexOf(exts[i])<0) { continue; }

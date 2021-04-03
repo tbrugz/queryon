@@ -612,18 +612,4 @@
     </profile>
   </profiles>
 
-  <!--<repositories>
-    <repository>
-      <id>central</id>
-      <url>http://repo.maven.apache.org/maven2/</url>
-    </repository>
-    <repository>
-      <id>aduana</id>
-      <url>http://maven.ontotext.com/content/repositories/aduna/</url>
-    </repository>
-    <repository>
-      <id>bitbucket-tbrugz</id>
-      <url>https://bitbucket.org/tbrugz/mvn-repo/raw/tip/</url>
-    </repository>
-  </repositories>-->
 </project>
