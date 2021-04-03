@@ -234,7 +234,7 @@ function doRequest(url, btnId, download, callback) {
 	request.open("POST", url, true);
 	request.onload = function(oEvent) {
 		var completedTimeMilis = Date.now();
-		console.log('request.status: ', request.status); //, ' ; request: ', request,' ; oEvent: ', oEvent);
+		//console.log('request.status: ', request.status); //, ' ; request: ', request,' ; oEvent: ', oEvent);
 		if (request.status >= 200 && request.status < 300) {
 			byId('resultContainer').style.display = 'block';
 			//console.log("Ok", oEvent);
@@ -275,7 +275,7 @@ function doRequest(url, btnId, download, callback) {
 			}
 		}
 		else {
-			console.log("Err", oEvent);
+			console.log("Error:", oEvent);
 			showErrorMessages("messages", oEvent.target.responseText
 					+(request.status==403?" (invalid session?)":"")
 					);
@@ -334,45 +334,9 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	}
 }
 
-// https://stackoverflow.com/questions/22724070/prompt-file-download-with-xmlhttprequest/44435573#44435573
-function saveBlob(content, fileName, contentType) {
-	var a = document.createElement('a');
-	blob = new File([content], fileName); //, { type: contentType });
-	a.href = window.URL.createObjectURL(blob);
-	a.download = fileName;
-	a.dispatchEvent(new MouseEvent('click'));
-}
-
 function closeResults() {
 	byId('queryResult').innerHTML = '';
 	byId('resultContainer').style.display = 'none';
-}
-
-/* see: index.html: downloadExtFilter (+html, +sql) */
-var defaultDownloadExts = [ "csv", "htmlx", "json", "md", "sql", "xml" ];
-var downloadExtFilter = [ "csv", "htmlx", "json", "md", "ods", "sql", "xls", "xlsx", "xml" ];
-
-function getDownloadHrefs() {
-	var ret = [];
-
-	//var exts = settings["syntax.fileextensions"];
-	var exts = defaultDownloadExts;
-	//var exts = downloadExtFilter;
-	//console.log("getDownloadHrefs... exts=", exts);
-	for(var i=0;i<exts.length;i++) {
-		if(downloadExtFilter.indexOf(exts[i])<0) { continue; }
-
-		//var href = queryOnUrl+"/SqlAny."+exts[i]; //XXX modelId!
-		ret.push({
-			//"onclick": href,
-			"onclick": "doDownload(\""+exts[i].trim()+"\");return false;",
-			"label": exts[i],
-			"title": "download "+exts[i]
-		});
-	}
-	console.log("getDownloadHrefs...", exts, ret);
-	
-	return ret;
 }
 
 function registerKeybindings() {

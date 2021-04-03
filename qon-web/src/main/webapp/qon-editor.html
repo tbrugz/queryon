@@ -3,6 +3,7 @@
 <head>
 	<title>QueryOn - query editor</title>
 	<link href="css/queryon.css" rel="stylesheet">
+	<link href="css/qon-components.css" rel="stylesheet">
 	<link href="css/qon-editor.css" rel="stylesheet">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
@@ -19,6 +20,7 @@
 	<script type="text/javascript" src="js/auth.js"></script>
 	<script type="text/javascript" src="js/models.js"></script>
 	<script type="text/javascript" src="js/table.js"></script>
+	<script src="js/ui.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
 <script type="text/javascript">
 	var responseType = "htmlx";
@@ -330,7 +332,7 @@
 		var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
 
 		if(name==null || name=="") {
-			errorMessage('query <b>name</b> cannot be null...');
+			errorMessage('<strong>query name</strong> cannot be null...');
 			updateUI();
 			return;
 		}
@@ -441,7 +443,7 @@
 		});
 	}
 	
-	function doDownload() {
+	function doDownload(ext) {
 		var sqlString = editor.getSelectedText();
 		if(!sqlString) { sqlString = editor.getValue(); }
 		
@@ -459,11 +461,27 @@
 			reqData[item.name] = item.value;
 		}
 		
+		if(!reqData['name']) {
+			reqData['name'] = 'queryon';
+		}
 		//var startTimeMilis = Date.now();
 		
+		var url = queryOnUrl+"/QueryAny."+ext;
 		btnActionStart('btnDownload');
-		post(queryOnUrl+"/QueryAny.csv", reqData, function () {
+		/*post(queryOnUrl+"/QueryAny."+ext, reqData, function () {
 			//console.log('downloading...'); 
+			btnActionStop('btnDownload');
+		});*/
+		doHttpRequest(url, reqData, function (oEvent) {
+			//console.log('downloading...', oEvent);
+			var contentType = oEvent.target.getResponseHeader('Content-Type');
+			var fileName = reqData.name+"."+ext;
+			saveBlob(oEvent.target.response, fileName, contentType);
+			btnActionStop('btnDownload');
+		},
+		function (oEvent) {
+			console.log("Error:", oEvent);
+			errorMessage(oEvent.target.responseText);
 			btnActionStop('btnDownload');
 		});
 		
@@ -831,7 +849,9 @@
 		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain Query Plan">
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run Query (F9)">
 		<input type="button" id="btnSave" value="save" onclick="javascript:doSave();" title="Save Query (F10)">
-		<input type="button" id="btnDownload" value="download" onclick="doDownload();" title="Download CSV" style="float: right;"/>
+
+		<!--<input type="button" id="btnDownloadOld" value="old-download" onclick="doDownload('csv');" title="Download CSV" style="float: right;"/>-->
+		<input type="button" id="btnDownload" value="download" onclick="createPopupBelow('download-ext', 'btnDownload', getDownloadHrefs());" title="Download (click to see avaiable formats)" style="float: right;"/>
 	</div>
 	
 </div>

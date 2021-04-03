@@ -41,3 +41,49 @@ function obj2encodedUrl(obj) {
 	}
 	return str.join("&");
 }
+
+// https://stackoverflow.com/questions/22724070/prompt-file-download-with-xmlhttprequest/44435573#44435573
+function saveBlob(content, fileName, contentType) {
+	var a = document.createElement('a');
+	blob = new File([content], fileName); //, { type: contentType });
+	a.href = window.URL.createObjectURL(blob);
+	a.download = fileName;
+	a.dispatchEvent(new MouseEvent('click'));
+}
+
+function doHttpRequest(url, params, callbackOk, callbackError) {
+	var request = new XMLHttpRequest();
+	request.open("POST", url, true);
+	request.onload = function(oEvent) {
+		if (request.status >= 200 && request.status < 300) {
+			//var updateCount = request.getResponseHeader("X-UpdateCount");
+			var warnings = request.getResponseHeader("X-Warning");
+			if(warnings) {
+				console.log("warnings:", warnings);
+			}
+			if(callbackOk) {
+				callbackOk(oEvent);
+			}
+			else {
+				console.log("no callback?", oEvent);
+			}
+		}
+		else if(callbackError) {
+			callbackError(oEvent);
+		}
+		else {
+			console.log("error[",request.status,"] - no callback?", oEvent);
+		}
+	}
+	request.onerror = function(oEvent) {
+		if(callbackError) {
+			callbackError(oEvent);
+		}
+		else {
+			console.log("onerror:", oEvent);
+		}
+	}
+	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");	
+	//request.overrideMimeType('text/html; charset=UTF-8');
+	request.send(obj2encodedUrl(params));
+}

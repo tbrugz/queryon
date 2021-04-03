@@ -96,3 +96,31 @@ function getCharCountPrecedingSelection(editor) {
 	count += start.column;
 	return count;
 }
+
+/* see: index.html: downloadExtFilter (+html, +sql) */
+var defaultDownloadExts = [ "csv", "htmlx", "json", "md", "sql", "xml" ];
+var downloadExtFilter = [ "csv", "htmlx", "json", "md", "ods", "sql", "xls", "xlsx", "xml" ];
+
+/*
+ * doDownload(ext) must be defined elsewhere
+ */
+function getDownloadHrefs() {
+	var ret = [];
+
+	var exts = (typeof settings !== "undefined") ? settings["syntax.fileextensions"] : defaultDownloadExts;
+	//console.log("getDownloadHrefs... exts=", exts);
+	for(var i=0;i<exts.length;i++) {
+		if(downloadExtFilter.indexOf(exts[i])<0) { continue; }
+
+		//var href = queryOnUrl+"/SqlAny."+exts[i]; //XXX modelId!
+		ret.push({
+			//"onclick": href,
+			"onclick": "doDownload(\""+exts[i].trim()+"\");return false;",
+			"label": exts[i],
+			"title": "download "+exts[i]
+		});
+	}
+	//console.log("getDownloadHrefs...", exts, ret);
+	
+	return ret;
+}
