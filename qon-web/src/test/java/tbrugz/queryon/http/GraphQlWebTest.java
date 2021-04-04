@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
 
 import graphql.language.Document;
 import graphql.parser.Parser;
+import tbrugz.queryon.graphql.GraphQlQonServlet;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
@@ -254,12 +255,17 @@ public class GraphQlWebTest {
 		String query = "mutation { login(username: \"jdoe\", password: \"jdoepw\") { authenticated username } }";
 		String jsonStr = getContent(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
-		assertGraphqlOk(jsonStr);
-		
-		JSONObject o = (JSONObject) getJsonData(jsonStr);
-		o = (JSONObject) o.get("login");
-		Assert.assertEquals(true, o.get("authenticated"));
-		Assert.assertEquals("jdoe", o.get("username"));
+		if(GraphQlQonServlet.allowAuthentication) {
+			assertGraphqlOk(jsonStr);
+
+			JSONObject o = (JSONObject) getJsonData(jsonStr);
+			o = (JSONObject) o.get("login");
+			Assert.assertEquals(true, o.get("authenticated"));
+			Assert.assertEquals("jdoe", o.get("username"));
+		}
+		else {
+			assertGraphqlErrors(jsonStr);
+		}
 	}
 
 	@Test
@@ -275,11 +281,17 @@ public class GraphQlWebTest {
 		String query = "mutation { logout { authenticated username } }";
 		String jsonStr = getContent(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
-		assertGraphqlOk(jsonStr);
+		if(GraphQlQonServlet.allowAuthentication) {
+			assertGraphqlOk(jsonStr);
+
+			JSONObject o = (JSONObject) getJsonData(jsonStr);
+			o = (JSONObject) o.get("logout");
+			Assert.assertEquals(false, o.get("authenticated"));
+		}
+		else {
+			assertGraphqlErrors(jsonStr);
+		}
 		
-		JSONObject o = (JSONObject) getJsonData(jsonStr);
-		o = (JSONObject) o.get("logout");
-		Assert.assertEquals(false, o.get("authenticated"));
 	}
 	
 }

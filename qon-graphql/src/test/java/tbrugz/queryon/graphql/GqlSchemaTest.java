@@ -146,23 +146,6 @@ public class GqlSchemaTest {
 		Assert.assertEquals(0, executionResult.getErrors().size());
 		log.info(executionResult.getData().toString());
 		
-		//---
-
-		query = "mutation { login(username: \"user\", password: \"xyz\") { authenticated username } }";
-		executionResult = build.execute(query);
-		
-		Assert.assertNotNull(executionResult.getData());
-		Assert.assertEquals(0, executionResult.getErrors().size());
-		log.info(executionResult.getData().toString());
-		
-		//---
-
-		query = "mutation { logout { authenticated username } }";
-		executionResult = build.execute(query);
-		
-		Assert.assertNotNull(executionResult.getData());
-		Assert.assertEquals(0, executionResult.getErrors().size());
-		log.info(executionResult.getData().toString());
 
 		//---
 		/*
@@ -210,6 +193,34 @@ public class GqlSchemaTest {
 		Assert.assertEquals(1, executionResult.getErrors().size());
 		log.info(executionResult.getErrors().toString());
 
+	}
+	
+	@Test
+	public void testQuerySyntaxLoginLogout() {
+		GqlSchemaFactory gs = new GqlSchemaFactory(getSchemaModel());
+		GraphQLSchema graphQLSchema = gs.getSchema();
+		
+		GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
+		String query = null;
+		ExecutionResult executionResult = null;
+
+		if(GraphQlQonServlet.allowAuthentication) {
+			query = "mutation { login(username: \"user\", password: \"xyz\") { authenticated username } }";
+			executionResult = build.execute(query);
+			
+			Assert.assertNotNull(executionResult.getData());
+			Assert.assertEquals(0, executionResult.getErrors().size());
+			log.info(executionResult.getData().toString());
+			
+			//---
+	
+			query = "mutation { logout { authenticated username } }";
+			executionResult = build.execute(query);
+			
+			Assert.assertNotNull(executionResult.getData());
+			Assert.assertEquals(0, executionResult.getErrors().size());
+			log.info(executionResult.getData().toString());
+		}
 	}
 	
 	@Test

@@ -46,6 +46,8 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	
 	static final String[] ACCEPTED_METHODS = {"GET", "POST"};
 	
+	public static final boolean allowAuthentication = false; // XXX: allow setting with properties
+	
 	@Override
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		if(Arrays.binarySearch(ACCEPTED_METHODS, req.getMethod().toUpperCase())<0) {

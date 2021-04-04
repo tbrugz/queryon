@@ -81,9 +81,9 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 					return getBeanValue(GqlSchemaFactory.queryBeansQueries[i], /*GqlSchemaFactory.queryBeans[i],*/ reqspec);
 				}
 			}
-			for(int i=0;i<GqlSchemaFactory.mutationActions.length;i++) {
-				if( GqlSchemaFactory.mutationActions[i].equals(reqspec.getObject()) ) {
-					return getBeanValue(GqlSchemaFactory.mutationActions[i], /*GqlSchemaFactory.mutationReturnBeans[i],*/ reqspec);
+			for(int i=0;i<GqlSchemaFactory.mutationActions.size();i++) {
+				if( GqlSchemaFactory.mutationActions.get(i).equals(reqspec.getObject()) ) {
+					return getBeanValue(GqlSchemaFactory.mutationActions.get(i), /*GqlSchemaFactory.mutationReturnBeans[i],*/ reqspec);
 				}
 			}
 			
@@ -195,11 +195,13 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 		if(beanQuery.equals(GqlSchemaFactory.QUERY_CURRENTUSER)) {
 			return (T) beanActions.getCurrentUser(req);
 		}
-		else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGIN)) {
-			return (T) beanActions.doLogin(reqspec.getParameterMapUniqueValues());
-		}
-		else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGOUT)) {
-			return (T) beanActions.doLogout();
+		if(GraphQlQonServlet.allowAuthentication) {
+			if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGIN)) {
+				return (T) beanActions.doLogin(reqspec.getParameterMapUniqueValues());
+			}
+			else if(beanQuery.equals(GqlSchemaFactory.MUTATION_LOGOUT)) {
+				return (T) beanActions.doLogout();
+			}
 		}
 		
 		throw new InternalServerException("unknown bean query: "+beanQuery);

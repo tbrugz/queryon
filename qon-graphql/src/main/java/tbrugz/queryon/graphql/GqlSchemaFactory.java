@@ -5,6 +5,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -75,9 +76,9 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	static final Class<?>[] queryBeans = { UserInfo.class };
 	static final String[] queryBeansRemarks = { "current user information" };
 
-	static final String[] mutationActions = { MUTATION_LOGIN, MUTATION_LOGOUT };
-	static final Class<?>[] mutationParamBeans = { LoginInfo.class, null };
-	static final Class<?>[] mutationReturnBeans = { UserInfo.class, UserInfo.class };
+	static final List<String> mutationActions = new ArrayList<String>();
+	static final List<Class<?>> mutationParamBeans = new ArrayList<Class<?>>();
+	static final List<Class<?>> mutationReturnBeans = new ArrayList<Class<?>>();
 	//XXX add mutationReturnBeansRemarks ?
 	
 	public static class QonAction {
@@ -104,6 +105,17 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 	
 	public GqlSchemaFactory(SchemaModel sm) {
 		this.sm = sm;
+		if(GraphQlQonServlet.allowAuthentication) {
+			// login
+			mutationActions.add(MUTATION_LOGIN);
+			mutationParamBeans.add(LoginInfo.class);
+			mutationReturnBeans.add(UserInfo.class);
+
+			//logout
+			mutationActions.add(MUTATION_LOGOUT);
+			mutationParamBeans.add(null);
+			mutationReturnBeans.add(UserInfo.class);
+		}
 	}
 	
 	public GraphQLSchema getSchema() {
@@ -157,15 +169,16 @@ public class GqlSchemaFactory { // GqlSchemaBuilder?
 				mutationCount++;
 			}
 			
-			for(int i=0;i<mutationActions.length;i++) {
+			for(int i=0;i<mutationActions.size();i++) {
 				try {
 					//XXX: distinct schema/db/model & bean datafetchers?
-					createBeanAction(mutationBuilder, mutationActions[i], mutationParamBeans[i], mutationReturnBeans[i], null, df);
+					createBeanAction(mutationBuilder, mutationActions.get(i), mutationParamBeans.get(i), mutationReturnBeans.get(i), null, df);
+					mutationCount++;
 				} catch (IntrospectionException e) {
 					log.warn("IntrospectionException:: getSchema: createBeanAction: "+e);
 				}
 			}
-		
+			
 			if(mutationCount>0) {
 				//add UpdateInfo type
 				gqlSchemaBuilder.mutation(mutationBuilder.build());
