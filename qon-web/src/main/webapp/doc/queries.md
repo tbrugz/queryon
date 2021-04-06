@@ -108,7 +108,7 @@ Query results may be visualized as a map. To that end, a Geojson map should be a
 Also, the query should have a column named `GEOM_ID` so that the map feature and the query result's row may be matched. Once matched, the fill color of the feature
 will change according toi the selected column value.
 
-Default implementation of maps visualization uses the [Google Maps API](https://developers.google.com/maps/) and the [Mapproc framework](https://bitbucket.org/tbrugz/mapproc).
+Default implementation of maps visualization uses the [Google Maps API](https://developers.google.com/maps/) and the [Mapproc framework](https://github.com/tbrugz/mapproc).
 
 **chart**
 
