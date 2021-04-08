@@ -111,12 +111,13 @@ public class InfoServlet extends AbstractHttpServlet {
 		Set<String> modelSet = SchemaModelUtils.getModelIds(getServletContext());
 		ret.put("models", modelSet);
 		
-		// XXX add ServiceRegistry class?
-		String[] endpoints = { "QueryOn", "QueryOnSchema", "Diff", "QonPages", "Swagger",
+		String[] endpoints = { "QueryOn", "QueryOnSchema", "Auth",
+				"Diff", "QonPages", "Swagger",
 				"OData", "GraphQL", "Soap" };
-		String[] classNames = { "queryon.QueryOn", "QueryOnSchemaInstant", "diff.DiffServlet", "PagesServlet", "SwaggerServlet",
+		String[] classNames = { "queryon.QueryOn", "QueryOnSchemaInstant", "auth.AuthServlet",
+				"diff.DiffServlet", "PagesServlet", "SwaggerServlet",
 				"ODataServlet", "GraphQlQonServlet", "QonSoapServlet" };
-		Map<String, ? extends ServletRegistration> servletRegs =getServletContext().getServletRegistrations();
+		Map<String, ? extends ServletRegistration> servletRegs = getServletContext().getServletRegistrations();
 
 		Map<String, String> serviceEndpoints = new TreeMap<String, String>(); // new LinkedHashMap<String, String>();
 		for(int i=0;i<endpoints.length;i++) {
@@ -343,6 +344,7 @@ public class InfoServlet extends AbstractHttpServlet {
 					if(modelId==null) { modelId = "null"; }
 					//XXX: filter properties if user not logged...
 					modelsInfo.put(modelId, entry.getValue().getMetadata());
+					//modelsInfo.put(modelId+".sqldialect", entry.getValue().getSqlDialect());
 					
 					//qon-tables-warnings
 					Map<String, String> tWarnings = (Map<String, String>) getServletContext().getAttribute(QOnTables.ATTR_TABLES_WARNINGS_PREFIX+"."+modelId);
