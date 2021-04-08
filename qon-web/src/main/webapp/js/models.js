@@ -12,26 +12,31 @@ function loadModels(callback) {
 
 function loadModelsContent(oEvent) {
 	var txt = oEvent.target.responseText;
-	var json = JSON.parse(txt);
-	//console.log(json);
-	if(json.models) {
-		modelsInfo = json.models;
-		//loadSelect(json.models, 'model');
+	//console.log("loadModelsContent", oEvent);
+	if(oEvent.target.status >= 400) {
+		console.log("loadModelsContent: status =", oEvent.target.status, oEvent);
 	}
-	if(json.services) {
-		servicesInfo = json.services;
+	else {
+		var json = JSON.parse(txt);
+		if(json.models) {
+			modelsInfo = json.models;
+			//loadSelect(json.models, 'model');
+		}
+		if(json.services) {
+			servicesInfo = json.services;
+		}
+		if(json["update-plugins"]) {
+			updatePluginsInfo = json["update-plugins"];
+		}
+		//console.log('modelsInfo', modelsInfo);
+		/*if(json.models.length>1) {
+			document.getElementById('model').parentNode.style.display = 'inline-block';
+		}
+		for(var i=0;i<json.models.length;i++) {
+			loadSchemas(json.models[i]);
+		}
+		updateSelectedQueryState();*/
 	}
-	if(json["update-plugins"]) {
-		updatePluginsInfo = json["update-plugins"];
-	}
-	//console.log('modelsInfo', modelsInfo);
-	/*if(json.models.length>1) {
-		document.getElementById('model').parentNode.style.display = 'inline-block';
-	}
-	for(var i=0;i<json.models.length;i++) {
-		loadSchemas(json.models[i]);
-	}
-	updateSelectedQueryState();*/
 	
 	if(typeof loadModelsContentCallback === 'function') {
 		loadModelsContentCallback();

@@ -98,7 +98,7 @@
 		if(settings["queryon.web.appname"]) {
 			document.title = settings["queryon.web.appname"];
 		}
-		if(settings["queryon.web.login.show"]=="false") {
+		if(!settings.loaded || settings["queryon.web.login.show"]=="false") {
 			byId('authinfo').style.display='none';
 		}
 		if(settings["queryon.groupby.allow"]=="false") {

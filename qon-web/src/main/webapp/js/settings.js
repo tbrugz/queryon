@@ -5,9 +5,14 @@ function loadSettings(callbackOk) {
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
 	request.onload = function(oEvent) {
+		if(oEvent.target.status >= 400) {
+			console.log("loadSettings: status =", oEvent.target.status, oEvent);
+			return;
+		}
 		var info = JSON.parse(oEvent.target.responseText);
 		//console.log('settings',info);
 		settings = info;
+		settings.loaded = true;
 		if(callbackOk) { callbackOk(); }
 	}
 	request.send();

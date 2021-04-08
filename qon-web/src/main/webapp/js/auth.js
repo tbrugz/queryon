@@ -17,18 +17,23 @@ function loadAuthInfo() { //callback?
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
 	request.onload = function(oEvent) {
-		var info = JSON.parse(oEvent.target.responseText);
-		//console.log('authInfo', info);
-		if(info.permissions) {
-			info.isAdmin = info.permissions.indexOf("SQL_ANY")>=0;
-			info.isDev = info.permissions.indexOf("SELECT_ANY")>=0;
-			info.loaded = true;
-			authInfo = info;
+		if(oEvent.target.status >= 400) {
+			console.log("loadAuthInfo: status =", oEvent.target.status, oEvent);
 		}
 		else {
-			console.log('auth.js: no info.permissions? info=', info);
+			var info = JSON.parse(oEvent.target.responseText);
+			//console.log('authInfo', info);
+			if(info.permissions) {
+				info.isAdmin = info.permissions.indexOf("SQL_ANY")>=0;
+				info.isDev = info.permissions.indexOf("SELECT_ANY")>=0;
+				info.loaded = true;
+				authInfo = info;
+			}
+			else {
+				console.log('auth.js: no info.permissions? info=', info);
+			}
 		}
-		
+
 		if(typeof loadAuthInfoCallback === 'function') {
 			loadAuthInfoCallback();
 		}
