@@ -10,12 +10,17 @@ function loadModelStatus(callback) {
 }
 
 function loadModelStatusContent(oEvent) {
-	//console.log("loadModelStatusContent");
-	var txt = oEvent.target.responseText;
-	var json = JSON.parse(txt);
-	//console.log(json);
-	if(json["models-info"]) {
-		modelStatus = json["models-info"];
+	if(oEvent.target.status >= 400) {
+		console.log("loadModelStatusContent: status =", oEvent.target.status, oEvent);
+	}
+	else {
+		//console.log("loadModelStatusContent");
+		var txt = oEvent.target.responseText;
+		var json = JSON.parse(txt);
+		//console.log(json);
+		if(json["models-info"]) {
+			modelStatus = json["models-info"];
+		}
 	}
 	//console.log('models-info', modelStatus);
 	
