@@ -7,20 +7,23 @@ function loadSettings(callbackOk) {
 	request.onload = function(oEvent) {
 		if(oEvent.target.status >= 400) {
 			console.log("loadSettings: status =", oEvent.target.status, oEvent);
-			return;
 		}
-		var info = JSON.parse(oEvent.target.responseText);
-		//console.log('settings',info);
-		settings = info;
-		settings.loaded = true;
+		else {
+			var info = JSON.parse(oEvent.target.responseText);
+			//console.log('settings',info);
+			settings = info;
+			settings.loaded = true;
+		}
 		if(callbackOk) { callbackOk(); }
 	}
 	request.send();
 }
 
+/*
 function getSetting(key) {
 	return settings[key];
 }
+*/
 
 function getModelSetting(prefix, suffix, modelId) {
 	var value = null;
