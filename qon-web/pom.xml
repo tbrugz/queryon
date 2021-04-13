@@ -490,6 +490,12 @@
     </dependency> -->
     <dependency>
       <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-catalina</artifactId>
+      <version>8.5.65</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
       <artifactId>jasper</artifactId>
       <version>6.0.53</version>
       <scope>test</scope>
@@ -610,6 +616,36 @@
       </plugins>
       </build>
     </profile>
+
+    <profile>
+      <id>hardness</id>
+      <build>
+        <!-- http://blog.code-cop.org/2015/04/maven-integration-tests-extra-folder.html -->
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.12</version>
+            <executions>
+              <execution>
+                <id>add-integration-test-source-as-test-sources</id>
+                <phase>generate-test-sources</phase>
+                <goals>
+                  <goal>add-test-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>target/test/java</source>
+                    <source>src/it/java</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
   </profiles>
 
 </project>

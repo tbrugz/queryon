@@ -15,6 +15,17 @@ you may build it first (and publish it to your local maven repo)
 Deploy (local/sonatype), see: [doc/mvn-deploy.md](doc/mvn-deploy.md)
 
 
+maven profiles
+-----
+
+* `release` - release profile (sign artifacts)
+
+* `haddness` - extra tests - currently this profile must be called after a initial build (eg: `mvn package && mvn -P hardness test && mvn clean` )
+
+* `thorntail` - package thorntail demos
+
+
+
 other useful maven goals
 -----
 

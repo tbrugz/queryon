@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import tbrugz.queryon.http.GraphQlWebTest;
 import tbrugz.queryon.http.ODataWebTest;
 import tbrugz.queryon.http.SoapCodeGenTest;
+//import tbrugz.queryon.http.SoapCodeGenCallTest;
 import tbrugz.queryon.http.SoapWebTest;
 import tbrugz.queryon.http.WebDavWebTest;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
@@ -29,6 +30,7 @@ import tbrugz.queryon.util.StringUtilsTest;
 	GraphQlWebTest.class,
 	SoapWebTest.class,
 	SoapCodeGenTest.class,
+	//SoapCodeGenCallTest.class,
 	WebDavWebTest.class,
 })
 public class QueryOnTestSuite {
