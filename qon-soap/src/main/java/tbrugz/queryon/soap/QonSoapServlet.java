@@ -1,5 +1,7 @@
 package tbrugz.queryon.soap;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -29,6 +31,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.api.BaseApiServlet;
+import tbrugz.queryon.api.BeanActions;
 import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.MiscUtils;
@@ -61,6 +64,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	public static final String PREFIX_UPDATE_ELEMENT = "update";
 	public static final String PREFIX_DELETE_ELEMENT = "delete";
 	public static final String PREFIX_EXECUTE_ELEMENT = "execute";
+	public static final String PREFIX_BEAN_ELEMENT = "beanQuery";
 
 	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
 	
@@ -275,6 +279,10 @@ public class QonSoapServlet extends BaseApiServlet {
 		Set<Table> ts = model.getTables();
 		Set<ExecutableObject> eos = model.getExecutables();
 		
+		BeanActions beanActions = new BeanActions(prop);
+		List<String> beanQueries = beanActions.getBeanQueries();
+		Set<Class<?>> uniqueBeanTypes = BeanActions.getAllBeanClasses();
+		
 		// -- TYPES --
 		
 		{
@@ -296,6 +304,7 @@ public class QonSoapServlet extends BaseApiServlet {
 				//schemaNames.add(v.getSchemaName());
 				//relationNames.add(v.getQualifiedName());
 			}
+
 			for(Table t: ts) {
 				schema.appendChild(createElementRequest(doc, t));
 				// relation
@@ -327,6 +336,25 @@ public class QonSoapServlet extends BaseApiServlet {
 					schema.appendChild(createExecutableElementResponse(doc, eo));
 				}
 			}
+			
+			for(Class<?> c: uniqueBeanTypes) {
+				try {
+					Element entity = createBeanElementType(doc, c.getSimpleName(), c);
+					schema.appendChild(entity);
+				} catch (IntrospectionException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+			for(int i=0;i<beanQueries.size();i++) {
+				String beanQuery = beanQueries.get(i);
+				schema.appendChild(createBeanElementRequest(doc, beanQuery,
+						BeanActions.beanQueriesParamBeans[i])); //, BeanActions.beanQueriesReturnBeans[i]
+				if(BeanActions.beanQueriesReturnBeans[i]!=null) {
+					schema.appendChild(createBeanElementResponse(doc, beanQuery, BeanActions.beanQueriesReturnBeans[i]));
+				}
+			}
+			
 		}
 
 		definitions.appendChild(types);
@@ -365,6 +393,12 @@ public class QonSoapServlet extends BaseApiServlet {
 				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", "updateInfo")); //TODOne - return + outParams
 			}
 		}
+		// beanQueries
+		for(int i=0;i<beanQueries.size();i++) {
+			String beanQuery = normalize( beanQueries.get(i) );
+			definitions.appendChild(createMessage(doc, PREFIX_BEAN_ELEMENT + beanQuery + "Input", PREFIX_BEAN_ELEMENT + beanQuery));
+			definitions.appendChild(createMessage(doc, PREFIX_BEAN_ELEMENT + beanQuery + "Output", PREFIX_BEAN_ELEMENT + beanQuery + "Return"));
+		}
 
 		// -- PORTTYPE/OPERATIONS --
 
@@ -386,7 +420,11 @@ public class QonSoapServlet extends BaseApiServlet {
 		for(ExecutableObject eo: eos) {
 			portType.appendChild(createOperation(doc, normalizeExecutableName(eo), "execute", "execute"));
 		}
-		
+		// beanQueries
+		for(int i=0;i<beanQueries.size();i++) {
+			portType.appendChild(createOperation(doc, normalize( beanQueries.get(i) ), PREFIX_BEAN_ELEMENT, PREFIX_BEAN_ELEMENT));
+		}
+
 		definitions.appendChild(portType);
 		}
 		
@@ -416,6 +454,10 @@ public class QonSoapServlet extends BaseApiServlet {
 		for(ExecutableObject eo: eos) {
 			binding.appendChild(createBindingOperation(doc, normalizeExecutableName(eo), "execute", "execute"));
 		}
+		//XXX: beanQueries
+		for(int i=0;i<beanQueries.size();i++) {
+			binding.appendChild(createBindingOperation(doc, normalize( beanQueries.get(i) ), PREFIX_BEAN_ELEMENT, PREFIX_BEAN_ELEMENT));
+		}
 		
 		definitions.appendChild(binding);
 		}
@@ -425,6 +467,8 @@ public class QonSoapServlet extends BaseApiServlet {
 		{
 		String host = getServiceHost(req, true, false);
 		String contextPath = getServletContext().getContextPath();
+		String servletPath = req.getServletPath();
+		if(servletPath==null) { servletPath = ""; }
 		
 		Element service = doc.createElement("wsdl:"+"service");
 		service.setAttribute("name", serviceName);
@@ -439,8 +483,8 @@ public class QonSoapServlet extends BaseApiServlet {
 		service.appendChild(port);
 
 		Element address = doc.createElement("soap:address");
-		address.setAttribute("location", host+contextPath+req.getServletPath()
-			+(modelId!=null?req.getPathInfo():"")
+		address.setAttribute("location", host+contextPath+servletPath
+			+(modelId!=null && req.getPathInfo()!=null?req.getPathInfo():"")
 			);
 		port.appendChild(address);
 		
@@ -654,7 +698,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		if(eo.getReturnParam()!=null) { return true; }
 		return SchemaModelUtils.getNumberOfOutParameters(eo.getParams()) > 0;
 	}
-
+	
 	Element createExecutableElementResponse(Document doc, ExecutableObject eo) {
 		Element element = doc.createElement("xs:"+"element");
 		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return");
@@ -692,6 +736,77 @@ public class QonSoapServlet extends BaseApiServlet {
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "updateInfo");
 			el.setAttribute("type", "xsd1:" + "updateInfoType" );
+			all.appendChild(el);
+		}
+		
+		return element;
+	}
+
+	Element createBeanElementType(Document doc, String beanName, Class<?> beanType) throws IntrospectionException {
+		Element complexType = doc.createElement("xs:"+"complexType");
+		complexType.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize( beanName ) + "Type");
+		
+		//BeanInfo beanInfo = Introspector.getBeanInfo(beanType);
+		//PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+		List<PropertyDescriptor> propertyDescriptors = BeanActions.getPropertyDescriptors(beanType);
+		
+		if(propertyDescriptors.size()>0) {
+			Element all = doc.createElement("xs:"+"all");
+			complexType.appendChild(all);
+			for(int i=0;i<propertyDescriptors.size();i++) {
+				PropertyDescriptor pd = propertyDescriptors.get(i);
+				Class<?> type = pd.getPropertyType();
+	
+				if(allowedBeanPropertyType(type)) {
+					Element el = doc.createElement("xs:"+"element");
+					String name = pd.getName();
+					el.setAttribute("name", normalize(name) );
+					el.setAttribute("type", "xs:" + getElementType(type) );
+					el.setAttribute("minOccurs", "0");
+					//el.setAttribute("maxOccurs", "1");
+					all.appendChild(el);
+					log.info("added bean property: "+normalize(name));
+				}
+				else {
+					log.warn("unrecognized bean property type: "+type.getName());
+				}
+			}
+		}
+		return complexType;
+	}
+	
+	Element createBeanElementRequest(Document doc, String beanQuery, Class<?> paramType) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize(beanQuery));
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		if(paramType!=null) {
+			//throw new IllegalStateException("createBeanElementRequest: 'paramType' not implemented");
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "parameter");
+			el.setAttribute("type", "xsd1:" + PREFIX_BEAN_ELEMENT + normalize( paramType.getSimpleName() ) + "Type" );
+			all.appendChild(el);
+		}
+		return element;
+	}
+	
+	Element createBeanElementResponse(Document doc, String beanQuery, Class<?> returnType) {
+		Element element = doc.createElement("xs:"+"element");
+		element.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize(beanQuery) + "Return");
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
+		
+		if(returnType!=null) {
+			Element el = doc.createElement("xs:"+"element");
+			el.setAttribute("name", "return");
+			//el.setAttribute("type", "xs:" + getElementType(rp.getDataType()) );
+			//complexType.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize( beanName ) + "Type");
+			el.setAttribute("type", "xsd1:" + PREFIX_BEAN_ELEMENT + normalize( returnType.getSimpleName() ) + "Type" );
 			all.appendChild(el);
 		}
 		
@@ -1008,6 +1123,34 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		
 		return "string";
+	}
+	
+	boolean allowedBeanPropertyType(Class<?> type) {
+		return
+			Boolean.TYPE.equals(type) ||
+			Integer.TYPE.equals(type) ||
+			String.class.equals(type)
+			;
+	}
+
+	String getElementType(Class<?> ctype) {
+		if(ctype==null) { return "string"; }
+		
+		boolean isBoolean = Boolean.TYPE.equals(ctype);
+		if(isBoolean) {
+			return "boolean";
+		}
+		boolean isInt = Integer.TYPE.equals(ctype);
+		if(isInt) {
+			return "int";
+		}
+		boolean isString = String.class.equals(ctype);
+		if(isString) {
+			return "string";
+		}
+		// XYZ.class.isAssignableFrom(ctype);
+		
+		throw new IllegalArgumentException(ctype.getName());
 	}
 	
 	static String normalizeRelationName(Relation r) {
