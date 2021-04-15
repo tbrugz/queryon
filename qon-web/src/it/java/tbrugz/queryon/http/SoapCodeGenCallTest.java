@@ -20,6 +20,9 @@ import org.apache.cxf.tools.common.ToolContext;
 import org.apache.cxf.tools.wsdlto.WSDLToJava;
 
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
+import org.bitbucket.tbrugz.queryon.queryonservice.BeanQueryUserInfoType;
+import org.bitbucket.tbrugz.queryon.queryonservice.BeanQuerycurrentUserRequest;
+import org.bitbucket.tbrugz.queryon.queryonservice.BeanQuerycurrentUserReturn;
 import org.bitbucket.tbrugz.queryon.queryonservice.BooleanValuedFilterType;
 import org.bitbucket.tbrugz.queryon.queryonservice.DeletePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice.ExecutePUBLICINSERTTASK;
@@ -513,16 +516,38 @@ public class SoapCodeGenCallTest {
 			//Assert.assertEquals("1", uit.getGeneratedKey().getValue()); //?
 		}
 	}
-	
-	//@Test
-	//public void callXXX() throws IOException, XMLStreamException, SAXException {
-	//	QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
-	//	QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
-	//	
-	//	{
-	//		ObjectFactory of = new ObjectFactory();
-	//		XXXXX obj = of.create...
-	//	}
-	//}
+
+	@Test
+	public void callBeanQueryCurrentUser() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			BeanQuerycurrentUserRequest obj = of.createBeanQuerycurrentUserRequest();
+			BeanQuerycurrentUserReturn user = qonsp.beanQuerycurrentUser(obj);
+			Assert.assertNotNull(user);
+			//System.out.println(">>[1] "+user);
+			BeanQueryUserInfoType userinfo = user.getBeanQueryUserInfo();
+			//System.out.println(">>[2] "+userinfo);
+			Assert.assertNotNull(userinfo);
+			//System.out.println(">>[3] "+userinfo.getUsername()+" / auth? "+userinfo.isAuthenticated());
+			Assert.assertEquals("anonymous", userinfo.getUsername());
+			Assert.assertEquals(false, userinfo.isAuthenticated());
+		}
+	}
+
+	/*
+	@Test
+	public void callXXX() throws IOException, XMLStreamException, SAXException {
+		QueryOnService qons = new QueryOnService(new URL(wsdlUrl));
+		QueryOnServicePortType qonsp = qons.getQueryOnServicePort();
+		
+		{
+			ObjectFactory of = new ObjectFactory();
+			XXXXX obj = of.create...
+		}
+	}
+	*/
 
 }

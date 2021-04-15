@@ -202,7 +202,21 @@ public class SoapWebTest {
 		String s = IOUtil.readFromReader(new InputStreamReader(is));
 		log.info("requestQueryWithParams: response="+s);
 	}
-	
+
+	@Test
+	public void requestCurrentUser() throws IOException, XMLStreamException, SAXException {
+		String body = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:quer=\"http://bitbucket.org/tbrugz/queryon/queryOnService.xsd\">\n" + 
+				"	   <soapenv:Header/>\n" + 
+				"	   <soapenv:Body>\n" + 
+				"	      <quer:beanQuerycurrentUserRequest>\n" + 
+				"	      </quer:beanQuerycurrentUserRequest>\n" + 
+				"	   </soapenv:Body>\n" + 
+				"	</soapenv:Envelope>";
+		InputStream is = httpPostContentStream(soaplUrl, body);
+		String s = IOUtil.readFromReader(new InputStreamReader(is));
+		log.info("requestCurrentUser: response="+s);
+	}
+
 	// https://cxf.apache.org/docs/wsdl-to-java.html
 	@Test
 	public void generateJavaFromWsdl() throws Exception {

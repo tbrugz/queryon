@@ -21,5 +21,9 @@ public class UserInfo {
 	public String getUsername() {
 		return username;
 	}
+
+	public String toString() {
+		return "UserInfo[username="+username+";authenticated="+authenticated+"]";
+	}
 	
 }
