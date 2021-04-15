@@ -185,7 +185,7 @@ public class SoapWebTest {
 				"	</soapenv:Envelope>";
 		InputStream is = httpPostContentStream(soaplUrl, body);
 		String s = IOUtil.readFromReader(new InputStreamReader(is));
-		log.info("request1: responde="+s);
+		log.info("request1: response="+s);
 	}
 	
 	@Test
@@ -200,7 +200,7 @@ public class SoapWebTest {
 				"	</soapenv:Envelope>";
 		InputStream is = httpPostContentStream(soaplUrl, body);
 		String s = IOUtil.readFromReader(new InputStreamReader(is));
-		log.info("request1: responde="+s);
+		log.info("requestQueryWithParams: response="+s);
 	}
 	
 	// https://cxf.apache.org/docs/wsdl-to-java.html

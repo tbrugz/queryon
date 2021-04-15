@@ -64,6 +64,8 @@ import tbrugz.sqldump.sqlrun.SQLRun;
 
 public class SoapCodeGenTest {
 
+	/*
+
 	private static final Log log = LogFactory.getLog(SoapCodeGenTest.class);
 	
 	public static final String basedir = "src/test/java";
@@ -124,6 +126,7 @@ public class SoapCodeGenTest {
 		
 		// XXX compile? add to (test) classpath?
 	}
+	*/
 
 	/*
 	

@@ -778,14 +778,13 @@ public class QonSoapServlet extends BaseApiServlet {
 	Element createBeanElementRequest(Document doc, String beanQuery, Class<?> paramType) {
 		Element element = doc.createElement("xs:"+"element");
 		element.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize(beanQuery) + SUFFIX_REQUEST_ELEMENT);
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
 		
 		if(paramType!=null) {
 			//throw new IllegalStateException("createBeanElementRequest: 'paramType' not implemented");
-
-			Element complexType = doc.createElement("xs:"+"complexType");
-			element.appendChild(complexType);
-			Element all = doc.createElement("xs:"+"all");
-			complexType.appendChild(all);
 
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "parameter");
@@ -798,12 +797,12 @@ public class QonSoapServlet extends BaseApiServlet {
 	Element createBeanElementResponse(Document doc, String beanQuery, Class<?> returnType) {
 		Element element = doc.createElement("xs:"+"element");
 		element.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize(beanQuery) + "Return");
+		Element complexType = doc.createElement("xs:"+"complexType");
+		element.appendChild(complexType);
+		Element all = doc.createElement("xs:"+"all");
+		complexType.appendChild(all);
 		
 		if(returnType!=null) {
-			Element complexType = doc.createElement("xs:"+"complexType");
-			element.appendChild(complexType);
-			Element all = doc.createElement("xs:"+"all");
-			complexType.appendChild(all);
 
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "return");

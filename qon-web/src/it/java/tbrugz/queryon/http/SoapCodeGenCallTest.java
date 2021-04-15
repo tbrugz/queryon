@@ -422,7 +422,7 @@ public class SoapCodeGenCallTest {
 				ipt.setEntity(ptt);
 				UpdateInfoType uit = qonsp.insertPUBLICTASK(ipt);
 				Assert.assertEquals(1, uit.getUpdateCount());
-				Assert.assertEquals("1", uit.getGeneratedKey().getValue());
+				Assert.assertEquals("2", uit.getGeneratedKey().getValue());
 			}
 
 			{
@@ -433,7 +433,7 @@ public class SoapCodeGenCallTest {
 				ipt.setEntity(ptt);
 				UpdateInfoType uit = qonsp.insertPUBLICTASK(ipt);
 				Assert.assertEquals(1, uit.getUpdateCount());
-				Assert.assertEquals("2", uit.getGeneratedKey().getValue());
+				Assert.assertEquals("3", uit.getGeneratedKey().getValue());
 			}
 		}
 	}
