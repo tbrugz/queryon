@@ -135,6 +135,8 @@ public class QueryOn extends AbstractHttpServlet {
 		EXPLAIN_ANY,
 		MANAGE,
 		PLUGIN_ACTION,
+		BEAN_QUERY, // no side-effects
+		// BEAN_ACTION, // with side-effects
 		// not actions but special (global) permissions:
 		INSERT_ANY,
 		UPDATE_ANY,
@@ -143,6 +145,8 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		public String objectType() {
 			switch(this) {
+				case BEAN_QUERY:
+					return "BEAN";
 				case PLUGIN_ACTION:
 					return "PLUGIN";
 				default:
@@ -164,6 +168,8 @@ public class QueryOn extends AbstractHttpServlet {
 					return name().toLowerCase();
 				case PLUGIN_ACTION:
 					return "PluginAction";
+				case BEAN_QUERY:
+					return "BeanQuery";
 				default:
 					return name();
 			}

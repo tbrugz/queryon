@@ -101,7 +101,12 @@ public class SoapRequest extends RequestSpec {
 			tagName = tagName.substring(nsPrefix.length()+1);
 		}
 		
-		if(tagName.endsWith(QonSoapServlet.SUFFIX_REQUEST_ELEMENT)) {
+		if(tagName.startsWith(QonSoapServlet.PREFIX_BEAN_ELEMENT) && tagName.endsWith(QonSoapServlet.SUFFIX_REQUEST_ELEMENT)) {
+			tagName = tagName.substring(QonSoapServlet.PREFIX_BEAN_ELEMENT.length(),
+				tagName.length()-QonSoapServlet.SUFFIX_REQUEST_ELEMENT.length());
+			atype = ActionType.BEAN_QUERY;
+		}
+		else if(tagName.endsWith(QonSoapServlet.SUFFIX_REQUEST_ELEMENT)) {
 			tagName = tagName.substring(0, tagName.length()-QonSoapServlet.SUFFIX_REQUEST_ELEMENT.length());
 			atype = ActionType.SELECT;
 		}

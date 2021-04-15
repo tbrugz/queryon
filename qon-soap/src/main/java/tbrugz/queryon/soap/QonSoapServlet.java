@@ -3,6 +3,8 @@ package tbrugz.queryon.soap;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
@@ -74,6 +76,8 @@ public class QonSoapServlet extends BaseApiServlet {
 	
 	public static final String XSD_UNBOUNDED = "unbounded"; 
 	
+	public static final String ATTR_REQSPEC = "reqspec";
+
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	
@@ -181,7 +185,12 @@ public class QonSoapServlet extends BaseApiServlet {
 	@Override
 	protected SoapRequest getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
 		//SoapRequest.setAttributes(req, requestEl, nsPrefix);
-		return new SoapRequest(/*requestEl, nsPrefix, dsutils, */req, prop);
+		SoapRequest sr = (SoapRequest) req.getAttribute(ATTR_REQSPEC);
+		if(sr==null) {
+			sr = new SoapRequest(/*requestEl, nsPrefix, dsutils, */req, prop);
+			req.setAttribute(ATTR_REQSPEC, sr);
+		}
+		return sr;
 	}
 	
 	protected void doServiceIntern(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -189,6 +198,13 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		// on exception throw soap fault... override doFacade() ? only for POST
 		try {
+			// checking for beanAction
+			SoapRequest reqspec = getRequestSpec(req);
+			if(reqspec.atype==ActionType.BEAN_QUERY) {
+				//log.debug("doServiceIntern... <<BEAN_QUERY>>: "+reqspec.getObject());
+				doBeanAction(reqspec, req, resp);
+				return;
+			}
 			super.doService(req, resp);
 		}
 		catch(Exception e) {
@@ -197,6 +213,74 @@ public class QonSoapServlet extends BaseApiServlet {
 				log.info("doServiceIntern: Exeption: "+e.getMessage(), e);
 			}
 			XmlUtils.writeSoapFault(resp, e, debugMode);
+		}
+	}
+
+	void doBeanAction(SoapRequest reqspec, HttpServletRequest req, HttpServletResponse resp) throws IOException, IntrospectionException {
+		BeanActions beanActions = new BeanActions(prop);
+		List<String> beanQueries = beanActions.getBeanQueries();
+		for(String bq: beanQueries) {
+			if(bq.equals(reqspec.getObject())) {
+				//log.debug("beanQuery: "+bq);
+				Object bean = beanActions.getBeanValue(bq, req);
+				log.debug("beanQuery = "+bq+" ; bean = "+bean);
+
+				//DumpSyntaxInt ds = reqspec.getOutputSyntax();
+				writeBean(bq, bean, resp);
+
+				return;
+			}
+		}
+		throw new IllegalStateException("Unknown beanQuery: "+reqspec.getObject());
+	}
+
+	public static void writeBean(String beanQuery, Object bean, HttpServletResponse resp) throws IOException, IntrospectionException {
+		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		
+		StringBuilder sb = new StringBuilder();
+		String soapPrefix = "soapenv";
+		String beanPrefix = "ns1";
+		String tagName = PREFIX_BEAN_ELEMENT + beanQuery + "Return";
+		sb.append(SoapDumpSyntax.getSoapHeader(soapPrefix));
+		sb.append("<"+beanPrefix+":"+tagName+" xmlns:"+beanPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
+
+		if(bean!=null) {
+			Class<?> beanClass = bean.getClass();
+			//String returnTag = "return";
+			String returnTag = PREFIX_BEAN_ELEMENT + beanClass.getSimpleName();
+			sb.append("<"+returnTag+">\n");
+			List<PropertyDescriptor> propertyDescriptors = BeanActions.getPropertyDescriptors(beanClass);
+			if(propertyDescriptors.size()>0) {
+				for(int i=0;i<propertyDescriptors.size();i++) {
+					PropertyDescriptor pd = propertyDescriptors.get(i);
+					Class<?> type = pd.getPropertyType();
+					if(allowedBeanPropertyType(type)) {
+						String name = pd.getName();
+						Object value = invokeMethod(pd.getReadMethod(), bean);
+						sb.append("<"+name+">"+value+"</"+name+">\n");
+					}
+					else {
+						log.warn("unrecognized bean property type: "+type.getName());
+					}
+				}
+			}
+			sb.append("</"+returnTag+">\n");
+		}
+		
+		sb.append("</"+beanPrefix+":"+tagName+">\n");
+		sb.append(SoapDumpSyntax.getSoapFooter(soapPrefix));
+		resp.getWriter().write(sb.toString());
+	}
+
+	static Object invokeMethod(Method m, Object o) {
+		try {
+			return m.invoke(o);
+		}
+		catch(InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+		catch(IllegalAccessException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -805,7 +889,8 @@ public class QonSoapServlet extends BaseApiServlet {
 		if(returnType!=null) {
 
 			Element el = doc.createElement("xs:"+"element");
-			el.setAttribute("name", "return");
+			//el.setAttribute("name", "return");
+			el.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize( returnType.getSimpleName() ));
 			//el.setAttribute("type", "xs:" + getElementType(rp.getDataType()) );
 			//complexType.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize( beanName ) + "Type");
 			el.setAttribute("type", "xsd1:" + PREFIX_BEAN_ELEMENT + normalize( returnType.getSimpleName() ) + "Type" );
@@ -1127,7 +1212,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		return "string";
 	}
 	
-	boolean allowedBeanPropertyType(Class<?> type) {
+	static boolean allowedBeanPropertyType(Class<?> type) {
 		return
 			Boolean.TYPE.equals(type) ||
 			Integer.TYPE.equals(type) ||
