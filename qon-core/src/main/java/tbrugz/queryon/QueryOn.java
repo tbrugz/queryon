@@ -135,7 +135,7 @@ public class QueryOn extends AbstractHttpServlet {
 		EXPLAIN_ANY,
 		MANAGE,
 		PLUGIN_ACTION,
-		BEAN_QUERY, // no side-effects
+		BEAN_QUERY,     // no side-effects
 		// BEAN_ACTION, // with side-effects
 		// not actions but special (global) permissions:
 		INSERT_ANY,

@@ -69,6 +69,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	public static final String PREFIX_BEAN_ELEMENT = "beanQuery";
 
 	public static final String SUFFIX_REQUEST_ELEMENT = "Request";
+	public static final String SUFFIX_RETURN_ELEMENT = "Return";
 	
 	public static final String[] UNIQUE_FILTERS = { "filterEquals", "filterNotEquals", "filterGreaterThan", "filterGreaterOrEqual", "filterLessThan", "filterLessOrEqual" };
 	public static final String[] MULTI_FILTERS = { "filterIn", "filterNotIn", "filterLike", "filterNotLike" };
@@ -240,13 +241,12 @@ public class QonSoapServlet extends BaseApiServlet {
 		StringBuilder sb = new StringBuilder();
 		String soapPrefix = "soapenv";
 		String beanPrefix = "ns1";
-		String tagName = PREFIX_BEAN_ELEMENT + beanQuery + "Return";
+		String tagName = PREFIX_BEAN_ELEMENT + beanQuery + SUFFIX_RETURN_ELEMENT;
 		sb.append(SoapDumpSyntax.getSoapHeader(soapPrefix));
 		sb.append("<"+beanPrefix+":"+tagName+" xmlns:"+beanPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
 
 		if(bean!=null) {
 			Class<?> beanClass = bean.getClass();
-			//String returnTag = "return";
 			String returnTag = PREFIX_BEAN_ELEMENT + beanClass.getSimpleName();
 			sb.append("<"+returnTag+">\n");
 			List<PropertyDescriptor> propertyDescriptors = BeanActions.getPropertyDescriptors(beanClass);
@@ -471,7 +471,7 @@ public class QonSoapServlet extends BaseApiServlet {
 			String eoName = normalizeExecutableName(eo);
 			definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Input", PREFIX_EXECUTE_ELEMENT + eoName));
 			if(executableReturnsValues(eo)) {
-				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", PREFIX_EXECUTE_ELEMENT + eoName + "Return"));
+				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", PREFIX_EXECUTE_ELEMENT + eoName + SUFFIX_RETURN_ELEMENT));
 			}
 			else {
 				definitions.appendChild(createMessage(doc, PREFIX_EXECUTE_ELEMENT + eoName + "Output", "updateInfo")); //TODOne - return + outParams
@@ -481,7 +481,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		for(int i=0;i<beanQueries.size();i++) {
 			String beanQuery = normalize( beanQueries.get(i) );
 			definitions.appendChild(createMessage(doc, PREFIX_BEAN_ELEMENT + beanQuery + "Input", PREFIX_BEAN_ELEMENT + beanQuery + SUFFIX_REQUEST_ELEMENT));
-			definitions.appendChild(createMessage(doc, PREFIX_BEAN_ELEMENT + beanQuery + "Output", PREFIX_BEAN_ELEMENT + beanQuery + "Return"));
+			definitions.appendChild(createMessage(doc, PREFIX_BEAN_ELEMENT + beanQuery + "Output", PREFIX_BEAN_ELEMENT + beanQuery + SUFFIX_RETURN_ELEMENT));
 		}
 
 		// -- PORTTYPE/OPERATIONS --
@@ -785,7 +785,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	
 	Element createExecutableElementResponse(Document doc, ExecutableObject eo) {
 		Element element = doc.createElement("xs:"+"element");
-		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return");
+		element.setAttribute("name", PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + SUFFIX_RETURN_ELEMENT);
 		Element complexType = doc.createElement("xs:"+"complexType");
 		element.appendChild(complexType);
 		Element all = doc.createElement("xs:"+"all");
@@ -869,7 +869,6 @@ public class QonSoapServlet extends BaseApiServlet {
 		
 		if(paramType!=null) {
 			//throw new IllegalStateException("createBeanElementRequest: 'paramType' not implemented");
-
 			Element el = doc.createElement("xs:"+"element");
 			el.setAttribute("name", "parameter");
 			el.setAttribute("type", "xsd1:" + PREFIX_BEAN_ELEMENT + normalize( paramType.getSimpleName() ) + "Type" );
@@ -880,19 +879,15 @@ public class QonSoapServlet extends BaseApiServlet {
 	
 	Element createBeanElementResponse(Document doc, String beanQuery, Class<?> returnType) {
 		Element element = doc.createElement("xs:"+"element");
-		element.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize(beanQuery) + "Return");
+		element.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize(beanQuery) + SUFFIX_RETURN_ELEMENT);
 		Element complexType = doc.createElement("xs:"+"complexType");
 		element.appendChild(complexType);
 		Element all = doc.createElement("xs:"+"all");
 		complexType.appendChild(all);
 		
 		if(returnType!=null) {
-
 			Element el = doc.createElement("xs:"+"element");
-			//el.setAttribute("name", "return");
 			el.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize( returnType.getSimpleName() ));
-			//el.setAttribute("type", "xs:" + getElementType(rp.getDataType()) );
-			//complexType.setAttribute("name", PREFIX_BEAN_ELEMENT + normalize( beanName ) + "Type");
 			el.setAttribute("type", "xsd1:" + PREFIX_BEAN_ELEMENT + normalize( returnType.getSimpleName() ) + "Type" );
 			all.appendChild(el);
 		}
@@ -1375,7 +1370,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		StringBuilder sb = new StringBuilder();
 		sb.append(SoapDumpSyntax.getSoapHeader(envPrefix));
 
-		String execReturnElemName = PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + "Return";
+		String execReturnElemName = PREFIX_EXECUTE_ELEMENT + normalizeExecutableName(eo) + SUFFIX_RETURN_ELEMENT;
 		
 		if(executableReturnsValues(eo)) {
 			sb.append("<"+qonPrefix+":"+execReturnElemName+" xmlns:"+qonPrefix+"=\""+QonSoapServlet.NS_QON_PREFIX+"\">\n");
