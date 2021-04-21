@@ -101,7 +101,7 @@
 		if(!settings.loaded || settings["queryon.web.login.show"]=="false") {
 			byId('authinfo').style.display='none';
 		}
-		if(settings["queryon.groupby.allow"]=="false") {
+		if(!settings.loaded || settings["queryon.groupby.allow"]=="false") {
 			byId('btn-pivot-toggle').style.display='none';
 		}
 		
