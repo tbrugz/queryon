@@ -37,6 +37,7 @@ public class QOnContextUtils {
 		context.setAttribute(ATTR_PROP, prop);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Map<String, List<String>> getSchemasByModel(ServletContext context) {
 		return (Map<String, List<String>>) context.getAttribute(ATTR_SCHEMAS_MAP);
 	}
@@ -45,6 +46,7 @@ public class QOnContextUtils {
 		context.setAttribute(ATTR_SCHEMAS_MAP, schemasByModel);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Map<String, List<UpdatePlugin>> getUpdatePlugins(ServletContext context) {
 		return (Map<String, List<UpdatePlugin>>) context.getAttribute(ATTR_UPDATE_PLUGINS);
 	}

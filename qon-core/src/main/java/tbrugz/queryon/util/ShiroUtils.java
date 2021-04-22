@@ -1,5 +1,6 @@
 package tbrugz.queryon.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,7 +54,7 @@ public class ShiroUtils {
 			for(String s: providers) {
 				try {
 					Class<?> c = Class.forName(s);
-					IdentityProvider ip = (IdentityProvider) c.newInstance();
+					IdentityProvider ip = (IdentityProvider) c.getConstructor().newInstance();
 					identityProviders.add(ip);
 					log.debug("Loaded identity provider '"+ip.getClass().getName()+"'");
 				}
@@ -71,6 +72,14 @@ public class ShiroUtils {
 					log.debug("Error loading identity provider '"+s+"'", e);
 				}
 				catch (IllegalAccessException e) {
+					log.warn("Error loading identity provider '"+s+"': "+e);
+					log.debug("Error loading identity provider '"+s+"'", e);
+				}
+				catch (InvocationTargetException e) {
+					log.warn("Error loading identity provider '"+s+"': "+e);
+					log.debug("Error loading identity provider '"+s+"'", e);
+				}
+				catch (NoSuchMethodException e) {
 					log.warn("Error loading identity provider '"+s+"': "+e);
 					log.debug("Error loading identity provider '"+s+"'", e);
 				}
