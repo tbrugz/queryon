@@ -763,46 +763,69 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	//XXX: move to SchemaModelUtils?
 	static SchemaModel modelGrabber(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
-		final String prefix = getModelPrefix(prop, modelId);
+		final String modelPrefix = getModelPrefix(prop, modelId);
+		//DBMSResources.instance().setup(prop);
 
-		List<String> grabClassesNames = Utils.getStringListFromProp(prop, prefix+SUFFIX_GRABBERS, ",");
-		if(grabClassesNames!=null) {
+		List<String> grabClassesDefs = Utils.getStringListFromProp(prop, modelPrefix+SUFFIX_GRABBERS, ",");
+		if(grabClassesDefs!=null) {
 			SchemaModel sm = null;
 			int grabCount = 0;
-			for(String grabClassName: grabClassesNames) {
+			for(String grabDef: grabClassesDefs) {
 				grabCount++;
-				log.info("grabbing model [#" + grabCount + "]: "+grabClassName+" [modelId="+modelId+"; prefix="+prefix+"]");
-				SchemaModel sm2 = modelGrabber(prop, grabClassName, modelId);
+				String grabClassName = grabDef;
+				String grabPrefix = null;
+				List<String> partz = Utils.getStringList(grabDef, ":");
+				if(partz.size()>1) {
+					grabClassName = partz.get(0);
+					grabPrefix = partz.get(1);
+				}
+				log.info("grabbing model [#" + grabCount + "]: "+grabClassName+" [modelId="+modelId+"; modelPrefix="+modelPrefix+
+					(grabPrefix!=null?" ; grabPrefix="+grabPrefix:"") + "]");
+				SchemaModel sm2 = modelGrabber(prop, grabClassName, grabPrefix, modelId);
 				sm = SchemaModelUtils.mergeModels(sm, sm2);
 			}
 			return sm;
 		}
 		else {
-			String grabClassName = prop.getProperty(prefix+SUFFIX_GRABCLASS); //, prop.getProperty(PROP_GRABCLASS)
-			if(grabClassName==null) {
-				grabClassName = prop.getProperty(QON_PROP_PREFIX+SUFFIX_GRABCLASS);
-				if(grabClassName==null) {
-					log.info("grab class not defined [modelId="+modelId+"; prefix="+prefix+"]. Using "+EMPTY_MODEL_GRABCLASS); //EmptyModelGrabber
+			String grabClassDef = prop.getProperty(modelPrefix+SUFFIX_GRABCLASS);
+			String grabClassName = grabClassDef;
+			String grabPrefix = null;
+			if(grabClassDef==null) {
+				grabClassDef = prop.getProperty(QON_PROP_PREFIX+SUFFIX_GRABCLASS);
+				if(grabClassDef==null) {
+					log.info("grab class not defined [modelId="+modelId+"; modelPrefix="+modelPrefix+"]. Using "+EMPTY_MODEL_GRABCLASS); //EmptyModelGrabber
 					grabClassName = EMPTY_MODEL_GRABCLASS;
 				}
 				else {
-					log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; prefix="+QON_PROP_PREFIX+" (default)]");
+					List<String> partz = Utils.getStringList(grabClassDef, ":");
+					if(partz.size()>1) {
+						grabClassName = partz.get(0);
+						grabPrefix = partz.get(1);
+					}
+					log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; modelPrefix="+QON_PROP_PREFIX+" (default)"+
+						(grabPrefix!=null?" ; grabPrefix="+grabPrefix:"") + "]");
 				}
-				/*log.info("grab class not defined [prop '"+prefix+SUFFIX_GRABCLASS+"']. Using empty model");
+				/*log.info("grab class not defined [prop '"+modelPrefix+SUFFIX_GRABCLASS+"']. Using empty model");
 				DBMSResources.instance().setup(prop);
 				SchemaModel sm = new SchemaModel();
 				setModelProperties(sm, prop, modelId);
 				return sm;*/
 			}
 			else {
-				log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; prefix="+prefix+"]");
+				List<String> partz = Utils.getStringList(grabClassDef, ":");
+				if(partz.size()>1) {
+					grabClassName = partz.get(0);
+					grabPrefix = partz.get(1);
+				}
+				log.info("grabbing model: "+grabClassName+" [modelId="+modelId+"; modelPrefix="+modelPrefix+
+					(grabPrefix!=null?" ; grabPrefix="+grabPrefix:"")+"]");
 			}
-			SchemaModel sm = modelGrabber(prop, grabClassName, modelId);
+			SchemaModel sm = modelGrabber(prop, grabClassName, grabPrefix, modelId);
 			return sm;
 		}
 	}
 
-	static SchemaModel modelGrabber(Properties prop, String grabClassName, String modelId) throws ClassNotFoundException, SQLException, NamingException {
+	static SchemaModel modelGrabber(Properties prop, String grabClassName, String grabPrefix, String modelId) throws ClassNotFoundException, SQLException, NamingException {
 		
 		SchemaModelGrabber schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 		if(schemaGrabber==null) {
@@ -816,6 +839,9 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		
 		DBMSResources.instance().setup(prop);
+		if(grabPrefix!=null) {
+			schemaGrabber.setPropertiesPrefix(grabPrefix);
+		}
 		schemaGrabber.setProperties(prop);
 		
 		Connection conn = null;
