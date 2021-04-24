@@ -16,6 +16,8 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.diff.DiffManyServlet;
+import tbrugz.queryon.diff.DiffUtilQon;
+import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
@@ -39,7 +41,10 @@ public class QOnManage {
 	public static final String ACTION_DIFF = "diffmodel";
 	public static final String ACTION_RELOAD = "reload";
 	
-	public void diffModel(SchemaModel model, Connection conn, HttpServletResponse resp) throws IOException {
+	public static final String DIFF_SUBACTION_SHOW = "show";
+	public static final String DIFF_SUBACTION_APPLY = "applydiff";
+	
+	public void diffModel(SchemaModel model, Connection conn, boolean apply, HttpServletResponse resp) throws IOException {
 		//XXX param: schemas, validate?
 		
 		Properties grabProps = new Properties();
@@ -58,6 +63,7 @@ public class QOnManage {
 		SchemaModel dbModel = jsg.grabSchema();
 		String dialect = dbModel.getSqlDialect();
 		
+		//log.debug("do SQLDialectTransformer: dialect="+dialect);
 		Processor transf = new SQLDialectTransformer();
 		transf.setSchemaModel(dbModel);
 		
@@ -68,12 +74,12 @@ public class QOnManage {
 			transf.process();
 		}
 
-		{
+		/*{
 			Properties transformProps = new Properties();
 			transformProps.setProperty("sqldump.schematransform.todbid", dialect);
 			transf.setProperties(transformProps);
 			transf.process();
-		}
+		}*/
 		
 		SchemaDiffer differ = new SchemaDiffer();
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
@@ -91,10 +97,12 @@ public class QOnManage {
 			while(it.hasNext()) {
 				TableDiff td = it.next();
 				if(td.getChangeType().equals(ChangeType.REMARKS)) {
+					log.debug("will not generate diff for "+td);
 					it.remove();
 					removed++;
 				}
 				if(td.getChangeType().equals(ChangeType.DROP)) {
+					log.debug("will not generate diff for "+td);
 					it.remove();
 					removed++;
 				}
@@ -121,14 +129,24 @@ public class QOnManage {
 		SchemaDiff.logInfo(diff);
 		
 		int diffcount = diff.getDiffListSize();
-		resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
-		if(diffcount==0) {
-			//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-			resp.getWriter().write("-- no diffs found");
+		// output diff
+		if(!apply && resp!=null) {
+			resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
+			if(diffcount==0) {
+				//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+				resp.getWriter().write("-- no diffs found");
+			}
+			else {
+				CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
+				diff.outDiffs(cout);
+			}
 		}
-		else {
-			CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
-			diff.outDiffs(cout);
+		// apply...
+		if(apply) {
+			log.info("diff: will apply "+diff.getChildren().size()+" diffs");
+			boolean addComments = true;
+			DiffUtilQon.applyDiffs(diff.getChildren(), conn, model.getModelId(), addComments, resp);
+			log.info("diff: applyed diffs");
 		}
 	}
 	
@@ -138,6 +156,13 @@ public class QOnManage {
 			names.add( t.getSchemaName() );
 		}
 		return names;
+	}
+
+	public static boolean isSubactionValid(String subaction) {
+		return
+			QOnManage.DIFF_SUBACTION_SHOW.equals(subaction) ||
+			QOnManage.DIFF_SUBACTION_APPLY.equals(subaction)
+			;
 	}
 	
 }

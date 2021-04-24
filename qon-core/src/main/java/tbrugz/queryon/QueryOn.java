@@ -571,9 +571,11 @@ public class QueryOn extends AbstractHttpServlet {
 			Map<String, List<String>> schemasByModel = new HashMap<String, List<String>>();
 			QOnContextUtils.setSchemasByModel(context, schemasByModel);
 			
+			runOnStartupProcessors(context);
+			
 			setupUpdatePlugins(context);
 			
-			runOnStartupProcessors(context);
+			// XXX runOnStartupPostProcessors(context); //??
 			
 			initModelsMetadata(models);
 		} catch (Exception e) {
@@ -629,7 +631,7 @@ public class QueryOn extends AbstractHttpServlet {
 			return true;
 		}
 		catch(Exception e) {
-			log.warn("Error initting model '"+id+"': "+e);
+			log.error("Error initting model '"+id+"': "+e);
 			log.debug("Error initting model '"+id+"': "+e.getMessage(), e);
 		}
 		return false;
@@ -745,7 +747,7 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	void runProcessor(String processorClass, ServletContext context, String modelId) {
 		try {
-			log.info("Running startup processor '"+processorClass+"' ["+modelId+"]");
+			log.info("Running startup processor '"+processorClass+"' [model="+modelId+"]");
 			ProcessorServlet.doProcess(processorClass, context, modelId);
 		}
 		catch(Exception e) {
@@ -914,7 +916,12 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	protected void handleException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e) throws IOException {
-		WebUtils.writeException(req, resp, e, debugMode);
+		if(!resp.isCommitted()) {
+			WebUtils.writeException(req, resp, e, debugMode);
+		}
+		else {
+			log.warn("handleException: response already committed. Exception not returned: "+e, e);
+		}
 	}
 	
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
@@ -2631,7 +2638,14 @@ public class QueryOn extends AbstractHttpServlet {
 		//log.info("doManage: params: "+reqspec.params);
 		
 		String action = String.valueOf( reqspec.params.get(0) );
-		ShiroUtils.checkPermission(currentUser, ActionType.MANAGE.objectType()+":"+action);
+		String permission = ActionType.MANAGE.objectType()+":"+action;
+		String subaction = null;
+		if(reqspec.params.size()>1) {
+			subaction = String.valueOf( reqspec.params.get(1) );
+			permission += ":"+subaction;
+		}
+		
+		ShiroUtils.checkPermission(currentUser, permission);
 
 		if(QOnManage.ACTION_RELOAD.equals(action)) {
 			doInit(req.getServletContext());
@@ -2646,17 +2660,26 @@ public class QueryOn extends AbstractHttpServlet {
 		 * for each table, grab table's metadata from database & compare
 		 */
 		if(QOnManage.ACTION_DIFF.equals(action)) {
+			if(subaction==null) {
+				throw new BadRequestException("subaction must not be null [action="+action+"; modelId="+reqspec.getModelId()+"]");
+			}
+			if(!QOnManage.isSubactionValid(subaction)) {
+				throw new BadRequestException("unknown subaction '"+subaction+"' [action="+action+"; modelId="+reqspec.getModelId()+"]");
+			}
+
 			if(model==null) {
 				throw new InternalServerException("null model [modelId="+reqspec.getModelId()+"]");
 			}
+
 			Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 			QOnManage qm = new QOnManage();
+			boolean applyDiff = QOnManage.DIFF_SUBACTION_APPLY.equals(subaction);
 			try {
-				qm.diffModel(model, conn, resp);
+				qm.diffModel(model, conn, applyDiff, resp);
 			}
 			catch(Exception e) {
-				log.debug("Error diffing model: "+e.getMessage(), e);
-				throw new InternalServerException("Error diffing model", e);
+				log.warn("Error diffing model: "+e.getMessage(), e);
+				throw new InternalServerException("Error diffing model: "+e.getMessage(), e);
 			}
 			finally {
 				ConnectionUtil.closeConnection(conn);

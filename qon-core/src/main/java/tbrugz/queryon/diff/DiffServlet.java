@@ -247,7 +247,7 @@ public class DiffServlet extends AbstractHttpServlet {
 					log.info("pre-hook: ret:\n"+ret);
 				}
 			}
-			applyDiffs(diffs, prop, modelIdSource, resp);
+			DiffUtilQon.applyDiffs(diffs, prop, modelIdSource, addComments, resp);
 			// post-hooks
 			// XXX use queue/async in post-hooks?
 			for(ApplyHook ah: postHooks) {
@@ -320,6 +320,7 @@ public class DiffServlet extends AbstractHttpServlet {
 		log.info(count+" diffs dumped");
 	}
 	
+	/*
 	void applyDiffs(List<Diff> diffs, Properties prop, String modelId, HttpServletResponse resp) throws IOException {
 		Connection conn = null;
 		String sql = null;
@@ -339,7 +340,7 @@ public class DiffServlet extends AbstractHttpServlet {
 					int count = st.getUpdateCount();
 					resp.getWriter().write(sql);
 					if(addComments) {
-						resp.getWriter().write(" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] */");
+						resp.getWriter().write(" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] * /");
 					}
 					resp.getWriter().write((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
 					executeCount++;
@@ -362,6 +363,7 @@ public class DiffServlet extends AbstractHttpServlet {
 			ConnectionUtil.closeConnection(conn);
 		}
 	}
+	*/
 	
 	int doTableRenames(List<Diff> diffs, Properties prop) {
 		double minSimilarity = 0.5;
