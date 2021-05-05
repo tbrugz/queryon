@@ -1964,6 +1964,31 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void testGetBlobStringRange() throws IOException, ParserConfigurationException, SAXException {
+		String url = baseUrl+"/EMP?order=ID&limit=1&offset=1&valuefield=NAME";
+		int expectedStatus = HttpServletResponse.SC_PARTIAL_CONTENT;
+		
+		{
+			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=2-4");
+			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
+			Assert.assertEquals("ry", content);
+		}
+
+		{
+			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=0-3");
+			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
+			Assert.assertEquals("mar", content);
+		}
+
+		{
+			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=1-");
+			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
+			Assert.assertEquals("ary", content);
+		}
+		
+	}
+
+	@Test
 	public void testGetTrySqlCommandColumns() throws IOException, ParserConfigurationException, SAXException {
 		String sql = "$columns EMP";
 		String sqlpar = URLEncoder.encode(sql, utf8);
