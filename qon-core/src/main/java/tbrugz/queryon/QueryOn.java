@@ -3128,7 +3128,7 @@ public class QueryOn extends AbstractHttpServlet {
 				}
 			}
 			catch(SQLException e) { // oracle?
-				log.warn("Error at 'isLast()/next()': "+e);
+				log.debug("Error at 'isLast()': "+e);
 			}
 			
 			if(reqspec.uniValueMimetypeCol!=null) {
@@ -3136,6 +3136,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			//resp.addHeader(ResponseSpec.HEADER_CONTENT_TYPE, mimeType);
 			resp.setContentType(mimeType);
+			resp.setHeader(ResponseSpec.HEADER_ACCEPT_RANGES, ResponseSpec.HEADERVALUE_ACCEPT_RANGES_BYTES);
 			if(reqspec.uniValueFilenameCol!=null) {
 				filename = rs.getString(reqspec.uniValueFilenameCol);
 			}
@@ -3144,7 +3145,7 @@ public class QueryOn extends AbstractHttpServlet {
 				resp.setHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "inline; filename=" + filename);
 			}
 			if(reqspec.isHeadMethod()) {
-				log.debug("HEAD method: response body is empty"); 
+				log.debug("HEAD method: response body is empty");
 				return;
 			}
 			
@@ -3161,15 +3162,42 @@ public class QueryOn extends AbstractHttpServlet {
 					// "scalar" types / non-binary types
 					Reader r = rs.getCharacterStream(reqspec.uniValueCol);
 					if(r!=null) {
-						IOUtil.pipeCharacterStreams(r, resp.getWriter());
+						if(reqspec.isRangeDefined()) {
+							r.skip(reqspec.getRangeStart());
+							resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+							resp.setHeader(ResponseSpec.HEADER_CONTENT_RANGE, "bytes "+reqspec.getRangeSpec()+"/*");
+						}
+						if(reqspec.isRangeEndDefined()) {
+							IOUtil.pipeCharacterStreams(r, resp.getWriter(), reqspec.getRangeLength());
+						}
+						else {
+							IOUtil.pipeCharacterStreams(r, resp.getWriter());
+						}
 						r.close();
 					}
 				}
 				else {
 					// types: Blob, Array, ResultSet, Object
+					/*if(reqspec.isRangeEndDefined()) {
+						Blob b = rs.getBlob(reqspec.uniValueCol);
+						byte[] content = b.getBytes(reqspec.getRangeStart(), (int) (reqspec.getRangeLength()));
+						resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+						resp.getOutputStream().write(content);
+						return;
+					}*/
 					InputStream is = rs.getBinaryStream(reqspec.uniValueCol);
 					if(is!=null) {
-						IOUtil.pipeStreams(is, resp.getOutputStream());
+						if(reqspec.isRangeDefined()) {
+							is.skip(reqspec.getRangeStart());
+							resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+							resp.setHeader(ResponseSpec.HEADER_CONTENT_RANGE, "bytes "+reqspec.getRangeSpec()+"/*");
+						}
+						if(reqspec.isRangeEndDefined()) {
+							IOUtil.pipeStreams(is, resp.getOutputStream(), reqspec.getRangeLength());
+						}
+						else {
+							IOUtil.pipeStreams(is, resp.getOutputStream());
+						}
 						is.close();
 					}
 					else {

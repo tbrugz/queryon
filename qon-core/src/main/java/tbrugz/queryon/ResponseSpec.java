@@ -12,8 +12,10 @@ public class ResponseSpec {
 	public static final String MIME_TYPE_XML = "application/xml";
 	
 	// --- standard HTTP response headers ---
+	public static final String HEADER_ACCEPT_RANGES = "Accept-Ranges";
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
+	public static final String HEADER_CONTENT_RANGE = "Content-Range";
 	//public static final String HEADER_CONTENT_TYPE = "Content-Type"; // not needed... use HttpServletResponse.setContentType()
 	
 	//https://en.wikipedia.org/wiki/List_of_HTTP_header_fields ; https://en.wikipedia.org/wiki/Chunked_transfer_encoding
@@ -45,5 +47,6 @@ public class ResponseSpec {
 	//---
 	
 	public static final String HEADERVALUE_CONTENT_DISPOSITION_INLINE = "inline";
+	public static final String HEADERVALUE_ACCEPT_RANGES_BYTES = "bytes";
 	
 }

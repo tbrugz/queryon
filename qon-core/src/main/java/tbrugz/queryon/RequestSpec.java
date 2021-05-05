@@ -78,6 +78,7 @@ public class RequestSpec {
 	
 	public static final String HEADER_ACCEPT = "Accept";
 	//public static final String HEADER_CONTENT_DISPOSITION = "content-disposition";
+	public static final String HEADER_RANGE = "Range";
 	public static final String HEADER_PARAM_ENCODING = "X-ParamEncoding";
 	public static final String PARAM_ENCODING_URLENCODE = "url";
 	
@@ -223,6 +224,7 @@ public class RequestSpec {
 	final String uniValueMimetypeCol;
 	final String uniValueFilename;
 	final String uniValueFilenameCol;
+	long[] bytesRange;
 	
 	public final static int DEFAULT_LIMIT = 100;
 	final static int DEFAULT_MAX_UPDATES = 1;
@@ -449,6 +451,7 @@ public class RequestSpec {
 		uniValueMimetypeCol = req.getParameter(PARAM_MIMETYPE_FIELD);
 		uniValueFilename = req.getParameter(PARAM_FILENAME);
 		uniValueFilenameCol = req.getParameter(PARAM_FILENAME_FIELD);
+		bytesRange = getBytesRange(req);
 		
 		//Enumeration<String> en = (Enumeration<String>) req.getParameterNames();
 		//while(en.hasMoreElements()) {
@@ -476,6 +479,59 @@ public class RequestSpec {
 		List<String> URIpartz = new ArrayList<String>( Arrays.asList(URIparts) );
 		if(!URIpartz.isEmpty() && "".equals(URIpartz.get(0))) { URIpartz.remove(0); }
 		return URIpartz;
+	}
+	
+	long[] getBytesRange(HttpServletRequest req) {
+		String range = req.getHeader(HEADER_RANGE);
+		if(range==null) {
+			return null;
+		}
+		return parseRange(range);
+	}
+	
+	boolean isRangeDefined() {
+		return bytesRange!=null;
+	}
+
+	boolean isRangeEndDefined() {
+		return bytesRange!=null && bytesRange[1] != -1;
+	}
+	
+	long getRangeStart() {
+		return bytesRange[0];
+	}
+
+	long getRangeLength() {
+		return bytesRange[1]-bytesRange[0];
+	}
+
+	String getRangeSpec() {
+		return bytesRange[0]+"-"+bytesRange[1];
+	}
+	
+	static final Pattern rangePtrn = Pattern.compile("bytes\\s*=\\s*(\\d+)-(\\d*)"); //XXX: 2nd digit group could be omitted...
+
+	static long[] parseRange(String range) {
+		Matcher m = rangePtrn.matcher(range);
+		if(m.find()) {
+			String d1 = m.group(1);
+			String d2 = m.group(2);
+			long[] ret = new long[2];
+			ret[0] = Long.parseLong(d1);
+			if("".equals(d2)) {
+				ret[1] = -1;
+			}
+			else {
+				ret[1] = Long.parseLong(d2);
+				//System.out.println("ret: "+ret[0]+" -- "+ret[1]);
+				if(ret[1]<ret[0]) {
+					throw new BadRequestException("Range not understood");
+				}
+			}
+			return ret;
+		}
+		
+		throw new BadRequestException("Range not understood");
 	}
 	
 	protected void processBody(HttpServletRequest req) throws NumberFormatException, IOException, ServletException {
