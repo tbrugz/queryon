@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.naming.NamingException;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -56,6 +58,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -89,6 +92,7 @@ import tbrugz.sqldump.util.Utils;
 
 import static tbrugz.queryon.http.JettySetup.*;
 
+@SuppressWarnings("unused")
 public class WinstoneAndH2HttpRequestTest {
 
 	private static final Log log = LogFactory.getLog(WinstoneAndH2HttpRequestTest.class);
@@ -155,15 +159,24 @@ public class WinstoneAndH2HttpRequestTest {
 	public static String getContentFromUrl(String url) throws ClientProtocolException, IOException {
 		return getContentFromUrl(url, 200);
 	}
+
+	public static String getContentFromUrl(String url, int expectedStatus) throws ClientProtocolException, IOException {
+		return getContentFromUrl(url, null, expectedStatus);
+	}
 	
 	public static CloseableHttpClient getHttpClient() {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		return httpclient;
 	}
 	
-	public static String getContentFromUrl(String url, int expectedStatus) throws ClientProtocolException, IOException {
+	public static String getContentFromUrl(String url, Header[] headers, int expectedStatus) throws ClientProtocolException, IOException {
 		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(url);
+		if(headers!=null) {
+			for(Header h: headers) {
+				httpGet.addHeader(h);
+			}
+		}
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
 		/*if(expectedStatus != response1.getStatusLine().getStatusCode()) {
@@ -1269,9 +1282,8 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void swaggerGsonParse() throws IOException, ParserConfigurationException, SAXException {
 		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
-		JsonParser parser = new JsonParser();
 		//System.out.println(jsonStr);
-		JsonElement json = parser.parse(jsonStr);
+		JsonElement json = JsonParser.parseString(jsonStr);
 		Assert.assertTrue(json.isJsonObject());
 		
 		JsonObject jsonObject = json.getAsJsonObject();
@@ -1314,9 +1326,8 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void swaggerGsonCall() throws IOException, ParserConfigurationException, SAXException {
 		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
-		JsonParser parser = new JsonParser();
 		//System.out.println(jsonStr);
-		JsonElement json = parser.parse(jsonStr);
+		JsonElement json = JsonParser.parseString(jsonStr);
 		JsonObject jsonObject = json.getAsJsonObject();
 		JsonObject paths = jsonObject.get("paths").getAsJsonObject();
 		for(Entry<String, JsonElement> e: paths.entrySet()) {
@@ -1340,7 +1351,7 @@ public class WinstoneAndH2HttpRequestTest {
 			}
 			String url = "http://"+jsonObject.get("host").getAsString()+jsonObject.get("basePath").getAsString()+path+queryString;
 			//System.out.println("swaggerGsonCall: "+url);
-			JsonElement resp = parser.parse(getContentFromUrl(url));
+			JsonElement resp = JsonParser.parseString(getContentFromUrl(url));
 			//String respStr = getContentFromUrl(url);
 			//System.out.println("swaggerGsonCall: resp = "+resp);
 		}
@@ -1694,7 +1705,6 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testLoginLogout() throws Exception {
 		// https://issues.apache.org/jira/browse/SHIRO-613 !!!
-		JsonParser parser = new JsonParser();
 		// https://stackoverflow.com/a/6273665/616413
 		//HttpClient httpClient = HttpClients.custom().build();
 		CookieStore cookieStore = new BasicCookieStore();
@@ -1732,7 +1742,7 @@ public class WinstoneAndH2HttpRequestTest {
 			String jsonStr = getContent(jsonResp);
 			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
 			//System.out.print("json:\n"+jsonStr+"\n");
-			JsonElement json = parser.parse(jsonStr);
+			JsonElement json = JsonParser.parseString(jsonStr);
 			Assert.assertEquals(false, json.getAsJsonObject().get("authenticated").getAsBoolean());
 			Assert.assertEquals("anonymous", json.getAsJsonObject().get("username").getAsString());
 			EntityUtils.consumeQuietly(jsonResp.getEntity());
@@ -1756,7 +1766,7 @@ public class WinstoneAndH2HttpRequestTest {
 			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
 			String jsonStr = getContent(jsonResp);
 			//System.out.print("json:\n"+jsonStr+"\n");
-			JsonElement json = parser.parse(jsonStr);
+			JsonElement json = JsonParser.parseString(jsonStr);
 			Assert.assertEquals(true, json.getAsJsonObject().get("authenticated").getAsBoolean());
 			Assert.assertEquals(LOGIN_JDOE, json.getAsJsonObject().get("username").getAsString());
 			EntityUtils.consumeQuietly(jsonResp.getEntity());
@@ -1784,7 +1794,7 @@ public class WinstoneAndH2HttpRequestTest {
 			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+currentUserUrl, cookieStore);
 			String jsonStr = getContent(jsonResp);
 			//System.out.print("json:\n"+jsonStr+"\n");
-			JsonElement json = parser.parse(jsonStr);
+			JsonElement json = JsonParser.parseString(jsonStr);
 			Assert.assertEquals(false, json.getAsJsonObject().get("authenticated").getAsBoolean());
 			Assert.assertEquals("anonymous", json.getAsJsonObject().get("username").getAsString());
 			EntityUtils.consumeQuietly(jsonResp.getEntity());

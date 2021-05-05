@@ -1,5 +1,6 @@
 package tbrugz.queryon.http;
 
+/*
 import static tbrugz.queryon.http.JettySetup.qonUrl;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.tools.common.ToolContext;
 import org.apache.cxf.tools.wsdlto.WSDLToJava;
+*/
 /*
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnService;
 import org.bitbucket.tbrugz.queryon.queryonservice.BooleanValuedFilterType;
@@ -51,6 +53,7 @@ import org.bitbucket.tbrugz.queryon.queryonservice.UpdateInfoType;
 import org.bitbucket.tbrugz.queryon.queryonservice.UpdatePUBLICEMP;
 import org.bitbucket.tbrugz.queryon.queryonservice_wsdl.QueryOnServicePortType;
 */
+/*
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -61,6 +64,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
+*/
 
 public class SoapCodeGenTest {
 
