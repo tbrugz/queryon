@@ -1969,13 +1969,25 @@ public class WinstoneAndH2HttpRequestTest {
 		int expectedStatus = HttpServletResponse.SC_PARTIAL_CONTENT;
 		
 		{
-			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=2-4");
+			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=2-3");
+			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
+			Assert.assertEquals("ry", content);
+		}
+
+		{
+			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=2-100");
 			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
 			Assert.assertEquals("ry", content);
 		}
 
 		{
 			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=0-3");
+			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
+			Assert.assertEquals("mary", content);
+		}
+
+		{
+			Header header = new BasicHeader(HttpHeaders.RANGE, "bytes=0-2");
 			String content = getContentFromUrl(url, new Header[]{header}, expectedStatus);
 			Assert.assertEquals("mar", content);
 		}

@@ -502,7 +502,7 @@ public class RequestSpec {
 	}
 
 	long getRangeLength() {
-		return bytesRange[1]-bytesRange[0];
+		return bytesRange[1]-bytesRange[0]+1; // <range-end> is inclusive
 	}
 
 	String getRangeSpec() {
