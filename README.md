@@ -53,7 +53,7 @@ Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven
 
 license
 -------
-[AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html) - except where otherwise noted
+[AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html), see [LICENSE.md](LICENSE.md) - except where otherwise noted
 
 
 license - notable exceptions
