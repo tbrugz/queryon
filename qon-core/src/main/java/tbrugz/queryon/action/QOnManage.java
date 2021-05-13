@@ -43,9 +43,12 @@ public class QOnManage {
 	
 	public static final String DIFF_SUBACTION_SHOW = "show";
 	public static final String DIFF_SUBACTION_APPLY = "applydiff";
+
+	static final boolean transformDialectBackAndForth = false;
 	
 	public void diffModel(SchemaModel model, Connection conn, boolean apply, HttpServletResponse resp) throws IOException {
 		//XXX param: schemas, validate?
+		//log.info("starting diff");
 		
 		Properties grabProps = new Properties();
 		grabProps.put(JDBCSchemaGrabber.PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, "false");
@@ -63,28 +66,30 @@ public class QOnManage {
 		SchemaModel dbModel = jsg.grabSchema();
 		String dialect = dbModel.getSqlDialect();
 		
-		//log.debug("do SQLDialectTransformer: dialect="+dialect);
-		Processor transf = new SQLDialectTransformer();
-		transf.setSchemaModel(dbModel);
-		
-		{
-			Properties transformProps = new Properties();
-			transformProps.setProperty("sqldump.schematransform.toansi", "true");
-			transf.setProperties(transformProps);
-			transf.process();
-		}
+		if(transformDialectBackAndForth) {
+			log.info("diffModel: SQLDialectTransformer: todbid dialect="+dialect);
+			Processor transf = new SQLDialectTransformer();
+			transf.setSchemaModel(dbModel);
+			
+			{
+				Properties transformProps = new Properties();
+				transformProps.setProperty("sqldump.schematransform.toansi", "true");
+				transf.setProperties(transformProps);
+				transf.process();
+			}
 
-		/*{
-			Properties transformProps = new Properties();
-			transformProps.setProperty("sqldump.schematransform.todbid", dialect);
-			transf.setProperties(transformProps);
-			transf.process();
-		}*/
+			{
+				Properties transformProps = new Properties();
+				transformProps.setProperty("sqldump.schematransform.todbid", dialect);
+				transf.setProperties(transformProps);
+				transf.process();
+			}
+		}
 		
 		SchemaDiffer differ = new SchemaDiffer();
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
 		ColumnDiff.updateFeatures(feat);
-		log.debug("feats: "+feat);
+		log.debug("dialect: "+dialect+" ; feats: "+feat);
 		
 		differ.setTypesForDiff("TABLE");
 		SchemaDiff diff = differ.diffSchemas(dbModel, model);
@@ -148,6 +153,7 @@ public class QOnManage {
 			DiffUtilQon.applyDiffs(diff.getChildren(), conn, model.getModelId(), addComments, resp);
 			log.info("diff: applyed diffs");
 		}
+		//log.info("diff finished");
 	}
 	
 	static Set<String> getModelSchemas(SchemaModel model) {
