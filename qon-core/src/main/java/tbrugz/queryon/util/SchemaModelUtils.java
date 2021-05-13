@@ -348,6 +348,11 @@ public class SchemaModelUtils {
 		sm.getSynonyms().addAll(sm2.getSynonyms());
 		sm.getTriggers().addAll(sm2.getTriggers());
 		sm.getViews().addAll(sm2.getViews());
+
+		if(! Utils.equalsConsiderNull(sm.getSqlDialect(), sm2.getSqlDialect())) {
+			log.warn("merging models with distinct dialects: "+sm.getSqlDialect()+" & "+sm2.getSqlDialect()+
+				" [will keep the 1st: "+sm.getSqlDialect()+"]");
+		}
 		
 		return sm;
 	}

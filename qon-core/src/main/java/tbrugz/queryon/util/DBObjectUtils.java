@@ -61,7 +61,9 @@ public class DBObjectUtils {
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
-			rel.setColumns(new ArrayList<Column>());
+			if(update) {
+				rel.setColumns(new ArrayList<Column>());
+			}
 			log.warn("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
 			throw e;
@@ -73,7 +75,7 @@ public class DBObjectUtils {
 		
 		try {
 			ParameterMetaData pmd = stmt.getParameterMetaData();
-			if(pmd!=null && update) {
+			if(pmd!=null) {
 				int params = pmd.getParameterCount();
 				//rel.setParameterCount(params);
 				
@@ -118,13 +120,17 @@ public class DBObjectUtils {
 						log.warn("Parameter of mode '"+pmode+"' not understood for query '"+queryFullName+"/"+i+"'");
 					}
 				}
-				rel.setParameterCount(inParams);
-				rel.setParameterTypes(paramsTypes);
+				if(update) {
+					rel.setParameterCount(inParams);
+					rel.setParameterTypes(paramsTypes);
+				}
 				//log.info("["+rel.getQualifiedName()+"] params: "+paramsTypes);
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
-			rel.setParameterCount(null);
+			if(update) {
+				rel.setParameterCount(null);
+			}
 			log.warn("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("parameter metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
 			throw e;
@@ -145,17 +151,19 @@ public class DBObjectUtils {
 		try {
 			PreparedStatement stmt = conn.prepareStatement(finalSql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
-			if(rsmd!=null && update) {
-				//rel.setColumns(DataDumpUtils.getColumns(rsmd));
-				setColumns(rel, DataDumpUtils.getColumns(rsmd));
+			if(rsmd!=null) {
+				if(update) {
+					setColumns(rel, DataDumpUtils.getColumns(rsmd));
+				}
 			}
 			else {
 				log.warn("getMetaData() returned null: empty query? sql:\n"+finalSql);
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
-			//rel.setColumns(new ArrayList<Column>());
-			setColumns(rel, new ArrayList<Column>());
+			if(update) {
+				setColumns(rel, new ArrayList<Column>());
+			}
 			log.warn("resultset metadata's sqlexception: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
 			throw e;
