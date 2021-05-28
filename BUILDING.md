@@ -4,7 +4,9 @@ building queryon
 
 Dependencies: java 1.6+ ; maven 3+
 
-Building:
+
+Building
+----
 
 `mvn install`
 
@@ -15,12 +17,21 @@ you may build it first (and publish it to your local maven repo)
 Deploy (local/sonatype), see: [doc/mvn-deploy.md](doc/mvn-deploy.md)
 
 
+Testing
+-----
+
+`mvn clean package && mvn -P hardness test`
+
+see also: `demo/qon-demo-dbn/TESTING.md`, `demo/qon-demo-minimal/TESTING.md`
+
+
+
 maven profiles
 -----
 
 * `release` - release profile (sign artifacts)
 
-* `haddness` - extra tests - currently this profile must be called after a initial build (eg: `mvn package && mvn -P hardness test && mvn clean` )
+* `haddness` - extra tests - currently this profile must be called after a initial build (eg: `mvn clean package && mvn -P hardness test && mvn clean` )
 
 * `thorntail` - package thorntail demos
 
