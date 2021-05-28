@@ -304,7 +304,7 @@ public class DBObjectUtils {
 			setColumns(rel, cols);
 		}
 		else if(rel.getColumnCount()==cols.size()) {
-			log.info("won't update columns (original count [#"+rel.getColumnCount()+" == new count [#"+cols.size()+"]) [name="+rel.getQualifiedName()+"]: "+cols);
+			log.debug("won't update columns (original count [#"+rel.getColumnCount()+" == new count [#"+cols.size()+"]) [name="+rel.getQualifiedName()+"]: "+cols);
 		}
 		else {
 			log.warn("won't update columns (has "+rel.getColumnCount()+" cols) [name="+rel.getQualifiedName()+"]: "+cols);
