@@ -54,13 +54,7 @@ public class DBObjectUtils {
 			if(rsmd!=null) {
 				if(update) {
 					List<Column> cols = DataDumpUtils.getColumns(rsmd);
-					if(rel.getColumnCount()==0) {
-						rel.setColumns(cols);
-						log.info("updated columns (had zero cols) [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]: "+cols);
-					}
-					else {
-						log.warn("won't update columns (has "+rel.getColumnCount()+" cols) [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]: "+cols);
-					}
+					updateColumnsIfEmpty(rel, cols);
 				}
 			}
 			else {
@@ -162,13 +156,7 @@ public class DBObjectUtils {
 			if(rsmd!=null) {
 				if(update) {
 					List<Column> cols = DataDumpUtils.getColumns(rsmd);
-					if(rel.getColumnCount()==0) {
-						setColumns(rel, cols);
-						log.info("updated columns (had zero cols) [name="+rel.getQualifiedName()+"]: "+cols);
-					}
-					else {
-						log.warn("won't update columns (has "+rel.getColumnCount()+" cols) [name="+rel.getQualifiedName()+"]: "+cols);
-					}
+					updateColumnsIfEmpty(rel, cols);
 				}
 			}
 			else {
@@ -307,6 +295,19 @@ public class DBObjectUtils {
 		}
 		catch(SQLException e) {
 			log.warn("SQLException: "+e);
+		}
+	}
+	
+	static void updateColumnsIfEmpty(Relation rel, List<Column> cols) {
+		if(rel.getColumnCount()==0) {
+			log.info("will update columns (has zero cols) [name="+rel.getQualifiedName()+"]: "+cols);
+			setColumns(rel, cols);
+		}
+		else if(rel.getColumnCount()==cols.size()) {
+			log.info("won't update columns (original count [#"+rel.getColumnCount()+" == new count [#"+cols.size()+"]) [name="+rel.getQualifiedName()+"]: "+cols);
+		}
+		else {
+			log.warn("won't update columns (has "+rel.getColumnCount()+" cols) [name="+rel.getQualifiedName()+"]: "+cols);
 		}
 	}
 	
