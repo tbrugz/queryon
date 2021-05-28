@@ -53,7 +53,14 @@ public class DBObjectUtils {
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			if(rsmd!=null) {
 				if(update) {
-					rel.setColumns(DataDumpUtils.getColumns(rsmd));
+					List<Column> cols = DataDumpUtils.getColumns(rsmd);
+					if(rel.getColumnCount()==0) {
+						rel.setColumns(cols);
+						log.info("updated columns (had zero cols) [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]: "+cols);
+					}
+					else {
+						log.warn("won't update columns (has "+rel.getColumnCount()+" cols) [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]: "+cols);
+					}
 				}
 			}
 			else {
@@ -124,7 +131,7 @@ public class DBObjectUtils {
 					rel.setParameterCount(inParams);
 					rel.setParameterTypes(paramsTypes);
 				}
-				//log.info("["+rel.getQualifiedName()+"] params: "+paramsTypes);
+				//log.info("["+rel.getQualifiedName()+"] #inParams = "+inParams+" ; params: "+paramsTypes);
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
@@ -140,6 +147,7 @@ public class DBObjectUtils {
 			List<String> namedParameterNames = SQL.getNamedParameterNames(finalSql);
 			SQL.validateNamedParametersWithParamCount(namedParameterNames, rel.getParameterCount());
 			rel.setNamedParameterNames(namedParameterNames);
+			//log.info("["+rel.getQualifiedName()+"] namedParameterNames = "+namedParameterNames);
 		}
 	}
 
@@ -153,7 +161,14 @@ public class DBObjectUtils {
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			if(rsmd!=null) {
 				if(update) {
-					setColumns(rel, DataDumpUtils.getColumns(rsmd));
+					List<Column> cols = DataDumpUtils.getColumns(rsmd);
+					if(rel.getColumnCount()==0) {
+						setColumns(rel, cols);
+						log.info("updated columns (had zero cols) [name="+rel.getQualifiedName()+"]: "+cols);
+					}
+					else {
+						log.warn("won't update columns (has "+rel.getColumnCount()+" cols) [name="+rel.getQualifiedName()+"]: "+cols);
+					}
 				}
 			}
 			else {

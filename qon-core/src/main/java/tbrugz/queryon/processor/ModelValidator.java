@@ -18,7 +18,7 @@ public class ModelValidator extends AbstractSQLProc {
 	static final Log log = LogFactory.getLog(ModelValidator.class);
 	
 	final boolean removeInvalid = false;
-	final boolean update = false; //XXX: update may change data type & lose nullable info
+	final boolean update = true; //XXX: update may change data type & lose nullable info
 	//XXX: setInvalid...
 	
 	@Override

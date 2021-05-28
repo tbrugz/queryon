@@ -134,6 +134,10 @@
             <name>DESCRIPTION</name>
             <type>TEXT</type>
         </columns>
+        <columns>
+            <name>ATTACH</name>
+            <type>BLOB</type>
+        </columns>
         <constraints>
             <name>TASKS_PK</name>
             <type>PK</type>
@@ -172,6 +176,11 @@
             <type>VARCHAR</type>
         </columns>
         <parameterCount>3</parameterCount>
+        <!--
+        <namedParameterNames>par1</namedParameterNames>
+        <namedParameterNames>par2</namedParameterNames>
+        <namedParameterNames>par1</namedParameterNames>
+        -->
         <query>
 /*
 named-parameters=par1,par2,par1
