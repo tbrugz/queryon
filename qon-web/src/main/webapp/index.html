@@ -39,9 +39,9 @@
 	
 	const aggregateFunctions = [ "count", "distinct-count", "sum", "min", "max", "avg" ];
 	
-	var pivotAllColsAreStatic = true;
+	const pivotAllColsAreStatic = true;
 
-	var textareaDbColTypes = ["CLOB", "TEXT"];
+	const textareaDbColTypes = ["CLOB", "TEXT"];
 	
 	function onLoad() {
 		loadModels(); //loadModelsCallback);
@@ -220,6 +220,12 @@
 		setDisplayNone('popup-manage'); resetColors('btn-manage');
 	}
 	
+	function updateFromPivotChange() {
+		//console.log('updateFromPivotChange...');
+		updateState();
+		makeHrefs();
+	}
+
 	function updateFromFilters() {
 		updateState();
 		makeHrefs();
@@ -874,7 +880,7 @@
 		if(foo || modelId) { state += '|'+foo; }
 		if(modelId) { state += "|"+modelId; }
 		
-		//console.log('updateState', state); //, ' - urlAddFilterOrderOffset:', urlAddFilterOrderOffset(''));
+		//console.log('updateState: replaceState', state); //, ' - urlAddFilterOrderOffset:', urlAddFilterOrderOffset(''));
 		history.replaceState(null, null, "#"+state);
 	}
 	
@@ -918,8 +924,9 @@
 		//pivot
 		var oncols = getParameterByName('oncols', qs);
 		var onrows = getParameterByName('onrows', qs);
-		var aggs = getParameterNamesStartWith('agg:', qs);
-		//console.log('updateSelectedQueryState: oncols: ', oncols, '; onrows: ', onrows, '; aggs: ', aggs);
+		//var aggs = getParameterNamesStartWith('agg:', qs);
+		var aggsMap = getParameterArrayStartWith('agg:', qs);
+		//console.log('updateSelectedQueryState: oncols: ', oncols, '; onrows: ', onrows, '; aggsMap: ', aggsMap);
 		if(oncols) {
 			var cols = oncols.split(',');
 			for(var i=0;i<cols.length;i++) {
@@ -932,13 +939,16 @@
 				pivotSimpleAddColumn(rows[i], null, 'onrows');
 			}
 		}
-		for(var i=0;i<aggs.length;i++) {
-			var key = aggs[i].substring(4);
-			var value = getParameterByName(aggs[i], qs);
-			//console.log('updateSelectedQueryState: measure: aggs[i]: ', aggs[i], '; key: ', key, '; value: ', value);
+		for(var i=0;i<aggsMap.length;i++) {
+			//var key = aggs[i].substring(4);
+			//var value = getParameterByName(aggs[i], qs);
+			var key0 = Object.keys(aggsMap[i])[0];
+			var key = key0.substring(4);
+			var value = aggsMap[i][key0];
+			//console.log('updateSelectedQueryState: measure: aggsMap[', i ,']: ', aggsMap[i], '; key: ', key, '; value: ', value);
 			pivotSimpleAddColumn(key, value, 'measures');
 		}
-		if(oncols || onrows || aggs.length > 0) {
+		if(oncols || onrows || aggsMap.length > 0) {
 			//togglePivotDialog();
 			showPivotDialog(true);
 		}
@@ -946,6 +956,10 @@
 			showPivotDialog(false);
 		}
 		
+		var dragTo = byId("measures");
+		if(aggsMap.length > dragTo.children.length) {
+			console.warn("updateSelectedQueryState: aggsMap.length [", aggsMap.length, "] > dragto.children.length [", dragTo.children.length, "] ; aggsMap=", aggsMap, ", dragto.children=", dragTo.children);
+		}
 		//console.log('updateSelectedQueryState: qs: ', qs, ';filters: ', filters, '; orderVal=', orderVal, '; offsetVal=', offsetVal);
 		updateState();
 	}
@@ -1134,7 +1148,7 @@
 		var origColAgg = originalAgg;
 		var origCol = null;
 		var dragto = byId(dragtoId);
-		//console.log("pivotSimpleAddColumn: columnName=", columnName, ", dragtoId=", dragtoId);
+		//console.log("pivotSimpleAddColumn: columnName=", columnName, ", originalAgg=", originalAgg, ", dragtoId=", dragtoId);
 		pivotDropColumn(data, origColParentId, origColId, origColAgg, origCol, dragto, event);
 	}
 	
@@ -1193,15 +1207,16 @@
 				if(event) {
 					//console.log("NOT before", event.clientX);
 				}
-				//console.log("appendChild: dragto=", dragto, ", col=", col);
+				//console.log("appendChild: dragto=", dragto, ", col=", col, "contains?=", dragto.contains(col));
 				dragto.appendChild(col);
 			}
 		}
-		//console.log("pivotAllColsAreStatic",pivotAllColsAreStatic,"dragto.id",dragto.id);
+		//console.log("pivotAllColsAreStatic=", pivotAllColsAreStatic, "dragto.id=", dragto.id);
 		if(dragto.id=="measures") {
 			//console.log("drop at measures!");
 			var div = document.createElement('span');
 			var select = document.createElement('select');
+			select.addEventListener('change', updateFromPivotChange);
 			var s = "";
 			for(var i=0;i<aggregateFunctions.length;i++) {
 				s += "<option value='"+aggregateFunctions[i]+"'>"+aggregateFunctions[i]+"</option>";
@@ -1220,6 +1235,7 @@
 		//TODO drop: if measure, add select for aggregate function
 		
 		makeHrefs();
+		//console.log("pivotDropColumn(1): dragto=", dragto, ", col=", col, "contains?=", dragto.contains(col));
 	}
 	
 	function pivotSwitchDims() {
@@ -1344,6 +1360,7 @@
 		togglePivotDialog();
 		//updateState();
 		//pivotClearUI(); // ?
+		//console.log('pushState', newhash);
 		history.pushState(null, null, newhash);
 		updateSelectedQueryState();
 		doRun('objects', 'content', 'messages', function(request) {
@@ -1354,7 +1371,7 @@
 	
 	function onPopState(event) {
 		//console.log("location=", document.location, "; state=", JSON.stringify(event.state), "; event=", event);
-		console.log("onPopState: hash=", document.location.hash);
+		//console.log("onPopState: hash=", document.location.hash);
 		pivotClearUI();
 		updateSelectedQueryState();
 		doRun('objects', 'content', 'messages', doRunCallback);

@@ -70,6 +70,24 @@ function getParameterNamesStartWith(startWithRegex, queryString) {
 	// test: getParameterNamesStartWith('',document.location.href)
 }
 
+function getParameterArrayStartWith(startWithRegex, queryString) {
+	startWithRegex = startWithRegex.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	var regex = new RegExp("[\\?&](" + startWithRegex + ".*?)=([^&#]*)", "g");
+	//var results = regex.exec(queryString);
+	var ret = [];
+	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
+	while ((results = regex.exec(queryString)) !== null) {
+		//ret.push(results[1]);
+		var key = decodeURIComponent(results[1].replace(/\+/g," "));
+		var value = decodeURIComponent(results[2].replace(/\+/g," "));
+		var obj = {} ; obj[key] = value;
+		ret.push( obj );
+	}
+	//return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
+	return ret;
+	// test: getParameterNamesStartWith('',document.location.href)
+}
+
 // intersect 2 arrays: keey order of 1st array
 function arrayIntersect(a, b) {
 	var ret = [];

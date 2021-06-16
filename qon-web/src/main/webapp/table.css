@@ -100,8 +100,11 @@ th[dimoncol], td[dimoncol] {
 }
 
 th[dimoncol] {
+	/* if <th title=XXX> from cols is too big, th[dimoncol] may hide <td dimoncol="true"> */
+	/*
 	z-index: 4;
 	top: 0px;
+	*/
 }
 
 td[dimoncol] {
