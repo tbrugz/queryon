@@ -871,18 +871,51 @@ public class SQL {
 		sql += "\n"+PARAM_ORDER_CLAUSE;
 	}
 	
-	static String getFunction(String f) {
+	static String getFunctionStart(String f) {
+		if(f.equals("avg")) {
+			return "avg( ";
+		}
+		if(f.equals("count")) {
+			return "count( ";
+		}
+		if(f.equals("distinct-count")) {
+			return "count( distinct ";
+		}
+		if(f.equals("max")) {
+			return "max( ";
+		}
+		if(f.equals("min")) {
+			return "min( ";
+		}
+		if(f.equals("sum")) {
+			return "sum( ";
+		}
+
+		//XXX: var? stdev?
+		//XXX: see available functions by DBMS?
+		// median, mode, rank, percentile_cont
+		throw new IllegalArgumentException("unknown aggregate function: "+f);
+	}
+
+	static String getFunctionEnd(String f) {
+		return " )";
+	}
+
+	static String getFunctionName(String f) {
 		if(f.equals("avg")) {
 			return "avg";
 		}
 		if(f.equals("count")) {
 			return "count";
 		}
-		if(f.equals("min")) {
-			return "min";
+		if(f.equals("distinct-count")) {
+			return "distinct_count";
 		}
 		if(f.equals("max")) {
 			return "max";
+		}
+		if(f.equals("min")) {
+			return "min";
 		}
 		if(f.equals("sum")) {
 			return "sum";
@@ -907,9 +940,11 @@ public class SQL {
 			}
 			String[] functions = entry.getValue();
 			for(String f: functions) {
-				String func = getFunction(f);
+				String funcName = getFunctionName(f);
+				String funcStart = getFunctionStart(f);
+				String funcEnd = getFunctionEnd(f);
 				sb.append((count>0?", ":"")+
-						func+"( "+sqlIdDecorator.get(col)+" )"+" as "+sqlIdDecorator.get(func+"_"+col));
+						funcStart+" "+sqlIdDecorator.get(col)+" "+funcEnd+" as "+sqlIdDecorator.get(funcName+"_"+col));
 				count++;
 			}
 		}
