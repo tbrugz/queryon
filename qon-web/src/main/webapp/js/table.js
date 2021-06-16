@@ -292,9 +292,15 @@ function applyTableStyles() {
 }
 
 function doTableOnLoad() {
+	var queryString = getQueryString();
+	var skipMerge = getParameterByName("skipMerge", queryString);
+
 	createBlobLinks();
-	mergeDimensions();
+	if(! skipMerge) {
+		mergeDimensions();
+	}
 	applyTableStyles();
+
 	console.log("table.js: doTableOnLoad() finished");
 }
 
