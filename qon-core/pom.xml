@@ -70,7 +70,7 @@
       </plugin>
     </plugins -->
     <plugins>
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
@@ -78,9 +78,9 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
-      </plugin>
+      </plugin>-->
       <!-- https://maven.apache.org/plugins/maven-source-plugin/usage.html -->
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.4</version>
@@ -93,7 +93,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
       <!-- plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -160,7 +160,7 @@
         </configuration>
       </plugin>
 
-      <plugin>
+      <!-- <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
         <version>1.6.7</version>
@@ -170,7 +170,7 @@
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
-      </plugin>
+      </plugin> -->
 
       <!--  web plugins -->
 

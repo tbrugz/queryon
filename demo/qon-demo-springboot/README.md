@@ -10,9 +10,9 @@ running
 
 `mvn spring-boot:run`
 
-OR (jar)
+OR (using jar)
 
-```
+```shell
 mvn clean package
 java -jar target/qon-demo-springboot-0.7-SNAPSHOT.jar
 ```
