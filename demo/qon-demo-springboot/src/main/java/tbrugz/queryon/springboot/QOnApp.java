@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Bean;
 
 import tbrugz.queryon.AbstractHttpServlet;
 
+/*
+ * https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.embedded-container.servlets-filters-listeners
+ */
 @SpringBootApplication
 public class QOnApp extends SpringBootServletInitializer {
 

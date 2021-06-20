@@ -1,15 +1,43 @@
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-files
+# https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html
 
-# TODO: datasources
+spring:
+    application:
+        name: QueryOn SpringBoot Demo
+    # https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-files
+    # config:
+    #    import: "optional:file:./dev.properties"
+    # https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto.data-access
+    # https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.sql.datasource.configuration
+    autoconfigure:
+        exclude:
+        - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+    # https://stackoverflow.com/questions/32074631/spring-boot-application-without-a-datasource
+    datasource:
+        url: jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon
+        # 'jdbc-url' needed when using DataSourceBuilder with @ConfigurationProperties(prefix = "spring.datasource")
+        # also needed if HikariJNDIFactory used directly?
+        # jdbc-url: jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon
+        username: admin
+        # password: 
+        # driver-class-name: ${SPRING_DATASOURCE_DRIVER-CLASS-NAME}
+        # used by tbrugz.queryon.springboot.DataSourceConfig
+        datasource-name: jdbc/datasource-demo
 
 logging:
     level:
+        # https://stackoverflow.com/questions/60757590/logging-hikaricp-spring-boot
+        com.zaxxer.hikari.HikariConfig: DEBUG 
+        #com.zaxxer.hikari: TRACE
         org.apache.shiro: DEBUG
         #org.apache.shiro.config.Ini: TRACE
         #org.apache.shiro.realm.text.IniRealm: TRACE
         org.springframework.boot.context.config.ConfigFileApplicationListener: DEBUG
         #org.springframework.web: DEBUG
+        #tbrugz.sqldump.util.ConnectionUtil: DEBUG
+        # verbose spring-boot web logging:
+        #web: DEBUG
 
 # https://stackoverflow.com/a/50743050/616413 - Embedded tomcat giving failed to scan jars from classloader hierarchy
 #server:

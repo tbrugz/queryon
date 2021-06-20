@@ -4,11 +4,13 @@ qon-demo-springboot
 
 Demo using QueryOn with [Spring Boot](https://spring.io/projects/spring-boot)
 
+Uses the same database of [qon-demo-minimal](../qon-demo-minimal)
+
 
 running
 -----
 
-`mvn spring-boot:run`
+`mvn clean spring-boot:run`
 
 OR (using jar)
 

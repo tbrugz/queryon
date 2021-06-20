@@ -36,6 +36,13 @@ mvn jetty:run
 navigate to `http://localhost:8888`
 
 
+teardown
+--------
+
+* remove h2 database:
+`rm ~/.queryon/demo-minimal.*`
+
+
 usage examples
 --------------
 
