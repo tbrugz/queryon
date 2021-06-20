@@ -3068,6 +3068,9 @@ public class QueryOn extends AbstractHttpServlet {
 			//https://benramsey.com/blog/2008/05/http-status-204-no-content-and-205-reset-content/
 			//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			//resp.addIntHeader("X-ResultSet-Count", count);
+			if(reqspec.offset > 0) {
+				resp.addHeader(ResponseSpec.HEADER_WARNING, "No rows returned but offset ["+reqspec.offset+"] > 0");
+			}
 		}
 		if(ds.acceptsOutputStream()) {
 			ds.dumpFooter(count, hasMoreRows, resp.getOutputStream());
