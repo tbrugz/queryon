@@ -1,4 +1,7 @@
 
+// ␀ - &#9216; - \u2400
+const DIM_NULL_VALUE = '\u2400';
+
 function getNodeIndex(cell) {
 	var idx = 0;
 	while(cell.previousElementSibling) {
@@ -100,6 +103,7 @@ function getRowDimValues(table, rowN) {
 	keys = keys.slice(0, keysMaxColIndex);
 	//console.log("keysMaxColIndex=", keysMaxColIndex, "keys=", keys);
 	for(var i=0;i<keys.length;i++) {
+		//console.log("i=", i, "keys=", keys[i]);
 		keysValues[keys[i]] = [];
 	}
 
@@ -113,11 +117,16 @@ function getRowDimValues(table, rowN) {
 			if(!dimoncol) { break; }
 			
 			var dimIdx = j + rowCount - row.children.length;
+			if(dimIdx<0) {
+				//console.warn("dimIdx [=",dimIdx," ; i=",i,"] should be >= 0");
+				//console.log("row.children.length=", row.children.length, "row.children=", row.children);
+				dimIdx = 0;
+			}
 			var dim = keys[dimIdx];
 			//var dim = cell.innerText;
 			//var dim = cell.getAttribute("colname");
 			if(!dim) { dim = "xxx"; }
-			//console.log("j=", j, "dim=", dim);
+			//console.log("j=", j, "dimIdx=", dimIdx, "dim=", dim, "j=", j, "rowCount=", rowCount, "row.children.length=", row.children.length);
 			
 			var height = cell.getAttribute("rowspan");
 			if(! height) { height = 1; }
@@ -125,7 +134,13 @@ function getRowDimValues(table, rowN) {
 			//console.log("i=", i, "j=", j, "dimIdx=", dimIdx, "dim=", dim, "height=", height);
 			
 			for(var z=0;z<height;z++) {
-				keysValues[dim].push(cell.innerText);
+				var isnull = cell.getAttribute("null");
+				if(isnull=="true") {
+					keysValues[dim].push(DIM_NULL_VALUE);
+				}
+				else {
+					keysValues[dim].push(cell.innerText);
+				}
 			}
 		}
 	}

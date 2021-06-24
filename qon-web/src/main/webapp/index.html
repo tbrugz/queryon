@@ -1310,10 +1310,17 @@
 			}
 		}
 		for(var i=0;i<dimKeys.length;i++) {
-			newparams.push("fin:" + dimKeys[i] + "=" + encodeURIComponent(dimVals[dimKeys[i]]) )
+			var value = dimVals[dimKeys[i]];
+			if(value==DIM_NULL_VALUE) {
+				newparams.push("fnull:" + dimKeys[i] + "=" )
+			}
+			else {
+				newparams.push("fin:" + dimKeys[i] + "=" + encodeURIComponent(dimVals[dimKeys[i]]) )
+			}
 		}
 		
 		bigparts[1] = newparams.join("&");
+		//console.log("bigparts[1]=", bigparts[1]);
 		return bigparts.join("|");
 	}
 	

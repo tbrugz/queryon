@@ -104,7 +104,7 @@
 				//console.log("loadQuery: ", response);
 				byId('schema').value = response.schema_name;
 				byId('name').value = response.name;
-				byId('remarks').value = response.remarks;
+				byId('remarks').value = response.remarks || '';
 				byId('optimisticlock').value = response.version_seq;
 				byId('roles').value = response.roles_filter;
 				editor.setValue(response.query, 1);
