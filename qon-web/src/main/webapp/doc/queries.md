@@ -29,6 +29,9 @@ Parameters will be created by the order they are defined in the query.
 Example: In the query `select * from person where age > ? and name like ?` the age should be informed
 as the first parameter and the name pattern as the second parameter. 
 
+You may also define named parameters by using the `:<parameter-name>` syntax. <!--This is similar to the `named-parameters=<param1-name>` query construct...--> Using both positional and named parameters in the same
+query is not allowed.
+
 
 Special columns
 ----------------

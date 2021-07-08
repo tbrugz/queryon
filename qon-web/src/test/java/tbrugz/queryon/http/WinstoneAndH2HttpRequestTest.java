@@ -107,7 +107,7 @@ public class WinstoneAndH2HttpRequestTest {
 	static final String utf8 = "UTF-8";
 	
 	static final int relationsInModel = 4;
-	static final int queriesInModel = 5;
+	static final int queriesInModel = 6;
 	static final int executablesInModel = 2;
 	
 	static final String LOGIN_JDOE = "jdoe";
@@ -904,7 +904,20 @@ public class WinstoneAndH2HttpRequestTest {
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&id=2", 1);
 	}
-	
+
+	@Test
+	public void testGetXmlSelectAnyWithBindNamedPars() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select * from emp where id in (:id, :id)";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&id=2", 1);
+	}
+
+	@Test
+	public void testGetCsvWithNamedParameters() throws Exception {
+		String url = "/QUERY.QUERY_WITH_BIND_NAMED_PARAMS.csv?par1=1&par2=2";
+		getContentFromUrl(baseUrl+url);
+	}
+
 	//----- limit-related tests - end
 
 	@Test
@@ -1341,6 +1354,9 @@ public class WinstoneAndH2HttpRequestTest {
 				continue;
 			}
 			if(path.indexOf("NAMED_PARAMS_1")>=0) {
+				queryString = "?par1=1&par2=2";
+			}
+			if(path.indexOf("QUERY_WITH_BIND_NAMED_PARAMS")>=0) {
 				queryString = "?par1=1&par2=2";
 			}
 			if(path.indexOf("QUERY_WITH_PARAMS_NULL_BIND_ARRAY")>=0) {

@@ -203,7 +203,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	protected int addQueryToModel(Query q) {
 		Savepoint sp = null;
 		try {
-			String sql = SQL.getFinalSqlNoUsername(q.getQuery());
+			String sql = SQL.getSqlWithNamedParameters(q.getQuery());
 			sp = ConnectionUtil.setSavepointIfNotAutocommit(conn);
 			UpdatePluginUtils.removeWarning(servletContext, getWarnKey(model.getModelId()), q);
 			
@@ -219,7 +219,9 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
 			DBUtil.doRollback(conn, sp);
 		}
-		DBUtil.releaseSavepoint(conn, sp);
+		finally {
+			DBUtil.releaseSavepoint(conn, sp);
+		}
 	
 		if(model.getViews().contains(q)) {
 			model.getViews().remove(q);

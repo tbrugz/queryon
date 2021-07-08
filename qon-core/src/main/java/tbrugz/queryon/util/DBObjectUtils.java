@@ -23,6 +23,7 @@ import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.dbmodel.ExecutableParameter.INOUT;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
 
 public class DBObjectUtils {
 
@@ -35,18 +36,25 @@ public class DBObjectUtils {
 		validateQuery(rel, finalSql, conn, update);
 	}*/
 
-	public static void validateQuery(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
+	public static void validateQuery(Query rel, String sqlWithNamedParams, Connection conn, boolean update) throws SQLException {
+		String finalSql = TokenizerUtil.replaceNamedParameters(sqlWithNamedParams);
+
+		// validate query without named parameters
 		PreparedStatement stmt = conn.prepareStatement(finalSql);
-		validateQueryColumns(rel, finalSql, conn, stmt, update);
-		validateQueryParameters(rel, finalSql, conn, stmt, update);
+		validateQueryColumns(rel, conn, stmt, update);
+
+		// extract (& update) named parameters
+		validateQueryParameters(rel, sqlWithNamedParams, conn, stmt, update);
 	}
 
-	public static void validateQueryParameters(Query rel, String finalSql, Connection conn, boolean update) throws SQLException {
+	public static void validateQueryParameters(Query rel, String sqlWithNamedParams, Connection conn, boolean update) throws SQLException {
+		String finalSql = TokenizerUtil.replaceNamedParameters(sqlWithNamedParams);
+
 		PreparedStatement stmt = conn.prepareStatement(finalSql);
-		validateQueryParameters(rel, finalSql, conn, stmt, update);
+		validateQueryParameters(rel, sqlWithNamedParams, conn, stmt, update);
 	}
 	
-	static void validateQueryColumns(Query rel, String finalSql, Connection conn, PreparedStatement stmt, boolean update) throws SQLException {
+	static void validateQueryColumns(Query rel, Connection conn, PreparedStatement stmt, boolean update) throws SQLException {
 		log.debug("grabbing colums name & type from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
 		
 		try {
@@ -58,7 +66,7 @@ public class DBObjectUtils {
 				}
 			}
 			else {
-				log.warn("getMetaData() returned null: empty/invalid query? not a 'select'? [query="+rel.getQualifiedName()+"] sql:\n"+finalSql);
+				log.warn("getMetaData() returned null: empty/invalid query? not a 'select'? [query="+rel.getQualifiedName()+"] query:\n"+rel.getQuery());
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
@@ -71,7 +79,7 @@ public class DBObjectUtils {
 		}
 	}
 		
-	static void validateQueryParameters(Query rel, String finalSql, Connection conn, PreparedStatement stmt, boolean update) throws SQLException {
+	static void validateQueryParameters(Query rel, String sqlWithNamedParams, Connection conn, PreparedStatement stmt, boolean update) throws SQLException {
 		log.debug("grabbing parameters from prepared statement's metadata [id="+rel.getId()+"; name="+rel.getQualifiedName()+"]");
 		
 		try {
@@ -138,11 +146,16 @@ public class DBObjectUtils {
 		}
 		
 		if(update) {
-			List<String> namedParameterNames = SQL.getNamedParameterNames(finalSql);
-			SQL.validateNamedParametersWithParamCount(namedParameterNames, rel.getParameterCount());
-			rel.setNamedParameterNames(namedParameterNames);
-			//log.info("["+rel.getQualifiedName()+"] namedParameterNames = "+namedParameterNames);
+			updateParameterNames(rel, sqlWithNamedParams);
 		}
+	}
+
+	static void updateParameterNames(Query query, String sqlWithNamedParams) {
+		//log.debug("updateParameterNames: sqlWithNamedParams = "+sqlWithNamedParams);
+		List<String> namedParameterNames = SQL.getAllNamedParameterNames(sqlWithNamedParams);
+		SQL.validateNamedParametersWithParamCount(namedParameterNames, query.getParameterCount());
+		query.setNamedParameterNames(namedParameterNames);
+		log.debug("updateParameterNames: namedParameterNames = "+namedParameterNames+" [query="+query.getQualifiedName()+"]");
 	}
 
 	public static void validateTable(Relation rel, Connection conn, boolean update) throws SQLException {
@@ -295,6 +308,7 @@ public class DBObjectUtils {
 		}
 		catch(SQLException e) {
 			log.warn("SQLException: "+e);
+			log.debug("SQLException: "+e.getMessage(), e);
 		}
 	}
 	

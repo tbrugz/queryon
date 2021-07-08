@@ -43,6 +43,8 @@ import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil.QueryParameter;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -60,6 +62,7 @@ public class SQL {
 
 	public static final String VARIABLE_USERNAME = "$username";
 	//public static final String VARIABLE_USERROLES = "$userroles";
+	public static final String EMPTY_USERNAME = "''";
 	
 	//XXX add limit/offset-clause?
 
@@ -117,7 +120,16 @@ public class SQL {
 		//log.info("limit="+limit+" ; limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
 		
 		this.username = getFinalVariableValue(username);
-		this.namedParameters = getNamedParameterNames(sql);
+		List<String> namedParametersTmp = getNamedParameterNames(sql);
+		if(namedParametersTmp==null) {
+			List<QueryParameter> qpl = TokenizerUtil.getNamedParameters(sql);
+			if(qpl.size()>0) {
+				namedParametersTmp = TokenizerUtil.getParameterNames(qpl);
+				this.sql = TokenizerUtil.replaceNamedParameters(sql, qpl);
+			}
+		}
+		this.namedParameters = namedParametersTmp;
+		
 		//log.info("validate == "+validate+" ; bindParameterCountTmp == "+bindParameterCountTmp+" ; this.namedParameters == "+this.namedParameters+" ; bindNullOnMissingParameters() == "+Arrays.toString(bindNullOnMissingParameters()));
 		if(validate) {
 			this.originalBindParameterCount = bindParameterCountTmp;
@@ -167,9 +179,24 @@ public class SQL {
 	
 	private static String getFinalSql(String sql, String username) {
 		if(username==null) {
-			username = "''";
+			username = EMPTY_USERNAME;
 		}
+
+		sql = TokenizerUtil.replaceNamedParameters(sql);
+
 		//log.info("getFinalSql: "+username);
+		return replaceClauses(sql, username);
+	}
+
+	public String getSqlWithNamedParameters() {
+		return replaceClauses(sql, EMPTY_USERNAME);
+	}
+
+	public static String getSqlWithNamedParameters(String sql) {
+		return replaceClauses(sql, EMPTY_USERNAME);
+	}
+	
+	private static String replaceClauses(String sql, String username) {
 		return sql.replace(PARAM_PROJECTION_CLAUSE, "*")
 				.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
 				.replace(VARIABLE_USERNAME, username);
@@ -996,13 +1023,25 @@ public class SQL {
 		return processPatternBooleanArray(sql, SQL.bindNullOnMissingParamsPattern, false);
 	}
 	
-	public static List<String> getNamedParameterNames(String sql) {
+	static List<String> getNamedParameterNames(String sql) {
 		List<String> namedParameters = null;
 		String namedParamsStr = processPatternString(sql, namedParametersPattern, null);
 		if(namedParamsStr!=null) {
 			namedParameters = Utils.getStringList(namedParamsStr, ",");
 		}
 		return namedParameters;
+	}
+	
+	public static List<String> getAllNamedParameterNames(String sql) {
+		List<String> ret = getNamedParameterNames(sql);
+		if(ret!=null) {
+			return ret;
+		}
+		List<QueryParameter> qpl = TokenizerUtil.getNamedParameters(sql);
+		if(qpl.size()>0) {
+			return TokenizerUtil.getParameterNames(qpl);
+		}
+		return null;
 	}
 	
 	public static void validateNamedParametersWithParamCount(List<String> namedParameters, int bindParameterCount) {

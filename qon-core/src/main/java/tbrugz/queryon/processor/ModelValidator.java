@@ -53,7 +53,8 @@ public class ModelValidator extends AbstractSQLProc {
 				try {
 					Query q = (Query) rel;
 					SQL sql = SQL.createSQL(q, null, null);
-					DBObjectUtils.validateQuery(q, sql.getFinalSql(), conn, update);
+					String sqlWithNamedParams = sql.getSqlWithNamedParameters();
+					DBObjectUtils.validateQuery(q, sqlWithNamedParams, conn, update);
 				}
 				catch(RuntimeException e) {
 					if(removeInvalid) { it2.remove(); }
