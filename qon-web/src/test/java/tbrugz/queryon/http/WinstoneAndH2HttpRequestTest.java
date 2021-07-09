@@ -107,7 +107,7 @@ public class WinstoneAndH2HttpRequestTest {
 	static final String utf8 = "UTF-8";
 	
 	static final int relationsInModel = 4;
-	static final int queriesInModel = 6;
+	static final int queriesInModel = 7;
 	static final int executablesInModel = 2;
 	
 	static final String LOGIN_JDOE = "jdoe";
@@ -1362,6 +1362,9 @@ public class WinstoneAndH2HttpRequestTest {
 			if(path.indexOf("NAMED_PARAMS_1")>=0) {
 				queryString = "?par1=1&par2=2";
 			}
+			if(path.indexOf("NAMED_PARAMS_NO_PARAM_COUNT")>=0) {
+				queryString = "?par1=1&par2=2";
+			}
 			if(path.indexOf("QUERY_WITH_BIND_NAMED_PARAMS")>=0) {
 				queryString = "?par1=1&par2=2";
 			}
@@ -1510,6 +1513,20 @@ public class WinstoneAndH2HttpRequestTest {
 		getContentFromUrl(baseUrl+url, 400);
 	}
 	
+	@Test
+	public void testGetQueryWithNamedParametersNoCount() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_NO_PARAM_COUNT.csv?par1=1&par2=2";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		//System.out.println(content);
+		Assert.assertEquals("C1" + LF + 
+				"1" + LF +
+				"2" + LF +
+				"1" + LF,
+				content);
+		
+	}
+
 	@Test
 	public void testGetQueryWithNamedParametersNullBind1() throws Exception {
 		String url = "/QUERY.QUERY_WITH_PARAMS_NULL_BIND.csv?par1=1";
@@ -2069,18 +2086,29 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@Test
+	public void testGetTableCount() throws IOException, ParserConfigurationException, SAXException {
+		//String content = httpGetContent("/table.xml?limit=20");
+		//System.out.println(">> content[table.xml] = "+content);
+
+		baseReturnCountTest("/table.xml?limit=20", relationsInModel);
+	}
+
+	@Test
 	public void testGetViewCount() throws IOException, ParserConfigurationException, SAXException {
-		baseReturnCountTest("/view.xml", queriesInModel);
+		baseReturnCountTest("/view.xml?limit=20", queriesInModel);
 	}
 
 	@Test
 	public void testGetQueryCount() throws IOException, ParserConfigurationException, SAXException {
-		baseReturnCountTest("/query.xml", queriesInModel);
+		baseReturnCountTest("/query.xml?limit=20", queriesInModel);
 	}
 	
 	@Test
 	public void testGetRelationCount() throws IOException, ParserConfigurationException, SAXException {
-		baseReturnCountTest("/relation.xml", relationsInModel + queriesInModel);
+		//String content = httpGetContent("/relation.xml?limit=20");
+		//System.out.println(">> content[relation.xml] = "+content);
+
+		baseReturnCountTest("/relation.xml?limit=20", relationsInModel + queriesInModel);
 	}
 
 	@Test

@@ -130,6 +130,7 @@ public class SQL {
 		}
 		this.namedParameters = namedParametersTmp;
 		
+		/*
 		//log.info("validate == "+validate+" ; bindParameterCountTmp == "+bindParameterCountTmp+" ; this.namedParameters == "+this.namedParameters+" ; bindNullOnMissingParameters() == "+Arrays.toString(bindNullOnMissingParameters()));
 		if(validate) {
 			this.originalBindParameterCount = bindParameterCountTmp;
@@ -145,9 +146,17 @@ public class SQL {
 				this.originalBindParameterCount = bindParameterCountTmp;
 			}
 		}
+		*/
+		if(originalBindParameterCount == null && this.namedParameters!=null && this.namedParameters.size()>0) {
+			this.originalBindParameterCount = this.namedParameters.size();
+		}
+		else {
+			this.originalBindParameterCount = bindParameterCountTmp;
+		}
 		this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNullOnMissingParameters(), this.originalBindParameterCount);
 		
 		if(validate) {
+			validateNamedParametersWithParamCount(namedParameters, this.originalBindParameterCount);
 			if(bindNullOnMissingParameters != null &&
 					bindNullOnMissingParameters.length != this.originalBindParameterCount) {
 				String message = "'"+PTRN_BIND_NULL_ON_MISSING_PARAMS+"' count [#"+bindNullOnMissingParameters.length+"] should be equal to 1 or bind parameters count [#"+this.originalBindParameterCount+"]";

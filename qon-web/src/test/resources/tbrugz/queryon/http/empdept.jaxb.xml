@@ -192,6 +192,23 @@ union all select cast(? as varchar)
     </view>
 
     <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>NAMED_PARAMS_NO_PARAM_COUNT</name>
+        <schemaName>QUERY</schemaName>
+        <columns>
+            <name>C1</name>
+            <type>VARCHAR</type>
+        </columns>
+        <query>
+/*
+named-parameters=par1,par2,par1
+*/
+select cast(? as varchar) as c1
+union all select cast(? as varchar)
+union all select cast(? as varchar)
+       </query>
+    </view>
+
+    <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <name>QUERY_WITH_PARAMS_NULL_BIND</name>
         <schemaName>QUERY</schemaName>
         <columns>
