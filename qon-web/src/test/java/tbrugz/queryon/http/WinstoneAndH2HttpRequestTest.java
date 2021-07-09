@@ -949,6 +949,12 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	@Test
+	public void testExplainPlanWithNamedParam1() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select * from emp where id = :parId";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		basePostReturnCountTest("/ExplainAny.xml?name=test&sql="+sqlpar+"&parId=1", 1);
+	}
+	@Test
 	public void testGetHtmlTitleEmp() throws IOException, ParserConfigurationException, SAXException, TransformerException {
 		Document doc = getXmlDocument("/EMP.html?fnin:SALARY=1200&fnin:SALARY=1000&title=true");
 		//String str = getString(doc);
@@ -2117,7 +2123,22 @@ public class WinstoneAndH2HttpRequestTest {
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		String ret = httpPostContent("/ValidateAny.xml?name=test&sql="+sqlpar, "");
 	}
-	
+
+	@Test
+	public void testValidateAnyNamedPars1() throws IOException, ParserConfigurationException, SAXException {
+		String sql = "select id, name from emp where id in (:id, :id2)";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		
+		HttpResponse response = httpPostContentGetResponse("/ValidateAny.xml?name=test&sql="+sqlpar, "");
+		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+
+		Header headParamCount = response.getFirstHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT);
+		Assert.assertEquals("2", headParamCount.getValue());
+
+		Header headParamNames = response.getFirstHeader(ResponseSpec.HEADER_VALIDATE_NAMED_PARAMETER_NAMES);
+		Assert.assertEquals("id,id2", headParamNames.getValue());
+	}
+
 	static String getPrettyStringFromJson(String content) {
 		Gson gsonpretty = new GsonBuilder().setPrettyPrinting().create();
 		Object jsonObj = gsonpretty.fromJson(content, Object.class);

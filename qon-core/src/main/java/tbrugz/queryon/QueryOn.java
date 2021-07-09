@@ -1494,16 +1494,19 @@ public class QueryOn extends AbstractHttpServlet {
 		boolean fullKeyDefined = fullKeyDefined(reqspec, pk);
 		
 		preprocessParameters(reqspec, relation, pk);
+		//XXX if pivotquery, use other limit - standard limit should be used after - with LimitOffsetStrategy.RESULTSET_CONTROL
+		// add reqspec.isPivotQuery()
 		sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp, isStrictMode());
 		finalSql = sql.getFinalSql();
 		
 		if(validateQuery) {
 			if(relation instanceof Query) {
+				String sqlWithNamedParams = sql.getSqlWithNamedParameters();
 				try {
-					DBObjectUtils.validateQuery((Query)relation, finalSql, conn, true);
+					DBObjectUtils.validateQuery((Query)relation, sqlWithNamedParams, conn, true);
 				}
 				catch(SQLException e) {
-					log.warn("error validating query '"+relation+"': "+finalSql);
+					log.warn("error validating query '"+relation+"': "+sqlWithNamedParams);
 				}
 			}
 			else {
@@ -1594,11 +1597,12 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			
 			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser), false);
+			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
 			try {
-				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
+				DBObjectUtils.validateQueryParameters(relation, sqlWithNamedParams, conn, true);
 			}
 			catch(SQLException e) {
-				log.warn("error validating query '"+relation+"': "+finalSql);
+				log.warn("error validating query '"+relation+"': "+sqlWithNamedParams);
 			}
 			
 			sql.addOriginalParameters(reqspec);
@@ -1657,9 +1661,11 @@ public class QueryOn extends AbstractHttpServlet {
 		SQL sql = null;
 		try {
 			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser), false);
-			DBObjectUtils.validateQuery(relation, sql.getFinalSql(), conn, true);
+			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
+			DBObjectUtils.validateQuery(relation, sqlWithNamedParams, conn, true);
+			String finalSql = sql.getFinalSql();
 			//DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
-			PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
+			PreparedStatement stmt = conn.prepareStatement(finalSql);
 
 			ParameterMetaData pmd = stmt.getParameterMetaData();
 			int params = pmd.getParameterCount();
@@ -1684,7 +1690,7 @@ public class QueryOn extends AbstractHttpServlet {
 				ResultSetMetaData rsmd = stmt.getMetaData(); // needed to *really* validate query (at least on oracle)
 				if(rsmd==null) {
 					//String message = "can't get resultset metadata of: "+sql.getFinalSql().trim();
-					String message = "getMetaData() returned null: empty/invalid query? not a 'select'? sql:\n"+sql.getFinalSql().trim();
+					String message = "getMetaData() returned null: empty/invalid query? not a 'select'? sql:\n"+finalSql.trim();
 					log.warn(message);
 					//throw new SQLException(message);
 					//throw new BadRequestException(message);
@@ -1727,11 +1733,12 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			
 			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
 			try {
-				DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
+				DBObjectUtils.validateQueryParameters(relation, sqlWithNamedParams, conn, true);
 			}
 			catch(SQLException e) {
-				log.warn("error validating query '"+relation+"': "+sql.getFinalSql());
+				log.warn("error validating query '"+relation+"': "+sqlWithNamedParams);
 			}
 			
 			// sets named parameters
