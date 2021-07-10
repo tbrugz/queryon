@@ -141,17 +141,18 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			appendStyleNumericAlignRight(sb);
 		}
 		if(dumpCaptionElement){
-			sb.append("\n\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
+			sb.append(nl()+"\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
 		}
 		if(dumpColElement) {
-			sb.append("\n\t<colgroup>");
+			sb.append(nl()+"\t<colgroup>");
 			for(int i=0;i<finalColNames.size();i++) {
 				//if(finalColNames.contains(lsColNames.get(i))) {
-					sb.append("\n\t\t<col colname=\""+finalColNames.get(i)+"\" type=\""+finalColTypes.get(i).getSimpleName()+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
+					sb.append(nl()+"\t\t<col colname=\""+finalColNames.get(i)+"\" type=\""+finalColTypes.get(i).getSimpleName()+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
 				//}
 			}
-			sb.append("\n\t</colgroup>");
+			sb.append(nl()+"\t</colgroup>");
 		}
+		sb.append("\n");
 		
 		/*
 		//System.out.println("onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount+" ; finalColNames="+finalColNames);

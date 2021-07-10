@@ -2087,7 +2087,8 @@ public class WinstoneAndH2HttpRequestTest {
 	
 	@Test
 	public void testGetTableCount() throws IOException, ParserConfigurationException, SAXException {
-		//String content = httpGetContent("/table.xml?limit=20");
+		//String content = null;
+		//content = httpGetContent("/table.xml?limit=20");
 		//System.out.println(">> content[table.xml] = "+content);
 
 		baseReturnCountTest("/table.xml?limit=20", relationsInModel);
