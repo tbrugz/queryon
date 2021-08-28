@@ -31,7 +31,7 @@ maven profiles
 
 * `release` - release profile (sign artifacts)
 
-* `haddness` - extra tests - currently this profile must be called after a initial build (eg: `mvn clean package && mvn -P hardness test && mvn clean` )
+* `hardness` - extra tests - currently this profile must be called after a initial build (eg: `mvn clean package && mvn -P hardness test && mvn clean` )
 
 * `thorntail` - package thorntail demos
 
@@ -48,7 +48,7 @@ other useful maven goals
 
 * `mvn javadoc:test-javadoc`
 
-* `mvn org.owasp:dependency-check-maven:6.0.3:check` / `mvn org.owasp:dependency-check-maven:6.0.3:aggregate`
+* `mvn org.owasp:dependency-check-maven:6.2.2:check` / `mvn org.owasp:dependency-check-maven:6.2.2:aggregate`
 
 * `mvn se.kth.castor:depclean-maven-plugin:1.1.0:depclean -Dcreate.pom.debloated=true -Dcreate.result.json=true -Dignore.scopes=test`
   (see <https://castor-software.github.io/depclean/>)
