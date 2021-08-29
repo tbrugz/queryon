@@ -3,11 +3,14 @@ queryon
 =======
 
 A REST-like API that follows the naked objects pattern. A bit like a 'naked database objects' API.
-Depends on [sqldump](https://github.com/tbrugz/sqldump)
+Depends on [sqldump](https://github.com/tbrugz/sqldump).
 
 Database objects are defined by a properties file. See
 [queryon.template.properties](qon-core/src/main/java/queryon.template.properties)
 for more info.
+
+[Apache Shiro](https://shiro.apache.org/) is used for handling authentication and authorization. 
+Permissions rules for objects and actions are available in [doc/permissions.md](doc/permissions.md).
 
 More info about QueryOn:
 
