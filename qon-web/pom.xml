@@ -16,7 +16,7 @@
   
   <artifactId>qon-web</artifactId>
   <packaging>war</packaging>
-  <version>${project.parent.version}</version>
+  <version>0.7-SNAPSHOT</version>
 
   <name>qon-web</name>
 

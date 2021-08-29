@@ -11,7 +11,7 @@
   
   <artifactId>qon-soap</artifactId>
   <packaging>jar</packaging>
-  <version>${project.parent.version}</version>
+  <version>0.7-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
 

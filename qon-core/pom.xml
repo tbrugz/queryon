@@ -16,7 +16,7 @@
   
   <artifactId>qon-core</artifactId>
   <packaging>jar</packaging>
-  <version>${project.parent.version}</version>
+  <version>0.7-SNAPSHOT</version>
 
   <name>qon-core</name>
 

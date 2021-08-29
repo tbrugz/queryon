@@ -11,7 +11,7 @@
   
   <artifactId>qon-auth-keycloak</artifactId>
   <packaging>jar</packaging>
-  <version>${project.parent.version}</version>
+  <version>0.7-SNAPSHOT</version>
 
   <name>qon-auth-keycloak</name>
 

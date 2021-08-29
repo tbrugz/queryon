@@ -8,7 +8,7 @@
 	</parent>
 	
 	<artifactId>qon-demo-minimal</artifactId>
-	<version>${project.parent.version}</version>
+	<version>0.7-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>qon-demo-minimal</name>
 
