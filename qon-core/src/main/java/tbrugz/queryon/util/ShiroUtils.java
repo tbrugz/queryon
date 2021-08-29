@@ -304,7 +304,7 @@ public class ShiroUtils {
 	
 	/*
 	// shiro with no realms is not possible (shiro initialization error occurs)
-	public static boolean isShiroRealmsAvaiable() {
+	public static boolean isShiroRealmsAvailable() {
 		try {
 			org.apache.shiro.mgt.SecurityManager sm = SecurityUtils.getSecurityManager();
 			if(sm instanceof RealmSecurityManager) {
@@ -316,7 +316,7 @@ public class ShiroUtils {
 			}
 		}
 		catch (UnavailableSecurityManagerException e) {
-			log.info("isShiroRealmsAvaiable: UnavailableSecurityManagerException: "+e);
+			log.info("isShiroRealmsAvailable: UnavailableSecurityManagerException: "+e);
 			return false;
 		}
 		return false;

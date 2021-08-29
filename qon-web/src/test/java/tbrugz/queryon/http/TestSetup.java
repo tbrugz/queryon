@@ -27,7 +27,7 @@ public class TestSetup {
 	public static void setupWinstone() throws IOException {
 		//if(winstone!=null) { return; }
 		
-		port = getAvaiablePort(startPort, maxPort);
+		port = getAvailablePort(startPort, maxPort);
 		setupTestUrls();
 		Map<String, String> args = new HashMap<String, String>();
 		args.put("webroot", WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http"); // or any other command line args, eg port
@@ -70,14 +70,14 @@ public class TestSetup {
 		//winstone.shutdown();
 	}
 	
-	public static int getAvaiablePort(int testPortInit, int testPortMax) {
+	public static int getAvailablePort(int testPortInit, int testPortMax) {
 		int testPort = testPortInit;
-		while(!isAvaiable(testPort) && testPort<testPortMax) { testPort++; }
+		while(!isAvailable(testPort) && testPort<testPortMax) { testPort++; }
 		return testPort;
 	}
 	
 	// http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
-	public static boolean isAvaiable(int port) {
+	public static boolean isAvailable(int port) {
 		ServerSocket ss = null;
 		try {
 			ss = new ServerSocket(port);

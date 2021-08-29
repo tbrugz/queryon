@@ -53,7 +53,7 @@ public class JettySetup {
 		if(server!=null && server.isRunning()) { return; }
 		server = new Server();
 		
-		port = getAvaiablePort(startPort, maxPort);
+		port = getAvailablePort(startPort, maxPort);
 		log.info("setup(): port="+port);
 		setupTestUrls();
 		
@@ -157,17 +157,17 @@ public class JettySetup {
 		server = null;
 	}
 	
-	public static int getAvaiablePort(int testPortInit, int testPortMax) {
+	public static int getAvailablePort(int testPortInit, int testPortMax) {
 		int testPort = testPortInit;
-		while(!isAvaiable(testPort) && testPort<=testPortMax) { testPort++; }
+		while(!isAvailable(testPort) && testPort<=testPortMax) { testPort++; }
 		if(testPort>testPortMax) {
-			throw new IllegalArgumentException("no avaiable port: testPortInit="+testPortInit+" ; testPortMax="+testPortMax);
+			throw new IllegalArgumentException("no available port: testPortInit="+testPortInit+" ; testPortMax="+testPortMax);
 		}
 		return testPort;
 	}
 	
 	// http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
-	public static boolean isAvaiable(int port) {
+	public static boolean isAvailable(int port) {
 		ServerSocket ss = null;
 		try {
 			ss = new ServerSocket(port);

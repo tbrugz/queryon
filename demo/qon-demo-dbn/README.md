@@ -118,7 +118,7 @@ data
 ----
 
 This demo uses the sample database Classic Models, a retailer of scale models of classic cars.
-More info avaiable at:
+More info available at:
 <http://www.eclipse.org/birt/documentation/sample-database.php>.
 
 

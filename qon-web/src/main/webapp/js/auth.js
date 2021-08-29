@@ -62,7 +62,7 @@ function refreshAuthInfo() {
 		}
 	}
 	else {
-		console.log("element 'authaction' not avaiable");
+		console.log("element 'authaction' not available");
 	}
 
 	/*
