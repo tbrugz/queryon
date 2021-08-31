@@ -256,23 +256,27 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	<!--
 	<filter>
 		<filter-name>AccessLogFilter</filter-name>
 		<filter-class>tbrugz.queryon.filter.AccessLogFilter</filter-class>
-		<!--<init-param>
-			<param-name>modelId</param-name>
-			<param-value>model2</param-value>
-		</init-param>-->
-		<!--<init-param>
-			<param-name>tableName</param-name>
-			<param-value>QUERYON.QON_ACCESS_LOG</param-value>
-		</init-param>-->
 	</filter>
+	-->
+	<!--<init-param>
+		<param-name>modelId</param-name>
+		<param-value>model2</param-value>
+	</init-param>-->
+	<!--<init-param>
+		<param-name>tableName</param-name>
+		<param-value>QUERYON.QON_ACCESS_LOG</param-value>
+	</init-param>-->
 
+	<!--
 	<filter-mapping>
 		<filter-name>AccessLogFilter</filter-name>
 		<servlet-name>QueryOn</servlet-name>
 	</filter-mapping>
+	-->
 	<!-- <url-pattern>/q/*</url-pattern> -->
 
 </web-app>

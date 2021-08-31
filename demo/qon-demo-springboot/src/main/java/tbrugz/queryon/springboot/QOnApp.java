@@ -39,6 +39,31 @@ public class QOnApp extends SpringBootServletInitializer {
 		};
 	}
 	*/
+	
+	/*
+	 * https://stackoverflow.com/questions/24941829/how-to-create-jndi-context-in-spring-boot-with-embedded-tomcat-container
+	 * TODO: add datasource stuff to configuration class...
+	 */
+	/*@Bean
+	public TomcatServletWebServerFactory tomcatFactory() {
+		return new TomcatServletWebServerFactory() {
+			@Override
+			protected TomcatWebServer getTomcatWebServer(org.apache.catalina.startup.Tomcat tomcat) {
+				tomcat.enableNaming();
+				return super.getTomcatWebServer(tomcat);
+			}
+			
+			@Override
+			protected void postProcessContext(Context context) {
+				//containerContext = context;
+				//for each configuration in spring.datasource*, add resource in context...
+				// or assume one: spring.datasource
+				// or list of datasources should be in a property: spring.datasources=ds1,ds2,...
+				// https://stackoverflow.com/questions/44803211/read-environment-variable-in-springboot
+				context.getNamingResources().addResource(null);
+			}
+		};
+	}*/
 
 	// https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-create-a-deployable-war-file
 	// https://howtodoinjava.com/spring-boot/spring-boot-jsp-view-example/
@@ -46,6 +71,13 @@ public class QOnApp extends SpringBootServletInitializer {
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(QOnApp.class);
 	}
+
+	/*@Bean
+	@ConfigurationProperties(prefix = "spring.datasource")
+	public DataSource getDataSource() {
+		DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+		return dataSourceBuilder.build();
+	}*/
 
 	// https://stackoverflow.com/questions/32394862/how-to-register-servletcontextlistener-in-spring-boot
 	@Bean

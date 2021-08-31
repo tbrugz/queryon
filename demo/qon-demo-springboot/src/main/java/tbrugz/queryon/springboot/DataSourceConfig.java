@@ -40,6 +40,7 @@ public class DataSourceConfig {
 				log.debug("postProcessContext...");
 
 				ContextResource resource = new ContextResource();
+				//TODO: multiple datasource
 				String prefix = "spring.datasource.";
 				String dataSourceName = env.getProperty(prefix+"datasource-name");
 				if(dataSourceName==null) {
@@ -82,4 +83,17 @@ public class DataSourceConfig {
 		return dataSourceBuilder.build();
 	}
 	*/
+
+	/*
+	@Bean
+	public DataSource getDataSource() {
+		String dataSourceName = env.getProperty(prefix+"datasource-name");
+		if(dataSourceName==null) {
+			dataSourceName = "jdbc/datasource";
+		}
+		Connection conn = ConnectionUtil.getConnectionFromDataSource(dataSourceName, ConnectionUtil.DEFAULT_INITIAL_CONTEXT);
+		return conn;
+	}
+	*/
+
 }

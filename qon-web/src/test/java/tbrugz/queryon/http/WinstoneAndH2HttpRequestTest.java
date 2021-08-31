@@ -2090,6 +2090,12 @@ public class WinstoneAndH2HttpRequestTest {
 		//String content = null;
 		//content = httpGetContent("/table.xml?limit=20");
 		//System.out.println(">> content[table.xml] = "+content);
+		//content = httpGetContent("/table.html?limit=20");
+		//System.out.println(">> content[table.html] = "+content);
+		//content = httpGetContent("/table.htmlx?limit=20");
+		//System.out.println(">> content[table.htmlx] = "+content);
+		//content = httpGetContent("/table.json?limit=20");
+		//System.out.println(">> content[table.json] = "+content);
 
 		baseReturnCountTest("/table.xml?limit=20", relationsInModel);
 	}

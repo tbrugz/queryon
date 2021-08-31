@@ -44,3 +44,6 @@ logging:
     #port: 8888
     #tomcat:
     #    additional-tld-skip-patterns: '*.jar'
+    # Graceful shutdown is supported with all four embedded web servers (Jetty, Reactor Netty, Tomcat, and Undertow)
+    # Graceful shutdown with Tomcat requires Tomcat 9.0.33 or later.
+    #shutdown: "graceful"
