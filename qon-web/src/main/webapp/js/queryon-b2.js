@@ -7,6 +7,7 @@
 
 var queryOnUrl = 'q';
 var qonEditorUrl = 'qon-editor.html';
+var utf8par = "utf8=✓";
 //var processorUrl = 'processor';
 
 /* functions */
@@ -26,7 +27,11 @@ function loadQueries(modelId, filterSchema, doUpdate, callback) {
 				}
 			}
 		}
-		writeRelations(containerId, rels);
+		else {
+			filterSchema = null;
+		}
+		//console.log('loadQueries: filterSchema=', filterSchema);
+		writeRelations(containerId, rels, (filterSchema==null));
 		if(doUpdate != false) {
 			updateSelectedQueryState(); makeHrefs();
 		}
@@ -160,13 +165,15 @@ function updateNavBar() {
 
 function makeOneHref(objectName, syntax, modelId) {
 	//aElem.style.display = 'initial';
-	var utf8par = "utf8=✓";
+	//var utf8par = "utf8=✓";
 	var href = queryOnUrl+"/"+encodeURIComponent(objectName);
 	
 	href += getParameters(true)+"."+syntax+"?"+utf8par;
 	if(modelId) {
 		href += "&model="+modelId;
 	}
+	href = urlAddNamedParameters(href);
+	href = urlAddFilterOrderOffset(href);
 	href = getPivotURL(href);
 	return href;
 }
@@ -179,7 +186,7 @@ function makeHrefs() {
 
 	var select = document.getElementById('objects');
 	//console.log("select.selectedIndex", select.selectedIndex);
-	var utf8par = "utf8=✓";
+	//var utf8par = "utf8=✓";
 	
 	var id = null;
 	var modelId = getCurrentModelId();
@@ -217,20 +224,26 @@ function makeHrefs() {
 
 		if(urlpl) {
 			urlpl.style.display = 'initial';
+			urlpl.href = makeOneHref(id, "htmlx", modelId);
+			/*
 			urlpl.href = queryOnUrl+"/"+encodeURIComponent(id);
 			urlpl.href += getParameters(true)+".htmlx"+"?"+utf8par;
 			if(modelId) {
 				urlpl.href += "&model="+modelId;
 			}
+			*/
 		}
 	
 		if(urldown) {
 			urldown.style.display = 'initial';
+			urldown.href = makeOneHref(id, "csv", modelId);
+			/*
 			urldown.href = queryOnUrl+"/"+encodeURIComponent(id);
 			urldown.href += getParameters(true)+".csv"+"?"+utf8par;
 			if(modelId) {
 				urldown.href += "&model="+modelId;
 			}
+			*/
 		}
 		
 		if(urldownByExt) {
@@ -238,19 +251,21 @@ function makeHrefs() {
 		}
 	}
 	
+	/*
 	if(urlpl) {
 		urlpl.href = urlAddNamedParameters(urlpl.href);
 		urlpl.href = urlAddFilterOrderOffset(urlpl.href);
 		urlpl.href = getPivotURL(urlpl.href);
 	}
 	if(urldown) {
-		urlpl.href = urlAddNamedParameters(urlpl.href);
+		urldown.href = urlAddNamedParameters(urldown.href);
 		urldown.href = urlAddFilterOrderOffset(urldown.href);
 		urldown.href = getPivotURL(urldown.href);
 	}
 	if(urldownByExt) {
 		//urldownByExt.href = urlAddFilterOrderOffset(urldownByExt.href);
 	}
+	*/
 	
 	var urlednew = document.getElementById("url-editor-new");
 	if(urlednew) {

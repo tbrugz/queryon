@@ -65,10 +65,14 @@
 	
 	function doLoadQueries(doUpdate, callback) {
 		var s = getParametersByName('s', location.search);
-		if(s) {
-			schemaNameFilter = s;
+		if(s.length > 0) {
+			schemaNameFilter = s[0];
 			byId('schemaNameFilter').innerHTML = " "+schemaNameFilter;
 			document.title += " - "+schemaNameFilter;
+			byId('schemaNameDoUnfilter').style.display = '';
+		}
+		else {
+			byId('schemaNameDoFilter').style.display = '';
 		}
 		//console.log('schemaNameFilter',schemaNameFilter);
 		loadQueries(getCurrentModelId(), schemaNameFilter, doUpdate, callback);
@@ -140,6 +144,27 @@
 		else {
 			byId('navbar-warn').innerHTML = '';
 		}
+	}
+
+	function schemaNameDoFilter() {
+		//makeOneHref(id, "htmlx", modelId);
+		const rel = getCurrentRelation('objects');
+		if(rel) {
+			location.href = location.pathname + location.search
+				+ (location.search?"&":"?") + "s=" + (rel.schemaName || "")
+				+ location.hash;
+		}
+		else {
+			console.log("no relation selected");
+		}
+	}
+
+	function schemaNameDoUnfilter() {
+		const rel = getCurrentRelation('objects');
+		const newparams = removeParameter('s', location.search);
+		location.href = location.pathname
+			+ (newparams?"?"+newparams:"")
+			+ location.hash;
 	}
 	
 	function testForAuthRequired() {
@@ -1473,6 +1498,11 @@
 		/* padding: 1px 14px; */
 		background-color: #666;
 	}
+
+	button.schemafilter {
+		padding: 0 9px;
+		margin: 2px 0 0 2px;
+	}
 	
 	label.filter-label {
 		/*padding-top: 2px;
@@ -1574,7 +1604,22 @@
 <body onload="onLoad();" id="body">
 
 <nav id="nav" class="navbar">
-	<span id="logo"><span id="logotext">Query<span style="color: #ff8a47;">On</span></span><span id="schemaNameFilter"></span></span>
+	<span id="logo">
+		<span id="logotext">Query<span style="color: #ff8a47;">On</span></span>
+		<span id="schemaNameFilter"></span>
+		<span id="schemaNameFilterBtns">
+			<span id="schemaNameDoFilter" style="display: none">
+				<button class="schemafilter" type="submit" value="" onclick="schemaNameDoFilter();" title="filter by schema">
+					<i class="fa fa-angle-double-right"></i>
+				</button>
+			</span>
+			<span id="schemaNameDoUnfilter" style="display: none">
+				<button class="schemafilter" type="submit" value="" onclick="schemaNameDoUnfilter();" title="unfilter schema">
+					<i class="fa fa-angle-double-left"></i>
+				</button>
+			</span>
+		</span>
+	</span>
 
 	<label style="display: none">
 		<select id="model" onchange="onModelChanged(true);"></select>

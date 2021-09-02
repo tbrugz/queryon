@@ -45,8 +45,8 @@ function getParametersByName(name, queryString) {
 	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)", "g");
 	var results = regex.exec(queryString);
-	if(results === null) { return ""; }
 	var ret = [];
+	if(results === null) { return ret; }
 	while(results !== null) {
 		ret.push( decodeURIComponent(results[1].replace(/\+/g," ")) );
 		results = regex.exec(queryString);
@@ -86,6 +86,15 @@ function getParameterArrayStartWith(startWithRegex, queryString) {
 	//return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
 	return ret;
 	// test: getParameterNamesStartWith('',document.location.href)
+}
+
+// https://stackoverflow.com/a/44583973
+function removeParameter(name, queryString) {
+	const params = new URLSearchParams(queryString);
+	//console.log("removeParameter[0]:", params.toString());
+	params.delete(name);
+	//console.log("removeParameter[1]:", params.toString());
+	return params.toString();
 }
 
 // intersect 2 arrays: keey order of 1st array

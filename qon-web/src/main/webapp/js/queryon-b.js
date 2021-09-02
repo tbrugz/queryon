@@ -43,19 +43,20 @@ function getId(obj) {
 	return (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null")?obj.schemaName+"."+obj.name:obj.name;
 }
 
-function getDescription(obj) {
-	return ((obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null")?obj.schemaName+"."+obj.name:obj.name)
+function getDescription(obj, showSchemaName) {
+	return ( (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null" && showSchemaName) ? obj.schemaName+"." : "")
+		+ obj.name
 		+ ((obj.remarks!=null && obj.remarks!="" && obj.remarks!="null")?" - "+obj.remarks:"");
 }
 
-function writeRelations(containerId, relations) {
+function writeRelations(containerId, relations, showSchemaName) {
 	if(!relations) { return; }
 	//console.log('write relations [#'+relations.length+'] to '+containerId);
 	for(var i=0;i<relations.length;i++) {
 		var id = getId(relations[i]);
 		$('#'+containerId).append("<option value='"+id+"'"+
 				//" class='schema_"+relations[i].schemaName+"'"+
-				">"+getDescription(relations[i])+"</option>");
+				">"+getDescription(relations[i], showSchemaName)+"</option>");
 		relationsHash[id] = relations[i];
 	}
 }
