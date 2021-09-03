@@ -6,7 +6,7 @@ function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, 
 	d3.json(url, function(error, data) {
 		if(error) {
 			if(callbackError) { callbackError(error); }
-			else { console.log("error:: ",error); }
+			else { console.log("runNvD3: error: ",error); }
 			return;
 		}
 		
@@ -26,7 +26,7 @@ function runNvD3(url, columns, xaxis, d3chartfunction, containerId, callbackOk, 
 			//console.log("ok...");
 		}
 		catch (e) {
-			console.log(e);
+			console.log("runNvD3: error[2]: ",e);
 			if(callbackError) {
 				callbackError(e);
 			}

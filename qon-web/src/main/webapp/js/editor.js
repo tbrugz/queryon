@@ -61,7 +61,7 @@ function getRangeFromLine(editor, line) {
 	var sqlString = editor.getValue();
 	var partz = sqlString.split("\n")
 	
-	console.log(partz);
+	console.log("getRangeFromLine: partz=", partz);
 	console.log("getRangeFromLine: line", line, "partz[line].length", partz[line].length);
 	return new Range(line, 0, line, partz[line].length);
 }

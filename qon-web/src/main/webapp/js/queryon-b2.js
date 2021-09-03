@@ -335,7 +335,7 @@ function getKeyValsForRow(rownum) {
 	
 	//console.log('getKeyValsForRow row', row, 'pk', pk, 'cols.length', cols.length, 'cols', cols);
 	if(pk==null) {
-		console.log('relation has no PK');
+		console.log('relation has no PK', relation);
 		return null;
 	}
 	var idx = [];

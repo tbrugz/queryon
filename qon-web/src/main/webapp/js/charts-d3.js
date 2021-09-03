@@ -27,7 +27,7 @@ var runD3 = function(url, columns, d3chartfunction, containerId, callbackOk, cal
 	d3.json(url, function(error, data) {
 		if(error) {
 			if(callbackError) { callbackError(error); }
-			else { console.log("error:: ",error); }
+			else { console.log("runD3: error: ",error); }
 			return;
 		}
 		data = getQonData(data);
@@ -40,7 +40,7 @@ var runD3 = function(url, columns, d3chartfunction, containerId, callbackOk, cal
 		catch (e) {
 			if(callbackError) { callbackError(e); }
 			else {
-				console.log(e);
+				console.log("runD3: error[2]: ", e);
 			}
 		}
 	});

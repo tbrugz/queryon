@@ -201,7 +201,7 @@ function addFilterWithValues(col, operator, value, colType) {
 
 function removeFilter(element) {
 	var filter = element.parentNode.parentNode.parentNode;
-	console.log('removeFilter: el:', element, 'filter:', filter);
+	//console.log('removeFilter: el:', element, 'filter:', filter);
 	element.parentNode.parentNode.removeChild(element.parentNode);
 	if(filter.getElementsByTagName('input').length==0) {
 		filter.parentNode.removeChild(filter);
