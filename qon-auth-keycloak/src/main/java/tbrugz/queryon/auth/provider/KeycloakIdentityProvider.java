@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.IDToken;
 
 public class KeycloakIdentityProvider implements IdentityProvider {
 
@@ -39,7 +41,21 @@ public class KeycloakIdentityProvider implements IdentityProvider {
 			if(principal instanceof KeycloakPrincipal) {
 				// https://stackoverflow.com/questions/31864062/fetch-logged-in-username-in-a-webapp-secured-with-keycloak
 				KeycloakPrincipal<?> kp = (KeycloakPrincipal<?>) principal;
-				return kp.getKeycloakSecurityContext().getIdToken().getPreferredUsername();
+				KeycloakSecurityContext securityContext = kp.getKeycloakSecurityContext();
+				IDToken idtoken = securityContext.getIdToken();
+				if(idtoken==null) {
+					//log.warn("getIdentity: null IDToken");
+					idtoken = securityContext.getToken();
+					if(idtoken==null) {
+						log.warn("getIdentity: null IDToken and AccessToken");
+						return null;
+					}
+				}
+				/*else {
+					return idtoken.getPreferredUsername();
+				}*/
+
+				return idtoken.getPreferredUsername();
 			}
 			/*else {
 				return principal.getName();
