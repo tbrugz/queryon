@@ -387,7 +387,9 @@
 		*/
 		
 		doTableOnLoad();
-		
+		//intercept <a href> that points to another query (not an external URL)
+		registerInnerHrefInterceptors();
+
 		// scroll to top - only if query changed
 		if(lastQueryThatRan==null || lastQueryThatRan!=id) {
 			var bodyElem = document.getElementsByTagName('body')[0];
@@ -445,7 +447,46 @@
 			
 		lastQueryThatRan = id;
 	}
-		
+
+	/*
+	 * intercepts <a href> that points to another query (not an external URL)
+	 */
+	function registerInnerHrefInterceptors() {
+		const nl = document.querySelectorAll('#content a[href^="q/"]');
+		//nl.forEach(e => e.addEventListener("click", innerHrefInterceptor));
+		nl.forEach(function(e) {
+			e.classList.add("innerRef");
+			e.addEventListener("click", innerHrefInterceptor);
+		});
+	}
+
+	function innerHrefInterceptor(evt) {
+		const href = evt.target.getAttribute("href");
+		if(!href.startsWith("q/")) {
+			return;
+		}
+		evt.preventDefault();
+		const fullh = new URL(evt.target.href);
+		//console.log("innerHrefInterceptor: fullh.pathname=", fullh.pathname); //, "typeof fullh=", typeof fullh);
+
+		var obj = fullh.pathname.substring(0, fullh.pathname.lastIndexOf('.'));
+		//obj = obj.substring(obj.lastIndexOf("/")+1);
+		obj = obj.substring(obj.indexOf("/q/")+3);
+		//console.log("innerHrefInterceptor: evt=", evt, "href=", href, "fullh=", fullh, "obj=", obj, "search=", fullh.search);
+		var newbigparts = [];
+		newbigparts.push(obj);
+		newbigparts.push(fullh.search);
+		if(isMultiModel()) {
+			newbigparts.push(getCurrentModelId());
+		}
+		var newbigpartsstr = "#" + newbigparts.join("|");
+		//console.log("newbigparts=", newbigparts, "newbigpartsstr=", newbigpartsstr);
+
+		history.pushState(null, null, newbigpartsstr);
+		updateSelectedQueryState();
+		doRun('objects', 'content', 'messages');
+	}
+
 	function doOpenInsertDialog() {
 		//var content = document.getElementById('content');
 		//var rows = content.querySelectorAll('tr');
@@ -1510,6 +1551,10 @@
 		padding-bottom: 2px;*/
 		display: block;
 		padding: 2px 8px;
+	}
+	
+	a.innerRef {
+		background-color: #cce;
 	}
 	
 	#pivots {

@@ -161,7 +161,7 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 		+(syntax?'.'+syntax:'')
 		+(queryString?'?'+queryString:'');
 	
-	console.log('getQueryUrl: url=', returl);
+	//console.log('getQueryUrl: url=', returl);
 	return returl;
 }
 

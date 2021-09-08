@@ -95,6 +95,7 @@ var doRunD3 = function() {
 	document.getElementById('chartcontainer').innerHTML = '';
 	closeMessages('messages');
 	btnActionStart('go-button');
+	console.log('doRunD3: url=',url,' ; cols=',columns);
 	//runD3(url, columns, d3multiseries, containerId, callbackOk, callbackError);
 	runD3(url, columns, d3multiseries, 'chartcontainer',
 			function() { btnActionStop('go-button'); },
