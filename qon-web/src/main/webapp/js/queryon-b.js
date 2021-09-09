@@ -214,10 +214,25 @@ function getNodeListAttributeAsArray(nodelist, attr) {
 	return arr;
 }
 
+function tblActivate(table) {
+	//var table = document.querySelector('#content > table');
+	if(table) {
+		table.style.filter = "opacity(1)";
+	}
+}
+
+function tblInactivate(table) {
+	//var table = document.querySelector('#content > table');
+	if(table) {
+		table.style.filter = "opacity(.3)";
+	}
+}
+
 function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 	var finalUrl = getQueryUrl(selectId, 'htmlx');
 	
 	btnActionStart('go-button');
+	tblInactivate(document.querySelector('#content > table'));
 	var startTimeMilis = Date.now();
 	var order = document.getElementById('order').value;
 	var container = document.getElementById(containerId);
@@ -226,6 +241,7 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 		// http://stackoverflow.com/questions/3142837/capture-iframe-load-complete-event
 		container.onload = function() {
 			btnActionStop('go-button');
+			tblActivate(document.querySelector('#content > table'));
 			var completedTimeMilis = Date.now();
 			closeMessages(messagesId);
 			//addSortHrefs(containerId, order);
@@ -244,6 +260,7 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
 			container.innerHTML = data;
+			tblActivate(document.querySelector('#content > table'));
 			//console.log('X-ResultSet-Limit',request.getResponseHeader('X-ResultSet-Limit'));
 			closeMessages(messagesId);
 			if(!pivotQueryActive()) {
@@ -257,6 +274,7 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			btnActionStop('go-button');
+			tblActivate(document.querySelector('#content > table'));
 			showErrorMessages(messagesId, jqXHR.responseText ? jqXHR.responseText : "No response from server");
 			//if(! jqXHR.responseText) { console.warn("Error", jqXHR); }
 			if(errorCallback) { errorCallback(errorThrown); }

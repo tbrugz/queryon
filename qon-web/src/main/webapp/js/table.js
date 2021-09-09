@@ -71,7 +71,7 @@ function createBlobLinks() {
 		if(typeof(getCurrentRelation) == "function") {
 			urlPrepend = queryOnUrl + "/" + getId(getCurrentRelation('objects')) + getParameters(true) + queryString;
 		}
-		console.log("table.js: currentOffset", currentOffset, "queryString", queryString, "urlPrepend", urlPrepend);
+		//console.log("table.js: currentOffset", currentOffset, "queryString", queryString, "urlPrepend", urlPrepend);
 		var rownum = 0;
 		for(var i=1;i<rows.length;i++) {
 			var row = rows[i];
@@ -104,7 +104,7 @@ function createBlobLinks() {
 }
 
 function mergeDimensions() {
-	var content = document.getElementsByTagName('table')[0];
+	var content = document.querySelector('#content > table');
 	if(!content) {
 		//console.log('table.js: mergeDimensions: no table found...');
 		return;

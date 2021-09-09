@@ -302,6 +302,7 @@
 	}
 	
 	function doRunCallback(request) {
+		//console.log("doRunCallback: request=", request);
 		var select = document.getElementById('objects');
 		var id = select.options[select.selectedIndex].value;
 		var relationType = relationsHash[id] ? relationsHash[id].relationType : null;
@@ -484,7 +485,7 @@
 
 		history.pushState(null, null, newbigpartsstr);
 		updateSelectedQueryState();
-		doRun('objects', 'content', 'messages');
+		doRun('objects', 'content', 'messages', doRunCallback, doRunErrorCallback);
 	}
 
 	function doOpenInsertDialog() {
