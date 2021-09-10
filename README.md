@@ -50,8 +50,10 @@ demos - running
 
 * **demo-anydb**: demo that can use any supported JDBC database (using default web interface) - see [demo/qon-demo-anydb/README.md](demo/qon-demo-anydb/README.md)
 
+* **demo-springboot**: demo using SpringBoot - see [demo/qon-demo-springboot/README.md](demo/qon-demo-springboot/README.md)
+
 Note: *demo-minimal* & *demo-dbn* need maven ant tasks to populate database(s).
-Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
+Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar https://repo1.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
 
 
 license

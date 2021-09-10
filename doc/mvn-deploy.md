@@ -49,7 +49,7 @@ release:
 & go to `https://oss.sonatype.org/` & close & release staging repo
 
 artifacts at central:  
-`http://central.maven.org/maven2/org/bitbucket/tbrugz/queryon/`
+`https://repo1.maven.org/maven2/org/bitbucket/tbrugz/queryon/`
 
 
 run jetty
