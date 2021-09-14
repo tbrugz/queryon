@@ -485,7 +485,10 @@
 
 		history.pushState(null, null, newbigpartsstr);
 		updateSelectedQueryState();
-		doRun('objects', 'content', 'messages', doRunCallback, doRunErrorCallback);
+		doRun('objects', 'content', 'messages', doRunCallback, function(request) {
+			doRunErrorCallback(request);
+			history.back();
+		});
 	}
 
 	function doOpenInsertDialog() {
@@ -1441,6 +1444,9 @@
 		doRun('objects', 'content', 'messages', function(request) {
 			doRunCallback(request);
 			pivotToggleDrillthrough();
+		}, function(request) {
+			doRunErrorCallback(request);
+			history.back();
 		});
 	}
 	
