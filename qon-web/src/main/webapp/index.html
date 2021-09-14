@@ -66,13 +66,25 @@
 	function doLoadQueries(doUpdate, callback) {
 		var s = getParametersByName('s', location.search);
 		if(s.length > 0) {
+			var titleAppend = "";
 			schemaNameFilter = s[0];
-			byId('schemaNameFilter').innerHTML = " "+schemaNameFilter;
-			document.title += " - "+schemaNameFilter;
+			if(isMultiModel()) {
+				document.getElementById('model').parentNode.style.display = 'none';
+				titleAppend += getCurrentModelId();
+				if(schemaNameFilter) {
+					titleAppend += "/";
+				}
+			}
+			titleAppend += schemaNameFilter;
+			byId('schemaNameFilter').innerHTML = " "+titleAppend;
+			document.title += " - "+titleAppend;
 			byId('schemaNameDoUnfilter').style.display = '';
 		}
 		else {
 			byId('schemaNameDoFilter').style.display = '';
+			if(isMultiModel()) {
+				document.getElementById('model').parentNode.style.display = 'inline-block';
+			}
 		}
 		//console.log('schemaNameFilter',schemaNameFilter);
 		loadQueries(getCurrentModelId(), schemaNameFilter, doUpdate, callback);
@@ -83,11 +95,7 @@
 		
 		if(modelsInfo) {
 			loadSelect(modelsInfo, 'model');
-			/* var modelId = getParameterByName('model', location.search);
-			if(modelId) {
-				byId('model').value = modelId;
-			} */
-			if(modelsInfo.length>1) {
+			if(isMultiModel()) {
 				document.getElementById('model').parentNode.style.display = 'inline-block';
 			}
 		}
@@ -1662,12 +1670,12 @@
 		<span id="schemaNameFilter"></span>
 		<span id="schemaNameFilterBtns">
 			<span id="schemaNameDoFilter" style="display: none">
-				<button class="schemafilter" type="submit" value="" onclick="schemaNameDoFilter();" title="filter by schema">
+				<button class="schemafilter" type="submit" value="" onclick="schemaNameDoFilter();" title="filter by model/schema">
 					<i class="fa fa-angle-double-right"></i>
 				</button>
 			</span>
 			<span id="schemaNameDoUnfilter" style="display: none">
-				<button class="schemafilter" type="submit" value="" onclick="schemaNameDoUnfilter();" title="unfilter schema">
+				<button class="schemafilter" type="submit" value="" onclick="schemaNameDoUnfilter();" title="unfilter model/schema">
 					<i class="fa fa-angle-double-left"></i>
 				</button>
 			</span>
