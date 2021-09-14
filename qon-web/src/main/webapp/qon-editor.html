@@ -589,6 +589,8 @@
 			container.style.display = 'none';
 			isQuerySaved = false;
 		}
+
+		refreshRolesCount();
 	}
 	
 	function errorMessage(message) {
@@ -674,7 +676,7 @@
 		rl.style.display='initial';
 		if(rolesInfo.roles && rolesInfo.roles.length>0) {
 			//console.log('multi-roles');
-			refreshRolesCount();
+			//refreshRolesCount();
 			var rc = document.getElementById('rolesCount');
 			var rolesBtn = document.getElementById('rolesBtn');
 			r.style.display='none';
