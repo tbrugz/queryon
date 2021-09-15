@@ -121,6 +121,19 @@ function updateSelectedQueryStateParameters() {
 	}
 }
 
+function checkIfRelationExsts(relname) {
+	return relationsHash[relname]!=null;
+	/*
+	var select = document.getElementById('objects');
+	for(var i = 0;i<select.length;i++) {
+		if(select.options[i].value==relname) {
+			return true;
+		}
+	}
+	return false;
+	*/
+}
+
 function updateSelectedQueryStateParametersCallback(relname, parts) {
 	//console.log("updateSelectedQueryStateParametersCallback", relname, parts);
 	var found = false;
@@ -137,11 +150,11 @@ function updateSelectedQueryStateParametersCallback(relname, parts) {
 	}
 	
 	if(!found) {
-		var message = "Query "+relname+" not found.";
+		//var message = "Query "+relname+" not found.";
 		console.log('query "',relname,'" not found [',select.length,']... authenticated == ', authInfo.authenticated);
 		showWarnMessages('messages', 'Query <code>'+relname+'</code> not found.'+
 			(authInfo.authenticated?'':' Maybe you should login') );
-		throw message;
+		//throw message;
 		/*else {
 			closeMessages('messages');
 		}*/

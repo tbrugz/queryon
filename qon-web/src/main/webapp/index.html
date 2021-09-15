@@ -472,16 +472,27 @@
 	function innerHrefInterceptor(evt) {
 		const href = evt.target.getAttribute("href");
 		if(!href.startsWith("q/")) {
+			//not an inner href, won't intercept
 			return;
 		}
-		evt.preventDefault();
 		const fullh = new URL(evt.target.href);
 		//console.log("innerHrefInterceptor: fullh.pathname=", fullh.pathname); //, "typeof fullh=", typeof fullh);
 
 		var obj = fullh.pathname.substring(0, fullh.pathname.lastIndexOf('.'));
-		//obj = obj.substring(obj.lastIndexOf("/")+1);
 		obj = obj.substring(obj.indexOf("/q/")+3);
+		var relname = obj;
+		if(relname.indexOf("/")>1) {
+			relname = relname.substring(0, relname.indexOf("/"));
+		}
 		//console.log("innerHrefInterceptor: evt=", evt, "href=", href, "fullh=", fullh, "obj=", obj, "search=", fullh.search);
+		//console.log("innerHrefInterceptor: href=", href, "obj=", obj, "relname=", relname);
+		if(!checkIfRelationExsts(relname)) {
+			console.log("innerHrefInterceptor: relation", relname, "not found, won't intercept click event");
+			//showWarnMessages('messages', 'Query <code>'+relname+'</code> not found.'+
+ 			//	(authInfo.authenticated?'':' Maybe you should login') );
+			return;
+		}
+		evt.preventDefault();
 		var newbigparts = [];
 		newbigparts.push(obj);
 		newbigparts.push(fullh.search);
