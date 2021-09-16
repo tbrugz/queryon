@@ -43,7 +43,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.4</version>
+        <version>${maven-war-plugin.version}</version>
         <configuration>
           <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
           <!-- webappDirectory>web</webappDirectory-->
