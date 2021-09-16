@@ -12,7 +12,7 @@
 		curl -L - -create-dirs -o qon-web/target/download/swagger-ui/v2.2.10.zip https://github.com/swagger-api/swagger-ui/archive/v2.2.10.zip
 		-->
 		<get src="https://github.com/swagger-api/swagger-ui/archive/v${version.swagger2}.zip" dest="${download.dir}/swagger2-ui" verbose="true" skipexisting="true"/>
-		<echo message="downloaded swagger ${version.swagger2}"/>
+		<echo message="downloaded swagger ${version.swagger2}" level="info"/>
 
 		<mkdir dir="${download.dir}/swagger2-ui/unzipped"/>
 		<unzip src="${download.dir}/swagger2-ui/v${version.swagger2}.zip" dest="${download.dir}/swagger2-ui/unzipped"/>
@@ -28,7 +28,7 @@
 		<mkdir dir="${download.dir}/swagger-ui"/>
 		
 		<get src="https://github.com/swagger-api/swagger-ui/archive/v${version.swagger}.zip" dest="${download.dir}/swagger-ui" verbose="true" skipexisting="true"/>
-		<echo message="downloaded swagger ${version.swagger}"/>
+		<echo message="downloaded swagger ${version.swagger}" level="info"/>
 
 		<mkdir dir="${download.dir}/swagger-ui/unzipped"/>
 		<unzip src="${download.dir}/swagger-ui/v${version.swagger}.zip" dest="${download.dir}/swagger-ui/unzipped"/>
