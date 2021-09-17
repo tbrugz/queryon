@@ -12,7 +12,6 @@ import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.logging.Log;
@@ -155,7 +154,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		setPropForTypes(pp, typesList);
 	}
 	
-	void dump(Properties pp, String syntax, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
+	void dump(Properties pp, String syntax, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, XMLStreamException, InterruptedException, ExecutionException {
 		SQLDiff sqldiff = new SQLDiff();
 		sqldiff.setProperties(pp);
 		
