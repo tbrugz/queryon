@@ -6,7 +6,6 @@ import java.net.ServerSocket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.util.Factory;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.plus.webapp.EnvConfiguration;
@@ -60,13 +59,14 @@ public class JettySetup {
 		connector.setPort(port);
 		server.setConnectors(new Connector[]{ connector });
 
-		final String webRoot = WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http";
+		final String webRoot = WinstoneAndH2HttpRequestTest.testJavaDir+"/tbrugz/queryon/http";
 		final String webappRoot = WinstoneAndH2HttpRequestTest.webappdir;
-		//String resourcesRoot = WinstoneAndH2HttpRequestTest.testResourcesDir;
+		final String resourcesRoot = WinstoneAndH2HttpRequestTest.testResourcesDir;
 		
 		WebAppContext webapp = new WebAppContext();
 		webapp.setDescriptor(webRoot+webxmlPath);
 		webapp.setResourceBase(webappRoot);
+		webapp.setExtraClasspath(resourcesRoot);
 		webapp.setContextPath("/");
 		webapp.setParentLoaderPriority(true);
 		// https://stackoverflow.com/a/18021180/616413
@@ -75,8 +75,24 @@ public class JettySetup {
 				new WebInfConfiguration(), //new TagLibConfiguration(),
 				new PlusConfiguration(), new MetaInfConfiguration(),
 				new FragmentConfiguration(), new EnvConfiguration() });
+		/*
+		// Specify the Session ID Manager
+		HashSessionIdManager idmanager = new HashSessionIdManager();
+		server.setSessionIdManager(idmanager);
 		
+		// Create the SessionHandler to handle the sessions
+		HashSessionManager manager = new HashSessionManager();
+		manager.setSessionTrackingModes(EnumSet.of(SessionTrackingMode.COOKIE)); // <-- here
+		SessionHandler sessions = new SessionHandler(manager);
+		webapp.setSessionHandler(sessions);
+		*/
 		server.setHandler(webapp);
+		
+		/*
+		Using Jetty QOS filter instead of ThreadPool
+		https://stackoverflow.com/questions/48751826/process-requests-one-by-one-in-jetty-embedded
+		https://www.eclipse.org/jetty/documentation/jetty-9/index.html#qos-filter
+		*/
 		
 		// https://stackoverflow.com/questions/12281418/single-threaded-embedded-jetty
 		//server.setThreadPool(new QueuedThreadPool(3)); //XXX needed by WinstoneAndH2HttpRequestTest.testLoginLogout() !?!
@@ -126,14 +142,16 @@ public class JettySetup {
 		//server.join();
 		server.setStopAtShutdown(true);
 		
-		setupShiro();
+		//setupShiro();
 	}
 	
+	/*
 	public static void setupShiro() {
 		// see http://shiro.apache.org/testing.html
 		Factory<org.apache.shiro.mgt.SecurityManager> factory = new IniSecurityManagerFactory("classpath:test.shiro.permission.ini");
 		SecurityUtils.setSecurityManager(factory.getInstance());
 	}
+	*/
 	
 	public static void setupTestUrls() {
 		qonUrl = "http://localhost:"+port;

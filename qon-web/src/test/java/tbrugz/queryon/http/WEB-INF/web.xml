@@ -7,6 +7,32 @@
 	version="3.0">
 	<display-name>queryon</display-name>
 	
+	<!--
+	<session-config>
+		<session-timeout>5</session-timeout>
+		<tracking-mode>COOKIE</tracking-mode>
+	</session-config>
+	-->
+
+	<!-- apache shiro: see http://shiro.apache.org/web.html -->
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	</listener>
+
+	<filter>
+		<filter-name>ShiroFilter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>ShiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+
 	<servlet>
 		<servlet-name>QueryOn</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOn</servlet-class>
@@ -131,5 +157,19 @@
 		<servlet-name>InfoServlet</servlet-name>
 		<url-pattern>/qinfo/*</url-pattern>
 	</servlet-mapping>
+
+	<!--
+	https://www.eclipse.org/jetty/documentation/jetty-9/index.html#qos-filter
+	-->
+	<!--
+	<filter>
+		<filter-name>QoSFilter</filter-name>
+		<filter-class>org.eclipse.jetty.servlets.QoSFilter</filter-class>
+		<init-param>
+			<param-name>maxRequests</param-name>
+			<param-value>1</param-value>
+		</init-param>
+	</filter>
+	-->
 
 </web-app>

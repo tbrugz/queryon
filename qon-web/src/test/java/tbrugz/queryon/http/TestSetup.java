@@ -30,7 +30,7 @@ public class TestSetup {
 		port = getAvailablePort(startPort, maxPort);
 		setupTestUrls();
 		Map<String, String> args = new HashMap<String, String>();
-		args.put("webroot", WinstoneAndH2HttpRequestTest.basedir+"/tbrugz/queryon/http"); // or any other command line args, eg port
+		args.put("webroot", WinstoneAndH2HttpRequestTest.testJavaDir+"/tbrugz/queryon/http"); // or any other command line args, eg port
 		args.put("httpPort", ""+port);
 		args.put("ajp13Port", "-1");
 		//Launcher.initLogger(args);

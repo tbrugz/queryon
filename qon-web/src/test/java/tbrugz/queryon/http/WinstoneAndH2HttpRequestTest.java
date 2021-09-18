@@ -97,9 +97,9 @@ public class WinstoneAndH2HttpRequestTest {
 
 	private static final Log log = LogFactory.getLog(WinstoneAndH2HttpRequestTest.class);
 	
-	public static final String basedir = "src/test/java";
+	public static final String testJavaDir = "src/test/java";
 	public static final String webappdir = "src/main/webapp";
-	//public static final String testResourcesDir = "src/test/resources";
+	public static final String testResourcesDir = "src/test/resources/";
 	
 	static DocumentBuilderFactory dbFactory;
 	static DocumentBuilder dBuilder;
@@ -130,7 +130,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 	
 	public static void setupH2() throws ClassNotFoundException, IOException, SQLException, NamingException {
-		String[] params = {"-propfile="+basedir+"/tbrugz/queryon/http/sqlrun.properties"};
+		String[] params = {"-propfile="+testJavaDir+"/tbrugz/queryon/http/sqlrun.properties"};
 		SQLRun.main(params);
 	}
 	
@@ -625,8 +625,17 @@ public class WinstoneAndH2HttpRequestTest {
 	static void baseReturnCountTest(String url, int expectedReturnRows) throws IOException, SAXException {
 		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
-		
 		HttpResponse response1 = httpclient.execute(httpGet);
+		
+		try {
+			baseReturnCountTest(response1, expectedReturnRows);
+		}
+		finally {
+			httpGet.releaseConnection();
+		}
+	}
+		
+	static void baseReturnCountTest(HttpResponse response1, int expectedReturnRows) throws IOException, SAXException {
 		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 		//String resp = getContent(response1); System.out.println(resp);
 		
@@ -648,7 +657,6 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		//System.out.println("nrows: "+nl.getLength());
 		EntityUtils.consume(entity1);
-		httpGet.releaseConnection();
 		Assert.assertEquals(expectedReturnRows, length);
 	}
 
@@ -1604,6 +1612,7 @@ public class WinstoneAndH2HttpRequestTest {
 		return httpClient.execute(httpCall);
 	}
 	
+	/*
 	static HttpResponse jspLogin(HttpClient httpClient, CookieStore cookies, String username, String password) throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(qonUrl+"/auth/login.jsp");
 		setCookies(httpPost, cookies);
@@ -1620,6 +1629,7 @@ public class WinstoneAndH2HttpRequestTest {
 		setCookies(httpPost, cookies);
 		return httpClient.execute(httpPost);
 	}
+	*/
 
 	static HttpResponse servletLogin(HttpClient httpClient, CookieStore cookies, String username, String password) throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(qonUrl+"/qauth/login");
@@ -1674,6 +1684,7 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 	}
 	
+	/*
 	@Test
 	public void testLoginOk() throws Exception {
 		// https://stackoverflow.com/a/6273665/616413
@@ -1701,6 +1712,7 @@ public class WinstoneAndH2HttpRequestTest {
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
 	}
+	*/
 	
 	@Test
 	public void testServletLoginOk() throws Exception {
@@ -1747,7 +1759,7 @@ public class WinstoneAndH2HttpRequestTest {
 		// https://stackoverflow.com/a/6273665/616413
 		//HttpClient httpClient = HttpClients.custom().build();
 		CookieStore cookieStore = new BasicCookieStore();
-		HttpClient httpClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
 		//HttpContext httpContext = new BasicHttpContext();
 		//httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
@@ -1769,7 +1781,7 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		{
 			// XXX logout needed in the beginning? interaction between tests...
-			HttpResponse response3 = jspLogout(httpClient, cookieStore);
+			HttpResponse response3 = servletLogout(httpClient, cookieStore);
 			Assert.assertEquals(200, response3.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response3.getEntity());
 		}
@@ -1779,8 +1791,10 @@ public class WinstoneAndH2HttpRequestTest {
 		{
 			HttpResponse jsonResp = getGetResponse(httpClient, qonUrl+currentUserUrl, cookieStore);
 			String jsonStr = getContent(jsonResp);
-			//System.out.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
-			//System.out.print("json:\n"+jsonStr+"\n");
+			//System.err.println("response-headers:\n"+Arrays.asList(jsonResp.getAllHeaders()));
+			//System.err.print("json:\n"+jsonStr+"\n");
+			//System.err.print("cookies:\n"+cookieStore.getCookies()+"\n");
+			
 			JsonElement json = JsonParser.parseString(jsonStr);
 			Assert.assertEquals(false, json.getAsJsonObject().get("authenticated").getAsBoolean());
 			Assert.assertEquals("anonymous", json.getAsJsonObject().get("username").getAsString());
@@ -1791,7 +1805,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("\ncookieStore1:\n"+cookieStore);
 		
 		{
-			HttpResponse response1 = jspLogin(httpClient, cookieStore, LOGIN_JDOE, PASSWORD_JDOE);
+			HttpResponse response1 = servletLogin(httpClient, cookieStore, LOGIN_JDOE, PASSWORD_JDOE);
 			Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
 			// https://stackoverflow.com/a/16211729/616413
 			EntityUtils.consumeQuietly(response1.getEntity());
@@ -1815,7 +1829,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("\ncookieStore3:\n"+cookieStore);
 		
 		{
-			HttpResponse response2 = jspLogin(httpClient, cookieStore, LOGIN_JDOE, "jdoez");
+			HttpResponse response2 = servletLogin(httpClient, cookieStore, LOGIN_JDOE, "jdoez");
 			Assert.assertEquals(400, response2.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response2.getEntity());
 		}
@@ -1824,7 +1838,7 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("\ncookieStore4:\n"+cookieStore);
 		
 		{
-			HttpResponse response3 = jspLogout(httpClient, cookieStore);
+			HttpResponse response3 = servletLogout(httpClient, cookieStore);
 			Assert.assertEquals(200, response3.getStatusLine().getStatusCode());
 			EntityUtils.consumeQuietly(response3.getEntity());
 		}
@@ -2120,8 +2134,17 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testExecutableCount() throws IOException, ParserConfigurationException, SAXException {
-		servletLoginOk();
-		baseReturnCountTest("/executable.xml", executablesInModel);
+		// login
+		CookieStore cookieStore = new BasicCookieStore();
+		CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+		HttpResponse resp1 = servletLogin(httpClient, cookieStore, LOGIN_JDOE, PASSWORD_JDOE);
+		EntityUtils.consumeQuietly(resp1.getEntity());
+		
+		// request
+		HttpResponse resp = getGetResponse(httpClient, baseUrl+"/executable.xml", cookieStore);
+		baseReturnCountTest(resp, executablesInModel);
+		
+		// logout
 		servletLogoutOk();
 	}
 
@@ -2185,6 +2208,7 @@ public class WinstoneAndH2HttpRequestTest {
 		Object jsonObj = gson.fromJson(content, Object.class);
 	}
 	
+	/*
 	@Test
 	public void jspGetSchemas() throws IOException, ParserConfigurationException, SAXException {
 		String content = getContentFromUrl(qonUrl + "/info/schemas.jsp");
@@ -2212,6 +2236,7 @@ public class WinstoneAndH2HttpRequestTest {
 		checkJson(content);
 		//System.out.println("jspGetEnv: "+getPrettyStringFromJson(content));
 	}
+	*/
 	
 	@Test
 	public void infoGetSchemas() throws IOException, ParserConfigurationException, SAXException {
