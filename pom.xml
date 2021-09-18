@@ -59,7 +59,7 @@
 
     <cxf.version>3.3.7</cxf.version>
 
-    <jetty.version>9.4.28.v20200408</jetty.version>
+    <jetty.version>9.4.43.v20210629</jetty.version> <!-- jetty 10+ requires JVM 11+ -->
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->
     <httpclient.version>4.5.13</httpclient.version>
 
