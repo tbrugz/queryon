@@ -13,12 +13,10 @@ import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.plus.webapp.PlusConfiguration;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.MetaInfConfiguration;
-import org.eclipse.jetty.webapp.TagLibConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
@@ -52,12 +50,13 @@ public class JettySetup {
 		log.info("setup()");
 		if(server!=null && server.isRunning()) { return; }
 		server = new Server();
+		//server = new Server(new QueuedThreadPool(4));
 		
 		port = getAvailablePort(startPort, maxPort);
 		log.info("setup(): port="+port);
 		setupTestUrls();
 		
-		Connector connector = new SelectChannelConnector();
+		ServerConnector connector = new ServerConnector(server);
 		connector.setPort(port);
 		server.setConnectors(new Connector[]{ connector });
 
@@ -73,14 +72,14 @@ public class JettySetup {
 		// https://stackoverflow.com/a/18021180/616413
 		webapp.setConfigurations(new Configuration[] {
 				new AnnotationConfiguration(), new WebXmlConfiguration(),
-				new WebInfConfiguration(), new TagLibConfiguration(),
+				new WebInfConfiguration(), //new TagLibConfiguration(),
 				new PlusConfiguration(), new MetaInfConfiguration(),
 				new FragmentConfiguration(), new EnvConfiguration() });
 		
 		server.setHandler(webapp);
 		
 		// https://stackoverflow.com/questions/12281418/single-threaded-embedded-jetty
-		server.setThreadPool(new QueuedThreadPool(3)); //XXX needed by WinstoneAndH2HttpRequestTest.testLoginLogout() !?!
+		//server.setThreadPool(new QueuedThreadPool(3)); //XXX needed by WinstoneAndH2HttpRequestTest.testLoginLogout() !?!
 		
 		/*
 		// context0 - test artifacts

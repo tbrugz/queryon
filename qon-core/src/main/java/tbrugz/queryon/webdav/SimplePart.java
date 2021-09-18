@@ -64,5 +64,12 @@ public class SimplePart implements Part {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	// needed for servlet 3.1
+	@Override
+	public String getSubmittedFileName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
