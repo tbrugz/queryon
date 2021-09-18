@@ -15,6 +15,7 @@
 
   <name>${project.artifactId}</name>
 
+  <!--
   <build>
     <plugins>
       <plugin>
@@ -28,6 +29,7 @@
       </plugin>
     </plugins>
   </build>
+  -->
     
   <dependencies>
 
