@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+	id="WebApp_ID"
+	version="3.0">
+	<display-name>queryon</display-name>
+	
+	<session-config>
+		<session-timeout>480</session-timeout> <!-- in minutes (300 = 5hs; 480 = 8hs) -->
+	</session-config>
+
+	<!-- apache shiro: see http://shiro.apache.org/web.html -->
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	</listener>
+	
+	<servlet>
+		<servlet-name>QueryOn</servlet-name>
+		<servlet-class>tbrugz.queryon.QueryOn</servlet-class>
+		<!-- <init-param>
+			<param-name>properties-resource</param-name>
+			<param-value>/queryon.properties</param-value>
+		</init-param> -->
+		<load-on-startup>1</load-on-startup>
+		<!-- <multipart-config>
+			<location>/tmp</location>
+			<max-file-size>2097152</max-file-size> <!- 2mb ->
+			<max-request-size>5242880</max-request-size> <!- 5bm ->
+			<file-size-threshold>1048576</file-size-threshold> <!- 1mb ->
+		</multipart-config> -->
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>QueryOn</servlet-name>
+		<url-pattern>/q/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>QueryOnSchema</servlet-name>
+		<servlet-class>tbrugz.queryon.QueryOnSchemaInstant</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>QueryOnSchema</servlet-name>
+		<url-pattern>/qos/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>QueryOnInstant</servlet-name>
+		<servlet-class>tbrugz.queryon.QueryOnInstant</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>QueryOnInstant</servlet-name>
+		<url-pattern>/qoi/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DiffServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.diff.DiffServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>DiffServlet</servlet-name>
+		<url-pattern>/qdiff/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>DataDiffServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.diff.DataDiffServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>DataDiffServlet</servlet-name>
+		<url-pattern>/datadiff/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>Diff2QServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.diff.Diff2QServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>Diff2QServlet</servlet-name>
+		<url-pattern>/diff2q/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DiffManyServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.diff.DiffManyServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>DiffManyServlet</servlet-name>
+		<url-pattern>/diffmany/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>Cool303</servlet-name>
+		<servlet-class>tbrugz.queryon.Cool303RedirectionServlet</servlet-class>
+		<init-param>
+			<param-name>url-prepend</param-name>
+			<param-value>/queryon/q</param-value>
+		</init-param>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>Cool303</servlet-name>
+		<url-pattern>/id/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PagesServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.PagesServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>PagesServlet</servlet-name>
+		<url-pattern>/p/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>MarkdownServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.MarkdownServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>MarkdownServlet</servlet-name>
+		<url-pattern>/md/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.ProcessorServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>ProcessorServlet</servlet-name>
+		<url-pattern>/processor/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.SwaggerServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>SwaggerServlet</servlet-name>
+		<url-pattern>/swagger/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ODataServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.ODataServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>ODataServlet</servlet-name>
+		<url-pattern>/odata/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>GraphQlQonServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.graphql.GraphQlQonServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>GraphQlQonServlet</servlet-name>
+		<url-pattern>/graphql/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>QonSoapServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.soap.QonSoapServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>QonSoapServlet</servlet-name>
+		<url-pattern>/soap/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AuthServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.auth.AuthServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AuthServlet</servlet-name>
+		<url-pattern>/qauth/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>WebDavServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.webdav.WebDavServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>WebDavServlet</servlet-name>
+		<url-pattern>/webdav/*</url-pattern>
+		<url-pattern>/anondav/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>InfoServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.api.InfoServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>InfoServlet</servlet-name>
+		<url-pattern>/qinfo/*</url-pattern>
+	</servlet-mapping>
+
+	<filter>
+		<filter-name>ShiroFilter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>ShiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>CorsFilter</filter-name>
+		<filter-class>tbrugz.queryon.CorsFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CorsFilter</filter-name>
+		<servlet-name>QueryOn</servlet-name>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>CacheControlFilter</filter-name>
+		<filter-class>tbrugz.queryon.cache.CacheControlFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CacheControlFilter</filter-name>
+		<servlet-name>QueryOn</servlet-name>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>EncodingFilter</filter-name>
+		<filter-class>tbrugz.queryon.filter.EncodingFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>EncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!--
+	<filter>
+		<filter-name>AccessLogFilter</filter-name>
+		<filter-class>tbrugz.queryon.filter.AccessLogFilter</filter-class>
+	</filter>
+	-->
+	<!--<init-param>
+		<param-name>modelId</param-name>
+		<param-value>model2</param-value>
+	</init-param>-->
+	<!--<init-param>
+		<param-name>tableName</param-name>
+		<param-value>QUERYON.QON_ACCESS_LOG</param-value>
+	</init-param>-->
+
+	<!--
+	<filter-mapping>
+		<filter-name>AccessLogFilter</filter-name>
+		<servlet-name>QueryOn</servlet-name>
+	</filter-mapping>
+	-->
+	<!-- <url-pattern>/q/*</url-pattern> -->
+
+</web-app>
