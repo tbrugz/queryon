@@ -25,6 +25,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
     <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
@@ -111,6 +112,7 @@
     <module>demo/qon-demo-pg</module>
     <module>demo/qon-demo-anydb</module>
     <module>demo/qon-demo-springboot</module>
+    <module>demo/qon-demo-quarkus</module>
   </modules>
 
   <licenses>

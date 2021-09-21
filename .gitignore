@@ -1,6 +1,7 @@
 
 **/target/
 **/work/
+**/.mvn/
 
 qon-web/src/main/webapp/swagger-ui/
 qon-web/src/main/webapp/swagger2-ui/
