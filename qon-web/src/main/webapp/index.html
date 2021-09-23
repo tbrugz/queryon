@@ -494,13 +494,21 @@
 		}
 		evt.preventDefault();
 		var newbigparts = [];
+		var namedParams = relationsHash[relname].namedParameterNames;
+		if(namedParams) {
+			for(var i=0;i<namedParams.length;i++) {
+				var param = getParameterByName(namedParams[i], fullh.search);
+				obj += "/" + param;
+			}
+			//console.log("namedParams=", namedParams, "obj=", obj);
+		}
 		newbigparts.push(obj);
 		newbigparts.push(fullh.search);
 		if(isMultiModel()) {
 			newbigparts.push(getCurrentModelId());
 		}
 		var newbigpartsstr = "#" + newbigparts.join("|");
-		//console.log("newbigparts=", newbigparts, "newbigpartsstr=", newbigpartsstr);
+		//console.log("newbigparts=", newbigparts, "newbigpartsstr=", newbigpartsstr, "relation=", relationsHash[relname]);
 
 		history.pushState(null, null, newbigpartsstr);
 		updateSelectedQueryState();
