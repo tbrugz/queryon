@@ -89,6 +89,7 @@ import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.ModelUtils;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.ParametrizedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
@@ -2040,14 +2041,16 @@ public class QueryOn extends AbstractHttpServlet {
 		case RELATION: {
 			/*List<Relation> list = new ArrayList<Relation>(); list.addAll(model.getViews()); list.addAll(model.getTables());
 			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, list, Relation.class);*/
-			//XXX: sort relations? maybe a client (js) task
 			List<View> lViews = Utils.newList(model.getViews());
-			ResultSet rsQ = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, queryAllColumns, lViews, Query.class);
+			//ResultSet rsQ = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, queryAllColumns, lViews, Query.class);
 			List<Table> lTable = Utils.newList(model.getTables());
-			ResultSet rsT = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, queryAllColumns, lTable, Table.class);
+			//ResultSet rsT = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, queryAllColumns, lTable, Table.class);
+			List<Relation> lRels = QOnModelUtils.joinRelations(lViews, lTable);
+			lRels.sort(new NamedDBObject.SchemaAndNameComparator());
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, queryAllColumns, lRels, Relation.class);
 			
-			List<ResultSet> lrs = Utils.newList(rsQ, rsT);
-			rs = new UnionResultSet(lrs);
+			//List<ResultSet> lrs = Utils.newList(rsQ, rsT);
+			//rs = new UnionResultSet(lrs);
 			break;
 		}
 		case QUERY: {
@@ -2077,6 +2080,7 @@ public class QueryOn extends AbstractHttpServlet {
 			
 			List<ResultSet> lrs = Utils.newList(rsQ, rsT, rsE);
 			rs = new UnionResultSet(lrs);
+			//XXX: sort?
 			break;
 		}
 		default: {

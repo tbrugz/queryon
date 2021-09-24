@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 
@@ -86,6 +87,16 @@ public class QOnModelUtils {
 			model.setMetadata(new TreeMap<String, String>());
 		}
 		model.getMetadata().put("error", t.toString());
+	}
+	
+	// https://stackoverflow.com/questions/1445233/is-it-possible-to-solve-the-a-generic-array-of-t-is-created-for-a-varargs-param
+	@SafeVarargs
+	public static List<Relation> joinRelations(List<? extends Relation>... ls) {
+		List<Relation> ret = new ArrayList<Relation>();
+		for(List<? extends Relation> l: ls) {
+			ret.addAll(l);
+		}
+		return ret;
 	}
 
 }
