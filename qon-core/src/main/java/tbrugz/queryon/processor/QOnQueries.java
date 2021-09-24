@@ -318,7 +318,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 				PreparedStatement stinn = conn.prepareStatement( processQuery(query) );
 				count += addQueryFromDB(schema, queryName, stinn, query, remarks, rolesFilterStr, context);
 			}
-			catch(SQLException e) {
+			catch(SQLException | IllegalStateException e) {
 				String message = "error reading query '"+queryName+"': "+e;
 				log.warn(message);
 				UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), schema, queryName, message);

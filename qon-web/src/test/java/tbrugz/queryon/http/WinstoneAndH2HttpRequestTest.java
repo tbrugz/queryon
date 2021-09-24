@@ -921,7 +921,7 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
-	public void testGetCsvWithNamedParameters() throws Exception {
+	public void testGetCsvWithBindNamedParameters() throws Exception {
 		String url = "/QUERY.QUERY_WITH_BIND_NAMED_PARAMS.csv?par1=1&par2=2";
 		getContentFromUrl(baseUrl+url);
 	}
@@ -2271,6 +2271,28 @@ public class WinstoneAndH2HttpRequestTest {
 		String content = getContentFromUrl(qonUrl + "/qinfo/auth");
 		checkJson(content);
 		//System.out.println("infoGetAuth: "+getPrettyStringFromJson(content));
+	}
+	
+	@Test
+	public void testGetQueryWithNamedParametersAndFilter() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&par2=2&fin:C1=2";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("C1" + LF +
+				"2" + LF,
+				content);
+	}
+	
+	@Test
+	public void testGetQueryWithBindNamedParametersAndFilter() throws Exception {
+		String url = "/QUERY.QUERY_WITH_BIND_NAMED_PARAMS.csv?par1=1&par2=2&fin:C1=2";
+
+		String content = getContentFromUrl(baseUrl+url);
+		System.out.println(content);
+		Assert.assertEquals("C1" + LF +
+				"2" + LF,
+				content);
 	}
 
 }
