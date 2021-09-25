@@ -197,6 +197,10 @@ public class SQL {
 		return replaceClauses(sql, username);
 	}
 
+	public String getInitialSql() {
+		return replaceClauses(initialSql, EMPTY_USERNAME);
+	}
+	
 	public String getSqlWithNamedParameters() {
 		return replaceClauses(sql, EMPTY_USERNAME);
 	}

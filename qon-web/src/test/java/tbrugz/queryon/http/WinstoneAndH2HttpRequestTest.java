@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -2291,6 +2292,68 @@ public class WinstoneAndH2HttpRequestTest {
 		String content = getContentFromUrl(baseUrl+url);
 		System.out.println(content);
 		Assert.assertEquals("C1" + LF +
+				"2" + LF,
+				content);
+	}
+
+	public static Object getFieldFromNamedObject(List<Object> data, String objName, String objField) {
+		for(int i=0;i<data.size();i++) {
+			Map<String, Object> rel = (Map<String, Object>) data.get(i);
+			//System.out.println("["+i+"] data.map: "+rel);
+			if(objName.equals(rel.get("name"))) {
+				return rel.get(objField);
+			}
+		}
+		//Assert.fail("Object with name "+objName+" not found");
+		throw new RuntimeException("Object with name "+objName+" not found");
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetRelationFields() throws IOException, ParserConfigurationException, SAXException {
+		String content = httpGetContent("/relation.json?limit=20");
+		Gson gson = new Gson();
+		Map<String, Object> map = (Map<String, Object>) gson.fromJson(content, Map.class);
+		//System.out.println("map: "+map);
+		List<Object> data = (List<Object>) map.get("data");
+		//System.out.println("data: "+data);
+		String[] expectedArr = new String[] {"par1", "par2", "par1"};
+		
+		{
+			List<String> namedParameters = (List<String>) getFieldFromNamedObject(data, "NAMED_PARAMS_1", "namedParameterNames");
+			Assert.assertNotNull("namedParameters should not be null", namedParameters);
+			Assert.assertArrayEquals(expectedArr, namedParameters.toArray(new String[]{}));
+		}
+		{
+			List<String> namedParameters = (List<String>) getFieldFromNamedObject(data, "NAMED_PARAMS_NO_PARAM_COUNT", "namedParameterNames");
+			Assert.assertNotNull("namedParameters should not be null", namedParameters);
+			Assert.assertArrayEquals(expectedArr, namedParameters.toArray(new String[]{}));
+		}
+		{
+			List<String> namedParameters = (List<String>) getFieldFromNamedObject(data, "QUERY_WITH_BIND_NAMED_PARAMS", "namedParameterNames");
+			Assert.assertNotNull("namedParameters should not be null", namedParameters);
+			Assert.assertArrayEquals(expectedArr, namedParameters.toArray(new String[]{}));
+		}
+	}
+
+	@Test
+	public void testGetQueryWithNamedParametersPivotAndFilter() throws Exception {
+		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1&par2=2&fin:C1=1&onrows=C1&groupbydims=true&agg:C1=count";
+		
+		String content = getContentFromUrl(baseUrl+url);
+		//System.out.println(content);
+		Assert.assertEquals("C1,count_C1" + LF +
+				"1,2" + LF,
+				content);
+	}
+	
+	@Test
+	public void testGetQueryWithBindNamedParametersPivotAndFilter() throws Exception {
+		String url = "/QUERY.QUERY_WITH_BIND_NAMED_PARAMS.csv?par1=1&par2=2&fin:C1=1&oncols=C1&groupbydims=true&agg:C1=count";
+
+		String content = getContentFromUrl(baseUrl+url);
+		//System.out.println(content);
+		Assert.assertEquals("count_C1|||C1:::1" + LF +
 				"2" + LF,
 				content);
 	}
