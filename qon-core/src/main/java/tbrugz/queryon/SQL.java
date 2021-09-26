@@ -191,14 +191,15 @@ public class SQL {
 			username = EMPTY_USERNAME;
 		}
 
-		sql = TokenizerUtil.replaceNamedParameters(sql);
+		// parameters already replaced in constructor...
+		//sql = TokenizerUtil.replaceNamedParameters(sql);
 
 		//log.info("getFinalSql: "+username);
 		return replaceClauses(sql, username);
 	}
 
 	public String getInitialSql() {
-		return replaceClauses(initialSql, EMPTY_USERNAME);
+		return replaceClauses(initialSql, username);
 	}
 	
 	public String getSqlWithNamedParameters() {
@@ -315,7 +316,7 @@ public class SQL {
 		else if(sql.contains(PARAM_FILTER_CLAUSE)) {
 			sql = sql.replace(PARAM_FILTER_CLAUSE, "and "+filter+" "+PARAM_FILTER_CLAUSE);
 		}
-		else if(filter.length()>0) {
+		else {
 			if(relation!=null && relation instanceof Query) {
 				/*if(! allowEncapsulation) {
 					throw new BadRequestException("filter not allowed in query "+relation.getName());
