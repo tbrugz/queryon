@@ -41,15 +41,19 @@ change `settings.xml`:
 ```
 
 snapshot:  
-`mvn clean deploy`  
-(https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/queryon/)
+`mvn clean deploy` - all projects  
+`mvn clean deploy -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  
+
+artifacts at snapshot repo:
+`https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/`
 
 release:  
-`mvn clean deploy -P release`  
+`mvn clean deploy -P release` - all projects  
+`mvn clean deploy -P release -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  
 & go to `https://oss.sonatype.org/` & close & release staging repo
 
 artifacts at central:  
-`https://repo1.maven.org/maven2/org/bitbucket/tbrugz/queryon/`
+`https://repo1.maven.org/maven2/org/bitbucket/tbrugz/`
 
 
 run jetty
