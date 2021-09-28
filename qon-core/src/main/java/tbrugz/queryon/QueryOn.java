@@ -237,7 +237,7 @@ public class QueryOn extends AbstractHttpServlet {
 		static final ParametrizedProperties prop = new ParametrizedProperties();
 		static {
 			try {
-				prop.load(LimitOffsetStrategy.class.getResourceAsStream(PROPFILE_DBMS_SPECIFIC));
+				prop.load(IOUtil.getResourceAsStream(PROPFILE_DBMS_SPECIFIC));
 			} catch (IOException e) {
 				log.warn("LimitOffsetStrategy: "+e);
 				throw new ExceptionInInitializerError(e);
@@ -410,7 +410,7 @@ public class QueryOn extends AbstractHttpServlet {
 	/*
 	void log4jInit() {
 		String log4jres = "/log4j.properties";
-		InputStream is = QueryOn.class.getResourceAsStream(log4jres);
+		InputStream is = IOUtil.getResourceAsStream(log4jres);
 		if(is!=null) {
 			try {
 				Class<?> c = Class.forName("org.apache.log4j.PropertyConfigurator");
@@ -454,7 +454,7 @@ public class QueryOn extends AbstractHttpServlet {
 			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, rdfBase);
 			log.info("path= ["+path+"] "+PROP_CONTEXT_PATH+"= ["+contextPath+"] ; "+RDFAbstractSyntax.PROP_RDF_BASE+"= ["+rdfBase+"]");
 			
-			prop.load(QueryOn.class.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
+			prop.load(IOUtil.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
 
 			{
 				ServletConfig config = getServletConfig();
@@ -489,7 +489,7 @@ public class QueryOn extends AbstractHttpServlet {
 			
 			if(propertiesResource!=null) {
 				log.info("loading properties: "+propertiesResource);
-				prop.load(QueryOn.class.getResourceAsStream(propertiesResource));
+				prop.load(IOUtil.getResourceAsStream(propertiesResource));
 			}
 			else if(propertiesFile!=null) {
 				log.info("loading properties file: "+propertiesFile);

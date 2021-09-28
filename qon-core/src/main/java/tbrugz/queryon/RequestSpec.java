@@ -36,6 +36,7 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
@@ -212,7 +213,7 @@ public class RequestSpec {
 	static final Properties syntaxProperties = new Properties();
 	static {
 		try {
-			syntaxProperties.load(RequestSpec.class.getResourceAsStream(SYNTAXES_INFO_RESOURCE));
+			syntaxProperties.load(IOUtil.getResourceAsStream(SYNTAXES_INFO_RESOURCE));
 		} catch (Exception e) {
 			log.warn("Error loading resource '"+SYNTAXES_INFO_RESOURCE+"'", e);
 		}

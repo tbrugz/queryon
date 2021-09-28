@@ -47,6 +47,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
@@ -306,7 +307,7 @@ public class InfoServlet extends AbstractHttpServlet {
 
 		try {
 			Properties pqon = new Properties();
-			pqon.load(QueryOn.class.getResourceAsStream("/queryon-version.properties"));
+			pqon.load(IOUtil.getResourceAsStream("/queryon-version.properties"));
 			for(Map.Entry<Object, Object> entry: pqon.entrySet()) {
 				//p2.put("queryon."+entry.getKey(), String.valueOf(entry.getValue()) );
 				ret.put("queryon."+entry.getKey(), String.valueOf(entry.getValue()) );
@@ -316,7 +317,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		
 		try {
 			Properties psqld = new Properties();
-			psqld.load(QueryOn.class.getResourceAsStream("/sqldump-version.properties"));
+			psqld.load(IOUtil.getResourceAsStream("/sqldump-version.properties"));
 			for(Map.Entry<Object, Object> entry: psqld.entrySet()) {
 				//p2.put("sqldump."+entry.getKey(), String.valueOf(entry.getValue()) );
 				ret.put("sqldump."+entry.getKey(), String.valueOf(entry.getValue()) );
