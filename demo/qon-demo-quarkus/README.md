@@ -20,6 +20,8 @@ Packaging: `mvn package`
 
 Running: `java -jar target/quarkus-app/quarkus-run.jar`
 
+Running (using H2): `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC java -jar target/quarkus-app/quarkus-run.jar`
+
 
 ## Other commands
 
