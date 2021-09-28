@@ -1,6 +1,51 @@
 
-queryon 0.6.2
-----------
+queryon 0.7 [2021-09-26]
+-----------
+* refactoring: modules 'qon-core', 'qon-web', 'demo-minimal', 'demo-dbn'
+* api: added 'graphql' module
+* qon: added BaseApiServlet
+* web: added qon-graphql dependency & graphiql.html
+* queryon: added HEAD method [2018-07-16]
+* graphql: added mutation (execute)
+* api: swagger: added responses
+* queryon: SQL/query: using 'namedParameterNames', doStatus: using UnionResultSet
+* queryon: SQL: added 'bind-null-on-missing-parameters' special construct
+* api: added 'soap' module [2018-11-11]
+* processor: added SQLQueriesLoader
+* queryon: added warning headers 'SQL-Position' & 'SQL-Line'
+* updateplugin: multi-model mode added ; QOnExecs/QOnQueries/QOnTables changed
+* queryon/graphql: added BeanActions
+* api: odata: added beans/singleton queries, added 'currentUser' query
+* syntax: htmlx: added support for 'breaks'
+* demo: added 'qon-demo-static'
+* auth: added AuthServlet
+* api: added 'webdav' methods
+* demo: added 'qon-demo-pg' [2019-11-20]
+* demo: added 'qon-demo-anydb'
+* demo: qon-demo-pg: added thorntail profile & Dockerfile
+* auth: added 'qon-auth-keycloak' module (keycloak/shiro integration)
+* web: pivot: add 'drillthrough' action [2020-02-06]
+* demo: refactoring/moving demos to '/demo'
+* build/pom: updates for java11
+* web: workspace: 'download' with many syntaxes
+* web: using swagger-ui v2 & v3 [2020-07-28]
+* datadiff: filters: added 'gt', 'ge', 'lt' & 'le' filters + 'null' & 'notnull' filters
+* doc: added BUILDING.md, updated README (moved to github.com)
+* web: added qon-editor.html
+* api: added InfoServlet (from qon-web: info/*.jsp)
+* demo: added 'qon-demo-springboot'
+* filter: add AccessLogFilter [2021-03-07]
+* web: workspace: added 'updatemax' input parameter
+* soap: beanQuery support
+* queryon: added DiffProcessor ; QOnManage: added 'applydiff' subaction
+* queryon: added support for 'Range requests' (blobs)
+* queryon: SQL: added 'distinct-count' aggregate
+* queryon: SQL: added named parameters (":param" syntax) [2021-07-08]
+* web: intercepting inner *_HREF links
+
+
+queryon 0.6.2 [2018-06-07]
+-------------
 * web: added "web" props: '.auth-required' & '.appname' (900)
 * datadiff: multi-table support
 * datadiff: added 'ignorecol' & 'altuk' params
@@ -48,8 +93,8 @@ queryon 0.6.2
 * datadiff: added 'fin:' & 'fnin:' param prefixes (1241)
 
 
-queryon 0.6.1
-----------
+queryon 0.6.1 [2016-08-29]
+-------------
 * build: added status.jsp & build.revisionNumber
 * web: blob dump ui
 * web: added map ui (mapproc)

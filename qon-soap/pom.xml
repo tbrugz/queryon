@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>queryon</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7</version>
   </parent>
   
   <artifactId>qon-soap</artifactId>
   <packaging>jar</packaging>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.7</version>
 
   <name>${project.artifactId}</name>
 
