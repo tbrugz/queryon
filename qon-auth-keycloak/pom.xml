@@ -35,7 +35,7 @@
 
     <dependency>
       <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-core</artifactId>
+      <artifactId>keycloak-common</artifactId>
       <version>${keycloak.version}</version>
     </dependency>
 
