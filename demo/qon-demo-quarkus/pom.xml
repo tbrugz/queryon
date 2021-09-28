@@ -6,11 +6,11 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>qon-demo-parent</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>qon-demo-quarkus</artifactId>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>

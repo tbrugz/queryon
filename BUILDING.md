@@ -28,7 +28,7 @@ see also: `demo/qon-demo-dbn/TESTING.md`, `demo/qon-demo-minimal/TESTING.md`
 Upgrading version
 -----
 
-`mvn versions:set -DnewVersion=<new-version>` - ex: `mvn versions:set -DnewVersion=0.7-SNAPSHOT`
+`mvn versions:set -DnewVersion=<new-version>` - ex: `mvn versions:set -DnewVersion=0.8-SNAPSHOT`
 
 
 maven profiles
