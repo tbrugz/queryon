@@ -171,6 +171,38 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+
+      <!--
+      https://stackoverflow.com/questions/37862552/spring-boot-shared-web-modules-jar-file-overlay - maven dependency
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.bitbucket.tbrugz</groupId>
+                  <artifactId>qon-web</artifactId>
+                  <version>${project.parent.version}</version>
+                  <type>war</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}/classes/META-INF/resources</outputDirectory>
+                  <includes>**/*.css,**/*.gif,**/*.html,**/*.js,**/*.json,**/*.map,**/*.md,**/*.png,**/*.ttf,**/*.woff,**/*.woff2</includes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
   <!--
