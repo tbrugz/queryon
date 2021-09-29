@@ -33,11 +33,6 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jetty.version}</version>
 
-				<!-- java 6, java 7 -->
-				<!--<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.java6.version}</version>-->
-
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<!-- <webApp>

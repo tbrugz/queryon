@@ -30,11 +30,6 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jetty.version}</version> <!-- 9.4.24.v20191120 -->
 
-				<!-- java 6, java 7 -->
-				<!--<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.java6.version}</version>-->
-
 				<configuration>
 					<!--
 					https://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin 
