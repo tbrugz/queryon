@@ -30,6 +30,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
 
     <maven-enforcer-plugin.requireJavaVersion>1.7.0</maven-enforcer-plugin.requireJavaVersion>
+    <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
 
     <!-- <queryon.version>${project.version}</queryon.version> -->
     <sqldump.version>0.10-SNAPSHOT</sqldump.version>
@@ -106,7 +107,7 @@
     <module>demo/qon-demo-pg</module>
     <module>demo/qon-demo-anydb</module>
     <module>demo/qon-demo-springboot</module>
-    <module>demo/qon-demo-quarkus</module>
+    <!--<module>demo/qon-demo-quarkus</module>-->
   </modules>
 
   <licenses>
@@ -188,7 +189,7 @@
                   <version>${maven-enforcer-plugin.requireJavaVersion}</version>
                 </requireJavaVersion>
                 <requireMavenVersion>
-                  <version>3.2.5</version>
+                  <version>${maven-enforcer-plugin.requireMavenVersion}</version>
                 </requireMavenVersion>
                 <!--
                 <enforceBytecodeVersion>
