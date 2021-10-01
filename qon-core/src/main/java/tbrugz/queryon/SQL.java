@@ -317,14 +317,18 @@ public class SQL {
 			sql = sql.replace(PARAM_FILTER_CLAUSE, "and "+filter+" "+PARAM_FILTER_CLAUSE);
 		}
 		else {
-			if(relation!=null && relation instanceof Query) {
-				/*if(! allowEncapsulation) {
-					throw new BadRequestException("filter not allowed in query "+relation.getName());
-				}*/
-				sql = "select * from (\n"+sql+"\n) qon_filter";
-			}
-			sql += " where "+filter+" "+PARAM_FILTER_CLAUSE;
+			addEncapsulatingFilter(filter, true);
 		}
+	}
+
+	public void addEncapsulatingFilter(String filter, boolean addFilterClause) {
+		if(relation!=null && relation instanceof Query) {
+			/*if(! allowEncapsulation) {
+				throw new BadRequestException("filter not allowed in query "+relation.getName());
+			}*/
+			sql = "select * from (\n"+sql+"\n) qon_filter";
+		}
+		sql += " where "+filter+" "+(addFilterClause?PARAM_FILTER_CLAUSE:"");
 	}
 	
 	private void addProjection(String columns) {
@@ -452,7 +456,7 @@ public class SQL {
 					sql = "select * from (\n"+sql+"\n) where rownum <= "+limit; 
 				}
 				else {
-					addFilter("rownum <= "+limit);
+					addEncapsulatingFilter("rownum <= "+limit, false);
 				}
 			}
 			else {
