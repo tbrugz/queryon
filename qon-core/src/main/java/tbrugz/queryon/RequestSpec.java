@@ -88,6 +88,8 @@ public class RequestSpec {
 	public static final String ATTR_SQL_LINE_OF_INITIAL = "sql.line-of-initial";
 	public static final String ATTR_GENERATED_KEYS = "generated-keys";
 	public static final String ATTR_RETURN_LIST = "return-list";
+
+	public static final String ATTR_WARNINGS = "warnings";
 	
 	// select parameters
 	public static final String PARAM_FIELDS = "fields";
@@ -868,7 +870,7 @@ public class RequestSpec {
 	}
 	
 	protected String getObject(List<String> parts, int prefixesToIgnore) {
-		log.info("getObject: parts = "+parts+" ; prefixesToIgnore = "+prefixesToIgnore);
+		log.debug("getObject: parts = "+parts+" ; prefixesToIgnore = "+prefixesToIgnore);
 		//String objectTmp = null;
 		/*if(parts.size()>0) {
 			objectTmp = parts.remove(0);
@@ -1342,4 +1344,9 @@ public class RequestSpec {
 	public DumpSyntaxInt getOutputSyntax() {
 		return outputSyntax;
 	}
+
+	public boolean isPivotedQueryRequest() {
+		return oncols.size()>0 || onrows.size()>0;
+	}
+	
 }

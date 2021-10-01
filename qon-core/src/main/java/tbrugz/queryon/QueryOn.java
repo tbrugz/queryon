@@ -1536,7 +1536,7 @@ public class QueryOn extends AbstractHttpServlet {
 		}*/
 		ResultSet rs = st.executeQuery();
 		
-		if(reqspec.oncols.size()>0 || reqspec.onrows.size()>0) {
+		if(reqspec.isPivotedQueryRequest()) {
 			rs = pivotResultSet(rs, relation, sql, reqspec, resp);
 		}
 		
