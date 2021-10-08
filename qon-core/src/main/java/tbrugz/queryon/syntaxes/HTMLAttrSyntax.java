@@ -353,7 +353,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				sb.append( "<td"
 						+(origVal==null?" null=\"true\"":"")
 						+attrsStr
-						+(i<onRowsColCount?" dimoncol=\"true\"":"")
+						+(i<getOnRowsColCount()?" dimoncol=\"true\"":"")
 						//+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
 						+((dumpIsNumeric && DataDumpUtils.isNumericType(ctype))?" numeric=\"true\"":"")
 						+">"+ value +"</td>");
