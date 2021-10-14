@@ -117,7 +117,14 @@
 			<version>${diffutils.version}</version>
 		</dependency>
 		<!-- /considering... -->
-		
+
+		<!-- syntaxes dependencies -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.14</version>
+		</dependency>
+
 		<!--
 		for using in java9+ , WildFly 17 (& others?)
 		see: https://stackoverflow.com/a/47412779
