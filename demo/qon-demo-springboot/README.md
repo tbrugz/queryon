@@ -16,15 +16,22 @@ OR (using jar)
 
 ```shell
 mvn clean package
-java -jar target/qon-demo-springboot-0.7-SNAPSHOT.jar
+java -jar target/qon-demo-springboot.jar
 ```
 
 <!--
+OR
+
+```shell
+mvn package spring-boot:repackage
+java -jar target/qon-demo-springboot.jar
+```
+
 OR (war)
 
-```
+```shell
 mvn clean package
-java -jar target/qon-demo-springboot-0.7-SNAPSHOT.war 
+java -jar target/qon-demo-springboot-0.8-SNAPSHOT.war 
 ```
 -->
 

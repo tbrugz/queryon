@@ -23,7 +23,7 @@
 	<properties>
 		<maven.deploy.skip>true</maven.deploy.skip>
 
-		<qon.version>0.7-SNAPSHOT</qon.version>
+		<!--<qon.version>0.8-SNAPSHOT</qon.version>-->
 		<springboot.version>2.3.12.RELEASE</springboot.version>
 		<!--
 		<queryon.version>0.7-SNAPSHOT</queryon.version>
@@ -47,12 +47,28 @@
 	<name>qon-demo-springboot</name>
 	<description>QueryOn Demo with Spring Boot</description>
 
+	<dependencyManagement>
+		<dependencies>
+			<!--
+			https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/using-boot-build-systems.html#using-boot-maven-without-a-parent
+			https://www.baeldung.com/spring-boot-dependency-management-custom-parent
+			-->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${springboot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<!-- https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html -->
 		<!--<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>queryon</artifactId>
-			<version>${qon.version}</version>
+			<version>${project.version}</version>
 			<type>pom</type>
 			<scope>import</scope>
 		</dependency>-->
@@ -60,18 +76,18 @@
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-core</artifactId>
-			<version>${qon.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-graphql</artifactId>
-			<version>${qon.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-soap</artifactId>
-			<version>${qon.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -187,11 +203,22 @@
 	</dependencies>
 
 	<build>
+		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${springboot.version}</version>
+				<!--
+				https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/html/build-tool-plugins-maven-plugin.html#build-tool-plugins-include-maven-plugin
+				-->
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<!--
@@ -213,7 +240,7 @@
 								<artifactItem>
 									<groupId>org.bitbucket.tbrugz</groupId>
 									<artifactId>qon-web</artifactId>
-									<version>${qon.version}</version>
+									<version>${project.version}</version>
 									<type>war</type>
 									<overWrite>false</overWrite>
 									<outputDirectory>${project.build.directory}/classes/static</outputDirectory>
@@ -223,7 +250,7 @@
 								<artifactItem>
 									<groupId>org.bitbucket.tbrugz</groupId>
 									<artifactId>qon-web</artifactId>
-									<version>${qon.version}</version>
+									<version>${project.version}</version>
 									<type>war</type>
 									<overWrite>false</overWrite>
 									<outputDirectory>${project.build.directory}/classes/WEB-INF/jsp</outputDirectory>
