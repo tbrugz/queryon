@@ -91,6 +91,11 @@
 			<artifactId>qon-soap</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-springboot-helper</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>

@@ -1,10 +1,13 @@
 package tbrugz.queryon.springboot;
 
+/*
 import javax.servlet.ServletContextListener;
 
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
+*/
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+/*
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -12,12 +15,13 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 
 import tbrugz.queryon.AbstractHttpServlet;
+*/
 
 /*
  * https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.embedded-container.servlets-filters-listeners
  */
 @SpringBootApplication
-public class QOnApp extends SpringBootServletInitializer {
+public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 
 	public static void main(String[] args) {
 		SpringApplication.run(QOnApp.class, args);
@@ -67,10 +71,12 @@ public class QOnApp extends SpringBootServletInitializer {
 
 	// https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-create-a-deployable-war-file
 	// https://howtodoinjava.com/spring-boot/spring-boot-jsp-view-example/
+	/*
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(QOnApp.class);
 	}
+	*/
 
 	/*@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -79,6 +85,7 @@ public class QOnApp extends SpringBootServletInitializer {
 		return dataSourceBuilder.build();
 	}*/
 
+	/*
 	// https://stackoverflow.com/questions/32394862/how-to-register-servletcontextlistener-in-spring-boot
 	@Bean
 	public ServletContextListener shiroListener() {
@@ -135,6 +142,7 @@ public class QOnApp extends SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DiffManyServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	/*
 	@Bean
@@ -150,6 +158,7 @@ public class QOnApp extends SpringBootServletInitializer {
 	}
 	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean servletPagesServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.PagesServlet();
@@ -202,5 +211,6 @@ public class QOnApp extends SpringBootServletInitializer {
 		registration.setOrder(1);
 		return registration;
 	}
+	*/
 
 }
