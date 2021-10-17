@@ -2,6 +2,9 @@
 queryon
 =======
 
+[![CI](https://github.com/tbrugz/queryon/actions/workflows/maven.yml/badge.svg)](https://github.com/tbrugz/queryon/actions/workflows/maven.yml)
+
+
 A REST-like API that follows the naked objects pattern. A bit like a 'naked database objects' API.
 Depends on [sqldump](https://github.com/tbrugz/sqldump).
 
@@ -24,7 +27,7 @@ More info about QueryOn:
 building
 --------
 
-Dependencies: java 1.6+ ; maven 3+
+Dependencies: java 8+ (java 7 can be used for running - with carefully selected dependencies); maven 3.2.5+
 
 Building: `mvn install`
 
@@ -50,7 +53,9 @@ demos - running
 
 * **demo-anydb**: demo that can use any supported JDBC database (using default web interface) - see [demo/qon-demo-anydb/README.md](demo/qon-demo-anydb/README.md)
 
-* **demo-springboot**: demo using SpringBoot - see [demo/qon-demo-springboot/README.md](demo/qon-demo-springboot/README.md)
+* **demo-springboot**: demo using [Spring Boot](https://spring.io/projects/spring-boot) - see [demo/qon-demo-springboot/README.md](demo/qon-demo-springboot/README.md)
+
+* **demo-quarkus**: demo using [Quarkus](https://quarkus.io/) - see [demo/qon-demo-quarkus/README.md](demo/qon-demo-quarkus/README.md)
 
 Note: *demo-minimal* & *demo-dbn* need maven ant tasks to populate database(s).
 Install with `curl -o  ~/.ant/lib/maven-ant-tasks-2.1.3.jar https://repo1.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`
