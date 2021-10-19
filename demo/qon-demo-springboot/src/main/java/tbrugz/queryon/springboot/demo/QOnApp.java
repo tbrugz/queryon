@@ -1,4 +1,4 @@
-package tbrugz.queryon.springboot;
+package tbrugz.queryon.springboot.demo;
 
 /*
 import javax.servlet.ServletContextListener;
@@ -7,6 +7,7 @@ import org.apache.shiro.web.env.EnvironmentLoaderListener;
 */
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 /*
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -16,11 +17,14 @@ import org.springframework.context.annotation.Bean;
 
 import tbrugz.queryon.AbstractHttpServlet;
 */
+import tbrugz.queryon.springboot.QOnSpringBootApp;
 
 /*
  * https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.embedded-container.servlets-filters-listeners
  */
 @SpringBootApplication
+// https://stackoverflow.com/a/30273253
+@ComponentScan("tbrugz.queryon.springboot")
 public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 
 	public static void main(String[] args) {
