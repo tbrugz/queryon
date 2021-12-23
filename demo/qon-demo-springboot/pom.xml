@@ -25,9 +25,6 @@
 
 		<!--<qon.version>0.8-SNAPSHOT</qon.version>-->
 		<!--
-		<springboot.version>2.3.12.RELEASE</springboot.version>
-		-->
-		<!--
 		<queryon.version>0.7-SNAPSHOT</queryon.version>
 		<sqldump.version>0.9.17</sqldump.version>
 
