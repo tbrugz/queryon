@@ -2,6 +2,8 @@
 queryon
 =======
 
+[![GNU Affero General Public License, v3](https://img.shields.io/github/license/tbrugz/queryon.svg?label=License&color=blue)](LICENSE.md)
+[![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/queryon.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.bitbucket.tbrugz/queryon)
 [![CI](https://github.com/tbrugz/queryon/actions/workflows/maven.yml/badge.svg)](https://github.com/tbrugz/queryon/actions/workflows/maven.yml)
 
 
