@@ -15,12 +15,13 @@ spring:
         - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
     # https://stackoverflow.com/questions/32074631/spring-boot-application-without-a-datasource
     datasource:
-        url: jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon
+        #url: jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon
+        url: ${QON_JDBC_URL}
         # 'jdbc-url' needed when using DataSourceBuilder with @ConfigurationProperties(prefix = "spring.datasource")
         # also needed if HikariJNDIFactory used directly?
         # jdbc-url: jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon
-        username: admin
-        # password: 
+        username: ${QON_JDBC_USER:#{null}}
+        password: ${QON_JDBC_PASSWORD:#{null}}
         # driver-class-name: ${SPRING_DATASOURCE_DRIVER-CLASS-NAME}
         # used by tbrugz.queryon.springboot.DataSourceConfig
         datasource-name: jdbc/datasource-demo
@@ -28,9 +29,9 @@ spring:
 logging:
     level:
         # https://stackoverflow.com/questions/60757590/logging-hikaricp-spring-boot
-        com.zaxxer.hikari.HikariConfig: DEBUG 
+        #com.zaxxer.hikari.HikariConfig: DEBUG 
         #com.zaxxer.hikari: TRACE
-        org.apache.shiro: DEBUG
+        #org.apache.shiro: DEBUG
         #org.apache.shiro.config.Ini: TRACE
         #org.apache.shiro.realm.text.IniRealm: TRACE
         org.springframework.boot.context.config.ConfigFileApplicationListener: DEBUG

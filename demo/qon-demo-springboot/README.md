@@ -2,21 +2,21 @@
 qon-demo-springboot
 =====
 
-Demo using QueryOn with [Spring Boot](https://spring.io/projects/spring-boot)
-
-Uses the same database of [qon-demo-minimal](../qon-demo-minimal)
+Demo using QueryOn with [Spring Boot](https://spring.io/projects/spring-boot). Uses the same environment variables as [qon-demo-anydb](../qon-demo-minimal).
 
 
 running
 -----
 
-`mvn clean spring-boot:run`
+_Examples using [qon-demo-minimal](../qon-demo-minimal)_
+
+`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" QON_JDBC_USER=admin QON_JDBC_PASSWORD= mvn clean spring-boot:run`
 
 OR (using jar)
 
 ```shell
 mvn clean package
-java -jar target/qon-demo-springboot.jar
+QON_JDBC_URL="jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" QON_JDBC_USER=admin QON_JDBC_PASSWORD= java -jar target/qon-demo-springboot.jar
 ```
 
 <!--
