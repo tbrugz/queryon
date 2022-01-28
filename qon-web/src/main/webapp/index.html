@@ -58,7 +58,15 @@
 			},
 			{
 				"href": "q/manage/diffmodel/show" + ( modelId ? "?model=" + modelId : ""),
-				"label": "diff model"
+				"label": "diff model" + ( modelId ? " (" + modelId + ")": "")
+			},
+			{
+				"href": "processor/JAXBSchemaXMLSerializer" + ( modelId ? "?model=" + modelId : ""),
+				"label": "dump Xml model" + ( modelId ? " (" + modelId + ")": "")
+			},
+			{
+				"href": "processor/JSONSchemaSerializer" + ( modelId ? "?model=" + modelId : ""),
+				"label": "dump Json model" + ( modelId ? " (" + modelId + ")": "")
 			}
 		];
 	}

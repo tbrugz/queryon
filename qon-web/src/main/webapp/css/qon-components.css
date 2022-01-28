@@ -215,11 +215,12 @@
 	position: fixed;
 	top: 15px;
 	/*right: 15px;*/
-	width: 15em;
+	/*width: 15em;*/
 	z-index: 100;
 	max-height: 80%;
 	background-color: #fff;
 	border: 3px solid #bbb;
+	padding: 0 3em 0 0;
 }
 
 .qonpopup li {
@@ -228,7 +229,7 @@
 
 .qonpopup input {
 	float: right;
-	margin: 5px;
+	margin: 5px -2em 0 0;
 }
 
 /***** diff *****/
