@@ -71,6 +71,13 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		return application.sources(QOnSpringBootApp.class);
 	}
 
+	/*
+	@Bean
+	public DataSourceConfig getDataSourceBean() {
+		return new DataSourceConfig();
+	}
+	*/
+
 	/*@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
 	public DataSource getDataSource() {
