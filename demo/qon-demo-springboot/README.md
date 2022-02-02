@@ -58,5 +58,21 @@ _Example using demo-minimal_
 `docker run -it --rm -v $HOME/.queryon/:/data/ -e QON_JDBC_URL="jdbc:h2:/data/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" -e QON_JDBC_USER=admin -e QON_JDBC_PASSWORD= -p 8080:8080 qon-demo-springboot`
 
 
-* ref: https://spring.io/guides/gs/spring-boot-docker/
+* tagging & publishing:
 
+```shell
+#export TAG=<TAG>
+#export TAG=0.8-SNAPSHOT
+#export TAG=latest
+docker tag qon-demo-springboot tbrugz/qon-demo-springboot:$TAG
+docker push tbrugz/qon-demo-springboot:$TAG
+```
+
+* images in Docker Hub:
+
+https://hub.docker.com/r/tbrugz/qon-demo-springboot/
+
+
+* ref:
+
+https://spring.io/guides/gs/spring-boot-docker/
