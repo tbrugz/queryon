@@ -8,7 +8,10 @@ QueryOn demo using [Quarkus](https://quarkus.io), based on `qon-demo-anydb`
 
 * Running in dev mode (using H2):
 
-`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_JDBC_DRIVER=org.h2.Driver mvn quarkus:dev`
+`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DBKIND=h2 mvn quarkus:dev`
+
+Database **kinds** (env `QUARKUS_DATASOURCE_DBKIND`, translated to property `quarkus.datasource.db-kind`) can be found in [Quarkus Datasources Guide](https://quarkus.io/guides/datasource#default-datasource)
+
 
 * Browse:
 
@@ -20,7 +23,7 @@ Packaging: `mvn package`
 
 Running: `java -jar target/quarkus-app/quarkus-run.jar`
 
-Running (using H2): `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_JDBC_DRIVER=org.h2.Driver java -jar target/quarkus-app/quarkus-run.jar`
+Running (using H2): `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DBKIND=h2 java -jar target/quarkus-app/quarkus-run.jar`
 
 
 ## Other commands
