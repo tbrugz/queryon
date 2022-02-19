@@ -37,6 +37,7 @@ logging:
         org.springframework.boot.context.config.ConfigFileApplicationListener: DEBUG
         #org.springframework.web: DEBUG
         #tbrugz.sqldump.util.ConnectionUtil: DEBUG
+        tbrugz.sqldump.cdi: DEBUG
         # verbose spring-boot web logging:
         #web: DEBUG
 
