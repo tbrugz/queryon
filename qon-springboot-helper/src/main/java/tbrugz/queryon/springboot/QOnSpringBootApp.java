@@ -18,6 +18,8 @@ import tbrugz.queryon.AbstractHttpServlet;
 //@SpringBootApplication
 public class QOnSpringBootApp extends SpringBootServletInitializer {
 
+	protected static boolean loadQueryOnServletOnStartup = true;
+	
 	public static void main(String[] args) {
 		SpringApplication.run(QOnSpringBootApp.class, args);
 	}
@@ -96,7 +98,9 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	public ServletRegistrationBean servletQueryOnBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOn();
 		ServletRegistrationBean bean = new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
-		bean.setLoadOnStartup(1);
+		if(loadQueryOnServletOnStartup) {
+			bean.setLoadOnStartup(1);
+		}
 		return bean;
 	}
 
