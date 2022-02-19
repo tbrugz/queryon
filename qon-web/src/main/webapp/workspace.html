@@ -301,7 +301,7 @@ function setParameters(numparams) {
 		for(var i=params.length+1;i<=numparams;i++) {
 			paramsStr += "<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"'/></label>";
 		}
-		byId('sqlparams').innerHTML = paramsStr;
+		byId('sqlparams').innerHTML += paramsStr;
 	}
 	else if(numparams < params.length) {
 		for (var i = params.length; i > numparams; --i) {
