@@ -25,6 +25,7 @@ import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 
 import tbrugz.queryon.auth.provider.IdentityProvider;
 import tbrugz.queryon.exception.ForbiddenException;
@@ -148,6 +149,9 @@ public class ShiroUtils {
 			
 			PrincipalCollection principals = new SimplePrincipalCollection(userIdentity, realmName);
 			currentUser = new Subject.Builder().principals(principals).authenticated(authenticated).session(currentUser.getSession()).buildSubject();
+			//request.setUserPrincipal(currentUser);
+			ThreadContext.bind(currentUser);
+			
 			if(log.isDebugEnabled()) {
 				log.debug("getSubject: Subject built [userIdentity="+userIdentity+"; realmName="+realmName+"; authenticated="+authenticated+
 						"; session="+(currentUser.getSession()!=null?currentUser.getSession().getId():null)+"]");
