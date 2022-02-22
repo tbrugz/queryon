@@ -189,12 +189,14 @@ public class DBUtil {
 		return true;
 	}
 
-	public static boolean releaseSavepoint(Connection conn, Savepoint sp) {
+	public static boolean releaseSavepoint(Connection conn, DBMSFeatures features, Savepoint sp) {
 		//boolean autocommit = false;
 		try {
 			//autocommit = conn.getAutoCommit();
 			if(sp!=null) {
-				conn.releaseSavepoint(sp);
+				if(features!=null && features.supportsReleaseSavepoint()) {
+					conn.releaseSavepoint(sp);
+				}
 			}
 		} catch (SQLFeatureNotSupportedException e) {
 			//log.debug("Error releasing savepoint [autocommit="+autocommit+"]: "+e);

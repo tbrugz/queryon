@@ -27,6 +27,7 @@ import tbrugz.queryon.SQL;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
@@ -34,6 +35,7 @@ import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
@@ -61,6 +63,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	static final String ACTION_READ_QUERY = "readQuery";
 	
 	ServletContext servletContext;
+	DBMSFeatures features = null;
 	
 	String getQonQueriesTable() {
 		return getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
@@ -127,6 +130,8 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		origViews.addAll(model.getViews());
 		
 		try {
+			DBMSResources res = DBMSResources.instance();
+			features = res.getSpecificFeatures(conn.getMetaData());
 			readFromDatabase(servletContext);
 		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
 			modelRollback(origViews);
@@ -220,7 +225,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			DBUtil.doRollback(conn, sp);
 		}
 		finally {
-			DBUtil.releaseSavepoint(conn, sp);
+			DBUtil.releaseSavepoint(conn, features, sp);
 		}
 	
 		if(model.getViews().contains(q)) {
