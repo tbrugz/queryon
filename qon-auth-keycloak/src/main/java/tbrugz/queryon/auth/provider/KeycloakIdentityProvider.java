@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.IDToken;
 
 public class KeycloakIdentityProvider implements IdentityProvider {
@@ -41,21 +42,50 @@ public class KeycloakIdentityProvider implements IdentityProvider {
 			if(principal instanceof KeycloakPrincipal) {
 				// https://stackoverflow.com/questions/31864062/fetch-logged-in-username-in-a-webapp-secured-with-keycloak
 				KeycloakPrincipal<?> kp = (KeycloakPrincipal<?>) principal;
+				//log.debug("kp.getName(): "+kp.getName());
 				KeycloakSecurityContext securityContext = kp.getKeycloakSecurityContext();
-				IDToken idtoken = securityContext.getIdToken();
-				if(idtoken==null) {
-					//log.warn("getIdentity: null IDToken");
-					idtoken = securityContext.getToken();
+				//log.debug("sc.realm: "+securityContext.getRealm());
+				/*
+				AuthorizationContext authContext = securityContext.getAuthorizationContext();
+				if(authContext!=null) {
+					log.debug("authContext.getPermissions(): "+authContext.getPermissions());
+				}
+				else {
+					log.debug("null authContext");
+				}
+				*/
+				
+				AccessToken acesstoken = securityContext.getToken();
+				if(acesstoken==null) {
+					log.debug("getIdentity: null AccessToken");
+					IDToken idtoken = securityContext.getIdToken();
 					if(idtoken==null) {
 						log.warn("getIdentity: null IDToken and AccessToken");
 						return null;
 					}
+					else {
+						//log.info("idtoken.getPreferredUsername: "+idtoken.getPreferredUsername());
+						return idtoken.getPreferredUsername();
+					}
 				}
-				/*else {
-					return idtoken.getPreferredUsername();
-				}*/
 
-				return idtoken.getPreferredUsername();
+				/*
+				{
+					log.info("acesstoken.getPreferredUsername: "+acesstoken.getPreferredUsername());
+					Access access = acesstoken.getRealmAccess();
+					if(access!=null) {
+						//log.info("acesstoken.getRealmAccess: "+access);
+						log.info("acesstoken.getRealmAccess.getRoles: "+access.getRoles());
+					}
+					else {
+						log.debug("null acesstoken.getRealmAccess");
+					}
+					IDToken idtoken = securityContext.getIdToken();
+					log.info("idtoken.getPreferredUsername[2]: "+idtoken.getPreferredUsername());
+				}
+				*/
+
+				return acesstoken.getPreferredUsername();
 			}
 			/*else {
 				return principal.getName();

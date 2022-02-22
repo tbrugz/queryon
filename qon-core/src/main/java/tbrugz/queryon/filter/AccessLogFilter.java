@@ -130,8 +130,8 @@ public class AccessLogFilter implements Filter {
 		String url = req.getRequestURI();
 		String queryString = grabQueryString ? req.getQueryString() : null;
 		Principal userPrincipal = req.getUserPrincipal();
-		String username = req.getRemoteUser();
 		String remoteAddr = req.getRemoteAddr();
+		//Subject currentUser = ShiroUtils.getSubject(prop, request);
 		//String authType = req.getAuthType();
 		// XXX req.getHeader("")
 		//req.getProtocol(); // protocol/version
@@ -163,10 +163,16 @@ public class AccessLogFilter implements Filter {
 			attr.put(SERVER_PROTOCOL, req.getProtocol());
 		}
 		if(userPrincipal!=null) {
+			//log.info("userPrincipal = "+userPrincipal+" ; getName() = "+userPrincipal.getName()+" ; getClass() = "+userPrincipal.getClass());
+			//log.info("req.getClass() = "+req.getClass());
 			attr.put(USERNAME, userPrincipal.getName());
 		}
-		else if(username!=null) {
-			attr.put(USERNAME, username);
+		else {
+			String username = req.getRemoteUser();
+			if(username!=null) {
+				//log.info("userPrincipal is null but username = "+username);
+				attr.put(USERNAME, username);
+			}
 		}
 		attr.put(REMOTE_ADDR, remoteAddr);
 		if(grabHeaderReferer) {

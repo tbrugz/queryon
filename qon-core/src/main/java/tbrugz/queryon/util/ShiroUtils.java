@@ -132,8 +132,15 @@ public class ShiroUtils {
 				// Adds principal do anonymous user so that we may check their perissions
 				// see: https://issues.apache.org/jira/browse/SHIRO-526
 				//XXX add property to set (or not) userIdentity/principal to anonymous user?
-				userIdentity = prop.getProperty(PROP_AUTH_ANONUSER, DEFAULT_AUTH_ANONUSER);
-				realmName = prop.getProperty(PROP_AUTH_ANONREALM, DEFAULT_AUTH_ANONREALM);
+				if(prop!=null) {
+					userIdentity = prop.getProperty(PROP_AUTH_ANONUSER, DEFAULT_AUTH_ANONUSER);
+					realmName = prop.getProperty(PROP_AUTH_ANONREALM, DEFAULT_AUTH_ANONREALM);
+				}
+				else {
+					log.debug("null Properties?");
+					userIdentity = DEFAULT_AUTH_ANONUSER;
+					realmName = DEFAULT_AUTH_ANONREALM;
+				}
 				if(log.isTraceEnabled()) {
 					log.trace("getSubject: Anonymous Subject will be built [userIdentity="+userIdentity+"; realmName="+realmName+"]");
 				}
