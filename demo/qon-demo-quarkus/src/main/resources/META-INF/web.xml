@@ -26,6 +26,9 @@
 		<!--
 		<load-on-startup>1</load-on-startup>
 		-->
+		<!-- this 'multipart-config' seems to be needed for undertow server -->
+		<multipart-config>
+		</multipart-config>
 		<!-- <multipart-config>
 			<location>/tmp</location>
 			<max-file-size>2097152</max-file-size> <!- 2mb ->

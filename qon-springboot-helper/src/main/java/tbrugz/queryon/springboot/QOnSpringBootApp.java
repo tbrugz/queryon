@@ -1,5 +1,6 @@
 package tbrugz.queryon.springboot;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContextListener;
 
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
@@ -65,6 +66,10 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 			}
 		};
 	}*/
+	
+	public static String getSystemTempDir() {
+		return System.getProperty("java.io.tmpdir");
+	}
 
 	// https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-create-a-deployable-war-file
 	// https://howtodoinjava.com/spring-boot/spring-boot-jsp-view-example/
@@ -94,10 +99,12 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	}
 	
 	// https://stackoverflow.com/a/20939923/616413
+	// http://websystique.com/springmvc/spring-mvc-4-file-upload-example-using-multipartconfigelement/
 	@Bean
 	public ServletRegistrationBean servletQueryOnBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOn();
 		ServletRegistrationBean bean = new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
+		bean.setMultipartConfig(new MultipartConfigElement(getSystemTempDir()));
 		if(loadQueryOnServletOnStartup) {
 			bean.setLoadOnStartup(1);
 		}

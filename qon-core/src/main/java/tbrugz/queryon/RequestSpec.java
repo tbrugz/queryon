@@ -209,7 +209,7 @@ public class RequestSpec {
 	protected final List<String> orderCols = new ArrayList<String>();
 	protected final List<String> orderAscDesc = new ArrayList<String>();
 	
-	final boolean showDebugInfo = false;
+	static final boolean showDebugInfo = log.isTraceEnabled(); // false? true?
 
 	// syntax properties resource
 	static final Properties syntaxProperties = new Properties();
@@ -558,7 +558,7 @@ public class RequestSpec {
 			}
 		}
 		if(showDebugInfo) {
-			showDebugInfo(reqParams);
+			showDebugInfo(req, reqParams);
 		}
 		
 		/*for(int i=1;;i++) {
@@ -592,7 +592,7 @@ public class RequestSpec {
 							else {
 								postionalParamsMap.put(pos, p);
 								partParamAdded = true;
-								//log.info("part["+i+"]: pos==" + pos);
+								//log.debug("part["+i+"]: pos==" + pos);
 							}
 						}
 					}
@@ -1173,19 +1173,25 @@ public class RequestSpec {
 		return null;
 	}
 	
-	void showDebugInfo(Map<String,String[]> reqParams) {
+	void showDebugInfo(HttpServletRequest req, Map<String,String[]> reqParams) throws IOException, ServletException {
 		//log.info("debug: object: "+object+" / partz: "+URIpartz);
-		log.info("debug: limit/offset: "+limit+"/"+offset);
+		log.trace("debug: limit/offset: "+limit+"/"+offset);
 		//final String loStrategy;
-		log.info("debug: contentType: "+contentType);
-		log.info("debug: minUpdates/maxUpdates: "+minUpdates+"/"+maxUpdates);
-		log.info("debug: params: "+params);
+		log.trace("debug: contentType: "+contentType);
+		log.trace("debug: minUpdates/maxUpdates: "+minUpdates+"/"+maxUpdates);
+		log.trace("debug: params: "+params);
 		for(String par: reqParams.keySet()) {
-			log.info("debug: reqParams["+par+"]: "+Arrays.toString(reqParams.get(par)));
+			log.trace("debug: reqParams["+par+"]: "+Arrays.toString(reqParams.get(par)));
 		}
-		log.info("debug: keyValues: "+keyValues);
-		log.info("debug: updateValues: "+updateValues);
-		log.info("debug: updatePartValues: "+updatePartValues);
+		log.trace("debug: keyValues: "+keyValues);
+		log.trace("debug: updateValues: "+updateValues);
+		log.trace("debug: updatePartValues: "+updatePartValues);
+		if(isContentTypeMultiPart()) {
+			log.trace("debug: req.getParts(): "+req.getParts());
+		}
+		else {
+			log.trace("debug: not multipart...");
+		}
 	}
 	
 	@Override
