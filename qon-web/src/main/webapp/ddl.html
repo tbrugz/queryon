@@ -254,7 +254,7 @@ getDDL = function() {
 			var container = document.getElementById('content-container');
 			container.style.display = 'block';
 			var block = document.getElementById('content');
-			block.innerHTML = data;
+			block.textContent = data;
 			// http://schier.co/blog/2013/01/07/how-to-re-run-prismjs-on-ajax-content.html
 			Prism.highlightElement(block);
 		},
