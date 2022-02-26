@@ -20,6 +20,9 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 	
 	String modelId;
 	
+	static final String COMMA_SPLIT = ",";
+	static final String PIPE_SPLIT = "\\|";
+	
 	@Override
 	public void setModelId(String modelId) {
 		this.modelId = modelId;

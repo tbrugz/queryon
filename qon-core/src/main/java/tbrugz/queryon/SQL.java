@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.model.QonRelation;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
@@ -479,16 +480,17 @@ public class SQL {
 	}
 	
 	public void applyProjection(RequestSpec reqspec, Relation table) {
-		String columns = createSQLColumns(reqspec, table);
-		applyProjection(reqspec, columns);
+		String projectionClause = createSQLColumns(reqspec, table);
+		//log.debug("applyProjection: projectionClause = "+projectionClause);
+		applyProjection(reqspec, table, projectionClause);
 	}
 	
-	public void applyProjection(RequestSpec reqspec, String projectionClause) {
+	public void applyProjection(RequestSpec reqspec, Relation table, String projectionClause) {
 		if(sql.contains(PARAM_PROJECTION_CLAUSE)) {
 			sql = sql.replace(PARAM_PROJECTION_CLAUSE, projectionClause);
 		}
 		else {
-			if(reqspec.columns.size()>0 || reqspec.distinct) {
+			if(reqspec.columns.size()>0 || hasDefaultColumnNames(table) || reqspec.distinct) {
 				addProjection(projectionClause);
 				if(!(relation instanceof Query)) {
 					log.warn("relation of type "+relation.getRelationType()+" (not Query) with no "+PARAM_PROJECTION_CLAUSE+" ?");
@@ -536,6 +538,14 @@ public class SQL {
 		}
 		else {
 			List<String> cols = table.getColumnNames();
+			if(table instanceof QonRelation) {
+				QonRelation qr = (QonRelation) table;
+				List<String> qrCols = qr.getDefaultColumnNames();
+				log.debug("getDefaultColumnNames: qrCols = "+qrCols);
+				if(qrCols!=null) {
+					cols = qrCols;
+				}
+			}
 			if(aliases!=null) { checkAliases(aliases, cols); }
 			if(cols!=null) {
 				columns = getColumnsStr(cols, aliases);
@@ -545,6 +555,16 @@ public class SQL {
 			columns = "distinct "+columns;
 		}
 		return columns;
+	}
+
+	static boolean hasDefaultColumnNames(Relation relation) {
+		if(relation instanceof QonRelation) {
+			QonRelation qr = (QonRelation) relation;
+			List<String> qrCols = qr.getDefaultColumnNames();
+			log.debug("getDefaultColumnNames: qrCols = "+qrCols);
+			return (qrCols!=null) && qrCols.size()>0;
+		}
+		return false;
 	}
 	
 	/*static void checkAliases(RequestSpec reqspec) {

@@ -1,20 +1,32 @@
 
+2022-02 - qon_queries & qon_tables
+-------------------
+
+```sql
+alter table qon_queries
+	add default_column_names varchar(400);
+
+alter table qon_tables
+	add default_column_names varchar(400);
+```
+
+
 2017-09 - qon_queries/pages: add version_seq
 -------------------
 
-```
+```sql
 alter table qon_queries
 	add column version_seq integer;
 	
 alter table qon_pages
 	add column version_seq integer;
 ```
-	
+
 
 2017-01 - qon_queries & qon_pages
 ---------------------------------
 
-```
+```sql
 alter table qon_queries
 	add column created_at timestamp,
 	add column created_by varchar(200),
@@ -32,7 +44,7 @@ alter table qon_pages
 2016-05 - qon_execs
 -------------------
 
-```
+```sql
 alter table qon_execs
 	alter column parameter_count null;
 ```
@@ -41,7 +53,7 @@ alter table qon_execs
 2016-05 - qon_pages: add binary_data, has_body
 -----------------------
 
-```
+```sql
 alter table qon_pages
 	add column binary_data blob;
 
@@ -53,7 +65,7 @@ alter table qon_pages
 2016-04 - add qon_pages
 -----------------------
 
-```
+```sql
 create table qon_pages (
 	id integer, -- serial, identity, auto_increment ...
 	path varchar(400),
@@ -70,7 +82,7 @@ create table qon_pages (
 2016-02 - disabled column
 -------------------------
 
-```
+```sql
 alter table qon_queries
 	add column disabled tinyint
 	
@@ -85,7 +97,7 @@ alter table qon_execs
 2016-01 - qon_tables: add column_remarks ; add qon_execs
 --------------------------------------------------------
 
-```
+```sql
 alter table qon_tables
 	add column column_remarks varchar(4000)
 	
@@ -109,7 +121,7 @@ create table qon_execs (
 2015-07 - rename column schema
 ------------------------------
 
-```
+```sql
 alter table qon_queries
 	rename column schema to schema_name
 
@@ -121,7 +133,7 @@ alter table qon_tables
 2015-04 - add roles_filter
 ------------------------
 
-```
+```sql
 alter table qon_queries
 	add roles_filter varchar(1000)
 ```

@@ -22,6 +22,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.UpdatePlugin;
+import tbrugz.queryon.model.QonTable;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column;
@@ -65,7 +66,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 
 	static final String ACTION_READ = "read";
 	
-	static final String PIPE_SPLIT = "\\|";
+	//static final String PIPE_SPLIT = "\\|";
 	
 	public static final String DEFAULT_TABLES_TABLE = "qon_tables";
 	
@@ -100,7 +101,8 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		String qonTablesTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
 		String qonTablesNames = getProperty(PROP_PREFIX, SUFFIX_TABLE_NAMES, null);
 		List<String> tables = Utils.getStringList(qonTablesNames, ",");
-		String sql = "select schema_name, name, column_names, pk_column_names, column_remarks, remarks"
+		String sql = "select schema_name, name, column_names, pk_column_names, default_column_names"
+				+ ", column_remarks, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable
@@ -124,18 +126,20 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			String tableName = rs.getString(2);
 			String columnNames = rs.getString(3);
 			String pkColumnNamesStr = rs.getString(4);
-			String columnRemarksStr = rs.getString(5);
-			String remarks = rs.getString(6);
-			String rolesSelectFilterStr = rs.getString(7);
-			String rolesInsertFilterStr = rs.getString(8);
-			String rolesUpdateFilterStr = rs.getString(9);
-			String rolesDeleteFilterStr = rs.getString(10);
-			String rolesInsertColumnsFilterStr = rs.getString(11);
-			String rolesUpdateColumnsFilterStr = rs.getString(12);
+			String defaultColumnNamesStr = rs.getString(5);
+			String columnRemarksStr = rs.getString(6);
+			String remarks = rs.getString(7);
+			String rolesSelectFilterStr = rs.getString(8);
+			String rolesInsertFilterStr = rs.getString(9);
+			String rolesUpdateFilterStr = rs.getString(10);
+			String rolesDeleteFilterStr = rs.getString(11);
+			String rolesInsertColumnsFilterStr = rs.getString(12);
+			String rolesUpdateColumnsFilterStr = rs.getString(13);
 			//XXX default_select_filter
 			//XXXdone default_select_projection: column_names
 			
-			List<String> pkColumnNames = Utils.getStringList(pkColumnNamesStr, ",");
+			List<String> pkColumnNames = Utils.getStringList(pkColumnNamesStr, COMMA_SPLIT);
+			List<String> defaultColumnNames = Utils.getStringList(defaultColumnNamesStr, COMMA_SPLIT);
 			List<String> columnRemarks = Utils.getStringList(columnRemarksStr, PIPE_SPLIT);
 			
 			try {
@@ -144,7 +148,8 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, PIPE_SPLIT);
 				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, PIPE_SPLIT);
 				
-				Table t = addTable(schema, tableName, columnNames, pkColumnNames, columnRemarks, remarks,
+				Table t = addTable(schema, tableName, columnNames, pkColumnNames, defaultColumnNames,
+						columnRemarks, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
 				if(t!=null) { count++; }
@@ -175,10 +180,11 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		warnings.put((schemaName!=null?schemaName+".":"") + name, warning);
 	}
 
-	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, List<String> columnRemarks,
+	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, 
+			List<String> defaultColumnNames, List<String> columnRemarks,
 			String remarks, List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
 			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) {
-		Table t = new Table();
+		QonTable t = new QonTable();
 		t.setSchemaName(schema);
 		t.setName(tableName);
 		t.setRemarks(remarks);
@@ -240,6 +246,13 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 				log.warn(message);
 			}
 		}
+		
+		if(validColumnList(defaultColumnNames)) {
+			t.setDefaultColumnNames(defaultColumnNames);
+		}
+		else {
+			log.warn("invalid defaultColumnNames: "+defaultColumnNames);
+		}
 
 		if(columnRemarks!=null) {
 			List<Column> cols = t.getColumns();
@@ -280,7 +293,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 
 	void addColumnGrants(List<Grant> grants, String owner, PrivilegeType pt, String columnRoles) {
 		if(columnRoles==null) { return; }
-		List<String> rolesCols = Utils.getStringList(columnRoles, "\\|");
+		List<String> rolesCols = Utils.getStringList(columnRoles, PIPE_SPLIT);
 		for(String s: rolesCols) {
 			if(!SQL.valid(s)) { continue; }
 			
@@ -289,7 +302,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 				log.warn("addColumnGrants: col syntax error: "+s);
 				continue;
 			}
-			List<String> grantees = Utils.getStringList(sarr[1], ",");
+			List<String> grantees = Utils.getStringList(sarr[1], COMMA_SPLIT);
 			for(String grantee: grantees) {
 				grants.add(new Grant(owner, sarr[0], pt, grantee, false));
 			}
@@ -391,8 +404,15 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	Table createQonTable(RequestSpec reqspec) {
 		Map<String, String> v = reqspec.getUpdateValues();
 		
-		return addTable(getLowerAlso(v, "SCHEMA_NAME"), getLowerAlso(v, "NAME"), getLowerAlso(v, "COLUMN_NAMES"), Utils.getStringList(getLowerAlso(v, "PK_COLUMN_NAMES"), ","), Utils.getStringList(getLowerAlso(v, "COLUMN_REMARKS"), PIPE_SPLIT),
-				getLowerAlso(v, "REMARKS"), Utils.getStringList(getLowerAlso(v, "ROLES_SELECT"), PIPE_SPLIT), Utils.getStringList(getLowerAlso(v, "ROLES_INSERT"), PIPE_SPLIT), Utils.getStringList(getLowerAlso(v, "ROLES_UPDATE"), PIPE_SPLIT), Utils.getStringList(getLowerAlso(v, "ROLES_DELETE"), PIPE_SPLIT),
+		return addTable(getLowerAlso(v, "SCHEMA_NAME"), getLowerAlso(v, "NAME"), getLowerAlso(v, "COLUMN_NAMES"),
+				Utils.getStringList(getLowerAlso(v, "PK_COLUMN_NAMES"), COMMA_SPLIT),
+				Utils.getStringList(getLowerAlso(v, "DEFAULT_COLUMN_NAMES"), COMMA_SPLIT),
+				Utils.getStringList(getLowerAlso(v, "COLUMN_REMARKS"), PIPE_SPLIT),
+				getLowerAlso(v, "REMARKS"),
+				Utils.getStringList(getLowerAlso(v, "ROLES_SELECT"), PIPE_SPLIT),
+				Utils.getStringList(getLowerAlso(v, "ROLES_INSERT"), PIPE_SPLIT),
+				Utils.getStringList(getLowerAlso(v, "ROLES_UPDATE"), PIPE_SPLIT),
+				Utils.getStringList(getLowerAlso(v, "ROLES_DELETE"), PIPE_SPLIT),
 				getLowerAlso(v, "ROLES_INSERT_COLUMNS"), getLowerAlso(v, "ROLES_UPDATE_COLUMNS"));
 	}
 	

@@ -15,7 +15,6 @@
             <name>SCHEMA_NAME</name>
             <columSize>100</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>1</ordinalPosition>
             <pk>false</pk>
             <type>VARCHAR</type>
         </columns>
@@ -23,7 +22,6 @@
             <name>NAME</name>
             <columSize>100</columSize>
             <nullable>false</nullable>
-            <ordinalPosition>2</ordinalPosition>
             <pk>true</pk>
             <type>VARCHAR</type>
         </columns>
@@ -31,16 +29,22 @@
             <name>COLUMN_NAMES</name>
             <columSize>400</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>
             <remarks>Names of the columns (separated by comma)</remarks>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>DEFAULT_COLUMN_NAMES</name>
+            <columSize>400</columSize>
+            <nullable>true</nullable>
+            <pk>false</pk>
+            <remarks>Names of the default columns (separated by comma)</remarks>
             <type>VARCHAR</type>
         </columns>
         <columns>
             <name>REMARKS</name>
             <columSize>400</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>4</ordinalPosition>
             <pk>false</pk>
             <remarks>Short description of the table</remarks>
             <type>VARCHAR</type>
@@ -49,7 +53,6 @@
             <name>ROLES_SELECT</name>
             <columSize>1000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>5</ordinalPosition>
             <pk>false</pk>
             <remarks>Roles allowed to SELECT (separated by "|") - if null ALL are allowed</remarks>
             <type>VARCHAR</type>
@@ -58,7 +61,6 @@
             <name>ROLES_INSERT</name>
             <columSize>1000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>6</ordinalPosition>
             <pk>false</pk>
             <remarks>Roles allowed to INSERT (separated by "|") - if null NONE are allowed</remarks>
             <type>VARCHAR</type>
@@ -67,7 +69,6 @@
             <name>ROLES_UPDATE</name>
             <columSize>1000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>7</ordinalPosition>
             <pk>false</pk>
             <remarks>Roles allowed to UPDATE (separated by "|") - if null NONE are allowed</remarks>
             <type>VARCHAR</type>
@@ -76,7 +77,6 @@
             <name>ROLES_DELETE</name>
             <columSize>1000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>8</ordinalPosition>
             <pk>false</pk>
             <remarks>Roles allowed to DELETE (separated by "|") - if null NONE are allowed</remarks>
             <type>VARCHAR</type>
@@ -85,7 +85,6 @@
             <name>ROLES_INSERT_COLUMNS</name>
             <columSize>1000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>9</ordinalPosition>
             <pk>false</pk>
             <remarks>Insert permission on columns (&lt;column&gt;:&lt;role&gt;[comma&lt;role&gt;][|...])</remarks>
             <type>VARCHAR</type>
@@ -94,7 +93,6 @@
             <name>ROLES_UPDATE_COLUMNS</name>
             <columSize>1000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>10</ordinalPosition>
             <pk>false</pk>
             <remarks>Update permission on columns (&lt;column&gt;:&lt;role&gt;[comma&lt;role&gt;][|...])</remarks>
             <type>VARCHAR</type>
@@ -103,7 +101,6 @@
             <name>PK_COLUMN_NAMES</name>
             <columSize>400</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>11</ordinalPosition>
             <pk>false</pk>
             <remarks>Names of the Primary Key (PK) columns (separated by comma)</remarks>
             <type>VARCHAR</type>
@@ -112,7 +109,6 @@
             <name>COLUMN_REMARKS</name>
             <columSize>4000</columSize>
             <nullable>true</nullable>
-            <ordinalPosition>12</ordinalPosition>
             <pk>false</pk>
             <remarks>Column remarks - short descriptions (separated by "|")</remarks>
             <type>VARCHAR</type>
@@ -120,7 +116,6 @@
         <columns>
             <name>DISABLED</name>
             <nullable>true</nullable>
-            <ordinalPosition>13</ordinalPosition>
             <pk>false</pk>
             <remarks>Enabled (null or 0) or disabled table?</remarks>
             <type>SMALLINT</type>
@@ -313,6 +308,13 @@
         <columns>
             <name>QUERY</name>
             <type>CLOB</type>
+        </columns>
+        <columns>
+            <name>DEFAULT_COLUMN_NAMES</name>
+            <columSize>1000</columSize>
+            <nullable>true</nullable>
+            <type>VARCHAR</type>
+            <remarks>Names of the default columns (separated by comma)</remarks>
         </columns>
         <columns>
             <name>ROLES_FILTER</name>

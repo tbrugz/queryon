@@ -10,6 +10,7 @@ create table qon_queries (
 	query clob, -- ansi(?), oracle
 	--query text, -- pgsql, mysql
 	--query varchar(4000),
+	default_column_names varchar(400),
 	roles_filter varchar(1000),
 	disabled tinyint,
 	created_at timestamp,
@@ -26,6 +27,7 @@ create table qon_tables (
 	name varchar(100) not null,
 	column_names varchar(400),
 	pk_column_names varchar(400),
+	default_column_names varchar(400),
 	remarks varchar(400),
 	column_remarks varchar(4000),
 	roles_select varchar(1000),

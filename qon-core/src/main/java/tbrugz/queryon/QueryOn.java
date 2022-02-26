@@ -49,6 +49,7 @@ import tbrugz.queryon.action.QOnManage;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.model.QonRelation;
 import tbrugz.queryon.processor.UpdatePluginUtils;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
@@ -633,7 +634,7 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		catch(Exception e) {
 			log.error("Error initting model '"+id+"': "+e);
-			log.debug("Error initting model '"+id+"': "+e.getMessage(), e);
+			log.warn("Error initting model '"+id+"': "+e.getMessage(), e);
 		}
 		return false;
 	}
@@ -1993,7 +1994,7 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
-	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks", "constraints", "remarks", "grants"});
+	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks", "defaultColumnNames", "constraints", "remarks", "grants"}); //, "class"
 	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "parameterCount", "parameterTypes", "params", "returnParam", "remarks", "grants"});
 
 	static final List<String> relationAndExecutableCols =  Arrays.asList(new String[]{"parameterCount", "parameterTypes", "remarks", "grants", "dbObjectType" /*"class", "type", "relationType"*/});
@@ -2012,7 +2013,7 @@ public class QueryOn extends AbstractHttpServlet {
 		tableAllColumns = new ArrayList<String>(); tableAllColumns.addAll(relationCommonCols); tableAllColumns.addAll(tableExclusiveColumns);
 		viewAllColumns = new ArrayList<String>(); viewAllColumns.addAll(relationCommonCols); viewAllColumns.addAll(viewExclusiveColumns);
 		queryAllColumns = new ArrayList<String>(); queryAllColumns.addAll(relationCommonCols); queryAllColumns.addAll(queryExclusiveColumns);
-		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(viewExclusiveColumns);
+		relationAllColumns = new ArrayList<String>(); relationAllColumns.addAll(relationCommonCols); relationAllColumns.addAll(queryExclusiveColumns);
 		executableAllColumns = new ArrayList<String>(); executableAllColumns.addAll(executableCols);
 	}
 	
@@ -2047,7 +2048,7 @@ public class QueryOn extends AbstractHttpServlet {
 			//ResultSet rsT = new ResultSetListAdapter<Table>(objectName, statusUniqueColumns, queryAllColumns, lTable, Table.class);
 			List<Relation> lRels = QOnModelUtils.joinRelations(lViews, lTable);
 			lRels.sort(new NamedDBObject.SchemaAndNameComparator());
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, queryAllColumns, lRels, Relation.class);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationAllColumns, lRels, QonRelation.class);
 			
 			//List<ResultSet> lrs = Utils.newList(rsQ, rsT);
 			//rs = new UnionResultSet(lrs);

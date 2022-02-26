@@ -25,6 +25,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.model.QonQuery;
 import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -58,7 +59,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	
 	static final String DEFAULT_QUERIES_TABLE = "qon_queries";*/
 
-	static final String PIPE_SPLIT = "\\|";
+	//static final String PIPE_SPLIT = "\\|";
 
 	static final String ACTION_READ_QUERY = "readQuery";
 	
@@ -91,11 +92,12 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		}
 	}
 	
-	Query newQuery(String schema, String name, String sql, String remarks, List<String> rolesSelect) {
-		Query q = new Query();
+	Query newQuery(String schema, String name, String sql, List<String> defaultColumnNames, String remarks, List<String> rolesSelect) {
+		QonQuery q = new QonQuery();
 		q.setSchemaName(schema);
 		q.setName(name);
 		q.setQuery(sql);
+		q.setDefaultColumnNames(defaultColumnNames);
 		q.setRemarks(remarks);
 		//XXX t.setParameterCount(parameterCount);
 	
@@ -106,7 +108,9 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	Query createQonQuery(RequestSpec reqspec) {
 		Map<String, String> v = reqspec.getUpdateValues();
 	
-		Query q = newQuery(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("QUERY"), v.get("REMARKS"),
+		Query q = newQuery(v.get("SCHEMA_NAME"), v.get("NAME"), v.get("QUERY"),
+				Utils.getStringListIgnoreEmpty(v.get("DEFAULT_COLUMN_NAMES"), COMMA_SPLIT),
+				v.get("REMARKS"),
 				Utils.getStringListIgnoreEmpty(v.get("ROLES_FILTER"), PIPE_SPLIT));
 		
 		int addcount = addQueryToModel(q);
@@ -198,9 +202,11 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		log.info("onDelete: removed "+q+"? "+removed);
 	}
 	
-	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt, String sql, String remarks,
+	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt,
+			String sql, String defaultColumnNamesStr, String remarks,
 			String rolesFilterStr, ServletContext context) {
-		Query q = newQuery(schemaName, queryName, sql, remarks,
+		Query q = newQuery(schemaName, queryName, sql,
+				Utils.getStringList(defaultColumnNamesStr, PIPE_SPLIT), remarks,
 				Utils.getStringList(rolesFilterStr, PIPE_SPLIT));
 		return addQueryToModel(q);
 	}
@@ -295,7 +301,8 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	 */
 	void readFromDatabase(ServletContext context) throws SQLException {
 		String qonQueriesTable = getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
-		String sql = "select schema_name, name, query, remarks, roles_filter from "+qonQueriesTable+
+		String sql = "select schema_name, name, query, default_column_names, remarks, roles_filter"+
+				" from "+qonQueriesTable+
 				" where (disabled = 0 or disabled is null)"
 				;
 				//+" order by schema, name";
@@ -316,12 +323,13 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			String schema = rs.getString(1);
 			String queryName = rs.getString(2);
 			String query = rs.getString(3);
-			String remarks = rs.getString(4);
-			String rolesFilterStr = rs.getString(5);
+			String defaultColumnNamesStr = rs.getString(4);
+			String remarks = rs.getString(5);
+			String rolesFilterStr = rs.getString(6);
 			
 			try {
 				PreparedStatement stinn = conn.prepareStatement( processQuery(query) );
-				count += addQueryFromDB(schema, queryName, stinn, query, remarks, rolesFilterStr, context);
+				count += addQueryFromDB(schema, queryName, stinn, query, defaultColumnNamesStr, remarks, rolesFilterStr, context);
 			}
 			catch(SQLException | IllegalStateException e) {
 				String message = "error reading query '"+queryName+"': "+e;
