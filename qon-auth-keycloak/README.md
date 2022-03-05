@@ -8,7 +8,7 @@ Optional module to integrate Keycloak with Queryon/Shiro.
 adding Keycloak integration
 -----
 
-In `web.xml`, declare Keycloak and Shiro filters, like this:
+### 1. In `web.xml`, declare Keycloak and Shiro filters, like this:
 
 ```xml
 	<filter>
@@ -36,7 +36,8 @@ In `web.xml`, declare Keycloak and Shiro filters, like this:
 	</filter-mapping>
 ```
 
-Add a `keycloak.json` to your `WEB-INF` dir - something like this:
+
+### 2. Add a `keycloak.json` to your `WEB-INF` dir - something like this:
 
 ```json
 {
@@ -49,10 +50,25 @@ Add a `keycloak.json` to your `WEB-INF` dir - something like this:
 }
 ```
 
-In `queryon.properties`, add `KeycloakIdentityProvider` as identity provider:
+
+### 3a. In `queryon.properties`, add `KeycloakIdentityProvider` as identity provider:
 
 ```properties
 queryon.auth.identity-providers=tbrugz.queryon.auth.provider.KeycloakIdentityProvider
+```
+
+OR
+
+
+### 3b. In `shiro.ini`, add:
+
+```ini
+[main]
+keycloakFilter = tbrugz.queryon.shiro.KeycloakAuthFilter
+# ...
+
+[urls]
+/** = keycloakFilter
 ```
 
 
