@@ -114,10 +114,10 @@ public class ShiroUtils {
 			
 			if(request!=null) {
 				for(IdentityProvider ip: identityProviders) {
-					ip.setInfo(request, prop);
-					if(ip.isAuthenticated()) {
+					ip.setInfo(prop);
+					if(ip.isAuthenticated(request)) {
 						authenticated = true;
-						userIdentity = ip.getIdentity();
+						userIdentity = ip.getIdentity(request);
 						realmName = ip.getRealm();
 						//realmName = prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
 						log.debug("getSubject: Subject authenticated with provider '"+ip.getClass().getName()+"' [userIdentity="+userIdentity+"; realmName="+realmName+"]");
@@ -208,7 +208,10 @@ public class ShiroUtils {
 			permission += ":"+object;
 		}
 		boolean permitted =  subject.isPermitted(permission);
-		//log.info("checking permission '"+permission+"', subject = "+subject.getPrincipal()+" :: "+permitted);
+		//log.debug("checking permission '"+permission+"', subject = "+subject.getPrincipal()+" ; permitted = "+permitted);
+		/*if(!permitted) {
+			log.info("not permitted: '"+permission+"', subject = "+subject.getPrincipal());
+		}*/
 		return permitted;
 	}
 

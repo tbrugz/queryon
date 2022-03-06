@@ -18,17 +18,15 @@ public class RemoteUserIdentityProvider implements IdentityProvider {
 	static final String PROP_AUTH_HTTPREALM = "queryon.auth.http-realm";
 	static final String PROP_AUTH_USERNAME_PATTERN = "queryon.auth.http-username-pattern";
 	
-	HttpServletRequest request;
 	Properties prop;
 	
 	@Override
-	public void setInfo(HttpServletRequest request, Properties prop) {
-		this.request = request;
+	public void setInfo( Properties prop) {
 		this.prop = prop;
 	}
 
 	@Override
-	public boolean isAuthenticated() {
+	public boolean isAuthenticated(HttpServletRequest request) {
 		if(request!=null && request.getRemoteUser()!=null) {
 			return true;
 		}
@@ -36,8 +34,8 @@ public class RemoteUserIdentityProvider implements IdentityProvider {
 	}
 
 	@Override
-	public String getIdentity() {
-		if(isAuthenticated()) {
+	public String getIdentity(HttpServletRequest request) {
+		if(isAuthenticated(request)) {
 			String userIdentity = request.getRemoteUser();
 			String usernamePattern = prop.getProperty(PROP_AUTH_USERNAME_PATTERN);
 			if(usernamePattern!=null) {
@@ -64,10 +62,7 @@ public class RemoteUserIdentityProvider implements IdentityProvider {
 
 	@Override
 	public String getRealm() {
-		if(isAuthenticated()) {
-			return prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
-		}
-		return null;
+		return prop.getProperty(PROP_AUTH_HTTPREALM, DEFAULT_AUTH_HTTPREALM);
 	}
 
 }

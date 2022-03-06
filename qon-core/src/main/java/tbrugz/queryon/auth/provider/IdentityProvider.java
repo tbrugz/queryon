@@ -6,11 +6,11 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface IdentityProvider {
 	
-	public void setInfo(HttpServletRequest request, Properties prop);
+	public void setInfo(Properties prop);
 	
-	public boolean isAuthenticated();
+	public boolean isAuthenticated(HttpServletRequest request);
 	
-	public String getIdentity();
+	public String getIdentity(HttpServletRequest request);
 	
 	public String getRealm();
 	
