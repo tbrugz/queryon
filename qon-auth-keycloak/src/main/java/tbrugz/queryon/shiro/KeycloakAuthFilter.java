@@ -14,7 +14,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.filter.authc.AuthenticationFilter;
 
-import tbrugz.queryon.auth.provider.KeycloakIdentityProvider;
+import tbrugz.queryon.auth.provider.KeycloakUtils;
 
 public class KeycloakAuthFilter extends AuthenticationFilter {
 
@@ -36,10 +36,9 @@ public class KeycloakAuthFilter extends AuthenticationFilter {
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		//log.debug("request.getPathInfo(): "+req.getPathInfo());
-		KeycloakIdentityProvider kip = new KeycloakIdentityProvider();
-		kip.setInfo(req, null);
-		boolean authenticated = kip.isAuthenticated();
-		String identity = kip.getIdentity();
+		
+		boolean authenticated = KeycloakUtils.isAuthenticated(req);
+		String identity = KeycloakUtils.getPreferredUsername(req);
 		if(!authenticated) {
 			log.debug("not authenticated ; identity = "+identity);
 			return false;
