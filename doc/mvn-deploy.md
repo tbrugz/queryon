@@ -1,37 +1,9 @@
 
-deploy maven artifacts to local dir
------------------------------------
-
-* https://maven.apache.org/plugins/maven-install-plugin/examples/specific-local-repo.html
-
-```
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=path-to-your-artifact-jar \
-                                                                              -DgroupId=your.groupId \
-                                                                              -DartifactId=your-artifactId \
-                                                                              -Dversion=version \
-                                                                              -Dpackaging=jar \
-                                                                              -DlocalRepositoryPath=path-to-specific-local-repo
-```
-
-* http://stackoverflow.com/a/22715898/616413
-
-
-**fast install:**
-
-```
-export MVN_ARTIFACT_VERSION=0.6.2-SNAPSHOT
-
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dfile=target/queryon-$MVN_ARTIFACT_VERSION.war -Dpackaging=war -DpomFile=pom.xml -DlocalRepositoryPath=$HOME/Desktop/proj/mvn-repo -DcreateChecksum=true
-
-mvn install:install-file -DgroupId=org.bitbucket.tbrugz -DartifactId=queryon -Dfile=target/queryon-$MVN_ARTIFACT_VERSION-sources.jar -Dpackaging=jar -DpomFile=pom.xml -Dclassifier=sources -DlocalRepositoryPath=$HOME/Desktop/proj/mvn-repo -DcreateChecksum=true
-```
-
 deploy to sonatype
 ---------
 
-http://central.sonatype.org/pages/apache-maven.html
+* Setting up: Change `settings.xml`:
 
-change `settings.xml`:
 ```
 <server>
     <id>ossrh</id>
@@ -40,20 +12,29 @@ change `settings.xml`:
 </server>
 ```
 
-snapshot:  
+
+* Deploy snapshot:
+
 `mvn clean deploy` - all projects  
-`mvn clean deploy -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  
+<!--`mvn clean deploy -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  -->
 
 artifacts at snapshot repo:
 `https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/`
 
-release:  
+
+* Deploy release version:
+
 `mvn clean javadoc:jar deploy -P release` - all projects  
-`mvn clean javadoc:jar deploy -P release -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  
+<!--`mvn clean javadoc:jar deploy -P release -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  -->
 & go to `https://oss.sonatype.org/` & close & release staging repo
 
 artifacts at central:  
 `https://repo1.maven.org/maven2/org/bitbucket/tbrugz/`
+
+
+* Reference:
+
+https://central.sonatype.org/publish/publish-maven/
 
 
 run jetty

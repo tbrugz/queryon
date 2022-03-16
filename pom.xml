@@ -55,7 +55,7 @@
     <springboot.version>2.6.3</springboot.version>
     <quarkus.version>2.5.4.Final</quarkus.version>
 
-    <cxf.version>3.3.7</cxf.version>
+    <cxf.version>3.3.13</cxf.version>
 
     <jetty.version>9.4.43.v20210629</jetty.version> <!-- jetty 10+ requires JVM 11+ -->
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->

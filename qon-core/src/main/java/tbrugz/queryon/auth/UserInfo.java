@@ -6,7 +6,7 @@ public class UserInfo {
 	
 	final boolean authenticated;
 	final String username;
-	//Set<String> roles;
+	//final Set<String> roles;
 	
 	public UserInfo(Subject subject) {
 		authenticated = subject.isAuthenticated();

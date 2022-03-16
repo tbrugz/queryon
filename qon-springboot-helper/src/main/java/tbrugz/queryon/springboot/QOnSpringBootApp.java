@@ -159,13 +159,13 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.Cool303RedirectionServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	@Bean
 	public ServletRegistrationBean servletProcessorServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.ProcessorServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
-	*/
 
 	@Bean
 	public ServletRegistrationBean servletPagesServletBean() {
