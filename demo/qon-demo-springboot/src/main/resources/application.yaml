@@ -36,7 +36,11 @@ logging:
         #org.apache.shiro.realm.text.IniRealm: TRACE
         org.springframework.boot.context.config.ConfigFileApplicationListener: DEBUG
         #org.springframework.web: DEBUG
+        #tbrugz.queryon.action.QOnManage: DEBUG
+        #tbrugz.queryon.diff: DEBUG
+        #tbrugz.queryon.util: DEBUG
         #tbrugz.queryon.RequestSpec: TRACE
+        #tbrugz.sqldiff: DEBUG
         #tbrugz.sqldump.cdi: DEBUG
         #tbrugz.sqldump.util.ConnectionUtil: DEBUG
         # verbose spring-boot web logging:

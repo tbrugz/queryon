@@ -537,5 +537,9 @@
     </table>
     -->
 
+    <schemaMetadata>
+        <name>QUERYON</name>
+    </schemaMetadata>
+
     <!-- <sqlDialect>?</sqlDialect> -->
 </schemaModel>

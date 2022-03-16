@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.diff.DiffManyServlet;
 import tbrugz.queryon.diff.DiffUtilQon;
-import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
@@ -56,9 +55,11 @@ public class QOnManage {
 		//grabProps.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
 		//grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, "public");
 		grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Utils.join(getModelSchemas(model), ", "));
-		List<String> typesList = Arrays.asList(new String[]{"TABLE", "FK", "CONSTRAINT"});
+		List<String> typesList = Arrays.asList(new String[]{"SCHEMA_META", "TABLE", "FK", "CONSTRAINT"});
 		DiffManyServlet.setPropForTypes(grabProps, typesList);
 		//log.debug("grab props: "+grabProps);
+		//log.debug("grab schema = "+getModelSchemas(model));
+		//log.debug("model's schemaMetadata = "+model.getSchemaMetadata());
 
 		JDBCSchemaGrabber jsg = new JDBCSchemaGrabber();
 		jsg.setConnection(conn);
@@ -91,7 +92,7 @@ public class QOnManage {
 		ColumnDiff.updateFeatures(feat);
 		log.debug("dialect: "+dialect+" ; feats: "+feat);
 		
-		differ.setTypesForDiff("TABLE");
+		differ.setTypesForDiff("SCHEMA_META,TABLE");
 		SchemaDiff diff = differ.diffSchemas(dbModel, model);
 		diff.getGrantDiffs().clear(); //do not dump Grant diffs
 
@@ -131,6 +132,7 @@ public class QOnManage {
 		
 		SchemaDiff.logInfo(diff);
 		diff.compact();
+		log.info("diff: compacted diffs");
 		SchemaDiff.logInfo(diff);
 		
 		int diffcount = diff.getDiffListSize();
