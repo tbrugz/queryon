@@ -61,7 +61,6 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	static final String PROP_PREFIX = "queryon.qon-tables";
 	
 	static final String SUFFIX_ACTION = ".action";
-	static final String SUFFIX_TABLE = ".table";
 	static final String SUFFIX_TABLE_NAMES = ".names";
 
 	static final String ACTION_READ = "read";
@@ -98,7 +97,8 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	}
 	
 	int readFromDatabase(ServletContext context) throws SQLException {
-		String qonTablesTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		//String qonTablesTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
+		String qonTablesTable = getTableName(PROP_PREFIX, DEFAULT_TABLES_TABLE);
 		String qonTablesNames = getProperty(PROP_PREFIX, SUFFIX_TABLE_NAMES, null);
 		List<String> tables = Utils.getStringList(qonTablesNames, ",");
 		String sql = "select schema_name, name, column_names, pk_column_names, default_column_names"

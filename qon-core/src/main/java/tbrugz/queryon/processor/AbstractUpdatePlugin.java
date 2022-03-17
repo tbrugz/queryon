@@ -22,7 +22,10 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 	
 	static final String COMMA_SPLIT = ",";
 	static final String PIPE_SPLIT = "\\|";
-	
+
+	static final String SUFFIX_TABLE = ".table";
+	//static final String SUFFIX_SCHEMA_NAME = ".schema-name";
+
 	@Override
 	public void setModelId(String modelId) {
 		this.modelId = modelId;
@@ -50,6 +53,15 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 	 */
 	public void executePluginAction(RequestSpec reqspec, HttpServletResponse resp) throws IOException, SQLException {
 		throw new UnsupportedOperationException(Utils.join(reqspec.getParams(), "/"));
+	}
+
+	public String getTableName(final String propPrefix, final String defaultTableName) {
+		String tableName = getProperty(propPrefix, SUFFIX_TABLE, defaultTableName);
+		/*String schemaName = getProperty(propPrefix, SUFFIX_SCHEMA_NAME, null);
+		if(schemaName!=null && !schemaName.equals("")) {
+			return schemaName + "." + tableName;
+		}*/
+		return tableName;
 	}
 
 }

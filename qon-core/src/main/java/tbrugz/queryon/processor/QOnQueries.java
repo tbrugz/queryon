@@ -67,7 +67,8 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	DBMSFeatures features = null;
 	
 	String getQonQueriesTable() {
-		return getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
+		//return getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
+		return getTableName(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 	}
 	
 	boolean isQonQueriesRelation(Relation relation) {
@@ -244,6 +245,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		return 0;
 	}
 	
+	/*
 	public static Map<String, String> readQueryFromDatabase(Properties prop, String modelId, String schemaName, String name) throws SQLException, ClassNotFoundException, NamingException {
 		String qonQueriesTable = AbstractUpdatePlugin.getProperty(prop, modelId, QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 		Connection conn = null;
@@ -255,8 +257,9 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			ConnectionUtil.closeConnection(conn);
 		}
 	}
+	*/
 
-	public static Map<String, String> readQueryFromDatabase(Connection conn, String qonQueriesTable, String schemaName, String name) throws SQLException {
+	static Map<String, String> readQueryFromDatabase(Connection conn, String qonQueriesTable, String schemaName, String name) throws SQLException {
 		String sql = "select schema_name, name, query, remarks, roles_filter, version_seq\n" +
 				"from "+qonQueriesTable+"\n" +
 				"where (disabled = 0 or disabled is null)\n" +
@@ -300,7 +303,8 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	 * see: QOnQueriesProcessor
 	 */
 	void readFromDatabase(ServletContext context) throws SQLException {
-		String qonQueriesTable = getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
+		String qonQueriesTable = getQonQueriesTable();
+		//String qonQueriesTable = getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 		String sql = "select schema_name, name, query, default_column_names, remarks, roles_filter"+
 				" from "+qonQueriesTable+
 				" where (disabled = 0 or disabled is null)"
