@@ -137,6 +137,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		try {
 			DBMSResources res = DBMSResources.instance();
 			features = res.getSpecificFeatures(conn.getMetaData());
+			updateTableNameProperty(QOnQueriesProcessor.PROP_PREFIX, conn.getMetaData());
 			readFromDatabase(servletContext);
 		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
 			modelRollback(origViews);

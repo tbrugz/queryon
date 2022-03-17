@@ -2,6 +2,7 @@ package tbrugz.queryon.processor;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -48,6 +49,21 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 		return prop.getProperty(prefix+suffix, defaultValue);
 	}
 
+	public static void updateProperty(Properties prop, String modelId, String prefix, String suffix, String value) {
+		String key = prefix+"@"+modelId+suffix;
+		String ret = prop.getProperty(key);
+		if(ret==null) {
+			key = prefix+suffix;
+			ret = prop.getProperty(key);
+		}
+		if(ret==null) {
+			String message = "key not found: "+key;
+			log.warn(message);
+			return;
+		}
+		prop.setProperty(key, value);
+	}
+
 	/**
 	 * Executes "direct" plugin action
 	 */
@@ -62,6 +78,24 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 			return schemaName + "." + tableName;
 		}*/
 		return tableName;
+	}
+
+	public void updateTableNameProperty(final String propPrefix, DatabaseMetaData dbmd) throws SQLException {
+		String tableName = getProperty(propPrefix, SUFFIX_TABLE, null);
+		if(tableName==null) {
+			log.debug("updateTableNameProperty: property not found: prefix="+propPrefix+" ; suffix="+SUFFIX_TABLE);
+			return;
+		}
+		if(dbmd.storesLowerCaseIdentifiers()) {
+			tableName = tableName.toLowerCase();
+			updateProperty(prop, modelId, propPrefix, SUFFIX_TABLE, tableName);
+			log.debug("updateTableNameProperty: updated tableName to '"+tableName+"' (lower) [prefix="+propPrefix+" ; suffix="+SUFFIX_TABLE+"]");
+		}
+		else if(dbmd.storesUpperCaseIdentifiers()) {
+			tableName = tableName.toUpperCase();
+			updateProperty(prop, modelId, propPrefix, SUFFIX_TABLE, tableName);
+			log.debug("updateTableNameProperty: updated tableName to '"+tableName+"' (upper) [prefix="+propPrefix+" ; suffix="+SUFFIX_TABLE+"]");
+		}
 	}
 
 }

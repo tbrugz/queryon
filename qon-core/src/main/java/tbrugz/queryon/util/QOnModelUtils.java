@@ -67,13 +67,21 @@ public class QOnModelUtils {
 		model.getMetadata().put("driver-version", conn.getMetaData().getDriverVersion());
 		model.getMetadata().put("db-url", conn.getMetaData().getURL());
 		model.getMetadata().put("db-user", conn.getMetaData().getUserName());
+		//model.getMetadata().put("db-metadata-storesLowerCaseIdentifiers", ""+conn.getMetaData().storesLowerCaseIdentifiers());
+		//model.getMetadata().put("db-metadata-storesUpperCaseIdentifiers", ""+conn.getMetaData().storesUpperCaseIdentifiers());
+		model.getMetadata().put("model-sqldialect", model.getSqlDialect());
 		
-		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
-		model.getMetadata().put("db-features", feat.getClass().getName());
-		//DBMSFeatures feat2 = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
-		//model.getMetadata().put("db-features2", feat2.getClass().getName());
-		DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
-		model.getMetadata().put("db-metadata", dbmd.getClass().getName());
+		// features
+		{
+			//DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
+			//model.getMetadata().put("db-features-from-dialect", feat.getClass().getName());
+		}
+		{
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+			model.getMetadata().put("db-features", feat.getClass().getName());
+			DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
+			model.getMetadata().put("db-metadata", dbmd.getClass().getName());
+		}
 		
 		//log.info("metadata["+id+"]: "+model.getMetadata());
 		
