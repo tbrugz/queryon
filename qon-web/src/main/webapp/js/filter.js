@@ -84,7 +84,7 @@ function addFilterDialog(selectedCol, columns) {
 
 function filterGetColumnTypes() {
 	var cols = getColumnTypesFromColgroup('content');
-	if(!cols) {
+	if(!cols || pivotQueryActive()) {
 		cols = getColumnsTypesFromHash();
 	}
 	return cols;
