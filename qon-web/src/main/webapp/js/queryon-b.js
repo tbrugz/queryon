@@ -335,8 +335,14 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	var messages = document.getElementById(messagesId);
 	
 	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
+	var numOfCols = -1;
+	if(numOfRows>0 && content.getElementsByTagName('tr')[0]) { // && pivotQueryActive()) {
+		numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
+	}
 	//messages.innerHTML = 'rows = '+numOfRows+' ; time in millis: server = '+(completedTimeMilis-startTimeMilis)+' ; render = '+(renderedTimeMilis-completedTimeMilis)
-	messages.innerHTML = 'rows = '+numOfRows+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
+	messages.innerHTML = 'rows = '+numOfRows
+		+((numOfCols > 0) ? ' ; cols = ' + numOfCols : '')
+		+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
 		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 	messages.style.display = '';
 }
