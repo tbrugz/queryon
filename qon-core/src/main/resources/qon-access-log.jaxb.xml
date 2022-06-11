@@ -9,7 +9,7 @@
         <columns>
             <name>server_name</name>
             <type>VARCHAR</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
         </columns>
         <columns>
             <name>server_port</name>
@@ -18,12 +18,12 @@
         <columns>
             <name>server_protocol</name>
             <type>VARCHAR</type>
-            <columSize>20</columSize>
+            <columnSize>20</columnSize>
         </columns>
         <columns>
             <name>remote_addr</name>
             <type>VARCHAR</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
@@ -34,12 +34,12 @@
         <columns>
             <name>username</name>
             <type>VARCHAR</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
         </columns>
         <columns>
             <name>request_method</name>
             <type>VARCHAR</type>
-            <columSize>20</columSize>
+            <columnSize>20</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
@@ -55,23 +55,23 @@
         <columns>
             <name>request_uri</name>
             <type>VARCHAR</type>
-            <columSize>1000</columSize>
+            <columnSize>1000</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>query_string</name>
             <type>VARCHAR</type>
-            <columSize>1000</columSize>
+            <columnSize>1000</columnSize>
         </columns>
         <columns>
             <name>header_referer</name>
             <type>VARCHAR</type>
-            <columSize>1000</columSize>
+            <columnSize>1000</columnSize>
         </columns>
         <columns>
             <name>header_useragent</name>
             <type>VARCHAR</type>
-            <columSize>1000</columSize>
+            <columnSize>1000</columnSize>
         </columns>
     </table>
 
