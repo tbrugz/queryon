@@ -1,0 +1,4 @@
+# package tbrugz.queryon.model
+QonQuery
+#QonRelation - JAXB does not handle interfaces
+QonTable

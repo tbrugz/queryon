@@ -247,11 +247,14 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			}
 		}
 		
-		if(validColumnList(defaultColumnNames)) {
-			t.setDefaultColumnNames(defaultColumnNames);
-		}
-		else {
-			log.warn("invalid defaultColumnNames: "+defaultColumnNames);
+		if(defaultColumnNames!=null) {
+			if(validColumnList(defaultColumnNames)) {
+				//log.info("setting defaultColumnNames ["+tableName+"]: "+defaultColumnNames);
+				t.setDefaultColumnNames(defaultColumnNames);
+			}
+			else {
+				log.warn("invalid defaultColumnNames ["+tableName+"]: "+defaultColumnNames);
+			}
 		}
 
 		if(columnRemarks!=null) {

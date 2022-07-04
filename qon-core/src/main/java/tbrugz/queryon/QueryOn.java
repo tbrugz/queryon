@@ -73,6 +73,7 @@ import tbrugz.queryon.util.QOnModelUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.queryon.util.WebUtils;
+import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.EmptyModelGrabber;
@@ -374,6 +375,7 @@ public class QueryOn extends AbstractHttpServlet {
 	static {
 		//BaseResultSetCollectionAdapter.setCollectionValuesJoiner("|");
 		ParametrizedProperties.setUseSystemProperties(true);
+		JAXBSchemaXMLSerializer.setJaxbSchemaPackages(JAXBSchemaXMLSerializer.DEFAULT_JAXB_SCHEMA_PACKAGES+":tbrugz.queryon.model");
 	}
 	
 	/*protected void doInitConfig(ServletConfig config) {
