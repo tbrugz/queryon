@@ -108,7 +108,7 @@ public class WinstoneAndH2HttpRequestTest {
 	static final String utf8 = "UTF-8";
 	
 	static final int relationsInModel = 4;
-	static final int queriesInModel = 7;
+	static final int queriesInModel = 8;
 	static final int executablesInModel = 2;
 	
 	static final String LOGIN_JDOE = "jdoe";
@@ -2357,5 +2357,28 @@ public class WinstoneAndH2HttpRequestTest {
 				"2" + LF,
 				content);
 	}
+
+	@Test
+	public void testGetQueryWithDefaultColumns() throws Exception {
+		String url = "/QUERY.QUERY_WITH_DEFAULT_COLUMNS.csv";
+
+		String content = getContentFromUrl(baseUrl+url);
+		//System.out.println(content);
+		Assert.assertEquals("C1,C2" + LF +
+				"1,2" + LF,
+				content);
+	}
+
+	@Test
+	public void testGetQueryWithNonDefaultColumns() throws Exception {
+		String url = "/QUERY.QUERY_WITH_DEFAULT_COLUMNS.csv?fields=C1,C3";
+
+		String content = getContentFromUrl(baseUrl+url);
+		//System.out.println(content);
+		Assert.assertEquals("C1,C3" + LF +
+				"1,3" + LF,
+				content);
+	}
+
 
 }

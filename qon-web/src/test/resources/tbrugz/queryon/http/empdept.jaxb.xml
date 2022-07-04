@@ -32,6 +32,7 @@
         <remarks>Departments' table</remarks>
         <type>TABLE</type>
     </table>
+
     <table>
         <name>EMP</name>
         <schemaName>PUBLIC</schemaName>
@@ -276,9 +277,19 @@ union all select cast(? as varchar)
 select cast(? as varchar) as c1
 union all select cast(? as varchar)
 union all select cast(? as varchar)
-       </query>
+        </query>
     </view>
-    
+
+    <view xsi:type="qonQuery" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>QUERY_WITH_DEFAULT_COLUMNS</name>
+        <schemaName>QUERY</schemaName>
+        <query>
+select 1 as c1, 2 as c2, 3 as c3
+        </query>
+        <defaultColumnNames>C1</defaultColumnNames>
+        <defaultColumnNames>C2</defaultColumnNames>
+    </view>
+
     <executable>
         <name>IS_PRIME</name>
         <schemaName>PUBLIC</schemaName>

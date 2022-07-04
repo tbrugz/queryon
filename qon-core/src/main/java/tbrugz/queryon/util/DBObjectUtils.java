@@ -314,7 +314,7 @@ public class DBObjectUtils {
 	
 	static void updateColumnsIfEmpty(Relation rel, List<Column> cols) {
 		if(rel.getColumnCount()==0) {
-			log.info("will update columns (has zero cols) [name="+rel.getQualifiedName()+"]: "+cols);
+			log.debug("will update columns (has zero cols) [name="+rel.getQualifiedName()+"]: "+cols);
 			setColumns(rel, cols);
 		}
 		else if(rel.getColumnCount()==cols.size()) {
