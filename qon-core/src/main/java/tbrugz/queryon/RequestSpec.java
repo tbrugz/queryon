@@ -229,7 +229,7 @@ public class RequestSpec {
 	final String uniValueFilenameCol;
 	long[] bytesRange;
 	
-	public final static int DEFAULT_LIMIT = 100;
+	public final static int DEFAULT_LIMIT = 1000;
 	final static int DEFAULT_MAX_UPDATES = 1;
 	final static int DEFAULT_MIN_UPDATES = 1;
 	
