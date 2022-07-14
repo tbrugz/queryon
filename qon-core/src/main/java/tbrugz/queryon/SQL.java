@@ -516,6 +516,7 @@ public class SQL {
 			if(tabColsList==null) {
 				throw new BadRequestException("relation's columns not found [relation: "+table.getQualifiedName()+"]");
 			}
+			//log.debug("createSQLColumns: tabColsList: "+tabColsList);
 			if(aliases!=null) { checkAliases(aliases, reqspec.columns); }
 			Set<String> tabCols = new HashSet<String>(tabColsList);
 			List<String> sqlCols = new ArrayList<String>(); 
@@ -538,16 +539,17 @@ public class SQL {
 		}
 		else {
 			List<String> cols = table.getColumnNames();
+			//log.debug("createSQLColumns: cols: "+cols);
 			if(table instanceof QonRelation) {
 				QonRelation qr = (QonRelation) table;
 				List<String> qrCols = qr.getDefaultColumnNames();
 				log.debug("getDefaultColumnNames: qrCols = "+qrCols);
-				if(qrCols!=null) {
+				if(qrCols!=null && qrCols.size()>0) {
 					cols = qrCols;
 				}
 			}
 			if(aliases!=null) { checkAliases(aliases, cols); }
-			if(cols!=null) {
+			if(cols!=null && cols.size()>0) {
 				columns = getColumnsStr(cols, aliases);
 			}
 		}
