@@ -2,6 +2,7 @@ package tbrugz.queryon.processor;
 
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,14 +13,25 @@ import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.util.Utils;
 
 public class ModelValidator extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(ModelValidator.class);
 	
-	final boolean removeInvalid = false;
+	static final String PROP_PREFIX = "queryon.ModelValidator";
+
+	static final String SUFFIX_REMOVE_INVALID = ".remove-invalid-objects";
+	
+	boolean removeInvalid = false;
 	final boolean update = true; //XXX: update may change data type & lose nullable info
 	//XXX: setInvalid...
+	
+	@Override
+	public void setProperties(Properties prop) {
+		super.setProperties(prop);
+		removeInvalid = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_REMOVE_INVALID, removeInvalid);
+	}
 	
 	@Override
 	public void process() {
