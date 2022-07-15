@@ -7,12 +7,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.SQL;
+import tbrugz.queryon.model.QonRelation;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -63,6 +65,22 @@ public class DBObjectUtils {
 				if(update) {
 					List<Column> cols = DataDumpUtils.getColumns(rsmd);
 					updateColumnsIfEmpty(rel, cols);
+					if(rel instanceof QonRelation) {
+						// check if defaultColumnNames exists in cols
+						QonRelation qr = (QonRelation) rel;
+						List<String> colNames = getColumnNames(cols);
+						//log.info("[QonRelation] colNames: "+colNames+" ; rel: "+rel.getQualifiedName());
+						//List<String> qrCols = qr.getDefaultColumnNames();
+						//for(String s: qrCols) {
+						Iterator<String> iter = qr.getDefaultColumnNames().iterator();
+						while(iter.hasNext()){
+							String s = iter.next();
+							if(!colNames.contains(s)) {
+								log.warn("default column '"+s+"' not found in relation "+rel.getQualifiedName()+", removing");
+								iter.remove();
+							}
+						}
+					}
 				}
 			}
 			else {
@@ -181,6 +199,7 @@ public class DBObjectUtils {
 				setColumns(rel, new ArrayList<Column>());
 			}
 			log.warn("resultset metadata's sqlexception: "+e.toString().trim());
+			//log.warn("sql:\n"+finalSql);
 			log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
 			throw e;
 		}
@@ -325,4 +344,14 @@ public class DBObjectUtils {
 		}
 	}
 	
+	/* see: Table.getColumnNames() */
+	public static List<String> getColumnNames(List<Column> columns) {
+		if(columns==null) { return null; }
+		List<String> ret = new ArrayList<String>();
+		for(Column c: columns) {
+			ret.add(c.getName());
+		}
+		return ret;
+	}
+
 }

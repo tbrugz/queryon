@@ -33,6 +33,7 @@ import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
@@ -226,7 +227,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 			String[] tableAltUk = altUk.get(obj.getName());
 			if(tableAltUk!=null) {
 				keyCols = Arrays.asList(tableAltUk);
-				List<String> commonCols = getColumnNames(DataDiff.getCommonColumns(tSource, tTarget));
+				List<String> commonCols = DBObjectUtils.getColumnNames(DataDiff.getCommonColumns(tSource, tTarget));
 				
 				for(int i=keyCols.size()-1;i>=0;i--) {
 					String colName = keyCols.get(i);
@@ -457,16 +458,6 @@ public class DataDiffServlet extends AbstractHttpServlet {
 		return dmlTypes;
 	}
 
-	/* see: Table.getColumnNames() */
-	static List<String> getColumnNames(List<Column> columns) {
-		if(columns==null) { return null; }
-		List<String> ret = new ArrayList<String>();
-		for(Column c: columns) {
-			ret.add(c.getName());
-		}
-		return ret;
-	}
-	
 	void setupProperties(Properties prop) {
 		loopLimit = Utils.getPropLong(prop, PROP_LIMIT_MAX, Utils.getPropLong(prop, QueryOn.PROP_MAX_LIMIT, DEFAULT_LOOP_LIMIT));
 		//log.info("loopLimit = "+loopLimit);
