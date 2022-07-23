@@ -300,6 +300,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String PROP_SCHEMAS_TO_IGNORE = "queryon.schemas-to-ignore";
 	static final String PROP_SQL_USEIDDECORATOR = "queryon.sql.use-id-decorator";
 	static final String PROP_AUTH_SHIRO_ALLOW_DISABLED = "queryon.auth.shiro.allow-disabled";
+	static final String PROP_DEBUG_MODE = "queryon.debug-mode";
 	
 	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	static final String DEFAULT_XTRA_SYNTAXES = null;
@@ -358,7 +359,7 @@ public class QueryOn extends AbstractHttpServlet {
 	protected final boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
 	protected Integer defaultLimit;
 	protected int maxLimit;
-	protected final boolean debugMode = false; //XXX add prop for debugMode
+	protected boolean debugMode = false;
 	private Boolean shiroEnabled = null;
 	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
@@ -503,6 +504,10 @@ public class QueryOn extends AbstractHttpServlet {
 				log.warn("no properties config loaded");
 			}
 
+			debugMode = Utils.getPropBool(prop, PROP_DEBUG_MODE, debugMode);
+			if(debugMode) {
+				log.info("debug-mode is active");
+			}
 			DumpSyntaxRegistry.setSyntaxesResource(DEFAULT_SYNTAXES_RESOURCE);
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
 			log.info("syntaxes: "+StringUtils.getClassSimpleNameListT( DumpSyntaxRegistry.getSyntaxes()) );
