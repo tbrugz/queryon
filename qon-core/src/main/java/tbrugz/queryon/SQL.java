@@ -167,7 +167,7 @@ public class SQL {
 					if(rdcn==null) {
 						qr.setDefaultColumnNames(new ArrayList<String>());
 					}
-					log.debug("adding default columns: "+defaultColsTmp);
+					//log.debug("adding default columns: "+defaultColsTmp);
 					for(String s: defaultColsTmp) {
 						qr.getDefaultColumnNames().add(s);
 					}
@@ -502,19 +502,19 @@ public class SQL {
 		return;
 	}
 	
-	public void applyProjection(RequestSpec reqspec, Relation table) {
-		String projectionClause = createSQLColumns(reqspec, table);
+	public void applyProjection(RequestSpec reqspec) {
+		String projectionClause = createSQLColumns(reqspec, relation);
 		//log.debug("applyProjection: projectionClause = "+projectionClause);
-		applyProjection(reqspec, table, projectionClause);
+		applyProjection(reqspec, projectionClause);
 	}
 	
-	public void applyProjection(RequestSpec reqspec, Relation table, String projectionClause) {
+	public void applyProjection(RequestSpec reqspec, String projectionClause) {
 		//log.debug("applyProjection: projectionClause: "+projectionClause+" [table="+table+"]");
 		if(sql.contains(PARAM_PROJECTION_CLAUSE)) {
 			sql = sql.replace(PARAM_PROJECTION_CLAUSE, projectionClause);
 		}
 		else {
-			if(reqspec.columns.size()>0 || hasDefaultColumnNames(table) || reqspec.distinct) {
+			if(reqspec.columns.size()>0 || hasDefaultColumnNames(relation) || reqspec.distinct) {
 				addProjection(projectionClause);
 				if(!(relation instanceof Query)) {
 					log.warn("relation of type "+relation.getRelationType()+" (not Query) with no "+PARAM_PROJECTION_CLAUSE+" ?");

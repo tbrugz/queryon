@@ -1404,7 +1404,7 @@ public class QueryOn extends AbstractHttpServlet {
 		//XXX: apply order or projection first? order last seems more natural...
 		
 		// projection (select columns) - also adds 'distinct' if requested
-		sql.applyProjection(reqspec, relation);
+		sql.applyProjection(reqspec);
 		
 		// group by
 		sql.applyGroupByOrAggregate(reqspec);
@@ -1673,7 +1673,7 @@ public class QueryOn extends AbstractHttpServlet {
 		try {
 			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser), false);
 			if(asQuery) {
-				sql.applyProjection(reqspec, relation); //XXX: only if query (select)? ie, when comming from 'qon-editor.html'?
+				sql.applyProjection(reqspec);
 			}
 			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
 			String finalSql = sql.getFinalSql();

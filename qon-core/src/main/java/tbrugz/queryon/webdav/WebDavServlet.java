@@ -417,7 +417,7 @@ public class WebDavServlet extends BaseApiServlet {
 		String projection = Utils.join(selectCols, ", ");
 		SQL sql = SQL.createSQL(r, reqspec, null);
 		filterByKey(r, reqspec, pk, sql);
-		sql.applyProjection(reqspec, r, projection);
+		sql.applyProjection(reqspec, projection);
 		
 		String finalSql = sql.getFinalSql();
 		log.debug("getResourcesFromRelationColumns: sql:\n"+finalSql);
