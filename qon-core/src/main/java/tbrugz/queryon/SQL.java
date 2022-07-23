@@ -155,6 +155,29 @@ public class SQL {
 			this.originalBindParameterCount = bindParameterCountTmp;
 		}
 		this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNullOnMissingParameters(), this.originalBindParameterCount);
+
+		// default columns
+		List<String> defaultColsTmp = getDefaultColumns(sql);
+		if(defaultColsTmp!=null) {
+			if(relation instanceof QonRelation) {
+				QonRelation qr = (QonRelation) relation;
+				//List<String> colNames = qr.getColumnNames();
+				List<String> rdcn = qr.getDefaultColumnNames();
+				if(rdcn==null || rdcn.size()==0) {
+					if(rdcn==null) {
+						qr.setDefaultColumnNames(new ArrayList<String>());
+					}
+					log.debug("adding default columns: "+defaultColsTmp);
+					for(String s: defaultColsTmp) {
+						qr.getDefaultColumnNames().add(s);
+					}
+				}
+			}
+			else {
+				String message = "relation "+relation+" is not of type QonRelation";
+				log.warn(message); //, new RuntimeException(message));
+			}
+		}
 		
 		if(validate) {
 			validateNamedParametersWithParamCount(namedParameters, this.originalBindParameterCount);
@@ -486,6 +509,7 @@ public class SQL {
 	}
 	
 	public void applyProjection(RequestSpec reqspec, Relation table, String projectionClause) {
+		//log.debug("applyProjection: projectionClause: "+projectionClause+" [table="+table+"]");
 		if(sql.contains(PARAM_PROJECTION_CLAUSE)) {
 			sql = sql.replace(PARAM_PROJECTION_CLAUSE, projectionClause);
 		}
@@ -633,6 +657,7 @@ public class SQL {
 	/* ----------------- extra SQL metadata ----------------- */
 	
 	static final String PTRN_ALLOW_ENCAPSULATION = "allow-encapsulation";
+	static final String PTRN_DEFAULT_COLUMNS = "default-columns";
 	static final String PTRN_LIMIT_MAX = "limit-max";
 	static final String PTRN_LIMIT_DEFAULT = "limit-default";
 	static final String PTRN_NAMED_PARAMETERS = "named-parameters";
@@ -644,6 +669,7 @@ public class SQL {
 	static final String PTRN_MATCH_BOOLEANLIST = "[true|false][,[true|false]]*";
 	
 	static final Pattern allowEncapsulationBooleanPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_ALLOW_ENCAPSULATION)+"\\s*=\\s*("+PTRN_MATCH_BOOLEAN+")\\b.*\\*/", Pattern.DOTALL);
+	static final Pattern defaultColumnsPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_DEFAULT_COLUMNS)+"\\s*=\\s*("+PTRN_MATCH_STRINGLIST+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitMaxIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_MAX)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern limitDefaultIntPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_LIMIT_DEFAULT)+"\\s*=\\s*("+PTRN_MATCH_INT+")\\b.*\\*/", Pattern.DOTALL);
 	static final Pattern namedParametersPattern = Pattern.compile("/\\*.*\\b"+Pattern.quote(PTRN_NAMED_PARAMETERS)+"\\s*=\\s*("+PTRN_MATCH_STRINGLIST+")\\b.*\\*/", Pattern.DOTALL);
@@ -1082,6 +1108,15 @@ public class SQL {
 			return TokenizerUtil.getParameterNames(qpl);
 		}
 		return null;
+	}
+
+	static List<String> getDefaultColumns(String sql) {
+		List<String> defaultColumns = null;
+		String defaultColumnsStr = processPatternString(sql, defaultColumnsPattern, null);
+		if(defaultColumnsStr!=null) {
+			defaultColumns = Utils.getStringList(defaultColumnsStr, ",");
+		}
+		return defaultColumns;
 	}
 	
 	public static void validateNamedParametersWithParamCount(List<String> namedParameters, int bindParameterCount) {

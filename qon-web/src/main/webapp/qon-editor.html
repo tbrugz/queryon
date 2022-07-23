@@ -207,6 +207,7 @@
 		var reqData = {
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
+			asquery : "true",
 			sql: sqlString
 		}
 		if(getModelId()) {
@@ -676,7 +677,6 @@
 		rl.style.display='initial';
 		if(rolesInfo.roles && rolesInfo.roles.length>0) {
 			//console.log('multi-roles');
-			//refreshRolesCount();
 			var rc = document.getElementById('rolesCount');
 			var rolesBtn = document.getElementById('rolesBtn');
 			r.style.display='none';
@@ -684,6 +684,7 @@
 			rolesBtn.style.display='initial';
 			var rtext = document.getElementById('rolesLabelText');
 			rtext.innerHTML = 'roles#';
+			refreshRolesCount();
 		}
 	}
 

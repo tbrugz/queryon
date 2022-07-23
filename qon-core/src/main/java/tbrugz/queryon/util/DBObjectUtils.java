@@ -68,16 +68,21 @@ public class DBObjectUtils {
 					if(rel instanceof QonRelation) {
 						// check if defaultColumnNames exists in cols
 						QonRelation qr = (QonRelation) rel;
-						List<String> colNames = getColumnNames(cols);
 						//log.info("[QonRelation] colNames: "+colNames+" ; rel: "+rel.getQualifiedName());
 						//List<String> qrCols = qr.getDefaultColumnNames();
 						//for(String s: qrCols) {
-						Iterator<String> iter = qr.getDefaultColumnNames().iterator();
-						while(iter.hasNext()){
-							String s = iter.next();
-							if(!colNames.contains(s)) {
-								log.warn("default column '"+s+"' not found in relation "+rel.getQualifiedName()+", removing");
-								iter.remove();
+						List<String> defaultCols = qr.getDefaultColumnNames();
+						if(defaultCols!=null) {
+							List<String> colNames = getColumnNames(cols);
+							Iterator<String> iter = defaultCols.iterator();
+							while(iter.hasNext()){
+								String s = iter.next();
+								if(!colNames.contains(s)) {
+									log.warn("default column '"+s+"' not found in relation '"+rel.getQualifiedName()+"', removing");
+									iter.remove();
+									//log.warn("default column '"+s+"' not found in relation '"+rel.getQualifiedName()+"'");
+									//XXX: throw ?
+								}
 							}
 						}
 					}

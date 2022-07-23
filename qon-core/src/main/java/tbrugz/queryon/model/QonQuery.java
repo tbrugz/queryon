@@ -15,6 +15,7 @@ public class QonQuery extends Query implements QonRelation {
 		return defaultColumnNames;
 	}
 	
+	@Override
 	public void setDefaultColumnNames(List<String> defaultColumnNames) {
 		this.defaultColumnNames = defaultColumnNames;
 	}

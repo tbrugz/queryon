@@ -64,6 +64,7 @@ Special query constructs inside SQL comments (`/* ... */`)
   that, for example, the query results may be paginated in the database. In some edge cases this may be a problem, so
   it can be disabled (default is *true*)
 * `bind-null-on-missing-parameters=<true|false>[,<true|false>[,...]]` - binds `NULL` on required missing parameters
+* `default-columns=<column-1>[,<column-2>[,...]]` - sets the default columns that will be retuned by this query (all columns are returned by default)
 * `limit-default=<numeric>` - sets the default limit of the number of rows that may be returned by the query in a single
   request - may be overriden by the `limit` parameter
 * `limit-max=<numeric>` - limits the number of rows that may be returned by the query in a single request

@@ -8,4 +8,6 @@ public interface QonRelation extends Relation {
 
 	public List<String> getDefaultColumnNames();
 
+	public void setDefaultColumnNames(List<String> defaultColumnNames);
+
 }

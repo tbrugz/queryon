@@ -49,6 +49,7 @@ import tbrugz.queryon.action.QOnManage;
 import tbrugz.queryon.exception.ForbiddenException;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
+import tbrugz.queryon.model.QonQuery;
 import tbrugz.queryon.model.QonRelation;
 import tbrugz.queryon.processor.UpdatePluginUtils;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
@@ -1064,7 +1065,8 @@ public class QueryOn extends AbstractHttpServlet {
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
-					doValidate(relation, reqspec, currentUser, conn, resp);
+					boolean asQuery = RequestSpec.getBoolValue(req.getParameter(PARAM_ASQUERY));
+					doValidate(relation, reqspec, currentUser, asQuery, conn, resp);
 				}
 				catch(RuntimeException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -1331,14 +1333,18 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	*/
 	
+	static final String PARAM_NAME = "name";
+	static final String PARAM_SQL = "sql";
+	static final String PARAM_ASQUERY = "asquery";
+
 	// XXX should use RequestSpec for parameters?
 	protected Query getQuery(HttpServletRequest req, RequestSpec reqspec, Subject currentUser, Connection conn) throws SQLException {
-		Query relation = new Query();
-		String name = req.getParameter("name");
+		Query relation = new QonQuery();
+		String name = req.getParameter(PARAM_NAME);
 		/*if(name==null || name.equals("")) {
 			throw new BadRequestException("parameter 'name' undefined");
 		}*/
-		String sql = req.getParameter("sql");
+		String sql = req.getParameter(PARAM_SQL);
 		if(sql==null || sql.equals("")) {
 			throw new BadRequestException("parameter 'sql' undefined");
 		}
@@ -1370,6 +1376,7 @@ public class QueryOn extends AbstractHttpServlet {
 			String username, Integer defaultLimit, int maxLimit, HttpServletResponse resp, boolean strictMode) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		
 		SQL sql = SQL.createSQL(relation, reqspec, username);
+		//log.debug("createSQL: sql:\n"+sql.getSql());
 		
 		// sets named parameters
 		reqspec.setNamedParameters(sql);
@@ -1517,7 +1524,7 @@ public class QueryOn extends AbstractHttpServlet {
 				log.warn("relation '"+relation+"' not a query: can't validate");
 			}
 		}
-		log.debug("sql:\n"+finalSql);
+		log.debug("doSelect: sql:\n"+finalSql);
 		/*
 		if(reqspec.isHeadMethod()) {
 			log.info("HEAD method: response body is empty"); 
@@ -1612,7 +1619,7 @@ public class QueryOn extends AbstractHttpServlet {
 			sql.addOriginalParameters(reqspec);
 			
 			finalSql = sql.getFinalSql();
-			log.debug("sql:\n"+finalSql);
+			log.debug("doSql: sql:\n"+finalSql);
 			PreparedStatement st = conn.prepareStatement(finalSql);
 			sql.bindParameters(st);
 			
@@ -1661,13 +1668,17 @@ public class QueryOn extends AbstractHttpServlet {
 	 * - no stmt.getMetaData()
 	 * - run query with limit of 0 or 1? set parameters with what? null? random?
 	 */
-	void doValidate(Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+	void doValidate(Query relation, RequestSpec reqspec, Subject currentUser, boolean asQuery, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		SQL sql = null;
 		try {
 			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser), false);
+			if(asQuery) {
+				sql.applyProjection(reqspec, relation); //XXX: only if query (select)? ie, when comming from 'qon-editor.html'?
+			}
 			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
-			DBObjectUtils.validateQuery(relation, sqlWithNamedParams, conn, true);
 			String finalSql = sql.getFinalSql();
+			log.debug("doValidate[asQuery="+asQuery+"]: sql:\n"+finalSql);
+			DBObjectUtils.validateQuery(relation, sqlWithNamedParams, conn, true);
 			//DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
 			PreparedStatement stmt = conn.prepareStatement(finalSql);
 

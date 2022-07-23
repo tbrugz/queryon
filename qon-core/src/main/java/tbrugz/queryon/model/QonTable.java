@@ -15,6 +15,7 @@ public class QonTable extends Table implements QonRelation {
 		return defaultColumnNames;
 	}
 	
+	@Override
 	public void setDefaultColumnNames(List<String> defaultColumnNames) {
 		this.defaultColumnNames = defaultColumnNames;
 	}

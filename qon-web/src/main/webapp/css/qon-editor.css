@@ -130,6 +130,12 @@ input[type=button] {
 	border: 1px solid #999;
 	margin: 2px;
 	padding: 2px;
+	white-space: pre-wrap;
+	max-height: 200px;
+	overflow-y: auto;
+	/*
+	position: absolute;
+	*/
 }
 
 #xtra-actions {
