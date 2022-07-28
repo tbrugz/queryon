@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
@@ -13,6 +15,8 @@ import tbrugz.queryon.util.ShiroUtils;
 
 public class AuthActions {
 	
+	private static final Log log = LogFactory.getLog(AuthActions.class);
+
 	final Properties prop;
 	
 	public AuthActions(Properties prop) {
@@ -25,8 +29,14 @@ public class AuthActions {
 	}
 
 	public ExtendedUserInfo getCurrentUserXtra(HttpServletRequest req) {
+		Subject subject = ShiroUtils.getSubject(prop, req);
+		/*
+		log.info("subject: "+subject+
+			" ; principals: "+subject.getPrincipals()+"/"+subject.getPrincipals().getClass().getName()+
+			" ; realmNames: "+subject.getPrincipals().getRealmNames());
+		*/
 		ExtendedUserInfo ui = new ExtendedUserInfo(
-				ShiroUtils.getSubject(prop, req),
+				subject,
 				SchemaModelUtils.getModelIds(req.getServletContext())
 				);
 		return ui;

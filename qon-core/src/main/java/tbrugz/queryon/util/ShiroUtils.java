@@ -209,9 +209,12 @@ public class ShiroUtils {
 		}
 		boolean permitted =  subject.isPermitted(permission);
 		//log.debug("checking permission '"+permission+"', subject = "+subject.getPrincipal()+" ; permitted = "+permitted);
-		/*if(!permitted) {
-			log.info("not permitted: '"+permission+"', subject = "+subject.getPrincipal());
-		}*/
+		/*
+		if(!permitted) {
+			log.debug("not permitted: '"+permission+"', subject = '"+subject+"'"+
+				", principals = "+subject.getPrincipals()+"/"+subject.getPrincipals().getClass().getName());
+		}
+		*/
 		return permitted;
 	}
 
@@ -262,7 +265,7 @@ public class ShiroUtils {
 				for(Realm r: rs) {
 					AuthorizationInfo ai = getAuthorizationInfo(r, subject);
 					if(ai!=null) {
-						log.debug("AuthorizationInfo:: "+ai.getClass());
+						log.debug("AuthorizationInfo["+r.getName()+"/"+r.getClass().getName()+"]: "+ai.getClass().getName());
 						Collection<String> cr = ai.getRoles();
 						if(cr!=null) {
 							log.debug("roles:: "+cr+" [realm="+r.getName()+"]");
@@ -270,7 +273,7 @@ public class ShiroUtils {
 						}
 					}
 					else {
-						log.debug("null AuthorizationInfo: Realm/AuthorizationInfoInformer="+r.getClass());
+						log.debug("AuthorizationInfo["+r.getName()+"/"+r.getClass().getName()+"]: is null");
 					}
 				}
 			}
@@ -300,7 +303,7 @@ public class ShiroUtils {
 		}
 		log.debug("AuthorizationInfo (not an AuthorizationInfoInformer class - will use reflection):: "+r.getClass()+" / "+r.getName());
 		Object o = ReflectionUtil.callProtectedMethodNoException(r, "getAuthorizationInfo", new Class<?>[]{ PrincipalCollection.class }, subject.getPrincipals());
-		//log.info("AuthorizationInfo:: "+o);
+		//log.debug("AuthorizationInfo:: "+o);
 		return (AuthorizationInfo) o;
 	}
 	
@@ -310,6 +313,7 @@ public class ShiroUtils {
 			SecurityUtils.getSecurityManager();
 		}
 		catch (UnavailableSecurityManagerException e) {
+			//log.warn("isShiroEnabled: UnavailableSecurityManagerException", e);
 			log.debug("isShiroEnabled: UnavailableSecurityManagerException: "+e.getMessage());
 			return false;
 		}
