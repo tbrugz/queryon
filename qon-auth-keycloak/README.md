@@ -2,7 +2,7 @@
 qon-auth-keycloak
 =================
 
-Optional module to integrate Keycloak with Queryon/Shiro.
+Optional module to integrate Keycloak (Java servlet filter adapter) with Queryon/Shiro.
 
 
 adding Keycloak integration
@@ -51,16 +51,7 @@ adding Keycloak integration
 ```
 
 
-### 3a. In `queryon.properties`, add `KeycloakIdentityProvider` as identity provider:
-
-```properties
-queryon.auth.identity-providers=tbrugz.queryon.auth.provider.KeycloakIdentityProvider
-```
-
-OR
-
-
-### 3b. In `shiro.ini`, add:
+### 3a. In `shiro.ini`, add:
 
 ```ini
 [main]
@@ -69,6 +60,25 @@ keycloakFilter = tbrugz.queryon.shiro.KeycloakAuthFilter
 
 [urls]
 /** = keycloakFilter
+```
+
+**OR**
+
+
+### 3a. In `queryon.properties`, add `KeycloakIdentityProvider` as identity provider:
+
+```properties
+queryon.auth.identity-providers=tbrugz.queryon.auth.provider.KeycloakIdentityProvider
+```
+
+
+### 4. In `shiro.ini`, add (optional, for using keycloak roles):
+
+```ini
+[main]
+keycloakRealm = tbrugz.queryon.shiro.KeycloakShiroRealm
+
+securityManager.realms = $keycloakRealm, <...>
 ```
 
 

@@ -13,6 +13,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.filter.authc.AuthenticationFilter;
+import org.apache.shiro.web.subject.WebSubject;
 
 import tbrugz.queryon.auth.provider.KeycloakUtils;
 
@@ -31,6 +32,7 @@ public class KeycloakAuthFilter extends AuthenticationFilter {
 
 		Subject currentUser = SecurityUtils.getSubject();
 		if(currentUser.getPrincipal()!=null) {
+			//log.debug("currentUser = "+currentUser);
 			return true;
 		}
 
@@ -45,11 +47,15 @@ public class KeycloakAuthFilter extends AuthenticationFilter {
 		}
 		
 		log.debug("authenticated: identity = "+identity);
+		/*
+		Set<String> roles = KeycloakUtils.getRoles(req);
+		log.debug("roles = "+roles+" ; identity = "+identity);
+		*/
 
 		Session currentSession = currentUser.getSession(); //XXX: false?
 		
 		PrincipalCollection principals = new SimplePrincipalCollection(identity, DEFAULT_REALM_NAME);
-		Subject.Builder sbuilder = new Subject.Builder().principals(principals).authenticated(authenticated);
+		Subject.Builder sbuilder = new WebSubject.Builder(request, response).principals(principals).authenticated(authenticated);
 		if(currentSession!=null) {
 			sbuilder = sbuilder.session(currentSession);
 		}
