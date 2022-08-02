@@ -3,26 +3,26 @@ drop table if exists EMP;
 drop table if exists DEPT;
 
 create table DEPT ( -- type=TABLE
-	ID INTEGER(10) not null,
+	ID INTEGER not null,
 	NAME VARCHAR(100),
-	PARENT_ID INTEGER(10),
+	PARENT_ID INTEGER,
 	constraint DEPT_PK primary key (ID)
 );
 
 create table EMP ( -- type=TABLE
-	ID INTEGER(10) not null,
+	ID INTEGER not null,
 	NAME VARCHAR(100) not null,
-	SUPERVISOR_ID INTEGER(10),
-	DEPARTMENT_ID INTEGER(10),
-	SALARY INTEGER(10),
+	SUPERVISOR_ID INTEGER,
+	DEPARTMENT_ID INTEGER,
+	SALARY INTEGER,
 	constraint EMP_PK primary key (ID)
 );
 
 drop table if exists PAIR;
 
 create table PAIR ( -- type=TABLE
-	ID1 INTEGER(10) not null,
-	ID2 INTEGER(10) not null,
+	ID1 INTEGER not null,
+	ID2 INTEGER not null,
 	REMARKS VARCHAR,
 	constraint PAIR_PK primary key (ID1, ID2)
 );
