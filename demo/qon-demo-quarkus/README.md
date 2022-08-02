@@ -8,22 +8,27 @@ QueryOn demo using [Quarkus](https://quarkus.io), based on `qon-demo-anydb`
 
 * Running in dev mode (using H2):
 
-`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DBKIND=h2 mvn quarkus:dev`
+`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QUARKUS_DATASOURCE_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DB_KIND=h2 mvn quarkus:dev`
 
-Database **kinds** (env `QUARKUS_DATASOURCE_DBKIND`, translated to property `quarkus.datasource.db-kind`) can be found in [Quarkus Datasources Guide](https://quarkus.io/guides/datasource#default-datasource)
+Database **kinds** (env `QUARKUS_DATASOURCE_DB_KIND`, translated to property `quarkus.datasource.db-kind`) and **driver** (env `QUARKUS_DATASOURCE_JDBC_DRIVER`) can be found in [Quarkus Datasources Guide](https://quarkus.io/guides/datasource#default-datasource)
+
+(**Note**: Quarkus performs optimizations & checks at build time, and using QueryOn in dev mode has some issues - including classloading/JAXB, ...)
+
+
+* Packaging & running in prod mode:
+
+Packaging: `QUARKUS_DATASOURCE_JDBC_DRIVER=<driver> QUARKUS_DATASOURCE_DB_KIND=<db-kind> mvn package`
+
+Running: `[<ENV>] java -jar target/quarkus-app/quarkus-run.jar`
+
+Example Packaging (using H2): `QUARKUS_DATASOURCE_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DB_KIND=h2 mvn package`
+
+Example Running (using H2): `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_DIFF_APPLY=true java -jar target/quarkus-app/quarkus-run.jar`
 
 
 * Browse:
 
 http://localhost:8080/
-
-* Packaging & running in prod mode:
-
-Packaging: `mvn package`
-
-Running: `java -jar target/quarkus-app/quarkus-run.jar`
-
-Running (using H2): `QON_JDBC_URL="jdbc:h2:~/.queryon/demo-anydb.h2;SCHEMA_SEARCH_PATH=QUERYON,PUBLIC;DB_CLOSE_ON_EXIT=true" QON_SCHEMAS=PUBLIC QON_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DBKIND=h2 java -jar target/quarkus-app/quarkus-run.jar`
 
 
 ## Other commands
