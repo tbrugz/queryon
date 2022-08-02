@@ -19,7 +19,7 @@ Database **kinds** (env `QUARKUS_DATASOURCE_DB_KIND`, translated to property `qu
 
 Packaging: `QUARKUS_DATASOURCE_JDBC_DRIVER=<driver> QUARKUS_DATASOURCE_DB_KIND=<db-kind> mvn package`
 
-Running: `[<ENV>] java -jar target/quarkus-app/quarkus-run.jar`
+Running: `[<ENVs>] java -jar target/quarkus-app/quarkus-run.jar`
 
 Example Packaging (using H2): `QUARKUS_DATASOURCE_JDBC_DRIVER=org.h2.Driver QUARKUS_DATASOURCE_DB_KIND=h2 mvn package`
 
@@ -51,3 +51,8 @@ mvn io.quarkus.platform:quarkus-maven-plugin:2.2.3.Final:create \
 ```
 
 ref: https://quarkus.io/guides/getting-started
+
+
+## Links
+
+https://quarkus.io/guides/maven-tooling

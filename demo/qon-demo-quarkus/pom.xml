@@ -206,6 +206,13 @@
               <goal>generate-code</goal>
               <goal>generate-code-tests</goal>
             </goals>
+            <configuration>
+              <properties>
+                <!-- making default quarkus build happy -->
+                <quarkus.datasource.db-kind>h2</quarkus.datasource.db-kind>
+                <quarkus.datasource.jdbc.driver>org.h2.Driver</quarkus.datasource.jdbc.driver>
+              </properties>
+            </configuration>
           </execution>
         </executions>
       </plugin>
