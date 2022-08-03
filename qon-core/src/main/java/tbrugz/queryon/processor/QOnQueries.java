@@ -48,16 +48,18 @@ public class QOnQueries extends AbstractUpdatePlugin {
 
 	public static final String ATTR_QUERIES_WARNINGS_PREFIX = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX;
 	
-	/*static final String PROP_PREFIX = "queryon.qon-queries";
+	static final String PROP_PREFIX = QOnQueriesProcessor.PROP_PREFIX; //"queryon.qon-queries";
 	
+	/*
 	static final String SUFFIX_ACTION = ".action";
 	static final String SUFFIX_TABLE = ".table";
 	static final String SUFFIX_QUERY_NAMES = ".querynames";
 	static final String SUFFIX_LIMIT_INSERT_EXACT = ".limit.insert.exact";
 	static final String SUFFIX_LIMIT_UPDATE_EXACT = ".limit.update.exact";
 	static final String SUFFIX_METADATA_ALLOW_QUERY_EXEC = ".metadata.allow-query-exec";
+	*/
 	
-	static final String DEFAULT_QUERIES_TABLE = "qon_queries";*/
+	public static final String DEFAULT_QUERIES_TABLE = QOnQueriesProcessor.DEFAULT_QUERIES_TABLE;
 
 	//static final String PIPE_SPLIT = "\\|";
 
@@ -68,7 +70,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	
 	String getQonQueriesTable() {
 		//return getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
-		return getTableName(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
+		return getTableName(PROP_PREFIX, DEFAULT_QUERIES_TABLE);
 	}
 	
 	boolean isQonQueriesRelation(Relation relation) {

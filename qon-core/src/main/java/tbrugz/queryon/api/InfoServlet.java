@@ -31,7 +31,6 @@ import tbrugz.queryon.auth.UserInfo;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.processor.QOnExecs;
 import tbrugz.queryon.processor.QOnQueries;
-import tbrugz.queryon.processor.QOnQueriesProcessor;
 import tbrugz.queryon.processor.QOnTables;
 import tbrugz.queryon.processor.UpdatePluginUtils;
 import tbrugz.queryon.util.DBUtil;
@@ -252,7 +251,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		//XXX: test if 'queryon.update-plugins' contains qon-tables and/or qon-execs
 		String[] defaultValues = {
 				null, null,
-				QOnQueriesProcessor.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE,
+				QOnQueries.DEFAULT_QUERIES_TABLE, QOnTables.DEFAULT_TABLES_TABLE,
 				QOnExecs.DEFAULT_EXECS_TABLE, PagesServlet.DEFAULT_PAGES_TABLE,
 				null, null,
 				null, null, "true", null,
