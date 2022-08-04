@@ -23,9 +23,10 @@
 	<script src="js/ui.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
 <script type="text/javascript">
+	const DEFAULT_TABLE_NAME = "QON_QUERIES";
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
-	var qonUrl = 'q/QON_QUERIES';
+	var qonUrl = 'q/' + DEFAULT_TABLE_NAME;
 	var qonPluginUrl = 'q/PluginAction/QOnQueries/readQuery';
 	var isQuerySaved = false;
 	//var modelId = null;

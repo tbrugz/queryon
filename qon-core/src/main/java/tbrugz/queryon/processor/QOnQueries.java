@@ -72,7 +72,11 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		//return getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 		return getTableName(PROP_PREFIX, DEFAULT_QUERIES_TABLE);
 	}
-	
+
+	String getQualifiedQonQueriesTable() {
+		return getTableName(PROP_PREFIX, DEFAULT_QUERIES_TABLE, true); //supportsSchemasInDataManipulation(conn));
+	}
+
 	boolean isQonQueriesRelation(Relation relation) {
 		String tablename = getQonQueriesTable();
 		if( (! tablename.equalsIgnoreCase(relation.getName()))
@@ -139,7 +143,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		try {
 			DBMSResources res = DBMSResources.instance();
 			features = res.getSpecificFeatures(conn.getMetaData());
-			updateTableNameProperty(QOnQueriesProcessor.PROP_PREFIX, conn.getMetaData());
+			updateTableNameProperty(PROP_PREFIX, conn.getMetaData());
 			readFromDatabase(servletContext);
 		} catch (BadRequestException e) { // BadRequestException | ProcessingException ?
 			modelRollback(origViews);
@@ -306,7 +310,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	 * see: QOnQueriesProcessor
 	 */
 	void readFromDatabase(ServletContext context) throws SQLException {
-		String qonQueriesTable = getQonQueriesTable();
+		String qonQueriesTable = getQualifiedQonQueriesTable();
 		//String qonQueriesTable = getProperty(QOnQueriesProcessor.PROP_PREFIX, QOnQueriesProcessor.SUFFIX_TABLE, QOnQueriesProcessor.DEFAULT_QUERIES_TABLE);
 		String sql = "select schema_name, name, query, default_column_names, remarks, roles_filter"+
 				" from "+qonQueriesTable+
@@ -377,7 +381,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		}
 
 		if(ACTION_READ_QUERY.equals(reqspec.getParams().get(1))) {
-			String tablename = getQonQueriesTable();
+			String tablename = getQualifiedQonQueriesTable();
 			String fullObjectName = reqspec.getParams().get(2).toString();
 
 			String[] partz = fullObjectName.split("\\.");

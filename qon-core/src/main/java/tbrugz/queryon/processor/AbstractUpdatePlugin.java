@@ -2,6 +2,7 @@ package tbrugz.queryon.processor;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
@@ -19,13 +20,15 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 
 	static final Log log = LogFactory.getLog(AbstractUpdatePlugin.class);
 	
+	//static final String DEFAULT_SCHEMA_NAME = "queryon";
+
 	String modelId;
 	
 	static final String COMMA_SPLIT = ",";
 	static final String PIPE_SPLIT = "\\|";
 
 	static final String SUFFIX_TABLE = ".table";
-	//static final String SUFFIX_SCHEMA_NAME = ".schema-name";
+	static final String SUFFIX_SCHEMA_NAME = ".schema-name";
 
 	@Override
 	public void setModelId(String modelId) {
@@ -71,12 +74,30 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 		throw new UnsupportedOperationException(Utils.join(reqspec.getParams(), "/"));
 	}
 
+	/*
+	public String getSchemaName(final String propPrefix, final String defaultSchemaName) {
+		return getProperty(propPrefix, SUFFIX_SCHEMA_NAME, defaultSchemaName);
+	}
+	*/
+
 	public String getTableName(final String propPrefix, final String defaultTableName) {
+		return getTableName(propPrefix, defaultTableName, false);
+	}
+
+	/*
+	public String getQualifiedTableName(final String propPrefix, final String defaultTableName) {
+		return getTableName(propPrefix, defaultTableName, true);
+	}
+	*/
+
+	protected String getTableName(final String propPrefix, final String defaultTableName, boolean grabSchemaName) {
 		String tableName = getProperty(propPrefix, SUFFIX_TABLE, defaultTableName);
-		/*String schemaName = getProperty(propPrefix, SUFFIX_SCHEMA_NAME, null);
-		if(schemaName!=null && !schemaName.equals("")) {
-			return schemaName + "." + tableName;
-		}*/
+		if(grabSchemaName) {
+			String schemaName = getProperty(propPrefix, SUFFIX_SCHEMA_NAME, null);
+			if(schemaName!=null && !schemaName.equals("")) {
+				return schemaName + "." + tableName;
+			}
+		}
 		return tableName;
 	}
 
@@ -97,5 +118,19 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 			log.debug("updateTableNameProperty: updated tableName to '"+tableName+"' (upper) [prefix="+propPrefix+" ; suffix="+SUFFIX_TABLE+"]");
 		}
 	}
+
+	/*
+	public boolean supportsSchemasInDataManipulation(Connection conn) {
+		try {
+			boolean ret = conn.getMetaData().supportsSchemasInDataManipulation();
+			//log.debug("supportsSchemasInDataManipulation: "+ret);
+			return ret;
+		}
+		catch(SQLException e) {
+			log.warn("SQLException: "+e, e);
+			return true;
+		}
+	}
+	*/
 
 }
