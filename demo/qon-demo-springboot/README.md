@@ -76,3 +76,10 @@ https://hub.docker.com/r/tbrugz/qon-demo-springboot/
 * ref:
 
 https://spring.io/guides/gs/spring-boot-docker/
+
+
+misc links
+-----
+
+* Release Notes / Migration Guide
+https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.7-Release-Notes
