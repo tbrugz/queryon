@@ -2,6 +2,8 @@ package tbrugz.queryon.util;
 
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Savepoint;
@@ -307,5 +309,17 @@ public class DBUtil {
 	/*public String getIsNullFunction(String columnName) {
 		return "case when "+columnName+" is null then 't' else 'f' end";
 	}*/
+
+	public static boolean checkIfRelationExists(String relationName, Connection conn) {
+		String sql = "select * from "+relationName;
+		try {
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			ResultSetMetaData rsmd = stmt.getMetaData();
+			return true;
+		}
+		catch(SQLException e) {
+			return false;
+		}
+	}
 	
 }

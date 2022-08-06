@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +45,7 @@ public class PagesServlet extends AbstractHttpServlet {
 	private static final Log log = LogFactory.getLog(PagesServlet.class);
 	
 	public static final String PROP_PREFIX = "queryon.qon-pages";
-	public static final String SUFFIX_TABLE = ".table";
+	public static final String SUFFIX_TABLE = AbstractUpdatePlugin.SUFFIX_TABLE; //".table";
 	public static final String SUFFIX_URL_404 = ".url-404";
 	
 	public static final String DEFAULT_PAGES_TABLE = "QON_PAGES";
@@ -67,12 +68,24 @@ public class PagesServlet extends AbstractHttpServlet {
 		// get qon_pages table
 		Set<String> mids = SchemaModelUtils.getModelIds(config.getServletContext());
 		for(String modelId: mids) {
-			String relationName = AbstractUpdatePlugin.getProperty(prop, modelId, PROP_PREFIX, SUFFIX_TABLE, null);
+			String relationName = AbstractUpdatePlugin.getProperty(prop, modelId, PROP_PREFIX, SUFFIX_TABLE, DEFAULT_PAGES_TABLE);
+			String schemaName = AbstractUpdatePlugin.getProperty(prop, modelId, PROP_PREFIX, AbstractUpdatePlugin.SUFFIX_SCHEMA_NAME, AbstractUpdatePlugin.DEFAULT_SCHEMA_NAME);
 			if(relationName!=null) {
-				relationMap.put(modelId, relationName);
+				String qualifiedRelationName = (schemaName!=null?schemaName+".":"")+relationName;
+				try(Connection conn = DBUtil.initDBConn(prop, modelId)) {
+					if(DBUtil.checkIfRelationExists(qualifiedRelationName, conn)) {
+						relationMap.put(modelId, qualifiedRelationName);
+					}
+					else {
+						log.warn("relation not found [modelId="+modelId+"]: "+qualifiedRelationName);
+					}
+				}
+				catch(SQLException | ClassNotFoundException | NamingException e) {
+					log.warn("Error initing connection [modelId="+modelId+";relationName="+qualifiedRelationName+"]: "+e);
+				}
 			}
 		}
-		log.debug("modelIds: "+mids+" ; relationMap: "+relationMap);
+		log.info("init: modelIds="+mids+" ; relationMap="+relationMap);
 		
 		// get not found (404) url
 		notFoundUrl = prop.getProperty(PROP_PREFIX+SUFFIX_URL_404);

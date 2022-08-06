@@ -20,15 +20,15 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 
 	static final Log log = LogFactory.getLog(AbstractUpdatePlugin.class);
 	
-	//static final String DEFAULT_SCHEMA_NAME = "queryon";
+	public static final String DEFAULT_SCHEMA_NAME = "queryon";
 
 	String modelId;
 	
 	static final String COMMA_SPLIT = ",";
 	static final String PIPE_SPLIT = "\\|";
 
-	static final String SUFFIX_TABLE = ".table";
-	static final String SUFFIX_SCHEMA_NAME = ".schema-name";
+	public static final String SUFFIX_TABLE = ".table";
+	public static final String SUFFIX_SCHEMA_NAME = ".schema-name";
 
 	@Override
 	public void setModelId(String modelId) {
