@@ -12,7 +12,11 @@
 		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="${sqldump.version}" scope="runtime">
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
+		<!--
 		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-core" version="${jaxb.version}" scope="runtime"/>
+		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-impl" version="${jaxb.version}" scope="runtime"/>
+		-->
+		<dependency groupId="jakarta.xml.bind" artifactId="jakarta.xml.bind-api" version="${jaxb.version}" scope="runtime"/>
 		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-impl" version="${jaxb.version}" scope="runtime"/>
 		<!-- jdbc drivers -->
 		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="${mariadb.jdbc.version}" scope="runtime"/>
