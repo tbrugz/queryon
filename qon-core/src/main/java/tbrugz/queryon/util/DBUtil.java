@@ -316,6 +316,7 @@ public class DBUtil {
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			return true;
+			// or DatabaseMetaData.getTables(null, null, relationName, null) ?
 		}
 		catch(SQLException e) {
 			return false;
