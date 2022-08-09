@@ -86,7 +86,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 
 	int readFromDatabase(ServletContext context) throws SQLException {
 		//String qonExecsTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_EXECS_TABLE);
-		String qonExecsTable = getTableName(PROP_PREFIX, DEFAULT_EXECS_TABLE);
+		String qonExecsTable = getTableName(PROP_PREFIX, DEFAULT_EXECS_TABLE, true); //supportsSchemasInDataManipulation(conn));
 		String namesStr = getProperty(PROP_PREFIX, SUFFIX_EXECS_NAMES, null);
 		List<String> names = Utils.getStringList(namesStr, ",");
 		String sql = "select schema_name, name, remarks, roles_filter, exec_type"

@@ -98,7 +98,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	
 	int readFromDatabase(ServletContext context) throws SQLException {
 		//String qonTablesTable = getProperty(PROP_PREFIX, SUFFIX_TABLE, DEFAULT_TABLES_TABLE);
-		String qonTablesTable = getTableName(PROP_PREFIX, DEFAULT_TABLES_TABLE);
+		String qonTablesTable = getTableName(PROP_PREFIX, DEFAULT_TABLES_TABLE, true); //supportsSchemasInDataManipulation(conn));
 		String qonTablesNames = getProperty(PROP_PREFIX, SUFFIX_TABLE_NAMES, null);
 		List<String> tables = Utils.getStringList(qonTablesNames, ",");
 		String sql = "select schema_name, name, column_names, pk_column_names, default_column_names"
