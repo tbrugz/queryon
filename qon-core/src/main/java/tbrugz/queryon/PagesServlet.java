@@ -71,7 +71,7 @@ public class PagesServlet extends AbstractHttpServlet {
 			String relationName = AbstractUpdatePlugin.getProperty(prop, modelId, PROP_PREFIX, SUFFIX_TABLE, DEFAULT_PAGES_TABLE);
 			String schemaName = AbstractUpdatePlugin.getProperty(prop, modelId, PROP_PREFIX, AbstractUpdatePlugin.SUFFIX_SCHEMA_NAME, AbstractUpdatePlugin.DEFAULT_SCHEMA_NAME);
 			if(relationName!=null) {
-				String qualifiedRelationName = (schemaName!=null?schemaName+".":"")+relationName;
+				String qualifiedRelationName = SchemaModelUtils.getQualifiedRelationName(schemaName, relationName);
 				try(Connection conn = DBUtil.initDBConn(prop, modelId)) {
 					if(DBUtil.checkIfRelationExists(qualifiedRelationName, conn)) {
 						relationMap.put(modelId, qualifiedRelationName);

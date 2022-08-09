@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.UpdatePlugin;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.Utils;
 
@@ -92,13 +93,11 @@ public abstract class AbstractUpdatePlugin extends AbstractSQLProc implements Up
 
 	protected String getTableName(final String propPrefix, final String defaultTableName, boolean grabSchemaName) {
 		String tableName = getProperty(propPrefix, SUFFIX_TABLE, defaultTableName);
+		String schemaName = null;
 		if(grabSchemaName) {
-			String schemaName = getProperty(propPrefix, SUFFIX_SCHEMA_NAME, null);
-			if(schemaName!=null && !schemaName.equals("")) {
-				return schemaName + "." + tableName;
-			}
+			schemaName = getProperty(propPrefix, SUFFIX_SCHEMA_NAME, null);
 		}
-		return tableName;
+		return SchemaModelUtils.getQualifiedRelationName(schemaName, tableName);
 	}
 
 	public void updateTableNameProperty(final String propPrefix, DatabaseMetaData dbmd) throws SQLException {

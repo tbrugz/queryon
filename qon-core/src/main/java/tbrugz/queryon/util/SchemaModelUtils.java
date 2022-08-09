@@ -357,5 +357,12 @@ public class SchemaModelUtils {
 		
 		return sm;
 	}
+
+	public static String getQualifiedRelationName(final String schemaName, final String relationName) {
+		if(schemaName!=null && !schemaName.equals("")) {
+			return schemaName + "." + relationName;
+		}
+		return relationName;
+	}
 	
 }
