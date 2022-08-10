@@ -42,6 +42,14 @@
             <type>VARCHAR</type>
         </columns>
         <columns>
+            <name>SQL_FILTER</name>
+            <columnSize>1000</columnSize>
+            <nullable>true</nullable>
+            <pk>false</pk>
+            <remarks>fixed SQL filter clause</remarks>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
             <name>REMARKS</name>
             <columnSize>400</columnSize>
             <nullable>true</nullable>

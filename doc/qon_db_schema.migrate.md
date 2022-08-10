@@ -1,5 +1,14 @@
 
-2022-02 - qon_queries & qon_tables
+2022-08 - qon_tables: add sql_filter
+-------------------
+
+```sql
+alter table qon_tables
+	add sql_filter varchar(1000);
+```
+
+
+2022-02 - qon_queries & qon_tables: add default_column_names
 -------------------
 
 ```sql

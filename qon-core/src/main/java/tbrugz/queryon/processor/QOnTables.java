@@ -102,7 +102,8 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		String qonTablesNames = getProperty(PROP_PREFIX, SUFFIX_TABLE_NAMES, null);
 		List<String> tables = Utils.getStringList(qonTablesNames, ",");
 		String sql = "select schema_name, name, column_names, pk_column_names, default_column_names"
-				+ ", column_remarks, remarks"
+				+", sql_filter"
+				+", column_remarks, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable
@@ -127,14 +128,15 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			String columnNames = rs.getString(3);
 			String pkColumnNamesStr = rs.getString(4);
 			String defaultColumnNamesStr = rs.getString(5);
-			String columnRemarksStr = rs.getString(6);
-			String remarks = rs.getString(7);
-			String rolesSelectFilterStr = rs.getString(8);
-			String rolesInsertFilterStr = rs.getString(9);
-			String rolesUpdateFilterStr = rs.getString(10);
-			String rolesDeleteFilterStr = rs.getString(11);
-			String rolesInsertColumnsFilterStr = rs.getString(12);
-			String rolesUpdateColumnsFilterStr = rs.getString(13);
+			String sqlFilter = rs.getString(6);
+			String columnRemarksStr = rs.getString(7);
+			String remarks = rs.getString(8);
+			String rolesSelectFilterStr = rs.getString(9);
+			String rolesInsertFilterStr = rs.getString(10);
+			String rolesUpdateFilterStr = rs.getString(11);
+			String rolesDeleteFilterStr = rs.getString(12);
+			String rolesInsertColumnsFilterStr = rs.getString(13);
+			String rolesUpdateColumnsFilterStr = rs.getString(14);
 			//XXX default_select_filter
 			//XXXdone default_select_projection: column_names
 			
@@ -148,7 +150,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 				List<String> rolesUpdate = Utils.getStringList(rolesUpdateFilterStr, PIPE_SPLIT);
 				List<String> rolesDelete = Utils.getStringList(rolesDeleteFilterStr, PIPE_SPLIT);
 				
-				Table t = addTable(schema, tableName, columnNames, pkColumnNames, defaultColumnNames,
+				Table t = addTable(schema, tableName, columnNames, pkColumnNames, defaultColumnNames, sqlFilter,
 						columnRemarks, remarks,
 						rolesSelect, rolesInsert, rolesUpdate, rolesDelete,
 						rolesInsertColumnsFilterStr, rolesUpdateColumnsFilterStr);
@@ -180,14 +182,16 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		warnings.put((schemaName!=null?schemaName+".":"") + name, warning);
 	}
 
-	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames, 
-			List<String> defaultColumnNames, List<String> columnRemarks,
-			String remarks, List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
+	private Table addTable(String schema, String tableName, String columnNames, List<String> pkColumnNames,
+			List<String> defaultColumnNames, String sqlFilter,
+			List<String> columnRemarks, String remarks,
+			List<String> rolesSelect, List<String> rolesInsert, List<String> rolesUpdate, List<String> rolesDelete,
 			String rolesInsertColumnsFilterStr, String rolesUpdateColumnsFilterStr) {
 		QonTable t = new QonTable();
 		t.setSchemaName(schema);
 		t.setName(tableName);
 		t.setRemarks(remarks);
+		t.setSqlFilter(sqlFilter);
 		//XXX table type: what if it is a view? t.setType(TableType.VIEW); ?
 		//XXXdone option to add primary key (for tables/views that doesn't have them, or to setup a different PK for a table)
 
@@ -199,12 +203,18 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 				+ (SQL.valid(schema)?SQL.sqlIdDecorator.get(schema)+".":"")
 				+ (SQL.sqlIdDecorator.get(tableName))
 				;
+		boolean isWhereAdded = false;
 		if(validColumnList(pkColumnNames)) {
 			for(int i=0;i<pkColumnNames.size();i++) {
 				if(!"".equals(pkColumnNames.get(i))) {
 					sql += (i==0?" where ":" and ")+pkColumnNames.get(i) + " = ? ";
+					isWhereAdded = true;
 				}
 			}
+		}
+		
+		if(sqlFilter!=null) {
+			sql += (isWhereAdded?" and ":" where ")+sqlFilter;
 		}
 		
 		//XXX validate pk_column_names
@@ -410,6 +420,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		return addTable(getLowerAlso(v, "SCHEMA_NAME"), getLowerAlso(v, "NAME"), getLowerAlso(v, "COLUMN_NAMES"),
 				Utils.getStringList(getLowerAlso(v, "PK_COLUMN_NAMES"), COMMA_SPLIT),
 				Utils.getStringList(getLowerAlso(v, "DEFAULT_COLUMN_NAMES"), COMMA_SPLIT),
+				getLowerAlso(v, "SQL_FILTER"),
 				Utils.getStringList(getLowerAlso(v, "COLUMN_REMARKS"), PIPE_SPLIT),
 				getLowerAlso(v, "REMARKS"),
 				Utils.getStringList(getLowerAlso(v, "ROLES_SELECT"), PIPE_SPLIT),

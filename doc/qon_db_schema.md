@@ -28,6 +28,7 @@ create table qon_tables (
 	column_names varchar(400),
 	pk_column_names varchar(400),
 	default_column_names varchar(400),
+	sql_filter varchar(1000),
 	remarks varchar(400),
 	column_remarks varchar(4000),
 	roles_select varchar(1000),

@@ -2996,11 +2996,11 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	static void applyQonTableSqlFilter(Relation relation, SQL sql) {
-		System.out.println("relation: "+relation+" / "+relation.getClass());
+		//log.debug("applyQonTableSqlFilter: relation: "+relation+" / "+relation.getClass());
 		if(relation instanceof QonTable) {
 			QonTable qt = (QonTable) relation;
 			if(qt.getSqlFilter()!=null) {
-				System.out.println("filter: "+qt.getSqlFilter());
+				//log.debug("applyQonTableSqlFilter: filter: "+qt.getSqlFilter());
 				sql.addFilter(qt.getSqlFilter());
 			}
 		}
