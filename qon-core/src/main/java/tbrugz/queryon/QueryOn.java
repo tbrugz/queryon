@@ -51,6 +51,7 @@ import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.model.QonQuery;
 import tbrugz.queryon.model.QonRelation;
+import tbrugz.queryon.model.QonTable;
 import tbrugz.queryon.processor.UpdatePluginUtils;
 import tbrugz.queryon.resultset.ResultSetFilterDecorator;
 import tbrugz.queryon.resultset.ResultSetGrantsFilterDecorator;
@@ -1403,6 +1404,8 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 		}
 		
+		applyQonTableSqlFilter(relation, sql);
+		
 		//XXX app-specific xtra filters, like auth filters? app should extend QueryOn & implement addXtraConstraints
 		//appXtraConstraints(relation, sql, reqspec, req);
 		
@@ -2196,6 +2199,8 @@ public class QueryOn extends AbstractHttpServlet {
 			throw new BadRequestException("Filter error: "+warns);
 		}
 		
+		applyQonTableSqlFilter(relation, sql);
+
 		//XXX optimistic lock on delete?
 		//boolean willTryLock = tryOptimisticLock(relation, reqspec, sql);
 		
@@ -2365,6 +2370,8 @@ public class QueryOn extends AbstractHttpServlet {
 			String warns = Utils.join(warnings, ", ");
 			throw new BadRequestException("Filter error: "+warns);
 		}
+
+		applyQonTableSqlFilter(relation, sql);
 
 		//optimistic lock
 		boolean willTryLock = tryOptimisticLock(relation, reqspec, sql);
@@ -2546,6 +2553,8 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 		}
 		
+		// XXX: applyQonTableSqlFilter(relation, sql);
+
 		if("".equals(sbCols.toString())) {
 			throw new BadRequestException("[insert] No valid columns");
 		}
@@ -2982,6 +2991,17 @@ public class QueryOn extends AbstractHttpServlet {
 			else {
 				log.warn("unknown filter column: "+col+" [relation="+relationName+"]");
 				warnings.add("unknown filter column: "+col);
+			}
+		}
+	}
+	
+	static void applyQonTableSqlFilter(Relation relation, SQL sql) {
+		System.out.println("relation: "+relation+" / "+relation.getClass());
+		if(relation instanceof QonTable) {
+			QonTable qt = (QonTable) relation;
+			if(qt.getSqlFilter()!=null) {
+				System.out.println("filter: "+qt.getSqlFilter());
+				sql.addFilter(qt.getSqlFilter());
 			}
 		}
 	}

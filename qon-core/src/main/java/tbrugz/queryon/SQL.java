@@ -30,6 +30,7 @@ import tbrugz.queryon.QueryOn.LimitOffsetStrategy;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.model.QonRelation;
+import tbrugz.queryon.model.QonTable;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
@@ -262,7 +263,14 @@ public class SQL {
 			return sql;
 		}
 		else if(relation instanceof Table) {
-			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
+			SQL sql = new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
+			/*if(relation instanceof QonTable) {
+				QonTable qt = (QonTable) relation;
+				if(qt.getSqlFilter()!=null) {
+					sql.addFilter(qt.getSqlFilter());
+				}
+			}*/
+			return sql;
 		}
 		else if(relation instanceof View) {
 			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
