@@ -367,9 +367,9 @@ public class WebDavWebTest {
 	public void sardinePutTask1_Attach() throws IOException {
 		Sardine sardine = SardineFactory.begin();
 		byte[] binaryData = new byte[] { 0,1,2,3 };
-		sardine.put(webdavUrl + "/" + "TASK" + "/1" + "/ATTACH", binaryData);
+		sardine.put(webdavUrl + "/" + "TASK" + "/2" + "/ATTACH", binaryData);
 		
-		InputStream is = sardine.get(webdavUrl + "/" + "TASK" + "/1" + "/ATTACH");
+		InputStream is = sardine.get(webdavUrl + "/" + "TASK" + "/2" + "/ATTACH");
 		
 		byte[] readBinaryData = new byte[binaryData.length];
 		is.read(readBinaryData);

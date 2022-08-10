@@ -120,7 +120,7 @@
         <type>TABLE</type>
     </table>
 
-    <table>
+    <table xsi:type="qonTable" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <name>TASK</name>
         <schemaName>PUBLIC</schemaName>
         <columns>
@@ -145,6 +145,7 @@
             <uniqueColumns>ID</uniqueColumns>
         </constraints>
         <type>TABLE</type>
+        <sqlFilter>DESCRIPTION is not null</sqlFilter>
     </table>
 
     <view xsi:type="query" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
