@@ -2104,7 +2104,54 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetXmlTask() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/TASK.xml", 1);
 	}
+	
+	@Test
+	public void testPatchTask() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
 
+		{
+			HttpPatch httpPut = new HttpPatch(baseUrl+"/TASK?k:ID=1&v:DESCRIPTION=some+other+description");
+			
+			HttpResponse response1 = httpclient.execute(httpPut);
+	
+			Assert.assertEquals("Must be Error (not updated)", 400, response1.getStatusLine().getStatusCode());
+			httpPut.releaseConnection();
+		}
+		{
+			HttpPatch httpPut = new HttpPatch(baseUrl+"/TASK?k:ID=2&v:DESCRIPTION=some+other+description");
+			
+			HttpResponse response1 = httpclient.execute(httpPut);
+	
+			Assert.assertEquals("Must be OK (updated)", 200, response1.getStatusLine().getStatusCode());
+			httpPut.releaseConnection();
+		}
+	}
+
+	@Test
+	public void testDeleteTask() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+
+		{
+			HttpDelete httpDelete = new HttpDelete(baseUrl+"/TASK/1");
+			HttpResponse response1 = httpclient.execute(httpDelete);
+			//System.out.println("content: "+getContent(response1));
+			Assert.assertEquals("Must be Error (not found)", 404, response1.getStatusLine().getStatusCode());
+			httpDelete.releaseConnection();
+		}
+
+		{
+			HttpDelete httpDelete = new HttpDelete(baseUrl+"/TASK/2");
+			HttpResponse response1 = httpclient.execute(httpDelete);
+			//System.out.println("content: "+getContent(response1));
+			Assert.assertEquals("Must be Ok", 200, response1.getStatusLine().getStatusCode());
+			httpDelete.releaseConnection();
+		}
+	}
+
+	//TODO: testInsertTask
+	//@Test
+	//public void testInsertTask() throws IOException, ParserConfigurationException, SAXException {}
+	
 	@Test
 	public void testGetTableCount() throws IOException, ParserConfigurationException, SAXException {
 		//String content = null;
