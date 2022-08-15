@@ -2101,12 +2101,12 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
-	public void testGetXmlTask() throws IOException, ParserConfigurationException, SAXException {
+	public void testGetXmlTaskWithSqlFilter() throws IOException, ParserConfigurationException, SAXException {
 		baseReturnCountTest("/TASK.xml", 1);
 	}
 	
 	@Test
-	public void testPatchTask() throws IOException, ParserConfigurationException, SAXException {
+	public void testPatchTaskWithSqlFilter() throws IOException, ParserConfigurationException, SAXException {
 		CloseableHttpClient httpclient = getHttpClient();
 
 		{
@@ -2128,7 +2128,22 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
-	public void testDeleteTask() throws IOException, ParserConfigurationException, SAXException {
+	public void testPatchTaskWithSqlFilterNotAllowed() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+
+		{
+			// setting DESCRIPTION to '' should not be allowed, since it would make the TASK invisible giver it uses *sqlFilter*
+			HttpPatch httpPut = new HttpPatch(baseUrl+"/TASK?k:ID=2&v:DESCRIPTION=");
+			
+			HttpResponse response1 = httpclient.execute(httpPut);
+
+			Assert.assertEquals("Must be Error (not updated)", 400, response1.getStatusLine().getStatusCode());
+			httpPut.releaseConnection();
+		}
+	}
+
+	@Test
+	public void testDeleteTaskWithSqlFilter() throws IOException, ParserConfigurationException, SAXException {
 		CloseableHttpClient httpclient = getHttpClient();
 
 		{

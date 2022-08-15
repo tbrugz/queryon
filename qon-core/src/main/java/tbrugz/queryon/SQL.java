@@ -266,7 +266,7 @@ public class SQL {
 			SQL sql = new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
 			/*if(relation instanceof QonTable) {
 				QonTable qt = (QonTable) relation;
-				if(qt.getSqlFilter()!=null) {
+				if(qt.hasSqlFilter()) {
 					sql.addFilter(qt.getSqlFilter());
 				}
 			}*/
@@ -339,6 +339,13 @@ public class SQL {
 		return body.replace(VARIABLE_USERNAME, getFinalVariableValue(username));
 	}
 	
+	public static SQL createSelectCountSQL(Relation relation) {
+		String sql = "select count(*) as counter from "+
+				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
+				" " + PARAM_WHERE_CLAUSE;
+		return new SQL(sql, relation);
+	}
+
 	public void addFilter(String filter) {
 		if(filter==null || filter.length()==0) { return; }
 		

@@ -2172,6 +2172,15 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 	}
 	
+	static int getUniqueRowFirstIntValue(SQL sql, Connection conn) throws SQLException, IOException {
+		PreparedStatement stmt = conn.prepareStatement(sql.getFinalSql());
+		sql.bindParameters(stmt);
+		log.debug("getUniqueRowFirstIntValue: sql="+sql.getFinalSql());
+		ResultSet rs = stmt.executeQuery();
+		rs.next();
+		return rs.getInt(1);
+	}
+
 	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
@@ -2371,7 +2380,7 @@ public class QueryOn extends AbstractHttpServlet {
 			throw new BadRequestException("Filter error: "+warns);
 		}
 
-		applyQonTableSqlFilter(relation, sql);
+		boolean applyedSqlFilter = applyQonTableSqlFilter(relation, sql);
 
 		//optimistic lock
 		boolean willTryLock = tryOptimisticLock(relation, reqspec, sql);
@@ -2397,6 +2406,20 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		if(reqspec.minUpdates!=null && count < reqspec.minUpdates) {
 			throw new BadRequestException("Update count ["+count+"] less than update-min ["+reqspec.minUpdates+"]");
+		}
+
+		if(applyedSqlFilter) {
+			// check if row is still visible...
+			//select count(*) from TABLE - if selectCount != updateCount - throw error
+			SQL checkSql = SQL.createSelectCountSQL(relation);
+			boolean applyedCheckSqlFilter = applyQonTableSqlFilter(relation, checkSql);
+			int sqlCheckCount = getUniqueRowFirstIntValue(checkSql, conn);
+			//log.debug("applyedCheckSqlFilter="+applyedCheckSqlFilter+" ; (update)count="+count+" ; sqlCheckCount="+sqlCheckCount);
+			if(count != sqlCheckCount) {
+				String message = "can't update sqlFilter discriminator column [updatecount = "+count+" ; checkcount = "+sqlCheckCount+"]";
+				log.warn(message);
+				throw new BadRequestException(message);
+			}
 		}
 		
 		//XXX add ResultSet generatedKeys = st.getGeneratedKeys(); //?
@@ -2995,15 +3018,17 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 	}
 	
-	static void applyQonTableSqlFilter(Relation relation, SQL sql) {
+	static boolean applyQonTableSqlFilter(Relation relation, SQL sql) {
 		//log.debug("applyQonTableSqlFilter: relation: "+relation+" / "+relation.getClass());
 		if(relation instanceof QonTable) {
 			QonTable qt = (QonTable) relation;
-			if(qt.getSqlFilter()!=null) {
+			if(qt.hasSqlFilter()) {
 				//log.debug("applyQonTableSqlFilter: filter: "+qt.getSqlFilter());
 				sql.addFilter(qt.getSqlFilter());
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	/*

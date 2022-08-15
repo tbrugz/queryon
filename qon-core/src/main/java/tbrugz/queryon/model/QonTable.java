@@ -29,4 +29,8 @@ public class QonTable extends Table implements QonRelation {
 		this.sqlFilter = sqlFilter;
 	}
 
+	public boolean hasSqlFilter() {
+		return sqlFilter!=null;
+	}
+
 }
