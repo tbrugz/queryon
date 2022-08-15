@@ -112,6 +112,7 @@
     <module>demo/qon-demo-anydb</module>
     <module>demo/qon-demo-springboot</module>
     <!--<module>demo/qon-demo-quarkus</module>-->
+    <!--<module>demo/qon-demo-micronaut</module>-->
   </modules>
 
   <licenses>

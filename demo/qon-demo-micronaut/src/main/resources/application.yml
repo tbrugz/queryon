@@ -1,0 +1,7 @@
+micronaut:
+  application:
+    name: qon-demo-micronaut
+#netty:
+#  default:
+#    allocator:
+#      max-order: 3
