@@ -751,6 +751,7 @@ public class RequestSpec {
 				setMultiParam("agg:", key, value, aggregate);
 				
 				setUniParam("v:", key, value[0], updateValues);
+				setUniParam("vnull:", key, null, updateValues);
 				
 				setUniParam("k:", key, value[0], keyValues);
 			}

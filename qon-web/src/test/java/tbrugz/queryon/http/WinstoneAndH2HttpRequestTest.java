@@ -2133,7 +2133,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 		{
 			// setting DESCRIPTION to '' should not be allowed, since it would make the TASK invisible giver it uses *sqlFilter*
-			HttpPatch httpPut = new HttpPatch(baseUrl+"/TASK?k:ID=2&v:DESCRIPTION=");
+			HttpPatch httpPut = new HttpPatch(baseUrl+"/TASK?k:ID=2&vnull:DESCRIPTION"); // 'v:DESCRIPTION=' ...
 			
 			HttpResponse response1 = httpclient.execute(httpPut);
 
