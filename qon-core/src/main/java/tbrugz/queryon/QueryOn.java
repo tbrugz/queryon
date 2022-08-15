@@ -2156,16 +2156,21 @@ public class QueryOn extends AbstractHttpServlet {
 		preprocessParameters(reqspec, relation, pk);
 		filterByKey(relation, reqspec, pk, sqlLock);
 		sqlLock.addCount();
+		/*
 		PreparedStatement stmt = conn.prepareStatement(sqlLock.getFinalSql());
 		sqlLock.bindParameters(stmt);
 		log.debug("sql lock: "+sqlLock.getFinalSql());
 		ResultSet rs = stmt.executeQuery();
+		*/
 		/*if(rs.next()) {
 			log.debug("no rows updated but optimisticLock active... query without lock has rows, so probably row has been changed");
 			throw new BadRequestException("Row has been changed [update-count="+count+"]", HttpServletResponse.SC_CONFLICT);
 		}*/
+		/*
 		rs.next();
 		int sqlLockCount = rs.getInt(1);
+		*/
+		int sqlLockCount = getUniqueRowFirstIntValue(sqlLock, conn);
 		if(sqlLockCount>=1) {
 			log.debug("no rows updated but optimisticLock active... query without lock has rows [#"+sqlLockCount+"], so probably row has been changed");
 			throw new BadRequestException("Row has been changed", HttpServletResponse.SC_CONFLICT);
