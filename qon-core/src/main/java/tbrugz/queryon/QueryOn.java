@@ -2510,9 +2510,10 @@ public class QueryOn extends AbstractHttpServlet {
 		*/
 		boolean hasRelationInsertPermission = isPermitted || ShiroUtils.isPermitted(currentUser, ActionType.INSERT_ANY.name());
 		
-		StringBuilder sbCols = new StringBuilder();
-		StringBuilder sbVals = new StringBuilder();
-		int colsCount = 0;
+		List<String> colsToInsert = new ArrayList<>();
+		//StringBuilder sbCols = new StringBuilder();
+		//StringBuilder sbVals = new StringBuilder();
+		//int colsCount = 0;
 		Set<String> updateCols = new HashSet<String>();
 		{
 			Iterator<Map.Entry<String, String>> cols = reqspec.updateValues.entrySet().iterator();
@@ -2536,12 +2537,13 @@ public class QueryOn extends AbstractHttpServlet {
 				throw new ForbiddenException("no insert permission on column: "+reqspec.object+"."+col, currentUser.isAuthenticated());
 			}
 			//XXX timestamp '' ?
-			sbCols.append((colsCount!=0?", ":"")+col);
-			sbVals.append((colsCount!=0?", ":"")+"?");
+			colsToInsert.add(col);
+			//sbCols.append((colsCount!=0?", ":"")+col);
+			//sbVals.append((colsCount!=0?", ":"")+"?");
 			String ctype = DBUtil.getColumnTypeFromColName(relation, col);
 				//log.debug("col: "+col+" ; ctype: "+ctype);
 				sql.addParameter(colmap.getValue(), ctype);
-			colsCount++;
+			//colsCount++;
 		}
 		}
 
@@ -2566,12 +2568,13 @@ public class QueryOn extends AbstractHttpServlet {
 				}
 				int colindex = MiscUtils.indexOfIgnoreCase(relation.getColumnNames(), pcol);
 				if(colindex>=0) {
-					sbCols.append((colsCount!=0?", ":"")+pcol);
-					sbVals.append((colsCount!=0?", ":"")+"?");
+					colsToInsert.add(pcol);
+					//sbCols.append((colsCount!=0?", ":"")+pcol);
+					//sbVals.append((colsCount!=0?", ":"")+"?");
 					
 					String ctype = relation.getColumnTypes().get(colindex);
 					addPartParameter(reqspec, sql, ctype, pcol, colindex);
-					colsCount++;
+					//colsCount++;
 				}
 				else {
 					String msg = "column "+pcol+" not found on relation "+relation;
@@ -2583,10 +2586,12 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		// XXX: applyQonTableSqlFilter(relation, sql);
 
-		if("".equals(sbCols.toString())) {
+		//if("".equals(sbCols.toString())) {
+		if(colsToInsert.size()==0) {
 			throw new BadRequestException("[insert] No valid columns");
 		}
-		sql.applyInsert(sbCols.toString(), sbVals.toString());
+		//sql.applyInsert(sbCols.toString(), sbVals.toString());
+		sql.applyInsert(colsToInsert);
 
 		//log.debug("sql insert: " + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
 

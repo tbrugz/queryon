@@ -436,10 +436,21 @@ public class SQL {
 		sql = sql.replace(PARAM_UPDATE_SET_CLAUSE, set);
 	}
 
+	@Deprecated
 	public void applyInsert(String cols, String values) {
 		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
-	
+
+	public void applyInsert(List<String> columnNames) {
+		String colsStr = Utils.join(columnNames, ", ");
+		List<String> values = new ArrayList<>();
+		for(String c: columnNames) {
+			values.add("?");
+		}
+		String valuesStr = Utils.join(values, ", ");
+		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, colsStr).replace(PARAM_INSERT_VALUES_CLAUSE, valuesStr);
+	}
+
 	/*public void addLimitOffset(LimitOffsetStrategy strategy, int offset) throws ServletException {
 		addLimitOffset(strategy, this.limit, offset);
 	}*/
