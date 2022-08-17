@@ -47,6 +47,8 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil.QueryParameter;
+import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -57,16 +59,78 @@ public class SQL {
 	public static final String PARAM_WHERE_CLAUSE = "$where_clause";
 	public static final String PARAM_FILTER_CLAUSE = "$filter_clause";
 	public static final String PARAM_PROJECTION_CLAUSE = "$projection_clause";
+	public static final String PARAM_ORDER_CLAUSE = "$order_clause";
+
 	public static final String PARAM_UPDATE_SET_CLAUSE = "[update-set-clause]";
 	public static final String PARAM_INSERT_COLUMNS_CLAUSE = "[insert-columns-clause]";
 	public static final String PARAM_INSERT_VALUES_CLAUSE = "[insert-values-clause]";
-	public static final String PARAM_ORDER_CLAUSE = "$order_clause";
-
+	public static final String PARAM_INSERT_VALUES_AND_COLUMNS_CLAUSE = "[insert-values-and-columns-clause]";
+	
 	public static final String VARIABLE_USERNAME = "$username";
 	//public static final String VARIABLE_USERROLES = "$userroles";
 	public static final String EMPTY_USERNAME = "''";
 	
 	//XXX add limit/offset-clause?
+
+	public enum FilteredInsertStrategy {
+		BASE,
+		VALUES,
+		FROM_DUAL,
+		;
+
+		static final String PROPFILE_DBMS_SPECIFIC = "/dbms-specific-queryon.properties";
+		static final ParametrizedProperties prop = new ParametrizedProperties();
+		static {
+			try {
+				prop.load(IOUtil.getResourceAsStream(PROPFILE_DBMS_SPECIFIC));
+			} catch (IOException e) {
+				log.warn("FilteredInsertStrategy: "+e);
+				throw new ExceptionInInitializerError(e);
+			}
+		}
+		
+		public static FilteredInsertStrategy getStrategy(String dbid) {
+			String strategyStr = prop.getProperty("dbid."+dbid+".insert-with-filter-strategy");
+			log.debug("getStrategy["+dbid+"]: "+strategyStr);
+			FilteredInsertStrategy strat = FilteredInsertStrategy.valueOf(strategyStr);
+			return strat;
+		}
+
+		public String createInsert(Relation relation) {
+			String sql = null;
+			String relationName = (SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName());
+
+			switch(this) {
+				case BASE:
+					sql = "insert into " + relationName +
+						" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")\n" +
+						"select " + PARAM_INSERT_COLUMNS_CLAUSE + " from (\n" +
+						"	select " + PARAM_INSERT_VALUES_AND_COLUMNS_CLAUSE + "\n" +
+						") qon_select\n" +
+						PARAM_WHERE_CLAUSE;
+					break;
+				case VALUES:
+					sql = "insert into " + relationName +
+						" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")\n" +
+						"select " + PARAM_INSERT_COLUMNS_CLAUSE + " from (\n" +
+						"	values (" + PARAM_INSERT_VALUES_CLAUSE + ")\n" +
+						") qon_select (" + PARAM_INSERT_COLUMNS_CLAUSE + ")\n" +
+						PARAM_WHERE_CLAUSE;
+					break;
+				case FROM_DUAL:
+					sql = "insert into " + relationName +
+						" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")\n" +
+						"select " + PARAM_INSERT_COLUMNS_CLAUSE + " from (\n" +
+						"	select " + PARAM_INSERT_VALUES_AND_COLUMNS_CLAUSE + "\n" +
+						"	from dual\n" +
+						") qon_select\n" +
+						PARAM_WHERE_CLAUSE;
+					break;
+			}
+			return sql;
+		}
+
+	}
 
 	public static StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(quoteString()); //FIXME: StringDecorator should not be static
 	
@@ -284,11 +348,18 @@ public class SQL {
 		return createSQL(relation, reqspec, null);
 	}*/
 	
-	public static SQL createInsertSQL(Relation relation) {
-		String sql = "insert into "+
+	public static SQL createInsertSQL(Relation relation, String dialect) {
+		String sql = null;
+		if(hasSqlFilter(relation)) {
+			FilteredInsertStrategy fis = FilteredInsertStrategy.getStrategy(dialect);
+			sql = fis.createInsert(relation);
+		}
+		else {
+			sql = "insert into "+
 				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")" +
 				" values (" + PARAM_INSERT_VALUES_CLAUSE+")";
+		}
 		return new SQL(sql, relation);
 	}
 
@@ -441,14 +512,31 @@ public class SQL {
 		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
 
-	public void applyInsert(List<String> columnNames) {
+	public void applyInsert(List<String> allColumnNames, List<String> columnNames, List<String> colTypes) {
+		List<String> defaultColumns = new ArrayList<>();
+		defaultColumns.addAll(allColumnNames);
+		defaultColumns.removeAll(columnNames);
 		String colsStr = Utils.join(columnNames, ", ");
+		List<String> valuesAndCols = new ArrayList<>();
 		List<String> values = new ArrayList<>();
-		for(String c: columnNames) {
+		for(int i=0;i<columnNames.size();i++) {
+			String c = columnNames.get(i);
+			String ct = colTypes.get(i);
+			valuesAndCols.add("cast(? as "+ct+") as "+c);
 			values.add("?");
 		}
+		List<String> defaultValuesAndCols = new ArrayList<>();
+		for(int i=0;i<defaultColumns.size();i++) {
+			defaultValuesAndCols.add("null as "+defaultColumns.get(i));
+		}
+		valuesAndCols.addAll(defaultValuesAndCols);
+		String valuesAndColsStr = Utils.join(valuesAndCols, ", ");
 		String valuesStr = Utils.join(values, ", ");
-		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, colsStr).replace(PARAM_INSERT_VALUES_CLAUSE, valuesStr);
+		//XXX replace 'valuesAndColsStr'
+		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, colsStr)
+			.replace(PARAM_INSERT_VALUES_AND_COLUMNS_CLAUSE, valuesAndColsStr)
+			.replace(PARAM_INSERT_VALUES_CLAUSE, valuesStr);
+		//log.debug("applyInsert: "+sql);
 	}
 
 	/*public void addLimitOffset(LimitOffsetStrategy strategy, int offset) throws ServletException {
@@ -1183,4 +1271,12 @@ public class SQL {
 	}
 	*/
 	
+	public static boolean hasSqlFilter(Relation relation) {
+		if(relation instanceof QonTable) {
+			QonTable t = (QonTable) relation;
+			return t.hasSqlFilter();
+		}
+		return false;
+	}
+
 }

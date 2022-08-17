@@ -1133,7 +1133,7 @@ public class QueryOn extends AbstractHttpServlet {
 				doExecute(eo, reqspec, currentUser, resp);
 				break;
 			case INSERT: {
-				doInsert((Relation) dbobj, reqspec, currentUser, permitted, resp);
+				doInsert((Relation) dbobj, reqspec, model.getSqlDialect(), currentUser, permitted, resp);
 				}
 				break;
 			case UPDATE: {
@@ -2417,6 +2417,7 @@ public class QueryOn extends AbstractHttpServlet {
 			// check if row is still visible...
 			//select count(*) from TABLE - if selectCount != updateCount - throw error
 			SQL checkSql = SQL.createSelectCountSQL(relation);
+			@SuppressWarnings("unused")
 			boolean applyedCheckSqlFilter = applyQonTableSqlFilter(relation, checkSql);
 			int sqlCheckCount = getUniqueRowFirstIntValue(checkSql, conn);
 			//log.debug("applyedCheckSqlFilter="+applyedCheckSqlFilter+" ; (update)count="+count+" ; sqlCheckCount="+sqlCheckCount);
@@ -2469,14 +2470,14 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 	}
 
-	protected void doInsert(Relation relation, RequestSpec reqspec, Subject currentUser, boolean isPermitted, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	protected void doInsert(Relation relation, RequestSpec reqspec, String sqlDialect, Subject currentUser, boolean isPermitted, HttpServletResponse resp) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		Connection conn = DBUtil.initDBConn(prop, reqspec.modelId);
 		try {
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		preprocessParameters(reqspec, relation, pk);
 		
-		SQL sql = SQL.createInsertSQL(relation);
+		SQL sql = SQL.createInsertSQL(relation, sqlDialect);
 
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
@@ -2511,6 +2512,7 @@ public class QueryOn extends AbstractHttpServlet {
 		boolean hasRelationInsertPermission = isPermitted || ShiroUtils.isPermitted(currentUser, ActionType.INSERT_ANY.name());
 		
 		List<String> colsToInsert = new ArrayList<>();
+		List<String> colTypesToInsert = new ArrayList<>();
 		//StringBuilder sbCols = new StringBuilder();
 		//StringBuilder sbVals = new StringBuilder();
 		//int colsCount = 0;
@@ -2541,8 +2543,9 @@ public class QueryOn extends AbstractHttpServlet {
 			//sbCols.append((colsCount!=0?", ":"")+col);
 			//sbVals.append((colsCount!=0?", ":"")+"?");
 			String ctype = DBUtil.getColumnTypeFromColName(relation, col);
-				//log.debug("col: "+col+" ; ctype: "+ctype);
-				sql.addParameter(colmap.getValue(), ctype);
+			//log.debug("col: "+col+" ; ctype: "+ctype);
+			colTypesToInsert.add(ctype);
+			sql.addParameter(colmap.getValue(), ctype);
 			//colsCount++;
 		}
 		}
@@ -2573,6 +2576,7 @@ public class QueryOn extends AbstractHttpServlet {
 					//sbVals.append((colsCount!=0?", ":"")+"?");
 					
 					String ctype = relation.getColumnTypes().get(colindex);
+					colTypesToInsert.add(ctype);
 					addPartParameter(reqspec, sql, ctype, pcol, colindex);
 					//colsCount++;
 				}
@@ -2591,7 +2595,9 @@ public class QueryOn extends AbstractHttpServlet {
 			throw new BadRequestException("[insert] No valid columns");
 		}
 		//sql.applyInsert(sbCols.toString(), sbVals.toString());
-		sql.applyInsert(colsToInsert);
+		sql.applyInsert(relation.getColumnNames(), colsToInsert, colTypesToInsert);
+
+		applyQonTableSqlFilter(relation, sql);
 
 		//log.debug("sql insert: " + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
 

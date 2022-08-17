@@ -2092,7 +2092,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testInsertWithAutoIncrement() throws IOException, ParserConfigurationException, SAXException {
-		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task", "");
+		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task&v:DESCRIPTION=some+description", "");
 		Assert.assertEquals(201, response.getStatusLine().getStatusCode());
 		Header[] headers = response.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
 		Assert.assertEquals(1, headers.length);
@@ -2163,9 +2163,18 @@ public class WinstoneAndH2HttpRequestTest {
 		}
 	}
 
-	//TODO: testInsertTask
-	//@Test
-	//public void testInsertTask() throws IOException, ParserConfigurationException, SAXException {}
+	@Test
+	public void testInsertTaskWithSqlFilter() throws IOException, ParserConfigurationException, SAXException {
+		{
+			HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task&v:DESCRIPTION=some+description", "");
+			Assert.assertEquals(201, response.getStatusLine().getStatusCode());
+		}
+		{
+			// return error, since task should not be visible
+			HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=4th+Task", "");
+			Assert.assertEquals(400, response.getStatusLine().getStatusCode());
+		}
+	}
 	
 	@Test
 	public void testGetTableCount() throws IOException, ParserConfigurationException, SAXException {
