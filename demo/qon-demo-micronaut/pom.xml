@@ -28,6 +28,8 @@
     <micronaut-maven-plugin.version>3.3.1</micronaut-maven-plugin.version>
     <micronaut.runtime>netty</micronaut.runtime>
     <exec.mainClass>tbrugz.queryon.micronautdemo.Application</exec.mainClass>
+
+    <jetty.version>9.4.48.v20220622</jetty.version>
   </properties>
 
   <!--
@@ -108,12 +110,25 @@
       <groupId>io.micronaut.servlet</groupId>
       <artifactId>micronaut-http-server-jetty</artifactId>
     </dependency>
+    <dependency>
+        <groupId>io.micronaut.servlet</groupId>
+        <artifactId>micronaut-servlet-engine</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-server</artifactId>
+        <version>${jetty.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlet</artifactId>
+        <version>${jetty.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>qon-core</artifactId>
       <version>${project.parent.version}</version>
-      <scope>runtime</scope>
     </dependency>
     <!--
     <dependency>
@@ -184,6 +199,37 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
+      <!--
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.bitbucket.tbrugz</groupId>
+                  <artifactId>qon-web</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}/classes/static</outputDirectory>
+                  <includes>**/*.css,**/*.gif,**/*.html,**/*.js,**/*.json,**/*.map,**/*.md,**/*.png,**/*.ttf,**/*.woff,**/*.woff2</includes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
+
     </plugins>
   </build>
 
