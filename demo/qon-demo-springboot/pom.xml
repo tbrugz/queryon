@@ -7,9 +7,10 @@
 
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
-		<artifactId>queryon</artifactId>
+		<!--<artifactId>queryon</artifactId>-->
+		<artifactId>qon-demo-parent</artifactId>
 		<version>0.8-SNAPSHOT</version>
-		<relativePath>../../pom.xml</relativePath>
+		<!--<relativePath>../../pom.xml</relativePath>-->
 	</parent>
 
 	<!-- https://spring.io/guides/gs/spring-boot/ -->
@@ -21,7 +22,7 @@
 	</parent>-->
 
 	<properties>
-		<maven.deploy.skip>true</maven.deploy.skip>
+		<!--<maven.deploy.skip>true</maven.deploy.skip>-->
 
 		<!--<qon.version>0.8-SNAPSHOT</qon.version>-->
 		<!--

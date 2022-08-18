@@ -4,7 +4,7 @@
 
 spring:
     application:
-        name: QueryOn SpringBoot Demo
+        name: "QueryOn SpringBoot Demo"
     # https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-files
     # config:
     #    import: "optional:file:./dev.properties"

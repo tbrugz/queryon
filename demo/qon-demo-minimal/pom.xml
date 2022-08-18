@@ -2,9 +2,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
-		<artifactId>queryon</artifactId>
+		<artifactId>qon-demo-parent</artifactId>
 		<version>0.8-SNAPSHOT</version>
-		<relativePath>../../pom.xml</relativePath>
+		<!--<relativePath>../../pom.xml</relativePath>-->
 	</parent>
 	
 	<artifactId>qon-demo-minimal</artifactId>
@@ -14,7 +14,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.deploy.skip>true</maven.deploy.skip>
+		<!--<maven.deploy.skip>true</maven.deploy.skip>-->
 	</properties>
 	
 	<build>

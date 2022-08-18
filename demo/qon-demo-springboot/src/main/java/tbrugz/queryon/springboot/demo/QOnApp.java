@@ -1,5 +1,7 @@
 package tbrugz.queryon.springboot.demo;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 /*
 import javax.servlet.ServletContextListener;
 
@@ -7,6 +9,8 @@ import org.apache.shiro.web.env.EnvironmentLoaderListener;
 */
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
 import org.springframework.context.annotation.ComponentScan;
 /*
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -27,10 +31,36 @@ import tbrugz.queryon.springboot.QOnSpringBootApp;
 @ComponentScan("tbrugz.queryon.springboot")
 public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 
+	static final Log log = LogFactory.getLog(QOnApp.class);
+
+	static ApplicationContext applicationContext;
+	
 	public static void main(String[] args) {
-		SpringApplication.run(QOnApp.class, args);
+		applicationContext = SpringApplication.run(QOnApp.class, args);
+		//showAppInfo();
+		//displayAllBeans();
+	}
+	
+	public static ApplicationContext getApplicationContext() {
+		return applicationContext;
 	}
 
+	public static void showAppInfo() {
+		log.info("showAppInfo: appName = " + getApplicationContext().getApplicationName() +
+			" ; displayName = " + getApplicationContext().getDisplayName() +
+			" ; context = " + getApplicationContext() +
+			" ; QOnApp.class = "+QOnApp.class.getName()+" ; CL = "+QOnApp.class.getClassLoader());
+	}
+
+	// see: https://www.baeldung.com/spring-show-all-beans
+	public static void displayAllBeans() {
+		log.info("displayAllBeans:: appName = " + getApplicationContext().getApplicationName());
+		String[] allBeanNames = getApplicationContext().getBeanDefinitionNames();
+		for(String beanName : allBeanNames) {
+			log.info(beanName);
+		}
+	}
+	
 	/*
 	@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
