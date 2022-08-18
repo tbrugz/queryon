@@ -114,7 +114,7 @@ public class QonDataFetcher<T> implements DataFetcher<T> {
 				}
 				break;
 			case INSERT: {
-				servlet.doInsert((Relation) dbobj, reqspec, currentUser, true, resp);
+				servlet.doInsert((Relation) dbobj, reqspec, sm.getSqlDialect(), currentUser, true, resp);
 				return (T) getUpdateCountMap(reqspec.updateCount);
 				}
 			case UPDATE: {
