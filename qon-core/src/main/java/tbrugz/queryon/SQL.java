@@ -436,12 +436,12 @@ public class SQL {
 	}
 
 	public void addEncapsulatingFilter(String filter, boolean addFilterClause) {
-		if(relation!=null && relation instanceof Query) {
+		//if(relation!=null && relation instanceof Query) {
 			/*if(! allowEncapsulation) {
 				throw new BadRequestException("filter not allowed in query "+relation.getName());
 			}*/
-			sql = "select * from (\n"+sql+"\n) qon_filter";
-		}
+		sql = "select * from (\n"+sql+"\n) qon_filter";
+		//}
 		sql += " where "+filter+" "+(addFilterClause?PARAM_FILTER_CLAUSE:"");
 	}
 	
@@ -591,15 +591,13 @@ public class SQL {
 					+"and rnum > "+offset;
 			}
 			else if(limit>0) {
-				if(orderByApplyed) {
-					/*if(! allowEncapsulation) {
-						throw new BadRequestException("filter not allowed in query "+relation.getName());
-					}*/
+				/*if(orderByApplyed) {
 					sql = "select * from (\n"+sql+"\n) where rownum <= "+limit; 
 				}
 				else {
-					addEncapsulatingFilter("rownum <= "+limit, false);
-				}
+				*/
+				addEncapsulatingFilter("rownum <= "+limit, false);
+				//}
 			}
 			else {
 				/*if(! allowEncapsulation) {
