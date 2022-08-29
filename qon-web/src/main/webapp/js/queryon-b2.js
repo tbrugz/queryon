@@ -346,6 +346,7 @@ function getKeyValsForRow(rownum) {
 
 	var relation = getCurrentRelation('objects');
 	var cols = getColumnsFromRelation(relation);
+	cols = removeHtmlxSpecialCols(cols);
 	
 	//console.log('getKeyValsForRow row', row, 'pk', pk, 'cols.length', cols.length, 'cols', cols);
 	if(pk==null) {
