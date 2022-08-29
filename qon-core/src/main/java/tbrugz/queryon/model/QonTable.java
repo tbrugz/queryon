@@ -30,7 +30,7 @@ public class QonTable extends Table implements QonRelation {
 	}
 
 	public boolean hasSqlFilter() {
-		return sqlFilter!=null;
+		return sqlFilter!=null && !sqlFilter.isEmpty();
 	}
 
 }

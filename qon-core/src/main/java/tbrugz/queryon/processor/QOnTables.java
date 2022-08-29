@@ -213,7 +213,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			}
 		}
 		
-		if(sqlFilter!=null) {
+		if(t.hasSqlFilter()) {
 			sql += (isWhereAdded?" and ":" where ")+sqlFilter;
 		}
 		
@@ -224,6 +224,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		 * http://stackoverflow.com/questions/9207073/column-names-for-an-ad-hoc-sql
 		 */
 		try {
+			sql = SQL.replaceVariablesWithEmptyValues(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			t.setColumns(DataDumpUtils.getColumns(rsmd));

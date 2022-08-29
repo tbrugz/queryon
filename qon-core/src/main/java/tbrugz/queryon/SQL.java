@@ -304,7 +304,11 @@ public class SQL {
 				.replace(PARAM_WHERE_CLAUSE, "").replace(PARAM_FILTER_CLAUSE, "").replace(PARAM_ORDER_CLAUSE, "")
 				.replace(VARIABLE_USERNAME, username);
 	}
-	
+
+	public static String replaceVariablesWithEmptyValues(String sql) {
+		return sql.replace(VARIABLE_USERNAME, EMPTY_USERNAME);
+	}
+
 	private static String createSQLstr(Relation table, RequestSpec reqspec) {
 		String sql = "select "+PARAM_PROJECTION_CLAUSE+
 			" from " + (SQL.valid(table.getSchemaName())?sqlIdDecorator.get(table.getSchemaName())+".":"") + sqlIdDecorator.get(table.getName())+
