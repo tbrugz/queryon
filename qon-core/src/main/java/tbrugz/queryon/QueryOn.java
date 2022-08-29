@@ -1391,6 +1391,7 @@ public class QueryOn extends AbstractHttpServlet {
 		sql.addOriginalParameters(reqspec);
 		
 		filterByKey(relation, reqspec, pk, sql);
+		//log.debug("filterByKey: sql:\n"+sql.getSql());
 
 		// TODO parameters: remove reqspec.params in excess of #parametersToBind ?
 
@@ -1403,6 +1404,7 @@ public class QueryOn extends AbstractHttpServlet {
 				throw new BadRequestException(warns);
 			}
 		}
+		//log.debug("filterByXtraParams: sql:\n"+sql.getSql());
 		
 		applyQonTableSqlFilter(relation, sql);
 		
@@ -1419,6 +1421,7 @@ public class QueryOn extends AbstractHttpServlet {
 
 		// order by
 		sql.applyOrder(reqspec);
+		//log.debug("applyOrder: sql:\n"+sql.getSql());
 
 		//limit-offset
 		//how to decide strategy? default is LimitOffsetStrategy.RESULTSET_CONTROL
@@ -1441,6 +1444,7 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		//log.info("finalMaxLimit="+finalMaxLimit+" ; sql.limitMax="+sql.limitMax+" ; defaultLimit="+defaultLimit);
 		sql.addLimitOffset(loStrategy, getLimit(sql.limit, defaultLimit, finalMaxLimit), reqspec.offset);
+		//log.debug("addLimitOffset: sql:\n"+sql.getSql());
 		
 		sql.applyCount(reqspec);
 		
@@ -2199,7 +2203,7 @@ public class QueryOn extends AbstractHttpServlet {
 			throw new ForbiddenException("no delete permission on relation: "+relation.getName());
 		}*/
 
-		SQL sql = SQL.createDeleteSQL(relation);
+		SQL sql = SQL.createDeleteSQL(relation, getUsername(currentUser));
 
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		preprocessParameters(reqspec, relation, pk);
@@ -2289,7 +2293,7 @@ public class QueryOn extends AbstractHttpServlet {
 		SQL sql = null;
 		try {
 
-		sql = SQL.createUpdateSQL(relation);
+		sql = SQL.createUpdateSQL(relation, getUsername(currentUser));
 		
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
@@ -2416,7 +2420,9 @@ public class QueryOn extends AbstractHttpServlet {
 		if(applyedSqlFilter) {
 			// check if row is still visible...
 			//select count(*) from TABLE - if selectCount != updateCount - throw error
-			SQL checkSql = SQL.createSelectCountSQL(relation);
+			SQL checkSql = SQL.createSelectCountSQL(relation, getUsername(currentUser));
+			filterByKey(relation, reqspec, pk, checkSql);
+			filterByXtraParams(relation, reqspec, checkSql);
 			@SuppressWarnings("unused")
 			boolean applyedCheckSqlFilter = applyQonTableSqlFilter(relation, checkSql);
 			int sqlCheckCount = getUniqueRowFirstIntValue(checkSql, conn);
@@ -2477,7 +2483,7 @@ public class QueryOn extends AbstractHttpServlet {
 		Constraint pk = SchemaModelUtils.getPK(relation);
 		preprocessParameters(reqspec, relation, pk);
 		
-		SQL sql = SQL.createInsertSQL(relation, sqlDialect);
+		SQL sql = SQL.createInsertSQL(relation, sqlDialect, getUsername(currentUser));
 
 		Set<String> columns = new HashSet<String>();
 		columns.addAll(relation.getColumnNames());
@@ -2871,6 +2877,7 @@ public class QueryOn extends AbstractHttpServlet {
 				}
 			}
 		}
+		//logFilter.debug("filterByKey: filter: ["+filter+"]");
 		sql.addFilter(filter);
 	}
 	

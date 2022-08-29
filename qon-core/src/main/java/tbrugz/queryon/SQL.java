@@ -255,12 +255,14 @@ public class SQL {
 		}
 	}
 
+	/*
 	protected SQL(String sql, Relation relation, Integer originalBindParameterCount, Integer reqspecLimit) {
 		this(sql, relation, originalBindParameterCount, reqspecLimit, null);
 	}
+	*/
 	
-	protected SQL(String sql, Relation relation) {
-		this(sql, relation, null, null);
+	protected SQL(String sql, Relation relation, String username) {
+		this(sql, relation, null, null, username);
 	}
 	
 	public String getSql() {
@@ -331,7 +333,7 @@ public class SQL {
 			return sql;
 		}
 		else if(relation instanceof Table) {
-			SQL sql = new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
+			SQL sql = new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null, username);
 			/*if(relation instanceof QonTable) {
 				QonTable qt = (QonTable) relation;
 				if(qt.hasSqlFilter()) {
@@ -341,7 +343,7 @@ public class SQL {
 			return sql;
 		}
 		else if(relation instanceof View) {
-			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null);
+			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null, username);
 		}
 		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
 		
@@ -352,7 +354,7 @@ public class SQL {
 		return createSQL(relation, reqspec, null);
 	}*/
 	
-	public static SQL createInsertSQL(Relation relation, String dialect) {
+	public static SQL createInsertSQL(Relation relation, String dialect, String username) {
 		String sql = null;
 		if(hasSqlFilter(relation)) {
 			FilteredInsertStrategy fis = FilteredInsertStrategy.getStrategy(dialect);
@@ -364,22 +366,22 @@ public class SQL {
 				" (" + PARAM_INSERT_COLUMNS_CLAUSE + ")" +
 				" values (" + PARAM_INSERT_VALUES_CLAUSE+")";
 		}
-		return new SQL(sql, relation);
+		return new SQL(sql, relation, username);
 	}
 
-	public static SQL createUpdateSQL(Relation relation) {
+	public static SQL createUpdateSQL(Relation relation, String username) {
 		String sql = "update "+
 				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" set " + PARAM_UPDATE_SET_CLAUSE +
 				" " + PARAM_WHERE_CLAUSE;
-		return new SQL(sql, relation);
+		return new SQL(sql, relation, username);
 	}
 
-	public static SQL createDeleteSQL(Relation relation) {
+	public static SQL createDeleteSQL(Relation relation, String username) {
 		String sql = "delete "+
 				"from " + (SQL.valid(relation.getSchemaName())?relation.getSchemaName()+".":"") + relation.getName()+
 				" " + PARAM_WHERE_CLAUSE;
-		return new SQL(sql, relation);
+		return new SQL(sql, relation, username);
 	}
 	
 	public static String createExecuteSQLstr(ExecutableObject eo) {
@@ -414,11 +416,11 @@ public class SQL {
 		return body.replace(VARIABLE_USERNAME, getFinalVariableValue(username));
 	}
 	
-	public static SQL createSelectCountSQL(Relation relation) {
+	public static SQL createSelectCountSQL(Relation relation, String username) {
 		String sql = "select count(*) as counter from "+
 				(SQL.valid(relation.getSchemaName())?sqlIdDecorator.get(relation.getSchemaName())+".":"") + sqlIdDecorator.get(relation.getName())+
 				" " + PARAM_WHERE_CLAUSE;
-		return new SQL(sql, relation);
+		return new SQL(sql, relation, username);
 	}
 
 	public void addFilter(String filter) {
