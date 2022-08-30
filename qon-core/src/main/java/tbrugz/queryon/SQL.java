@@ -518,7 +518,7 @@ public class SQL {
 		sql = sql.replace(PARAM_INSERT_COLUMNS_CLAUSE, cols).replace(PARAM_INSERT_VALUES_CLAUSE, values);
 	}
 
-	public void applyInsert(List<String> allColumnNames, List<String> columnNames, List<String> colTypes) {
+	public void applyInsert(List<String> allColumnNames, List<String> columnNames, List<String> colTypes, List<Integer> colSizes) {
 		List<String> defaultColumns = new ArrayList<>();
 		defaultColumns.addAll(allColumnNames);
 		defaultColumns.removeAll(columnNames);
@@ -528,7 +528,10 @@ public class SQL {
 		for(int i=0;i<columnNames.size();i++) {
 			String c = columnNames.get(i);
 			String ct = colTypes.get(i);
-			valuesAndCols.add("cast(? as "+ct+") as "+c);
+			Integer cs = colSizes.get(i);
+			valuesAndCols.add("cast(? as " + ct +
+				(cs != null ? "(" + cs + ")" : "") +
+				") as " + c);
 			values.add("?");
 		}
 		List<String> defaultValuesAndCols = new ArrayList<>();

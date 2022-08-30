@@ -25,8 +25,10 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.SQL;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
 
@@ -238,7 +240,16 @@ public class DBUtil {
 		if(idx<0) { return null; }
 		return relation.getColumnTypes().get(idx);
 	}
-	
+
+	public static Integer getColumnSizeFromColName(Relation relation, String colname) {
+		if(relation instanceof Table) {
+			Table t = (Table) relation;
+			Column c = t.getColumn(colname);
+			return c.getColumnSize();
+		}
+		return null;
+	}
+
 	// http://stackoverflow.com/questions/3914404/how-to-get-current-moment-in-iso-8601-format
 	public static DateFormat getIsoDateFormat() {
 		return isoDateFormat;

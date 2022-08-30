@@ -2600,12 +2600,18 @@ public class QueryOn extends AbstractHttpServlet {
 		if(colsToInsert.size()==0) {
 			throw new BadRequestException("[insert] No valid columns");
 		}
+		List<Integer> colSizesToInsert = new ArrayList<>();
+		for(String col: colsToInsert) {
+			Integer size = DBUtil.getColumnSizeFromColName(relation, col);
+			colSizesToInsert.add(size);
+		}
 		//sql.applyInsert(sbCols.toString(), sbVals.toString());
-		sql.applyInsert(relation.getColumnNames(), colsToInsert, colTypesToInsert);
+		sql.applyInsert(relation.getColumnNames(), colsToInsert, colTypesToInsert, colSizesToInsert);
 
 		applyQonTableSqlFilter(relation, sql);
 
-		//log.debug("sql insert: " + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
+		//log.debug("insert: sql=\n" + sql + (pkcols!=null?" [pkcols="+Arrays.asList(pkcols)+"]":"") );
+		//log.debug("insert: sqlFinal=\n" + sql.getFinalSql() );
 
 		PreparedStatement st = pkcols!=null? 
 			conn.prepareStatement(sql.getFinalSql(), pkcols):
