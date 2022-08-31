@@ -302,7 +302,8 @@ public class QueryOn extends AbstractHttpServlet {
 	static final String PROP_SQL_USEIDDECORATOR = "queryon.sql.use-id-decorator";
 	static final String PROP_AUTH_SHIRO_ALLOW_DISABLED = "queryon.auth.shiro.allow-disabled";
 	static final String PROP_DEBUG_MODE = "queryon.debug-mode";
-	
+	static final String PROP_DISCOVERY_MODE = "queryon.discovery-mode";
+
 	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	static final String DEFAULT_XTRA_SYNTAXES = null;
 	
@@ -360,6 +361,8 @@ public class QueryOn extends AbstractHttpServlet {
 	protected final boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
 	protected Integer defaultLimit;
 	protected int maxLimit;
+
+	protected boolean discoveryMode = false;
 	protected boolean debugMode = false;
 	private Boolean shiroEnabled = null;
 	
@@ -505,6 +508,10 @@ public class QueryOn extends AbstractHttpServlet {
 				log.warn("no properties config loaded");
 			}
 
+			discoveryMode = Utils.getPropBool(prop, PROP_DISCOVERY_MODE, discoveryMode);
+			if(discoveryMode) {
+				log.info("discovery-mode is active");
+			}
 			debugMode = Utils.getPropBool(prop, PROP_DEBUG_MODE, debugMode);
 			if(debugMode) {
 				log.info("debug-mode is active");
@@ -936,7 +943,9 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
-		return new RequestSpec(req, prop);
+		DumpSyntaxUtils dsutils = QOnContextUtils.getDumpSyntaxUtils(req.getServletContext());
+		int minUrlParts = discoveryMode ? 0 : 1;
+		return new RequestSpec(dsutils, req, prop, 0, QueryOn.DEFAULT_OUTPUT_SYNTAX, true, minUrlParts, null);
 	}
 	
 	protected void doService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -959,6 +968,19 @@ public class QueryOn extends AbstractHttpServlet {
 			log.info(">> pathInfo: "+req.getPathInfo()+" ; method: "+req.getMethod()+
 					( (reqspec.httpMethod!=null && !reqspec.httpMethod.equals(req.getMethod())?" ; final-method: "+reqspec.httpMethod:"") )
 					);
+			//log.info("object: ["+reqspec.object+"]");
+			if(discoveryMode && MiscUtils.isNullOrEmpty(reqspec.object)) {
+				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
+				resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+				String location = req.getRequestURI();
+				if(!location.endsWith("/")) {
+					location += "/";
+				}
+				location += DBObjectType.ANY.toString().toLowerCase();
+				resp.setHeader(ResponseSpec.HEADER_LOCATION, location);
+				log.info("location: " + location);
+				return;
+			}
 			//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 			
 			SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.getModelId());

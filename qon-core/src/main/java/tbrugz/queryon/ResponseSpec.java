@@ -16,6 +16,7 @@ public class ResponseSpec {
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final String HEADER_CONTENT_RANGE = "Content-Range";
+	public static final String HEADER_LOCATION = "Location";
 	//public static final String HEADER_CONTENT_TYPE = "Content-Type"; // not needed... use HttpServletResponse.setContentType()
 	
 	//https://en.wikipedia.org/wiki/List_of_HTTP_header_fields ; https://en.wikipedia.org/wiki/Chunked_transfer_encoding
