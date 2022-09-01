@@ -1043,6 +1043,10 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			else {
 				permitted = isPermitted(currentUser, otype, atype, reqspec.object);
+				if(discoveryMode) {
+					List<String> allowedMethods = getAllowedMethods(currentUser, otype, reqspec.object);
+					resp.addHeader(ResponseSpec.HEADER_ALLOW, Utils.join(allowedMethods, ", "));
+				}
 				if(!permitted) {
 					if( (atype==ActionType.UPDATE || atype == ActionType.INSERT) && validateUpdateColumnPermissions) {
 						// should validate columns on doInsert/doUpdate
@@ -1304,6 +1308,26 @@ public class QueryOn extends AbstractHttpServlet {
 		log.debug("grantsAndRolesMatches: user must have any of "+mustHaveRoles+" roles but only has "+roles+" roles [privilege="+privilege+"]");
 		
 		return false;
+	}
+
+	List<String> getAllowedMethods(Subject currentUser, String otype, String object) {
+		List<String> ret = new ArrayList<>();
+		DBObjectType dbObjectType = DBObjectType.valueOf(otype);
+		if(dbObjectType.isRelationType()) {
+			if( isPermitted(currentUser, otype, ActionType.SELECT, object) ) {
+				ret.add("GET");
+			}
+			if( isPermitted(currentUser, otype, ActionType.INSERT, object) ) {
+				ret.add("POST");
+			}
+			if( isPermitted(currentUser, otype, ActionType.UPDATE, object) ) {
+				ret.add("PATCH");
+			}
+			if( isPermitted(currentUser, otype, ActionType.DELETE, object) ) {
+				ret.add("DELETE");
+			}
+		}
+		return ret;
 	}
 
 	@Override

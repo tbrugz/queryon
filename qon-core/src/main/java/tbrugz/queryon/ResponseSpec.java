@@ -12,6 +12,7 @@ public class ResponseSpec {
 	public static final String MIME_TYPE_XML = "application/xml";
 	
 	// --- standard HTTP response headers ---
+	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_ACCEPT_RANGES = "Accept-Ranges";
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
