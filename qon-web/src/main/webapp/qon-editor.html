@@ -413,14 +413,16 @@
 			//"queryon.qon-queries.action": "remove",
 			//"queryon.qon-queries.querynames": document.getElementById('name').value,
 		};
-		if(modelId!=null) {
+		if(modelId) {
 			data["model"] = modelId;
 		}*/
 		var modelId = getModelId();
 		var deleteUrl = qonUrl + "?" +
 				"p1=" + encodeURIComponent(document.getElementById('name').value) +
-				(modelId!=null ? "&model="+modelId : "");
+				(modelId ? "&model="+modelId : "");
 		
+		//console.log("deleteUrl=", deleteUrl);
+
 		var request = $.ajax({
 			url : deleteUrl,
 			type : "DELETE",
