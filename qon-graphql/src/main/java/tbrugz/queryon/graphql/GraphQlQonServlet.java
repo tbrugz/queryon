@@ -55,11 +55,6 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		}
 		
 		boolean requestSchema = req.getParameter("schema")!=null;
-		ExecutionInput exec = getExecutionInput(req);
-		
-		if(exec.getQuery()==null && !requestSchema) {
-			throw new BadRequestException("query must not be null");
-		}
 
 		log.info(">> GraphQlQonServlet: method: "+req.getMethod());
 		//log.info(">> GqlQuery: "+exec.getQuery());
@@ -77,6 +72,13 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 			writeSchema(graphQLSchema, resp.getWriter());
 			return;
 		}
+
+		ExecutionInput exec = getExecutionInput(req);
+		if(exec.getQuery()==null) {
+			// if query is null, 'getExecutionInput' will throw error?
+			throw new BadRequestException("query must not be null");
+		}
+		
 		resp.setContentType(GqlMapBufferSyntax.MIME_TYPE);
 		GraphQL gql = GraphQL.newGraphQL(graphQLSchema).build();
 		ExecutionResult executionResult = gql.execute(exec);

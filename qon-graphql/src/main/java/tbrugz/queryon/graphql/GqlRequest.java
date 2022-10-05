@@ -21,6 +21,7 @@ import graphql.language.IntValue;
 import graphql.language.StringValue;
 import graphql.language.Value;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.SelectedField;
 import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
@@ -58,7 +59,7 @@ public class GqlRequest extends RequestSpec {
 		//log.info("relationColMap: "+relationColMap+" // "+action.objectName+" // "+object);
 
 		//log.debug("field-names: "+env.getSelectionSet().get().keySet());
-		Set<String> fieldNames = env.getSelectionSet().get().keySet();
+		List<SelectedField> fieldNames = env.getSelectionSet().getFields();
 		//columns.addAll(fieldNames); //"fields" param (PARAM_FIELDS)
 		// non-normalized columns will not be retrieved...
 		/*for(String s: fieldNames) {
@@ -67,21 +68,22 @@ public class GqlRequest extends RequestSpec {
 			}
 		}*/
 		if(relationColMap!=null) {
-			for(String f: fieldNames) {
-				String unnormalizedCol = relationColMap.get(f);
+			for(SelectedField f: fieldNames) {
+				String fn = f.getName();
+				String unnormalizedCol = relationColMap.get(fn);
 				if(unnormalizedCol==null) {
-					log.debug("null unnormalized column [normalized="+f+"]");
-					columns.add(f);
+					log.debug("null unnormalized column [normalized="+fn+"]");
+					columns.add(fn);
 					aliases.add(null);
 					continue;
 				}
 				
 				columns.add(unnormalizedCol);
-				if(unnormalizedCol.equals(f)) {
+				if(unnormalizedCol.equals(fn)) {
 					aliases.add(null);
 				}
 				else {
-					aliases.add(f);
+					aliases.add(fn);
 				}
 			}
 		}
@@ -124,17 +126,17 @@ public class GqlRequest extends RequestSpec {
 		}
 		}
 	
+		List<SelectedField> fields = env.getSelectionSet().getFields();
 		//log.info("getSelectionSet: "+env.getSelectionSet()+"\n- "+env.getSelectionSet().getArguments());
-		Map<String, Map<String, Object>> fieldsArguments = env.getSelectionSet().getArguments();
+		//Map<String, Map<String, Object>> fieldsArguments = env.getSelectionSet().getArguments();
 		
-		for(Map.Entry<String, Map<String, Object>> eset: fieldsArguments.entrySet()) {
-			String field = eset.getKey();
-			Map<String, Object> args = eset.getValue();
+		for(SelectedField field: fields) {
+			Map<String, Object> args = field.getArguments();
 			for(Map.Entry<String, Object> argMap: args.entrySet()) {
 				String filter = argMap.getKey();
 				Object value = argMap.getValue();
 				
-				addValueToFilter(field, filter, value);
+				addValueToFilter(field.getName(), filter, value);
 			}
 			
 		}

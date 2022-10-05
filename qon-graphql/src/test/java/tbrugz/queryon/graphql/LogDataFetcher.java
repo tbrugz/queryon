@@ -13,8 +13,13 @@ public class LogDataFetcher<T> implements DataFetcher<T> {
 	@Override
 	public T get(DataFetchingEnvironment env) {
 		log.info("env: args: "+env.getArguments()+" / source: "+env.getSource()+" / field: "+env.getField());
-		log.info("env2: ctx: "+env.getContext()+" / exec-ctx: "+env.getExecutionContext()+" / exec-id: "+env.getExecutionId());
-		log.info("env3: definition: "+env.getFieldDefinition()+"\n- fields: "+env.getFields()+"\n- field-type: "+env.getFieldType()+"\n- f-t-info: "+env.getFieldTypeInfo());
+		log.info("env2: ctx: "+env.getContext()
+			//+" / exec-ctx: "+env.getExecutionContext()
+			+" / exec-id: "+env.getExecutionId());
+		log.info("env3: definition: "+env.getFieldDefinition()+"\n- fields: "+env.getFields()
+			+"\n- field-type: "+env.getFieldType()
+			//+"\n- f-t-info: "+env.getFieldTypeInfo()
+			);
 		log.info("env4: getSelectionSet: "+env.getSelectionSet());
 		log.info("env5: field.getSelectionSet: "+env.getField().getSelectionSet());
 		
