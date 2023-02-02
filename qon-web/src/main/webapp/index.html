@@ -489,7 +489,7 @@
 		//var obj = fullh.pathname.substring(0, fullh.pathname.lastIndexOf('.'));
 		var obj = fullh.pathname.substring(fullh.pathname.indexOf("/q/")+3);
 		for(var i=0;i<settings["syntax.fileextensions"].length;i++) {
-			var syntaxExt = "."+settings["syntax.fileextensions"];
+			var syntaxExt = "."+settings["syntax.fileextensions"][i];
 			if(obj.endsWith(syntaxExt)) {
 				obj = obj.substring(0, obj.length - syntaxExt.length -1);
 			}

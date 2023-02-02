@@ -13,10 +13,10 @@ alter table qon_tables
 
 ```sql
 alter table qon_queries
-	add default_column_names varchar(400);
+	add default_column_names varchar(1000);
 
 alter table qon_tables
-	add default_column_names varchar(400);
+	add default_column_names varchar(1000);
 ```
 
 

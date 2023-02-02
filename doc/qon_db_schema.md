@@ -6,11 +6,11 @@ sql ansi
 create table qon_queries (
 	schema_name varchar(100),
 	name varchar(100) not null,
-	remarks varchar(400),
+	remarks varchar(1000),
 	query clob, -- ansi(?), oracle
 	--query text, -- pgsql, mysql
 	--query varchar(4000),
-	default_column_names varchar(400),
+	default_column_names varchar(1000),
 	roles_filter varchar(1000),
 	disabled tinyint,
 	created_at timestamp,
@@ -25,11 +25,11 @@ create table qon_queries (
 create table qon_tables (
 	schema_name varchar(100),
 	name varchar(100) not null,
-	column_names varchar(400),
-	pk_column_names varchar(400),
-	default_column_names varchar(400),
+	column_names varchar(1000),
+	pk_column_names varchar(1000),
+	default_column_names varchar(1000),
 	sql_filter varchar(1000),
-	remarks varchar(400),
+	remarks varchar(1000),
 	column_remarks varchar(4000),
 	roles_select varchar(1000),
 	roles_insert varchar(1000),
@@ -45,7 +45,7 @@ create table qon_tables (
 create table qon_execs (
 	schema_name varchar(100),
 	name varchar(100) not null,
-	remarks varchar(400),
+	remarks varchar(1000),
 	roles_filter varchar(1000),
 	exec_type varchar(100),
 	package_name varchar(100),
@@ -61,7 +61,7 @@ create table qon_execs (
 create table qon_pages (
 	id integer, -- serial, identity, auto_increment ...
 	path varchar(400),
-	remarks varchar(400),
+	remarks varchar(1000),
 	mime varchar(100),
 	body clob, --text ...
 	binary_data blob,
