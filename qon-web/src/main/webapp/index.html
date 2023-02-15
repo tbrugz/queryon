@@ -348,7 +348,7 @@
 		}
 
 		updateState();
-		
+		makeHrefs();
 		updateFilterButtonStyle();
 		
 		var content = document.getElementById('content');
@@ -484,14 +484,14 @@
 			return;
 		}
 		const fullh = new URL(evt.target.href);
-		//console.log("innerHrefInterceptor: fullh.pathname=", fullh.pathname); //, "typeof fullh=", typeof fullh);
-
-		//var obj = fullh.pathname.substring(0, fullh.pathname.lastIndexOf('.'));
 		var obj = fullh.pathname.substring(fullh.pathname.indexOf("/q/")+3);
+		//console.log("innerHrefInterceptor: fullh.pathname=", fullh.pathname, "obj=", obj); //, "typeof fullh=", typeof fullh);
+
 		for(var i=0;i<settings["syntax.fileextensions"].length;i++) {
 			var syntaxExt = "."+settings["syntax.fileextensions"][i];
 			if(obj.endsWith(syntaxExt)) {
-				obj = obj.substring(0, obj.length - syntaxExt.length -1);
+				//console.log("innerHrefInterceptor: endsWith=", syntaxExt);
+				obj = obj.substring(0, obj.length - syntaxExt.length);
 			}
 		}
 		var relname = obj;
