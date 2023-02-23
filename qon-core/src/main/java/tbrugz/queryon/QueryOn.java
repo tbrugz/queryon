@@ -2005,7 +2005,7 @@ public class QueryOn extends AbstractHttpServlet {
 		else {
 			setContentType(resp, MIME_TEXT);
 			if(outParamCount==0) {
-				//XXX reqspec.getExecuteWithNoReturnSucessStatus(); //?
+				//XXX reqspec.getExecuteWithNoReturnSuccessStatus(); //?
 				writeExecuteOutput(reqspec, eo, resp, "execution successful - no return");
 			}
 			else {
@@ -2310,7 +2310,7 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		//XXXxxx ??: (heterogeneous) array to ResultSet adapter? (?!?)
 		DBUtil.doCommit(conn);
-		Integer status = reqspec.getDeleteSucessStatus();
+		Integer status = reqspec.getDeleteSuccessStatus();
 		if(status!=null) {
 			resp.setStatus(status);
 		}
@@ -2497,7 +2497,7 @@ public class QueryOn extends AbstractHttpServlet {
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		DBUtil.doCommit(conn);
 		
-		Integer status = reqspec.getUpdateSucessStatus();
+		Integer status = reqspec.getUpdateSuccessStatus();
 		if(status!=null) {
 			resp.setStatus(status);
 		}

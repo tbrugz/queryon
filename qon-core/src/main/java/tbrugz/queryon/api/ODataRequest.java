@@ -351,12 +351,12 @@ public class ODataRequest extends RequestSpec {
 	}
 	
 	@Override
-	public Integer getUpdateSucessStatus() {
+	public Integer getUpdateSuccessStatus() {
 		return HttpServletResponse.SC_NO_CONTENT;
 	}
 
 	@Override
-	public Integer getDeleteSucessStatus() {
+	public Integer getDeleteSuccessStatus() {
 		return HttpServletResponse.SC_NO_CONTENT;
 	}
 

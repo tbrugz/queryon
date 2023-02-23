@@ -1279,11 +1279,11 @@ public class RequestSpec {
 		return ret;
 	}
 	
-	public Integer getUpdateSucessStatus() {
+	public Integer getUpdateSuccessStatus() {
 		return null;
 	}
 
-	public Integer getDeleteSucessStatus() {
+	public Integer getDeleteSuccessStatus() {
 		return null;
 	}
 

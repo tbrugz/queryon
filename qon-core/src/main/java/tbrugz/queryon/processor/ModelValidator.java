@@ -119,7 +119,7 @@ public class ModelValidator extends AbstractSQLProc {
 		}
 		*/
 		
-		log.info((count-countErr)+" of "+count+" objects sucessfully validated [elapsed="+(System.currentTimeMillis()-init)+"ms]");
+		log.info((count-countErr)+" of "+count+" objects successfully validated [elapsed="+(System.currentTimeMillis()-init)+"ms]");
 	}
 
 }
