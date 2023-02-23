@@ -59,14 +59,15 @@ doLogin = function(event) {
 		byId('loginStatusContainer').style.display = 'block';
 		if(status>=200 && status<300) {
 			var redirect = getParameterByName('return', location.search);
-			console.log("doLogin: sucess; redirect=", redirect);
-			byId('loginStatus').innerHTML = "Login Sucessful";
-			byId('loginStatus').className ='information';
+			console.log("doLogin: success; redirect=", redirect);
+			byId('loginStatus').innerHTML = "Login Successful";
+			byId('loginStatus').className = 'information';
 			if(redirect) {
+				byId('loginStatus').innerHTML += " - Redirecting...";
 				location.href = redirect;
 			}
 			/*else {
-				alert("Login sucessful!");
+				alert("Login successful!");
 			}*/
 		}
 		else {
