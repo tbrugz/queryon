@@ -606,11 +606,13 @@
       <name>Sonatype Snapshots</name>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
+    <!--
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
       <url>https://maven.pkg.github.com/tbrugz/queryon</url>
     </repository>
+    -->
     <!--<repository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2/</url>

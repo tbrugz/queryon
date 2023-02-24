@@ -1,6 +1,7 @@
 
 # https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-maven
 # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry
+# https://stackoverflow.com/questions/41611671/difference-between-altdeploymentrepository-and-altreleasedeploymentrepository
 
 name: CI-deploy
 
@@ -23,6 +24,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           server-id: github
+          cache: maven
       - name: Publish to GitHub Packages
         run: mvn -V -B -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/tbrugz/queryon/ deploy
         env:
