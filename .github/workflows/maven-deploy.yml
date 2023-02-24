@@ -24,6 +24,6 @@ jobs:
           distribution: 'temurin'
           server-id: github
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode deploy
+        run: mvn -V -B -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/tbrugz/queryon/ deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
