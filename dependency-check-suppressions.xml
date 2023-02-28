@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes><![CDATA[
+        False positive for org.bitbucket.tbrugz:sqldump:0.10-SNAPSHOT
+        ]]></notes>
+        <sha1>1be73092d628705d453129540012103f504c8074</sha1>
+        <cve>CVE-2015-10044</cve>
+    </suppress>
+</suppressions>
