@@ -28,6 +28,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Publish to GitHub Packages
-        run: mvn -V -B -DaltDeploymentRepository=github::default::${{ REPOSITORY }} deploy
+        run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
