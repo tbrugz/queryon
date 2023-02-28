@@ -58,6 +58,8 @@ other useful maven goals
 * `mvn se.kth.castor:depclean-maven-plugin:1.1.0:depclean -Dcreate.pom.debloated=true -Dcreate.result.json=true -Dignore.scopes=test`
   (see <https://castor-software.github.io/depclean/>)
 
+see also: <https://github.com/rfichtner/maven-survival-guide>
+
 
 maven goals that need external services
 -----
