@@ -1,7 +1,7 @@
 
-# see: https://spring.io/guides/gs/spring-boot-docker/
-
-FROM openjdk:11
+# see: https://spring.io/guides/topicals/spring-boot-docker/
+# see: https://hub.docker.com/_/eclipse-temurin
+FROM eclipse-temurin:17-jre
 
 RUN groupadd spring && useradd -g spring spring
 USER spring:spring

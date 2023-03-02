@@ -1,7 +1,7 @@
 
-# see: https://spring.io/guides/gs/spring-boot-docker/
-
-FROM openjdk:8-jdk-alpine
+# see: https://spring.io/guides/topicals/spring-boot-docker/
+# see: https://hub.docker.com/_/eclipse-temurin
+FROM eclipse-temurin:8-jdk-alpine
 
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring

@@ -53,7 +53,9 @@ other useful maven goals
 
 * `mvn javadoc:test-javadoc`
 
-* `mvn org.owasp:dependency-check-maven:6.2.2:check` / `mvn org.owasp:dependency-check-maven:6.2.2:aggregate`
+* `mvn buildplan:list-phase`
+
+* `mvn org.owasp:dependency-check-maven:check` / `mvn org.owasp:dependency-check-maven:aggregate`
 
 * `mvn se.kth.castor:depclean-maven-plugin:1.1.0:depclean -Dcreate.pom.debloated=true -Dcreate.result.json=true -Dignore.scopes=test`
   (see <https://castor-software.github.io/depclean/>)
