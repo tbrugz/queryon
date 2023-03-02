@@ -47,13 +47,13 @@ other useful maven goals
 
 * `mvn enforcer:display-info`
 
-* `mvn versions:display-dependency-updates -DallowAnyUpdates=false -DallowMajorUpdates=false`
+* `mvn buildplan:list-phase`
 
 * `mvn versions:display-plugin-updates -DallowAnyUpdates=false -DallowMajorUpdates=false`
 
-* `mvn javadoc:test-javadoc`
+* `mvn versions:display-dependency-updates -DallowAnyUpdates=false -DallowMajorUpdates=false`
 
-* `mvn buildplan:list-phase`
+* `mvn javadoc:test-javadoc`
 
 * `mvn org.owasp:dependency-check-maven:check` / `mvn org.owasp:dependency-check-maven:aggregate`
 
