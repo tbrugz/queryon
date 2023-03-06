@@ -38,6 +38,10 @@ function statusGetWarnings(modelId, type) {
 	return modelStatus ? modelStatus[modelId+"."+type+"-warnings"] : null;
 }
 
+function statusGetRawWarnings(type) {
+	return modelStatus ? modelStatus[type] : null;
+}
+
 function statusWarnings2Text(warnings) {
 	var ret = "";
 	var keys = Object.keys(warnings);

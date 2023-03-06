@@ -136,10 +136,11 @@
 	
 	function loadModelStatusContentCallback() {
 		var modelId = getCurrentModelId();
+		var iErrors = statusGetRawWarnings("init-errors");
 		var qWarnings = statusGetWarnings(modelId, "queries");
 		var iWarnings = statusGetWarnings(modelId, "init");
 		var warnings = {};
-		Object.assign(warnings, qWarnings, iWarnings)
+		Object.assign(warnings, iErrors, iWarnings, qWarnings)
 		//console.log("loadModelStatusContentCallback: modelId: '", modelId,"' warnings:", warnings, "modelStatus:", modelStatus);
 		
 		if(warnings && Object.keys(warnings).length > 0) {

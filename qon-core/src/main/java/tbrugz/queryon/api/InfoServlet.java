@@ -371,10 +371,16 @@ public class InfoServlet extends AbstractHttpServlet {
 					}
 				}
 			}
+			Map<String, String> initErrors = (Map<String, String>) getServletContext().getAttribute(QueryOn.ATTR_INIT_ERRORS);
+			if(initErrors!=null && initErrors.size()>0) {
+				modelsInfo.put("init-errors", initErrors);
+			}
+			/*
 			Throwable initError = (Throwable) getServletContext().getAttribute(QueryOn.ATTR_INIT_ERROR);
 			if(initError!=null) {
 				modelsInfo.put("init-error", initError.toString());
 			}
+			*/
 			ret.put("models-info", modelsInfo);
 		}
 		return ret;

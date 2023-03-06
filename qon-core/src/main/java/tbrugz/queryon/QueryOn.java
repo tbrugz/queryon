@@ -324,7 +324,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String ATTR_DEFAULT_MODEL = SchemaModelUtils.ATTR_DEFAULT_MODEL;
 	@Deprecated
 	public static final String ATTR_SCHEMAS_MAP = QOnContextUtils.ATTR_SCHEMAS_MAP;
-	public static final String ATTR_INIT_ERROR = "initerror";
+	public static final String ATTR_INIT_ERRORS = "initerrors";
 	@Deprecated
 	public static final String ATTR_DUMP_SYNTAX_UTILS = QOnContextUtils.ATTR_DUMP_SYNTAX_UTILS;
 	@Deprecated
@@ -447,7 +447,8 @@ public class QueryOn extends AbstractHttpServlet {
 		String propertiesFile = null;
 		try {
 			prop.clear();
-			context.removeAttribute(ATTR_INIT_ERROR);
+			UpdatePluginUtils.clearWarnings(context, ATTR_INIT_ERRORS);
+			//context.removeAttribute(ATTR_INIT_ERROR);
 			
 			//XXX: protocol: add from ServletRequest?
 			String protocol = "http://"; //XXX https protocol??
@@ -532,13 +533,15 @@ public class QueryOn extends AbstractHttpServlet {
 						throw new ServletException(msg);
 					}
 					else {
-						String modelWarningsKey = id+"."+ATTR_INIT_ERROR;
+						String modelWarningsKey = id+"."+ATTR_INIT_ERRORS;
 						if( grabModel(models, id) ) {
 							modelsGrabbed.add(id);
-							context.removeAttribute(modelWarningsKey);
+							//context.removeAttribute(modelWarningsKey);
+							UpdatePluginUtils.removeWarning(context, ATTR_INIT_ERRORS, null, modelWarningsKey);
 						}
 						else {
-							context.setAttribute(modelWarningsKey, "Error grabbing model '"+id+"'");
+							//context.setAttribute(modelWarningsKey, "Error grabbing model '"+id+"'");
+							UpdatePluginUtils.putWarning(context, ATTR_INIT_ERRORS, null, modelWarningsKey, "Error grabbing model '"+id+"'");
 						}
 					}
 				}
@@ -569,8 +572,9 @@ public class QueryOn extends AbstractHttpServlet {
 				String defaultModel = null; // XXX: use DEFAULT_MODELID? 
 				boolean grabbed = grabModel(models, defaultModel);
 				if(!grabbed) {
-					String modelWarningsKey = defaultModel+"."+ATTR_INIT_ERROR;
-					context.setAttribute(modelWarningsKey, "Error grabbing model '"+defaultModel+"'");
+					String modelWarningsKey = defaultModel+"."+ATTR_INIT_ERRORS;
+					//context.setAttribute(modelWarningsKey, "Error grabbing model '"+defaultModel+"'");
+					UpdatePluginUtils.putWarning(context, ATTR_INIT_ERRORS, null, modelWarningsKey, "Error grabbing model '"+defaultModel+"'");
 				}
 				SchemaModelUtils.setDefaultModelId(context, defaultModel);
 				log.info("defaultmodel="+defaultModel+" [single-model]");
@@ -603,12 +607,14 @@ public class QueryOn extends AbstractHttpServlet {
 				"[contextPath: "+contextPath+"][servlet: "+this.getClass().getSimpleName()+"]";
 			log.error(message);
 			log.debug(message, e);
-			context.setAttribute(ATTR_INIT_ERROR, e);
+			//context.setAttribute(ATTR_INIT_ERROR, e);
+			UpdatePluginUtils.putWarning(context, ATTR_INIT_ERRORS, null, "[init]", e.toString());
 			throw new ServletException(message, e);
 		} catch (Error e) {
 			log.error(e.toString());
 			log.debug(e.toString(), e);
-			context.setAttribute(ATTR_INIT_ERROR, e);
+			//context.setAttribute(ATTR_INIT_ERROR, e);
+			UpdatePluginUtils.putWarning(context, ATTR_INIT_ERRORS, null, "[init]", e.toString());
 			throw e;
 		}
 	}
@@ -711,6 +717,7 @@ public class QueryOn extends AbstractHttpServlet {
 
 		String warnKey = UpdatePluginUtils.ATTR_INIT_WARNINGS_PREFIX+"."+modelId;
 		
+		int warnCount = 0;
 		try {
 			Connection conn = DBUtil.initDBConn(prop, modelId, model);
 			UpdatePluginUtils.clearWarnings(context, warnKey);
@@ -725,7 +732,7 @@ public class QueryOn extends AbstractHttpServlet {
 					String message = "Exception starting update-plugin "+up.getClass().getSimpleName()+" [model="+modelId+"]";
 					log.warn(message+": "+e);
 					log.debug(message+": "+e, e);
-					UpdatePluginUtils.putWarning(context, warnKey, null, "[init]", message);
+					UpdatePluginUtils.putWarning(context, warnKey, null, "[init-plugin."+( ++warnCount)+"]", message);
 				}
 			}
 			
@@ -735,7 +742,7 @@ public class QueryOn extends AbstractHttpServlet {
 			String message = "Exception starting update-plugin [model="+modelId+"]: "+e;
 			log.warn(message);
 			log.info(message, e);
-			UpdatePluginUtils.putWarning(context, warnKey, null, "[init]", message);
+			UpdatePluginUtils.putWarning(context, warnKey, null, "[init-plugin."+( ++warnCount)+"]", message);
 		}
 
 		log.info("active update-plugins"+(modelId!=null?" [model="+modelId+"]":"")+": "+StringUtils.getClassSimpleNameListFromObjectList(activePlugins));
