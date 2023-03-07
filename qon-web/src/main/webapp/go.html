@@ -46,6 +46,7 @@ loadSelectContent = function(oEvent) {
 		//XXX: packageName...
 		var e = executables[i];
 		var option = '<option value="'+e.qualifiedName+'" params="'+e.params+'" grants="'+e.grants+'">'+
+			(e.valid == "false" ? "&#10008; " : "")+
 			e.qualifiedName+(e.remarks?" - "+e.remarks:"")+'</option>';
 		select.innerHTML += option;
 	}

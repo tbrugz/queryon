@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -52,6 +53,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 	
 	//static final String SUFFIX_TABLE = ".table";
 	static final String SUFFIX_EXECS_NAMES = ".names";
+	static final String SUFFIX_KEEP_NOT_FOUND = ".keep-not-found";
 
 	static final String PIPE_SPLIT = "\\|";
 	
@@ -60,6 +62,8 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 	public static final String TYPE_SCRIPT = "SCRIPT";
 
 	public static final String ATTR_EXECS_WARNINGS_PREFIX = "qon-execs-warnings";
+
+	boolean keepExecutablesNotFound = false;
 	
 	Writer writer;
 
@@ -82,6 +86,12 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 			log.warn("Exception: "+e, e);
 			throw new BadRequestException("Exception: "+e, e);
 		}
+	}
+
+	@Override
+	public void setProperties(Properties prop) {
+		super.setProperties(prop);
+		keepExecutablesNotFound = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_KEEP_NOT_FOUND, keepExecutablesNotFound);
 	}
 
 	int readFromDatabase(ServletContext context) throws SQLException {
@@ -159,7 +169,8 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 				if(!schemasGrabbed.contains(schema)) {
 					execs.addAll(jgrab.doGrabFunctions(dbmd, schema, false));
 					execs.addAll(jgrab.doGrabProcedures(dbmd, schema, false));
-					//log.info("execs: "+execs);
+					log.debug("[schema="+schema+"] #execs = "+execs.size());
+					//log.debug("[schema="+schema+"] execs: "+execs);
 					schemasGrabbed.add(schema);
 				}
 
@@ -183,6 +194,11 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 							body);
 				}
 				else {
+					if(keepExecutablesNotFound) {
+						count += addExecutable(schema, name, remarks, rolesFilter, exec_type,
+								packageName, parameterCount, parameterNames, parameterTypes, parameterInouts,
+								body, false);
+					}
 					String message = "executable '"+execFullName+"' not found";
 					log.warn(message);
 					putWarning(context, model.getModelId(), schema, execName, message);
@@ -236,11 +252,22 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,
 			String packageName, String parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
 			String body) {
+		return addExecutable(schema, execName, remarks, rolesFilter, execType,
+			packageName, parameterCount, parameterNames, parameterTypes, parameterInouts,
+			body, true);
+	}
+
+	int addExecutable(String schema, String execName, String remarks, List<String> rolesFilter, String execType,
+			String packageName, String parameterCount, List<String> parameterNames, List<String> parameterTypes, List<String> parameterInouts,
+			String body, boolean valid) {
 		ExecutableObject e = new ExecutableObject();
 		e.setName(execName);
 		if(!isNullOrEmpty(schema)) { e.setSchemaName(schema); }
 		if(!isNullOrEmpty(packageName)) { e.setPackageName(packageName); }
 		e.setRemarks(remarks);
+		if(! valid) {
+			e.setValid(false);
+		}
 		
 		if(execType==null) {
 			throw new BadRequestException("Executable 'type' is mandatory");
