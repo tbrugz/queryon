@@ -13,7 +13,7 @@ var utf8par = "utf8=✓";
 /* functions */
 
 function loadQueries(modelId, filterSchema, doUpdate, callback) {
-	init(queryOnUrl, 'objects', function(containerId, rels) {
+	loadQueries0(queryOnUrl, 'objects', function(containerId, rels) {
 		if(filterSchema) {
 			console.log('filtering rels', rels.length, 'filterSchema', filterSchema);
 			if(!Array.isArray(filterSchema)) {

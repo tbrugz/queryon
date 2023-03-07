@@ -48,6 +48,7 @@ public class ModelValidator extends AbstractSQLProc {
 				DBObjectUtils.validateTable(rel, conn, update);
 			}
 			catch(SQLException e) {
+				rel.setValid(false);
 				if(removeInvalid) { it1.remove(); }
 				log.warn("Error validating table '"+rel.getFinalQualifiedName()+"': "+e);
 				log.debug("Error validating table '"+rel.getFinalQualifiedName()+"': "+e.getMessage(), e);
@@ -68,18 +69,21 @@ public class ModelValidator extends AbstractSQLProc {
 					String sqlWithNamedParams = sql.getInitialSql();
 					DBObjectUtils.validateQuery(q, sqlWithNamedParams, conn, update);
 				}
-				catch(RuntimeException e) {
+				catch(RuntimeException | SQLException e) {
+					rel.setValid(false);
 					if(removeInvalid) { it2.remove(); }
 					log.warn("Error with query '"+rel.getFinalQualifiedName()+"': "+e);
 					log.debug("Error with query '"+rel.getFinalQualifiedName()+"': "+e.getMessage(), e);
 					countErr++;
 				}
+				/*
 				catch(SQLException e) {
 					if(removeInvalid) { it2.remove(); }
 					log.warn("Error with query '"+rel.getFinalQualifiedName()+"': "+e);
 					log.debug("Error with query '"+rel.getFinalQualifiedName()+"': "+e.getMessage(), e);
 					countErr++;
 				}
+				*/
 				count++;
 			}
 			else {
@@ -87,6 +91,7 @@ public class ModelValidator extends AbstractSQLProc {
 					DBObjectUtils.validateTable(rel, conn, update);
 				}
 				catch(RuntimeException e) {
+					rel.setValid(false);
 					if(removeInvalid) { it2.remove(); }
 					log.warn("Error with table '"+rel.getFinalQualifiedName()+"': "+e);
 					log.debug("Error with table '"+rel.getFinalQualifiedName()+"': "+e.getMessage(), e);

@@ -9,7 +9,7 @@ var utf8par = "utf8=✓";
 
 var messagesId = "messages";
 
-function init(url, containerId, callback, modelId) {
+function loadQueries0(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
 	byId(containerId).innerHTML = defaultNullObjectOption;
@@ -44,7 +44,8 @@ function getId(obj) {
 }
 
 function getDescription(obj, showSchemaName) {
-	return ( (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null" && showSchemaName) ? obj.schemaName+"." : "")
+	return (obj.valid == "false" ? "&#10008; " : "")
+		+ ( (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null" && showSchemaName) ? obj.schemaName+"." : "")
 		+ obj.name
 		+ ((obj.remarks!=null && obj.remarks!="" && obj.remarks!="null")?" - "+obj.remarks:"");
 }

@@ -2072,8 +2072,8 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 
 	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
-	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks", "defaultColumnNames", "constraints", "remarks", "grants"}); //, "class"
-	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "parameterCount", "parameterTypes", "params", "returnParam", "remarks", "grants"});
+	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks", "defaultColumnNames", "valid", "constraints", "remarks", "grants"}); //, "class"
+	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "parameterCount", "parameterTypes", "params", "returnParam", "valid", "remarks", "grants"});
 
 	static final List<String> relationAndExecutableCols =  Arrays.asList(new String[]{"parameterCount", "parameterTypes", "remarks", "grants", "dbObjectType" /*"class", "type", "relationType"*/});
 	
