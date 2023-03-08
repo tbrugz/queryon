@@ -43,7 +43,7 @@ Special columns
 
 **html(x) + table.js**:
 
-* blob columns have download link
+* columns of Blob type (or columns ending with `_ASBLOB`) have download link (when not null)
 * `_FILEEXT` suffix: blob download link uses it's value as file extension
 * **Warning**: query should be totally ordered for correct blob download (e.g.: *order by <primary key>*)
 

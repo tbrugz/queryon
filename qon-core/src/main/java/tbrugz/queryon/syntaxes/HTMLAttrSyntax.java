@@ -2,6 +2,7 @@ package tbrugz.queryon.syntaxes;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -36,6 +37,8 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 	transient static final List<String> ROWWIDE_COLS_LIST = Arrays.asList(ROWWIDE_COLS);
 	static final List<String> ROWWIDE_ATTRIBS = Arrays.asList("style", "class");
 	
+	static final String SUFFIX_ASBLOB = "_ASBLOB";
+
 	/*static final Map<String, StringDecorator> decorators = new HashMap<String, StringDecorator>();
 	
 	static class HRefDecorator extends StringDecorator {
@@ -123,12 +126,20 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				" & lsColDbTypes [#"+lsColDbTypes.size()+";"+lsColDbTypes+"] should have the same size");
 		}
 		
+		changeTypes4AsBlobCols(lsColNames, lsColTypes);
+		changeTypes4AsBlobCols(finalColNames, finalColTypes);
+
 		//dumpColType = true;
 		dumpIsNumeric = true;
+	}
 
-		/*for(int i=0;i<numCol;i++) {
-			lsColDbTypes.add(md.getColumnTypeName(i+1));
-		}*/
+	static void changeTypes4AsBlobCols(List<String> colNames, List<Class<?>> colTypes) {
+		for(int i=0;i<colNames.size();i++) {
+			if(colNames.get(i).endsWith(SUFFIX_ASBLOB)) {
+				colTypes.set(i, Blob.class);
+				log.info("col '"+colNames.get(i)+"' changed type to Blob");
+			}
+		}
 	}
 	
 	@Override
@@ -146,9 +157,9 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		if(dumpColElement) {
 			sb.append(nl()+"\t<colgroup>");
 			for(int i=0;i<finalColNames.size();i++) {
-				//if(finalColNames.contains(lsColNames.get(i))) {
-					sb.append(nl()+"\t\t<col colname=\""+finalColNames.get(i)+"\" type=\""+finalColTypes.get(i).getSimpleName()+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
-				//}
+				String colName = finalColNames.get(i);
+				String colType = finalColTypes.get(i).getSimpleName();
+				sb.append(nl()+"\t\t<col colname=\""+colName+"\" type=\""+colType+"\" dbtype=\""+lsColDbTypes.get(i)+"\"/>");
 			}
 			sb.append(nl()+"\t</colgroup>");
 		}
