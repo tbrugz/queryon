@@ -92,7 +92,7 @@ function createBlobLinks() {
 					else {
 						row.children[blobIndexes[ci]].innerHTML = "<a href=\""+urlPrepend +
 							(queryString?"&":"?") + qs +
-							"\" target=\"_blank\">"+currval+"</a>";
+							"\" target=\"_blank\" blobref=\"true\">"+currval+"</a>";
 					}
 					
 					}

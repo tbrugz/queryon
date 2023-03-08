@@ -485,6 +485,12 @@
 			//not an inner href, won't intercept
 			return;
 		}
+		const isblob = evt.target.getAttribute("blobref");
+		//console.log("isblob: ", isblob);
+		if(isblob) {
+			// is a blob, won't intercept
+			return;
+		}
 		const fullh = new URL(evt.target.href);
 		var obj = fullh.pathname.substring(fullh.pathname.indexOf("/q/")+3);
 		//console.log("innerHrefInterceptor: fullh.pathname=", fullh.pathname, "obj=", obj); //, "typeof fullh=", typeof fullh);
@@ -502,7 +508,7 @@
 		}
 		//console.log("innerHrefInterceptor: evt=", evt, "href=", href, "fullh=", fullh, "obj=", obj, "search=", fullh.search);
 		//console.log("innerHrefInterceptor: href=", href, "obj=", obj, "relname=", relname);
-		if(!checkIfRelationExsts(relname)) {
+		if(!checkIfRelationExists(relname)) {
 			console.log("innerHrefInterceptor: relation", relname, "not found, won't intercept click event");
 			//showWarnMessages('messages', 'Query <code>'+relname+'</code> not found.'+
  			//	(authInfo.authenticated?'':' Maybe you should login') );

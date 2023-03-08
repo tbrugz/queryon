@@ -121,7 +121,7 @@ function updateSelectedQueryStateParameters() {
 	}
 }
 
-function checkIfRelationExsts(relname) {
+function checkIfRelationExists(relname) {
 	return relationsHash[relname]!=null;
 	/*
 	var select = document.getElementById('objects');
