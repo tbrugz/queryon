@@ -98,7 +98,7 @@ public class ODataWebTest {
 		HttpResponse response1 = httpclient.execute(httpGet);
 		String content = getContent(response1);
 		if(response1.getStatusLine().getStatusCode()>=400) {
-			//System.out.println("content:: "+content);
+			//System.out.println("getContentFromUrl/err [status="+response1.getStatusLine().getStatusCode()+"]: content:: "+content);
 			throw new RuntimeException(response1.getStatusLine().getStatusCode()+": "+content);
 		}
 		return content;

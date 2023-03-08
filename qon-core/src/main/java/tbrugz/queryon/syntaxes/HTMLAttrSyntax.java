@@ -137,7 +137,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		for(int i=0;i<colNames.size();i++) {
 			if(colNames.get(i).endsWith(SUFFIX_ASBLOB)) {
 				colTypes.set(i, Blob.class);
-				log.info("col '"+colNames.get(i)+"' changed type to Blob");
+				//log.info("col '"+colNames.get(i)+"' changed type to Blob");
 			}
 		}
 	}

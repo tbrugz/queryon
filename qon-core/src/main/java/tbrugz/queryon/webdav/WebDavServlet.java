@@ -701,6 +701,11 @@ public class WebDavServlet extends BaseApiServlet {
 		return ResponseSpec.MIME_TYPE_TEXT_PLAIN;
 	}
 
+	@Override
+	public boolean discoveryModeRootRedirect(HttpServletRequest req, HttpServletResponse resp) {
+		return false;
+	}
+
 	/*
 	void propFindShowRequest(HttpServletRequest req) throws IOException {
 		String body = IOUtil.readFromReader(req.getReader()).trim();

@@ -229,6 +229,11 @@ public class ODataServlet extends BaseApiServlet {
 	}
 	
 	@Override
+	public boolean discoveryModeRootRedirect(HttpServletRequest req, HttpServletResponse resp) {
+		return false;
+	}
+
+	@Override
 	protected RequestSpec getRequestSpec(HttpServletRequest req) throws ServletException, IOException {
 		//return new ODataRequest(dsutils, req, prop, 0, ODataJsonSyntax.ODATA_ID, false, 0, "relation");
 		return new ODataRequest(req, prop);

@@ -977,16 +977,10 @@ public class QueryOn extends AbstractHttpServlet {
 					);
 			//log.info("object: ["+reqspec.object+"]");
 			if(discoveryMode && MiscUtils.isNullOrEmpty(reqspec.object)) {
-				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
-				resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-				String location = req.getRequestURI();
-				if(!location.endsWith("/")) {
-					location += "/";
+				boolean redirected = discoveryModeRootRedirect(req, resp);
+				if(redirected) {
+					return;
 				}
-				location += DBObjectType.ANY.toString().toLowerCase();
-				resp.setHeader(ResponseSpec.HEADER_LOCATION, location);
-				log.info("location: " + location);
-				return;
 			}
 			//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 			
@@ -999,6 +993,7 @@ public class QueryOn extends AbstractHttpServlet {
 			//XXX should status object names have special syntax? like meta:table, meta:fk
 			
 			boolean isStatusObject = isStatusObject(reqspec.object);
+			boolean isPrivilegedAction = false;
 			//DBObjectType statusType = null;
 			if(isStatusObject) {
 				//if(statusType!=null && Arrays.asList(STATUS_OBJECTS).contains(statusType)) { //test if STATUS_OBJECTS contains statusType ?
@@ -1014,6 +1009,7 @@ public class QueryOn extends AbstractHttpServlet {
 					//otype = (reqspec.getParams().size()>0) ? String.valueOf(reqspec.getParams().get(0)) : atype.name();
 					otype = atype.objectType();
 					dbobj = null;
+					isPrivilegedAction = true;
 				}
 				else {
 					if(model==null) {
@@ -1051,8 +1047,10 @@ public class QueryOn extends AbstractHttpServlet {
 			else {
 				permitted = isPermitted(currentUser, otype, atype, reqspec.object);
 				if(discoveryMode) {
-					List<String> allowedMethods = getAllowedMethods(currentUser, otype, reqspec.object);
-					resp.addHeader(ResponseSpec.HEADER_ALLOW, Utils.join(allowedMethods, ", "));
+					if(! isPrivilegedAction) {
+						List<String> allowedMethods = getAllowedMethods(currentUser, otype, reqspec.object);
+						resp.addHeader(ResponseSpec.HEADER_ALLOW, Utils.join(allowedMethods, ", "));
+					}
 				}
 				if(!permitted) {
 					if( (atype==ActionType.UPDATE || atype == ActionType.INSERT) && validateUpdateColumnPermissions) {
@@ -1228,7 +1226,20 @@ public class QueryOn extends AbstractHttpServlet {
 			throw new ServletException(e);
 		}
 	}
-	
+
+	public boolean discoveryModeRootRedirect(HttpServletRequest req, HttpServletResponse resp) {
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
+		resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+		String location = req.getRequestURI();
+		if(!location.endsWith("/")) {
+			location += "/";
+		}
+		location += DBObjectType.ANY.toString().toLowerCase();
+		resp.setHeader(ResponseSpec.HEADER_LOCATION, location);
+		log.info("location: " + location);
+		return true;
+	}
+
 	ActionType getPrivilegedAction(String object, String httpMethod) {
 		for(ActionType at: ActionType.values()) {
 			if(at.slug().equals(object)) {
@@ -1319,7 +1330,17 @@ public class QueryOn extends AbstractHttpServlet {
 
 	List<String> getAllowedMethods(Subject currentUser, String otype, String object) {
 		List<String> ret = new ArrayList<>();
-		DBObjectType dbObjectType = DBObjectType.valueOf(otype);
+
+		DBObjectType dbObjectType = null;
+		
+		try {
+			dbObjectType = DBObjectType.valueOf(otype);
+		}
+		catch(IllegalArgumentException e) {
+			log.warn("getAllowedMethods: otype '"+otype+"' not enum of DBObjectType");
+			return ret;
+		}
+
 		if(dbObjectType.isRelationType()) {
 			if( isPermitted(currentUser, otype, ActionType.SELECT, object) ) {
 				ret.add("GET");
