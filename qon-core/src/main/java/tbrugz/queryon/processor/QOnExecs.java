@@ -53,7 +53,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 	
 	//static final String SUFFIX_TABLE = ".table";
 	static final String SUFFIX_EXECS_NAMES = ".names";
-	static final String SUFFIX_KEEP_NOT_FOUND = ".keep-not-found";
+	static final String SUFFIX_KEEP_INVALID = ".keep-invalid";
 
 	static final String PIPE_SPLIT = "\\|";
 	
@@ -63,7 +63,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 
 	public static final String ATTR_EXECS_WARNINGS_PREFIX = "qon-execs-warnings";
 
-	boolean keepExecutablesNotFound = false;
+	boolean keepInvalidExecutables = true;
 	
 	Writer writer;
 
@@ -91,7 +91,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
-		keepExecutablesNotFound = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_KEEP_NOT_FOUND, keepExecutablesNotFound);
+		keepInvalidExecutables = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_KEEP_INVALID, keepInvalidExecutables);
 	}
 
 	int readFromDatabase(ServletContext context) throws SQLException {
@@ -194,13 +194,15 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 							body);
 				}
 				else {
-					if(keepExecutablesNotFound) {
+					String message = "executable '"+execFullName+"' not found";
+					String logMessageXtra = "";
+					if(keepInvalidExecutables) {
 						count += addExecutable(schema, name, remarks, rolesFilter, exec_type,
 								packageName, parameterCount, parameterNames, parameterTypes, parameterInouts,
 								body, false);
+						logMessageXtra = " (was kept in model)";
 					}
-					String message = "executable '"+execFullName+"' not found";
-					log.warn(message);
+					log.warn(message + logMessageXtra);
 					putWarning(context, model.getModelId(), schema, execName, message);
 					//XXX: throw SQLException?
 				}
