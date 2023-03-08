@@ -57,6 +57,10 @@ _Example using demo-minimal_
 
 `docker run -it --rm -v $HOME/.queryon/:/data/ -e QON_JDBC_URL="jdbc:h2:/data/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" -e QON_JDBC_USER=admin -e QON_JDBC_PASSWORD= -p 8080:8080 qon-demo-springboot`
 
+_You man set system properties using the **JAVA_TOOL_OPTIONS** env_
+
+`docker run -it --rm -e JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom -e QON_JDBC_URL="jdbc:h2:/data/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" -p 8080:8080 qon-demo-springboot`
+
 
 * tagging & publishing:
 

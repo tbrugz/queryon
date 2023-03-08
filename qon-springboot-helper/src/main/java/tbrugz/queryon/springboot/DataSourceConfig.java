@@ -51,6 +51,7 @@ public class DataSourceConfig {
 				resource.setType(DataSource.class.getName());
 				//resource.setProperty("factory", "org.apache.tomcat.jdbc.pool.DataSourceFactory");
 				resource.setProperty("factory", "com.zaxxer.hikari.HikariJNDIFactory");
+				//resource.setProperty("jmxEnabled", "false");
 				
 				//setPropIfNotEmpty(resource, "url", env.getProperty(prefix+"url"));
 				// Hiraki uses 'jdbcUrl'...

@@ -1,7 +1,12 @@
 micronaut:
   application:
     name: qon-demo-micronaut
+  #router:
+  #  static-resources:
+  #    *:
+  #      enabled: true
 #netty:
 #  default:
 #    allocator:
 #      max-order: 3
+#micronaut.router.static-resources.*.enabled
