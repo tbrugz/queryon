@@ -32,6 +32,12 @@ function append2url(url, append) {
 	}
 }
 
+function getLocationHash() {
+	var hash = window.location.hash;
+	//return hash;
+	return hash.replaceAll("%7C", "|");
+}
+
 function getScalarArrayFromValue(value) {
 	if(typeof value === "string") {
 		if(value.substring(0,1)=="[") { value = value.substring(1); }

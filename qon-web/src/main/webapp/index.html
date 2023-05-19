@@ -170,7 +170,7 @@
 		if(rel) {
 			location.href = location.pathname + location.search
 				+ (location.search?"&":"?") + "s=" + (rel.schemaName || "")
-				+ location.hash;
+				+ getLocationHash();
 		}
 		else {
 			//console.log("no object selected");
@@ -183,7 +183,7 @@
 		const newparams = removeParameter('s', location.search);
 		location.href = location.pathname
 			+ (newparams?"?"+newparams:"")
-			+ location.hash;
+			+ getLocationHash();
 	}
 	
 	function testForAuthRequired() {
@@ -1417,7 +1417,7 @@
 	}
 	
 	function makeDrillHash(dimVals) {
-		var hash = window.location.hash;
+		var hash = getLocationHash();
 		var bigparts = hash.split("|");
 		var params = bigparts[1].split("&");
 		var dimKeys = Object.keys(dimVals);

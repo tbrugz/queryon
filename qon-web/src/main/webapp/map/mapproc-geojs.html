@@ -770,7 +770,7 @@ function updateFragment() { // updateState() ?
 }
 
 function onLoadUpdateUiComponents() {
-	var hash = window.location.hash;
+	var hash = getLocationHash();
 	if(hash.length<2) { return }
 	var idx = hash.indexOf('?');
 	if(idx<0) { idx = hash.lenght; }

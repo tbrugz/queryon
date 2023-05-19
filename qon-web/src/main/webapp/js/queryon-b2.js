@@ -70,7 +70,7 @@ function onParameterChange(pname) {
 }
 
 function updateSelectedQueryStateParameters() {
-	var hash = window.location.hash;
+	var hash = getLocationHash();
 	if(hash.indexOf('#')==0) {
 		hash = hash.substring(1);
 		var bigParts = hash.split('|');
