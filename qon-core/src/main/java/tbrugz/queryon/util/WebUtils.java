@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 
 public class WebUtils {
 
@@ -84,7 +85,14 @@ public class WebUtils {
 				Integer line = getLine(e.getCause());
 				//log.info("lineOfInitialSql=="+lineOfInitialSql+" / line=="+line);
 				if(line!=null) {
-					resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_LINE, String.valueOf(line));
+					int warningLine = (line - lineOfInitialSql + 1);
+					DBMSFeatures feat = (DBMSFeatures) req.getAttribute(RequestSpec.ATTR_DBMS_FESTURES);
+					//log.info("lineOfInitialSql=="+lineOfInitialSql+" / line=="+line+" / warning-line=="+warningLine+" / feat=="+feat);
+					if(feat!=null && feat.sqlStatementsAreTrimmed()) {
+						//log.info(">> sqlStatementsAreTrimmed!");
+						resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_ISTRIMMED, "true");
+					}
+					resp.addHeader(ResponseSpec.HEADER_WARNING_SQL_LINE, String.valueOf(warningLine));
 				}
 			}
 		}

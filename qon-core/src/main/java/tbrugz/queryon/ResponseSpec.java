@@ -28,6 +28,7 @@ public class ResponseSpec {
 	public static final String HEADER_WARNING_UNKNOWN_COLUMN = "X-Warning-UnknownColumn";
 	public static final String HEADER_WARNING_SQL_POSITION = "X-Warning-SQL-Position";
 	public static final String HEADER_WARNING_SQL_LINE = "X-Warning-SQL-Line";
+	public static final String HEADER_WARNING_SQL_ISTRIMMED = "X-Warning-SQL-IsTrimmed";
 	
 	public static final String HEADER_RELATION_UK_VALUES = "X-Relation-UK-Values";
 	public static final String HEADER_RELATION_UK = "X-Relation-UK";

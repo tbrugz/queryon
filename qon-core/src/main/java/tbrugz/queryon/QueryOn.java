@@ -12,6 +12,7 @@ import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -940,6 +941,12 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 	}
 	
+	protected void setFeatures(HttpServletRequest req, DatabaseMetaData dbmd) {
+		DBMSResources res = DBMSResources.instance();
+		DBMSFeatures feat = res.getSpecificFeatures(dbmd);
+		req.setAttribute(RequestSpec.ATTR_DBMS_FESTURES, feat);
+	}
+
 	protected void handleException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e) throws IOException {
 		if(!resp.isCommitted()) {
 			WebUtils.writeException(req, resp, e, debugMode);
@@ -1077,6 +1084,7 @@ public class QueryOn extends AbstractHttpServlet {
 			case SELECT_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
+					setFeatures(req, conn.getMetaData());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
 						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
@@ -1101,6 +1109,7 @@ public class QueryOn extends AbstractHttpServlet {
 			case VALIDATE_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
+					setFeatures(req, conn.getMetaData());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					boolean asQuery = RequestSpec.getBoolValue(req.getParameter(PARAM_ASQUERY));
 					doValidate(relation, reqspec, currentUser, asQuery, conn, resp);
@@ -1118,6 +1127,7 @@ public class QueryOn extends AbstractHttpServlet {
 			case EXPLAIN_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
+					setFeatures(req, conn.getMetaData());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					DBObjectUtils.updateQueryParameters(relation, conn);
 					doExplain(relation, reqspec, currentUser, conn, resp);
@@ -1135,6 +1145,7 @@ public class QueryOn extends AbstractHttpServlet {
 			case SQL_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
+					setFeatures(req, conn.getMetaData());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);

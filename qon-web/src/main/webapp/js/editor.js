@@ -1,6 +1,8 @@
 
 function checkForSqlWarnings(request, editor) {
 	var range = null;
+	var isTrimmed = (request.getResponseHeader('X-Warning-SQL-IsTrimmed') != null);
+	//console.log("isTrimmed = ", isTrimmed);
 	var position = parseInt(request.getResponseHeader('X-Warning-SQL-Position'));
 	if(position) {
 		//console.log("checkForPosition:: position = ", position);
@@ -19,11 +21,15 @@ function checkForSqlWarnings(request, editor) {
 			//console.log("isTextSelected:: checkForPosition line = ", line, "; diff = ", diff);
 			line += diff;
 		}
+		if(isTrimmed) {
+			var prep = getPrecedingWhitespaces(editor);
+			line += prep.split("\n").length-1;
+		}
 		range = getRangeFromLine(editor, line);
 	}
 	
 	if(range) {
-		console.log("checkForPosition range = ", range);
+		//console.log("checkForPosition range = ", range);
 		editor.warningMarker = editor.session.addMarker(range, "editor-warning", "line");
 	}
 }
@@ -35,8 +41,8 @@ function getRangeFromPosition(editor, position) {
 	var Range = ace.require('ace/range').Range;
 
 	var sqlString = editor.getValue();
-	
-	var partz = sqlString.split("\n")
+	var partz = sqlString.split("\n");
+
 	var newpos = 0;
 	var row=0, startColumn=0, endColumn=0;
 	for(var i=0;i<partz.length;i++) {
@@ -50,7 +56,7 @@ function getRangeFromPosition(editor, position) {
 			break;
 		} 
 	}
-	console.log("getRangeFromPosition: row", row, "startColumn", startColumn, "endColumn", endColumn, "position", position);
+	//console.log("getRangeFromPosition: row", row, "startColumn", startColumn, "endColumn", endColumn, "position", position);
 	return new Range(row, startColumn, row, endColumn);
 }
 
@@ -61,8 +67,8 @@ function getRangeFromLine(editor, line) {
 	var sqlString = editor.getValue();
 	var partz = sqlString.split("\n")
 	
-	console.log("getRangeFromLine: partz=", partz);
-	console.log("getRangeFromLine: line", line, "partz[line].length", partz[line].length);
+	//console.log("getRangeFromLine: partz=", partz);
+	//console.log("getRangeFromLine: line", line, "partz[line].length", partz[line].length);
 	return new Range(line, 0, line, partz[line].length);
 }
 
@@ -76,6 +82,12 @@ function getEditorText(editor) {
 	var sqlString = editor.getSelectedText();
 	if(!sqlString) { sqlString = editor.getValue(); }
 	return sqlString;
+}
+
+function getPrecedingWhitespaces(editor) {
+	var sqlString = getEditorText(editor);
+	var index = /[^\s]/i.exec(sqlString).index;
+	return sqlString.substring(0, index);
 }
 
 function isTextSelected(editor) {
