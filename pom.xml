@@ -661,12 +661,28 @@
       <id>sonatype-snapshots</id>
       <name>Sonatype Snapshots</name>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
     <!--
     <repository>
-      <id>github</id>
-      <name>GitHub Packages</name>
+      <id>github-tbrugz-sqldump</id>
+      <name>GitHub: tbrugz/sqldump</name>
+      <url>https://maven.pkg.github.com/tbrugz/sqldump</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+    -->
+    <!--
+    <repository>
+      <id>github-tbrugz-queryon</id>
+      <name>GitHub: tbrugz/queryon</name>
       <url>https://maven.pkg.github.com/tbrugz/queryon</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
     -->
     <!--<repository>
