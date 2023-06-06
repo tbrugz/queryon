@@ -20,6 +20,7 @@ import tbrugz.queryon.diff.DiffUtilQon;
 import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
+import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
@@ -103,12 +104,12 @@ public class QOnManage {
 			while(it.hasNext()) {
 				TableDiff td = it.next();
 				if(td.getChangeType().equals(ChangeType.REMARKS)) {
-					log.debug("will not generate diff for "+td);
+					log.debug("will not generate REMARKS diff for "+td);
 					it.remove();
 					removed++;
 				}
 				if(td.getChangeType().equals(ChangeType.DROP)) {
-					log.debug("will not generate diff for "+td);
+					log.debug("will not generate DROP diff for "+td);
 					it.remove();
 					removed++;
 				}
@@ -119,10 +120,28 @@ public class QOnManage {
 			while(it.hasNext()) {
 				ColumnDiff cd = it.next();
 				if(cd.getChangeType().equals(ChangeType.REMARKS)) {
+					log.debug("will not generate REMARKS diff for "+cd);
 					it.remove();
 					removed++;
 				}
 				if(cd.getChangeType().equals(ChangeType.DROP)) {
+					log.debug("will not generate DROP diff for "+cd);
+					it.remove();
+					removed++;
+				}
+			}
+		}
+		{
+			Iterator<DBIdentifiableDiff> it = diff.getDbIdDiffs().iterator();
+			while(it.hasNext()) {
+				DBIdentifiableDiff id = it.next();
+				if(id.getChangeType().equals(ChangeType.REMARKS)) {
+					log.debug("will not generate REMARKS diff for "+id);
+					it.remove();
+					removed++;
+				}
+				if(id.getChangeType().equals(ChangeType.DROP)) {
+					log.debug("will not generate DROP diff for "+id);
 					it.remove();
 					removed++;
 				}
