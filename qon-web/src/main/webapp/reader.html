@@ -17,7 +17,7 @@ window.onhashchange = updatePageContent;
 	
 function updatePageContent() {
 	//var url = 'doc/queries.md';
-	var url = getLocationHash();
+	var url = window.location.hash;
 	if(!url) {
 		console.warn("window.location.hash should have content...");
 		return;
