@@ -29,7 +29,7 @@
     <micronaut.runtime>netty</micronaut.runtime>
     <exec.mainClass>tbrugz.queryon.micronautdemo.Application</exec.mainClass>
 
-    <jetty.version>9.4.48.v20220622</jetty.version>
+    <jetty.version>9.4.51.v20230217</jetty.version>
 
     <maven-enforcer-plugin.requireJavaVersion>11</maven-enforcer-plugin.requireJavaVersion>
     <maven-enforcer-plugin.requireMavenVersion>3.3.9</maven-enforcer-plugin.requireMavenVersion>
