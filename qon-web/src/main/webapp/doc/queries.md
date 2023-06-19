@@ -29,8 +29,8 @@ Parameters will be created by the order they are defined in the query.
 Example: In the query `select * from person where age > ? and name like ?` the age should be informed
 as the first parameter and the name pattern as the second parameter. 
 
-You may also define named parameters by using the `:<parameter-name>` syntax. <!--This is similar to the `named-parameters=<param1-name>` query construct...--> Using both positional and named parameters in the same
-query is not allowed.
+You may also define named parameters by using the `:<parameter-name>` syntax. <!--This is similar to the `named-parameters=<param1-name>` query construct...-->
+Using both positional and named parameters in the same query is not allowed.
 
 
 Special columns
@@ -69,6 +69,18 @@ Special query constructs inside SQL comments (`/* ... */`)
   request - may be overriden by the `limit` parameter
 * `limit-max=<numeric>` - limits the number of rows that may be returned by the query in a single request
 * `named-parameters=<param1-name>[,<param2-name>[,...]]` - request parameter names to be binded into the query
+
+
+Special constructs
+----------------
+
+Constructs that will be replaced by API features/parameters. When they are not defined in a query,
+*QueryOn* will create an encapsulating query to enable the features.
+
+* `$filter_clause` - where the filters will be injected. See (in API docs): `feq:`, `fne:`, `fin:`...
+* `$order_clause` - where the order will be applied. See API `order` parameter.
+* `$projection_clause` - where the columns/fields will be selected/projected. See API `fields` parameter.
+* `$where_clause` - Similar to `$filter_clause`, but assumes `WHERE` is not present in the query.
 
 
 Query commands
