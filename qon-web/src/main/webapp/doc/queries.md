@@ -29,7 +29,7 @@ Parameters will be created by the order they are defined in the query.
 Example: In the query `select * from person where age > ? and name like ?` the age should be informed
 as the first parameter and the name pattern as the second parameter. 
 
-You may also define named parameters by using the `:<parameter-name>` syntax. <!--This is similar to the `named-parameters=<param1-name>` query construct...-->
+You may also define named parameters by using the `:<parameter-name>` syntax (this is similar to the `named-parameters=<param1-name>` query construct - see below).
 Using both positional and named parameters in the same query is not allowed.
 
 
@@ -86,7 +86,7 @@ Constructs that will be replaced by API features/parameters. When they are not d
 Query commands
 ----------------
 
-May only be used inside query editor, not on saved queries. Does not bind parameters. Can't be validated.
+May only be used inside query editor, not on saved queries. Does not bind parameters, and parameters are case-sensitive. Can't be validated.
 See [DatabaseMetaData's javadoc](http://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html).
 
 * `$columns [ [[<schema pattern>.]<table>][.<column>] ]`
