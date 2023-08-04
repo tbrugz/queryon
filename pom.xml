@@ -45,7 +45,7 @@
 
     <servlet-api.version>3.1.0</servlet-api.version>
 
-    <shiro.version>1.11.0</shiro.version>
+    <shiro.version>1.12.0</shiro.version>
     <shiro.web.version>${shiro.version}</shiro.web.version>
     <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.7.36</slf4j.version>
@@ -63,6 +63,7 @@
     <quarkus.version>2.16.3.Final</quarkus.version>
 
     <cxf.version>3.5.5</cxf.version>
+    <poi-ooxml.version>3.14</poi-ooxml.version>
 
     <jetty.version>9.4.51.v20230217</jetty.version> <!-- jetty 10+ requires JVM 11+ -->
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->

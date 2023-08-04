@@ -84,6 +84,7 @@
 			<version>${shiro.web.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -96,7 +97,13 @@
 			<version>${diffutils.version}</version>
 		</dependency>
 		<!-- /considering... -->
-		
+
+		<!-- syntaxes dependencies -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi-ooxml.version}</version>
+		</dependency>
 		<!-- <dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
