@@ -277,13 +277,14 @@ public class RequestSpec {
 		boolean convertLatin1ToUtf8 = false;
 		if(utf8!=null) {
 			if(utf8.equals(WebUtils.UTF8_CHECK)) {
+				//req.setCharacterEncoding("UTF-8");
 				log.debug("[ok] utf8: "+utf8);
 			}
 			else {
 				// assume url encoding as latin1 (iso-8859-1)
-				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] [expected="+WebUtils.UTF8_CHECK+"] - will 'convertLatin1ToUtf8'");
+				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] (expected=["+MiscUtils.toIntArrayAsString(WebUtils.UTF8_CHECK)+"]) - will 'convertLatin1ToUtf8'");
 				convertLatin1ToUtf8 = true;
-				//req.setCharacterEncoding("xxx");
+				//req.setCharacterEncoding("ISO-8859-1");
 				// 226 156 147 ? http://www.utf8-chartable.de/unicode-utf8-table.pl?start=9984&number=128&names=-&utf8=dec
 				// https://stackoverflow.com/questions/10517268/how-to-pass-unicode-characters-as-jsp-servlet-request-getparameter
 				// https://stackoverflow.com/questions/27338154/why-do-some-websites-have-utf8-in-their-title

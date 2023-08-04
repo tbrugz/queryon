@@ -138,6 +138,7 @@
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
 			sql: sqlString,
+			utf8: "✓",
 		};
 		if(getModelId()) {
 			reqData.model = getModelId();
@@ -145,7 +146,7 @@
 		
 		var params = document.querySelectorAll('.parameter');
 		//var paramsStr = '';
-		console.log("params:", params);
+		//console.log("params:", params);
 		
 		for (var i = 0; i < params.length; ++i) {
 			var item = params[i];
@@ -455,6 +456,7 @@
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
 			sql: sqlString,
+			utf8: "✓",
 		};
 		
 		var params = document.querySelectorAll('.parameter');

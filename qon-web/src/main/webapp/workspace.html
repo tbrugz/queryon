@@ -205,6 +205,7 @@ function doRequest(url, btnId, download, callback) {
 	reqData.schema = ""; //"workspace-schema";
 	reqData.name = "workspace"; //"workspace-name";
 	reqData.lostrategy = "RESULTSET_CONTROL";
+	reqData.utf8 = "✓";
 	
 	if(modelId) {
 		//console.log("modelId", modelId);
@@ -218,7 +219,7 @@ function doRequest(url, btnId, download, callback) {
 	
 	var params = document.querySelectorAll('.parameter');
 	//var paramsStr = '';
-	console.log("modelId:", modelId, "params:", params);
+	//console.log("modelId:", modelId, "params:", params);
 	
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
@@ -288,7 +289,7 @@ function doRequest(url, btnId, download, callback) {
 		}
 	}
 	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");	
-	//request.overrideMimeType('text/html; charset=UTF-8');
+	request.overrideMimeType('text/html; charset=UTF-8');
 	request.send(obj2encodedUrl(reqData));
 	btnActionStart(btnId);
 }

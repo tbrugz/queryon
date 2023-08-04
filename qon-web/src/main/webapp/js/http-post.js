@@ -54,6 +54,7 @@ function saveBlob(content, fileName, contentType) {
 function doHttpRequest(url, params, callbackOk, callbackError) {
 	var request = new XMLHttpRequest();
 	request.open("POST", url, true);
+	//request.overrideMimeType('text/xml; charset=UTF-8');
 	request.onload = function(oEvent) {
 		if (request.status >= 200 && request.status < 300) {
 			//var updateCount = request.getResponseHeader("X-UpdateCount");

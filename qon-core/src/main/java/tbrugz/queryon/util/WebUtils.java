@@ -119,7 +119,7 @@ public class WebUtils {
 				// assume url encoding as latin1 (iso-8859-1)
 				// https://stackoverflow.com/questions/10517268/how-to-pass-unicode-characters-as-jsp-servlet-request-getparameter
 				// req.setCharacterEncoding("xxx"); //??
-				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] [expected="+UTF8_CHECK+"]");
+				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] (expected=["+MiscUtils.toIntArrayAsString(UTF8_CHECK)+"])");
 				// 226 156 147 ? http://www.utf8-chartable.de/unicode-utf8-table.pl?start=9984&number=128&names=-&utf8=dec
 				return true;
 			}
