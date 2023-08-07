@@ -63,6 +63,9 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -825,6 +828,37 @@ public class WinstoneAndH2HttpRequestTest {
 		baseReturnCountTest("/EMP.xml?fnin:SALARY=1200&fnin:SALARY=1000", 2);
 	}
 	
+	@Test
+	public void testGetXlsEmp() throws IOException, SAXException {
+		HttpResponse resp = getHttpResponse("/EMP.xls");
+		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
+		
+		HttpEntity entity1 = resp.getEntity();
+		InputStream instream = entity1.getContent();
+
+		Workbook wb = WorkbookFactory.create(instream);
+		Sheet sheet = wb.getSheetAt(0);
+		int lastRow = sheet.getLastRowNum();
+		//System.out.println(">> lastRow: "+lastRow);
+		Assert.assertEquals(5, lastRow);
+	}
+
+	@Test
+	public void testQueryAnyXls() throws IOException, SAXException {
+		String sql = "select * from emp";
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		HttpResponse resp = httpPostContentGetResponse("/QueryAny.xls?name=test&sql="+sqlpar, "");
+		
+		HttpEntity entity1 = resp.getEntity();
+		InputStream instream = entity1.getContent();
+
+		Workbook wb = WorkbookFactory.create(instream);
+		Sheet sheet = wb.getSheetAt(0);
+		int lastRow = sheet.getLastRowNum();
+		//System.out.println(">> lastRow: "+lastRow);
+		Assert.assertEquals(5, lastRow);
+	}
+
 	//----- limit-related tests
 
 	String getSql30rows() throws UnsupportedEncodingException {
@@ -2372,6 +2406,7 @@ public class WinstoneAndH2HttpRequestTest {
 				content);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Object getFieldFromNamedObject(List<Object> data, String objName, String objField) {
 		for(int i=0;i<data.size();i++) {
 			Map<String, Object> rel = (Map<String, Object>) data.get(i);
