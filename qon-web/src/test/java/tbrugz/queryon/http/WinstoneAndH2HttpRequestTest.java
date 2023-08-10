@@ -728,6 +728,12 @@ public class WinstoneAndH2HttpRequestTest {
 		return ret;
 	}
 
+	static HttpResponse httpPostContentGetResponse(String url) throws IllegalStateException, IOException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpPost http = new HttpPost(baseUrl+url);
+		return httpclient.execute(http);
+	}
+
 	static HttpResponse httpPostContentGetResponse(String url, String content) throws IllegalStateException, IOException {
 		CloseableHttpClient httpclient = getHttpClient();
 		HttpPost http = new HttpPost(baseUrl+url);
@@ -847,7 +853,32 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testQueryAnyXls() throws IOException, SAXException {
 		String sql = "select * from emp";
 		String sqlpar = URLEncoder.encode(sql, utf8);
-		HttpResponse resp = httpPostContentGetResponse("/QueryAny.xls?name=test&sql="+sqlpar, "");
+		HttpResponse resp = httpPostContentGetResponse("/QueryAny.xls?name=test&sql="+sqlpar);
+		
+		HttpEntity entity1 = resp.getEntity();
+		InputStream instream = entity1.getContent();
+
+		Workbook wb = WorkbookFactory.create(instream);
+		Sheet sheet = wb.getSheetAt(0);
+		int lastRow = sheet.getLastRowNum();
+		//System.out.println(">> lastRow: "+lastRow);
+		Assert.assertEquals(5, lastRow);
+	}
+
+	@Test
+	public void testQueryAnyXlsPostBody() throws IOException, SAXException {
+		String sql = "select * from emp";
+		
+		final List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("name", "test"));
+		params.add(new BasicNameValuePair("sql", sql));
+
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpPost http = new HttpPost(baseUrl+"/QueryAny.xls");
+		http.setEntity(new UrlEncodedFormEntity(params));
+		HttpResponse resp = httpclient.execute(http);
+
+		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
 		
 		HttpEntity entity1 = resp.getEntity();
 		InputStream instream = entity1.getContent();
@@ -2126,7 +2157,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testInsertWithAutoIncrement() throws IOException, ParserConfigurationException, SAXException {
-		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task&v:DESCRIPTION=some+description", "");
+		HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task&v:DESCRIPTION=some+description");
 		Assert.assertEquals(201, response.getStatusLine().getStatusCode());
 		Header[] headers = response.getHeaders(ResponseSpec.HEADER_RELATION_UK_VALUES);
 		Assert.assertEquals(1, headers.length);
@@ -2200,12 +2231,12 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testInsertTaskWithSqlFilter() throws IOException, ParserConfigurationException, SAXException {
 		{
-			HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task&v:DESCRIPTION=some+description", "");
+			HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=3rd+Task&v:DESCRIPTION=some+description");
 			Assert.assertEquals(201, response.getStatusLine().getStatusCode());
 		}
 		{
 			// return error, since task should not be visible
-			HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=4th+Task", "");
+			HttpResponse response = httpPostContentGetResponse("/TASK?v:SUBJECT=4th+Task");
 			Assert.assertEquals(400, response.getStatusLine().getStatusCode());
 		}
 	}
@@ -2261,7 +2292,7 @@ public class WinstoneAndH2HttpRequestTest {
 
 	@Test
 	public void testExecuteScript() throws IOException, ParserConfigurationException, SAXException {
-		HttpResponse response = httpPostContentGetResponse("/INSERT_TASK?p1=2nd+Task&p2=some+description", "");
+		HttpResponse response = httpPostContentGetResponse("/INSERT_TASK?p1=2nd+Task&p2=some+description");
 		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 		
 		/*
@@ -2298,7 +2329,7 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "select id, name from emp where id in (:id, :id2)";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		
-		HttpResponse response = httpPostContentGetResponse("/ValidateAny.xml?name=test&sql="+sqlpar, "");
+		HttpResponse response = httpPostContentGetResponse("/ValidateAny.xml?name=test&sql="+sqlpar);
 		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 
 		Header headParamCount = response.getFirstHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT);
