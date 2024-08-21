@@ -347,24 +347,36 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 				}
 				else {
 				
-				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, nullValueStr, doEscape(i));
-				Map<String,String> attrs = attrsVals.get(colName);
+				boolean isDimOnCol = i<getOnRowsColCount();
 				String attrsStr = "";
-				if(attrs!=null) {
-					for(String key: attrs.keySet()) {
-						if(ATTRIBS.contains(key)) {
-							String attrVal = attrs.get(key);
-							if(attrVal!=null) {
-								attrsStr += " "+key+"=\""+attrVal+"\"";
+				String value = null;
+				if(!isDimOnCol) {
+					value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, nullValueStr, doEscape(i));
+					Map<String,String> attrs = attrsVals.get(colName);
+					if(attrs!=null) {
+						for(String key: attrs.keySet()) {
+							if(ATTRIBS.contains(key)) {
+								String attrVal = attrs.get(key);
+								if(attrVal!=null) {
+									attrsStr += " "+key+"=\""+attrVal+"\"";
+								}
 							}
+							value = decorateValue(attrs, key, String.valueOf(value));
 						}
-						value = decorateValue(attrs, key, String.valueOf(value));
+					}
+				}
+				else {
+					if(origVal==null) {
+						value = nullValueStr;
+					}
+					else {
+						value = DataDumpUtils.xmlEscapeText(String.valueOf(origVal));
 					}
 				}
 				sb.append( "<td"
 						+(origVal==null?" null=\"true\"":"")
 						+attrsStr
-						+(i<getOnRowsColCount()?" dimoncol=\"true\"":"")
+						+(isDimOnCol?" dimoncol=\"true\"":"")
 						//+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
 						+((dumpIsNumeric && DataDumpUtils.isNumericType(ctype))?" numeric=\"true\"":"")
 						+">"+ value +"</td>");
