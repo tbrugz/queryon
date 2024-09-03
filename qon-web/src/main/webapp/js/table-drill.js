@@ -12,6 +12,11 @@ function getNodeIndex(cell) {
 }
 
 function getColumnIndex(cell) {
+	if(cell.getAttribute("dimoncol") != null) {
+		//is dimoncol
+		return null;
+	}
+	
 	var idx = 0;
 	while(cell.previousElementSibling) {
 		cell = cell.previousElementSibling;
@@ -22,13 +27,18 @@ function getColumnIndex(cell) {
 		idx++;
 		//var colname = cell.parentNode.getAttribute("colname");
 	}
-	return idx; 
+	return idx;
 }
 
 function getRowIndex(cell) {
 	var idx = 0;
 	var nodeIdx = getNodeIndex(cell);
 	var row = cell.parentNode;
+	if(row.getAttribute("colname") != null || row.getAttribute("measuresrow") != null ||
+		(row.children[nodeIdx] && row.children[nodeIdx].tagName == 'TH') ) {
+		//is dimonrow
+		return null;
+	}
 	while(row.previousElementSibling) {
 		row = row.previousElementSibling;
 		if(row.getAttribute("colname") != null || row.getAttribute("measuresrow") != null ||
@@ -41,8 +51,88 @@ function getRowIndex(cell) {
 	return idx;
 }
 
+function getColumnCount(row) {
+	while(row.previousElementSibling) {
+		row = row.previousElementSibling;
+	}
+	var count =0;
+	for(var i=0;i<row.children.length;i++) {
+		var cell = row.children[i];
+		var width = cell.getAttribute("colspan");
+		if(! width) { width = 1; }
+		else { width = parseInt(width); }
+		count += width;
+	}
+	return count;
+}
+
+function getDimColumnIndex(cell) {
+	var idx = 0;
+	while(cell.previousElementSibling) {
+		var width = cell.getAttribute("colspan");
+		if(! width) { width = 1; }
+		else { width = parseInt(width); }
+		idx += width;
+		cell = cell.previousElementSibling;
+		//idx++;
+	}
+	return idx;
+}
+
+function getDimRowDimIndex(cell) {
+	var row = cell.parentNode;
+	var columnCount = getColumnCount(row); //row.children.length;
+	var initialRowCount = row.children.length;
+	var nodeIndex = getNodeIndex(cell);
+	return columnCount - initialRowCount + nodeIndex;
+}
+
+function getDimColDimIndex(cell) {
+	var row = cell.parentNode;
+	var count = 0;
+	while(row.previousElementSibling) {
+		var colname = row.getAttribute("colname");
+		if(colname) { count++; }
+		row = row.previousElementSibling;
+	}
+	return count;
+}
+
+function getDimRowIndex(cell) {
+	var idx = 0;
+	var row = cell.parentNode;
+	//var columnCount = getColumnCount(row); //row.children.length;
+	var initialRowCount = row.children.length;
+	var cellIdx = getNodeIndex(cell);
+	var count = 0;
+	while(row.previousElementSibling) {
+		//if(row.children.length == columnCount) {
+		var colIdx = cellIdx + (row.children.length - initialRowCount);// + (row.children.length - columnCount);
+		if(colIdx>=0) {
+			//if(colIdx<0) {colIdx = 0;}
+			//if(count == 0 && row.children.length == columnCount) { colIdx = cellIdx; }
+			var cellx = row.children[colIdx];
+			if(!cellx) {
+				console.log("getDimRowIndex: ERR colIdx=", colIdx, "initialRowCount=", initialRowCount, "cellIdx=", cellIdx, "row.children.length=", row.children.length);
+			}
+			//console.log("getDimRowIndex: colIdx=", colIdx, "initialRowCount=", initialRowCount, "cellIdx=", cellIdx, "row.children.length=", row.children.length, "text=", cellx.innerText);
+			if(!cellx.getAttribute("measure")) {
+				var height = cellx.getAttribute("rowspan");
+				if(! height || (count == 0)) { height = 1; }
+				else { height = parseInt(height); }
+				//console.log("getDimRowIndex: height=", height, "cellIdx=", cellIdx, "count=", count, "text=", cellx.innerText);
+				idx += height;
+			}
+		}
+		row = row.previousElementSibling;
+		count++;
+		//idx++;
+	}
+	return idx;
+}
+
 function getColDimValues(table, colN) {
-	var ret = {};
+	var ret = [];
 	for(var i=0;i<table.children.length;i++) {
 		var row = table.children[i];
 		if(row.getAttribute("colname")) {
@@ -56,9 +146,12 @@ function getColDimValues(table, colN) {
 				if(! width) { width = 1; }
 				else { width = parseInt(width); }
 				idx += width;
-				//console.log("idx", idx);
+				//console.log("idx=", idx, "width=", width, "cell=", cell);
 				if(colN <= idx) {
-					ret[dim] = cell.innerText;
+					//ret[dim] = cell.innerText;
+					const map = {};
+					map[dim] = cell.innerText;
+					ret.push(map);
 					break;
 				}
 			}
@@ -68,7 +161,7 @@ function getColDimValues(table, colN) {
 }
 
 function getRowDimValues(table, rowN) {
-	var ret = {};
+	var ret = [];
 	var keys = [];
 	var keysRowIndex = -1;
 	var keysValues = {};
@@ -146,7 +239,11 @@ function getRowDimValues(table, rowN) {
 	}
 	
 	for(var i=0;i<keys.length;i++) {
-		ret[keys[i]] = keysValues[keys[i]][rowN];
+		//ret[keys[i]] = keysValues[keys[i]][rowN];
+		const kk = keys[i];
+		const map = {};
+		map[kk] = keysValues[kk][rowN];
+		ret.push(map);
 	}
 	
 	//console.log("keys=", keys, "keysValues=", keysValues, "rowN=", rowN, "ret=", ret);
@@ -154,9 +251,41 @@ function getRowDimValues(table, rowN) {
 }
 
 function getTableDimValues(table, cell) {
-	var colDimVals = getColDimValues(table, getColumnIndex(cell));
-	var rowDimVals = getRowDimValues(table, getRowIndex(cell));
+	const colIndex = getColumnIndex(cell);
+	const rowIndex = getRowIndex(cell);
+	var colDimVals = colIndex!=null ? getColDimValues(table, colIndex) : [];
+	var rowDimVals = rowIndex!=null ? getRowDimValues(table, rowIndex) : [];
+	//console.log("... cOT getColDimValues0=", colDimVals);
+	//console.log("... cOT getRowDimValues0=", rowDimVals);
+
+	const rowDimIndex = getDimRowIndex(cell)-1;
+	const colDimIndex = getDimColumnIndex(cell)-1;
+	//console.log("... rowDimIndex=", rowDimIndex, "colDimIndex=", colDimIndex);
+	if(colIndex==null) {
+		rowDimVals = getRowDimValues(table, rowDimIndex);
+		var dimRowDimIndex = getDimRowDimIndex(cell);
+		//console.log("... >> rowDimIndex=", rowDimIndex, "getColumnIndex=", getColumnIndex(cell), "dimRowDimIndex=", dimRowDimIndex);
+		rowDimVals = rowDimVals.slice(0, dimRowDimIndex+1);
+	}
+	if(rowIndex==null) {
+		colDimVals = getColDimValues(table, colDimIndex-1);
+		var dimColDimIndex = getDimColDimIndex(cell);
+		//console.log("... >> colDimIndex=", colDimIndex, "dimColDimIndex=", dimColDimIndex);
+		colDimVals = colDimVals.slice(0, dimColDimIndex);
+	}
 	//console.log("... cOT getColDimValues=", colDimVals);
 	//console.log("... cOT getRowDimValues=", rowDimVals);
-	return Object.assign({}, colDimVals, rowDimVals);
+
+	//return Object.assign({}, colDimVals, rowDimVals);
+	var ret = {};
+	for(var i=0;i<colDimVals.length;i++) {
+		ret[Object.keys(colDimVals[i])[0]] = Object.values(colDimVals[i])[0];
+		//console.log("...C",i," -- ", Object.keys(colDimVals[i])[0], " -- ", Object.values(colDimVals[i])[0]);
+	}
+	for(var i=0;i<rowDimVals.length;i++) {
+		ret[Object.keys(rowDimVals[i])[0]] = Object.values(rowDimVals[i])[0];
+		//console.log("...R",i," -- ", Object.keys(rowDimVals[i])[0], " -- ", Object.values(rowDimVals[i])[0]);
+	}
+	//console.log("getTableDimValues: ret=", ret);
+	return ret;
 }
