@@ -21,6 +21,10 @@
 	margin: 2px;
 	margin-left: 4px;
 }
+#logoext {
+	font-family: monospace;
+	font-style: italic;
+}
 #queryResult {
 	font-family: monospace;
 }
@@ -69,6 +73,7 @@
 
 var responseType = "htmlx";
 var queryOnUrl = 'q';
+var runAction = "SqlAny";
 
 var editor = null;
 var pageAltered = false;
@@ -119,6 +124,15 @@ function onLoadAfter() {
 			byId('model').value = modelId;
 		}
 	}
+	if(!authInfo.isAdmin) {
+		runAction = "QueryAny";
+		byId('logoext').innerHTML = "[readonly]";
+	}
+	else {
+		runAction = "SqlAny";
+		byId('logoext').innerHTML = "";
+	}
+
 	refreshAuthInfo();
 }
 
@@ -182,12 +196,12 @@ function doExplain() {
 
 function doRun() {
 	var ext = byId('selFormat').value;
-	var url = queryOnUrl+"/SqlAny."+ext;
+	var url = queryOnUrl+"/"+runAction+"."+ext;
 	doRequest(url, 'btnRun', { format: ext });
 }
 
 function doDownload(ext) {
-	var url = queryOnUrl+"/SqlAny."+ext;
+	var url = queryOnUrl+"/"+runAction+"."+ext;
 	doRequest(url, 'btnDownload', { download: true });
 }
 
@@ -407,7 +421,7 @@ window.onresize = updateUI;
 
 <div id="controls">
 <nav class="container">
-	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Workspace</code></span>
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Workspace</code> <span id="logoext"></span></span>
 
 	<!-- <label style="display: none">
 		<select id="model" onchange="onModelChanged(true);"></select>

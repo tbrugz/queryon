@@ -82,7 +82,7 @@ function createMenuContent(addCloseBtn) {
 	var menu = document.createElement("div");
 	menu.classList.add("leftmenu");
 	var innerContent = '';
-	var isAdmin = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
+	//var isAdmin = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
 	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isDev != "undefined" && authInfo.isDev;
 	var hasLoginLink = document.getElementById('authaction') != null;
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
@@ -94,7 +94,8 @@ function createMenuContent(addCloseBtn) {
 		//XXXdone: index, d3chart: do not show login, logout
 		//XXX: graph: add login/out
 		//~XXX: all: do not show (linkable) self - current!
-		if( (!li.classList.contains("sqlany") || isAdmin)
+		if( true
+			//&& (!li.classList.contains("sqlany") || isAdmin)
 			&& (!li.classList.contains("dev") || isDeveloper)
 			&& (!li.classList.contains("auth") || !hasLoginLink)
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
