@@ -29,6 +29,13 @@
 	background-color: #bbb;
 	z-index: 10;
 }
+#queryResult pre {
+	background-color: #eee;
+	border: 1px solid #000;
+	margin: 5px;
+	padding: 3px;
+	display: inline-block;
+}
 .message {
 	white-space: pre;
 	min-height: 22px;
@@ -37,6 +44,11 @@
 #authinfo {
 	float: right;
 	margin-top: 4px;
+}
+#button-container select {
+	font-weight: bold;
+	margin: 3px 3px 3px 10px;
+	background-color: #eee;
 }
 .closebutton {
 	/*float: right;
@@ -146,7 +158,7 @@ function onTextFieldChange() {
 
 function doValidate() {
 	var url = queryOnUrl+"/ValidateAny";
-	doRequest(url, 'btnValidate', false, doValidateCallback);
+	doRequest(url, 'btnValidate', {}, doValidateCallback);
 }
 
 function doValidateCallback(request) {
@@ -169,19 +181,20 @@ function doExplain() {
 }
 
 function doRun() {
-	var url = queryOnUrl+"/SqlAny."+responseType;
-	doRequest(url, 'btnRun');
+	var ext = byId('selFormat').value;
+	var url = queryOnUrl+"/SqlAny."+ext;
+	doRequest(url, 'btnRun', { format: ext });
 }
 
 function doDownload(ext) {
 	var url = queryOnUrl+"/SqlAny."+ext;
-	doRequest(url, 'btnDownload', true);
+	doRequest(url, 'btnDownload', { download: true });
 }
 
-function doRequest(url, btnId, download, callback) {
+function doRequest(url, btnId, options = {}, callback) {
 	closeMessages("messages");
 	removeMarker(editor);
-	if(!download) {
+	if(!options.download) {
 		closeResults();
 	}
 	
@@ -253,7 +266,7 @@ function doRequest(url, btnId, download, callback) {
 				}
 			}
 			else {
-				if(download) {
+				if(options.download) {
 					// https://stackoverflow.com/a/44435573/616413
 					var contentType = this.getResponseHeader('Content-Type');
 					var contentDisposition = this.getResponseHeader('Content-Disposition');
@@ -264,11 +277,14 @@ function doRequest(url, btnId, download, callback) {
 					var fileName = reqData.name+"."+ext;
 					saveBlob(oEvent.target.response, fileName, contentType);
 				}
+				else if(options.format == "md") {
+					byId('queryResult').innerHTML = "<pre>"+oEvent.target.responseText+"</pre>";
+				}
 				else {
 					byId('queryResult').innerHTML = oEvent.target.responseText;
 				}
 				//console.log("oEvent.target.responseText=",oEvent.target.responseText,"request");
-				showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
+				showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis, options);
 			}
 			
 			if(warnings) {
@@ -289,7 +305,7 @@ function doRequest(url, btnId, download, callback) {
 		}
 	}
 	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");	
-	request.overrideMimeType('text/html; charset=UTF-8');
+	//request.overrideMimeType('text/html; charset=UTF-8');
 	request.send(obj2encodedUrl(reqData));
 	btnActionStart(btnId);
 }
@@ -314,19 +330,22 @@ function setParameters(numparams) {
 	}
 }
 
-function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTimeMilis) {
+function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTimeMilis, options = {}) {
 	var content = document.getElementById(containerId);
 	var messages = document.getElementById(messagesId);
 	
 	var numOfRows = content.getElementsByTagName('tr').length-1; // 1st is header
 	var numOfCols = -1;
-	if(numOfRows>0) {
+	//console.log('showRunStatusInfo: numOfRows=', numOfRows);
+	
+	if(true) {
 		if(content.getElementsByTagName('tr')[0]) {
 			numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
 		}
-		messages.innerHTML = 'rows = '+numOfRows
-			+ ((numOfCols > 0) ? ' ; cols = ' + numOfCols : '')
-			+' ; time = '+(completedTimeMilis-startTimeMilis)+'ms '
+		if(options.download) { numOfRows = -1; numOfCols = -1; }
+		messages.innerHTML = (numOfRows>0 ? 'rows = '+numOfRows+' ;' : '')
+			+ ((numOfCols > 0) ? ' cols = ' + numOfCols + ' ;': '')
+			+' time = '+(completedTimeMilis-startTimeMilis)+'ms '
 			+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
 		messages.style.display = 'initial';
 	}
@@ -411,6 +430,10 @@ window.onresize = updateUI;
 		<input type="button" id="btnValidate" value="validate" onclick="javascript:doValidate();" title="Validate SQL (F8)">
 		<input type="button" id="btnExplain" value="explain" onclick="javascript:doExplain();" title="Explain SQL Plan">
 		<label class="labelBtn" title="Max number of rows that may be updated/deleted by a DML command execution (DDL commands do not generate update-count)">max-updates: <input type="number" step="1" id="updatemax"> </label>
+		<select id="selFormat" title="Output format">
+			<option value="htmlx" selected>html</option>
+			<option value="md">md</option>
+		</select>
 		<input type="button" id="btnRun" value="run" onclick="javascript:doRun();" title="Run SQL (F9)">
 		<!--<input type="button" id="btnDownload0" value="download" onclick="javascript:doDownload('csv');" title="Download CSV" style="float: right;"/>-->
 		<input type="button" id="btnDownload" value="download" onclick="createPopupBelow('download-ext', 'btnDownload', getDownloadHrefs());" title="Download (click to see available formats)" style="float: right;"/>
