@@ -268,9 +268,10 @@ function getTableDimValues(table, cell) {
 		rowDimVals = rowDimVals.slice(0, dimRowDimIndex+1);
 	}
 	if(rowIndex==null) {
-		colDimVals = getColDimValues(table, colDimIndex-1);
+		const diff = getNodeIndex(cell) - colIndex - 1;
+		colDimVals = getColDimValues(table, colDimIndex-diff);
 		var dimColDimIndex = getDimColDimIndex(cell);
-		//console.log("... >> colDimIndex=", colDimIndex, "dimColDimIndex=", dimColDimIndex);
+		//console.log("... >> colDimIndex=", colDimIndex, "dimColDimIndex=", dimColDimIndex, "diff=", diff);
 		colDimVals = colDimVals.slice(0, dimColDimIndex);
 	}
 	//console.log("... cOT getColDimValues=", colDimVals);

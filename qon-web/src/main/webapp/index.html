@@ -1457,25 +1457,25 @@
 		var row = cell.parentNode;
 		// element.tagName
 		if(row.getAttribute("measuresrow") && !row.getAttribute("colname")) {
-			console.log("...clickOnTable row=", row, "tag=", row.tagName, ", is a 'measuresrow'");
+			console.log("clickOnTable: row=", row, "tag=", row.tagName, ", is a 'measuresrow'");
 			return;
 		}
 		if(cell.getAttribute("measure")) {
-			console.log("...clickOnTable cell=", cell, "tag=", row.tagName, ", is a 'measure'");
+			console.log("clickOnTable: cell=", cell, "tag=", row.tagName, ", is a 'measure'");
 			return;
 		}
 		if(cell.tagName != 'TD') {
 			//var colname = row.getAttribute("colname");
-			console.log("...clickOnTable cell=", cell, "tag=", cell.tagName, ", not a TD, parentNode.colname = ", row.getAttribute("colname"));
+			console.debug("...clickOnTable cell=", cell, "tag=", cell.tagName, ", not a TD, parentNode.colname = ", row.getAttribute("colname"));
 			//return;
 		}
 		if(cell.getAttribute("dimoncol") != null) {
 			// XXX get colname from table header...
-			console.log("...clickOnTable cell=", cell, "dimoncol=", cell.getAttribute("dimoncol"), ", not a data cell X");
+			console.debug("...clickOnTable cell=", cell, "dimoncol=", cell.getAttribute("dimoncol"), ", not a data cell X");
 			//return;
 		}
 		if(content.style.cursor != "crosshair") {
-			console.log("...clickOnTable [not active] cell=", cell, "tag=", cell.tagName);
+			console.log("clickOnTable: [not active] cell=", cell, "tag=", cell.tagName);
 			return;
 		}
 		/*
