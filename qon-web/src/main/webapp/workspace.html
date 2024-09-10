@@ -257,6 +257,15 @@ function doRequest(url, btnId, options = {}, callback) {
 	}
 	
 	var startTimeMilis = Date.now();
+
+	var ext = url.substring(url.lastIndexOf(".")+1); // what if query has parameters? they should be POST parameters... no worries
+	if(binaryDownloadExts.includes(ext)) {
+		post(url, reqData, function () {
+			console.log('downloading:', url); 
+			btnActionStop('btnDownload');
+		}, "_blank");
+		return;
+	}
 	
 	var request = new XMLHttpRequest();
 	request.open("POST", url, true);
@@ -283,11 +292,10 @@ function doRequest(url, btnId, options = {}, callback) {
 				if(options.download) {
 					// https://stackoverflow.com/a/44435573/616413
 					var contentType = this.getResponseHeader('Content-Type');
-					var contentDisposition = this.getResponseHeader('Content-Disposition');
+					//var contentDisposition = this.getResponseHeader('Content-Disposition');
 					// https://stackoverflow.com/a/23054920/
 					//var fileName = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
-					var ext = url.substring(url.lastIndexOf(".")+1); // what if query has parameters? they should be POST parameters... no worries
-					console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType, "; Content-Disposition:", contentDisposition);
+					console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType); //, "; Content-Disposition:", contentDisposition);
 					var fileName = reqData.name+"."+ext;
 					saveBlob(oEvent.target.response, fileName, contentType);
 				}

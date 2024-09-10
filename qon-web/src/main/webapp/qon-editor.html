@@ -33,7 +33,8 @@
 	var rolesInfo = {};
 	var queryAltered = false;
 	var lastExecutedQuery = null;
-	var utf8par = "utf8=✓";
+	var utf8check = "✓";
+	var utf8par = "utf8="+utf8check;
 
 	function getModelId() {
 		return byId('model').value
@@ -138,7 +139,7 @@
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
 			sql: sqlString,
-			utf8: "✓",
+			utf8: utf8check,
 		};
 		if(getModelId()) {
 			reqData.model = getModelId();
@@ -456,7 +457,7 @@
 			schema : document.getElementById('schema').value,
 			name : document.getElementById('name').value,
 			sql: sqlString,
-			utf8: "✓",
+			utf8: utf8check,
 		};
 		
 		var params = document.querySelectorAll('.parameter');
@@ -474,14 +475,19 @@
 		
 		var url = queryOnUrl+"/QueryAny."+ext;
 		btnActionStart('btnDownload');
-		/*post(queryOnUrl+"/QueryAny."+ext, reqData, function () {
-			//console.log('downloading...'); 
-			btnActionStop('btnDownload');
-		});*/
+		if(binaryDownloadExts.includes(ext)) {
+			post(queryOnUrl+"/QueryAny."+ext, reqData, function () {
+				console.log('downloading:', url); 
+				btnActionStop('btnDownload');
+			}, "_blank");
+			return;
+		}
+
 		doHttpRequest(url, reqData, function (oEvent) {
 			//console.log('downloading...', oEvent);
 			var contentType = oEvent.target.getResponseHeader('Content-Type');
 			var fileName = reqData.name+"."+ext;
+			//console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType);
 			saveBlob(oEvent.target.response, fileName, contentType);
 			btnActionStop('btnDownload');
 		},

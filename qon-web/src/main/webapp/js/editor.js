@@ -112,6 +112,7 @@ function getCharCountPrecedingSelection(editor) {
 /* see: index.html: downloadExtFilter (+html, +sql) */
 var defaultDownloadExts = [ "csv", "htmlx", "json", "md", "sql", "xml" ];
 var downloadExtFilter = [ "csv", "htmlx", "json", "md", "ods", "sql", "xls", "xlsx", "xml" ];
+var binaryDownloadExts = [ "ods", "xls", "xlsx" ];
 
 /*
  * doDownload(ext) must be defined elsewhere

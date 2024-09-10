@@ -88,3 +88,51 @@ function doHttpRequest(url, params, callbackOk, callbackError) {
 	//request.overrideMimeType('text/html; charset=UTF-8');
 	request.send(obj2encodedUrl(params));
 }
+
+/*
+function doHttpFormRequest(url, params, callbackOk, callbackError) {
+	var request = new XMLHttpRequest();
+
+	var reqData = new FormData();
+	for (var p in params) {
+		if (params.hasOwnProperty(p)) {
+			reqData.set(p, params[p]);
+		}
+	}
+
+	request.open("POST", url, true);
+	//request.overrideMimeType('text/xml; charset=UTF-8');
+	request.onload = function(oEvent) {
+		if (request.status >= 200 && request.status < 300) {
+			//var updateCount = request.getResponseHeader("X-UpdateCount");
+			var warnings = request.getResponseHeader("X-Warning");
+			if(warnings) {
+				console.log("warnings:", warnings);
+			}
+			if(callbackOk) {
+				callbackOk(oEvent);
+			}
+			else {
+				console.log("no callback?", oEvent);
+			}
+		}
+		else if(callbackError) {
+			callbackError(oEvent);
+		}
+		else {
+			console.log("error[",request.status,"] - no callback?", oEvent);
+		}
+	}
+	request.onerror = function(oEvent) {
+		if(callbackError) {
+			callbackError(oEvent);
+		}
+		else {
+			console.log("onerror:", oEvent);
+		}
+	}
+	//request.setRequestHeader("Content-Type", "multipart/form-data");
+	//request.overrideMimeType('text/html; charset=UTF-8');
+	request.send(reqData);
+}
+*/
