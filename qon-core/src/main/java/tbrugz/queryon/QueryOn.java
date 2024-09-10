@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.InetAddress;
@@ -308,7 +309,7 @@ public class QueryOn extends AbstractHttpServlet {
 	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
 	static final String DEFAULT_XTRA_SYNTAXES = null;
 	
-	static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
+	//static final String PROP_X_REQUEST_UTF8 = "queryon.x-request-utf8";
 
 	static final String SUFFIX_GRABBERS = ".grabbers";
 	static final String SUFFIX_GRABCLASS = ".grabclass";
@@ -338,7 +339,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	
-	public static final String UTF8 = "UTF-8";
+	public static final String UTF8 = "UTF-8"; 
 
 	public static final String QON_PROJECT_URL = "https://github.com/tbrugz/queryon";
 
@@ -1086,9 +1087,7 @@ public class QueryOn extends AbstractHttpServlet {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					setFeatures(req, conn.getMetaData());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
-					resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
-						+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
-						+"."+reqspec.outputSyntax.getDefaultFileExtension());
+					addFilenameHeader(resp, relation, reqspec);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
@@ -1147,6 +1146,7 @@ public class QueryOn extends AbstractHttpServlet {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
 					setFeatures(req, conn.getMetaData());
 					Query relation = getQuery(req, reqspec, currentUser, conn);
+					addFilenameHeader(resp, relation, reqspec);
 					
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
@@ -1236,6 +1236,12 @@ public class QueryOn extends AbstractHttpServlet {
 		catch(Throwable e) {
 			throw new ServletException(e);
 		}
+	}
+	
+	void addFilenameHeader(HttpServletResponse resp, Relation relation, RequestSpec reqspec) {
+		resp.addHeader(ResponseSpec.HEADER_CONTENT_DISPOSITION, "attachment; filename=queryon_"
+			+relation.getName() //XXX add parameter values? filters? -- ,maybe filters is too much
+			+"."+reqspec.outputSyntax.getDefaultFileExtension());
 	}
 
 	public boolean discoveryModeRootRedirect(HttpServletRequest req, HttpServletResponse resp) {
@@ -3229,12 +3235,24 @@ public class QueryOn extends AbstractHttpServlet {
 			return;
 		}
 		
+		OutputStream os = null;
 		int count = 0;
 		if(ds.acceptsOutputStream()) {
-			ds.dumpHeader(resp.getOutputStream());
+			//resp.setContentType("application/octet-stream");
+			os = resp.getOutputStream();
+			//log.info("outputstream: class="+os.getClass().getName());
+			//os = new OutputStreamDebugger(resp.getOutputStream());
+			/*
+			String fosPath = System.getProperty("java.io.tmpdir")+File.separator+
+					"debug_"+queryName+"."+ds.getDefaultFileExtension();
+			log.info("dumpResultSet: output-path: "+fosPath);
+			os = new java.io.FileOutputStream(fosPath);
+			*/
+
+			ds.dumpHeader(os);
 			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
 			while(hasNext) {
-				ds.dumpRow(rs, count, resp.getOutputStream());
+				ds.dumpRow(rs, count, os);
 				count++;
 				hasNext = rs.next();
 			}
@@ -3262,7 +3280,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 		}
 		if(ds.acceptsOutputStream()) {
-			ds.dumpFooter(count, hasMoreRows, resp.getOutputStream());
+			ds.dumpFooter(count, hasMoreRows, os);
 		}
 		else {
 			ds.dumpFooter(count, hasMoreRows, resp.getWriter());
