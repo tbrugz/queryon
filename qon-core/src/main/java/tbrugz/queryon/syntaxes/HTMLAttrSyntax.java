@@ -163,7 +163,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			}
 			sb.append(nl()+"\t</colgroup>");
 		}
-		sb.append("\n");
+		//sb.append("\n");
 		
 		/*
 		//System.out.println("onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount+" ; finalColNames="+finalColNames);

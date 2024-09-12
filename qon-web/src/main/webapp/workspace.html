@@ -297,7 +297,7 @@ function doRequest(url, btnId, options = {}, callback) {
 					//var fileName = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)[1];
 					console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType); //, "; Content-Disposition:", contentDisposition);
 					var fileName = reqData.name+"."+ext;
-					saveBlob(oEvent.target.response, fileName, contentType);
+					saveBlob(oEvent.target.response, "queryon_"+fileName, contentType);
 				}
 				else if(options.format == "md") {
 					byId('queryResult').innerHTML = "<pre>"+oEvent.target.responseText+"</pre>";

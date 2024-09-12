@@ -488,7 +488,7 @@
 			var contentType = oEvent.target.getResponseHeader('Content-Type');
 			var fileName = reqData.name+"."+ext;
 			//console.log("url:", url, "; ext: '", ext, "'; reqData.name:", reqData.name, "; Content-Type:", contentType);
-			saveBlob(oEvent.target.response, fileName, contentType);
+			saveBlob(oEvent.target.response, "queryon_"+fileName, contentType);
 			btnActionStop('btnDownload');
 		},
 		function (oEvent) {
