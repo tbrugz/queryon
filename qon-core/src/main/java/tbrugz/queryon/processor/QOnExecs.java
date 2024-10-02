@@ -135,6 +135,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 		final DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
 		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
 		JDBCSchemaGrabber jgrab = new JDBCSchemaGrabber();
+		jgrab.setProperties(prop);
 		List<ExecutableObject> execs = new ArrayList<ExecutableObject>();
 		Set<String> schemasGrabbed = new HashSet<String>();
 		
