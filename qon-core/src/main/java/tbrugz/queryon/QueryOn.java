@@ -1534,7 +1534,10 @@ public class QueryOn extends AbstractHttpServlet {
 			finalMaxLimit = Math.min(finalMaxLimit, sql.limitMax);
 		}
 		//log.info("finalMaxLimit="+finalMaxLimit+" ; sql.limitMax="+sql.limitMax+" ; defaultLimit="+defaultLimit);
-		sql.addLimitOffset(loStrategy, getLimit(sql.limit, defaultLimit, finalMaxLimit), reqspec.offset);
+		int limit = getLimit(sql.limit, defaultLimit, finalMaxLimit);
+		if(sql.shouldAddLimitOffset(limit, reqspec.offset) && !reqspec.isCountRequest()) {
+			sql.addLimitOffset(loStrategy, limit, reqspec.offset);
+		}
 		//log.debug("addLimitOffset: sql:\n"+sql.getSql());
 		
 		sql.applyCount(reqspec);

@@ -1357,5 +1357,9 @@ public class RequestSpec {
 	public boolean isPivotedQueryRequest() {
 		return oncols.size()>0 || onrows.size()>0;
 	}
-	
+
+	public boolean isCountRequest() {
+		return count;
+	}
+
 }

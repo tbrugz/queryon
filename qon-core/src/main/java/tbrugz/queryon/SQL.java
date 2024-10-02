@@ -469,7 +469,7 @@ public class SQL {
 	}
 	
 	public void applyCount(RequestSpec reqspec) {
-		if(!reqspec.count) { return; }
+		if(!reqspec.isCountRequest()) { return; }
 		addCount();
 	}
 	
@@ -552,10 +552,20 @@ public class SQL {
 		addLimitOffset(strategy, this.limit, offset);
 	}*/
 	
-	protected void addLimitOffset(LimitOffsetStrategy strategy, Integer limit, int offset) throws ServletException {
-		if(limit==null) { limit = 0; }
-		else { applyedLimit = limit; }
-		if(limit<=0 && offset<=0) { return; }
+	protected boolean shouldAddLimitOffset(int limit, int offset) throws ServletException {
+		//if(limit==null) { limit = 0; }
+		if(limit<=0 && offset<=0) { return false; }
+		return true;
+	}
+	
+	protected void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset) throws ServletException {
+		if(!shouldAddLimitOffset(limit, offset)) {
+			return;
+		}
+		if(limit>0) { applyedLimit = limit; }
+		//if(limit==null) { limit = 0; }
+		//else { applyedLimit = limit; }
+		//if(limit<=0 && offset<=0) { return; }
 		if(strategy==LimitOffsetStrategy.RESULTSET_CONTROL) { return; }
 		
 		if(strategy==LimitOffsetStrategy.SQL_LIMIT_OFFSET) {
