@@ -323,6 +323,32 @@
 				</executions>
 			</plugin>
 
+			<!-- files in 'src/main/webapp' will replace the ones of 'qon-web' -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<!--<version>3.3.1</version>-->
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<!-- here the phase you need -->
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/classes/static</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 
