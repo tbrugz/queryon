@@ -3,6 +3,7 @@ package tbrugz.queryon;
 import javax.servlet.http.HttpServletResponse;
 
 public class BadRequestException extends RuntimeException {
+
 	private static final long serialVersionUID = 1L;
 	
 	final int code;
