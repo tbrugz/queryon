@@ -29,6 +29,7 @@ import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
 import tbrugz.sqldiff.SQLDiff;
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
@@ -50,6 +51,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 	static final Log log = LogFactory.getLog(DiffManyServlet.class);
 	
 	public static final String PARAM_ACTION = "action";
+	public static final String PARAM_WS_IGNORE = "wsignore";
 	
 	public static final String ACTION_DUMP_DEBUG = "debugDumpModel";
 	
@@ -76,6 +78,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		//List<String> schemasList = Utils.getStringList(schemasStr, ",");
 		String types = partz.get(1);   // comma separated types to diff
 		String syntax = partz.get(2);  // valid:: json, xml, patch, sql
+		String wsIgnore = req.getParameter(PARAM_WS_IGNORE);
 		
 		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
@@ -125,6 +128,11 @@ public class DiffManyServlet extends AbstractHttpServlet {
 					.replaceAll("\\bPACKAGE\\b", "EXECUTABLE")
 					;*/
 			pp.put("sqldiff.typestodiff", types2diff);
+			if(wsIgnore!=null) {
+				WhitespaceIgnoreType wiType = WhitespaceIgnoreType.getType(wsIgnore);
+				pp.put("sqldiff.whitespace-ignore", wiType.toString());
+				//pp.put("sqldiff.whitespace-ignore", wsIgnore);
+			}
 			
 			pp.put("sqldiff.dodatadiff","false");
 			
@@ -133,14 +141,14 @@ public class DiffManyServlet extends AbstractHttpServlet {
 			dump(pp, syntax, resp);
 		}
 		catch (RuntimeException e) {
-			throw e;
+			throw new BadRequestException(e.getMessage(), e);
 		}
 		catch (Exception e) {
 			throw new InternalServerException(e.getMessage(), e);
 		}
-		finally {
+		/* finally {
 			resp.getWriter().flush();
-		}
+		} */
 	}
 	
 	void setupDumpProperties(Properties pp, String schemas, String types) {

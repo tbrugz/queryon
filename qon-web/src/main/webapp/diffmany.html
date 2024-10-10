@@ -148,6 +148,10 @@ onSyntaxChanged = function() {
 	updateState();
 }
 
+onWsIgnoreChanged = function() {
+	//updateState();
+}
+
 doDiff = function() {
 	doClear();
 	getDDLdiff();
@@ -169,7 +173,7 @@ getDDLdiff = function(apply) {
 	}
 	
 	//apply = apply==='true'?'true':false;
-	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
+	// /qdiff/TABLE/<schema>.<object>?modelSource=x&modelTarget=y
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
 	
@@ -178,6 +182,9 @@ getDDLdiff = function(apply) {
 	var syntaxSelect = document.getElementById('syntax');
 	var syntax = syntaxSelect.options[syntaxSelect.selectedIndex].value;
 
+	var wsIgnoreSelect = document.getElementById('wsignore');
+	var wsIgnore = wsIgnoreSelect.options[wsIgnoreSelect.selectedIndex].value;
+
 	var url = queryOnDiffManyUrl
 		+ schemas + '/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
@@ -185,6 +192,7 @@ getDDLdiff = function(apply) {
 		+ syntax
 		+'?modelSource='+document.getElementById('modelSource').value
 		+'&modelTarget='+document.getElementById('modelTarget').value
+		+'&wsignore='+wsIgnore
 		//+(apply?"&doApply=true":"")
 		;
 	console.log("getDDLdiff: url=", url);
@@ -252,7 +260,10 @@ function updateState() {
 
 	var select = document.getElementById('syntax');
 	var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
-	
+
+	//var select = document.getElementById('wsignore');
+	//var wsignore = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+
 	if(modelSource && modelTarget && schema) {
 		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types+"/"+syntax);
 	}
@@ -408,6 +419,15 @@ setSelectMultiOptions = function(select, values) {
 	#models-container label {
 		margin: 2px 0 2px 0;
 	}
+	#options-container {
+		display: inline-block;
+		padding: 2px 2px 2px 4px;
+		background-color: #555;
+		width: 240px;
+	}
+	#options-container label {
+		margin: 2px 0 2px 0;
+	}
 	.message {
 		margin: 10px;
 		background-color: #f77;
@@ -473,13 +493,23 @@ setSelectMultiOptions = function(select, values) {
 	<label>
 		<span>type:</span> <select id="type" onchange="onObjTypeChanged();" multiple="multiple" size="7"></select>
 	</label>
-	<label>
-		syntax:
-		<select id="syntax" onchange="onSyntaxChanged();">
-			<option value="sql" selected="selected">SQL
-			<option value="patch">patch
-		</select>
-	</label>
+	<span id="options-container">
+		<label>
+			syntax:
+			<select id="syntax" onchange="onSyntaxChanged();">
+				<option value="sql" selected="selected">SQL
+				<option value="patch">patch
+			</select>
+		</label>
+		<label>
+			space-ignore:
+			<select id="wsignore" onchange="onWsIgnoreChanged();" title="white-space ignore strategy">
+				<option value="NONE">NONE
+				<option value="EOL" selected="selected">EOL (End of line)
+				<option value="ALL">ALL
+			</select>
+		</label>
+	</span>
 	
 	<span id="navbar-prop">
 		<input type="button" id="go-button" class="mainaction" value="go!" onclick="doDiff();"/>
