@@ -52,6 +52,8 @@
 		<url-pattern>/qos/*</url-pattern>
 	</servlet-mapping>
 	
+	<!-- Quarkus doesn't seem to like multiple Servlet beans that inherit from one another -->
+	<!--
 	<servlet>
 		<servlet-name>QueryOnInstant</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOnInstant</servlet-class>
@@ -61,6 +63,7 @@
 		<servlet-name>QueryOnInstant</servlet-name>
 		<url-pattern>/qoi/*</url-pattern>
 	</servlet-mapping>
+	-->
 	
 	<servlet>
 		<servlet-name>DiffServlet</servlet-name>
@@ -81,7 +84,8 @@
 		<servlet-name>DataDiffServlet</servlet-name>
 		<url-pattern>/datadiff/*</url-pattern>
 	</servlet-mapping>
-	
+
+	<!--
 	<servlet>
 		<servlet-name>Diff2QServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.diff.Diff2QServlet</servlet-class>
@@ -91,6 +95,7 @@
 		<servlet-name>Diff2QServlet</servlet-name>
 		<url-pattern>/diff2q/*</url-pattern>
 	</servlet-mapping>
+	-->
 	
 	<servlet>
 		<servlet-name>DiffManyServlet</servlet-name>
@@ -126,6 +131,7 @@
 		<url-pattern>/p/*</url-pattern>
 	</servlet-mapping>
 	
+	<!--
 	<servlet>
 		<servlet-name>MarkdownServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.MarkdownServlet</servlet-class>
@@ -135,6 +141,7 @@
 		<servlet-name>MarkdownServlet</servlet-name>
 		<url-pattern>/md/*</url-pattern>
 	</servlet-mapping>
+	-->
 
 	<servlet>
 		<servlet-name>ProcessorServlet</servlet-name>
@@ -156,6 +163,7 @@
 		<url-pattern>/swagger/*</url-pattern>
 	</servlet-mapping>
 	
+	<!--
 	<servlet>
 		<servlet-name>ODataServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.api.ODataServlet</servlet-class>
@@ -185,6 +193,7 @@
 		<servlet-name>QonSoapServlet</servlet-name>
 		<url-pattern>/soap/*</url-pattern>
 	</servlet-mapping>
+	-->
 
 	<servlet>
 		<servlet-name>AuthServlet</servlet-name>
@@ -196,6 +205,7 @@
 		<url-pattern>/qauth/*</url-pattern>
 	</servlet-mapping>
 
+	<!--
 	<servlet>
 		<servlet-name>WebDavServlet</servlet-name>
 		<servlet-class>tbrugz.queryon.webdav.WebDavServlet</servlet-class>
@@ -206,6 +216,7 @@
 		<url-pattern>/webdav/*</url-pattern>
 		<url-pattern>/anondav/*</url-pattern>
 	</servlet-mapping>
+	-->
 
 	<servlet>
 		<servlet-name>InfoServlet</servlet-name>
