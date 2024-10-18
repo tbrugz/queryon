@@ -40,6 +40,8 @@ import static tbrugz.queryon.http.JettySetup.*;
  * 
  * http://www.w3.org/TR/r2rml/
  * http://www.w3.org/2001/sw/wiki/RDB2RDF
+
+ * HARDNESS?? any23 2.7 requires java 11 (java11)...
  */
 public class DirectMappingTest {
 

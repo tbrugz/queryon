@@ -104,6 +104,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		q.setSchemaName(schema);
 		q.setName(name);
 		q.setQuery(sql);
+		//XXX: extract default column names from query if defaultColumnNames is empty
 		q.setDefaultColumnNames(defaultColumnNames);
 		q.setRemarks(remarks);
 		//XXX t.setParameterCount(parameterCount);
@@ -231,12 +232,16 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		catch(RuntimeException e) {
 			UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), q, e.toString());
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
+			//XXX add warning to response? throw exception if not from DB? return 0?
+			//if throw exc or return 0, will not be able to fix query later...
 			DBUtil.doRollback(conn, sp);
+			//return 0;
 		}
 		catch(SQLException e) {
 			UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), q, e.toString());
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
 			DBUtil.doRollback(conn, sp);
+			//return 0;
 		}
 		finally {
 			DBUtil.releaseSavepoint(conn, features, sp);

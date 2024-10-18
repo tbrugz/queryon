@@ -282,6 +282,7 @@
       </exclusions>
     </dependency>
     <!-- used by PatchDumper -->
+    <!-- TODO: update to https://github.com/java-diff-utils/java-diff-utils (java8+) -->
     <dependency>
       <groupId>com.googlecode.java-diff-utils</groupId>
       <artifactId>diffutils</artifactId>
