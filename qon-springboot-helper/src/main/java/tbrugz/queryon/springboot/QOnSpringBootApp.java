@@ -130,6 +130,12 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	}
 
 	@Bean
+	public ServletRegistrationBean servletQueryOnSchemaInstantBean() {
+		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOnSchemaInstant();
+		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+	}
+
+	@Bean
 	public ServletRegistrationBean servletDiffServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DiffServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());

@@ -10,7 +10,7 @@ running
 
 _Examples using [qon-demo-minimal](../qon-demo-minimal)_
 
-`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" QON_JDBC_USER=admin QON_JDBC_PASSWORD= mvn clean spring-boot:run`
+`QON_JDBC_URL="jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon" QON_JDBC_USER=admin QON_JDBC_PASSWORD= mvn clean spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.output.ansi.enabled=ALWAYS -Dserver.port=8083"`
 
 OR (using jar)
 
