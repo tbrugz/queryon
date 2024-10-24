@@ -1,26 +1,17 @@
 package tbrugz.queryon.springboot.demo;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-/*
-import javax.servlet.ServletContextListener;
 
-import org.apache.shiro.web.env.EnvironmentLoaderListener;
-*/
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 
 import org.springframework.context.annotation.ComponentScan;
-/*
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Bean;
 
-import tbrugz.queryon.AbstractHttpServlet;
-*/
 import tbrugz.queryon.springboot.QOnSpringBootApp;
 
 /*
@@ -37,8 +28,8 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 	
 	public static void main(String[] args) {
 		applicationContext = SpringApplication.run(QOnApp.class, args);
-		//showAppInfo();
-		//displayAllBeans();
+		showAppInfo();
+		displayServletBeans();
 	}
 	
 	public static ApplicationContext getApplicationContext() {
@@ -46,18 +37,24 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 	}
 
 	public static void showAppInfo() {
-		log.info("showAppInfo: appName = " + getApplicationContext().getApplicationName() +
-			" ; displayName = " + getApplicationContext().getDisplayName() +
-			" ; context = " + getApplicationContext() +
-			" ; QOnApp.class = "+QOnApp.class.getName()+" ; CL = "+QOnApp.class.getClassLoader());
+		ApplicationContext ctx = getApplicationContext();
+		log.info("showAppInfo: appName = " + ctx.getId());
+		log.info("showAppInfo: startup = " + new Date(ctx.getStartupDate()) );
+			//" ; displayName = " + getApplicationContext().getDisplayName() +
+			//" ; context = " + getApplicationContext() +
+			//" ; QOnApp.class = "+QOnApp.class.getName()+" ; CL = "+QOnApp.class.getClassLoader());
 	}
 
 	// see: https://www.baeldung.com/spring-show-all-beans
-	public static void displayAllBeans() {
-		log.info("displayAllBeans:: appName = " + getApplicationContext().getApplicationName());
+	public static void displayServletBeans() {
+		ApplicationContext ctx = getApplicationContext();
 		String[] allBeanNames = getApplicationContext().getBeanDefinitionNames();
 		for(String beanName : allBeanNames) {
-			log.info(beanName);
+			Object bean = ctx.getBean(beanName);
+			//log.info(beanName + ": "+bean.getClass());
+			if(bean instanceof ServletRegistrationBean) {
+				log.info("- " + beanName + ": "+bean);
+			}
 		}
 	}
 	

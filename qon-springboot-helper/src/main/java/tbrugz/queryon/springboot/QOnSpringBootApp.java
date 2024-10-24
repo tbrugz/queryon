@@ -4,6 +4,8 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContextListener;
 
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
+import org.apache.shiro.web.servlet.ShiroFilter;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -101,9 +103,9 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	// https://stackoverflow.com/a/20939923/616413
 	// http://websystique.com/springmvc/spring-mvc-4-file-upload-example-using-multipartconfigelement/
 	@Bean
-	public ServletRegistrationBean servletQueryOnBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletQueryOnBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOn();
-		ServletRegistrationBean bean = new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
+		ServletRegistrationBean<AbstractHttpServlet> bean = new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
 		bean.setMultipartConfig(new MultipartConfigElement(getSystemTempDir()));
 		if(loadQueryOnServletOnStartup) {
 			bean.setLoadOnStartup(1);
@@ -112,51 +114,51 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	}
 
 	@Bean
-	public ServletRegistrationBean servletInfoServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletInfoServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.api.InfoServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletAuthServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletAuthServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.auth.AuthServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletQueryOnInstantBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletQueryOnInstantBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOnInstant();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletQueryOnSchemaInstantBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletQueryOnSchemaInstantBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOnSchemaInstant();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletDiffServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletDiffServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DiffServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletDataDiffServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletDataDiffServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DataDiffServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletDiff2QServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletDiff2QServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.Diff2QServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletDiffManyServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletDiffManyServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DiffManyServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	/*
@@ -168,58 +170,58 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	*/
 
 	@Bean
-	public ServletRegistrationBean servletProcessorServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletProcessorServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.ProcessorServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletPagesServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletPagesServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.PagesServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletMarkdownServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletMarkdownServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.MarkdownServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletSwaggerServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletSwaggerServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.api.SwaggerServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletODataServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletODataServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.api.ODataServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletGraphQlQonServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletGraphQlQonServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.graphql.GraphQlQonServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletQonSoapServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletQonSoapServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.soap.QonSoapServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	@Bean
-	public ServletRegistrationBean servletWebDavServletBean() {
+	public ServletRegistrationBean<AbstractHttpServlet> servletWebDavServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.webdav.WebDavServlet();
-		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
+		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
 	// https://stackoverflow.com/questions/19825946/how-to-add-a-filter-class-in-spring-boot/30658752#30658752
 	@Bean
-	public FilterRegistrationBean shiroFilterRegistration() {
-		FilterRegistrationBean registration = new FilterRegistrationBean();
-		registration.setFilter(new org.apache.shiro.web.servlet.ShiroFilter());
+	public FilterRegistrationBean<ShiroFilter> shiroFilterRegistration() {
+		FilterRegistrationBean<ShiroFilter> registration = new FilterRegistrationBean<ShiroFilter>();
+		registration.setFilter(new ShiroFilter());
 		registration.addUrlPatterns("/*");
 		registration.setName("ShiroFilter");
 		registration.setOrder(1);

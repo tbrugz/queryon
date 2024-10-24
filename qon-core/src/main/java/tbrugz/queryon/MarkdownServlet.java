@@ -86,4 +86,9 @@ public class MarkdownServlet extends PagesServlet {
 		rs.close();
 	}
 
+	@Override
+	public String getDefaultUrlMapping() {
+		return "/md/*";
+	}
+	
 }
