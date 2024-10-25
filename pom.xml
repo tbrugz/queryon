@@ -69,7 +69,7 @@
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->
     <httpclient.version>4.5.14</httpclient.version>
 
-    <h2.version>2.2.220</h2.version>
+    <h2.version>2.2.224</h2.version> <!-- 2.3.230+ requires java11+ -->
     <postgresql.version>42.2.25</postgresql.version>
     <mariadb.version>2.7.6</mariadb.version>
     <mssql-jdbc.version>8.4.1.jre8</mssql-jdbc.version>
