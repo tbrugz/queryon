@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>qon-demo-parent</artifactId>
-		<version>0.8-SNAPSHOT</version>
+		<version>0.8</version>
 		<!--<relativePath>../../pom.xml</relativePath>-->
 	</parent>
 	
 	<artifactId>qon-demo-minimal</artifactId>
-	<version>0.8-SNAPSHOT</version>
+	<version>0.8</version>
 	<packaging>war</packaging>
 	<name>qon-demo-minimal</name>
 
