@@ -41,6 +41,7 @@ logging:
         #tbrugz.queryon.action.QOnManage: INFO
         #tbrugz.queryon.action.QOnManage: DEBUG
         #tbrugz.queryon.diff: DEBUG
+        tbrugz.queryon.springboot.demo: DEBUG
         #tbrugz.queryon.util: DEBUG
         #tbrugz.sqldiff: DEBUG
         #tbrugz.sqldump.cdi: DEBUG

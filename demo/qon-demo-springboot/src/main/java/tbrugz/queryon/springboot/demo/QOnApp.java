@@ -16,6 +16,11 @@ import tbrugz.queryon.springboot.QOnSpringBootApp;
 
 /*
  * https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.embedded-container.servlets-filters-listeners
+ *
+ * h2 console (when using Spring Boot's developer tools):
+ * https://docs.spring.io/spring-boot/reference/data/sql.html#data.sql.h2-web-console
+ * https://docs.spring.io/spring-boot/reference/using/devtools.html
+ * props: spring.h2.console.enabled, spring.h2.console.path
  */
 @SpringBootApplication
 // https://stackoverflow.com/a/30273253
@@ -47,13 +52,16 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 
 	// see: https://www.baeldung.com/spring-show-all-beans
 	public static void displayServletBeans() {
-		ApplicationContext ctx = getApplicationContext();
-		String[] allBeanNames = getApplicationContext().getBeanDefinitionNames();
-		for(String beanName : allBeanNames) {
-			Object bean = ctx.getBean(beanName);
-			//log.info(beanName + ": "+bean.getClass());
-			if(bean instanceof ServletRegistrationBean) {
-				log.info("- " + beanName + ": "+bean);
+		boolean showInfo = log.isDebugEnabled();
+		if(showInfo) {
+			ApplicationContext ctx = getApplicationContext();
+			String[] allBeanNames = getApplicationContext().getBeanDefinitionNames();
+			for(String beanName : allBeanNames) {
+				Object bean = ctx.getBean(beanName);
+				//log.info(beanName + ": "+bean.getClass());
+				if(bean instanceof ServletRegistrationBean) {
+					log.debug("- " + beanName + ": "+bean);
+				}
 			}
 		}
 	}
