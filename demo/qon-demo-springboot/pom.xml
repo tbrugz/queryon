@@ -9,7 +9,7 @@
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<!--<artifactId>queryon</artifactId>-->
 		<artifactId>qon-demo-parent</artifactId>
-		<version>0.8</version>
+		<version>0.9-SNAPSHOT</version>
 		<!--<relativePath>../../pom.xml</relativePath>-->
 	</parent>
 
@@ -40,7 +40,7 @@
 
 	<groupId>org.bitbucket.tbrugz</groupId>
 	<artifactId>qon-demo-springboot</artifactId>
-	<version>0.8</version>
+	<version>0.9-SNAPSHOT</version>
 	<!--<packaging>war</packaging>-->
 	<name>qon-demo-springboot</name>
 	<description>QueryOn Demo with Spring Boot</description>
