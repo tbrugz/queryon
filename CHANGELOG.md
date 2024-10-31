@@ -1,4 +1,17 @@
 
+queryon 0.8 [2024-10-29]
+-----------
+* build/pom: added module 'qon-springboot-helper' [2021-10-14]
+* github: added maven workflow
+* demo: springboot: docker config [2022-02-01]
+* queryon: SQL/web: added 'default-columns' support
+* queryon: added prop 'queryon.debug-mode'
+* queryon: added suffix '.discovery-mode'
+* syntax: htmlx: added '_ASBLOB' suffix for columns
+* web: pivot: allow drillthrough on dimensions
+* diffmany: added 'whitespace-ignore' [2024-10-09]
+
+
 queryon 0.7 [2021-09-26]
 -----------
 * refactoring: modules 'qon-core', 'qon-web', 'demo-minimal', 'demo-dbn'
@@ -42,6 +55,7 @@ queryon 0.7 [2021-09-26]
 * queryon: SQL: added 'distinct-count' aggregate
 * queryon: SQL: added named parameters (":param" syntax) [2021-07-08]
 * web: intercepting inner *_HREF links
+* demo: added 'qon-demo-quarkus' [2021-09-20]
 
 
 queryon 0.6.2 [2018-06-07]
