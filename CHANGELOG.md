@@ -1,4 +1,9 @@
 
+queryon 0.9 [xxxx-xx-xx]
+-----------
+- **java 8+** required
+
+
 queryon 0.8 [2024-10-29]
 -----------
 * build/pom: added module 'qon-springboot-helper' [2021-10-14]

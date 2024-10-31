@@ -31,12 +31,12 @@
 
     <!-- release: maven-compiler 3.6.0+ required -->
     <!--
-    <maven.compiler.release>7</maven.compiler.release>
+    <maven.compiler.release>8</maven.compiler.release>
     -->
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
 
-    <maven-enforcer-plugin.requireJavaVersion>1.7.0</maven-enforcer-plugin.requireJavaVersion>
+    <maven-enforcer-plugin.requireJavaVersion>1.8.0</maven-enforcer-plugin.requireJavaVersion>
     <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
 
     <!-- <queryon.version>${project.version}</queryon.version> -->
@@ -289,10 +289,10 @@
         <!--
         <configuration>
           <!- -
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.8</source>
+          <target>1.8</target>
           - ->
-          <release>7</release>
+          <release>8</release>
         </configuration>
         -->
       </plugin>

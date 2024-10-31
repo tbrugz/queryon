@@ -29,7 +29,7 @@ More info about QueryOn:
 building
 --------
 
-Dependencies: java 8+ (java 7 can be used for running - with carefully selected dependencies); maven 3.2.5+
+Dependencies: java 8+ ; maven 3.2.5+
 
 Building: `mvn install`
 
