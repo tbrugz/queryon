@@ -3,7 +3,8 @@ queryon
 =======
 
 [![GNU Affero General Public License, v3](https://img.shields.io/github/license/tbrugz/queryon.svg?label=License&color=blue)](LICENSE.md)
-[![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/queryon.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.bitbucket.tbrugz/queryon)
+[![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/queryon.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.bitbucket.tbrugz/queryon)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/org.bitbucket.tbrugz/queryon?server=https%3A%2F%2Foss.sonatype.org&label=Snapshots)](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/)
 [![CI](https://github.com/tbrugz/queryon/actions/workflows/maven.yml/badge.svg)](https://github.com/tbrugz/queryon/actions/workflows/maven.yml)
 
 
