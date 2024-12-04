@@ -19,7 +19,7 @@ spring:
         url: ${QON_JDBC_URL}
         # 'jdbc-url' needed when using DataSourceBuilder with @ConfigurationProperties(prefix = "spring.datasource")
         # also needed if HikariJNDIFactory used directly?
-        # jdbc-url: jdbc:h2:~/.queryon/demo-minimal;SCHEMA_SEARCH_PATH=public,queryon
+        jdbc-url: ${QON_JDBC_URL}
         username: ${QON_JDBC_USER:#{null}}
         password: ${QON_JDBC_PASSWORD:#{null}}
         # driver-class-name: ${SPRING_DATASOURCE_DRIVER-CLASS-NAME}

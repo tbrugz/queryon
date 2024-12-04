@@ -2,17 +2,23 @@ package tbrugz.queryon.springboot.demo;
 
 import java.util.Date;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
-import org.springframework.context.annotation.ComponentScan;
-
+import tbrugz.queryon.springboot.DataSourceConfig;
 import tbrugz.queryon.springboot.QOnSpringBootApp;
+import tbrugz.queryon.springboot.SpringDataSourceProvider;
 
 /*
  * https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.embedded-container.servlets-filters-listeners
@@ -24,7 +30,10 @@ import tbrugz.queryon.springboot.QOnSpringBootApp;
  */
 @SpringBootApplication
 // https://stackoverflow.com/a/30273253
-@ComponentScan("tbrugz.queryon.springboot")
+//@ComponentScan("tbrugz.queryon.springboot")
+/* Use @Import(DataSourceConfig.class) or @Import(SpringDataSourceProvider.class), not both */
+//@Import(DataSourceConfig.class)
+@Import(SpringDataSourceProvider.class)
 public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 
 	static final Log log = LogFactory.getLog(QOnApp.class);
@@ -65,6 +74,21 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 			}
 		}
 	}
+	
+	@Bean
+	//@Primary
+	@ConfigurationProperties(prefix="spring.datasource")
+	public DataSource primaryDataSource() {
+		return DataSourceBuilder.create().build();
+	}
+
+	/*
+	@Bean
+	@ConfigurationProperties(prefix="spring.secondDatasource")
+	public DataSource secondaryDataSource() {
+		return DataSourceBuilder.create().build();
+	}
+	*/
 	
 	/*
 	@Bean
