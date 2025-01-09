@@ -40,7 +40,7 @@
     <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
 
     <!-- <queryon.version>${project.version}</queryon.version> -->
-    <sqldump.version>0.10</sqldump.version>
+    <sqldump.version>0.11-SNAPSHOT</sqldump.version>
     <kmlutils.version>0.5.6</kmlutils.version>
 
     <servlet-api.version>3.1.0</servlet-api.version>
@@ -76,7 +76,7 @@
     <derby.version>10.12.1.1</derby.version>
     <sqlite.version>3.36.0.3</sqlite.version>
 
-    <buildnumber-maven-plugin.version>3.0.0</buildnumber-maven-plugin.version>
+    <buildnumber-maven-plugin.version>3.1.0</buildnumber-maven-plugin.version>
 
     <checkstyle.version>2.10</checkstyle.version>
     <cobertura.version>2.5.2</cobertura.version>
@@ -450,7 +450,7 @@
   <dependencies>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
-      <artifactId>sqldump</artifactId>
+      <artifactId>sqldump-core</artifactId>
       <version>${sqldump.version}</version>
       <scope>compile</scope>
       <exclusions>
@@ -475,6 +475,12 @@
           <artifactId>jaxb-api</artifactId>
         </exclusion>-->
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>sqldump-graphml</artifactId>
+      <version>${sqldump.version}</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <!-- also as transitive dependency from sqldump -->

@@ -93,6 +93,7 @@
 			<version>${project.version}</version>
 		</dependency>
 		
+		<!--
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>sqldump</artifactId>
@@ -104,6 +105,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
 
 		<!-- https://shiro.apache.org/spring-boot.html -->
 		<!--<dependency>

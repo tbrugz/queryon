@@ -76,6 +76,7 @@
 			<version>${project.parent.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>sqldump</artifactId>
@@ -88,6 +89,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-graphql</artifactId>

@@ -62,6 +62,7 @@
 			<scope>runtime</scope>
 		</dependency>
 		
+		<!--
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>sqldump</artifactId>
@@ -72,12 +73,9 @@
 					<groupId>org.bitbucket.tbrugz</groupId>
 					<artifactId>kmlutils</artifactId>
 				</exclusion>
-				<!--<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>-->
 			</exclusions>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-web</artifactId>
