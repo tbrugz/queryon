@@ -68,6 +68,7 @@
     <jetty.version>9.4.55.v20240627</jetty.version> <!-- jetty 10+ requires JVM 11+ -->
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->
     <httpclient.version>4.5.14</httpclient.version>
+    <tomcat.version>9.0.98</tomcat.version>
 
     <h2.version>2.2.224</h2.version> <!-- 2.3.230+ requires java11+ -->
     <postgresql.version>42.2.25</postgresql.version>
