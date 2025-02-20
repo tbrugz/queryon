@@ -5,6 +5,7 @@
 	<link href="css/queryon.css" rel="stylesheet">
 	<link href="css/qon-components.css" rel="stylesheet">
 	<link href="css/qon-editor.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
@@ -28,10 +29,18 @@
 #queryResult {
 	font-family: monospace;
 }
-#queryResultControls input {
+#queryResultControls input, #queryResultControls i {
+	padding: 3px;
+}
+#queryResultControls i {
+	right: 33px;
+}
+#queryResultControlsIn {
 	position: fixed;
 	background-color: #bbb;
 	z-index: 10;
+	border: 1px solid;
+	right: 20px;
 }
 #queryResult pre {
 	background-color: #eee;
@@ -466,8 +475,15 @@ window.onresize = updateUI;
 </div>
 
 <div class="container" id="resultContainer" style="display: none;">
-	<div id="queryResultControls"><input type='button' class='closebutton' onclick='closeResults()' value='X'/></div>
-	<div id="queryResult"></div>
+	<div id="queryResultControls">
+		<div id="queryResultControlsIn">
+			<i class="fa fa-clone" aria-hidden="true" title="copy to clipboard" id="btn-clone" onclick="clickFadeElement(byId('btn-clone'));copyInnerTextToClipboard(byId('queryResult'));"></i>
+			<i class="fa fa-close" aria-hidden="true" title="close results" onclick="closeResults();"></i>
+			<!--<input type='button' class='closebutton' onclick='closeResults();' value='X'/>-->
+		</div>
+	</div>
+	<div id="queryResult">
+	</div>
 </div>
 
 <div id="status-container" class="status">

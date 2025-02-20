@@ -5,11 +5,19 @@
 	<link href="css/queryon.css" rel="stylesheet">
 	<link href="css/qon-components.css" rel="stylesheet">
 	<link href="css/qon-editor.css" rel="stylesheet">
+	<!--<link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">-->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<style type="text/css">
+#queryResult input {
+	position: fixed;
+	background-color: #bbb;
+	border: 1px solid;
+	right: 18px;
+	z-index: 10;
+}
 	</style>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
@@ -174,7 +182,7 @@
 			var completedTimeMilis = Date.now();
 			//XXX option to handle different response types (html, json, csv, xml)?
 			//'close' style:: position: relative, float: right?
-			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
+			byId('queryResult').innerHTML = getCloseResultBtnHtml()+data;
 			showRunStatusInfo('queryResult', 'status-container', startTimeMilis, completedTimeMilis);
 			
 			closeMessages('messages');
@@ -236,7 +244,7 @@
 			setParameters(paramCount, paramNames, paramOptionals);
 			makeHrefs();
 			
-			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/>"+data;
+			byId('queryResult').innerHTML = getCloseResultBtnHtml()+data;
 			
 			if(usingSelected) {
 				infoMessage('selected text from query <b>'+document.getElementById('name').value+'</b> successfully validated');
@@ -301,7 +309,7 @@
 			//setParameters(paramCount);
 			//makeHrefs();
 			
-			byId('queryResult').innerHTML = "<input type='button' class='closebutton' onclick='closeResults()' value='X' style='position: fixed;'/><div class='explain'>"+data+"</div>";
+			byId('queryResult').innerHTML = getCloseResultBtnHtml()+"<div class='explain'>"+data+"</div>";
 			
 			if(usingSelected) {
 				infoMessage('selected text from query <b>'+document.getElementById('name').value+'</b> successfully explained');
@@ -629,6 +637,11 @@
 	function closeResults() {
 		document.getElementById("queryResult").innerHTML = "";
 		updateUI();
+	}
+
+	function getCloseResultBtnHtml() {
+		return "<input type='button' class='closebutton' onclick='closeResults()' value='X'/>"; // style='position: fixed;'
+		//return '<i class="fa fa-close" aria-hidden="true" title="close results" onclick="closeResults();"></i>';
 	}
 	
 	function onEditorChange() {

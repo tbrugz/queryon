@@ -101,3 +101,15 @@ function createPopupBelow(id, btn, content) {
 	}
 	
 }
+
+function clickFadeElement(elem) {
+	if(! (elem instanceof Node)) {
+		elem = byId(elem);
+	}
+	//console.log('fadeElement: ', elem);
+	elem.classList.add('fade');
+	elem.classList.add('fadeoutable');
+	setTimeout(function() {
+		elem.classList.remove('fade');
+	}, 300);
+}
