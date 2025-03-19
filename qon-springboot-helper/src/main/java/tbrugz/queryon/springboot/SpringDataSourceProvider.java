@@ -35,10 +35,10 @@ public class SpringDataSourceProvider implements DataSourceProvider, Application
 			throw new IllegalStateException(message);
 		}
 		if(name==null || name.isEmpty()) {
-			log.info("getDataSource (empty name)");
+			//log.debug("getDataSource (empty name)");
 			return ctx.getBean(DataSource.class);
 		}
-		log.info("getDataSource: name = "+name);
+		//log.debug("getDataSource: name = "+name);
 		return ctx.getBean(name, DataSource.class);
 	}
 

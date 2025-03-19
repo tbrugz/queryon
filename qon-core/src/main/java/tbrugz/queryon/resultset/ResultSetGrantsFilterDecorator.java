@@ -29,6 +29,7 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 		this.idColumn = idColumn;
 		this.grantsColumn = grantsColumn;
 		//maxCol = rs.getMetaData().getColumnCount();
+		//log.info("RSGrantsFilter(): [roles="+roles+" ; priv="+privilege+"]");
 	}
 
 	@Override

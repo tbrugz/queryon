@@ -2218,8 +2218,11 @@ public class QueryOn extends AbstractHttpServlet {
 		if(reqspec.params!=null && reqspec.params.size()>0) {
 			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), MiscUtils.toStringList(reqspec.params) );
 		}
-		//log.info("doFilterStatusByPermission: "+doFilterStatusByPermission+" / doFilterStatusByQueryGrants: "+doFilterStatusByQueryGrants+" / "
-		//		+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)+":"+doNotCheckGrantsPermission);
+		/*
+		log.info("doFilterStatusByPermission: "+doFilterStatusByPermission
+				+" / doFilterStatusByQueryGrants: "+doFilterStatusByQueryGrants
+				+" / "+doNotCheckGrantsPermission+":"+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission));
+		*/
 		if(doFilterStatusByPermission && currentUser!=null) {
 			// filter by [(relation)Type]:SELECT|EXECUTE:[schemaName]:[name]
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[3]:"+privilege+":[1]:[2]");
