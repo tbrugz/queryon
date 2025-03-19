@@ -215,7 +215,8 @@ function makeHrefs() {
 		//return;
 	}
 	else {
-		if(authInfo.isDev && urled && isQonQueriesPluginActive()) {
+		if( (authInfo.isDev || authHasPermission('PLUGIN:QOnQueries:readQuery') )
+			&& urled && isQonQueriesPluginActive() ) {
 			if(relationsHash[id].relationType=="query") {
 				urled.style.display = 'initial';
 				var name = id;

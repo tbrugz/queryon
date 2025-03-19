@@ -11,9 +11,16 @@ import tbrugz.queryon.util.ShiroUtils;
 
 public class ExtendedUserInfo extends UserInfo {
 	
-	static final ActionType[] permissionsArr = { ActionType.SELECT_ANY, ActionType.INSERT_ANY, ActionType.UPDATE_ANY, ActionType.DELETE_ANY,
-			ActionType.VALIDATE_ANY, ActionType.SQL_ANY, ActionType.MANAGE };
+	static final ActionType[] permissionsArr = {
+		ActionType.SELECT_ANY,
+		ActionType.INSERT_ANY, ActionType.UPDATE_ANY, ActionType.DELETE_ANY,
+		ActionType.VALIDATE_ANY, ActionType.SQL_ANY, ActionType.MANAGE
+	};
 	
+	static final String[] permissionsStrArr = {
+		"PLUGIN:QOnQueries:readQuery",
+	};
+
 	final Set<String> roles;
 	final List<String> permissions;
 	
@@ -25,6 +32,9 @@ public class ExtendedUserInfo extends UserInfo {
 		List<String> permissionList = new ArrayList<String>();
 		for(ActionType perm: permissionsArr) {
 			permissionList.add(perm.name());
+		}
+		for(String perm: permissionsStrArr) {
+			permissionList.add(perm);
 		}
 		// XXX add APPLYDIFF when instance has only 1 model?
 		if(modelIds!=null) {

@@ -18,6 +18,10 @@
 	right: 18px;
 	z-index: 10;
 }
+#logoext {
+	font-family: monospace;
+	font-style: italic;
+}
 	</style>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
@@ -97,7 +101,15 @@
 		//updateUI();
 	}
 
-	function loadAuthInfoCallback() { refreshAuthInfo(); }
+	function loadAuthInfoCallback() {
+		refreshAuthInfo();
+		if(authInfo.isDev) {
+			byId('logoext').innerHTML = "";
+		}
+		else {
+			byId('logoext').innerHTML = " [readonly]";
+		}
+	}
 
 	function loadQuery(querySchema, queryName) {
 		var loadUrl = qonPluginUrl;
@@ -837,7 +849,7 @@
 
 <div id="spec">
 <div class="container" id="objectid-container">
-	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Editor</code></span>
+	<span id="logo">Q<span style="color: #ff8a47;">On</span> <code>Editor</code><span id="logoext"></span></span>
 	<label>schema: <input type="text" id="schema" name="schema" onchange="onTextFieldChange();makeHrefs()"/></label>
 	<label>name: <input type="text" id="name" name="name" onchange="onTextFieldChange();makeHrefs()"/></label>
 	<label>remarks: <input type="text" id="remarks" name="remarks" size="60" onchange="onTextFieldChange();"/></label>
