@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -215,9 +216,10 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			//----
 			//columns
 			ResultSet cols = dbmd.getColumns(null, schemaName, tableName, null);
+			ResultSetMetaData colsMD = cols.getMetaData();
 			int numCol = 0;
 			while(cols.next()) {
-				Column c = JDBCSchemaGrabber.retrieveColumn(cols);
+				Column c = JDBCSchemaGrabber.retrieveColumn(cols, colsMD);
 				newt.getColumns().add(c);
 				feat.addColumnSpecificFeatures(c, cols);
 				numCol++;

@@ -19,5 +19,5 @@ Help pages index
 Misc info
 ---------
 
-Project website: [github.com/tbrugz/queryo](https://github.com/tbrugz/queryon)  
+Project website: [github.com/tbrugz/queryon](https://github.com/tbrugz/queryon)  
 License: [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html)

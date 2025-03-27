@@ -1203,13 +1203,13 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		catch(InternalServerException e) {
 			//log.warn(e, e);
-			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
+			log.warn(e.getClass().getSimpleName()+" [ISE]["+e.getCode()+"]: "+e.getMessage());
 			//log.debug(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			throw e;
 		}
 		catch(BadRequestException e) {
 			//XXX: do not log exception!
-			log.warn(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage());
+			log.warn(e.getClass().getSimpleName()+" [BRE]["+e.getCode()+"]: "+e.getMessage());
 			//log.debug(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			throw e;
 		}
