@@ -1722,6 +1722,9 @@ public class QueryOn extends AbstractHttpServlet {
 				log.warn("error validating query '"+relation+"': "+sqlWithNamedParams);
 			}
 			
+			// sets named parameters
+			reqspec.setNamedParameters(sql);
+			
 			sql.addOriginalParameters(reqspec);
 			
 			finalSql = sql.getFinalSql();
@@ -1866,10 +1869,7 @@ public class QueryOn extends AbstractHttpServlet {
 			reqspec.setNamedParameters(sql);
 			
 			sql.addOriginalParameters(reqspec);
-			/*for(int i=0;i<reqspec.params.size();i++) {
-				sql.bindParameterValues.add(reqspec.params.get(i));
-			}*/
-			//log.info("doExplain: params [#"+sql.bindParameterValues.size()+"]: "+sql.bindParameterValues);
+
 			ResultSet rs = feat.explainPlan(sql.getFinalSql(), sql.getParameterValues(), conn);
 			
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(),
@@ -3157,28 +3157,6 @@ public class QueryOn extends AbstractHttpServlet {
 		return false;
 	}
 	
-	/*
-	static void addOriginalParameters(RequestSpec reqspec, SQL sql) throws SQLException {
-		int informedParams = reqspec.params.size();
-		//XXX bind all or bind none?
-		//int bindParamsLoop = informedParams; //bind all
-		int bindParamsLoop = -1; // bind none
-		if(sql.originalBindParameterCount!=null) {
-			if(sql.originalBindParameterCount > informedParams) {
-				//XXX option to bind params with null?
-				throw new BadRequestException("Query '"+reqspec.object+"' needs "+sql.originalBindParameterCount+" parameters but "
-					+((informedParams>0)?"only "+informedParams:"none")
-					+((informedParams>1)?" were":" was")
-					+" informed");
-			}
-			bindParamsLoop = sql.originalBindParameterCount;
-		}
-		for(int i=0;i<bindParamsLoop;i++) {
-			sql.bindParameterValues.add(reqspec.params.get(i));
-		}
-	}
-	*/
-
 	protected void dumpResultSet(ResultSet rs, RequestSpec reqspec, String schemaName, String queryName, 
 			List<String> uniqueColumns, List<FK> importedFKs, List<Constraint> UKs,
 			boolean mayApplyLimitOffset, HttpServletResponse resp) 
