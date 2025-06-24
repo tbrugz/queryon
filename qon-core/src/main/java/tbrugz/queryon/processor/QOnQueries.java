@@ -11,10 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -232,6 +230,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		catch(RuntimeException e) {
 			UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), q, e.toString());
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
+			q.setValid(false);
 			//XXX add warning to response? throw exception if not from DB? return 0?
 			//if throw exc or return 0, will not be able to fix query later...
 			DBUtil.doRollback(conn, sp);
@@ -240,6 +239,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		catch(SQLException e) {
 			UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), q, e.toString());
 			log.warn("Error validating query '"+q.getQualifiedName()+"': "+e.toString().trim());
+			q.setValid(false);
 			DBUtil.doRollback(conn, sp);
 			//return 0;
 		}

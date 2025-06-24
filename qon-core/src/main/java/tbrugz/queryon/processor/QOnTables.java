@@ -68,7 +68,9 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	//static final String PIPE_SPLIT = "\\|";
 	
 	public static final String DEFAULT_TABLES_TABLE = "qon_tables";
-	
+
+	public static final boolean throwOnError = false;
+
 	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
 
 	Writer writer;
@@ -234,7 +236,10 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			String message = "addTable ["+tableName+"]: exception: "+e.getMessage().trim();
 			log.warn(message+"\nsql: "+sql);
 			log.debug(message+"\nsql: "+sql, e);
-			throw new BadRequestException(message, "\nsql: "+sql, e);
+			t.setValid(false);
+			if(throwOnError) {
+				throw new BadRequestException(message, "\nsql: "+sql, e);
+			}
 		}
 		
 		//log.info("pkColumnNames: ["+pkColumnNames+"]");
