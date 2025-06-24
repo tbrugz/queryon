@@ -15,6 +15,7 @@ import tbrugz.queryon.util.ShiroUtils;
 
 public class AuthActions {
 	
+	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(AuthActions.class);
 
 	final Properties prop;

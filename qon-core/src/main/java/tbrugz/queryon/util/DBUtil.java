@@ -3,7 +3,6 @@ package tbrugz.queryon.util;
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Savepoint;
@@ -325,7 +324,8 @@ public class DBUtil {
 		String sql = "select * from "+relationName;
 		try {
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			ResultSetMetaData rsmd = stmt.getMetaData();
+			//ResultSetMetaData rsmd = stmt.getMetaData();
+			stmt.getMetaData();
 			return true;
 			// or DatabaseMetaData.getTables(null, null, relationName, null) ?
 		}

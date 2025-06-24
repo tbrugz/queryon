@@ -2,7 +2,6 @@ package tbrugz.queryon.processor;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 

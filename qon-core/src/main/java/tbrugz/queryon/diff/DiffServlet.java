@@ -1,14 +1,10 @@
 package tbrugz.queryon.diff;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +22,6 @@ import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.exception.NotFoundException;
-import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
@@ -44,7 +39,6 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
 /*

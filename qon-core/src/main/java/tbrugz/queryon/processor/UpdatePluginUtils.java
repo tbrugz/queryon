@@ -16,6 +16,7 @@ public class UpdatePluginUtils {
 	
 	public static final String ATTR_INIT_WARNINGS_PREFIX = "qon-init-warnings";
 
+	@SuppressWarnings("unchecked")
 	static Map<String, String> getWarnings(ServletContext context, String warnKey) {
 		//String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
 		if(warnKey==null) {
@@ -29,7 +30,7 @@ public class UpdatePluginUtils {
 		return warnings;
 	}
 
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public static void putWarning(ServletContext context, String warnKey, String schemaName, String queryName, String warning) {
 		/*
 		//String warnKey = ATTR_QUERIES_WARNINGS_PREFIX+"."+modelId;
