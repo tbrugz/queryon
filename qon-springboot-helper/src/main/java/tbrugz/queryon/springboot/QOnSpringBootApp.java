@@ -6,6 +6,8 @@ import javax.servlet.ServletContextListener;
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
 import org.apache.shiro.web.servlet.ShiroFilter;
 
+//import org.keycloak.adapters.servlet.KeycloakOIDCFilter;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -21,7 +23,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 //@SpringBootApplication
 public class QOnSpringBootApp extends SpringBootServletInitializer {
 
-	protected static boolean loadQueryOnServletOnStartup = true;
+	protected static final boolean loadQueryOnServletOnStartup = true;
 	
 	public static void main(String[] args) {
 		SpringApplication.run(QOnSpringBootApp.class, args);
@@ -137,29 +139,37 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletDiffServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DiffServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletDataDiffServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DataDiffServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletDiff2QServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.Diff2QServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletDiffManyServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.diff.DiffManyServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	/*
 	@Bean
@@ -169,11 +179,13 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	}
 	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletProcessorServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.ProcessorServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletPagesServletBean() {
@@ -211,21 +223,55 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletWebDavServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.webdav.WebDavServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	// https://stackoverflow.com/questions/19825946/how-to-add-a-filter-class-in-spring-boot/30658752#30658752
+
+	/*
+	// optional Keycloak filter...
+	@Bean
+	public FilterRegistrationBean<KeycloakOIDCFilter> keycloakFilterRegistration() {
+		FilterRegistrationBean<KeycloakOIDCFilter> registration = new FilterRegistrationBean<KeycloakOIDCFilter>();
+		registration.setFilter(new KeycloakOIDCFilter());
+		registration.addUrlPatterns("/*");
+		registration.setName("KeycloakOIDCFilter");
+		registration.setOrder(10);
+		return registration;
+	}
+	*/
+
 	@Bean
 	public FilterRegistrationBean<ShiroFilter> shiroFilterRegistration() {
 		FilterRegistrationBean<ShiroFilter> registration = new FilterRegistrationBean<ShiroFilter>();
 		registration.setFilter(new ShiroFilter());
 		registration.addUrlPatterns("/*");
 		registration.setName("ShiroFilter");
-		registration.setOrder(1);
+		registration.setOrder(20);
 		return registration;
 	}
+
+	/*
+	@Bean
+	public FilterRegistrationBean<AccessLogFilter> accessLogFilterRegistration() {
+		FilterRegistrationBean<AccessLogFilter> registration = new FilterRegistrationBean<AccessLogFilter>();
+		registration.setFilter(new AccessLogFilter());
+		//registration.addUrlPatterns("/*");
+		registration.addServletNames("queryOn", "queryOnInstant", "queryOnSchemaInstant",
+				"pagesServlet", "markdownServlet", "swaggerServlet",
+				"ODataServlet", "graphQlQonServlet", "qonSoapServlet"
+				//"webDavServlet"
+				);
+		//infoServlet, authServlet
+		registration.setName("AccessLogFilter");
+		registration.setOrder(100);
+		return registration;
+	}
+	*/
 
 }

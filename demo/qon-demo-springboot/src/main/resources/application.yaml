@@ -47,6 +47,7 @@ logging:
         #tbrugz.queryon.util.ShiroUtils: DEBUG
         #tbrugz.sqldiff: DEBUG
         #tbrugz.sqldump.cdi: DEBUG
+        #tbrugz.sqldump.resultset.pivot: DEBUG
         #tbrugz.sqldump.util.ConnectionUtil: DEBUG
         #tbrugz.sqldump.util.Utils: DEBUG
         # verbose spring-boot web logging:

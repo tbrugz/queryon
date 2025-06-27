@@ -16,7 +16,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import tbrugz.queryon.springboot.DataSourceConfig;
 import tbrugz.queryon.springboot.QOnSpringBootApp;
 import tbrugz.queryon.springboot.SpringDataSourceProvider;
 
