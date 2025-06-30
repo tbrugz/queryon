@@ -40,7 +40,10 @@ See also: [BUILDING.md](BUILDING.md)
 artifacts
 ---------
 
+* snapshots repo (maven central): https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/queryon/0.9-SNAPSHOT/maven-metadata.xml
+<!--
 * snapshots repo: https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/
+-->
 
 
 demos - running

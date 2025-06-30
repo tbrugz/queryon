@@ -63,7 +63,7 @@
     <quarkus.version>2.16.12.Final</quarkus.version>
 
     <cxf.version>3.5.9</cxf.version>
-    <poi-ooxml.version>3.17</poi-ooxml.version>
+    <poi-ooxml.version>3.17</poi-ooxml.version> <!-- 5.3.0 -->
 
     <jetty.version>9.4.55.v20240627</jetty.version> <!-- jetty 10+ requires JVM 11+ -->
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->
@@ -147,6 +147,15 @@
 
   <distributionManagement>
     <snapshotRepository>
+      <id>central</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>central</id>
+      <url>hhttps://repo.maven.apache.org/maven2/</url>
+    </repository>
+    <!--
+    <snapshotRepository>
       <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
@@ -154,6 +163,7 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
+    -->
   </distributionManagement>
 
   <build>
@@ -665,7 +675,12 @@
 
   <repositories>
     <repository>
-      <!-- needed for sqldump snapshot releases -->
+      <id>central</id> <!-- maven-central-snapshots -->
+      <name>Maven Central</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
+    <!--
+    <repository>
       <id>sonatype-snapshots</id>
       <name>Sonatype Snapshots</name>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -673,6 +688,7 @@
         <enabled>false</enabled>
       </releases>
     </repository>
+    -->
     <!--
     <repository>
       <id>github-tbrugz-sqldump</id>
@@ -693,10 +709,11 @@
       </releases>
     </repository>
     -->
-    <!--<repository>
-      <id>central</id>
+    <repository>
+      <id>central-repo</id>
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
+    <!--
     <repository>
       <id>aduana</id>
       <url>https://maven.ontotext.com/content/repositories/aduna/</url>
