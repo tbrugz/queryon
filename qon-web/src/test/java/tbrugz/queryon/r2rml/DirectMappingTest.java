@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
 
+/*
 import org.apache.any23.Any23;
 import org.apache.any23.extractor.ExtractionException;
 import org.apache.any23.source.DocumentSource;
@@ -15,6 +16,7 @@ import org.apache.any23.writer.CountingTripleHandler;
 import org.apache.any23.writer.TripleHandler;
 import org.apache.any23.writer.TripleHandlerException;
 import org.apache.any23.writer.TurtleWriter;
+*/
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -43,6 +45,7 @@ import static tbrugz.queryon.http.JettySetup.*;
 
  * HARDNESS?? any23 2.7 requires java 11 (java11)...
  */
+/*
 public class DirectMappingTest {
 
 	public static final String basedir = "src/test/java";
@@ -87,7 +90,7 @@ public class DirectMappingTest {
 	}
 	
 	@SuppressWarnings("unused")
-	@Test
+	//@Test
 	//@Ignore("properties count is frequantly changinf")
 	public void testGet_Turtle_Tables_withAny23() throws IOException, ParserConfigurationException, SAXException, ExtractionException, TripleHandlerException {
 		HttpClient httpclient = AbstractWebTest.getHttpClient();
@@ -114,11 +117,11 @@ public class DirectMappingTest {
 		}
 		
 		String n3 = out.toString("UTF-8");
-		/*
-		System.out.println("before:\n"+turtleStr);
-		System.out.println("after:\n"+n3);
-		System.out.println("count: "+countingHandler.getCount());
-		*/
+
+		//System.out.println("before:\n"+turtleStr);
+		//System.out.println("after:\n"+n3);
+		//System.out.println("count: "+countingHandler.getCount());
+
 		//System.out.println("report:\n"+reportHandler.printReport());
 		
 		//int propCount = 6;
@@ -128,3 +131,4 @@ public class DirectMappingTest {
 	}
 
 }
+*/

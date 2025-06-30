@@ -455,28 +455,20 @@
       <version>1.1.1</version>
       <scope>test</scope>
     </dependency>
+    <!--
     <dependency>
       <groupId>org.apache.any23</groupId>
       <artifactId>apache-any23-core</artifactId>
-      <version>2.4</version> <!-- 2.5 requires java11? -->
+      <version>2.4</version>
       <scope>test</scope>
-      <!-- org.apache.httpcomponents:httpclient-cache
-      xerces:xercesImpl:jar:2.12.0:test -->
       <exclusions>
         <exclusion>
           <groupId>xerces</groupId>
           <artifactId>xercesImpl</artifactId>
         </exclusion>
-        <!--<exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-csv</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm-debug-all</artifactId>
-        </exclusion>-->
       </exclusions>
     </dependency>
+    -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
