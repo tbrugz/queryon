@@ -65,7 +65,7 @@
     <quarkus.version>2.16.12.Final</quarkus.version>
 
     <cxf.version>3.5.9</cxf.version>
-    <poi-ooxml.version>3.17</poi-ooxml.version> <!-- 5.3.0 -->
+    <poi-ooxml.version>5.3.0</poi-ooxml.version>
 
     <jetty.version>9.4.55.v20240627</jetty.version> <!-- jetty 10+ requires JVM 11+ -->
     <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->
