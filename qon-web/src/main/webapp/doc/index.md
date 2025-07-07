@@ -20,4 +20,4 @@ Misc info
 ---------
 
 Project website: [github.com/tbrugz/queryon](https://github.com/tbrugz/queryon)  
-License: [AGPLv3](http://www.gnu.org/licenses/agpl-3.0.html)
+License: [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html)

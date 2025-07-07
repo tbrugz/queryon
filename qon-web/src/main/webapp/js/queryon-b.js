@@ -47,6 +47,8 @@ function getDescription(obj, showSchemaName) {
 	return (obj.valid == "false" ? "&#10008; " : "")
 		+ ( (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null" && showSchemaName) ? obj.schemaName+"." : "")
 		+ obj.name
+		+ ( obj.relationType == "table" ? " &#9638;" : "" ) // "table" symbol
+		//+ ( obj.relationType == "table" ? " &#8862;" : "" )
 		+ ((obj.remarks!=null && obj.remarks!="" && obj.remarks!="null")?" - "+obj.remarks:"");
 }
 

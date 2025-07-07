@@ -87,7 +87,7 @@ Query commands
 ----------------
 
 May only be used inside query editor, not on saved queries. Does not bind parameters, and parameters are case-sensitive. Can't be validated.
-See [DatabaseMetaData's javadoc](http://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html).
+See [DatabaseMetaData's javadoc](https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html).
 
 * `$columns [ [[<schema pattern>.]<table>][.<column>] ]`
 * `$exportedkeys [ <schema pattern>[.<table>] ]`
@@ -116,7 +116,7 @@ The edges may have special properties, as follows:
 * `EDGE_COLOR` - edge color, value should be a valid [web color](https://en.wikipedia.org/wiki/Web_colors), e.g.: `#ccc`
 * `EDGE_WIDTH` - edge width
 
-Default implementation of graphs visualization uses the [Sigma.js javascript library](http://sigmajs.org/).
+Default implementation of graphs visualization uses the [Sigma.js javascript library](https://sigmajs.org/).
 
 **map**
 
@@ -130,4 +130,4 @@ Default implementation of maps visualization uses the [Google Maps API](https://
 
 Queries may be visualized as charts with any column that is numeric, so no special column names need to be used.
 
-Default implementation of charts visualization uses the [d3.js javascript library](http://d3js.org/).
+Default implementation of charts visualization uses the [d3.js javascript library](https://d3js.org/).
