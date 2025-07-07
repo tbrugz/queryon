@@ -10,6 +10,15 @@ var authInfo = {
 	loaded: false  // should be set to 'true' after loading from ajax
 };
 
+function isAuthServiceActive() {
+	return isServiceActive("Auth");
+	/*
+	if(typeof(servicesInfo.Auth) == 'string') {
+		return true;
+	}
+	*/
+}
+
 function loadAuthInfo() { //callback?
 	//var url = "qauth/currentUser?ts=" + Date.now();
 	var url = "qinfo/auth?ts=" + Date.now();
@@ -48,17 +57,34 @@ function loadAuthInfo() { //callback?
 }
 
 function refreshAuthInfo() {
+	var authActive = isAuthServiceActive();
+
 	var user = document.getElementById('username');
-	user.innerHTML = authInfo.username || '';
-	var auth = document.getElementById('authaction');
-	if(auth) {
+	if(user) {
+		user.innerHTML = authInfo.username || '';
 		if(! authInfo.authenticated) {
-			auth.innerHTML = '<a href="'+authGetLoginUrl()+'">login</a>';
 			user.style.display = 'none';
 		}
 		else {
-			auth.innerHTML = '<a href="'+authGetLogoutUrl()+'">logout</a>';
 			user.style.display = 'inline';
+		}
+	}
+	else {
+		console.log("element 'username' not available");
+	}
+
+	var auth = document.getElementById('authaction');
+	if(auth) {
+		if(authActive) {
+			if(! authInfo.authenticated) {
+				auth.innerHTML = '<a href="'+authGetLoginUrl()+'">login</a>';
+			}
+			else {
+				auth.innerHTML = '<a href="'+authGetLogoutUrl()+'">logout</a>';
+			}
+		}
+		else {
+			auth.innerHTML = '';
 		}
 	}
 	else {
@@ -83,10 +109,12 @@ function refreshAuthInfo() {
 }
 
 function authGetLoginUrl() {
+	//if(!isAuthServiceActive()) { return null; }
 	return 'login.html?return='+encodeURIComponent(window.location.href);
 }
 
 function authGetLogoutUrl() {
+	//if(!isAuthServiceActive()) { return null; }
 	return 'qauth/logout?return='+encodeURIComponent(window.location.href);
 }
 

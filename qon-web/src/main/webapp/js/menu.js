@@ -84,7 +84,7 @@ function createMenuContent(addCloseBtn) {
 	var innerContent = '';
 	//var isAdmin = typeof authInfo != "undefined" && typeof authInfo.isAdmin != "undefined" && authInfo.isAdmin;
 	var isDeveloper = typeof authInfo != "undefined" && typeof authInfo.isDev != "undefined" && authInfo.isDev;
-	var hasLoginLink = document.getElementById('authaction') != null;
+	var hasLoginLink = document.getElementById('authaction') != null; //XXX ??
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
 	var path = location.pathname;
 	//console.log('typeof authInfo =', (typeof authInfo) ," typeof modelsInfo =", (typeof modelsInfo));
