@@ -3,7 +3,7 @@ console.log("table.js loaded");
 function getQueryString() {
 	var urlpl = document.getElementById("url-permalink");
 	var href = urlpl ? urlpl.href : location.search;
-	return href.indexOf("?")==-1?"":href.substr(href.indexOf("?"));
+	return href.indexOf("?")==-1?"":href.substring(href.indexOf("?"));
 }
 
 //see: http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
@@ -23,6 +23,10 @@ function removeLimitOffset(queryString) {
 	queryString = queryString.replace(re3, '&');
 	if(queryString=='?') { return ''; }
 	return queryString;
+}
+
+function isQonUIActive() {
+	return (typeof downloadExtFilter !== 'undefined');
 }
 
 function createBlobLinks() {
@@ -291,6 +295,18 @@ function applyTableStyles() {
 	rule.style.top = row1.offsetHeight+"px";
 }
 
+function checkPermalinkHrefs() {
+	if(isQonUIActive()) { return; }
+	// check if location.pathname matches ".*q/<tablename>.htmlx"?
+	const nl = document.querySelectorAll('table a[href^="q/"]');
+	var count = 0;
+	nl.forEach(function(e) {
+		e.setAttribute("href", e.getAttribute("href").substring(2));
+		count++;
+	});
+	console.log("checkPermalinkHrefs: ",count,"'q/' links updated");
+}
+
 function doTableOnLoad() {
 	var queryString = getQueryString();
 	var skipMerge = getParameterByName("skipMerge", queryString);
@@ -300,6 +316,7 @@ function doTableOnLoad() {
 		mergeDimensions();
 	}
 	applyTableStyles();
+	checkPermalinkHrefs();
 
 	console.log("table.js: doTableOnLoad() finished");
 }

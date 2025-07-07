@@ -499,6 +499,7 @@
 			var syntaxExt = "."+settings["syntax.fileextensions"][i];
 			if(obj.endsWith(syntaxExt)) {
 				//console.log("innerHrefInterceptor: endsWith=", syntaxExt);
+				if(syntaxExt != ".htmlx") { return; }
 				obj = obj.substring(0, obj.length - syntaxExt.length);
 			}
 		}
