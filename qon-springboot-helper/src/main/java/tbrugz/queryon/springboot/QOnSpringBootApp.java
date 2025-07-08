@@ -104,6 +104,7 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	
 	// https://stackoverflow.com/a/20939923/616413
 	// http://websystique.com/springmvc/spring-mvc-4-file-upload-example-using-multipartconfigelement/
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletQueryOnBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOn();
@@ -114,7 +115,9 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		}
 		return bean;
 	}
+	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletInfoServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.api.InfoServlet();
@@ -126,7 +129,9 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.auth.AuthServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletQueryOnInstantBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOnInstant();
@@ -138,6 +143,7 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOnSchemaInstant();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	/*
 	@Bean
@@ -187,6 +193,7 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	}
 	*/
 
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletPagesServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.PagesServlet();
@@ -222,6 +229,7 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.soap.QonSoapServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	/*
 	@Bean

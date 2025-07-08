@@ -1,22 +1,26 @@
 package tbrugz.queryon.springboot.demo;
 
-import java.util.Date;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.shiro.web.env.EnvironmentLoaderListener;
+import org.apache.shiro.web.servlet.ShiroFilter;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.springboot.QOnSpringBootApp;
+import tbrugz.queryon.springboot.SpringBootUtils;
 import tbrugz.queryon.springboot.SpringDataSourceProvider;
 
 /*
@@ -41,14 +45,15 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 	
 	public static void main(String[] args) {
 		applicationContext = SpringApplication.run(QOnApp.class, args);
-		showAppInfo();
-		displayServletBeans();
+		SpringBootUtils.showAppInfo(applicationContext);
+		SpringBootUtils.displayServletBeans(applicationContext);
 	}
 	
 	public static ApplicationContext getApplicationContext() {
 		return applicationContext;
 	}
 
+	/*
 	public static void showAppInfo() {
 		ApplicationContext ctx = getApplicationContext();
 		log.info("showAppInfo: appName = " + ctx.getId());
@@ -73,6 +78,7 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 			}
 		}
 	}
+	*/
 	
 	@Bean
 	//@Primary
@@ -153,7 +159,8 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 	public ServletContextListener shiroListener() {
 		return new EnvironmentLoaderListener();
 	}
-	
+	*/
+
 	// https://stackoverflow.com/a/20939923/616413
 	@Bean
 	public ServletRegistrationBean servletQueryOnBean() {
@@ -175,6 +182,7 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
 
+	/*
 	@Bean
 	public ServletRegistrationBean servletQueryOnInstantBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOnInstant();
@@ -212,15 +220,14 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.Cool303RedirectionServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
 	@Bean
 	public ServletRegistrationBean servletProcessorServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.ProcessorServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
-	*/
 
-	/*
 	@Bean
 	public ServletRegistrationBean servletPagesServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.PagesServlet();
@@ -257,12 +264,15 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
 
+	/*
 	@Bean
 	public ServletRegistrationBean servletWebDavServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.webdav.WebDavServlet();
 		return new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
 
+	/*
 	// https://stackoverflow.com/questions/19825946/how-to-add-a-filter-class-in-spring-boot/30658752#30658752
 	@Bean
 	public FilterRegistrationBean shiroFilterRegistration() {

@@ -3,16 +3,19 @@ var menucontent = null;
 //var nav = null;
 
 function loadMenu() {
-	var logo = document.getElementById('logo');
-	var nav = logo.parentNode;
+	var menuicon = document.getElementById('menuicon');
+	if(!menuicon) {
+		var logo = document.getElementById('logo');
+		var nav = logo.parentNode;
 	
-	var menu = document.createElement("i"); //<i class="fa fa-bars"></i>
-	menu.setAttribute("class", "fa fa-bars");
-	menu.setAttribute("onclick", "toggleMenu()");
-	menu.setAttribute("title", "show/hide menu");
-	menu.setAttribute("id", "menuicon");
+		var menu = document.createElement("i"); //<i class="fa fa-bars"></i>
+		menu.setAttribute("class", "fa fa-bars");
+		menu.setAttribute("onclick", "toggleMenu()");
+		menu.setAttribute("title", "show/hide menu");
+		menu.setAttribute("id", "menuicon");
 
-	nav.insertBefore(menu,logo);
+		nav.insertBefore(menu,logo);
+	}
 	
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", loadMenuContent);
@@ -87,7 +90,7 @@ function createMenuContent(addCloseBtn) {
 	var hasLoginLink = document.getElementById('authaction') != null; //XXX ??
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
 	var path = location.pathname;
-	//console.log('typeof authInfo =', (typeof authInfo) ," typeof modelsInfo =", (typeof modelsInfo));
+	console.log('typeof authInfo =', (typeof authInfo) ," typeof modelsInfo =", (typeof modelsInfo));
 	
 	for(var i=0;i<lis.length;i++) {
 		var li = lis[i];
@@ -107,7 +110,7 @@ function createMenuContent(addCloseBtn) {
 					continue;
 				}
 				else {
-					//console.log("service", service, "active");
+					console.log("service", service, "active");
 				}
 			}
 			
@@ -122,7 +125,7 @@ function createMenuContent(addCloseBtn) {
 			}
 			
 			var currentModelId = getCurrentModelId();
-			//console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
+			console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
 			if(path.endsWith(hrefCurrentLike)) {
 				li.classList.add("current");
 			}
