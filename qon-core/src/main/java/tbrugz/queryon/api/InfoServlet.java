@@ -161,6 +161,8 @@ public class InfoServlet extends AbstractHttpServlet {
 		
 		ret.put("update-plugins", updatePluginsMap);
 
+		ret.put("app-context", getServletContext().getContextPath() + "/");
+
 		return ret;
 	}
 	

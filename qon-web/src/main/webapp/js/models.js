@@ -1,4 +1,5 @@
 
+var qonAppContext = null;
 var modelsInfo = null;
 var servicesInfo = null;
 var updatePluginsInfo = null;
@@ -28,7 +29,10 @@ function loadModelsContent(oEvent) {
 		if(json["update-plugins"]) {
 			updatePluginsInfo = json["update-plugins"];
 		}
-		//console.log('modelsInfo', modelsInfo);
+		if(json["app-context"]) {
+			qonAppContext = json["app-context"];
+		}
+		//console.log('loadModelsContent: json:', json);
 		/*if(json.models.length>1) {
 			document.getElementById('model').parentNode.style.display = 'inline-block';
 		}

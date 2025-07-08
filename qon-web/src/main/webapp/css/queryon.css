@@ -17,6 +17,10 @@ h1,h2,h3 {
 	margin-left: 5px;
 }
 
+#logolink {
+	text-decoration: none;
+}
+
 /* table, td, th styles already on table.css - table.css takes precedence */
 table {
 	border-spacing: 0;
