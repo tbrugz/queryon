@@ -69,7 +69,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	
 	public static final String DEFAULT_TABLES_TABLE = "qon_tables";
 
-	public static final boolean throwOnError = false;
+	public static final boolean throwOnError = true;
 
 	public static StringDecorator sqlStringValuesDecorator = new StringQuoterEscaperDecorator("'");
 
