@@ -48,6 +48,7 @@ import tbrugz.sqldump.util.ConnectionUtil;
  * TODO: 'instant' servlets SHOULD NOT modify model, right?
  */
 public class QueryOnInstant extends QueryOn {
+
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnInstant.class);
 	

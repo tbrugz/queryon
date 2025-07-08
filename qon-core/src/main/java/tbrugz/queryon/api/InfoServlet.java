@@ -111,11 +111,15 @@ public class InfoServlet extends AbstractHttpServlet {
 		Set<String> modelSet = SchemaModelUtils.getModelIds(getServletContext());
 		ret.put("models", modelSet);
 		
-		String[] endpoints = { "QueryOn", "QueryOnSchema", "Auth",
-				"Diff", "QonPages", "Swagger",
+		String[] endpoints = { "QueryOn", "QueryOnSchema", //"QueryOnInstant",
+				"Auth",
+				"Diff", // DataDiffServlet, Diff2QServlet, DiffManyServlet
+				"QonPages", "Swagger",
 				"OData", "GraphQL", "Soap" };
-		String[] classNames = { "queryon.QueryOn", "QueryOnSchemaInstant", "auth.AuthServlet",
-				"diff.DiffServlet", "PagesServlet", "SwaggerServlet",
+		String[] classNames = { "queryon.QueryOn", "QueryOnSchemaInstant", //"QueryOnInstant",
+				"auth.AuthServlet",
+				"diff.DiffServlet", //...
+				"PagesServlet", "SwaggerServlet",
 				"ODataServlet", "GraphQlQonServlet", "QonSoapServlet" };
 		Map<String, ? extends ServletRegistration> servletRegs = getServletContext().getServletRegistrations();
 
@@ -124,8 +128,21 @@ public class InfoServlet extends AbstractHttpServlet {
 			for(Map.Entry<String, ? extends ServletRegistration> sre: servletRegs.entrySet()) {
 				ServletRegistration sr = sre.getValue();
 				if(sr.getClassName().endsWith(classNames[i])) {
-					String url = sr.getMappings().iterator().next();
-					serviceEndpoints.put(endpoints[i], url);
+					ArrayList<String> urls = new ArrayList<>();
+					for(String url: sr.getMappings()) {
+						urls.add(url);
+					}
+					if(urls.size()>=1) {
+						serviceEndpoints.put(endpoints[i], urls.get(0));
+						if(urls.size()>1) {
+							log.info("endpoint '"+endpoints[i]+"' with more than 1 url: "+urls);
+						}
+					}
+					/*
+					else {
+						log.info("endpoint '"+endpoints[i]+"' with no url");
+					}
+					*/
 					//System.out.println("- "+endpoints[i]+":: "+sre.getKey()+": "+sr.getClassName()+" / "+sr.getName()+" / "+url);
 				}
 			}

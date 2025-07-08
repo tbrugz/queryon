@@ -318,6 +318,7 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	static final String DEFAULT_OUTPUT_SYNTAX = "html";
 	
+	/*
 	@Deprecated
 	public static final String ATTR_PROP = QOnContextUtils.ATTR_PROP;
 	@Deprecated
@@ -326,11 +327,14 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String ATTR_DEFAULT_MODEL = SchemaModelUtils.ATTR_DEFAULT_MODEL;
 	@Deprecated
 	public static final String ATTR_SCHEMAS_MAP = QOnContextUtils.ATTR_SCHEMAS_MAP;
+	*/
 	public static final String ATTR_INIT_ERRORS = "initerrors";
+	/*
 	@Deprecated
 	public static final String ATTR_DUMP_SYNTAX_UTILS = QOnContextUtils.ATTR_DUMP_SYNTAX_UTILS;
 	@Deprecated
 	public static final String ATTR_UPDATE_PLUGINS = QOnContextUtils.ATTR_UPDATE_PLUGINS;
+	*/
 	
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_HEAD = "HEAD";
