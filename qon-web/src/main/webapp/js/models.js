@@ -19,19 +19,7 @@ function loadModelsContent(oEvent) {
 	}
 	else {
 		var json = JSON.parse(txt);
-		if(json.models) {
-			modelsInfo = json.models;
-			//loadSelect(json.models, 'model');
-		}
-		if(json.services) {
-			servicesInfo = json.services;
-		}
-		if(json["update-plugins"]) {
-			updatePluginsInfo = json["update-plugins"];
-		}
-		if(json["app-context"]) {
-			qonAppContext = json["app-context"];
-		}
+		updateEnvVars(json);
 		//console.log('loadModelsContent: json:', json);
 		/*if(json.models.length>1) {
 			document.getElementById('model').parentNode.style.display = 'inline-block';
@@ -44,6 +32,23 @@ function loadModelsContent(oEvent) {
 	
 	if(typeof loadModelsContentCallback === 'function') {
 		loadModelsContentCallback();
+	}
+}
+
+function updateEnvVars(json) {
+	//console.log("updateEnvVars, json:", json);
+	if(json.models) {
+		modelsInfo = json.models;
+		//loadSelect(json.models, 'model');
+	}
+	if(json.services) {
+		servicesInfo = json.services;
+	}
+	if(json["update-plugins"]) {
+		updatePluginsInfo = json["update-plugins"];
+	}
+	if(json["app-context"]) {
+		qonAppContext = json["app-context"];
 	}
 }
 
