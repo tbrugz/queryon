@@ -230,4 +230,12 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
     }
     */
 
+    public String getPrincipalSuffix() {
+        return principalSuffix;
+    }
+
+    public void setPrincipalSuffix(String s) {
+        this.principalSuffix = s;
+    }
+
 }
