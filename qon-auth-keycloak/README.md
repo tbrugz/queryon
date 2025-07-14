@@ -4,6 +4,12 @@ qon-auth-keycloak
 
 Optional module to integrate Keycloak (Java servlet filter adapter) with Queryon/Shiro.
 
+Note about Keycloak Servlet Filter deprecation:
+<https://www.keycloak.org/2022/02/adapter-deprecation>.
+
+Source for Keycloak Servlet Filter:
+<https://github.com/keycloak/keycloak/tree/archive/release/24.0/adapters/oidc/servlet-filter>.
+
 
 adding Keycloak integration
 -----

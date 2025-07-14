@@ -277,6 +277,8 @@ public class InfoServlet extends AbstractHttpServlet {
 				//, null, null
 				};
 		
+		// XXX extra exposed properties based on property (queryon.InfoServlet.xtra-exposed-properties)
+		
 		if(exposedKeys.length!=defaultValues.length) {
 			throw new InternalServerException("exposedKeys.length ["+exposedKeys.length+"] != defaultValues.length ["+defaultValues.length+"]");
 		}

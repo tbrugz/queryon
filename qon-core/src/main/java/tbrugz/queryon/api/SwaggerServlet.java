@@ -120,7 +120,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		}
 		
 		swagger.put("host", host);
-		swagger.put("basePath", contextPath + "/q");
+		swagger.put("basePath", contextPath + "/q"); //XXX check for QueryOnServlet mapping
 		
 		ServletContext context = req.getServletContext();
 		Properties prop = QOnContextUtils.getProperties(getServletContext());
