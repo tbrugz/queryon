@@ -111,6 +111,11 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+      </plugin>
+
       <!-- <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -204,6 +209,16 @@
       <version>${servlet-api.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <!-- jakarta ee: https://jakarta.ee/specifications/servlet/ -->
+    <!--
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>${jakarta.servlet-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    -->
     <!-- <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
