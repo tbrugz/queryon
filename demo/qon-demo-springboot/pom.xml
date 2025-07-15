@@ -23,7 +23,7 @@
 
 	<properties>
 		<maven.deploy.skip>true</maven.deploy.skip>
-
+		<maven-enforcer-plugin.requireJavaVersion>17</maven-enforcer-plugin.requireJavaVersion>
 		<!--<qon.version>0.8-SNAPSHOT</qon.version>-->
 		<!--
 		<queryon.version>0.7-SNAPSHOT</queryon.version>

@@ -27,6 +27,7 @@
 	</parent>-->
 
 	<properties>
+		<maven-enforcer-plugin.requireJavaVersion>17</maven-enforcer-plugin.requireJavaVersion>
 	</properties>
 
 	<dependencies>
