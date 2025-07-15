@@ -121,7 +121,7 @@
     <module>qon-auth-keycloak</module>
     <module>qon-graphql</module>
     <module>qon-soap</module>
-    <module>qon-springboot-helper</module>
+    <!--<module>qon-springboot-helper</module>-->
     <module>qon-web</module>
     <module>demo</module>
     <module>demo/qon-demo-static</module>
@@ -129,7 +129,7 @@
     <module>demo/qon-demo-dbn</module>
     <module>demo/qon-demo-pg</module>
     <module>demo/qon-demo-anydb</module>
-    <module>demo/qon-demo-springboot</module>
+    <!--<module>demo/qon-demo-springboot</module>-->
     <!--<module>demo/qon-demo-quarkus</module>-->
     <!--<module>demo/qon-demo-micronaut</module>-->
   </modules>
@@ -732,6 +732,16 @@
   </dependencies>
 
   <profiles>
+    <profile>
+      <id>jdk17</id>
+      <activation>
+        <jdk>[17</jdk>
+      </activation>
+      <modules>
+        <module>qon-springboot-helper</module>
+        <module>demo/qon-demo-springboot</module>
+      </modules>
+    </profile>
     <profile>
       <id>release</id>
       <build>
