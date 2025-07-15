@@ -291,6 +291,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<!--
+		springboot 3.5 tests require this
+		https://stackoverflow.com/questions/79640685/cannot-build-project-after-upgrading-spring-boot-to-3-5
+		-->
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<!--<version>1.12.2</version>-->
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
