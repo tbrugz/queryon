@@ -7,10 +7,10 @@
 
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
-		<!--<artifactId>queryon</artifactId>-->
-		<artifactId>qon-demo-parent</artifactId>
+		<artifactId>queryon</artifactId>
+		<!--<artifactId>qon-demo-parent</artifactId>-->
 		<version>0.9-SNAPSHOT</version>
-		<!--<relativePath>../../pom.xml</relativePath>-->
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<!-- https://spring.io/guides/gs/spring-boot/ -->
@@ -22,7 +22,7 @@
 	</parent>-->
 
 	<properties>
-		<!--<maven.deploy.skip>true</maven.deploy.skip>-->
+		<maven.deploy.skip>true</maven.deploy.skip>
 
 		<!--<qon.version>0.8-SNAPSHOT</qon.version>-->
 		<!--
@@ -74,18 +74,47 @@
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-core</artifactId>
+			<classifier>jakarta</classifier>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.shiro</groupId>
+					<artifactId>shiro-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-graphql</artifactId>
+			<classifier>jakarta</classifier>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bitbucket.tbrugz</groupId>
+					<artifactId>qon-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.shiro</groupId>
+					<artifactId>shiro-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
 			<artifactId>qon-soap</artifactId>
+			<classifier>jakarta</classifier>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bitbucket.tbrugz</groupId>
+					<artifactId>qon-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.shiro</groupId>
+					<artifactId>shiro-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.bitbucket.tbrugz</groupId>
@@ -116,11 +145,13 @@
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-core</artifactId>
+			<classifier>jakarta</classifier>
 			<version>${shiro.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-web</artifactId>
+			<classifier>jakarta</classifier>
 			<version>${shiro.web.version}</version>
 		</dependency>
 

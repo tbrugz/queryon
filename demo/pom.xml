@@ -20,7 +20,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.deploy.skip>true</maven.deploy.skip>
-		<oracle-jdbc.version>21.9.0.0</oracle-jdbc.version>
 	</properties>
 
 	<build>

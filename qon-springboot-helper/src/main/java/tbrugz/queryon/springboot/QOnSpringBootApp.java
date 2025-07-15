@@ -1,7 +1,7 @@
 package tbrugz.queryon.springboot;
 
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.ServletContextListener;
 
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
 import org.apache.shiro.web.servlet.ShiroFilter;
