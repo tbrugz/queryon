@@ -54,14 +54,19 @@ function updateEnvVars(json) {
 
 //--- ui functions
 
-function getCurrentModelId() {
+function getCurrentModelElement() {
 	var elem = document.getElementById('model');
 	if(!elem) {
 		elem = document.getElementById('modelTarget'); // diff<*>.html
-		if(!elem) {
-			console.warn("getCurrentModelId: element 'model' undefined...");
-			return;
-		}
+	}
+	return elem;
+}
+
+function getCurrentModelId() {
+	var elem = getCurrentModelElement();
+	if(!elem) {
+		console.warn("getCurrentModelId: element 'model' undefined...");
+		return;
 	}
 	var model = elem.value;
 	return model=="null"?null:model;

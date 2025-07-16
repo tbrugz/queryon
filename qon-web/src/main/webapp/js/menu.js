@@ -90,7 +90,7 @@ function createMenuContent(addCloseBtn) {
 	var hasLoginLink = document.getElementById('authaction') != null; //XXX ??
 	var isMultiModel = (typeof modelsInfo != "undefined" && modelsInfo != null) ? modelsInfo.length>1 : true;
 	var path = location.pathname;
-	console.log('typeof authInfo =', (typeof authInfo) ," typeof modelsInfo =", (typeof modelsInfo));
+	//console.log('typeof authInfo =', (typeof authInfo) ," typeof modelsInfo =", (typeof modelsInfo));
 	
 	for(var i=0;i<lis.length;i++) {
 		var li = lis[i];
@@ -106,11 +106,11 @@ function createMenuContent(addCloseBtn) {
 			var service = li.getAttribute('services');
 			if(service) {
 				if(!isServiceActive(service)) {
-					console.log("service", service, "not active");
+					//console.log("service", service, "not active");
 					continue;
 				}
 				else {
-					console.log("service", service, "active");
+					//console.log("service", service, "active");
 				}
 			}
 			
@@ -124,8 +124,11 @@ function createMenuContent(addCloseBtn) {
 				hrefCurrentLike = hrefCurrentLike.substring(0, hrefCurrentLike.indexOf('?'));
 			}
 			
-			var currentModelId = getCurrentModelId();
-			console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
+			var currentModelId = null;
+			if(getCurrentModelElement()) {
+				currentModelId = getCurrentModelId();
+			}
+			//console.log("menu["+i+"]: path=",path," ; href=",href,' ; hLike=',hrefCurrentLike);
 			if(path.endsWith(hrefCurrentLike)) {
 				li.classList.add("current");
 			}
