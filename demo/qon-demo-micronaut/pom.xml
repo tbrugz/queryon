@@ -149,7 +149,7 @@
     -->
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
-      <artifactId>sqldump</artifactId>
+      <artifactId>sqldump-core</artifactId>
       <version>${sqldump.version}</version>
       <scope>compile</scope>
       <exclusions>

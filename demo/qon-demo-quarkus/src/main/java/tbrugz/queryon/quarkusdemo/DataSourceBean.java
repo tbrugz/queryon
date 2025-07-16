@@ -1,8 +1,8 @@
 package tbrugz.queryon.quarkusdemo;
 
-//import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+//import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;

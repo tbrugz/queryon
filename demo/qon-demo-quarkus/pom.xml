@@ -87,30 +87,63 @@
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>qon-core</artifactId>
+			<classifier>jakarta</classifier>
       <version>${project.parent.version}</version>
       <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.shiro</groupId>
+          <artifactId>shiro-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>qon-graphql</artifactId>
+			<classifier>jakarta</classifier>
       <version>${project.parent.version}</version>
       <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bitbucket.tbrugz</groupId>
+          <artifactId>qon-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.shiro</groupId>
+          <artifactId>shiro-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>qon-soap</artifactId>
+			<classifier>jakarta</classifier>
       <version>${project.parent.version}</version>
       <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bitbucket.tbrugz</groupId>
+          <artifactId>qon-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.shiro</groupId>
+          <artifactId>shiro-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
-      <artifactId>sqldump</artifactId>
+      <artifactId>sqldump-core</artifactId>
       <version>${sqldump.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
           <artifactId>kmlutils</artifactId>
           <groupId>org.bitbucket.tbrugz</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>javax.enterprise</artifactId>
+          <groupId>cdi-api</groupId>
         </exclusion>
         <!--<exclusion>
           <groupId>javax.xml.bind</groupId>
@@ -121,6 +154,7 @@
     <dependency>
       <groupId>org.apache.shiro</groupId>
       <artifactId>shiro-web</artifactId>
+			<classifier>jakarta</classifier>
       <version>${shiro.web.version}</version>
       <scope>runtime</scope>
     </dependency>

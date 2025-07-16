@@ -747,7 +747,7 @@
       <modules>
         <module>qon-springboot-helper</module>
         <module>demo/qon-demo-springboot</module>
-        <!--<module>demo/qon-demo-quarkus</module>-->
+        <module>demo/qon-demo-quarkus</module>
       </modules>
     </profile>
     <profile>
