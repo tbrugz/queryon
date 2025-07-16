@@ -15,11 +15,13 @@
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
+    <!--
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    -->
     <maven.deploy.skip>true</maven.deploy.skip>
-    <maven-enforcer-plugin.requireJavaVersion>11</maven-enforcer-plugin.requireJavaVersion>
-    <maven-enforcer-plugin.requireMavenVersion>3.5.3</maven-enforcer-plugin.requireMavenVersion>
+    <maven-enforcer-plugin.requireJavaVersion>17</maven-enforcer-plugin.requireJavaVersion>
+    <maven-enforcer-plugin.requireMavenVersion>3.8.2</maven-enforcer-plugin.requireMavenVersion>
     <!--
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
