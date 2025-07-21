@@ -1,7 +1,13 @@
 
-queryon 0.9 [xxxx-xx-xx]
+queryon 0.9 [2025-07-xx]
 -----------
-- **java 8+** required
+* **java 8+** required [2024-10-30]
+* springboot/helper: added SpringDataSourceProvider [2024-12-03]
+* qon/qon-web: added permission 'readQuery' [2025-03-19]
+* updateplugin: show invalid queries & tables [2025-06-24]
+* qon-springboot-helper: better defaults, added SpringBootUtils [2025-06-27]
+* deploy: using maven central for snapshots [2025-06-30]
+* api: InfoServlet: getEnv: added 'app-context' [2025-07-08]
 
 
 queryon 0.8 [2024-10-29]
