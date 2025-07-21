@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>qon-demo-parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>0.9</version>
 	</parent>
 	
 	<artifactId>qon-demo-pg</artifactId>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.9</version>
 	<packaging>war</packaging>
 	<name>qon-demo-pg</name>
 

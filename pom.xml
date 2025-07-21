@@ -7,7 +7,7 @@
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>queryon</artifactId>
   <packaging>pom</packaging>
-  <version>0.9-SNAPSHOT</version>
+  <version>0.9</version>
 
   <name>queryon</name>
   <description>
