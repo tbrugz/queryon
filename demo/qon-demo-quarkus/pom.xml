@@ -6,12 +6,12 @@
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>queryon</artifactId>
     <!--<artifactId>qon-demo-parent</artifactId>-->
-    <version>0.9-SNAPSHOT</version>
+    <version>0.10-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>qon-demo-quarkus</artifactId>
-  <version>0.9-SNAPSHOT</version>
+  <version>0.10-SNAPSHOT</version>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>

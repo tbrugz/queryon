@@ -19,7 +19,7 @@ deploy to sonatype
 <!--`mvn clean deploy -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  -->
 
 artifacts at snapshot repo:
-`https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/queryon/0.9-SNAPSHOT/maven-metadata.xml`
+`https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/queryon/maven-metadata.xml`
 <!-- `https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/` -->
 
 
