@@ -19,19 +19,7 @@ function loadModelsContent(oEvent) {
 	}
 	else {
 		var json = JSON.parse(txt);
-		if(json.models) {
-			modelsInfo = json.models;
-			//loadSelect(json.models, 'model');
-		}
-		if(json.services) {
-			servicesInfo = json.services;
-		}
-		if(json["update-plugins"]) {
-			updatePluginsInfo = json["update-plugins"];
-		}
-		if(json["app-context"]) {
-			qonAppContext = json["app-context"];
-		}
+		updateEnvVars(json);
 		//console.log('loadModelsContent: json:', json);
 		/*if(json.models.length>1) {
 			document.getElementById('model').parentNode.style.display = 'inline-block';
@@ -47,16 +35,38 @@ function loadModelsContent(oEvent) {
 	}
 }
 
+function updateEnvVars(json) {
+	//console.log("updateEnvVars, json:", json);
+	if(json.models) {
+		modelsInfo = json.models;
+		//loadSelect(json.models, 'model');
+	}
+	if(json.services) {
+		servicesInfo = json.services;
+	}
+	if(json["update-plugins"]) {
+		updatePluginsInfo = json["update-plugins"];
+	}
+	if(json["app-context"]) {
+		qonAppContext = json["app-context"];
+	}
+}
+
 //--- ui functions
 
-function getCurrentModelId() {
+function getCurrentModelElement() {
 	var elem = document.getElementById('model');
 	if(!elem) {
 		elem = document.getElementById('modelTarget'); // diff<*>.html
-		if(!elem) {
-			console.warn("getCurrentModelId: element 'model' undefined...");
-			return;
-		}
+	}
+	return elem;
+}
+
+function getCurrentModelId() {
+	var elem = getCurrentModelElement();
+	if(!elem) {
+		console.warn("getCurrentModelId: element 'model' undefined...");
+		return;
 	}
 	var model = elem.value;
 	return model=="null"?null:model;

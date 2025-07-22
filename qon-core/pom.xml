@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>queryon</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.10-SNAPSHOT</version>
   </parent>
   
   <artifactId>qon-core</artifactId>
   <packaging>jar</packaging>
-  <version>0.9-SNAPSHOT</version>
+  <version>0.10-SNAPSHOT</version>
 
   <name>qon-core</name>
 

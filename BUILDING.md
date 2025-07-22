@@ -2,7 +2,7 @@
 building queryon
 ================
 
-Dependencies: java 1.6+ ; maven 3+
+Dependencies: java 8+ ; maven 3+
 
 
 Building
@@ -40,6 +40,11 @@ maven profiles
 
 * `thorntail` - package thorntail demos
 
+
+generate changelog (git)
+-----
+
+`git log --pretty=format:"* %s [%ad]%C(yellow)%d%Creset" --date=short --reverse v0.8^^..`
 
 
 other useful maven goals

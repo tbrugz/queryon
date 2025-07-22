@@ -11,9 +11,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * @see http://www.w3.org/TR/cooluris/
+ * see: http://www.w3.org/TR/cooluris/
  * 
- * @author <tbrugz@gmail.com>
+ * @author tbrugz@gmail.com
  */
 /*
  * TODO: init params: add current-server, current-port and/or current-context to path

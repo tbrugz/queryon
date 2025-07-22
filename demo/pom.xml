@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>queryon</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>0.10-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>qon-demo-parent</artifactId>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.10-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<!--<name>qon-demo-parent</name>-->
+	<name>qon-demo-parent</name>
 
 	<!--
 	<modules>

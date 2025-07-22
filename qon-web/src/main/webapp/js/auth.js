@@ -50,7 +50,13 @@ function loadAuthInfo() { //callback?
 			makeHrefs();
 		}
 		else {
-			console.log('auth.js: function makeHrefs() not present...');
+			if(typeof refreshAuthInfo === 'function') {
+				console.log('auth.js: function makeHrefs() not present but refreshAuthInfo() exists');
+				refreshAuthInfo();
+			}
+			else {
+				console.log('auth.js: functions makeHrefs() and refreshAuthInfo() not present...');
+			}
 		}
 	}
 	request.send();
