@@ -81,6 +81,9 @@
 
     <buildnumber-maven-plugin.version>3.1.0</buildnumber-maven-plugin.version>
 
+    <!--<central-publishing.skipPublishing>false</central-publishing.skipPublishing>-->
+    <!--<maven.deploy.skip>false</maven.deploy.skip>-->
+
     <checkstyle.version>2.10</checkstyle.version>
     <cobertura.version>2.5.2</cobertura.version>
     <dependency-check-maven.version>8.1.2</dependency-check-maven.version>
@@ -156,7 +159,7 @@
     </snapshotRepository>
     <repository>
       <id>central</id>
-      <url>hhttps://repo.maven.apache.org/maven2/</url>
+      <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
     <!--
     <snapshotRepository>
@@ -256,6 +259,21 @@
         </configuration>
       </plugin>
 
+      <!-- https://central.sonatype.org/publish/publish-portal-maven/ -->
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.8.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <!--
+          <skipPublishing>${maven.deploy.skip}</skipPublishing>
+          <skipPublishing>${central-publishing}</skipPublishing>
+          <autoPublish>true</autoPublish>
+          -->
+        </configuration>
+      </plugin>
     </plugins>
       
     <pluginManagement>

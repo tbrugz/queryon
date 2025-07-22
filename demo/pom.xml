@@ -10,7 +10,7 @@
 	<artifactId>qon-demo-parent</artifactId>
 	<version>0.9</version>
 	<packaging>pom</packaging>
-	<!--<name>qon-demo-parent</name>-->
+	<name>qon-demo-parent</name>
 
 	<!--
 	<modules>
