@@ -1,5 +1,5 @@
 
-queryon 0.9 [2025-07-xx]
+queryon 0.9 [2025-07-21]
 -----------
 * **java 8+** required [2024-10-30]
 * springboot/helper: added SpringDataSourceProvider [2024-12-03]

@@ -25,9 +25,12 @@ artifacts at snapshot repo:
 
 * Deploy release version:
 
+<!--
 `mvn clean javadoc:jar source:jar deploy -P release` - all projects  
-<!--`mvn clean javadoc:jar deploy -P release -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web` - ignores demo projects  -->
-& go to `https://oss.sonatype.org/` & close & release staging repo  
+-->
+`mvn clean javadoc:jar source:jar deploy -P release -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-springboot-helper,qon-web` - ignores demo projects  
+& go to `https://central.sonatype.com/publishing/deployments`  
+<!--& go to `https://oss.sonatype.org/` & close & release staging repo  -->
 (maybe do `mvn -DskipTests=true package` first, see: <https://issues.apache.org/jira/browse/MDEP-98>)
 
 artifacts at central:  
