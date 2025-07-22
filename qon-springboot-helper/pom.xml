@@ -8,12 +8,12 @@
 	<parent>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>queryon</artifactId>
-		<version>0.9</version>
+		<version>0.10-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.bitbucket.tbrugz</groupId>
 	<artifactId>qon-springboot-helper</artifactId>
-	<version>0.9</version>
+	<version>0.10-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>qon-springboot-helper</name>
 	<description>QueryOn Spring Boot Helper</description>
