@@ -11,6 +11,8 @@ demo/qon-demo-dbn/classicmodels/*
 demo/qon-demo-dbn/src/main/resources/credentials.properties
 demo/qon-demo-dbn/src/main/resources/env.properties
 
+demo/qon-demo-quarkus/tmp
+
 **/.classpath
 **/.project
 **/.settings

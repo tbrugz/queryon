@@ -5,8 +5,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import javax.sql.DataSource;
 
+// commons-logging
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+// slf4j
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.runtime.Startup;
@@ -18,6 +23,7 @@ import tbrugz.sqldump.util.DataSourceProvider;
 public class DataSourceBean implements DataSourceProvider {
 
 	static final Log log = LogFactory.getLog(DataSourceBean.class);
+	//static final Logger log = LoggerFactory.getLogger(DataSourceBean.class);
 
 	//@Inject
 	AgroalDataSource defaultDataSource;
