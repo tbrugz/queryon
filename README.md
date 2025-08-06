@@ -46,6 +46,8 @@ artifacts
 * snapshots repo: https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/
 -->
 
+* releases: https://central.sonatype.com/namespace/org.bitbucket.tbrugz
+
 
 demos - running
 ---------------
