@@ -11,9 +11,9 @@ import java.util.List;
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.soap.Detail;
+import jakarta.xml.soap.Detail;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.soap.SOAPFaultException;
+import jakarta.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
