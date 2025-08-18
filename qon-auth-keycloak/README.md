@@ -7,12 +7,32 @@ Optional module to integrate Keycloak (Java servlet filter adapter) with Queryon
 Note about Keycloak Servlet Filter deprecation:
 <https://www.keycloak.org/2022/02/adapter-deprecation>.
 
-Source for Keycloak Servlet Filter:
-<https://github.com/keycloak/keycloak/tree/archive/release/24.0/adapters/oidc/servlet-filter>.
+Sources for Keycloak Servlet Filter:  
+<https://github.com/keycloak/keycloak/tree/archive/release/24.0/adapters/oidc/servlet-filter>,  
+<https://github.com/keycloak/keycloak/tree/archive/release/24.0/adapters/oidc/jakarta-servlet-filter>.
+
+Keycloak 22:
+- Java 11 support removed
+- Transition from Java EE to Jakarta EE
+https://www.keycloak.org/docs/latest/release_notes/index.html#keycloak-22-0-0
 
 
 adding Keycloak integration
 -----
+
+### 0. In `pom.xml`, add Keycloak Servlet Filter Adapter
+
+```xml
+	<dependency>
+		<groupId>org.keycloak</groupId>
+		<artifactId>keycloak-jakarta-servlet-filter-adapter</artifactId>
+		<!--
+		Previous (javaee) adapter
+		<artifactId>keycloak-servlet-filter-adapter</artifactId>
+		-->
+		<version>24.0.5</version>
+	</dependency>
+```
 
 ### 1. In `web.xml`, declare Keycloak and Shiro filters, like this:
 
