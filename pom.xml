@@ -92,11 +92,10 @@
     https://jetty.org/docs/jetty/12/index.html
     Jetty 12   | Java 17 | Jakarta EE10, EE9, EE8 |
     Jetty 11   | Java 11 | Jakarta EE9            | 11.0.26
-    Jetty 10   | Java 11 | Jakarta EE8            |
+    Jetty 10   | Java 11 | Jakarta EE8            | 10.0.26
     Jetty 9.4  | Java 8  | Jakarta EE7            | 9.4.58.v20250814, 9.4.55.v20240627
     -->
     <jetty.version>9.4.58.v20250814</jetty.version>
-    <!-- <jetty.java6.version>8.1.22.v20160922</jetty.java6.version>  --><!-- java 6+ -->
     <httpclient.version>4.5.14</httpclient.version>
     <tomcat.version>9.0.98</tomcat.version>
 

@@ -342,6 +342,7 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.17</version>
+      <scope>test</scope>
       <optional>true</optional>
     </dependency> -->
     <dependency>
@@ -411,24 +412,16 @@
       <version>${h2.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-maven-plugin</artifactId>
-      <version>8.1.16.v20140903</version>
-      <scope>test</scope>
-    </dependency> -->
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <version>${jetty.version}</version>
-      <!-- <version>7.6.19.v20160209</version> -->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-webapp</artifactId>
       <version>${jetty.version}</version>
-      <!-- <version>7.6.19.v20160209</version> -->
       <scope>test</scope>
     </dependency>
     <dependency>
