@@ -111,15 +111,13 @@
 
       <!--  web plugins -->
 
+      <!--
       <plugin>
         <groupId>org.apache.tomcat.maven</groupId>
         <artifactId>tomcat7-maven-plugin</artifactId>
         <version>2.2</version>
-        <!-- <configuration>
-          <path>/web</path>
-          <warSourceDirectory>/web</warSourceDirectory>
-        </configuration> -->
       </plugin>
+      -->
 
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -444,12 +442,14 @@
       <scope>test</scope>
     </dependency>
     -->
+    <!--
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-catalina</artifactId>
       <version>${tomcat.version}</version>
       <scope>test</scope>
     </dependency>
+    -->
     <!--
     <dependency>
       <groupId>org.apache.tomcat</groupId>

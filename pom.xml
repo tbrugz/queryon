@@ -97,6 +97,13 @@
     -->
     <jetty.version>9.4.58.v20250814</jetty.version>
     <httpclient.version>4.5.14</httpclient.version>
+    <!--
+    https://tomcat.apache.org/whichversion.html
+    11.0.x | Servlet 6.1 | Jakarta EE 11 | java17+
+    10.1.x | Servlet 6.0 | Jakarta EE 10 | java11+
+    10.0.x | Servlet 5.0 | Jakarta EE 9  | java8+
+    9.0.x  | Servlet 4.0 | Java EE 8     | java8+
+    -->
     <tomcat.version>9.0.98</tomcat.version>
 
     <h2.version>2.2.224</h2.version> <!-- 2.3.230+ requires java11+ -->

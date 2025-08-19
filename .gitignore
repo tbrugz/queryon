@@ -13,6 +13,8 @@ demo/qon-demo-dbn/src/main/resources/env.properties
 
 demo/qon-demo-quarkus/tmp
 
+demo/qon-demo-springboot/tmp
+
 **/.classpath
 **/.project
 **/.settings
