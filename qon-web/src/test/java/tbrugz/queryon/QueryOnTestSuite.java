@@ -8,7 +8,7 @@ import tbrugz.queryon.http.GraphQlWebTest;
 import tbrugz.queryon.http.ODataWebTest;
 import tbrugz.queryon.http.SoapCodeGenTest;
 //import tbrugz.queryon.http.SoapCodeGenCallTest;
-//import tbrugz.queryon.http.SoapWebTest;
+import tbrugz.queryon.http.SoapWebTest;
 import tbrugz.queryon.http.WebDavWebTest;
 import tbrugz.queryon.http.WinstoneAndH2HttpRequestTest;
 //import tbrugz.queryon.r2rml.DirectMappingTest;
@@ -28,7 +28,7 @@ import tbrugz.queryon.util.StringUtilsTest;
 	WinstoneAndH2HttpRequestTest.class,
 	ODataWebTest.class,
 	GraphQlWebTest.class,
-	//SoapWebTest.class, //XXX: java17+
+	SoapWebTest.class, //XXX: cxf 4.1 requires java17+
 	SoapCodeGenTest.class,
 	//SoapCodeGenCallTest.class,
 	WebDavWebTest.class,

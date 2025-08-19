@@ -22,6 +22,26 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build-helper-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>add-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test-cxf/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>${maven-war-plugin.version}</version>
@@ -353,7 +373,6 @@
       <scope>test</scope>
     </dependency>-->
 
-    <!--
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-tools-wsdlto-core</artifactId>
@@ -378,7 +397,6 @@
       <version>${cxf.version}</version>
       <scope>test</scope>
     </dependency>
-    -->
     
     <!-- <dependency>
       <groupId>org.apache.cxf</groupId>
@@ -570,6 +588,7 @@
       </build>
     </profile>
 
+    <!--
     <profile>
       <id>jdk17</id>
       <activation>
@@ -602,7 +621,6 @@
         </dependency>
       </dependencies>
       <build>
-        <!-- http://blog.code-cop.org/2015/04/maven-integration-tests-extra-folder.html -->
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
@@ -626,6 +644,7 @@
         </plugins>
       </build>
     </profile>
+    -->
 
     <profile>
       <id>hardness</id>
