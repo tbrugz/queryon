@@ -353,6 +353,7 @@
       <scope>test</scope>
     </dependency>-->
 
+    <!--
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-tools-wsdlto-core</artifactId>
@@ -377,6 +378,7 @@
       <version>${cxf.version}</version>
       <scope>test</scope>
     </dependency>
+    -->
     
     <!-- <dependency>
       <groupId>org.apache.cxf</groupId>
@@ -569,14 +571,76 @@
     </profile>
 
     <profile>
-      <id>hardness</id>
+      <id>jdk17</id>
+      <activation>
+        <jdk>[17</jdk>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.cxf</groupId>
+          <artifactId>cxf-tools-wsdlto-core</artifactId>
+          <version>${cxf.version}</version>
+          <scope>test</scope>
+          <exclusions>
+            <exclusion>
+              <groupId>org.ow2.asm</groupId>
+              <artifactId>asm</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.cxf</groupId>
+          <artifactId>cxf-tools-wsdlto-frontend-jaxws</artifactId>
+          <version>${cxf.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.cxf</groupId>
+          <artifactId>cxf-tools-wsdlto-databinding-jaxb</artifactId>
+          <version>${cxf.version}</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
       <build>
         <!-- http://blog.code-cop.org/2015/04/maven-integration-tests-extra-folder.html -->
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.12</version>
+            <version>${build-helper-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>add-test-sources</id>
+                <phase>generate-test-sources</phase>
+                <goals>
+                  <goal>add-test-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>src/test-cxf/java</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>hardness</id>
+      <!--
+      <activation>
+        <jdk>[17</jdk>
+      </activation>
+      -->
+      <build>
+        <!-- http://blog.code-cop.org/2015/04/maven-integration-tests-extra-folder.html -->
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>${build-helper-maven-plugin.version}</version>
             <executions>
               <execution>
                 <id>add-integration-test-source-as-test-sources</id>
