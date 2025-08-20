@@ -188,7 +188,7 @@
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>qon-core</artifactId>
       <version>${project.parent.version}</version>
-      <scope>compile</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>

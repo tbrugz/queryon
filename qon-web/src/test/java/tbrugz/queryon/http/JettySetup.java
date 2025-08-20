@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.plus.webapp.EnvConfiguration;
 import org.eclipse.jetty.plus.webapp.PlusConfiguration;
-import org.eclipse.jetty.server.Connector;
+//import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.Configuration;
@@ -45,18 +45,21 @@ public class JettySetup {
 	}
 	
 	public static void setupServer(String webxmlPath) throws Exception {
+		//System.out.println("setup()");
 		log.info("setup()");
 		if(server!=null && server.isRunning()) { return; }
 		server = new Server();
 		//server = new Server(new QueuedThreadPool(4));
 		
 		port = getAvailablePort(startPort, maxPort);
+		//System.out.println("setup(): port="+port);
 		log.info("setup(): port="+port);
 		setupTestUrls();
 		
 		ServerConnector connector = new ServerConnector(server);
 		connector.setPort(port);
-		server.setConnectors(new Connector[]{ connector });
+		//server.setConnectors(new Connector[]{ connector });
+		server.addConnector(connector);
 
 		final String webRoot = WinstoneAndH2HttpRequestTest.testJavaDir+"/tbrugz/queryon/http";
 		final String webappRoot = WinstoneAndH2HttpRequestTest.webappdir;
@@ -73,7 +76,8 @@ public class JettySetup {
 				new AnnotationConfiguration(), new WebXmlConfiguration(),
 				new WebInfConfiguration(), //new TagLibConfiguration(),
 				new PlusConfiguration(), new MetaInfConfiguration(),
-				new FragmentConfiguration(), new EnvConfiguration() });
+				new FragmentConfiguration(), new EnvConfiguration()
+				});
 		/*
 		// Specify the Session ID Manager
 		HashSessionIdManager idmanager = new HashSessionIdManager();
@@ -137,6 +141,7 @@ public class JettySetup {
 		
 		server.start();
 		//log.info(server.dump());
+		//System.out.println("setup(): started...");
 		log.info("setup(): started...");
 		//server.join();
 		server.setStopAtShutdown(true);
@@ -163,6 +168,7 @@ public class JettySetup {
 	 * http://www.petervannes.nl/files/084d1067451c4f9a56f9b865984f803d-52.php
 	 */
 	public static void shutdown() throws Exception {
+		//System.out.println("shutdown()");
 		log.info("shutdown()");
 		//shutdownShiro(); //??
 		if(server!=null) {

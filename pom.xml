@@ -89,6 +89,7 @@
     <poi-ooxml.version>5.3.0</poi-ooxml.version>
 
     <!--
+    https://jetty.org/download.html#version-history
     https://jetty.org/docs/jetty/12/index.html
     Jetty 12   | Java 17 | Jakarta EE10, EE9, EE8 |
     Jetty 11   | Java 11 | Jakarta EE9            | 11.0.26
