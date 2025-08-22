@@ -107,13 +107,30 @@
     -->
     <tomcat.version>9.0.98</tomcat.version>
 
-    <h2.version>2.2.224</h2.version> <!-- 2.3.230+ requires java11+ -->
+    <!--
+    https://www.h2database.com/html/changelog.html
+    2.3.230+ requires java11+
+    2.2.224: supports java8+
+     -->
+    <h2.version>2.3.232</h2.version>
     <oracle-jdbc.version>21.9.0.0</oracle-jdbc.version>
-    <postgresql.version>42.2.25</postgresql.version>
+    <postgresql.version>42.7.7</postgresql.version>
     <mariadb.version>2.7.6</mariadb.version>
     <mssql-jdbc.version>8.4.1.jre8</mssql-jdbc.version>
-    <derby.version>10.12.1.1</derby.version>
-    <sqlite.version>3.36.0.3</sqlite.version>
+    <!--
+    https://db.apache.org/derby/derby_downloads.html
+    10.17.1.0: java21+
+    10.16.1.1: java17+
+    10.15.2.0: java9+
+    10.14.2.0: java8+
+    10.12.1.1: java6+
+    -->
+    <derby.version>10.14.2.0</derby.version>
+    <!--
+    https://github.com/xerial/sqlite-jdbc
+    3.36.0.3, 3.50.3.0
+    -->
+    <sqlite.version>3.50.3.0</sqlite.version>
 
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
     <buildnumber-maven-plugin.version>3.1.0</buildnumber-maven-plugin.version>
