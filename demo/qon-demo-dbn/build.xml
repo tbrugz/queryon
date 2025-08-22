@@ -1,24 +1,30 @@
 <project name="qon-demo-dbn" basedir="."
-	xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+	xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+	>
+	<!--
+	Maven ant task. Transitive (pom) dependencies and https issue
+	https://stackoverflow.com/a/78948457/616413
+
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+	xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+	xmlns:resolver="antlib:org.apache.maven.resolver.ant"
+	-->
 
 	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
 	<property name="sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 
 	<property file="../build.properties"/>
 	
-	<artifact:dependencies pathId="sqlrun.deps">
+	<artifact:dependencies pathId="sqlrun.deps" settingsfile="../settings-https.xml">
 		<dependency groupId="commons-logging" artifactId="commons-logging" version="${commons-logging.version}" scope="runtime"/>
 		<dependency groupId="log4j" artifactId="log4j" version="${log4j.version}" scope="runtime"/>
 		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="${sqldump.version}" scope="runtime">
 			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
 		</dependency>
-		<!--
-		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-core" version="${jaxb.version}" scope="runtime"/>
-		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-impl" version="${jaxb.version}" scope="runtime"/>
-		-->
 		<dependency groupId="jakarta.xml.bind" artifactId="jakarta.xml.bind-api" version="${jaxb.version}" scope="runtime"/>
 		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-impl" version="${jaxb.version}" scope="runtime"/>
-		<!-- jdbc drivers -->
+
 		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="${mariadb.jdbc.version}" scope="runtime"/>
 		<dependency groupId="org.postgresql" artifactId="postgresql" version="${postgresql.jdbc.version}" scope="runtime"/>
 		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
@@ -26,21 +32,56 @@
 		<dependency groupId="org.xerial" artifactId="sqlite-jdbc" version="${sqlite.version}" scope="runtime"/>
 	</artifact:dependencies>
 
-	<path id="sqlrun.classpath">
-		<path refid="sqlrun.deps"/>
-		<pathelement location="src/main/resources"/>
-	</path>
-
-	<artifact:dependencies pathId="h2.classpath">
+	<artifact:dependencies pathId="h2.classpath" settingsfile="../settings-https.xml">
 		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
 	</artifact:dependencies>
 
-	<artifact:dependencies pathId="derby.classpath">
+	<artifact:dependencies pathId="derby.classpath" settingsfile="../settings-https.xml">
 		<dependency groupId="org.apache.derby" artifactId="derby" version="${derby.version}" scope="runtime"/>
 		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
 		<dependency groupId="org.apache.derby" artifactId="derbynet" version="${derby.version}" scope="runtime"/>
 		<dependency groupId="org.apache.derby" artifactId="derbytools" version="${derby.version}" scope="runtime"/>
 	</artifact:dependencies>
+
+	<!--
+	<resolver:resolve>
+	<resolver:dependencies pathId="sqlrun.deps">
+		<dependency groupId="commons-logging" artifactId="commons-logging" version="${commons-logging.version}" scope="runtime"/>
+		<dependency groupId="log4j" artifactId="log4j" version="${log4j.version}" scope="runtime"/>
+		<dependency groupId="org.bitbucket.tbrugz" artifactId="sqldump" version="${sqldump.version}" scope="runtime">
+			<exclusion groupId="org.bitbucket.tbrugz" artifactId="kmlutils" />
+		</dependency>
+		<dependency groupId="jakarta.xml.bind" artifactId="jakarta.xml.bind-api" version="${jaxb.version}" scope="runtime"/>
+		<dependency groupId="com.sun.xml.bind" artifactId="jaxb-impl" version="${jaxb.version}" scope="runtime"/>
+
+		<dependency groupId="org.mariadb.jdbc" artifactId="mariadb-java-client" version="${mariadb.jdbc.version}" scope="runtime"/>
+		<dependency groupId="org.postgresql" artifactId="postgresql" version="${postgresql.jdbc.version}" scope="runtime"/>
+		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.xerial" artifactId="sqlite-jdbc" version="${sqlite.version}" scope="runtime"/>
+	</resolver:dependencies>
+	</resolver:resolve>
+
+	<resolver:resolve>
+	<resolver:dependencies pathId="h2.classpath">
+		<dependency groupId="com.h2database" artifactId="h2" version="${h2.version}" scope="runtime"/>
+	</resolver:dependencies>
+	</resolver:resolve>
+
+	<resolver:resolve>
+	<resolver:dependencies pathId="derby.classpath">
+		<dependency groupId="org.apache.derby" artifactId="derby" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbyclient" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbynet" version="${derby.version}" scope="runtime"/>
+		<dependency groupId="org.apache.derby" artifactId="derbytools" version="${derby.version}" scope="runtime"/>
+	</resolver:dependencies>
+	</resolver:resolve>
+	-->
+
+	<path id="sqlrun.classpath">
+		<path refid="sqlrun.deps"/>
+		<pathelement location="src/main/resources"/>
+	</path>
 
 	<!--
 
@@ -50,25 +91,29 @@
 	license: Eclipse Public License v1.0
 
 	Eclipse BIRT:
-	-> * http://www.eclipse.org/birt/documentation/sample-database.php
+	* http://www.eclipse.org/birt/documentation/sample-database.php
+	https://eclipse-birt.github.io/birt-website/
 	license: Eclipse Foundation Software User Agreement
 	http://www.eclipse.org/birt/resources/documentation/sample-database/ClassicModels-MySQL.zip
 
 	Mysql tutorial:
-	* http://www.mysqltutorial.org/mysql-sample-database.aspx
+	* https://www.mysqltutorial.org/getting-started-with-mysql/mysql-sample-database/
+	http://www.mysqltutorial.org/mysql-sample-database.aspx
 	http://www.mysqltutorial.org/download/2
 
 	-->
 	<target name="get-data">
 		<mkdir dir="${basedir}/data/"/>
-		<get src="http://www.eclipse.org/birt/resources/documentation/sample-database/ClassicModels-MySQL.zip" dest="${basedir}/data/" usetimestamp="true"/>
+		<!--<get src="http://www.eclipse.org/birt/resources/documentation/sample-database/ClassicModels-MySQL.zip" dest="${basedir}/data/" usetimestamp="true"/>-->
 		<!--get src="https://raw.githubusercontent.com/pentaho/mondrian/master/demo/FoodMartCreateData.zip" dest="${basedir}/data/" usetimestamp="true"/>
 		<get src="https://raw.githubusercontent.com/pentaho/mondrian/master/demo/mysql/SteelWheels.sql" dest="${basedir}/data/" usetimestamp="true"/>
 		<get src="http://www.mysqltutorial.org/download/2" dest="${basedir}/data/mysqlsampledatabase1.zip" usetimestamp="true"/-->
+		<!--<get src="https://www.mysqltutorial.org/wp-content/uploads/2023/10/mysqlsampledatabase.zip" dest="${basedir}/data/ClassicModels-MySQL.zip" usetimestamp="true"/>-->
+		<copy file="data0/ClassicModels-MySQL.zip" todir="${basedir}/data/"/>
 	</target>
 
 	<target name="unzip-data">
-		<unzip src="${basedir}/data/ClassicModels-MySQL.zip" dest="${basedir}/data/ClassicModels-MySQL"/>
+		<unzip src="${basedir}/data/ClassicModels-MySQL.zip" dest="${basedir}/data/"/>
 	</target>
 
 	<target name="run-sqlrun-mysql-createdatabase">

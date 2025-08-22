@@ -1,0 +1,13 @@
+<!--
+see: https://stackoverflow.com/a/78948457/616413
+-->
+<settings>
+    <mirrors>
+        <mirror>
+            <id>central.mirror</id>
+            <url>https://repo1.maven.org/maven2/</url>
+            <mirrorOf>central</mirrorOf>
+            <!--<mirrorOf>*</mirrorOf>-->
+        </mirror>
+    </mirrors>
+</settings>
