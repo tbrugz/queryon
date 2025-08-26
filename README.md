@@ -31,7 +31,7 @@ More info about QueryOn:
 building
 --------
 
-Dependencies: java 8+ ; maven 3.2.5+
+Dependencies: java 11+ ; maven 3.6.3+ (java 17+ required for spring-boot & quarkus modules)
 
 Building: `mvn install`
 

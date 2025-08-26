@@ -31,8 +31,10 @@
 
     <!--<jetty.version>9.4.51.v20230217</jetty.version>-->
 
+    <!--
     <maven-enforcer-plugin.requireJavaVersion>11</maven-enforcer-plugin.requireJavaVersion>
     <maven-enforcer-plugin.requireMavenVersion>3.3.9</maven-enforcer-plugin.requireMavenVersion>
+    -->
   </properties>
 
   <!--

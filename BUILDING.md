@@ -2,7 +2,7 @@
 building queryon
 ================
 
-Dependencies: java 8+ ; maven 3+
+Dependencies: java 11+ ; maven 3+
 
 
 Building
