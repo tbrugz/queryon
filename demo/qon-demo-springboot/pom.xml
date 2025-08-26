@@ -170,10 +170,25 @@
 
 		<!-- syntaxes dependencies -->
 		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>sqldump-poi</artifactId>
+			<version>${sqldump.version}</version>
+			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!--
+		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 			<version>${poi-ooxml.version}</version>
+			<scope>runtime</scope>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
