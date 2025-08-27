@@ -178,6 +178,20 @@
       <version>${diffutils.version}</version>
     </dependency>
 
+    <!-- syntaxes dependencies -->
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>sqldump-poi</artifactId>
+      <version>${sqldump.version}</version>
+      <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- jdbc drivers -->
     <dependency>
       <groupId>com.h2database</groupId>
