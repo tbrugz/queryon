@@ -35,7 +35,7 @@ http://localhost:8080/
 
 `mvn quarkus:dependency-tree`
 
-`mvn quarkus:info` (quarkus 2.7.0.Final+)
+`mvn quarkus:info`
 
 `mvn quarkus:list-extensions`
 

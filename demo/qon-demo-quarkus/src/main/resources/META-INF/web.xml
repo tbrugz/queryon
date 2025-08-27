@@ -28,6 +28,7 @@
 		WARN  [tbr.sql.cdi.CdiUtils] (Quarkus Main Thread) Exception instantiating class: tbrugz.queryon.quarkusdemo.DataSourceBean ; Exception: jakarta.enterprise.inject.CreationException: ActiveResult of synthetic bean for io.agroal.api.AgroalDataSource not initialized yet: io_agroal_api_AgroalDataSource_d57ffeb117c7359a64b62bfcd1f45b8878f49680
 		- a synthetic bean initialized during RUNTIME_INIT must not be accessed during STATIC_INIT
 		- RUNTIME_INIT build steps that require access to synthetic beans initialized during RUNTIME_INIT should consume the SyntheticBeansRuntimeInitBuildItem
+		* tbrugz.queryon.quarkusdemo.DataSourceBean:shoukd be @ApplicationScoped (lazy?) or @Singleton (eager?)
 		-->
 		<!--
 		<load-on-startup>1</load-on-startup>

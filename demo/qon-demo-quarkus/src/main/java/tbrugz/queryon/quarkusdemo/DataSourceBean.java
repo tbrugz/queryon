@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.runtime.Startup;
+
 import tbrugz.sqldump.util.DataSourceProvider;
 
 @Startup
