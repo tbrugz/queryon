@@ -1090,7 +1090,7 @@
 		updateState();
 	}
 	
-	function getDownloadHrefs() {
+	function getDownloadHrefs(/*recurseLvl = 0*/) {
 		var ret = [];
 	
 		var select = document.getElementById('objects');
@@ -1100,6 +1100,20 @@
 			objectName = select.options[select.selectedIndex].value;
 		}
 		
+		if(!settings.loaded) {
+			console.warn("settings not loaded...");
+			return ret;
+		}
+		if(!settings["syntax.fileextensions"]) {
+			console.warn("settings/syntax.fileextensions not loaded... trying again loadSettings()");
+			loadSettings(loadSettingsCallback);
+			/*if(recurseLvl<2) {
+				console.log("getDownloadHrefs0(",recurseLvl,")");
+				ret = getDownloadHrefs(++recurseLvl);
+				console.log("getDownloadHrefs1(",recurseLvl,")", ret);
+			}*/
+			return ret;
+		}
 		var exts = settings["syntax.fileextensions"];
 		for(var i=0;i<exts.length;i++) {
 			if(downloadExtFilter.indexOf(exts[i])<0) { continue; }
