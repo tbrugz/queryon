@@ -53,6 +53,16 @@
             <nullable>false</nullable>
         </columns>
         <columns>
+            <name>context_path</name>
+            <type>VARCHAR</type>
+            <columnSize>1000</columnSize>
+        </columns>
+        <columns>
+            <name>servlet_path</name>
+            <type>VARCHAR</type>
+            <columnSize>1000</columnSize>
+        </columns>
+        <columns>
             <name>request_uri</name>
             <type>VARCHAR</type>
             <columnSize>1000</columnSize>

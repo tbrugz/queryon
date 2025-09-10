@@ -45,6 +45,8 @@ public class AccessLogFilter implements Filter {
 	// statuscode, url, username, timestamp
 	// headers(xx)
 	
+	public static final String CONTEXT_PATH = "context_path";
+	public static final String SERVLET_PATH = "servlet_path";
 	public static final String SERVER_NAME = "server_name";
 	public static final String SERVER_PORT = "server_port";
 	public static final String REQUEST_METHOD = "request_method";
@@ -69,11 +71,15 @@ public class AccessLogFilter implements Filter {
 	String serverHostName = null;
 
 	final boolean grabQueryString = true,
+		grabContextPath = true,
+		grabServletPath = true,
 		grabServerName = true,
 		grabServerPort = false,
 		grabServerProtocol = false,
 		grabHeaderReferer = false,
-		grabHeaderUserAgent = false
+		grabHeaderUserAgent = false,
+		removeContextPathFromURI = false,
+		removeServletPathFromURI = false
 		;
 	
 	@Override
@@ -155,6 +161,27 @@ public class AccessLogFilter implements Filter {
 			attr.put(SERVER_PORT, req.getServerPort());
 		}
 		attr.put(REQUEST_METHOD, method);
+		if(grabContextPath) {
+			// option to grab servlet context-path
+			attr.put(CONTEXT_PATH, req.getServletContext().getContextPath());
+		}
+		if(grabServletPath) {
+			// option to grab servlet path
+			attr.put(SERVLET_PATH, req.getServletPath());
+		}
+		if(removeContextPathFromURI) {
+			// option to remove servlet context from URI
+			int len = req.getServletContext().getContextPath().length();
+			url = url.substring(len);
+			if(removeServletPathFromURI) {
+				int len2 = req.getServletPath().length();
+				url = url.substring(len2);
+			}
+		}
+		else if(removeServletPathFromURI) {
+			log.warn("can't remove servlet path if context path was not removed [context = "+req.getServletContext().getContextPath()+"]");
+		}
+
 		attr.put(REQUEST_URI, url);
 		if(grabQueryString) {
 			attr.put(QUERY_STRING, queryString);
