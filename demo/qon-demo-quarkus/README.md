@@ -55,6 +55,13 @@ mvn io.quarkus.platform:quarkus-maven-plugin:2.2.3.Final:create \
 ref: https://quarkus.io/guides/getting-started
 
 
+## Compatibility
+
+- Compatible with java 17+
+
+- Java 25 compatibility: see <https://github.com/orgs/quarkusio/projects/59/views/1>
+
+
 ## Links
 
 Dev:
