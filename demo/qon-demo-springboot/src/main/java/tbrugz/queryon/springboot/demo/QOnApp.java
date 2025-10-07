@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import tbrugz.queryon.AbstractHttpServlet;
+import tbrugz.queryon.filter.AccessLogFilter;
 import tbrugz.queryon.springboot.QOnSpringBootApp;
 import tbrugz.queryon.springboot.SpringBootUtils;
 import tbrugz.queryon.springboot.SpringDataSourceProvider;
@@ -284,5 +285,24 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 		return registration;
 	}
 	*/
+
+	@Bean
+	public FilterRegistrationBean<AccessLogFilter> accessLogFilterRegistration() {
+		FilterRegistrationBean<AccessLogFilter> registration = new FilterRegistrationBean<AccessLogFilter>();
+		registration.setFilter(new AccessLogFilter());
+		//registration.addUrlPatterns("/*");
+		registration.addServletNames("servletQueryOnBean", /*"queryOnInstant", "queryOnSchemaInstant",*/
+				"servletPagesServletBean", "servletMarkdownServletBean", "servletSwaggerServletBean",
+				"servletODataServletBean", "servletGraphQlQonServletBean", "servletQonSoapServletBean",
+				"servletProcessorServletBean"
+				//"webDavServlet"
+				);
+		//infoServlet, authServlet
+		registration.setName("AccessLogFilter");
+		registration.setOrder(100);
+		registration.addInitParameter("tableName", "queryon.QON_ACCESS_LOG");
+		//log.info("accessLogFilterRegistration...");
+		return registration;
+	}
 
 }
