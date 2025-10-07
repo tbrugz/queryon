@@ -238,12 +238,6 @@
       <version>${shiro.version}</version>
       <scope>compile</scope>
     </dependency> -->
-    <!-- <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>compile</scope>
-    </dependency> -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -259,12 +253,18 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- <dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.version}</version>
-      <optional>true</optional>
-    </dependency> -->
+      <scope>test</scope>
+    </dependency>
     <!-- <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
