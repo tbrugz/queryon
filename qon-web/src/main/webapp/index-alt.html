@@ -46,13 +46,17 @@ drawMenu = function () {
 	}
 	if(authInfo.loaded == false || modelsInfo == null || menucontent == null) {
 		console.log("drawMenu: cant draw yet...");
-		//console.log("authInfo=", authInfo, "modelsInfo=", modelsInfo, "menucontent=", menucontent);
+		//console.log("authInfo=", authInfo.loaded, "modelsInfo=", modelsInfo, "menucontent=", menucontent);
 		return;
 	}
+	/*else {
+		console.log("drawMenu: will draw... auth=", authInfo);
+	}*/
 	
 	var menu = createMenuContent(false);
 	var content = document.getElementById('content');
 	content.appendChild(menu);
+	refreshAuthInfo();
 	//loadMenuContentCallback("(from loadModelsContentCallback)");
 }
 	</script>
