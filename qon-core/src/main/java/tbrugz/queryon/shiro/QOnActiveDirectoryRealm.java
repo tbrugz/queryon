@@ -6,6 +6,7 @@ package tbrugz.queryon.shiro;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +21,9 @@ import javax.naming.ldap.LdapContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.activedirectory.ActiveDirectoryRealm;
 import org.apache.shiro.realm.ldap.LdapContextFactory;
@@ -210,6 +214,26 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
     }
     
     /*
+     * see: ActiveDirectoryRealm.queryForAuthenticationInfo()
+     */
+    @Override
+    protected AuthenticationInfo queryForAuthenticationInfo(AuthenticationToken token, LdapContextFactory ldapContextFactory)
+            throws NamingException {
+
+        UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+
+        // Binds using the username and password provided by the user.
+        LdapContext ctx = null;
+        try {
+            ctx = ldapContextFactory.getLdapContext(getUsernameWithSuffix(upToken.getUsername()), String.valueOf(upToken.getPassword()));
+        } finally {
+            LdapUtils.closeContext(ctx);
+        }
+
+        return buildAuthenticationInfo(upToken.getUsername(), upToken.getPassword());
+    }
+
+    /*
     @Override
     protected AuthenticationInfo queryForAuthenticationInfo(
     		AuthenticationToken token, LdapContextFactory ldapContextFactory)
@@ -229,6 +253,14 @@ public class QOnActiveDirectoryRealm extends ActiveDirectoryRealm implements Aut
         }
     }
     */
+
+    protected String getUsernameWithSuffix(String username) {
+        if (principalSuffix != null
+                && !username.toLowerCase(Locale.ROOT).endsWith(principalSuffix.toLowerCase(Locale.ROOT))) {
+            return username += principalSuffix;
+        }
+        return username;
+    }
 
     public String getPrincipalSuffix() {
         return principalSuffix;
