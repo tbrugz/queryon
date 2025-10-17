@@ -151,7 +151,7 @@ onSyntaxChanged = function() {
 }
 
 onWsIgnoreChanged = function() {
-	//updateState();
+	updateState();
 }
 
 doDiff = function() {
@@ -263,11 +263,12 @@ function updateState() {
 	var select = document.getElementById('syntax');
 	var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 
-	//var select = document.getElementById('wsignore');
-	//var wsignore = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
+	//wsignore
+	var select = document.getElementById('wsignore');
+	var wsignore = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 
 	if(modelSource && modelTarget && schema) {
-		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types+"/"+syntax);
+		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types+"/"+syntax+"/"+wsignore);
 	}
 }
 
@@ -298,6 +299,11 @@ function refreshSelectsState() {
 		if(parts[4]) {
 			var syntax = document.getElementById('syntax');
 			syntax.value = parts[4];
+		}
+		//wsignore
+		if(parts[5]) {
+			var wsignore = document.getElementById('wsignore');
+			wsignore.value = parts[5];
 		}
 	}
 }
@@ -501,6 +507,10 @@ setSelectMultiOptions = function(select, values) {
 			<select id="syntax" onchange="onSyntaxChanged();">
 				<option value="sql" selected="selected">SQL
 				<option value="patch">patch
+				<!--
+				<option value="xml">xml (debug)
+				<option value="json">json (debug)
+				-->
 			</select>
 		</label>
 		<label>
