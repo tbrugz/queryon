@@ -372,6 +372,8 @@ public class QueryOn extends AbstractHttpServlet {
 	protected boolean debugMode = false;
 	private Boolean shiroEnabled = null;
 	
+	static final boolean preventChangesFromSelectAny = false; //XXX: add prop for preventChangesFromSelectAny
+	
 	public static final String doNotCheckGrantsPermission = ActionType.SELECT_ANY.name();
 	
 	//protected ServletContext servletContext = null;
@@ -1089,15 +1091,33 @@ public class QueryOn extends AbstractHttpServlet {
 			case SELECT_ANY:
 				try {
 					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
-					setFeatures(req, conn.getMetaData());
+					DatabaseMetaData dbmd = conn.getMetaData();
+					setFeatures(req, dbmd);
 					Query relation = getQuery(req, reqspec, currentUser, conn);
 					addFilenameHeader(resp, relation, reqspec);
 					
+					if(preventChangesFromSelectAny) {
+						boolean ddiit = dbmd.dataDefinitionIgnoredInTransactions();
+						boolean ddctc = dbmd.dataDefinitionCausesTransactionCommit();
+						if(ddiit || ddctc) {
+							throw new BadRequestException("can't select any "+
+								"[dataDefinitionIgnoredInTransactions=="+ddiit+"]"+
+								"[dataDefinitionCausesTransactionCommit=="+ddctc+"]"
+								);
+						}
+					}
+					/*
+					sets read-only...
+					https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html#setReadOnly-boolean-
+					*/
+					boolean prevReadOnly = conn.isReadOnly();
+					if(!prevReadOnly) { conn.setReadOnly(true); }
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
 						DBObjectUtils.updateQueryParameters(relation, conn);
 						doSelect(model, relation, reqspec, currentUser, conn, resp, true);
 					}
+					if(!prevReadOnly) { conn.setReadOnly(false); }
 				}
 				catch(RuntimeException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -1106,6 +1126,7 @@ public class QueryOn extends AbstractHttpServlet {
 					throw new BadRequestException(e.getMessage(), e);
 				}
 				finally {
+					DBUtil.doRollback(conn);
 					ConnectionUtil.closeConnection(conn);
 				}
 				break;
@@ -2794,6 +2815,13 @@ public class QueryOn extends AbstractHttpServlet {
 		resp.getWriter().write(value);
 	}
 
+	/*
+	protected void writeMessage(RequestSpec reqspec, HttpServletResponse resp, String message) throws IOException {
+		resp.setContentType(MIME_TEXT);
+		resp.getWriter().write(message);
+	}
+	*/
+
 	protected void writeExecuteResultSetOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, ResultSet value) throws IOException, SQLException {
 		dumpResultSet(value, reqspec, null, reqspec.object, null, null, null, true, resp);
 	}
@@ -3178,12 +3206,25 @@ public class QueryOn extends AbstractHttpServlet {
 			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
 		}
 		DumpSyntaxInt ds = reqspec.outputSyntax;
+		ResultSetMetaData rsmd = null;
+		try {
+			rsmd = rs.getMetaData();
+		}
+		catch(SQLException e) {
+			log.warn("ResultSet has no metadata? Ex: "+e);
+			log.debug("ResultSet has no metadata? Ex: "+e, e);
+			String message = "ResultSet has no metadata [Ex: "+e.toString().trim()+"]";
+			resp.addHeader(ResponseSpec.HEADER_WARNING, message);
+			//writeMessage(reqspec, resp, message);
+			return;
+		}
+
 		if(ds instanceof DumpSyntaxBuilder) {
-			ds = ((DumpSyntaxBuilder) ds).build(schemaName, queryName, uniqueColumns, rs.getMetaData());
+			ds = ((DumpSyntaxBuilder) ds).build(schemaName, queryName, uniqueColumns, rsmd);
 		}
 		else {
 			log.warn("syntax '"+ds.getSyntaxId()+"' isn't a DumpSyntaxBuilder");
-			ds.initDump(schemaName, queryName, uniqueColumns, rs.getMetaData());
+			ds.initDump(schemaName, queryName, uniqueColumns, rsmd);
 		}
 
 		if(ds.usesImportedFKs()) {
