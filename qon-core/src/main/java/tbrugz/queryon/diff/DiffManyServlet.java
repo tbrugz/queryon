@@ -20,6 +20,7 @@ import org.apache.shiro.subject.Subject;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.QOnPrivilegeType;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.QueryOn.ActionType;
@@ -33,6 +34,7 @@ import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -83,7 +85,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 		Properties prop = QOnContextUtils.getProperties(getServletContext());
 		
 		Subject currentUser = ShiroUtils.getSubject(prop, req);
-		ShiroUtils.checkPermission(currentUser, ActionType.SELECT_ANY.name(), ActionType.SELECT_ANY.name());
+		ShiroUtils.checkPermission(currentUser, DBObjectType.ANY.name(), QOnPrivilegeType.SHOW.name());
 		
 		// debug mode
 		String action = req.getParameter(PARAM_ACTION);
