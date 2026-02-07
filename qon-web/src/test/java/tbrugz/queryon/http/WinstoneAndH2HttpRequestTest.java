@@ -85,6 +85,7 @@ import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -1413,6 +1414,75 @@ public class WinstoneAndH2HttpRequestTest {
 		key = e.getKey();
 		Assert.assertEquals("/PUBLIC.EMP", key);
 		Assert.assertTrue(e.getValue().getAsJsonObject().get("post")!=null);
+
+		///PUBLIC.PAIR.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///PUBLIC.PAIR >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///PUBLIC.TASK.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///PUBLIC.TASK >>>
+		e = it.next();
+		//System.out.println("[PUBLIC.TASK] key = "+e.getKey());
+
+		///QUERY.EMP_Q1.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///QUERY.NAMED_PARAMS_1.{syntax} >>> 
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///QUERY.NAMED_PARAMS_NO_PARAM_COUNT.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///QUERY.QUERY_WITH_BIND_NAMED_PARAMS.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///QUERY.QUERY_WITH_DEFAULT_COLUMNS.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///QUERY.QUERY_WITH_PARAMS_NULL_BIND.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///QUERY.QUERY_WITH_PARAMS_NULL_BIND_ARRAY.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+		JsonObject operation = e.getValue().getAsJsonObject();
+		//System.out.println(key+" >>> "+operation);
+		JsonArray parameters = operation.getAsJsonObject("get").getAsJsonArray("parameters");
+		//System.out.println(key+" >>> params = "+parameters);
+		JsonObject par1 = parameters.get(1).getAsJsonObject();
+		JsonObject par2 = parameters.get(2).getAsJsonObject();
+		//System.out.println(key+" >>> par1 = "+par1);
+		Assert.assertFalse(par1.get("required").getAsBoolean());
+		//System.out.println(key+" >>> par2 = "+par2);
+		Assert.assertTrue(par2.get("required").getAsBoolean());
+
+		///QUERY.QUERY_WITH_POSITIONAL_PARAMS.{syntax} >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///PUBLIC.IS_PRIME >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		///PUBLIC.INSERT_TASK >>>
+		e = it.next();
+		//System.out.println("key = "+e.getKey());
+
+		boolean hasNext = it.hasNext();
+		Assert.assertFalse(hasNext);
 	}
 
 	@SuppressWarnings("unused")
