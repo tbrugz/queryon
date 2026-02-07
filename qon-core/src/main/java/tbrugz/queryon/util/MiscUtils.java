@@ -120,6 +120,7 @@ public class MiscUtils {
 	public static boolean[] expandBooleanArray(boolean[] arr, int len) {
 		if(arr==null || arr.length==0) { return null; }
 		if(arr.length==len) { return arr; }
+		if(len==0) { return new boolean[] {}; }
 		if(arr.length!=1) {
 			throw new IllegalArgumentException("can't expand array "+Arrays.toString(arr)+" to length "+len);
 		}

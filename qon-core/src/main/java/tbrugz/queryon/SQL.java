@@ -311,7 +311,7 @@ public class SQL {
 		return sql.replace(VARIABLE_USERNAME, EMPTY_USERNAME);
 	}
 
-	private static String createSQLstr(Relation table, RequestSpec reqspec) {
+	private static String createSQLstr(Relation table/*, RequestSpec reqspec*/) {
 		String sql = "select "+PARAM_PROJECTION_CLAUSE+
 			" from " + (SQL.valid(table.getSchemaName())?sqlIdDecorator.get(table.getSchemaName())+".":"") + sqlIdDecorator.get(table.getName())+
 			" " + PARAM_WHERE_CLAUSE+
@@ -324,16 +324,21 @@ public class SQL {
 	}
 	
 	public static SQL createSQL(Relation relation, RequestSpec reqspec, String username, boolean validateParameters) {
+		Integer limit = reqspec!=null?reqspec.limit:null;
+		return createSqlBase(relation, limit, username, validateParameters);
+	}
+	
+	public static SQL createSqlBase(Relation relation, Integer limit, String username, boolean validateParameters) {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), reqspec!=null?reqspec.limit:null, username, validateParameters);
+			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), limit, username, validateParameters);
 			//processSqlXtraMetadata(sql);
 			//sql.originalBindParameterCount = q.getParameterCount();
 			return sql;
 		}
 		else if(relation instanceof Table) {
-			SQL sql = new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null, username);
+			SQL sql = new SQL(createSQLstr(relation), relation, null, limit, username);
 			/*if(relation instanceof QonTable) {
 				QonTable qt = (QonTable) relation;
 				if(qt.hasSqlFilter()) {
@@ -343,7 +348,8 @@ public class SQL {
 			return sql;
 		}
 		else if(relation instanceof View) {
-			return new SQL(createSQLstr(relation, reqspec), relation, null, reqspec!=null?reqspec.limit:null, username);
+			View v = (View) relation;
+			return new SQL(createSQLstr(relation), relation, v.getParameterCount(), limit, username);
 		}
 		throw new IllegalArgumentException("unknown relation type: "+relation.getClass().getName());
 		

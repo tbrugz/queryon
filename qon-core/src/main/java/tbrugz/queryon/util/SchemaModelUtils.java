@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.SQL;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -299,6 +300,10 @@ public class SchemaModelUtils {
 	
 	public static List<String> getUniqueNamedParameterNames(Query q) {
 		List<String> pNames = q.getNamedParameterNames();
+		return getUniqueNamedParameterNames(pNames);
+	}
+	
+	static List<String> getUniqueNamedParameterNames(List<String> pNames) {
 		if(pNames == null) { return null; }
 		
 		Set<String> uniqueNames = new LinkedHashSet<String>();
@@ -331,7 +336,40 @@ public class SchemaModelUtils {
 		}
 		return false;
 	}
+	
+	public static boolean[] getNullBindingParameters(View view) {
+		SQL sql = SQL.createSqlBase(view, null, null, false);
+		Integer pCount = view.getParameterCount();
+		if(pCount==null) { pCount = view.getNamedParameterNames().size(); }
+		//System.out.println(">> getNullBindingParameters: pCount="+pCount);
+		return MiscUtils.expandBooleanArray(sql.bindNullOnMissingParameters(), pCount!=null?pCount:0);
+		//return sql.bindNullOnMissingParameters();
+	}
 
+	public static boolean[] getNullBindingNamedParameters(View view) {
+		List<String> pNames = view.getNamedParameterNames();
+		//System.out.println(">> pNames="+pNames);
+		if(pNames == null) { return null; }
+		List<String> uniqueNames = getUniqueNamedParameterNames(pNames);
+		
+		boolean[] bNullBindings = getNullBindingParameters(view);
+		Boolean[] ret0 = new Boolean[uniqueNames.size()];
+		//System.out.println(">> pNames="+pNames+"; uniqueNames="+uniqueNames+" ; bNullBindings="+Arrays.toString(bNullBindings));
+		for(int i=0;i<pNames.size();i++) {
+			int uniqueIdx = uniqueNames.indexOf(pNames.get(i));
+			boolean bindsNull = bNullBindings.length>i?bNullBindings[i]:false;
+			//ret[uniqueIdx] = bindsNull; //XXX: last wins?
+			if(ret0[uniqueIdx]==null||ret0[uniqueIdx]==true) { ret0[uniqueIdx] = bindsNull; } //false wins
+		}
+		//System.out.println(">> ret0="+Arrays.toString(ret0));
+		boolean[] ret = new boolean[uniqueNames.size()];
+		for(int i=0;i<ret0.length;i++) {
+			if(ret0[i]!=null) { ret[i] = ret0[i]; }
+			else { ret[i] = false; } //false wins
+		}
+		return ret;
+	}
+	
 	public static SchemaModel mergeModels(SchemaModel sm, SchemaModel sm2) {
 		if(sm==null) {
 			return sm2;
