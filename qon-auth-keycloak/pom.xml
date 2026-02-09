@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>queryon</artifactId>
-    <version>0.10-SNAPSHOT</version>
+    <version>0.11-SNAPSHOT</version>
   </parent>
   
   <artifactId>qon-auth-keycloak</artifactId>
   <packaging>jar</packaging>
-  <version>0.10-SNAPSHOT</version>
+  <version>0.11-SNAPSHOT</version>
 
   <name>qon-auth-keycloak</name>
 
