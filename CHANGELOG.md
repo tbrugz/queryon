@@ -1,4 +1,9 @@
 
+queryon 0.10 [xxxx-xx-xx]
+-----------
+* api: swagger: fixed 'required' Query parameters when using 'bind-null-on-missing-parameters' [2026-02-06]
+
+
 queryon 0.9 [2025-07-21]
 -----------
 * **java 8+** required [2024-10-30]
