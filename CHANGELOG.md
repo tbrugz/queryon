@@ -1,11 +1,16 @@
 
-queryon 0.10 [xxxx-xx-xx]
+queryon 0.11 [xxxx-xx-xx]
 -----------
 * **java 11+** required
 * pom/shiro: upgrading to version 2
 * springboot/helper: upgrading version to 3 (jdk17+)
 * demo: quarkus: upgrading to version 3 / using 'jakarta' dependencies (jdk17+)
 * pom: updated required maven version (3.2.5 -> 3.6.3)
+
+
+queryon 0.10 [xxxx-xx-xx]
+-----------
+* api: swagger: fixed 'required' Query parameters when using 'bind-null-on-missing-parameters' [2026-02-06]
 
 
 queryon 0.9 [2025-07-21]
