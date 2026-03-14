@@ -317,12 +317,12 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.8.0</version>
+        <version>0.10.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
-          <!--
           <skipPublishing>${maven.deploy.skip}</skipPublishing>
+          <!--
           <skipPublishing>${central-publishing}</skipPublishing>
           <autoPublish>true</autoPublish>
           -->

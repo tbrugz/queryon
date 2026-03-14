@@ -15,10 +15,10 @@ deploy to sonatype
 
 * Deploy snapshot:
 
+`mvn clean deploy` - all "deployable" (non demo) projects  
 <!--
-`mvn clean deploy` - all projects  
--->
 `mvn clean deploy -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web,qon-springboot-helper` - ignores demo projects  
+-->
 
 artifacts at snapshot repo:
 `https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/queryon/maven-metadata.xml`
@@ -27,10 +27,10 @@ artifacts at snapshot repo:
 
 * Deploy release version:
 
+`mvn clean javadoc:jar source:jar deploy -P release` - all "deployable" (non demo) projects  
 <!--
-`mvn clean javadoc:jar source:jar deploy -P release` - all projects  
--->
 `mvn clean javadoc:jar source:jar deploy -P release -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web,qon-springboot-helper` - ignores demo projects  
+-->
 & go to `https://central.sonatype.com/publishing/deployments`  
 <!--& go to `https://oss.sonatype.org/` & close & release staging repo  -->
 (maybe do `mvn -DskipTests=true package` first, see: <https://issues.apache.org/jira/browse/MDEP-98>)
