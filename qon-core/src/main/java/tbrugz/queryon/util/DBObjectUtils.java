@@ -128,6 +128,9 @@ public class DBObjectUtils {
 							log.warn("Exception getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
 						}
 					}
+					catch(RuntimeException e) {
+						log.warn("RuntimeException getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
+					}
 					
 					try {
 						ptype = pmd.getParameterTypeName(i);
@@ -137,6 +140,9 @@ public class DBObjectUtils {
 						if(logParameterMetaDataExceptions) {
 							log.warn("Exception getting parameter type ["+queryFullName+"/"+i+"]: "+e);
 						}
+					}
+					catch(RuntimeException e) {
+						log.warn("RuntimeException getting parameter mode ["+queryFullName+"/"+i+"]: "+e);
 					}
 					
 					if(pmode==ParameterMetaData.parameterModeIn) {
