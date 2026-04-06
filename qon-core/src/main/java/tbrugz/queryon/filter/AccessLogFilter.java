@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * Access Logger: logs access (http requests) to database table
@@ -69,6 +70,7 @@ public class AccessLogFilter implements Filter {
 	String modelId = null;
 	String tableName = DEFAUL_TABLE_NAME;
 	String serverHostName = null;
+	boolean getRemoteAddressFromXff = false;
 
 	final boolean grabQueryString = true,
 		grabContextPath = true,
@@ -102,6 +104,12 @@ public class AccessLogFilter implements Filter {
 			}
 		}
 		log.info("modelId="+modelId+" ; tableName="+tableName);
+		// getRemoteAddressFromXff
+		String getRemoteAddressFromXffStr = filterConfig.getInitParameter("getRemoteAddressFromXff");
+		if(getRemoteAddressFromXffStr!=null) {
+			getRemoteAddressFromXff = Utils.isTrue(getRemoteAddressFromXffStr);
+			log.info("getRemoteAddressFromXff="+getRemoteAddressFromXff);
+		}
 	}
 	
 	@Override
@@ -136,7 +144,7 @@ public class AccessLogFilter implements Filter {
 		String url = req.getRequestURI();
 		String queryString = grabQueryString ? req.getQueryString() : null;
 		Principal userPrincipal = req.getUserPrincipal();
-		String remoteAddr = req.getRemoteAddr();
+		String remoteAddr = getRemoteAddress(req);
 		//Subject currentUser = ShiroUtils.getSubject(prop, request);
 		//String authType = req.getAuthType();
 		// XXX req.getHeader("")
@@ -215,7 +223,7 @@ public class AccessLogFilter implements Filter {
 		// log request
 		logAcess(attr, req.getServletContext());
 		
-		// throw execption
+		// throw exception
 		if(ex!=null) {
 			if(ex instanceof IOException) {
 				throw (IOException) ex;
@@ -223,6 +231,21 @@ public class AccessLogFilter implements Filter {
 			throw (ServletException) ex;
 		}
 
+	}
+
+	String getRemoteAddress(HttpServletRequest req) {
+		String remoteAddr = req.getRemoteAddr();
+		if(getRemoteAddressFromXff) {
+			String xForwardedFor = req.getHeader("X-Forwarded-For");
+			if(xForwardedFor!=null) {
+				log.debug("xForwardedFor="+xForwardedFor+"; remoteAddr="+remoteAddr);
+				String[] addrs = xForwardedFor.split(",");
+				if(addrs.length>0) {
+					remoteAddr = addrs[0].trim();
+				}
+			}
+		}
+		return remoteAddr;
 	}
 	
 	void logAcess(Map<String, Object> propMap, ServletContext context) {
