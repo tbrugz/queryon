@@ -54,7 +54,7 @@ public class ShiroUtils {
 		if(providers!=null) {
 			for(String s: providers) {
 				try {
-					Class<?> c = Class.forName(s);
+					Class<?> c = Utils.loadClass(s);
 					IdentityProvider ip = (IdentityProvider) c.getConstructor().newInstance();
 					identityProviders.add(ip);
 					log.debug("Loaded identity provider '"+ip.getClass().getName()+"'");

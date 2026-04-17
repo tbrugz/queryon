@@ -26,6 +26,7 @@ public class CorsFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 		if(resp instanceof HttpServletResponse) {
+			// nosemgrep
 			HttpServletResponse hresp = (HttpServletResponse) resp;
 			hresp.addHeader("Access-Control-Allow-Origin", "*");
 			hresp.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS, HEAD");

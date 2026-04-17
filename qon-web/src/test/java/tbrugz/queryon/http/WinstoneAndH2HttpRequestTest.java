@@ -91,6 +91,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import tbrugz.queryon.ResponseSpec;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
@@ -130,7 +131,7 @@ public class WinstoneAndH2HttpRequestTest {
 		JettySetup.setupServer();
 		//System.out.println(">> user.dir: "+System.getProperty("user.dir"));
 		
-		dbFactory = DocumentBuilderFactory.newInstance();
+		dbFactory = MiscUtils.getDocumentBuilderFactory();
 		dBuilder = dbFactory.newDocumentBuilder();
 	}
 	

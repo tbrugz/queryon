@@ -20,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.sqlrun.SQLRun;
 
 import static tbrugz.queryon.http.JettySetup.*;
@@ -50,7 +51,7 @@ public class JettyODataAndH2Test {
 		JettySetup.setupServer("/WEB-INF/web-odata.xml");
 		//System.out.println(">> user.dir: "+System.getProperty("user.dir"));
 		
-		dbFactory = DocumentBuilderFactory.newInstance();
+		dbFactory = MiscUtils.getDocumentBuilderFactory();
 		dBuilder = dbFactory.newDocumentBuilder();
 	}
 	

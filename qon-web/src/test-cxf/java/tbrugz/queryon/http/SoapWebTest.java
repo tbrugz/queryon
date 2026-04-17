@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 
@@ -65,7 +66,7 @@ public class SoapWebTest {
 		File dir = new File(outdir);
 		dir.mkdirs();
 		
-		dbFactory = DocumentBuilderFactory.newInstance();
+		dbFactory = MiscUtils.getDocumentBuilderFactory();
 		dBuilder = dbFactory.newDocumentBuilder();
 	}
 	

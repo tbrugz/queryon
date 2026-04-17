@@ -63,6 +63,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.sqlrun.SQLRun;
 
 public class SoapCodeGenCallTest {
@@ -91,7 +92,8 @@ public class SoapCodeGenCallTest {
 		setupH2();
 		JettySetup.setupServer();
 		
-		dbFactory = DocumentBuilderFactory.newInstance();
+		dbFactory = MiscUtils.getDocumentBuilderFactory();
+		//dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();
 	}
 	
