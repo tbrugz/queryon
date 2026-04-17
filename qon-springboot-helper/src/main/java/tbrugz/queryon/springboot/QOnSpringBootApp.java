@@ -14,6 +14,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import tbrugz.queryon.AbstractHttpServlet;
 
@@ -21,7 +23,7 @@ import tbrugz.queryon.AbstractHttpServlet;
  * https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.developing-web-applications.embedded-container.servlets-filters-listeners
  */
 //@SpringBootApplication
-public class QOnSpringBootApp extends SpringBootServletInitializer {
+public class QOnSpringBootApp extends SpringBootServletInitializer implements WebMvcConfigurer {
 
 	protected static final boolean loadQueryOnServletOnStartup = true;
 	
@@ -80,6 +82,19 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(QOnSpringBootApp.class);
+	}
+
+	/* 'path' should start with "/" and end without "/" */
+	protected void addIndexFowardForPath(ViewControllerRegistry registry, String path) {
+		registry.addViewController(path).setViewName("redirect:"+path+"/");
+		registry.addViewController(path+"/").setViewName("forward:"+path+"/index.html");
+	}
+
+	protected void addSwaggerIndexesFowards(ViewControllerRegistry registry) {
+		String[] swaggerPaths = {"/swagger-ui", "/swagger2-ui"};
+		for(String path: swaggerPaths) {
+			addIndexFowardForPath(registry, path);
+		}
 	}
 
 	/*
@@ -205,6 +220,10 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		AbstractHttpServlet servlet = new tbrugz.queryon.MarkdownServlet();
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
+	*/
+
+	/*
+	// Swagger
 
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletSwaggerServletBean() {
@@ -212,6 +231,24 @@ public class QOnSpringBootApp extends SpringBootServletInitializer {
 		return new ServletRegistrationBean<AbstractHttpServlet>(servlet, servlet.getDefaultUrlMapping());
 	}
 
+	// https://stackoverflow.com/a/59052438/
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		//registry.addViewController("/swagger-ui").setViewName("redirect:/swagger-ui/");
+		//registry.addViewController("/swagger-ui/").setViewName("forward:/swagger-ui/index.html");
+		//registry.addViewController("/swagger2-ui").setViewName("redirect:/swagger2-ui/");
+		//registry.addViewController("/swagger2-ui/").setViewName("forward:/swagger2-ui/index.html");
+
+		//String[] swaggerPaths = {"/swagger-ui", "/swagger2-ui"};
+		//for(String path: swaggerPaths) {
+		//	addIndexFowardForPath(registry, path);
+		//}
+
+		addSwaggerIndexesViewControllers(registry);
+	}
+	*/
+
+	/*
 	@Bean
 	public ServletRegistrationBean<AbstractHttpServlet> servletODataServletBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.api.ODataServlet();

@@ -70,6 +70,7 @@ public class AccessLogFilter implements Filter {
 	String modelId = null;
 	String tableName = DEFAUL_TABLE_NAME;
 	String serverHostName = null;
+	// XXX: 'Forwarded' header? https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Forwarded
 	boolean getRemoteAddressFromXff = false;
 
 	final boolean grabQueryString = true,
