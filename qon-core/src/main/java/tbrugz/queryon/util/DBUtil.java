@@ -128,10 +128,14 @@ public class DBUtil {
 	}
 	
 	public static Connection initDBConn(Properties prop, String modelId) throws ClassNotFoundException, SQLException, NamingException {
+		return initDBConn(prop, modelId, (Boolean) null);
+	}
+
+	public static Connection initDBConn(Properties prop, String modelId, Boolean readOnly) throws ClassNotFoundException, SQLException, NamingException {
 		boolean autocommit = false;
 		String prefix = getDBConnPrefix(prop, modelId);
-		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+prefix+" ; autocommit = "+autocommit);
-		Connection conn = ConnectionUtil.initDBConnection(prefix, prop, autocommit);
+		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+prefix+" ; autocommit = "+autocommit+" ; readonly = "+readOnly);
+		Connection conn = ConnectionUtil.initDBConnection(prefix, prop, autocommit, readOnly);
 		initStatics(conn);
 		return conn;
 	}

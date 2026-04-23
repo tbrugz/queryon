@@ -1090,7 +1090,7 @@ public class QueryOn extends AbstractHttpServlet {
 				break;
 			case SELECT_ANY:
 				try {
-					conn = DBUtil.initDBConn(prop, reqspec.getModelId());
+					conn = DBUtil.initDBConn(prop, reqspec.getModelId(), true);
 					DatabaseMetaData dbmd = conn.getMetaData();
 					setFeatures(req, dbmd);
 					Query relation = getQuery(req, reqspec, currentUser, conn);
@@ -1110,14 +1110,15 @@ public class QueryOn extends AbstractHttpServlet {
 					sets read-only...
 					https://docs.oracle.com/javase/8/docs/api/java/sql/Connection.html#setReadOnly-boolean-
 					*/
-					boolean prevReadOnly = conn.isReadOnly();
-					if(!prevReadOnly) { conn.setReadOnly(true); }
+					//boolean prevReadOnly = conn.isReadOnly();
+					//if(!prevReadOnly) { conn.setReadOnly(true); }
 					boolean sqlCommandExecuted = trySqlCommand(relation, conn, reqspec, resp);
 					if(!sqlCommandExecuted) {
 						DBObjectUtils.updateQueryParameters(relation, conn);
 						doSelect(model, relation, reqspec, currentUser, conn, resp, true);
 					}
-					if(!prevReadOnly) { conn.setReadOnly(false); }
+					// org.postgresql.util.PSQLException: Cannot change transaction read-only property in the middle of a transaction
+					//if(!prevReadOnly) { conn.setReadOnly(false); }
 				}
 				catch(RuntimeException e) {
 					throw new BadRequestException(e.getMessage(), e);
@@ -3260,7 +3261,7 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		if(reqspec.isHeadMethod()) {
 			//XXX: HEAD & Content-Length: https://stackoverflow.com/a/18925736/616413
-			log.debug("HEAD method: response body is empty"); 
+			log.debug("HEAD method: response body is empty");
 			return;
 		}
 		
