@@ -27,6 +27,13 @@ spring:
         datasource-name: jdbc/datasource-demo
 
 logging:
+    # https://docs.spring.io/spring-boot/reference/features/logging.html
+    # https://stackoverflow.com/questions/63251142/what-is-default-console-log-pattern-used-for-spring-boot-logging-and-where-to-fi
+    # https://github.com/spring-projects/spring-boot/blob/main/core/spring-boot/src/main/java/org/springframework/boot/logging/logback/DefaultLogbackConfiguration.java
+    pattern:
+        #console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+        # https://github.com/spring-projects/spring-boot/blob/3.5.x/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/logging/logback/DefaultLogbackConfiguration.java
+        console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
     level:
         # https://stackoverflow.com/questions/60757590/logging-hikaricp-spring-boot
         #com.zaxxer.hikari.HikariConfig: DEBUG 
@@ -40,6 +47,7 @@ logging:
         #tbrugz.queryon.RequestSpec: TRACE
         #tbrugz.queryon.action.QOnManage: INFO
         #tbrugz.queryon.action.QOnManage: DEBUG
+        #tbrugz.queryon.api: DEBUG
         #tbrugz.queryon.diff: DEBUG
         tbrugz.queryon.springboot.demo: DEBUG
         #tbrugz.queryon.util: DEBUG

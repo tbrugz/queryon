@@ -285,13 +285,13 @@ public class AccessLogFilter implements Filter {
 					log.warn("Error logging access [count = "+count+"]");
 				}
 			} catch (ClassNotFoundException e) {
-				log.warn("Exception: "+e);
+				log.warn("ClassNotFoundException: "+e);
 			} catch (SQLException e) {
-				log.warn("Exception [modelId = "+modelId+"]: "+e);
+				log.warn("SQLException [modelId = "+modelId+"]: "+e);
 			} catch (NamingException e) {
-				log.warn("Exception [modelId = "+modelId+"]: "+e);
+				log.warn("NamingException [modelId = "+modelId+"]: "+e);
 			} catch (RuntimeException e) {
-				log.warn("Exception [modelId = "+modelId+"]: "+e);
+				log.warn("RuntimeException [modelId = "+modelId+"]: "+e);
 			} finally {
 				ConnectionUtil.closeConnection(conn);
 			}

@@ -90,7 +90,7 @@ public class InfoServlet extends AbstractHttpServlet {
 			WebUtils.writeJsonResponse(getSchemas(req), resp);
 		}
 		else if(pathInfo.equals(INFO_SETTINGS)) {
-			WebUtils.writeJsonResponse(getSettings(), resp);
+			WebUtils.writeJsonResponse(getSettings(req), resp);
 		}
 		else if(pathInfo.equals(INFO_STATUS)) {
 			WebUtils.writeJsonResponse(getStatus(req), resp);
@@ -239,8 +239,14 @@ public class InfoServlet extends AbstractHttpServlet {
 		return ret;
 	}
 	
-	public Map<String, Object> getSettings() throws IOException {
+	public Map<String, Object> getSettings(HttpServletRequest request) throws IOException {
 		Map<String, Object> ret = new TreeMap<String, Object>();
+
+		Properties prop = QOnContextUtils.getProperties(getServletContext());
+		Subject currentUser = ShiroUtils.getSubject(prop, request);
+		boolean userIsAdmin = ShiroUtils.isPermitted(currentUser, "MANAGE");
+		boolean debugMode = Utils.getPropBool(prop, QueryOn.PROP_DEBUG_MODE);
+		log.debug("userIsAdmin = "+userIsAdmin+" ; debugMode = "+debugMode);
 
 		String[] exposedKeys = {
 				"queryon.models",
@@ -284,7 +290,7 @@ public class InfoServlet extends AbstractHttpServlet {
 		}
 		
 		int i = 0;
-		Properties prop = QOnContextUtils.getProperties(getServletContext());
+		//Properties prop = QOnContextUtils.getProperties(getServletContext());
 		if(prop!=null) {
 			for(;i<exposedKeys.length;) {
 				String k = exposedKeys[i];
@@ -330,7 +336,10 @@ public class InfoServlet extends AbstractHttpServlet {
 			pqon.load(IOUtil.getResourceAsStream("/queryon-version.properties"));
 			for(Map.Entry<Object, Object> entry: pqon.entrySet()) {
 				//p2.put("queryon."+entry.getKey(), String.valueOf(entry.getValue()) );
-				ret.put("queryon."+entry.getKey(), String.valueOf(entry.getValue()) );
+				String key = (String) entry.getKey();
+				if( (!isDebugKey(key)) || debugMode || userIsAdmin) {
+					ret.put("queryon."+key, String.valueOf(entry.getValue()) );
+				}
 			}
 		}
 		catch(RuntimeException e) {} 
@@ -340,12 +349,19 @@ public class InfoServlet extends AbstractHttpServlet {
 			psqld.load(IOUtil.getResourceAsStream("/sqldump-version.properties"));
 			for(Map.Entry<Object, Object> entry: psqld.entrySet()) {
 				//p2.put("sqldump."+entry.getKey(), String.valueOf(entry.getValue()) );
-				ret.put("sqldump."+entry.getKey(), String.valueOf(entry.getValue()) );
+				String key = (String) entry.getKey();
+				if( (!isDebugKey(key)) || debugMode || userIsAdmin) {
+					ret.put("sqldump."+key, String.valueOf(entry.getValue()) );
+				}
 			}
 		}
 		catch(RuntimeException e) {} 
 		
 		return ret;
+	}
+	
+	static boolean isDebugKey(String key) {
+		return key.startsWith("build.");
 	}
 	
 	@SuppressWarnings("unchecked")

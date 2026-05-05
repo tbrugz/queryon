@@ -303,7 +303,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String PROP_SCHEMAS_TO_IGNORE = "queryon.schemas-to-ignore";
 	static final String PROP_SQL_USEIDDECORATOR = "queryon.sql.use-id-decorator";
 	static final String PROP_AUTH_SHIRO_ALLOW_DISABLED = "queryon.auth.shiro.allow-disabled";
-	static final String PROP_DEBUG_MODE = "queryon.debug-mode";
+	public static final String PROP_DEBUG_MODE = "queryon.debug-mode";
 	static final String PROP_DISCOVERY_MODE = "queryon.discovery-mode";
 
 	//static final String DEFAULT_XTRA_SYNTAXES = "tbrugz.queryon.syntaxes.HTMLAttrSyntax";
@@ -523,7 +523,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			debugMode = Utils.getPropBool(prop, PROP_DEBUG_MODE, debugMode);
 			if(debugMode) {
-				log.info("debug-mode is active");
+				log.warn("debug-mode is active. DO NOT use in a production environment");
 			}
 			DumpSyntaxRegistry.setSyntaxesResource(DEFAULT_SYNTAXES_RESOURCE);
 			DumpSyntaxRegistry.addSyntaxes(prop.getProperty(PROP_XTRASYNTAXES, DEFAULT_XTRA_SYNTAXES));
