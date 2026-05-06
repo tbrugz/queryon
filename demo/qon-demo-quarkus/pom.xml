@@ -20,6 +20,7 @@
     <maven.compiler.target>11</maven.compiler.target>
     -->
     <maven.deploy.skip>true</maven.deploy.skip>
+    <!--<maven.install.skip>true</maven.install.skip>-->
     <maven-enforcer-plugin.requireJavaVersion>17</maven-enforcer-plugin.requireJavaVersion>
     <maven-enforcer-plugin.requireMavenVersion>3.8.2</maven-enforcer-plugin.requireMavenVersion>
     <!--
