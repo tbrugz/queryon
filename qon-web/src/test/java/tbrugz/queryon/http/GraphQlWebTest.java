@@ -5,6 +5,8 @@ import static tbrugz.queryon.http.JettySetup.qonUrl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -99,8 +103,39 @@ public class GraphQlWebTest {
 			qparts.add("\"operationName\": \""+operationName+"\"");
 		}
 		String body = "{ "+Utils.join(qparts, ",")+" }";
-		//System.out.println("body: "+body);
+		//System.out.println("post-body: "+body);
+
 		httpReq.setEntity(new StringEntity(body));
+		HttpResponse response1 = httpclient.execute(httpReq);
+		String content = getContent(response1);
+		httpReq.releaseConnection();
+		if(response1.getStatusLine().getStatusCode()>=400) {
+			//System.out.println("content:: "+content);
+			throw new RuntimeException(response1.getStatusLine().getStatusCode()+": "+content);
+		}
+		return content;
+	}
+	
+	public static String getContentWithGet(String query, String variables, String operationName) throws ClientProtocolException, IOException, URISyntaxException {
+		HttpClient httpclient = AbstractWebTest.getHttpClient();
+		HttpGet httpReq = new HttpGet(graphqlUrl);
+		List<String> qparts = new ArrayList<String>();
+		if(query!=null) {
+			qparts.add("\"query\": \""+escapeJson(query)+"\"");
+		}
+		if(variables!=null) {
+			qparts.add("\"variables\": "+variables+"");
+		}
+		if(operationName!=null) {
+			qparts.add("\"operationName\": \""+operationName+"\"");
+		}
+		String body = "{ "+Utils.join(qparts, ",")+" }";
+		//System.out.println("get-body: "+body);
+		URI uri = new URIBuilder(httpReq.getURI())
+				.addParameter("query", body)
+				.build();
+		httpReq.setURI(uri);
+
 		HttpResponse response1 = httpclient.execute(httpReq);
 		String content = getContent(response1);
 		httpReq.releaseConnection();
@@ -148,6 +183,15 @@ public class GraphQlWebTest {
 	public void getEmps() throws IOException, ParserConfigurationException, SAXException {
 		String query = "{ list_EMP { ID NAME SUPERVISOR_ID DEPARTMENT_ID SALARY }}";
 		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlOk(jsonStr);
+	}
+
+	@Test
+	public void getEmpsWithHttpGet() throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
+		String query = "{ list_EMP { ID NAME SUPERVISOR_ID DEPARTMENT_ID SALARY }}";
+		String jsonStr = getContentWithGet(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
 
 		assertGraphqlOk(jsonStr);
@@ -205,6 +249,15 @@ public class GraphQlWebTest {
 	public void executeIsPrimeError() throws ClientProtocolException, IOException {
 		String query = "mutation { execute_IS_PRIME(p1: \"asdasd\") { returnValue } }";
 		String jsonStr = getContent(query, null, null);
+		//System.out.println("content:\n"+jsonStr);
+
+		assertGraphqlErrors(jsonStr);
+	}
+	
+	@Test
+	public void executeIsPrimePermissionError() throws ClientProtocolException, IOException, URISyntaxException {
+		String query = "mutation { execute_IS_PRIME(p1: 181) { returnValue } }";
+		String jsonStr = getContentWithGet(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
 
 		assertGraphqlErrors(jsonStr);

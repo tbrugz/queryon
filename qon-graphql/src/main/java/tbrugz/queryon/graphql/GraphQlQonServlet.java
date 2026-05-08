@@ -59,7 +59,6 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		boolean requestSchema = req.getParameter("schema")!=null;
 
 		log.info(">> GraphQlQonServlet: method: "+req.getMethod());
-		//log.info(">> GqlQuery: "+exec.getQuery());
 		
 		String modelId = SchemaModelUtils.getModelId(req); //XXX: get modelId (also) from POST body (json)?
 		SchemaModel sm = getSchemaModel(modelId, req);
@@ -76,6 +75,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		}
 
 		ExecutionInput exec = getExecutionInput(req);
+		//System.out.println(">> GqlQuery: "+exec.getQuery());
 		if(exec.getQuery()==null) {
 			// if query is null, 'getExecutionInput' will throw error?
 			throw new BadRequestException("query must not be null");
@@ -169,37 +169,40 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	@SuppressWarnings("unchecked")
 	ExecutionInput getExecutionInput(HttpServletRequest req) throws IOException {
 		ExecutionInput.Builder execBuilder = ExecutionInput.newExecutionInput();
+		String content = null;
 		if(req.getMethod().equals("GET")) {
-			String query = req.getParameter("query");
-			execBuilder.query(query);
+			content = req.getParameter("query");
+			//execBuilder.query(query);
 		}
 		else if(req.getMethod().equals("POST")) {
 			//XXX test for Content-Type: application/json or application/graphql
-			String httpBody = IOUtil.readFromReader(req.getReader()).trim();
-			Gson gson = new Gson();
-			try {
-				Map<String, Object> map = (Map<String, Object>) gson.fromJson(httpBody, Map.class);
-				if(map==null) {
-					throw new BadRequestException("empty body? [method: "+req.getMethod()+"]");
-				}
-				
-				String query = (String) map.get("query");
-				execBuilder.query(query);
-				Object oVar = (Object) map.get("variables");
-				if(oVar instanceof Map<?, ?>) {
-					Map<String, Object> variables = (Map<String, Object>) oVar;
-					execBuilder.variables(variables);
-				}
-				String operationName = (String) map.get("operationName");
-				execBuilder.operationName(operationName);
-			}
-			catch(JsonSyntaxException e) {
-				throw new BadRequestException("malformed json in body [method: "+req.getMethod()+"]");
-			}
+			content = IOUtil.readFromReader(req.getReader()).trim();
 		}
 		else {
 			throw new BadRequestException("GraphQl query missing [method: "+req.getMethod()+"]");
 		}
+
+		Gson gson = new Gson();
+		try {
+			Map<String, Object> map = (Map<String, Object>) gson.fromJson(content, Map.class);
+			if(map==null) {
+				throw new BadRequestException("empty content? [method: "+req.getMethod()+"]");
+			}
+			
+			String query = (String) map.get("query");
+			execBuilder.query(query);
+			Object oVar = (Object) map.get("variables");
+			if(oVar instanceof Map<?, ?>) {
+				Map<String, Object> variables = (Map<String, Object>) oVar;
+				execBuilder.variables(variables);
+			}
+			String operationName = (String) map.get("operationName");
+			execBuilder.operationName(operationName);
+		}
+		catch(JsonSyntaxException e) {
+			throw new BadRequestException("malformed json in body [method: "+req.getMethod()+"]");
+		}
+		
 		ExecutionInput exec = execBuilder.build();
 		return exec;
 	}
@@ -247,8 +250,8 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 			HttpServletResponse resp, boolean validateQuery)
 			throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
 		// request: schema=true is processed in doService()
-		// XXX: option to get query from HTTP GET 'query' parameter: https://graphql.org/learn/serving-over-http/
-		WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
+		// works with HTTP GET 'query' parameter: https://graphql.org/learn/serving-over-http/
+		//WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
 		super.doSelect(model, relation, reqspec, currentUser, resp, validateQuery);
 	}
 	
