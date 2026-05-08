@@ -28,12 +28,14 @@ import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.SchemaPrinter;
 import tbrugz.queryon.BadRequestException;
+import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.graphql.GqlSchemaFactory.QonAction;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -244,30 +246,37 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 	protected void doSelect(SchemaModel model, Relation relation, RequestSpec reqspec, Subject currentUser,
 			HttpServletResponse resp, boolean validateQuery)
 			throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
+		// request: schema=true is processed in doService()
+		// XXX: option to get query from HTTP GET 'query' parameter: https://graphql.org/learn/serving-over-http/
+		WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
 		super.doSelect(model, relation, reqspec, currentUser, resp, validateQuery);
 	}
 	
 	@Override
 	protected void doInsert(Relation relation, RequestSpec reqspec, String sqlDialect, Subject currentUser, boolean isPermitted, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
 		super.doInsert(relation, reqspec, sqlDialect, currentUser, isPermitted, resp);
 	}
 	
 	@Override
 	protected void doUpdate(Relation relation, RequestSpec reqspec, Subject currentUser, boolean isPermitted, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
 		super.doUpdate(relation, reqspec, currentUser, isPermitted, resp);
 	}
 	
 	@Override
 	protected void doDelete(Relation relation, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException, ServletException {
+		WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
 		super.doDelete(relation, reqspec, currentUser, resp);
 	}
 	
 	@Override
 	protected void doExecute(ExecutableObject eo, RequestSpec reqspec, Subject currentUser, HttpServletResponse resp)
 			throws ClassNotFoundException, SQLException, NamingException, IOException {
+		WebUtils.checkHttpMethod(reqspec.getMethod(), QueryOn.METHOD_POST);
 		super.doExecute(eo, reqspec, currentUser, resp);
 	}
 	
