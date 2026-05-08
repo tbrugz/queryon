@@ -18,6 +18,7 @@ import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.NamedTypedDBObject;
 import tbrugz.queryon.QOnPrivilegeType;
+import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.QueryOnSchemaInstant;
 import tbrugz.queryon.exception.InternalServerException;
@@ -25,6 +26,7 @@ import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.ChangeType;
@@ -106,7 +108,8 @@ public class DiffServlet extends AbstractHttpServlet {
 		List<ApplyHook> preHooks = new ArrayList<ApplyHook>();
 		List<ApplyHook> postHooks = new ArrayList<ApplyHook>();
 		if(doApply) {
-			// XXX do NOT allow HTTP GET method...
+			// do NOT allow HTTP GET method: State-Changing Operations via GET (CSRF)
+			WebUtils.checkHttpMethod(req, QueryOn.METHOD_POST);
 			String permissionPattern = obj.getType()+":"+QOnPrivilegeType.APPLYDIFF+":"+modelIdSource;
 			log.info("aplying to '"+modelIdSource+"'... permission: "+permissionPattern+" :: "+obj.getFullObjectName());
 			ShiroUtils.checkPermission(currentUser, permissionPattern, obj.getFullObjectName());
