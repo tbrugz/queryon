@@ -428,15 +428,15 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	static DiffSyntax getSyntax(NamedTypedDBObject obj, String lastUrlPart) throws SQLException {
 		DiffSyntax ds = null;
 		String syntax = lastUrlPart;
-		if(syntax==null) { syntax = obj.getMimeType(); }
+		if(syntax==null) { syntax = obj.getMimeTypeLower(); }
 		if(SYNTAX_SQL.equals(syntax)) {
 			ds = new SQLDataDiffSyntax();
 		}
-		else if(SYNTAX_HTML.equals(syntax) || obj.getMimeType()==null) {
+		else if(SYNTAX_HTML.equals(syntax) || syntax==null) {
 			ds = new HTMLDiff();
 		}
 		else {
-			throw new BadRequestException("unknown data type: "+obj.getMimeType());
+			throw new BadRequestException("unknown data type: "+syntax);
 		}
 		
 		return ds;

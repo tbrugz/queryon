@@ -23,7 +23,6 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QOnPrivilegeType;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.ResponseSpec;
-import tbrugz.queryon.QueryOn.ActionType;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;

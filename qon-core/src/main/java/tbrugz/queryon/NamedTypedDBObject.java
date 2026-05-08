@@ -5,21 +5,33 @@ import java.util.List;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.TypedDBObject;
+import tbrugz.sqldump.util.SQLUtils;
 
 public class NamedTypedDBObject implements TypedDBObject {
+	
+	public enum Syntax {
+		HTML, SQL;
+		
+		public static Syntax getSyntax(String syntax) {
+			if(syntax==null) { return null; }
+			return valueOf(syntax.toUpperCase());
+		}
+	}
 
 	final DBObjectType type;
 	final String schemaName;
 	final String name;
-	final String fullObjectName;
-	final String mimetype;
+	//final String fullObjectName;
+	final Syntax mimetype;
 	
-	public NamedTypedDBObject(DBObjectType type, String schemaName, String name, String fullObjectName, String mimetype) {
+	public NamedTypedDBObject(DBObjectType type, String schemaName, String name, String mimetype) {
+		SQLUtils.validateSqlIdentifier(schemaName);
+		SQLUtils.validateSqlIdentifier(name);
 		this.type = type;
 		this.schemaName = schemaName;
 		this.name = name;
-		this.fullObjectName = fullObjectName;
-		this.mimetype = mimetype;
+		//this.fullObjectName = (schemaName!=null?schemaName+".":"")+name;
+		this.mimetype = Syntax.getSyntax( mimetype );
 	}
 	
 	public static NamedTypedDBObject getObject(List<String> partz) {
@@ -48,7 +60,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 			throw new BadRequestException("Unknown object type: "+objType);
 		}
 		
-		return new NamedTypedDBObject(type, schemaName, objectName, fullObjectName, mimetype);
+		return new NamedTypedDBObject(type, schemaName, objectName, mimetype);
 	}
 
 	public static List<NamedTypedDBObject> getObjectList(List<String> partz) {
@@ -81,7 +93,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 					mimetype = onPartz[2];
 				}
 			}
-			ret.add(new NamedTypedDBObject(type, schemaName, obj, (schemaName!=null?schemaName+".":"")+obj, mimetype));
+			ret.add(new NamedTypedDBObject(type, schemaName, obj, mimetype));
 		}
 		
 		return ret;
@@ -89,7 +101,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 	
 	@Override
 	public String toString() {
-		return "["+type+":"+fullObjectName+(mimetype!=null?" ; mime="+mimetype:"")+"]";
+		return "["+type+":"+getFullObjectName()+(mimetype!=null?" ; mime="+mimetype:"")+"]";
 	}
 	
 	@Override
@@ -115,13 +127,17 @@ public class NamedTypedDBObject implements TypedDBObject {
 	}
 	
 	public String getFullObjectName() {
-		return fullObjectName;
+		//return fullObjectName;
+		return (schemaName!=null?schemaName+".":"")+name;
 	}
 	
-	public String getMimeType() {
+	public Syntax getMimeType() {
 		return mimetype;
 	}
 
+	public String getMimeTypeLower() {
+		return mimetype.name().toLowerCase();
+	}
 	
 	/*public void setType(DBObjectType type) {
 		this.type = type;
