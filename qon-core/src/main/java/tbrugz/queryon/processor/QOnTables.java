@@ -404,7 +404,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			}
 			throw e;
 		}
-		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+tnew+"? "+added+" [qonRelation="+qonRelation+";newT.remarks="+tnew.getRemarks()+"]");
+		log.info("onUpdate: removed "+t+"? "+removed+" ; added "+tnew+"? "+added+" [qonRelation="+qonRelation+";newT.remarks="+(tnew!=null?tnew.getRemarks():null)+"]");
 	}
 
 	@Override
