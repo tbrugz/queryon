@@ -79,7 +79,6 @@ public class QonSoapServlet extends BaseApiServlet {
 	
 	public static final String ATTR_REQSPEC = "reqspec";
 
-	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	
 	String serviceName;
@@ -90,7 +89,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		serviceName = "queryOnService";
 		
 		try {
-			dbFactory = MiscUtils.getDocumentBuilderFactory();
+			DocumentBuilderFactory dbFactory = MiscUtils.getDocumentBuilderFactory();
 			dBuilder = dbFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
 			throw new ServletException(e); 

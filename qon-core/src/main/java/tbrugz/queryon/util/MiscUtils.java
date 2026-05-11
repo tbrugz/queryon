@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import tbrugz.sqldump.util.ParametrizedProperties;
 
@@ -187,12 +188,42 @@ public class MiscUtils {
 		return PATTERN_MULTISLASH.matcher(s).replaceAll("/");
 	}
 	
-	public static DocumentBuilderFactory getDocumentBuilderFactory() {
+	public static DocumentBuilderFactory getDocumentBuilderFactory() throws ParserConfigurationException {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		// https://rules.sonarsource.com/java/RSPEC-2755
 		// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java
-		docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+		//docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		//docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+		// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#java
+		String[] featuresToDisable = {
+			// Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-general-entities
+			// Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-general-entities
+			// JDK7+ - http://xml.org/sax/features/external-general-entities
+			//This feature has to be used together with the following one, otherwise it will not protect you from XXE for sure
+			"http://xml.org/sax/features/external-general-entities",
+			
+			// Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-parameter-entities
+			// Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-parameter-entities
+			// JDK7+ - http://xml.org/sax/features/external-parameter-entities
+			//This feature has to be used together with the previous one, otherwise it will not protect you from XXE for sure
+			"http://xml.org/sax/features/external-parameter-entities",
+			
+			// Disable external DTDs as well
+			"http://apache.org/xml/features/nonvalidating/load-external-dtd"
+		};
+		for (String feature : featuresToDisable) {
+			//try {
+				docFactory.setFeature(feature, false); 
+			//} catch (ParserConfigurationException e) {
+				// This should catch a failed setFeature feature
+				//log.info("ParserConfigurationException was thrown. The feature '" + feature+ "' is probably not supported by your XML processor.");
+			//}
+		}
+		
+		docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		//docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		docFactory.setXIncludeAware(false);
 		return docFactory;
 	}
 	
