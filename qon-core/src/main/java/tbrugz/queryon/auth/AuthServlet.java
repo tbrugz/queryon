@@ -28,6 +28,7 @@ import tbrugz.queryon.QueryOn;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.WebUtils;
+import tbrugz.sqldump.util.Utils;
 
 public class AuthServlet extends AbstractHttpServlet {
 
@@ -42,6 +43,7 @@ public class AuthServlet extends AbstractHttpServlet {
 	public static final String PARAM_RETURN = "return";
 	
 	boolean currentUserWithExtraInfo = true;
+	boolean debugMode = false;
 	
 	Properties prop;
 	
@@ -49,6 +51,7 @@ public class AuthServlet extends AbstractHttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		prop = QOnContextUtils.getProperties(getServletContext());
+		debugMode = Utils.getPropBool(prop, QueryOn.PROP_DEBUG_MODE);
 	}
 	
 	@Override
@@ -106,12 +109,12 @@ public class AuthServlet extends AbstractHttpServlet {
 		return contentType!=null && contentType.startsWith(ResponseSpec.MIME_TYPE_JSON);
 	}
 	
-	static String getExceptionMessage(Exception e) {
-		if(e instanceof UnknownAccountException) {
-			return "Unknown account";
-		}
-		else if(e instanceof IncorrectCredentialsException) {
-			return "Incorrect password";
+	String getExceptionMessage(Exception e) {
+		if(e instanceof UnknownAccountException || e instanceof IncorrectCredentialsException) {
+			if(e instanceof UnknownAccountException && debugMode) {
+				return "Unknown account";
+			}
+			return "Invalid credentials";
 		}
 		else if(e instanceof ShiroException) {
 			return "Shiro Exception: "+e;
