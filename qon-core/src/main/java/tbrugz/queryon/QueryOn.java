@@ -1872,17 +1872,14 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 
 	void doExplain(Query relation, RequestSpec reqspec, Subject currentUser, Connection conn, HttpServletResponse resp) throws IOException, ClassNotFoundException, SQLException, NamingException, ServletException {
-		SQL sql = null;
-		DBMSFeatures feat = null;
+		DBMSResources res = DBMSResources.instance();
+		DBMSFeatures feat = res.getSpecificFeatures(conn.getMetaData());
+		if(!feat.supportsExplainPlan()) {
+			throw new BadRequestException("Explain plan not available for database: "+feat.getClass().getSimpleName());
+		}
+		SQL sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
+		
 		try {
-			final DBMSResources res = DBMSResources.instance();
-			feat = res.getSpecificFeatures(conn.getMetaData());
-			
-			if(!feat.supportsExplainPlan()) {
-				throw new BadRequestException("Explain plan not available for database: "+feat.getClass().getSimpleName());
-			}
-			
-			sql = SQL.createSQL(relation, reqspec, getUsername(currentUser));
 			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
 			try {
 				DBObjectUtils.validateQueryParameters(relation, sqlWithNamedParams, conn, true);

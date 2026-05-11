@@ -332,11 +332,10 @@ public class RequestSpec {
 		String lastURIPart = URIpartz.size()>0 ? URIpartz.remove(URIpartz.size()-1) : null;
 		outputTypeStr = getSyntax(lastURIPart, dsutils, prop);
 		
-		if(outputTypeStr!=null) {
-			lastURIPart = lastURIPart.substring(0, lastURIPart.length()-1-outputTypeStr.length());
-		}
-
 		if(lastURIPart!=null) {
+			if(outputTypeStr!=null) {
+				lastURIPart = lastURIPart.substring(0, lastURIPart.length()-1-outputTypeStr.length());
+			}
 			URIpartz.add( lastURIPart );
 		}
 		//log.info("varUrl="+varUrl+" / URIparts="+Arrays.asList(URIparts)+" / URIpartz="+URIpartz+" / URIpartz.size="+URIpartz.size()+ " / lastURIPart = "+lastURIPart);
