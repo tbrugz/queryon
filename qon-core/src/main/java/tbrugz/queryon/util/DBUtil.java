@@ -325,8 +325,7 @@ public class DBUtil {
 
 	public static boolean checkIfRelationExists(String relationName, Connection conn) {
 		String sql = "select * from "+relationName;
-		try {
-			PreparedStatement stmt = conn.prepareStatement(sql);
+		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 			//ResultSetMetaData rsmd = stmt.getMetaData();
 			stmt.getMetaData();
 			return true;

@@ -277,9 +277,8 @@ public class QOnQueries extends AbstractUpdatePlugin {
 				"where (disabled = 0 or disabled is null)\n" +
 				"and schema_name = ? and name = ?";
 		
-		try {
+		try(PreparedStatement st = conn.prepareStatement(sql)) {
 			ResultSet rs = null;
-			PreparedStatement st = conn.prepareStatement(sql);
 			st.setString(1, schemaName);
 			st.setString(2, name);
 			rs = st.executeQuery();

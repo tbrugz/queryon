@@ -237,7 +237,7 @@ public class PagesServlet extends AbstractHttpServlet {
 			params.add(pathInfo+indexFile);
 		}
 		
-		PreparedStatement st = conn.prepareStatement(sql);
+		PreparedStatement st = conn.prepareStatement(sql); // NOSONAR (closing Statement may close Resultset)
 		for(int i=0;i<params.size();i++) {
 			st.setString(i+1, params.get(i));
 		}
