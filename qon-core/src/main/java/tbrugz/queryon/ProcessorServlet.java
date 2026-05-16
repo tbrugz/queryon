@@ -138,6 +138,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		if(procComponent==null) {
 			throw new BadRequestException("processor class not found: "+procClass);
 		}
+		String procClassName = procComponent.getClass().getCanonicalName();
 		
 		Properties appprop = QOnContextUtils.getProperties(context);
 		if(appprop==null) {
@@ -148,7 +149,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		if(req!=null) {
 			Subject currentUser = ShiroUtils.getSubject(appprop, req);
 			ShiroUtils.checkPermissionAny(currentUser, new String[]{
-					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getCanonicalName(),
+					PROCESSOR_PERMISSION_PREFIX+procClassName,
 					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getSimpleName(),
 					});
 		}
@@ -167,15 +168,14 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		//SchemaModel model = SchemaModelUtils.getModel(context, modelId);
 		
 		if(procComponent instanceof Processor) {
-			
 			Processor proc = (Processor) procComponent;
 			// if not idempotent, only POST method allowed
 			if(!proc.isIdempotent() && req!=null && req.getMethod()!=null && !req.getMethod().equals("POST")) {
-				throw new BadRequestException("processor '"+procClass+"' only allowed with POST method");
+				throw new BadRequestException("processor '"+procClassName+"' only allowed with POST method");
 			}
 			doProcessProcessor(proc, prop, modelId, context, req, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
-				resp.getWriter().write("processor '"+procClass+"' processed\n");
+				resp.getWriter().write("processor '"+procClassName+"' processed\n");
 			}
 		}
 		else if(procComponent instanceof SchemaModelDumper) {
@@ -183,11 +183,11 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			SchemaModelDumper dumper = (SchemaModelDumper) procComponent;
 			doProcessDumper(dumper, modelId, context, resp);
 			if(!dumper.acceptsOutputStream() && !dumper.acceptsOutputWriter() && resp!=null) {
-				resp.getWriter().write("dumper '"+procClass+"' processed\n");
+				resp.getWriter().write("dumper '"+procClassName+"' processed\n");
 			}
 		}
 		else {
-			throw new IllegalArgumentException("'"+procComponent.getClass()+"': unknown processor type");
+			throw new IllegalArgumentException("'"+procClassName+"': unknown processor type");
 		}
 	}
 	
