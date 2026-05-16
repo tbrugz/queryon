@@ -25,7 +25,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 	final Syntax mimetype;
 	
 	public NamedTypedDBObject(DBObjectType type, String schemaName, String name, String mimetype) {
-		SQLUtils.validateSqlIdentifier(schemaName);
+		SQLUtils.validateSchemaName(schemaName);
 		SQLUtils.validateSqlIdentifier(name);
 		this.type = type;
 		this.schemaName = schemaName;

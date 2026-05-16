@@ -1471,7 +1471,9 @@ public class QueryOn extends AbstractHttpServlet {
 		if(sql==null || sql.equals("")) {
 			throw new BadRequestException("parameter 'sql' undefined");
 		}
-		relation.setName(name);
+		if(name!=null && !name.equals("")) {
+			relation.setName(name);
+		}
 		relation.setQuery(sql);
 		//XXXxx: validate first & return number of parameters?
 		//relation.setParameterCount( reqspec.params.size() ); //maybe not good... anyway (would need connection to validate SQL)

@@ -306,6 +306,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 	void addGrants(List<Grant> grants, String owner, PrivilegeType pt, List<String> roles) {
 		if(roles==null) { return; }
 		for(String s: roles) {
+			if(s==null || s.equals("")) { continue; }
 			grants.add(new Grant(owner, pt, s));
 		}
 	}

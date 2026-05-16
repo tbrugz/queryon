@@ -89,6 +89,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		List<Grant> grants = new ArrayList<Grant>();
 		
 		for(String s: roles) {
+			if(s==null || s.equals("")) { continue; }
 			grants.add(new Grant(owner, pt, s));
 		}
 		

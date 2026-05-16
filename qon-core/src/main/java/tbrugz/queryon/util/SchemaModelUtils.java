@@ -389,8 +389,14 @@ public class SchemaModelUtils {
 		sm.getSchemaMetadata().addAll(sm2.getSchemaMetadata());
 
 		if(! Utils.equalsConsiderNull(sm.getSqlDialect(), sm2.getSqlDialect())) {
-			log.warn("merging models with distinct dialects: "+sm.getSqlDialect()+" & "+sm2.getSqlDialect()+
+			String message = ("merging models with distinct dialects: "+sm.getSqlDialect()+" & "+sm2.getSqlDialect()+
 				" [will keep the 1st: "+sm.getSqlDialect()+"]");
+			if(sm2.getSqlDialect()!=null) {
+				log.warn(message);
+			}
+			else {
+				log.info(message);
+			}
 		}
 		
 		return sm;
