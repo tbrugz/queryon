@@ -119,7 +119,6 @@ import tbrugz.sqldump.util.Utils;
  */
 /*
  * TODO r2rml: option to understand URLs like: Department/name=accounting;city=Cambridge
- * ?TODO: prevent sql injection
  */
 @MultipartConfig
 public class QueryOn extends AbstractHttpServlet {
