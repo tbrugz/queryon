@@ -99,14 +99,17 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 		String qonExecsTable = getTableName(PROP_PREFIX, DEFAULT_EXECS_TABLE, true); //supportsSchemasInDataManipulation(conn));
 		String namesStr = getProperty(PROP_PREFIX, SUFFIX_EXECS_NAMES, null);
 		List<String> names = Utils.getStringList(namesStr, ",");
+		int namesCount = names!=null?names.size():0;
 		String sql = "select schema_name, name, remarks, roles_filter, exec_type"
 				+ ", package_name, parameter_count, parameter_names, parameter_types, parameter_inouts"
 				+ ", body"
 				+ " from "+qonExecsTable
-				+ " where (disabled = 0 or disabled is null)"
-				+(names!=null?" and name in ("+Utils.join(names, ",", QOnTables.sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
-				;
-		
+				+ " where (disabled = 0 or disabled is null)";
+		if(names!=null) {
+			String binds = MiscUtils.repeatString("?", namesCount, ", ");
+			sql += " and name in ("+binds+")";
+		}
+
 		/*
 	schema_name varchar(100),
 	name varchar(100) not null,
@@ -125,6 +128,11 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 		ResultSet rs = null;
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
+			if(names!=null) {
+				for(int i=0;i<namesCount;i++) {
+					st.setString(i+1, names.get(i));
+				}
+			}
 			rs = st.executeQuery();
 		}
 		catch(SQLException e) {

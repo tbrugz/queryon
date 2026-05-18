@@ -23,6 +23,7 @@ import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.UpdatePlugin;
 import tbrugz.queryon.model.QonTable;
+import tbrugz.queryon.util.MiscUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column;
@@ -103,18 +104,27 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		String qonTablesTable = getTableName(PROP_PREFIX, DEFAULT_TABLES_TABLE, true); //supportsSchemasInDataManipulation(conn));
 		String qonTablesNames = getProperty(PROP_PREFIX, SUFFIX_TABLE_NAMES, null);
 		List<String> tables = Utils.getStringList(qonTablesNames, ",");
+		int tablesCount = tables!=null?tables.size():0;
 		String sql = "select schema_name, name, column_names, pk_column_names, default_column_names"
 				+", sql_filter"
 				+", column_remarks, remarks"
 				+", roles_select, roles_insert, roles_update, roles_delete"
 				+", roles_insert_columns, roles_update_columns"
 				+" from "+qonTablesTable
-				+" where (disabled = 0 or disabled is null)"
-				+(tables!=null?" and name in ("+Utils.join(tables, ",", sqlStringValuesDecorator)+")":""); //XXX: possible sql injection?
+				+" where (disabled = 0 or disabled is null)";
+		if(tables!=null) {
+			String binds = MiscUtils.repeatString("?", tablesCount, ", ");
+			sql += " and name in ("+binds+")";
+		}
 		
 		ResultSet rs = null;
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
+			if(tables!=null) {
+				for(int i=0;i<tablesCount;i++) {
+					st.setString(i+1, tables.get(i));
+				}
+			}
 			rs = st.executeQuery();
 		}
 		catch(SQLException e) {
@@ -197,7 +207,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		//XXX table type: what if it is a view? t.setType(TableType.VIEW); ?
 		//XXXdone option to add primary key (for tables/views that doesn't have them, or to setup a different PK for a table)
 
-		if(!SQL.valid(columnNames)) {
+		if(!SQL.valid(columnNames)) {  
 			columnNames = "*";
 		}
 		
@@ -226,7 +236,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		 * http://stackoverflow.com/questions/9207073/column-names-for-an-ad-hoc-sql
 		 */
 		try {
-			sql = SQL.replaceVariablesWithEmptyValues(sql);
+			sql = SQL.replaceVariablesWithEmptyValues(sql);  
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			t.setColumns(DataDumpUtils.getColumns(rsmd));

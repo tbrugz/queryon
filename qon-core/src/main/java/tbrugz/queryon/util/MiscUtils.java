@@ -227,4 +227,13 @@ public class MiscUtils {
 		return docFactory;
 	}
 	
+	public static String repeatString(String s, int n, String delim) {
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<n; i++) {
+			if(i>=0) { sb.append(delim); }
+			sb.append(s);
+		}
+		return sb.toString();
+	}
+
 }
