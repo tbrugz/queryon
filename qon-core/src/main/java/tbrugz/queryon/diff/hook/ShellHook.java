@@ -3,6 +3,7 @@ package tbrugz.queryon.diff.hook;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,18 +45,32 @@ public class ShellHook implements ApplyHook {
 		return PREFIX+id;
 	}
 	
-	@Override
-	public String run(ApplyHook.ApplyMessage am) {
-		String script = cmd
-				.replace("[message]", am.message.replace("\"", ""))
-				.replace("[username]", am.username)
-				.replace("[object-type]", am.objectType)
-				.replace("[object-schema]", am.objectSchema)
-				.replace("[object-name]", am.objectName)
+	static final Pattern NAME_REPALCER = Pattern.compile("[^a-zA-Z0-9_]");
+	
+	static String normalizeName(String s) {
+		return NAME_REPALCER.matcher(s).replaceAll("");
+	}
+	
+	static String normalizeMessage(String message) {
+		return message.replaceAll("\"", "");
+	}
+	
+	String getScriptString(ApplyHook.ApplyMessage am) {
+		return cmd
+				.replace("[message]", normalizeMessage(am.message) )
+				.replace("[username]", normalizeName(am.username) )
+				.replace("[object-type]", normalizeName(am.objectType) )
+				.replace("[object-schema]", normalizeName(am.objectSchema) )
+				.replace("[object-name]", normalizeName(am.objectName) )
 				.replace("[model-base]", am.modelBase)
 				.replace("[model-apply]", am.modelApply)
 				;
+	}
+	
+	@Override
+	public String run(ApplyHook.ApplyMessage am) {
 		try {
+			String script = getScriptString(am);
 			log.info("running: "+script);
 			Process p = Runtime.getRuntime().exec(script);
 			OutputStream os = p.getOutputStream();
