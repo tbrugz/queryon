@@ -55,7 +55,7 @@ public class ShellHook implements ApplyHook {
 		return message.replaceAll("\"", "");
 	}
 	
-	String getScriptString(ApplyHook.ApplyMessage am) {
+	protected String getScriptString(ApplyHook.ApplyMessage am) {
 		return cmd
 				.replace("[message]", normalizeMessage(am.message) )
 				.replace("[username]", normalizeName(am.username) )

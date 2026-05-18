@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
@@ -266,6 +267,10 @@ public class QueryOn extends AbstractHttpServlet {
 		}*/
 	}
 	
+	public enum Protocol {
+		http, https
+	}
+	
 	private static final Log log = LogFactory.getLog(QueryOn.class);
 	private static final Log logFilter = LogFactory.getLog(QueryOn.class.getName()+".filter");
 	
@@ -290,6 +295,7 @@ public class QueryOn extends AbstractHttpServlet {
 	public static final String PROP_MAX_LIMIT = "queryon.limit.max";
 	static final String PROP_BASE_URL = "queryon.baseurl";
 	static final String PROP_CONTEXT_PATH = "queryon.context-path";
+	static final String PROP_SERVLET_PATH = "queryon.servlet-path";
 	static final String PROP_HEADERS_ADDCONTENTLOCATION = "queryon.headers.addcontentlocation";
 	static final String PROP_SYNTAX_DEFAULT = "queryon.syntax.default";
 	static final String PROP_XTRASYNTAXES = "queryon.xtrasyntaxes";
@@ -448,29 +454,36 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	*/
 	
-	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
+	protected void setContextPathInfo(ServletContext context, Protocol protocol) throws UnknownHostException {
 		String contextPath = null;
+		//XXX: protocol: add from ServletRequest?
+		//String protocol = "http://"; //XXX https protocol??
+		//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
+		String path = protocol + "://" + InetAddress.getLocalHost().getHostName().toLowerCase();
+		contextPath = context.getContextPath();
+		String rdfBase = path +
+				((!path.endsWith("/") && (!contextPath.startsWith("/"))?"/":"")) +
+				contextPath;
+		// scheme://domain:port/path?query_string#fragment_id - http://en.wikipedia.org/wiki/Uniform_resource_locator
+		String servletPath = contextPath + WebUtils.getDefaultServletPathMapping(context, this.getClass());
+
+		prop.setProperty(PROP_CONTEXT_PATH, contextPath);
+		prop.setProperty(PROP_SERVLET_PATH, servletPath);
+		prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, rdfBase);
+		log.info("path= ["+path+"] ; "+
+				PROP_CONTEXT_PATH+"= ["+contextPath+"] ; "+
+				PROP_SERVLET_PATH+"= ["+servletPath+"] ; "+
+				RDFAbstractSyntax.PROP_RDF_BASE+"= ["+rdfBase+"]");
+	}
+	
+	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
 		String propertiesResource = null;
 		String propertiesFile = null;
 		try {
 			prop.clear();
 			UpdatePluginUtils.clearWarnings(context, ATTR_INIT_ERRORS);
-			//context.removeAttribute(ATTR_INIT_ERROR);
-			
-			//XXX: protocol: add from ServletRequest?
-			String protocol = "http://"; //XXX https protocol??
-			//XXX: path: add host port (request - ServletRequest - object needed?)? servlet mapping url-pattern?
-			String path = protocol + InetAddress.getLocalHost().getHostName().toLowerCase();
-			contextPath = context.getContextPath();
-			String rdfBase = path +
-					((!path.endsWith("/") && (!contextPath.startsWith("/"))?"/":"")) +
-					contextPath;
-			// scheme://domain:port/path?query_string#fragment_id - http://en.wikipedia.org/wiki/Uniform_resource_locator
-			//String path = "http://"+InetAddress.getLocalHost().getHostName()+"/"+getServletContext().getContextPath();
-			prop.setProperty(PROP_CONTEXT_PATH, contextPath);
-			prop.setProperty(RDFAbstractSyntax.PROP_RDF_BASE, rdfBase);
-			log.info("path= ["+path+"] "+PROP_CONTEXT_PATH+"= ["+contextPath+"] ; "+RDFAbstractSyntax.PROP_RDF_BASE+"= ["+rdfBase+"]");
-			
+
+			setContextPathInfo(context, Protocol.http);
 			prop.load(IOUtil.getResourceAsStream(DEFAULT_PROPERTIES_VALUES_RESOURCE));
 
 			{
@@ -611,16 +624,15 @@ public class QueryOn extends AbstractHttpServlet {
 			String message = e.toString()+" "+
 				(propertiesResource!=null?"[prop resource: "+propertiesResource+"]":"")+
 				(propertiesFile!=null?"[prop file: "+propertiesFile+"]":"")+
-				"[contextPath: "+contextPath+"][servlet: "+this.getClass().getSimpleName()+"]";
+				"[contextPath: "+prop.getProperty(PROP_CONTEXT_PATH)+"]"+
+				"[servlet: "+this.getClass().getSimpleName()+"]";
 			log.error(message);
 			log.debug(message, e);
-			//context.setAttribute(ATTR_INIT_ERROR, e);
 			UpdatePluginUtils.putWarning(context, ATTR_INIT_ERRORS, null, "[init]", e.toString());
 			throw new ServletException(message, e);
 		} catch (Error e) {
 			log.error(e.toString());
 			log.debug(e.toString(), e);
-			//context.setAttribute(ATTR_INIT_ERROR, e);
 			UpdatePluginUtils.putWarning(context, ATTR_INIT_ERRORS, null, "[init]", e.toString());
 			throw e;
 		}
@@ -997,7 +1009,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			//XXX app-specific xtra parameters, like auth properties? app should extend QueryOn & implement addXtraParameters
 			
-			SchemaModel model = SchemaModelUtils.getModel(req.getServletContext(), reqspec.getModelId());
+			SchemaModel model = SchemaModelUtils.getModel(getServletContext(), reqspec.getModelId());
 			
 			final String otype;
 			final ActionType atype; //XXX: add ActionType to RequestSpec
@@ -1272,14 +1284,18 @@ public class QueryOn extends AbstractHttpServlet {
 	public boolean discoveryModeRootRedirect(HttpServletRequest req, HttpServletResponse resp) {
 		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections
 		resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-		String location = req.getRequestURI();
-		if(!location.endsWith("/")) {
-			location += "/";
+		String location = prop.getProperty(PROP_SERVLET_PATH);
+		if(location!=null) {
+			if(!location.endsWith("/")) {
+				location += "/";
+			}
+			location += DBObjectType.ANY.toString().toLowerCase();
+			resp.setHeader(ResponseSpec.HEADER_LOCATION, location);
+			log.info("discovery-mode: location: " + location);
+			return true;
 		}
-		location += DBObjectType.ANY.toString().toLowerCase();
-		resp.setHeader(ResponseSpec.HEADER_LOCATION, location);
-		log.info("location: " + location);
-		return true;
+		log.warn("discovery-mode: prop '"+PROP_SERVLET_PATH+" is null'");
+		return false;
 	}
 
 	ActionType getPrivilegedAction(String object, String httpMethod) {
@@ -2866,7 +2882,7 @@ public class QueryOn extends AbstractHttpServlet {
 		ShiroUtils.checkPermission(currentUser, permission);
 
 		if(QOnManage.ACTION_RELOAD.equals(action)) {
-			doInit(req.getServletContext());
+			doInit(getServletContext());
 			resp.getWriter().write("queryon config reloaded");
 			return;
 		}

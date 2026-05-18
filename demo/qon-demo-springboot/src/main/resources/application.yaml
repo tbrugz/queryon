@@ -65,6 +65,8 @@ logging:
 # https://stackoverflow.com/a/50743050/616413 - Embedded tomcat giving failed to scan jars from classloader hierarchy
 #server:
     #port: 8888
+    #servlet:
+    #    context-path: /api/qon-demo-springboot
     #tomcat:
     #    additional-tld-skip-patterns: '*.jar'
     # Graceful shutdown is supported with all four embedded web servers (Jetty, Reactor Netty, Tomcat, and Undertow)

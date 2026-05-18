@@ -7,9 +7,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -185,4 +189,28 @@ public class WebUtils {
 	public static void checkHttpMethod(HttpServletRequest req, String method) {
 		checkHttpMethod(req.getMethod(), method);
 	}
+	
+	public static ServletRegistration getServletRegistration(ServletContext context, Class<? extends Servlet> servletClass) {
+		Map<String, ? extends ServletRegistration> servletRegs = context.getServletRegistrations();
+
+		for(Map.Entry<String, ? extends ServletRegistration> sre: servletRegs.entrySet()) {
+			ServletRegistration sr = sre.getValue();
+			if(sr.getClassName().equals(servletClass.getName())) {
+				return sr;
+			}
+		}
+		return null;
+	}
+
+	public static String getDefaultServletPathMapping(ServletContext context, Class<? extends Servlet> servletClass) {
+		ServletRegistration sr = getServletRegistration(context, servletClass);
+		if(sr==null) { return null; }
+		for(String s: sr.getMappings()) {
+			if(s.endsWith("*")) {
+				return s.substring(0, s.length()-2);
+			}
+		}
+		return null;
+	}
+	
 }
