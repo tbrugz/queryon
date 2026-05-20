@@ -62,8 +62,8 @@ public class ShellHook implements ApplyHook {
 				.replace("[object-type]", normalizeName(am.objectType) )
 				.replace("[object-schema]", normalizeName(am.objectSchema) )
 				.replace("[object-name]", normalizeName(am.objectName) )
-				.replace("[model-base]", am.modelBase)
-				.replace("[model-apply]", am.modelApply)
+				.replace("[model-base]", normalizeName(am.modelBase) )
+				.replace("[model-apply]", normalizeName(am.modelApply) )
 				;
 	}
 	
