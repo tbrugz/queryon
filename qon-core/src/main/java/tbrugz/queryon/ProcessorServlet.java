@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -35,7 +36,6 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * XXXdone: allow only POST method? (not idempotent)
  */
 public class ProcessorServlet extends AbstractHttpServlet {
 
@@ -45,18 +45,18 @@ public class ProcessorServlet extends AbstractHttpServlet {
 	static final String PROCESSOR_PERMISSION_PREFIX = "PROCESSOR:";
 	static final int ERROR_STATUS = 500;
 	
-	ServletConfig config = null; //XXX: remove ServletConfig config
+	static final String PREFIX_PROCESSOR = "queryon.processor.";
+	static final String SUFFIX_ALLOWED_PARAMS = ".allowed-parameters";
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		this.config = config;
 	}
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		//throw new BadRequestException("Only POST allowed", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		// HTTP method is checked in doProcess() using Processor.isIdempotent()
 		doPost(req, resp);
 	}
 
@@ -116,7 +116,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		String[] classParts = procClasses.split(",");
 		try {
 			for(String procClass: classParts) {
-				doProcess(procClass, config.getServletContext(), SchemaModelUtils.getModelId(req), req, resp);
+				doProcess(procClass, getServletContext(), SchemaModelUtils.getModelId(req), req, resp);
 			}
 		} catch (ClassNotFoundException e) {
 			throw new ServletException(e);
@@ -132,13 +132,13 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		doProcess(procClass, context, modelId, null, null);
 	}
 
-	//TODOne: shiro: add permission check
 	static void doProcess(String procClass, ServletContext context, String modelId, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {
 		ProcessComponent procComponent = (ProcessComponent) Utils.getClassInstance(procClass, QueryOn.DEFAULT_CLASSLOADING_PACKAGES);
 		if(procComponent==null) {
 			throw new BadRequestException("processor class not found: "+procClass);
 		}
 		String procClassName = procComponent.getClass().getCanonicalName();
+		String procClassSimpleName = procComponent.getClass().getSimpleName();
 		
 		Properties appprop = QOnContextUtils.getProperties(context);
 		if(appprop==null) {
@@ -150,20 +150,18 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			Subject currentUser = ShiroUtils.getSubject(appprop, req);
 			ShiroUtils.checkPermissionAny(currentUser, new String[]{
 					PROCESSOR_PERMISSION_PREFIX+procClassName,
-					PROCESSOR_PERMISSION_PREFIX+procComponent.getClass().getSimpleName(),
+					PROCESSOR_PERMISSION_PREFIX+procClassSimpleName,
 					});
 		}
 		
-		Properties prop = new ParametrizedProperties();
-		prop.putAll(appprop);
-		if(req!=null) {
-			Enumeration<String> en = req.getParameterNames();
-			while(en.hasMoreElements()) {
-				String s = en.nextElement();
-				prop.setProperty(s, req.getParameter(s));
-			}
+		//check allowed-parameters
+		List<String> allowedParams = Utils.getStringListFromProp(appprop, PREFIX_PROCESSOR+procClassName+SUFFIX_ALLOWED_PARAMS, ",");
+		if(allowedParams==null) {
+			allowedParams = Utils.getStringListFromProp(appprop, PREFIX_PROCESSOR+procClassSimpleName+SUFFIX_ALLOWED_PARAMS, ",");
 		}
-		procComponent.setProperties(prop);
+
+		//set properties
+		setProcessorProperties(procComponent, appprop, allowedParams, req);
 		
 		//SchemaModel model = SchemaModelUtils.getModel(context, modelId);
 		
@@ -173,7 +171,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			if(!proc.isIdempotent() && req!=null && req.getMethod()!=null && !req.getMethod().equals("POST")) {
 				throw new BadRequestException("processor '"+procClassName+"' only allowed with POST method");
 			}
-			doProcessProcessor(proc, prop, modelId, context, req, resp);
+			doProcessProcessor(proc, appprop, modelId, context, req, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
 				resp.getWriter().write("processor '"+procClassName+"' processed\n");
 			}
@@ -189,6 +187,25 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		else {
 			throw new IllegalArgumentException("'"+procClassName+"': unknown processor type");
 		}
+	}
+
+	static void setProcessorProperties(ProcessComponent procComponent, Properties appprop, List<String> allowedParams, HttpServletRequest req) {
+		Properties prop = new ParametrizedProperties();
+		prop.putAll(appprop);
+		if(req!=null) {
+			Enumeration<String> en = req.getParameterNames();
+			while(en.hasMoreElements()) {
+				String s = en.nextElement();
+				if(allowedParams!=null && allowedParams.contains(s)) {
+					String value = req.getParameter(s);
+					prop.setProperty(s, value);
+				}
+				else {
+					throw new BadRequestException("invalid parameter: "+s);
+				}
+			}
+		}
+		procComponent.setProperties(prop);
 	}
 	
 	static void doProcessProcessor(Processor pc, Properties prop, String modelId, ServletContext context, HttpServletRequest req, HttpServletResponse resp) throws ClassNotFoundException, ServletException, SQLException, NamingException, IOException {

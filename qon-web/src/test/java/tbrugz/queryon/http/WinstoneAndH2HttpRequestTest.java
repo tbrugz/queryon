@@ -1051,12 +1051,23 @@ public class WinstoneAndH2HttpRequestTest {
 		
 		HttpResponse response1 = httpclient.execute(httpGet);
 		////String resp = getContent(response1); System.out.println(resp);
+		Assert.assertEquals("Must be Ok (200)", 200, response1.getStatusLine().getStatusCode());
 		
 		HttpEntity entity1 = response1.getEntity();
 		InputStream instream = entity1.getContent();
 		Document doc = dBuilder.parse(instream);
 		NodeList nl = doc.getElementsByTagName("table");
 		Assert.assertEquals(relationsInModel, countNodesWithParentTagName(nl, "schemaModel"));
+	}
+
+	@Test
+	public void testProcessorJaxbSerInvalidParam() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonUrl+"/processor/JAXBSchemaXMLSerializer?inresource=/abc.xml");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		//String resp = getContent(response1); System.out.println(resp);
+		Assert.assertEquals("Must be Bad Request (400)", 400, response1.getStatusLine().getStatusCode());
 	}
 
 	@Test
