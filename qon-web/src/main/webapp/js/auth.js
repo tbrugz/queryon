@@ -86,7 +86,7 @@ function refreshAuthInfo() {
 				auth.innerHTML = '<a href="'+authGetLoginUrl()+'">login</a>';
 			}
 			else {
-				auth.innerHTML = '<a href="'+authGetLogoutUrl()+'">logout</a>';
+				auth.innerHTML = '<a href="#" onclick="javascript:authLogout(); return false;">logout</a>';
 			}
 		}
 		else {
@@ -121,9 +121,26 @@ function authGetLoginUrl() {
 
 function authGetLogoutUrl() {
 	//if(!isAuthServiceActive()) { return null; }
-	return 'qauth/logout?return='+encodeURIComponent(window.location.href);
+	return 'qauth/logout';
+	//return 'qauth/logout?return='+encodeURIComponent(window.location.href);
 }
 
 function authHasPermission(permission) {
 	return authInfo.permissions.indexOf(permission)>=0;
+}
+
+function authLogout() {
+	var request = new XMLHttpRequest();
+	request.open("GET", authGetLogoutUrl(), true);
+	request.onload = function(evt) {
+		//var jqXHR = evt.target;
+		//console.log('request: ', request,' ; oEvent: ', oEvent);
+		if (request.status >= 200 && request.status < 300) {
+			location.reload();
+		}
+		else {
+			console.warn("Error logging out?", request);
+		}
+	}
+	request.send();
 }
