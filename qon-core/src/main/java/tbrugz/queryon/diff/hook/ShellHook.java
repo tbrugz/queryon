@@ -45,6 +45,7 @@ public class ShellHook implements ApplyHook {
 		return PREFIX+id;
 	}
 	
+	static final Pattern MESSAGE_REPALCER = Pattern.compile("[^a-zA-Z0-9_\\.,;:'+-\\?\\\\/ ]");
 	static final Pattern NAME_REPALCER = Pattern.compile("[^a-zA-Z0-9_]");
 	
 	static String normalizeName(String s) {
@@ -52,7 +53,7 @@ public class ShellHook implements ApplyHook {
 	}
 	
 	static String normalizeMessage(String message) {
-		return message.replaceAll("\"", "");
+		return MESSAGE_REPALCER.matcher(message).replaceAll("");
 	}
 	
 	protected String getScriptString(ApplyHook.ApplyMessage am) {
