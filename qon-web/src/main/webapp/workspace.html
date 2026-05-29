@@ -423,6 +423,14 @@ function setParameters(numparams, paramNamesStr, paramOptionalsStr) {
 	setParametersValues(currentParamsWithValues);
 }
 
+function disableParam(paramName) {
+	var elem = document.getElementById(paramName);
+	var elemBtn = document.getElementById("disableBtn"+paramName);
+	//console.log("disable "+paramName, elem); //, elemBtn);
+	elem.disabled = !elem.disabled;
+	elemBtn.classList.toggle('on');
+}
+
 function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTimeMilis, options = {}) {
 	var content = document.getElementById(containerId);
 	var messages = document.getElementById(messagesId);
