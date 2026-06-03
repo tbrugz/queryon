@@ -1579,7 +1579,7 @@ public class QueryOn extends AbstractHttpServlet {
 		//log.info("finalMaxLimit="+finalMaxLimit+" ; sql.limitMax="+sql.limitMax+" ; defaultLimit="+defaultLimit);
 		int limit = getLimit(sql.limit, defaultLimit, finalMaxLimit);
 		if(sql.shouldAddLimitOffset(limit, reqspec.offset) && !reqspec.isCountRequest()) {
-			sql.addLimitOffset(loStrategy, limit, reqspec.offset);
+			sql.addLimitOffset(loStrategy, limit, reqspec.offset, !reqspec.isUniqueRowRequest());
 		}
 		//log.debug("addLimitOffset: sql:\n"+sql.getSql());
 		
@@ -1602,8 +1602,6 @@ public class QueryOn extends AbstractHttpServlet {
 			if(log.isDebugEnabled()) {
 				String colTypes = Utils.join(DataDumpUtils.getResultSetColumnsTypes(rs.getMetaData()), ";\n\t- ");
 				log.debug("PivotResultSet: cols ["+relation.getQualifiedName()+"]:\n\t- "+colTypes);
-			//}
-			//if(log.isDebugEnabled()) {
 				int originalColCount = rs.getMetaData().getColumnCount();
 				log.debug("PivotResultSet: rowCount: "+prs.getRowCount()+" ; colCount: "+prs.getMetaData().getColumnCount()+"; "+
 						"originalRowCount: "+prs.getOriginalRowCount()+" ; originalColCount: "+originalColCount+" ; "+
@@ -1709,7 +1707,7 @@ public class QueryOn extends AbstractHttpServlet {
 			reqspec.setAttribute(RequestSpec.ATTR_CONTENTLOCATION, contentLocation);
 		}
 		
-		if(reqspec.uniValueCol!=null) {
+		if(reqspec.isUniqueRowRequest()) {
 			dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
 		}
 		else {
@@ -1786,7 +1784,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			
 			if(hasResultSet) {
-				if(reqspec.uniValueCol!=null) {
+				if(reqspec.isUniqueRowRequest()) {
 					dumpBlob(rs, reqspec, relation.getName(), applyLimitOffsetInResultSet, resp);
 				}
 				else {
@@ -3218,7 +3216,7 @@ public class QueryOn extends AbstractHttpServlet {
 			throws SQLException, IOException {
 		if(mayApplyLimitOffset) {
 			//log.info("mayApplyLimitOffset: "+limit+"/"+reqspec.offset);
-			rs = new ResultSetLimitOffsetDecorator(rs, limit, reqspec.offset);
+			rs = new ResultSetLimitOffsetDecorator(rs, limit+1, reqspec.offset);
 		}
 		DumpSyntaxInt ds = reqspec.outputSyntax;
 		ResultSetMetaData rsmd = null;
@@ -3281,6 +3279,7 @@ public class QueryOn extends AbstractHttpServlet {
 		
 		OutputStream os = null;
 		int count = 0;
+		boolean hasNext = false;
 		if(ds.acceptsOutputStream()) {
 			//resp.setContentType("application/octet-stream");
 			os = resp.getOutputStream();
@@ -3294,8 +3293,8 @@ public class QueryOn extends AbstractHttpServlet {
 			*/
 
 			ds.dumpHeader(os);
-			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
-			while(hasNext) {
+			hasNext = ds.isFetcherSyntax()?true:rs.next();
+			while(hasNext && count < limit) {
 				ds.dumpRow(rs, count, os);
 				count++;
 				hasNext = rs.next();
@@ -3303,8 +3302,8 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		else {
 			ds.dumpHeader(resp.getWriter());
-			boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
-			while(hasNext) {
+			hasNext = ds.isFetcherSyntax()?true:rs.next();
+			while(hasNext && count < limit) {
 				//log.info("rs count:: "+ rs.getMetaData().getColumnCount());
 				ds.dumpRow(rs, count, resp.getWriter());
 				count++;
@@ -3312,7 +3311,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 		}
 		
-		boolean hasMoreRows = false; //XXX: test if there are more rows...
+		boolean hasMoreRows = hasNext;
 		
 		if(count==0) {
 			// rfc2616-sec10.html : 10.2.5 204 No Content

@@ -57,6 +57,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 	final List<Integer> rowSpecialAttrIdx = new ArrayList<Integer>();
 
 	protected boolean hrefDumpTargetBlank = true; //XXX: add prop for 'hrefDumpTargetBlank'
+	protected boolean dumpFooterMetadata = true; //XXX: add prop for 'dumpFooterMetadata'
 	
 	protected List<String> lsColDbTypes = new ArrayList<String>();
 	
@@ -439,6 +440,20 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	// see: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+	@Override
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
+		//add /tbody?
+		if(dumpFooterMetadata) {
+			StringBuilder sb = new StringBuilder();
+			//"<tfoot>"?;
+			sb.append("<span id=\"table-metadata\" hidden=\"\" data-count=\""+count+"\" data-has-more-rows=\""+hasMoreRows+"\"/>\n");
+			out(sb.toString(), fos);
+		}
+		
+		super.dumpFooter(count, hasMoreRows, fos);
 	}
 
 }

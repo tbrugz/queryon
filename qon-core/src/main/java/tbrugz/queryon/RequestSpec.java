@@ -1361,4 +1361,8 @@ public class RequestSpec {
 		return count;
 	}
 
+	public boolean isUniqueRowRequest() {
+		return uniValueCol!=null;
+	}
+
 }

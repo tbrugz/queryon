@@ -1043,6 +1043,23 @@ public class WinstoneAndH2HttpRequestTest {
 		nl = doc.getElementsByTagName("caption");
 		Assert.assertEquals(0, countNodesWithParentTagName(nl, "table"));
 	}
+
+	@Test
+	public void testGetHtmlxFooterMetadata() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+		Document doc = getXmlDocument("/EMP.htmlx");
+		//String str = getString(doc);
+		//System.out.println(">>>\n"+str);
+		NodeList nl = doc.getElementsByTagName("span");
+		Assert.assertEquals("5", nl.item(0).getAttributes().getNamedItem("data-count").getNodeValue());
+		Assert.assertEquals("false", nl.item(0).getAttributes().getNamedItem("data-has-more-rows").getNodeValue());
+
+		doc = getXmlDocument("/EMP.htmlx?limit=3");
+		//str = getString(doc);
+		//System.out.println(">>>\n"+str);
+		nl = doc.getElementsByTagName("span");
+		Assert.assertEquals("3", nl.item(0).getAttributes().getNamedItem("data-count").getNodeValue());
+		Assert.assertEquals("true", nl.item(0).getAttributes().getNamedItem("data-has-more-rows").getNodeValue());
+	}
 	
 	@Test
 	public void testProcessorJaxbSer() throws IOException, ParserConfigurationException, SAXException {

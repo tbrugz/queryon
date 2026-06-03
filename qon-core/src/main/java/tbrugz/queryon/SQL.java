@@ -564,11 +564,15 @@ public class SQL {
 		return true;
 	}
 	
-	protected void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset) throws ServletException {
+	protected void addLimitOffset(LimitOffsetStrategy strategy, int limit, int offset, boolean addExtraRowToLimit) throws ServletException {
 		if(!shouldAddLimitOffset(limit, offset)) {
 			return;
 		}
-		if(limit>0) { applyedLimit = limit; }
+		int limitToApply = 0;
+		if(limit>0) {
+			applyedLimit = limit;
+			limitToApply = limit + (addExtraRowToLimit?1:0); // so we can check if there are more rows to fetch after limit
+		}
 		//if(limit==null) { limit = 0; }
 		//else { applyedLimit = limit; }
 		//if(limit<=0 && offset<=0) { return; }
@@ -577,7 +581,7 @@ public class SQL {
 		if(strategy==LimitOffsetStrategy.SQL_LIMIT_OFFSET) {
 			//XXX assumes that the original query has no limit/offset clause
 			if(limit>0) {
-				sql += "\nlimit "+limit;
+				sql += "\nlimit "+limitToApply;
 			}
 			if(offset>0) {
 				sql += "\noffset "+offset;
@@ -608,7 +612,7 @@ public class SQL {
 					+       sql+"\n"
 					+"      ) a\n"
 					+"   )\n" 
-					+"where rnum <= "+(limit+offset)+"\n"
+					+"where rnum <= "+(limitToApply+offset)+"\n"
 					+"and rnum > "+offset;
 			}
 			else if(limit>0) {
@@ -617,7 +621,7 @@ public class SQL {
 				}
 				else {
 				*/
-				addEncapsulatingFilter("rownum <= "+limit, false);
+				addEncapsulatingFilter("rownum <= "+limitToApply, false);
 				//}
 			}
 			else {
