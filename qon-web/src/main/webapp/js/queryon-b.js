@@ -70,11 +70,14 @@ function loadRelation(selectId, parametersId, containerId) {
 	var params = relationsHash[id] ?
 			( relationsHash[id].namedParameterNames ? getScalarArrayFromValue( relationsHash[id].namedParameterNames ) : relationsHash[id].parameterCount ) :
 			null;
+	var parameterOptionals = relationsHash[id] ?
+			( relationsHash[id].parameterOptionals ? getScalarArrayFromValue( relationsHash[id].parameterOptionals ) : relationsHash[id].parameterOptionals ) :
+			null;
 	//console.log('selected: ',id,' ; params: ',params);
 	if(params==null || params=="") {
 		params = 0;
 	}
-	setParameters(parametersId, params);
+	setParameters(parametersId, params, parameterOptionals);
 }
 
 function urlGetQueryParameters(namedParametersOnly) {
@@ -82,6 +85,7 @@ function urlGetQueryParameters(namedParametersOnly) {
 	var ret = '';
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
+		if(item.disabled) { continue; }
 		if(namedParametersOnly && item.classList.contains("positional")) {
 			continue;
 		}
@@ -350,7 +354,7 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	messages.style.display = '';
 }
 
-function setParameters(parametersId, params) {
+function setParameters(parametersId, params, parameterOptionals) {
 	var numparams = params;
 	var paramNames = [];
 	var positionalParameters = true;
@@ -367,12 +371,15 @@ function setParameters(parametersId, params) {
 	}
 	var currentParamsWithValues = getParametersWithValues();
 	//console.log('params: ', params, ' ; numparams: ', numparams, ' ; paramNames: ', paramNames, ' ; currentParamsWithValues: ',currentParamsWithValues);
+	//console.log('numparams: ',numparams,' ; paramNames: ',paramNames, ' ; parameterOptionals: ', parameterOptionals);
 	
 	var paramsStr = '';
 	for(var i=0;i<numparams;i++) {
 		paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
 			" id='"+paramNames[i]+"' name='"+paramNames[i]+"' onchange='onParameterChange(\""+paramNames[i]+"\");'"+
-			"/>"+"</label>";
+			"/>"+
+			(parameterOptionals[i]?"<button class='nullbutton' id='disableBtn"+paramNames[i]+"' value='"+paramNames[i]+"' title='disable "+paramNames[i]+"' onclick='disableParam(\""+paramNames[i]+"\")'>\u2400</button>":"")+
+			"</label>";
 	}
 	byId(parametersId).innerHTML = paramsStr;
 	setParametersValues(currentParamsWithValues);
@@ -431,6 +438,7 @@ function getParameters(positionalsOnly) {
 	var paramsStr = '';
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
+		if(item.disabled) { continue; }
 		if(positionalsOnly && !item.classList.contains("positional")) {
 			continue;
 		}
@@ -465,6 +473,14 @@ function getColumnsFromRelation(relation) {
 		if(cols[i]=="") { cols.pop(i); }
 	}
 	return cols;
+}
+
+function disableParam(paramName) {
+	var elem = document.getElementById(paramName);
+	var elemBtn = document.getElementById("disableBtn"+paramName);
+	//console.log("disable "+paramName, elem); //, elemBtn);
+	elem.disabled = !elem.disabled;
+	elemBtn.classList.toggle('on');
 }
 
 function removeHtmlxSpecialCols(colsPar) {

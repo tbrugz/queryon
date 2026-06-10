@@ -77,6 +77,14 @@ public class MiscUtils {
 		}
 		return ret;
 	}
+
+	public static List<Boolean> toBooleanList(boolean[] arr) {
+		List<Boolean> bools = new ArrayList<>();
+		for(int i=0;i<arr.length;i++) {
+			bools.add(arr[i]);
+		}
+		return bools;
+	}
 	
 	public static <T> T getLowerAlso(Map<String, T> map, String key) {
 		T val = map.get(key);

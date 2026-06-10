@@ -142,6 +142,11 @@ button.manageaction.on {
 	/* background-color: rgba(255, 54, 0, 0.4); */
 }
 
+button.nullbutton {
+	padding: 0 2px;
+	font-weight: normal;
+}
+
 input[type=button] {
 	border: 0;
 	padding: 3px 9px 3px 9px;

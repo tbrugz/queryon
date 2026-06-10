@@ -186,6 +186,7 @@ public class SQL {
 		//log.info("limit="+limit+" ; limitDefault="+limitDefault+" ; reqspecLimit="+reqspecLimit+" ; limitMax="+limitMax);
 		
 		this.username = getFinalVariableValue(username);
+		{
 		List<String> namedParametersTmp = getNamedParameterNames(sql);
 		if(namedParametersTmp==null) {
 			List<QueryParameter> qpl = TokenizerUtil.getNamedParameters(sql);
@@ -195,6 +196,7 @@ public class SQL {
 			}
 		}
 		this.namedParameters = namedParametersTmp;
+		}
 		
 		/*
 		//log.info("validate == "+validate+" ; bindParameterCountTmp == "+bindParameterCountTmp+" ; this.namedParameters == "+this.namedParameters+" ; bindNullOnMissingParameters() == "+Arrays.toString(bindNullOnMissingParameters()));
@@ -332,7 +334,7 @@ public class SQL {
 		if(relation instanceof Query) { //class Query is subclass of View, so this test must come first
 			//XXX: other query builder strategy besides [where-clause]? contains 'cursor'?
 			Query q = (Query) relation;
-			SQL sql = new SQL( q.getQuery() , relation, q.getParameterCount(), limit, username, validateParameters);
+			SQL sql = new SQL( q.getQuery(), relation, q.getParameterCount(), limit, username, validateParameters);
 			//processSqlXtraMetadata(sql);
 			//sql.originalBindParameterCount = q.getParameterCount();
 			return sql;

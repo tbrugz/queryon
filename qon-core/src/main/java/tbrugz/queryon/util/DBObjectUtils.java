@@ -176,6 +176,12 @@ public class DBObjectUtils {
 		
 		if(update) {
 			updateParameterNames(rel, sqlWithNamedParams);
+			boolean[] arr = SchemaModelUtils.getNullBindingParameters(rel);
+			if(arr!=null) {
+				List<Boolean> bools = MiscUtils.toBooleanList(arr);
+				//log.debug("parameterOptionals: "+bools);
+				rel.setParameterOptionals(bools);
+			}
 		}
 	}
 

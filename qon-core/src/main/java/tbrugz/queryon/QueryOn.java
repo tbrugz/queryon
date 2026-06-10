@@ -2158,7 +2158,7 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	static final List<String> tableExclusiveColumns = Arrays.asList(new String[]{"PKConstraint"});
 	static final List<String> viewExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes"});
-	static final List<String> queryExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes", "namedParameterNames"});
+	static final List<String> queryExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes", "namedParameterNames", "parameterOptionals"});
 
 	static final List<String> tableAllColumns;
 	static final List<String> viewAllColumns;

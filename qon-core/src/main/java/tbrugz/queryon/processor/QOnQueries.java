@@ -26,6 +26,8 @@ import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.model.QonQuery;
 import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.MiscUtils;
+import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -210,7 +212,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		log.info("onDelete: removed "+q+"? "+removed);
 	}
 	
-	protected int addQueryFromDB(String schemaName, String queryName, PreparedStatement stmt,
+	protected int addQueryFromDB(String schemaName, String queryName,
 			String sql, String defaultColumnNamesStr, String remarks,
 			String rolesFilterStr, ServletContext context) {
 		Query q = newQuery(schemaName, queryName, sql,
@@ -218,7 +220,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 				Utils.getStringList(rolesFilterStr, PIPE_SPLIT));
 		return addQueryToModel(q);
 	}
-		
+	
 	protected int addQueryToModel(Query q) {
 		Savepoint sp = null;
 		try {
@@ -344,12 +346,12 @@ public class QOnQueries extends AbstractUpdatePlugin {
 			String rolesFilterStr = rs.getString(6);
 			
 			try {
-				PreparedStatement stinn = conn.prepareStatement( processQuery(query) );
-				count += addQueryFromDB(schema, queryName, stinn, query, defaultColumnNamesStr, remarks, rolesFilterStr, context);
+				count += addQueryFromDB(schema, queryName, query, defaultColumnNamesStr, remarks, rolesFilterStr, context);
 			}
-			catch(SQLException | IllegalStateException e) {
+			catch(IllegalStateException e) {
 				String message = "error reading query '"+queryName+"': "+e;
 				log.warn(message);
+				//log.debug(message, e);
 				UpdatePluginUtils.putWarning(servletContext, getWarnKey(model.getModelId()), schema, queryName, message);
 			}
 		}
@@ -359,9 +361,10 @@ public class QOnQueries extends AbstractUpdatePlugin {
 				"added/replaced "+count+" queries]");
 	}
 
-	protected String processQuery(String sql) {
-		return SQL.getFinalSqlNoUsername(sql);
-	}
+	/*protected String processQuery(String sql) {
+		sql = SQL.getFinalSqlNoUsername(sql);
+		return SQL.replaceNamedParameterNames(sql);
+	}*/
 	
 	void modelRollback(Set<View> origViews) {
 		model.getViews().clear();

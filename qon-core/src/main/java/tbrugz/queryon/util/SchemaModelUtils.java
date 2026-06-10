@@ -340,8 +340,9 @@ public class SchemaModelUtils {
 	public static boolean[] getNullBindingParameters(View view) {
 		SQL sql = SQL.createSqlBase(view, null, null, false);
 		Integer pCount = view.getParameterCount();
-		if(pCount==null) { pCount = view.getNamedParameterNames().size(); }
+		if(pCount==null && view.getNamedParameterNames()!=null) { pCount = view.getNamedParameterNames().size(); }
 		//System.out.println(">> getNullBindingParameters: pCount="+pCount);
+		//log.debug("pCount="+pCount+" / "+MiscUtils.toBooleanList(sql.bindNullOnMissingParameters()));
 		return MiscUtils.expandBooleanArray(sql.bindNullOnMissingParameters(), pCount!=null?pCount:0);
 		//return sql.bindNullOnMissingParameters();
 	}
