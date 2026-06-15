@@ -73,7 +73,7 @@ function loadRelation(selectId, parametersId, containerId) {
 	var parameterOptionals = relationsHash[id] ?
 			( relationsHash[id].parameterOptionals ? getScalarArrayFromValue( relationsHash[id].parameterOptionals ) : relationsHash[id].parameterOptionals ) :
 			null;
-	//console.log('selected: ',id,' ; params: ',params);
+	//console.log('selected: ', id, ' ; params: ', params, 'parameterOptionals: ', parameterOptionals);
 	if(params==null || params=="") {
 		params = 0;
 	}
@@ -92,7 +92,7 @@ function urlGetQueryParameters(namedParametersOnly) {
 		var value = item.value;
 		//console.log("urlAddParameters",item, item.name + "=" + encodeURIComponent(value));
 		//if(value=='') { value = '-'; }
-		ret += (i>0?"&":"") + item.name + "=" + encodeURIComponent(value);
+		ret += ((ret!='')?"&":"") + item.name + "=" + encodeURIComponent(value);
 	}
 	//console.log("ret",ret);
 	return ret;
@@ -103,7 +103,7 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 	var id = select.options[select.selectedIndex].value;
 	//var params = document.querySelectorAll('.parameter');
 	var paramsStr = '';
-	paramsStr = getParameters(true);
+	//paramsStr = getParameters(true);
 	/*for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
 		//console.log(item);
@@ -122,7 +122,7 @@ function getQueryUrl(selectId, syntax, baseUrlParam) {
 		}
 	}
 
-	queryString += (queryString?"&":"") + urlGetQueryParameters(true);
+	queryString += (queryString?"&":"") + urlGetQueryParameters(false);
 	
 	var filters = document.querySelectorAll('.filter');
 	for (var i = 0; i < filters.length; ++i) {
@@ -371,14 +371,14 @@ function setParameters(parametersId, params, parameterOptionals) {
 	}
 	var currentParamsWithValues = getParametersWithValues();
 	//console.log('params: ', params, ' ; numparams: ', numparams, ' ; paramNames: ', paramNames, ' ; currentParamsWithValues: ',currentParamsWithValues);
-	//console.log('numparams: ',numparams,' ; paramNames: ',paramNames, ' ; parameterOptionals: ', parameterOptionals);
+	//console.log('setParameters: numparams: ',numparams,' ; paramNames: ',paramNames, ' ; parameterOptionals: ', parameterOptionals);
 	
 	var paramsStr = '';
 	for(var i=0;i<numparams;i++) {
 		paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
 			" id='"+paramNames[i]+"' name='"+paramNames[i]+"' onchange='onParameterChange(\""+paramNames[i]+"\");'"+
 			"/>"+
-			(parameterOptionals[i]?"<button class='nullbutton' id='disableBtn"+paramNames[i]+"' value='"+paramNames[i]+"' title='disable "+paramNames[i]+"' onclick='disableParam(\""+paramNames[i]+"\")'>\u2400</button>":"")+
+			(parameterOptionals[i]?"<button class='nullbutton' id='disableBtn"+paramNames[i]+"' value='"+paramNames[i]+"' title='disable "+paramNames[i]+"' onclick='disableParam(\""+paramNames[i]+"\");onParameterChange();'>\u2400</button>":"")+
 			"</label>";
 	}
 	byId(parametersId).innerHTML = paramsStr;
@@ -438,12 +438,13 @@ function getParameters(positionalsOnly) {
 	var paramsStr = '';
 	for (var i = 0; i < params.length; ++i) {
 		var item = params[i];
-		if(item.disabled) { continue; }
+		//if(item.disabled) { continue; }
 		if(positionalsOnly && !item.classList.contains("positional")) {
 			continue;
 		}
 		var value = item.type!='file' ? item.value : '';
-		if(value=='') { value = '-'; }
+		if(item.disabled) { value = ''; }
+		//if(value=='') { value = '-'; }
 		paramsStr += '/'+value;
 	}
 	return paramsStr;

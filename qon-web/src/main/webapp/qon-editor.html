@@ -560,11 +560,11 @@
 		var paramNames = [];
 		var paramOptionals = [];
 		var positionalParameters = true;
+		var optionalPartz = paramOptionalsStr.split(",");
 		if(paramNamesStr) {
 			//XXX: sort array?
 			paramNames = [];
 			var namePartz = paramNamesStr.split(",");
-			var optionalPartz = paramOptionalsStr.split(",");
 			for(var i=0;i<namePartz.length;i++) {
 				if(paramNames.indexOf(namePartz[i])<0) {
 					paramNames.push(namePartz[i]);
@@ -577,7 +577,7 @@
 		else {
 			for(var i=0;i<numparams;i++) {
 				paramNames.push("p"+(i+1));
-				paramOptionals.push(false);
+				paramOptionals.push(optionalPartz[i]==="true");
 			}
 		}
 		console.log('numparams: ',numparams,' ; paramNames: ',paramNames, ' ; paramOptinals: ', paramOptionals);
