@@ -302,7 +302,21 @@ public class SchemaModelUtils {
 		List<String> pNames = q.getNamedParameterNames();
 		return getUniqueNamedParameterNames(pNames);
 	}
-	
+
+	public static List<Boolean> getUniqueNamedParameterOptionals(Query q) {
+		List<String> pNames = q.getNamedParameterNames();
+		List<String> pNamesChecked = new ArrayList<>();
+		List<Boolean> ret = new ArrayList<>();
+		for(int i=0;i<pNames.size();i++) {
+			String pname = pNames.get(i);
+			if(pNamesChecked.contains(pname)) { continue; }
+			ret.add(q.getParameterOptionals().get(i));
+			pNamesChecked.add(pname);
+		}
+		return ret;
+	}
+
+	//XXX: move to MiscUtils
 	static List<String> getUniqueNamedParameterNames(List<String> pNames) {
 		if(pNames == null) { return null; }
 		
@@ -343,11 +357,11 @@ public class SchemaModelUtils {
 		if(pCount==null && view.getNamedParameterNames()!=null) { pCount = view.getNamedParameterNames().size(); }
 		//System.out.println(">> getNullBindingParameters: pCount="+pCount);
 		//log.debug("pCount="+pCount+" / "+MiscUtils.toBooleanList(sql.bindNullOnMissingParameters()));
-		return MiscUtils.expandBooleanArray(sql.bindNullOnMissingParameters(), pCount!=null?pCount:0);
+		return MiscUtils.expandBooleanArray(SQL.bindNullOnMissingParameters(sql.getSql()), pCount!=null?pCount:0);
 		//return sql.bindNullOnMissingParameters();
 	}
 
-	public static boolean[] getNullBindingNamedParameters(View view) {
+	/*public static boolean[] getNullBindingNamedParameters(View view) {
 		List<String> pNames = view.getNamedParameterNames();
 		//System.out.println(">> pNames="+pNames);
 		if(pNames == null) { return null; }
@@ -369,7 +383,7 @@ public class SchemaModelUtils {
 			else { ret[i] = false; } //false wins
 		}
 		return ret;
-	}
+	}*/
 	
 	public static SchemaModel mergeModels(SchemaModel sm, SchemaModel sm2) {
 		if(sm==null) {

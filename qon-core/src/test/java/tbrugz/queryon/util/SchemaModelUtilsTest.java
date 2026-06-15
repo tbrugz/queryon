@@ -1,6 +1,7 @@
 package tbrugz.queryon.util;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,6 +9,14 @@ import org.junit.Test;
 import tbrugz.sqldump.dbmodel.Query;
 
 public class SchemaModelUtilsTest {
+	
+	static boolean[] getBooleanArray(List<Boolean> objs) {
+		boolean[] ret = new boolean[objs.size()];
+		for(int i=0;i<objs.size();i++) {
+			ret[i] = objs.get(i);
+		}
+		return ret;
+	}
 	
 	@Test
 	public void testNullBindingParameters0() {
@@ -53,7 +62,9 @@ public class SchemaModelUtilsTest {
 		//v.setParameterCount(2);
 		v.setNamedParameterNames(Arrays.asList(new String[] {"a"}));
 		v.setQuery(sql);
-		boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
+		DBObjectUtils.updateParameterOptionals(v, sql);
+		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
+		//boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
 		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {true}, nullBindingsNamed);
@@ -66,7 +77,8 @@ public class SchemaModelUtilsTest {
 		//v.setParameterCount(2);
 		v.setNamedParameterNames(Arrays.asList(new String[] {"a", "a"}));
 		v.setQuery(sql);
-		boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
+		DBObjectUtils.updateParameterOptionals(v, sql);
+		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
 		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {false}, nullBindingsNamed);
@@ -79,7 +91,8 @@ public class SchemaModelUtilsTest {
 		//v.setParameterCount(2);
 		v.setNamedParameterNames(Arrays.asList(new String[] {"a", "b"}));
 		v.setQuery(sql);
-		boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
+		DBObjectUtils.updateParameterOptionals(v, sql);
+		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
 		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {false, true}, nullBindingsNamed);
@@ -92,7 +105,8 @@ public class SchemaModelUtilsTest {
 		//v.setParameterCount(2);
 		v.setNamedParameterNames(Arrays.asList(new String[] {"a", "b", "a"}));
 		v.setQuery(sql);
-		boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
+		DBObjectUtils.updateParameterOptionals(v, sql);
+		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
 		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {true, false}, nullBindingsNamed);
@@ -110,8 +124,9 @@ public class SchemaModelUtilsTest {
 		//v.setParameterCount(2);
 		v.setNamedParameterNames(Arrays.asList(new String[] {"par1", "par2", "par1"}));
 		v.setQuery(sql);
-		boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
-		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
+		DBObjectUtils.updateParameterOptionals(v, sql);
+		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
+		System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {false, false}, nullBindingsNamed);
 	}
@@ -129,7 +144,8 @@ public class SchemaModelUtilsTest {
 		//v.setParameterCount(2);
 		v.setNamedParameterNames(Arrays.asList(new String[] {"par1", "par2", "par1"}));
 		v.setQuery(sql);
-		boolean[] nullBindingsNamed = SchemaModelUtils.getNullBindingNamedParameters(v);
+		DBObjectUtils.updateParameterOptionals(v, sql);
+		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
 		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {true, true}, nullBindingsNamed);

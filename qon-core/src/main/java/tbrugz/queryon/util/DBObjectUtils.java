@@ -31,7 +31,7 @@ public class DBObjectUtils {
 
 	static final Log log = LogFactory.getLog(DBObjectUtils.class);
 	
-	static boolean logParameterMetaDataExceptions = false;
+	static final boolean logParameterMetaDataExceptions = false;
 	
 	/*public static void validateQuery(Query rel, Connection conn, boolean update) throws SQLException {
 		String finalSql = rel.getQuery();
@@ -176,12 +176,7 @@ public class DBObjectUtils {
 		
 		if(update) {
 			updateParameterNames(rel, sqlWithNamedParams);
-			boolean[] arr = SchemaModelUtils.getNullBindingParameters(rel);
-			if(arr!=null) {
-				List<Boolean> bools = MiscUtils.toBooleanList(arr);
-				//log.debug("parameterOptionals: "+bools);
-				rel.setParameterOptionals(bools);
-			}
+			updateParameterOptionals(rel, sqlWithNamedParams);
 		}
 	}
 
@@ -193,6 +188,15 @@ public class DBObjectUtils {
 		log.debug("updateParameterNames: namedParameterNames = "+namedParameterNames+" [query="+query.getQualifiedName()+"]");
 	}
 
+	public static void updateParameterOptionals(Query query, String sqlWithNamedParams) {
+		boolean[] arr = SchemaModelUtils.getNullBindingParameters(query);
+		if(arr!=null) {
+			List<Boolean> bools = MiscUtils.toBooleanList(arr);
+			//log.debug("parameterOptionals: "+bools);
+			query.setParameterOptionals(bools);
+		}
+	}
+	
 	public static void validateTable(Relation rel, Connection conn, boolean update) throws SQLException {
 		String finalSql = "select * from "+rel.getQualifiedName();
 		

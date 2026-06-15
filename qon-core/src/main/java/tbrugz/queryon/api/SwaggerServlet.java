@@ -337,10 +337,11 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			if(useNamedParameters && t instanceof Query && ((Query)t).getNamedParameterNames()!=null) {
 				Query q = (Query) t;
 				List<String> namedParameters = SchemaModelUtils.getUniqueNamedParameterNames(q);
-				boolean[] bindsNullsNamed = SchemaModelUtils.getNullBindingNamedParameters(q);
+				List<Boolean> namedParameterOptionals = SchemaModelUtils.getUniqueNamedParameterOptionals(q);
+				//boolean[] bindsNullsNamed = SchemaModelUtils.getNullBindingNamedParameters(q);
 				for(int i=0;i <namedParameters.size() ;i++) {
 					Map<String, Object> pNamed = new LinkedHashMap<String, Object>();
-					boolean required = bindsNullsNamed.length>i?!bindsNullsNamed[i]:true;
+					boolean required = namedParameterOptionals.size()>i ? (!namedParameterOptionals.get(i)):true;
 					pNamed.put("name", namedParameters.get(i));
 					pNamed.put("in", "query");
 					pNamed.put("description", "parameter "+namedParameters.get(i));
@@ -352,11 +353,12 @@ public class SwaggerServlet extends AbstractHttpServlet {
 			else {
 				View v = (View) t;
 				Integer paramCount = v.getParameterCount();
-				boolean[] bindsNulls = SchemaModelUtils.getNullBindingParameters(v);
+				List<Boolean> paramOptionals = v.getParameterOptionals();
+				//boolean[] bindsNulls = SchemaModelUtils.getNullBindingParameters(v);
 				if(paramCount!=null) {
 					for(int i=1; i<=paramCount; i++) {
 						Map<String, Object> pNumbered = new LinkedHashMap<String, Object>();
-						boolean required = bindsNulls.length>i?!bindsNulls[i]:true;
+						boolean required = paramOptionals.size()>i ? (!paramOptionals.get(i)):true;
 						pNumbered.put("name", "p"+i);
 						pNumbered.put("in", "query");
 						pNumbered.put("description", "parameter number "+i);

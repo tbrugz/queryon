@@ -221,7 +221,9 @@ public class SQL {
 		else {
 			this.originalBindParameterCount = bindParameterCountTmp;
 		}
-		this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNullOnMissingParameters(), this.originalBindParameterCount);
+		boolean[] bindNulls = bindNullOnMissingParameters(sql);
+		//log.debug("bindNulls: "+MiscUtils.joinBooleanArray(bindNulls, ","));
+		this.bindNullOnMissingParameters = MiscUtils.expandBooleanArray(bindNulls, this.originalBindParameterCount);
 
 		// default columns
 		List<String> defaultColsTmp = getDefaultColumns(sql);
@@ -1228,7 +1230,7 @@ public class SQL {
 		return processPatternBoolean(sql, SQL.allowEncapsulationBooleanPattern, true);
 	}
 	
-	public boolean[] bindNullOnMissingParameters() {
+	public static boolean[] bindNullOnMissingParameters(String sql) {
 		return processPatternBooleanArray(sql, SQL.bindNullOnMissingParamsPattern, false);
 	}
 	

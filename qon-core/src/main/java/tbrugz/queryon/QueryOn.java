@@ -1825,11 +1825,11 @@ public class QueryOn extends AbstractHttpServlet {
 			if(asQuery) {
 				sql.applyProjection(reqspec);
 			}
-			String sqlWithNamedParams = sql.getSqlWithNamedParameters();
+			//String sqlWithNamedParams = sql.getSqlWithNamedParameters();
+			String initialSql = sql.getInitialSql();
 			String finalSql = sql.getFinalSql();
-			log.debug("doValidate[asQuery="+asQuery+"]: sql:\n"+finalSql);
-			DBObjectUtils.validateQuery(relation, sqlWithNamedParams, conn, true);
-			//DBObjectUtils.validateQueryParameters(relation, sql.getFinalSql(), conn, true);
+			log.debug("doValidate[asQuery="+asQuery+"]: initialSql:\n"+initialSql);
+			DBObjectUtils.validateQuery(relation, initialSql, conn, true);
 			PreparedStatement stmt = conn.prepareStatement(finalSql);
 
 			ParameterMetaData pmd = stmt.getParameterMetaData();
@@ -1846,9 +1846,9 @@ public class QueryOn extends AbstractHttpServlet {
 			//log.info("doValidate: #params="+params+" ; types = "+paramsTypes);
 			resp.setIntHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT, params);
 			resp.setHeader(ResponseSpec.HEADER_VALIDATE_PARAMTYPES, Utils.join(paramsTypes, ","));
-			resp.setHeader(ResponseSpec.HEADER_VALIDATE_NAMED_PARAMETER_NAMES, Utils.join(sql.namedParameters, ","));
-			if(sql.bindNullOnMissingParameters!=null) {
-				resp.setHeader(ResponseSpec.HEADER_VALIDATE_OPTIONAL_PARAMS, MiscUtils.joinBooleanArray(sql.bindNullOnMissingParameters, ","));
+			resp.setHeader(ResponseSpec.HEADER_VALIDATE_NAMED_PARAMETER_NAMES, Utils.join(relation.getNamedParameterNames(), ","));
+			if(relation.hasParameterOptionals()) {
+				resp.setHeader(ResponseSpec.HEADER_VALIDATE_OPTIONAL_PARAMS, Utils.join(relation.getParameterOptionals(), ","));
 			}
 			boolean doGetMetadata = Utils.getPropBool(prop, PROP_VALIDATE_GETMETADATA, true);
 			if(doGetMetadata) {

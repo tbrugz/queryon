@@ -650,6 +650,11 @@ public class RequestSpec {
 			int pCount = 1;
 			for(Map.Entry<Integer, Object> e: postionalParamsMap.entrySet()) {
 				int i = e.getKey();
+				// add null to parameters that were not informed
+				while(i>pCount) {
+					params.add(null);
+					pCount++;
+				}
 				params.add(e.getValue());
 				if(i!=pCount) {
 					String message = "parameter #"+i+" present but previous parameter isn't [pCount="+pCount+"]";

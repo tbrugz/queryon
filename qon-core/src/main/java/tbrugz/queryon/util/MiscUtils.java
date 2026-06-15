@@ -141,6 +141,7 @@ public class MiscUtils {
 		return ret;
 	}
 
+	/*
 	public static String joinBooleanArray(boolean[] arr, String separtor) {
 		if(arr==null || arr.length==0) { return null; }
 		
@@ -151,6 +152,7 @@ public class MiscUtils {
 		}
 		return sb.toString();
 	}
+	*/
 	
 	/*
 	public static Object getFieldValue(Object o, String field) {
