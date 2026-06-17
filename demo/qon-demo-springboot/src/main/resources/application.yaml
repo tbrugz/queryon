@@ -25,6 +25,9 @@ spring:
         # driver-class-name: ${SPRING_DATASOURCE_DRIVER-CLASS-NAME}
         # used by tbrugz.queryon.springboot.DataSourceConfig
         datasource-name: jdbc/datasource-demo
+    #devtools:
+    #    livereload:
+    #        enabled: false
 
 logging:
     # https://docs.spring.io/spring-boot/reference/features/logging.html
@@ -50,12 +53,14 @@ logging:
         #tbrugz.queryon.action.QOnManage: DEBUG
         #tbrugz.queryon.api: DEBUG
         #tbrugz.queryon.diff: DEBUG
+        #tbrugz.queryon.processor.QOnQueries: DEBUG
         tbrugz.queryon.springboot.demo: DEBUG
         #tbrugz.queryon.util: DEBUG
         #tbrugz.queryon.util.ReflectionUtil: DEBUG
         #tbrugz.queryon.util.ShiroUtils: DEBUG
         #tbrugz.sqldiff: DEBUG
         #tbrugz.sqldump.cdi: DEBUG
+        #tbrugz.sqldump.datadump.parquet: DEBUG
         #tbrugz.sqldump.resultset.BaseResultSetCollectionAdapter: DEBUG
         #tbrugz.sqldump.resultset.ResultSetArrayAdapter: DEBUG
         #tbrugz.sqldump.resultset.pivot: DEBUG
