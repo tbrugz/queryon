@@ -26,8 +26,6 @@ import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.model.QonQuery;
 import tbrugz.queryon.util.DBObjectUtils;
 import tbrugz.queryon.util.DBUtil;
-import tbrugz.queryon.util.MiscUtils;
-import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -46,9 +44,9 @@ public class QOnQueries extends AbstractUpdatePlugin {
 
 	static final Log log = LogFactory.getLog(QOnQueries.class);
 
-	public static final String ATTR_QUERIES_WARNINGS_PREFIX = QOnQueriesProcessor.ATTR_QUERIES_WARNINGS_PREFIX;
+	public static final String ATTR_QUERIES_WARNINGS_PREFIX = "qon-queries-warnings";
 	
-	static final String PROP_PREFIX = QOnQueriesProcessor.PROP_PREFIX; //"queryon.qon-queries";
+	static final String PROP_PREFIX = "queryon.qon-queries";
 	
 	/*
 	static final String SUFFIX_ACTION = ".action";
@@ -59,7 +57,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 	static final String SUFFIX_METADATA_ALLOW_QUERY_EXEC = ".metadata.allow-query-exec";
 	*/
 	
-	public static final String DEFAULT_QUERIES_TABLE = QOnQueriesProcessor.DEFAULT_QUERIES_TABLE;
+	public static final String DEFAULT_QUERIES_TABLE = "QON_QUERIES";
 
 	//static final String PIPE_SPLIT = "\\|";
 

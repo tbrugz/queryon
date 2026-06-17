@@ -2559,22 +2559,37 @@ public class WinstoneAndH2HttpRequestTest {
 		//System.out.println("map: "+map);
 		List<Object> data = (List<Object>) map.get("data");
 		//System.out.println("data: "+data);
-		String[] expectedArr = new String[] {"par1", "par2", "par1"};
+		String[] expectedArrDefault = new String[] {"par1", "par2", "par1"};
 		
 		{
 			List<String> namedParameters = (List<String>) getFieldFromNamedObject(data, "NAMED_PARAMS_1", "namedParameterNames");
 			Assert.assertNotNull("namedParameters should not be null", namedParameters);
-			Assert.assertArrayEquals(expectedArr, namedParameters.toArray(new String[]{}));
+			Assert.assertArrayEquals(expectedArrDefault, namedParameters.toArray(new String[]{}));
 		}
 		{
 			List<String> namedParameters = (List<String>) getFieldFromNamedObject(data, "NAMED_PARAMS_NO_PARAM_COUNT", "namedParameterNames");
 			Assert.assertNotNull("namedParameters should not be null", namedParameters);
-			Assert.assertArrayEquals(expectedArr, namedParameters.toArray(new String[]{}));
+			Assert.assertArrayEquals(expectedArrDefault, namedParameters.toArray(new String[]{}));
 		}
 		{
 			List<String> namedParameters = (List<String>) getFieldFromNamedObject(data, "QUERY_WITH_BIND_NAMED_PARAMS", "namedParameterNames");
 			Assert.assertNotNull("namedParameters should not be null", namedParameters);
-			Assert.assertArrayEquals(expectedArr, namedParameters.toArray(new String[]{}));
+			Assert.assertArrayEquals(expectedArrDefault, namedParameters.toArray(new String[]{}));
+		}
+
+		{
+			Boolean[] expectedBools = new Boolean[] {true, false, true};
+			List<String> parameterOptionals = (List<String>) getFieldFromNamedObject(data, "QUERY_WITH_PARAMS_NULL_BIND_ARRAY", "parameterOptionals");
+			Assert.assertNotNull("parameterOptionals should not be null", parameterOptionals);
+			//System.out.println("parameterOptionals: "+parameterOptionals);
+			Assert.assertArrayEquals(expectedBools, parameterOptionals.toArray(new Boolean[]{}));
+		}
+
+		{
+			Boolean[] expectedBools = new Boolean[] {true, true, true};
+			List<String> parameterOptionals = (List<String>) getFieldFromNamedObject(data, "QUERY_WITH_PARAMS_NULL_BIND", "parameterOptionals");
+			Assert.assertNotNull("parameterOptionals should not be null", parameterOptionals);
+			Assert.assertArrayEquals(expectedBools, parameterOptionals.toArray(new Boolean[]{}));
 		}
 	}
 

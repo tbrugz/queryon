@@ -47,11 +47,12 @@ import tbrugz.sqldump.util.Utils;
  * TODO: saving with 'SQLQueries+QOnQueries' may create inconsistencies when exception occurs in 2nd (QOnQueries) processor (can't rollback 1st processor actions)
  * TODO: should implement UpdatePlugin
  */
+@Deprecated
 public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 
 	static final Log log = LogFactory.getLog(QOnQueriesProcessor.class);
 	
-	static final String PROP_PREFIX = "queryon.qon-queries";
+	static final String PROP_PREFIX = QOnQueries.PROP_PREFIX; //"queryon.qon-queries";
 	
 	static final String SUFFIX_ACTION = ".action";
 	static final String SUFFIX_TABLE = ".table";
@@ -64,9 +65,9 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 	static final String ACTION_WRITE = "write";
 	static final String ACTION_REMOVE = "remove";
 	
-	public static final String DEFAULT_QUERIES_TABLE = "QON_QUERIES";
+	public static final String DEFAULT_QUERIES_TABLE = QOnQueries.DEFAULT_QUERIES_TABLE;
 	
-	public static final String ATTR_QUERIES_WARNINGS_PREFIX = "qon-queries-warnings";
+	public static final String ATTR_QUERIES_WARNINGS_PREFIX = QOnQueries.ATTR_QUERIES_WARNINGS_PREFIX;
 	
 	boolean metadataAllowQueryExec = false;
 	Subject currentUser;
@@ -155,6 +156,7 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			
 			try {
 			PreparedStatement stinn = conn.prepareStatement( processQuery(query) );
+			// see: SQL.bindNullOnMissingParameters
 			//count += addQueryToModel(queryName, queryName, schema,
 			//		/*String colNames*/ null, /*boolean grabInfoFromMetadata*/ true, /*addAlsoAsTable*/ false,
 			//		stinn, query, /*List<String> keyCols*/ null,
