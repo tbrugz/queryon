@@ -1654,7 +1654,10 @@ public class QueryOn extends AbstractHttpServlet {
 		preprocessParameters(reqspec, relation, pk);
 		//XXX if pivotquery, use other limit - standard limit should be used after - with LimitOffsetStrategy.RESULTSET_CONTROL
 		// add reqspec.isPivotQuery()
-		sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), defaultLimit, maxLimit, resp, isStrictMode());
+		Integer syntaxDefaultLimit = Utils.getPropInt(prop, PROP_DEFAULT_LIMIT+"."+reqspec.outputSyntax.getSyntaxId(), defaultLimit);
+		Integer syntaxMaxLimit = Utils.getPropInt(prop, PROP_MAX_LIMIT+"."+reqspec.outputSyntax.getSyntaxId(), maxLimit);
+		//log.debug("doSelect: ["+reqspec.outputSyntax.getSyntaxId()+"] syntaxDefaultLimit="+syntaxDefaultLimit+" ; syntaxMaxLimit="+syntaxMaxLimit);
+		sql = getSelectQuery(relation, reqspec, pk, loStrategy, getUsername(currentUser), syntaxDefaultLimit, syntaxMaxLimit, resp, isStrictMode());
 		finalSql = sql.getFinalSql();
 		
 		if(validateQuery) {
@@ -1725,7 +1728,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 			
 			dumpResultSet(rs, reqspec, relation.getSchemaName(), relation.getName(), pk!=null?pk.getUniqueColumns():null,
-					fks, uks, fullKeyDefined, applyLimitOffsetInResultSet, resp, getLimit(lim));
+					fks, uks, fullKeyDefined, applyLimitOffsetInResultSet, resp, getLimit(lim, syntaxDefaultLimit, syntaxMaxLimit));
 		}
 		
 		}

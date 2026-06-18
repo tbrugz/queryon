@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.naming.NamingException;
@@ -622,6 +623,38 @@ public class WinstoneAndH2HttpRequestTest {
 		Assert.assertEquals(expectedReturnRows, length);
 	}
 	
+	static void baseCountTsv(String url, int expectedReturnRows) throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpPost httpGet = new HttpPost(baseUrl+url);
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		//String resp = getContent(response1); System.out.println(resp);
+		
+		HttpEntity entity1 = response1.getEntity();
+		Reader in = new InputStreamReader(entity1.getContent());
+		
+		Iterable<CSVRecord> records = CSVFormat.TDF.builder()
+			.setHeader()
+			.setSkipHeaderRecord(true)
+			.build()
+			.parse(in);
+		Iterator<CSVRecord> it = records.iterator();
+		
+		int count = 0;
+		try {
+			while(true) {
+				CSVRecord record = it.next();
+				//System.out.println("> "+record);
+				count++;
+			}
+		}
+		catch(NoSuchElementException e) {}
+		httpGet.releaseConnection();
+		in.close();
+		Assert.assertEquals(expectedReturnRows, count);
+	}
+
 	static HttpResponse getHttpResponse(String url) throws IOException, SAXException {
 		CloseableHttpClient httpclient = getHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl+url);
@@ -986,6 +1019,22 @@ public class WinstoneAndH2HttpRequestTest {
 		String sql = "select * from emp where id in (:id, :id)";
 		String sqlpar = URLEncoder.encode(sql, utf8);
 		basePostReturnCountTest("/QueryAny.xml?name=test&sql="+sqlpar+"&id=2", 1);
+	}
+
+	@Test
+	public void testGetTsvSelectAny15() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "queryon.limit.default.tsv=15"
+		String sql = getSql30rows();
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseCountTsv("/QueryAny.tsv?name=test&sql="+sqlpar, 15);
+	}
+
+	@Test
+	public void testGetTsvSelectLimitMax() throws IOException, ParserConfigurationException, SAXException {
+		// limited by "queryon.limit.max.tsv=25"
+		String sql = getSql30rows();
+		String sqlpar = URLEncoder.encode(sql, utf8);
+		baseCountTsv("/QueryAny.tsv?name=test&sql="+sqlpar+"&limit=30", 25);
 	}
 
 	@Test
