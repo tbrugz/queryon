@@ -366,7 +366,7 @@ public class QOnExecs extends AbstractUpdatePlugin implements UpdatePlugin {
 
 		if(rolesFilter!=null) {
 			for(String g: rolesFilter) {
-				Grant gr = new Grant(schema, PrivilegeType.EXECUTE, g);
+				Grant gr = new Grant(execName, PrivilegeType.EXECUTE, g);
 				e.getGrants().add(gr);
 				//log.info("Exec: "+e+" ; grant="+gr);
 			}

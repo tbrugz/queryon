@@ -313,15 +313,15 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		return null;
 	}
 	
-	void addGrants(List<Grant> grants, String owner, PrivilegeType pt, List<String> roles) {
+	void addGrants(List<Grant> grants, String tableName, PrivilegeType pt, List<String> roles) {
 		if(roles==null) { return; }
 		for(String s: roles) {
 			if(s==null || s.equals("")) { continue; }
-			grants.add(new Grant(owner, pt, s));
+			grants.add(new Grant(tableName, pt, s));
 		}
 	}
 
-	void addColumnGrants(List<Grant> grants, String owner, PrivilegeType pt, String columnRoles) {
+	void addColumnGrants(List<Grant> grants, String tableName, PrivilegeType pt, String columnRoles) {
 		if(columnRoles==null) { return; }
 		List<String> rolesCols = Utils.getStringList(columnRoles, PIPE_SPLIT);
 		for(String s: rolesCols) {
@@ -334,7 +334,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			}
 			List<String> grantees = Utils.getStringList(sarr[1], COMMA_SPLIT);
 			for(String grantee: grantees) {
-				grants.add(new Grant(owner, sarr[0], pt, grantee, false));
+				grants.add(new Grant(tableName, sarr[0], pt, grantee, false));
 			}
 		}
 	}

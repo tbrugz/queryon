@@ -84,13 +84,18 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		return true;
 	}
 	
-	void addGrants(Relation r, String owner, PrivilegeType pt, List<String> roles) {
+	void addGrants(Relation r, PrivilegeType pt, List<String> roles) {
 		if(roles==null || roles.size()==0) { return; }
 		List<Grant> grants = new ArrayList<Grant>();
 		
 		for(String s: roles) {
 			if(s==null || s.equals("")) { continue; }
-			grants.add(new Grant(owner, pt, s));
+			try {
+				grants.add(new Grant(r.getName(), pt, s));
+			}
+			catch(IllegalArgumentException e) {
+				log.warn("Error adding Grant: owner=["+r.getSchemaName()+"], privilege="+pt+", role=["+s+"] ; relation="+r);
+			}
 		}
 		
 		if(grants.size()>0) {
@@ -108,7 +113,7 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		q.setRemarks(remarks);
 		//XXX t.setParameterCount(parameterCount);
 	
-		addGrants(q, name, PrivilegeType.SELECT, rolesSelect);
+		addGrants(q, PrivilegeType.SELECT, rolesSelect);
 		return q;
 	}
 	
