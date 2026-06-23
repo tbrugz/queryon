@@ -17,6 +17,7 @@
 	<script src="js/ui.js"></script>
 	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/editor.js"></script>
+	<script src="js/xtra.js"></script>
 <style>
 #logo {
 	margin: 2px;
@@ -180,7 +181,7 @@ function onTextFieldChange() {
 }
 
 function doValidate() {
-	var url = queryOnUrl+"/ValidateAny";
+	var url = qonContextPath()+queryOnUrl+"/ValidateAny";
 	doRequest(url, 'btnValidate', {}, doValidateCallback);
 }
 
@@ -237,18 +238,18 @@ function setParametersValues(values) {
 }
 
 function doExplain() {
-	var url = queryOnUrl+"/ExplainAny";
+	var url = qonContextPath()+queryOnUrl+"/ExplainAny";
 	doRequest(url, 'btnExplain');
 }
 
 function doRun() {
 	var ext = byId('selFormat').value;
-	var url = queryOnUrl+"/"+runAction+"."+ext;
+	var url = qonContextPath()+queryOnUrl+"/"+runAction+"."+ext;
 	doRequest(url, 'btnRun', { format: ext });
 }
 
 function doDownload(ext) {
-	var url = queryOnUrl+"/"+runAction+"."+ext;
+	var url = qonContextPath()+queryOnUrl+"/"+runAction+"."+ext;
 	doRequest(url, 'btnDownload', { download: true });
 }
 

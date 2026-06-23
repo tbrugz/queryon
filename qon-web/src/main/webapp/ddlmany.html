@@ -18,6 +18,7 @@
 	<script src="js/models.js"></script>
 	<script src="js/ddl.js"></script>
 	<script src="js/menu.js"></script>
+	<script src="js/xtra.js"></script>
 	<script>
 //var queryOnUrl = 'qoi/';
 var queryOnDiffManyUrl = 'diffmany/'
@@ -67,7 +68,7 @@ makeHrefs = function() {
 }
 
 $.ajax({
-	url: 'qinfo/env',
+	url: qonContextPath()+'qinfo/env',
 	dataType: "text",
 	success: function(data) {
 		var json = JSON.parse(data);
@@ -93,7 +94,7 @@ $.ajax({
 
 //TODOne: schemas by model?
 loadSchemas = function(model) {
-	var url = 'qinfo/schemas'+(model?'?model='+model:'');
+	var url = qonContextPath()+'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,
@@ -174,7 +175,7 @@ getDDLdiff = function(apply) {
 	var syntaxSelect = document.getElementById('syntax');
 	var syntax = syntaxSelect.options[syntaxSelect.selectedIndex].value;
 
-	var url = queryOnDiffManyUrl
+	var url = qonContextPath() + queryOnDiffManyUrl
 		+ schemas + '/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ types + '/'

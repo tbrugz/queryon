@@ -1,4 +1,6 @@
 
+/* depends on qon-base.js */
+
 var qonAppContext = null;
 var modelsInfo = null;
 var servicesInfo = null;
@@ -7,7 +9,7 @@ var updatePluginsInfo = null;
 function loadModels(callback) {
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", callback?callback:loadModelsContent);
-	oReq.open("GET", "qinfo/env");
+	oReq.open("GET", qonContextPath()+"qinfo/env");
 	oReq.send();
 }
 

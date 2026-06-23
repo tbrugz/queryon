@@ -14,6 +14,7 @@
 	<script src="js/models.js"></script>
 	<script src="js/settings.js"></script>
 	<script src="js/menu.js"></script>
+	<script src="js/xtra.js"></script>
 <script type="text/javascript">
 
 //javascript, html, json, markdown, css, xml
@@ -41,7 +42,7 @@ var mimeMap = {
 	"diff": "text/plain"
 };
 
-var pagesUrl = 'p/';
+//var pagesUrl = 'p/';
 var qonUrl = 'q/QON_PAGES'; //XXX: ignore-case?
 var qonEditorUrl = 'pages-editor.html'
 var pages = [];
@@ -133,7 +134,7 @@ updatePagesList = function() {
 loadPagesList = function() {
 	closeMessages('messages');
 
-	var loadUrl = qonUrl+'.json';
+	var loadUrl = qonContextPath()+qonUrl+'.json';
 
 	var modelQs = (getCurrentModelId()?'model='+getCurrentModelId():'');
 	var payload = "fields=ID,PATH,MIME,HAS_BODY&order=PATH&" + modelQs;
@@ -204,7 +205,7 @@ prettyLink = function(str) {
 removePage = function(id, path) {
 	
 	if(confirm("remove page "+path+"?")) {
-		var loadUrl = qonUrl+'/'+id+'.json';
+		var loadUrl = qonContextPath()+qonUrl+'/'+id+'.json';
 		if(getCurrentModelId()) {
 			loadUrl += '?model='+getCurrentModelId();
 		}
@@ -321,7 +322,7 @@ doConfirmUpload = function() {
 		qs += '&model='+getCurrentModelId();
 	}
 	
-	var loadUrl = qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json' + qs;
+	var loadUrl = qonContextPath() + qonUrl + (fd.get('v:ID')?"/"+fd.get('v:ID'):"") + '.json' + qs;
 	
 	request.open("POST", loadUrl, true);
 	actionStart();

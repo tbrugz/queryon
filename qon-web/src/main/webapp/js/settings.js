@@ -1,7 +1,10 @@
+
+/* depends on qon-base.js */
+
 var settings = {};
 
 function loadSettings(callbackOk) {
-	var url = "qinfo/settings";
+	var url = qonContextPath()+"qinfo/settings";
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
 	request.onload = function(oEvent) {

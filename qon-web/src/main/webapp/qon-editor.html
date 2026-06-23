@@ -23,6 +23,7 @@
 	font-style: italic;
 }
 	</style>
+	<script src="js/qon-base.js"></script>
 	<script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
 	<!-- see: https://github.com/oscargodson/jkey -->
 	<script type="text/javascript" src="js/jquery.jkey.js"></script>
@@ -34,6 +35,7 @@
 	<script type="text/javascript" src="js/table.js"></script>
 	<script src="js/ui.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
+	<script src="js/xtra.js"></script>
 <script type="text/javascript">
 	const DEFAULT_TABLE_NAME = "QON_QUERIES";
 	var responseType = "htmlx";
@@ -84,7 +86,7 @@
 			}
 			var table = getModelSetting('queryon.qon-queries', 'table', modelId);
 			if(table) {
-				qonUrl = queryOnUrl+'/'+table;
+				qonUrl = qonContextPath()+queryOnUrl+'/'+table;
 			}
 
 			//console.log("modelId: ", modelId, "qonUrl: ", qonUrl);
@@ -181,7 +183,7 @@
 		var startTimeMilis = Date.now();
 		
 		var request = $.ajax({
-			url : queryOnUrl+"/QueryAny."+responseType,
+			url : qonContextPath()+queryOnUrl+"/QueryAny."+responseType,
 			//url : "q/QueryAny"+paramsStr+"."+responseType,
 			type : "POST",
 			data: reqData,
@@ -238,7 +240,7 @@
 		}
 		
 		var request = $.ajax({
-			url : queryOnUrl+"/ValidateAny",
+			url : qonContextPath()+queryOnUrl+"/ValidateAny",
 			type : "POST",
 			data : reqData,
 			dataType : "html"
@@ -306,7 +308,7 @@
 		}
 		
 		var request = $.ajax({
-			url : queryOnUrl+"/ExplainAny",
+			url : qonContextPath()+queryOnUrl+"/ExplainAny",
 			type : "POST",
 			data : reqData,
 			dataType : "html"
@@ -493,10 +495,10 @@
 		}
 		//var startTimeMilis = Date.now();
 		
-		var url = queryOnUrl+"/QueryAny."+ext;
+		var url = qonContextPath()+queryOnUrl+"/QueryAny."+ext;
 		btnActionStart('btnDownload');
 		if(binaryDownloadExts.includes(ext)) {
-			post(queryOnUrl+"/QueryAny."+ext, reqData, function () {
+			post(qonContextPath()+queryOnUrl+"/QueryAny."+ext, reqData, function () {
 				console.log('downloading:', url); 
 				btnActionStop('btnDownload');
 			}, "_blank");
@@ -674,7 +676,7 @@
 		
 		var numparameters = document.getElementById("sqlparams").children.length;
 		var urlpl = document.getElementById("url-permalink");
-		urlpl.href = queryOnUrl+"/"+name;
+		urlpl.href = qonContextPath()+queryOnUrl+"/"+name;
 		for(var i=0;i<numparameters;i++) {
 			urlpl.href += "/-";
 		}
@@ -811,7 +813,7 @@
 		console.log("downloadBlob", qs, lastExecutedQuery, params);
 		
 		btnActionStart('btnDownload');
-		post(queryOnUrl+"/QueryAny?"+qs, lastExecutedQuery, function () {
+		post(qonContextPath()+queryOnUrl+"/QueryAny?"+qs, lastExecutedQuery, function () {
 			console.log('blob-downloading...'); 
 			btnActionStop('btnDownload');
 		}, "_blank");

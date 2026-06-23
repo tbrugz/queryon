@@ -18,6 +18,7 @@
 	<script src="js/sigma/sigma.min.js"></script>
 	<script src="js/sigma/plugins/sigma.layout.forceAtlas2.min.js"></script>
 	<script src="js/sigma/plugins/sigma.plugins.dragNodes.min.js"></script>
+	<script src="js/xtra.js"></script>
 <style type="text/css">
 body {
 	margin: 0;
@@ -138,6 +139,7 @@ body {
 </div>
 
 <script>
+		var queryOnUrl = 'q';
 		var downloadUrl = 'processor/RS2GraphML';
 
 		function writeOptions(containerId, relations) {
@@ -215,12 +217,12 @@ body {
 			}
 
 			//doLoadExecs();
-			init('q','objects', writeOptions, getCurrentModelId());
+			init(qonContextPath()+queryOnUrl,'objects', writeOptions, getCurrentModelId());
 		}
 		
 		function onModelChanged() {
 			byId('objects').innerHTML = defaultNullObjectOption;
-			init('q','objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
+			init(qonContextPath()+queryOnUrl,'objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
 		}
 		
 		// ======================== sigma-related functions ========================
@@ -319,7 +321,7 @@ body {
 			// ajax
 			var queryString = (modelId ? 'model='+modelId : '') + filterStr;
 			btnActionStart('go-button');
-			var url = 'q/'+qid+paramsStr+'.json?'+queryString;
+			var url = qonContextPath()+queryOnUrl+'/'+qid+paramsStr+'.json?'+queryString;
 			//console.log('url['+qid+']: '+url);
 			var jqxhr = $.getJSON(url, function(data) {
 				btnActionStop('go-button');

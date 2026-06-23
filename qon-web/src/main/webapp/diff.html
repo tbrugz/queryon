@@ -24,6 +24,7 @@
 	<script src="js/menu.js"></script>
 	<script src="js/filter.js"></script>
 	<script src="js/queryon-b.js"></script> <!-- XXX filter.js needs it, but maybe should not -->
+	<script src="js/xtra.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
@@ -192,7 +193,7 @@ loadObjectList = function(callbackOk) {
 	var type = typemap[origType];
 	var model = document.getElementById(defaultModelId).value;
 	var schema = document.getElementById('schema').value;
-	var url = queryOnUrl+type
+	var url = qonContextPath()+queryOnUrl+type
 		//+ (schema? '/'+schema:'')
 		+ '/'+schema
 		+ '.json'
@@ -228,7 +229,7 @@ loadObjectList = function(callbackOk) {
 
 getDDL = function(modelId, contentId, contentTitleId, callback) {
 	var model = document.getElementById(modelId).value;
-	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
+	var url = qonContextPath()+queryOnSchemaUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
 		+ (model ? '?model='+model : '');
@@ -563,7 +564,7 @@ getDDLdiff = function(apply) {
 	apply = apply==='true'?'true':false;
 	var applyMessage = ""; //XXX: get message from dialog?
 	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
-	var url = queryOnDiffUrl+document.getElementById('type').value+'/'
+	var url = qonContextPath()+queryOnDiffUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
 		+'?modelSource='+document.getElementById('modelSource').value
@@ -663,7 +664,7 @@ getDataDiffUrl = function(syntax) {
 	}
 	//console.log("filtersStr:", filtersStr);
 
-	return queryOnDataDiffUrl+document.getElementById('type').value+'/'
+	return qonContextPath()+queryOnDataDiffUrl+document.getElementById('type').value+'/'
 		+ document.getElementById('object').value
 		+ (syntax?"."+syntax:"")
 		+ '?modelSource='+document.getElementById('modelSource').value

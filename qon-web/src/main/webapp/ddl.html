@@ -18,6 +18,7 @@
 	<script src="js/auth.js"></script>
 	<script src="js/models.js"></script>
 	<script src="js/menu.js"></script>
+	<script src="js/xtra.js"></script>
 	<script>
 var queryOnUrl = 'qoi/';
 var queryOnSchemaUrl = 'qos/';
@@ -95,7 +96,7 @@ loadModelsContentCallback = function() {
 
 //TODOne: schemas by model?
 loadSchemas = function(model) {
-	var url = 'qinfo/schemas'+(model?'?model='+model:'');
+	var url = qonContextPath()+'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
 	$.ajax({
 		url: url,
@@ -199,7 +200,7 @@ loadObjectList = function(callback) {
 	var type = typemap[origType];
 	var model = getCurrentModelId();
 	var schema = document.getElementById('schema').value;
-	var url = queryOnUrl+type
+	var url = qonContextPath()+queryOnUrl+type
 		+ (schema? '/'+schema:'')
 		+ '.json'
 		+ (model?'?model='+model:'');
@@ -237,7 +238,7 @@ loadObjectList = function(callback) {
 
 getDDL = function() {
 	var model = getCurrentModelId();
-	var url = queryOnSchemaUrl+document.getElementById('type').value+'/'
+	var url = qonContextPath()+queryOnSchemaUrl+document.getElementById('type').value+'/'
 		//+ (document.getElementById('schema').value?document.getElementById('schema').value + '.':'')
 		+ document.getElementById('object').value
 		+(model?'?model='+document.getElementById('model').value:"");

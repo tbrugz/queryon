@@ -13,7 +13,7 @@ var utf8par = "utf8=✓";
 /* functions */
 
 function loadQueries(modelId, filterSchema, doUpdate, callback) {
-	loadQueries0(queryOnUrl, 'objects', function(containerId, rels) {
+	loadQueries0(qonContextPath() + queryOnUrl, 'objects', function(containerId, rels) {
 		if(filterSchema) {
 			console.log('filtering rels', rels.length, 'filterSchema', filterSchema);
 			if(!Array.isArray(filterSchema)) {
@@ -180,7 +180,7 @@ function updateNavBar() {
 function makeOneHref(objectName, syntax, modelId) {
 	//aElem.style.display = 'initial';
 	//var utf8par = "utf8=✓";
-	var href = queryOnUrl+"/"+encodeURIComponent(objectName);
+	var href = qonContextPath() + queryOnUrl+"/"+encodeURIComponent(objectName);
 	
 	href += getParameters(true)+"."+syntax+"?"+utf8par;
 	if(modelId) {

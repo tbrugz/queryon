@@ -1,4 +1,6 @@
 
+/* depends on qon-base.js */
+
 var authInfo = {
 	// similar to 'qauth/info'
 	authenticated: false,
@@ -21,7 +23,7 @@ function isAuthServiceActive() {
 
 function loadAuthInfo() { //callback?
 	//var url = "qauth/currentUser?ts=" + Date.now();
-	var url = "qinfo/auth?ts=" + Date.now();
+	var url = qonContextPath() + "qinfo/auth?ts=" + Date.now();
 	
 	var request = new XMLHttpRequest();
 	request.open("GET", url, true);
@@ -121,7 +123,7 @@ function authGetLoginUrl() {
 
 function authGetLogoutUrl() {
 	//if(!isAuthServiceActive()) { return null; }
-	return 'qauth/logout';
+	return qonContextPath() + 'qauth/logout';
 	//return 'qauth/logout?return='+encodeURIComponent(window.location.href);
 }
 

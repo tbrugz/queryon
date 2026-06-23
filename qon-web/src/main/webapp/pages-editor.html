@@ -15,6 +15,7 @@
 	<script src="js/models.js"></script>
 	<script src="js/settings.js"></script>
 	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/xtra.js"></script>
 <script type="text/javascript">
 // load url: http://<host>/queryon/q/<schema>.QON_PAGES?p1=<id>&valuefield=BODY&mimetypefield=MIME
 //javascript, html, json, markdown, css, xml //XXX add sql?
@@ -123,7 +124,7 @@ function doSave() {
 		return;
 	}
 
-	var saveUrl = qonUrl+'?';
+	var saveUrl = qonContextPath()+qonUrl+'?';
 
 	var payload = "v:PATH=" + encodeURIComponent(path) +
 		"&v:MIME=" + encodeURIComponent(mime) +
@@ -235,7 +236,7 @@ function doLoadPageError(evt) {
 }
 
 function doLoadPage(id) {
-	var loadUrl = qonUrl+'.json';
+	var loadUrl = qonContextPath()+qonUrl+'.json';
 
 	var payload = "p1=" + encodeURIComponent(id) +
 		(getCurrentModelId()?'&model='+getCurrentModelId():'');
@@ -286,7 +287,7 @@ function refreshUI() {
 		byId('pages-open').style.display = 'initial';
 		//var modelId = getParameterByName('model', location.search);
 		var modelId = getCurrentModelId();
-		var url = pagesUrl + byId('path').value + ( modelId ? "?model="+modelId : "" );
+		var url = qonContextPath() + pagesUrl + byId('path').value + ( modelId ? "?model="+modelId : "" );
 		url = url.replace(/\/+/, '/');
 		
 		byId('pages-open').href = url;

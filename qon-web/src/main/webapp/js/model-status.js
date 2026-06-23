@@ -1,11 +1,13 @@
 
+/* depends on qon-base.js */
+
 var modelStatus = null;
 
 function loadModelStatus(callback) {
 	//console.log("loadModelStatus", callback);
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", callback?callback:loadModelStatusContent);
-	oReq.open("GET", "qinfo/status");
+	oReq.open("GET", qonContextPath() + "qinfo/status");
 	oReq.send();
 }
 

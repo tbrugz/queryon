@@ -68,6 +68,10 @@ function getScalarArrayFromValue(value) {
 	return null;
 }
 
+function qonContextPath() {
+    return "";
+}
+
 // polyfill IE - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
 
 if (!String.prototype.startsWith) {

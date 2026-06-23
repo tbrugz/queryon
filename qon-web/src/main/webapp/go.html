@@ -16,6 +16,7 @@
 	<script src="js/auth.js"></script>
 	<script src="js/menu.js"></script>
 	<script src="js/settings.js"></script>
+	<script src="js/xtra.js"></script>
 	<script>
 var queryOnUrl = 'q/';
 
@@ -28,7 +29,7 @@ onLoad = function() {
 doLoadExecs = function() {
 	var queryString = (getCurrentModelId()?'?model='+getCurrentModelId():'');
 
-	var url = queryOnUrl + 'executable.json' + queryString;
+	var url = qonContextPath() + queryOnUrl + 'executable.json' + queryString;
 	var oReq = new XMLHttpRequest();
 	oReq.addEventListener("load", loadSelectContent);
 	oReq.open("GET", url);
@@ -117,7 +118,7 @@ doGo = function() {
 	var idx = select.selectedIndex;
 	var option = select.options[idx];
 
-	var url = queryOnUrl + option.getAttribute("value");
+	var url = qonContextPath() + queryOnUrl + option.getAttribute("value");
 
 	var reqData = new FormData();
 	var params = document.querySelectorAll('.parameter');
