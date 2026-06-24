@@ -23,16 +23,24 @@ public class ModelValidator extends AbstractSQLProc {
 	static final String PROP_PREFIX = "queryon.ModelValidator";
 
 	static final String SUFFIX_REMOVE_INVALID = ".remove-invalid-objects";
+	static final String SUFFIX_UPDATE_INVALID = ".update-invalid-objects";
 	static final String SUFFIX_VALIDATE_EXECUTABLES = ".validate-executables";
 	
 	boolean removeInvalid = false;
-	final boolean update = true; //XXX: update may change data type & lose nullable info
+	boolean update = true; // update may change data type & lose nullable info
 	boolean validateExecutables = false;
 	
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
-		removeInvalid = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_REMOVE_INVALID, removeInvalid);
+		if(Utils.propertyExists(prop, PROP_PREFIX+SUFFIX_REMOVE_INVALID)) {
+			removeInvalid = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_REMOVE_INVALID, removeInvalid);
+			log.info("property '"+PROP_PREFIX+SUFFIX_REMOVE_INVALID+"' = "+removeInvalid);
+		}
+		if(Utils.propertyExists(prop, PROP_PREFIX+SUFFIX_UPDATE_INVALID)) {
+			update = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_UPDATE_INVALID, update);
+			log.info("property '"+PROP_PREFIX+SUFFIX_UPDATE_INVALID+"' = "+update);
+		}
 		validateExecutables = Utils.getPropBool(prop, PROP_PREFIX+SUFFIX_VALIDATE_EXECUTABLES, validateExecutables);
 	}
 	
@@ -48,13 +56,16 @@ public class ModelValidator extends AbstractSQLProc {
 		while(it1.hasNext()) {
 			Table rel = it1.next();
 			try {
-				DBObjectUtils.validateTable(rel, conn, update);
+				DBObjectUtils.validateTable(rel, conn, update, removeInvalid);
 			}
 			catch(SQLException e) {
 				rel.setValid(false);
-				if(removeInvalid) { it1.remove(); }
 				log.warn("Error validating table '"+rel.getFinalQualifiedName()+"': "+e);
 				log.debug("Error validating table '"+rel.getFinalQualifiedName()+"': "+e.getMessage(), e);
+				if(removeInvalid) {
+					it1.remove();
+					log.info("Removed invalid table '"+rel.getFinalQualifiedName()+"' from model");
+				}
 				countErr++;
 			}
 			
@@ -91,7 +102,7 @@ public class ModelValidator extends AbstractSQLProc {
 			}
 			else {
 				try {
-					DBObjectUtils.validateTable(rel, conn, update);
+					DBObjectUtils.validateTable(rel, conn, update, removeInvalid);
 				}
 				catch(RuntimeException e) {
 					rel.setValid(false);

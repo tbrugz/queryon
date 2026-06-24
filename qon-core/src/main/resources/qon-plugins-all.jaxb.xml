@@ -381,6 +381,7 @@
             <type>INTEGER</type>
             <nullable>false</nullable>
             <autoIncrement>true</autoIncrement>
+            <generated>true</generated>
         </columns>
         <columns>
             <name>PATH</name>

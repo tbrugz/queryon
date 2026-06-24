@@ -93,11 +93,12 @@ public class DBObjectUtils {
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
-			if(update) {
-				rel.setColumns(new ArrayList<Column>());
-			}
 			log.warn("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.toString().trim());
 			log.debug("resultset metadata's sqlexception [query="+rel.getQualifiedName()+"]: "+e.getMessage(), e);
+			if(update) {
+				rel.setColumns(new ArrayList<Column>());
+				log.info("updated query columns ["+rel.getQualifiedName()+"] to empty list");
+			}
 			throw e;
 		}
 	}
@@ -197,7 +198,7 @@ public class DBObjectUtils {
 		}
 	}
 	
-	public static void validateTable(Relation rel, Connection conn, boolean update) throws SQLException {
+	public static void validateTable(Relation rel, Connection conn, boolean update, boolean removeColumnsOnError) throws SQLException {
 		String finalSql = "select * from "+rel.getQualifiedName();
 		
 		log.debug("grabbing colums name & type from prepared statement's metadata [name="+rel.getQualifiedName()+"]");
@@ -209,6 +210,7 @@ public class DBObjectUtils {
 				if(update) {
 					List<Column> cols = DataDumpUtils.getColumns(rsmd);
 					updateColumnsIfEmpty(rel, cols);
+					//log.info("updated relation columns ["+rel.getQualifiedName()+"]: "+cols);
 				}
 			}
 			else {
@@ -216,8 +218,9 @@ public class DBObjectUtils {
 			}
 		} catch (SQLException e) {
 			//DBUtil.doRollback(conn);
-			if(update) {
+			if(removeColumnsOnError) {
 				setColumns(rel, new ArrayList<Column>());
+				log.info("updated relation columns ["+rel.getQualifiedName()+"] to empty list");
 			}
 			log.warn("resultset metadata's sqlexception: "+e.toString().trim());
 			//log.warn("sql:\n"+finalSql);
