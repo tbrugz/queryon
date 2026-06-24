@@ -115,9 +115,9 @@ public class ResultSetDecoratorsTest {
 		roles.add("admin");
 		
 		Set<Grant> grantsUser = new HashSet<Grant>();
-		grantsUser.add(new Grant("Owner",PrivilegeType.SELECT, "user"));
+		grantsUser.add(new Grant("Table_X",PrivilegeType.SELECT, "user"));
 		Set<Grant> grantsAdmin = new HashSet<Grant>();
-		grantsAdmin.add(new Grant("Owner",PrivilegeType.SELECT, "admin"));
+		grantsAdmin.add(new Grant("Table_Y",PrivilegeType.SELECT, "admin"));
 		TestBean b1 = new TestBean(1, "one", grantsUser.toString());
 		TestBean b2 = new TestBean(2, "two", null);
 		TestBean b3 = new TestBean(3, "three", "[");

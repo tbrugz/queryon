@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -236,7 +237,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 		 * http://stackoverflow.com/questions/9207073/column-names-for-an-ad-hoc-sql
 		 */
 		try {
-			sql = SQL.replaceVariablesWithEmptyValues(sql);  
+			sql = SQL.replaceVariablesWithEmptyValues(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			t.setColumns(DataDumpUtils.getColumns(rsmd));
@@ -334,7 +335,7 @@ public class QOnTables extends AbstractUpdatePlugin implements UpdatePlugin {
 			}
 			List<String> grantees = Utils.getStringList(sarr[1], COMMA_SPLIT);
 			for(String grantee: grantees) {
-				grants.add(new Grant(tableName, sarr[0], pt, grantee, false));
+				grants.add(new Grant(tableName, Arrays.asList(sarr[0]), pt, grantee, false));
 			}
 		}
 	}
