@@ -67,7 +67,7 @@
     <shiro.version>2.2.1</shiro.version>
     <shiro.web.version>${shiro.version}</shiro.web.version>
     <log4j.version>1.2.17</log4j.version>
-    <slf4j.version>1.7.36</slf4j.version>
+    <slf4j.version>2.0.18</slf4j.version>
     <logback.version>1.2.13</logback.version>
 
     <!-- jaxb 3 from Jakarta EE 9 -->
