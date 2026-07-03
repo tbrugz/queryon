@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.naming.NamingException;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,8 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.subject.Subject;
 
+import tbrugz.queryon.api.BaseApiServlet;
 import tbrugz.queryon.util.DBUtil;
-import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -47,7 +46,7 @@ import tbrugz.sqldump.util.ConnectionUtil;
 /*
  * TODO: 'instant' servlets SHOULD NOT modify model, right?
  */
-public class QueryOnInstant extends QueryOn {
+public class QueryOnInstant extends BaseApiServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(QueryOnInstant.class);
@@ -67,10 +66,10 @@ public class QueryOnInstant extends QueryOn {
 		//statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
 	}
 	
-	@Override
+	/*@Override
 	protected void doInit(ServletContext context) throws ServletException {
 		prop.putAll(QOnContextUtils.getProperties(context));
-	}
+	}*/
 	
 	/*@Override
 	protected void doInitConfig(ServletConfig config) {

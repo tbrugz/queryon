@@ -2153,7 +2153,7 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 	}
 
-	static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
+	protected static final List<String> statusUniqueColumns = Arrays.asList(new String[]{"schemaName", "name"});
 	static final List<String> relationCommonCols =  Arrays.asList(new String[]{"relationType", "columnNames", "columnTypes", "columnRemarks", "defaultColumnNames", "valid", "constraints", "remarks", "grants"}); //, "class"
 	static final List<String> executableCols =  Arrays.asList(new String[]{"type", "packageName", "qualifiedName", "parameterCount", "parameterTypes", "params", "returnParam", "valid", "remarks", "grants"});
 
@@ -2163,8 +2163,8 @@ public class QueryOn extends AbstractHttpServlet {
 	static final List<String> viewExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes"});
 	static final List<String> queryExclusiveColumns = Arrays.asList(new String[]{"parameterCount", "parameterTypes", "namedParameterNames", "parameterOptionals"});
 
-	static final List<String> tableAllColumns;
-	static final List<String> viewAllColumns;
+	protected static final List<String> tableAllColumns;
+	protected static final List<String> viewAllColumns;
 	static final List<String> queryAllColumns;
 	static final List<String> relationAllColumns;
 	static final List<String> executableAllColumns;
@@ -2262,14 +2262,16 @@ public class QueryOn extends AbstractHttpServlet {
 		/*
 		log.info("doFilterStatusByPermission: "+doFilterStatusByPermission
 				+" / doFilterStatusByQueryGrants: "+doFilterStatusByQueryGrants
-				+" / "+doNotCheckGrantsPermission+":"+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission));
+				+" / "+doNotCheckGrantsPermission+": "+ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission));
 		*/
 		if(doFilterStatusByPermission && currentUser!=null) {
 			// filter by [(relation)Type]:SELECT|EXECUTE:[schemaName]:[name]
 			rs = new ResultSetPermissionFilterDecorator(rs, currentUser, "[3]:"+privilege+":[1]:[2]");
+			//log.info("... add ResultSetPermissionFilterDecorator");
 		}
 		if(doFilterStatusByQueryGrants && currentUser!=null && (! ShiroUtils.isPermitted(currentUser, doNotCheckGrantsPermission)) ) { // XXX: doNotCheckGrantsPermission: SELECT_ANY and/or EXECUTE_ANY ?
 			rs = new ResultSetGrantsFilterDecorator(rs, ShiroUtils.getSubjectRoles(currentUser), privilege, "name", "grants");
+			//log.info("... add ResultSetGrantsFilterDecorator");
 		}
 		return rs;
 	}

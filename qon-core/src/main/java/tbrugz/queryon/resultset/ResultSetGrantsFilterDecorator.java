@@ -37,7 +37,7 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 		//String id = rs.getString(idColumn);
 		String grantsStr = rs.getString(grantsColumn);
 		if(grantsStr==null || grantsStr.length()<2) {
-			//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]:: true [1]");
+			//log.info("RSGrantsFilter:matchesValues:: "+grantsStr+" [roles:"+roles+"]:: true [1]");
 			return true;
 		}
 		grantsStr = grantsStr.substring(1, grantsStr.length()-1); //removing array braquets "[]"
@@ -65,7 +65,10 @@ public class ResultSetGrantsFilterDecorator extends AbstractResultSetFilterDecor
 			}
 		}
 		boolean ret = containsRowWithPrivilege?false:true;
-		//log.info("RSGrantsFilter:matchesValues ["+id+"]:: "+grantsStr+" [roles:"+roles+"]:: "+ret);
+		//log.info("RSGrantsFilter:matchesValues:: "+grantsStr+" [roles:"+roles+"]:: "+ret);
+		/*if(!ret) {
+			log.info("RSGFD: not permitted: containsRowWithPrivilege="+containsRowWithPrivilege);
+		}*/
 		return ret;
 	}
 

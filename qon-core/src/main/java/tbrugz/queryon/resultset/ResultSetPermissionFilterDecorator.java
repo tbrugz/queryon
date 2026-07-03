@@ -41,7 +41,7 @@ public class ResultSetPermissionFilterDecorator extends AbstractResultSetFilterD
 			permission = permission.replaceAll("\\["+i+"\\]", colValue);
 		}
 		boolean permitted = subject.isPermitted(permission);
-		//log.debug("RSPFD: permission: "+permissionPattern+" / "+permission+" / "+permitted);
+		//log.debug("RSPFD: permissionPattern: "+permissionPattern+" / permission: "+permission+" / permitted="+permitted);
 		/*
 		if(!permitted) {
 			log.info("RSPFD: not permitted: "+permissionPattern+" / "+permission);

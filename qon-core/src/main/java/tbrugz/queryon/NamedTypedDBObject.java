@@ -136,7 +136,7 @@ public class NamedTypedDBObject implements TypedDBObject {
 	}
 
 	public String getMimeTypeLower() {
-		return mimetype.name().toLowerCase();
+		return mimetype!=null?mimetype.name().toLowerCase():null;
 	}
 	
 	/*public void setType(DBObjectType type) {
