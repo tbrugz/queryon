@@ -58,6 +58,8 @@ public class QueryOnInstant extends BaseApiServlet {
 	static final List<TableType> tableTypesList = Arrays.asList(tableTypes);
 	static final List<TableType> viewTypesList = Arrays.asList(viewTypes);
 	static final List<TableType> materializedViewTypesList = Arrays.asList(materializedViewTypes);
+
+	static final List<String> tableInstantCols =  Arrays.asList(new String[]{"relationType", "remarks"});
 	
 	static final List<String> statusTriggerAllColumns;
 	//static final List<String> statusSynonymAllColumns;
@@ -65,6 +67,8 @@ public class QueryOnInstant extends BaseApiServlet {
 		statusTriggerAllColumns = new ArrayList<String>(); statusTriggerAllColumns.addAll(statusUniqueColumns); statusTriggerAllColumns.addAll(Arrays.asList(new String[]{"tableName"}));
 		//statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
 	}
+	
+	static final boolean returnOnlyUniqueCols = true;
 	
 	/*@Override
 	protected void doInit(ServletContext context) throws ServletException {
@@ -104,19 +108,19 @@ public class QueryOnInstant extends BaseApiServlet {
 		switch (statusType) {
 		case TABLE: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, tableTypesList);
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableAllColumns, rels, Relation.class);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableInstantCols, rels, returnOnlyUniqueCols, Relation.class);
 			break;
 		}
 		case VIEW: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, viewAllColumns, rels, Relation.class);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableInstantCols, rels, returnOnlyUniqueCols, Relation.class);
 			break;
 		}
 		case MATERIALIZED_VIEW: {
 			// using feat.grabDBMaterializedViews...
 			List<View> rels = new ArrayList<View>();
 			feat.grabDBMaterializedViews(rels, schemaName, null, conn);
-			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, viewAllColumns, rels, View.class);
+			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, tableInstantCols, rels, returnOnlyUniqueCols, View.class);
 			
 			// using dbmd.getTables...
 			/*List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
