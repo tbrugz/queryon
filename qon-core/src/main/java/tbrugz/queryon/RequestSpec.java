@@ -131,6 +131,8 @@ public class RequestSpec {
 	
 	public static final String ORDER_ASC = "ASC";
 	public static final String ORDER_DESC = "DESC";
+
+	static boolean convertLatin1ToUtf8Warned = false;
 	
 	protected final HttpServletRequest request; //XXX: private & add getAttribute/setAttribute??
 
@@ -278,11 +280,15 @@ public class RequestSpec {
 		if(utf8!=null) {
 			if(utf8.equals(WebUtils.UTF8_CHECK)) {
 				//req.setCharacterEncoding("UTF-8");
-				log.debug("[ok] utf8: "+utf8);
+				//log.debug("[ok] utf8: "+utf8);
 			}
 			else {
 				// assume url encoding as latin1 (iso-8859-1)
-				log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] (expected=["+MiscUtils.toIntArrayAsString(WebUtils.UTF8_CHECK)+"]) - will 'convertLatin1ToUtf8'");
+				if(!convertLatin1ToUtf8Warned) {
+					log.warn("[err] utf8: ["+MiscUtils.toIntArrayAsString(utf8)+"] (expected=["+MiscUtils.toIntArrayAsString(WebUtils.UTF8_CHECK)+"])"+
+						" - will 'convertLatin1ToUtf8' ; will not WARN again");
+					convertLatin1ToUtf8Warned = true;
+				}
 				convertLatin1ToUtf8 = true;
 				//req.setCharacterEncoding("ISO-8859-1");
 				// 226 156 147 ? http://www.utf8-chartable.de/unicode-utf8-table.pl?start=9984&number=128&names=-&utf8=dec
