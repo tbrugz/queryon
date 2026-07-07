@@ -1,3 +1,5 @@
+drop view if exists EMP_VW;
+
 drop table if exists EMP;
 
 drop table if exists DEPT;
@@ -46,3 +48,5 @@ alter table EMP
 	add constraint EMP_EMP_FK foreign key (SUPERVISOR_ID)
 	references EMP (ID);
 
+create view EMP_VW as
+select ID, NAME, SALARY from EMP;

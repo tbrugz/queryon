@@ -44,6 +44,11 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>QueryOnInstant</servlet-name>
+		<servlet-class>tbrugz.queryon.QueryOnInstant</servlet-class>
+	</servlet>
+
+	<servlet>
 		<servlet-name>QueryOnSchema</servlet-name>
 		<servlet-class>tbrugz.queryon.QueryOnSchema</servlet-class>
 	</servlet>
@@ -72,6 +77,11 @@
 	<servlet-mapping>
 		<servlet-name>QueryOn</servlet-name>
 		<url-pattern>/q/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>QueryOnInstant</servlet-name>
+		<url-pattern>/qoi/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>

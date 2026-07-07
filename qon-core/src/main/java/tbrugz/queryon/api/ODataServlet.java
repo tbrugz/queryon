@@ -273,7 +273,7 @@ public class ODataServlet extends BaseApiServlet {
 		//List<FK> list = new ArrayList<FK>(); list.addAll(model.getForeignKeys());
 		//rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
 		
-		rs = filterStatus(rs, reqspec, currentUser, privilege);
+		rs = filterStatus(rs, reqspec.getParams(), currentUser, privilege);
 		
 		dumpResultSet(rs, reqspec, null, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
 		if(rs!=null) { rs.close(); }

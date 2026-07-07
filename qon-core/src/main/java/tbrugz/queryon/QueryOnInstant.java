@@ -60,7 +60,9 @@ public class QueryOnInstant extends BaseApiServlet {
 	static final List<TableType> materializedViewTypesList = Arrays.asList(materializedViewTypes);
 
 	static final List<String> tableInstantCols =  Arrays.asList(new String[]{"relationType", "remarks"});
-	
+	static final List<String> fkInstantCols =  Arrays.asList(new String[]{"fkTable", "pkTable"});
+	static final List<String> executableInstantCols =  Arrays.asList(new String[]{"type", "parameterCount", "deterministic", "packageName"});
+
 	static final List<String> statusTriggerAllColumns;
 	//static final List<String> statusSynonymAllColumns;
 	static {
@@ -98,6 +100,7 @@ public class QueryOnInstant extends BaseApiServlet {
 		//final DBMSFeatures feat = res.databaseSpecificFeaturesClass();
 		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
 		final String schemaName = String.valueOf( reqspec.params.get(0) );
+		final String objectParam = reqspec.params.size()>1 ? String.valueOf( reqspec.params.get(1) ) : null;
 		ResultSet rs;
 		
 		//final DBObjectType type = DBObjectType.valueOf(reqspec.object.toUpperCase());
@@ -141,7 +144,7 @@ public class QueryOnInstant extends BaseApiServlet {
 			//List<ExecutableObject> func = grabExecutables(jgrab, dbmd, schemaName, true);
 			removeExecsWithinPackages(func);
 			keepExecsByType(func, DBObjectType.FUNCTION); // XXX Oracle ok ; PgSQL? 
-			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, func, ExecutableObject.class);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, executableInstantCols, func, ExecutableObject.class);
 			//XXXdone: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
 		}
@@ -157,7 +160,7 @@ public class QueryOnInstant extends BaseApiServlet {
 			//List<ExecutableObject> proc = grabExecutables(jgrab, dbmd, schemaName, false);
 			removeExecsWithinPackages(proc);
 			keepExecsByType(proc, statusType); // XXX Oracle needs, PgSQL must not have it?
-			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, proc, ExecutableObject.class);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, executableInstantCols, proc, ExecutableObject.class);
 			//XXXdone: filter by type 'PROCEDURE', filter by packageName == null ?
 			break;
 		}
@@ -191,7 +194,7 @@ public class QueryOnInstant extends BaseApiServlet {
 				eo.setType(statusType);
 				pkgs.add(eo);
 			}
-			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, pkgs, ExecutableObject.class);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, executableInstantCols, pkgs, ExecutableObject.class);
 			
 			break;
 		}
@@ -238,13 +241,13 @@ public class QueryOnInstant extends BaseApiServlet {
 		}
 		case FK: {
 			//List<FK> list = grabFKs(schemaName, dbmd);
-			
-			ResultSet fkrs = dbmd.getImportedKeys(null, schemaName, null);
+			ResultSet fkrs = dbmd.getImportedKeys(null, schemaName, objectParam);
 			List<FK> list = JDBCSchemaGrabber.grabSchemaFKs(fkrs, feat);
+			log.info("#fks: "+list.size());
 			
 			//XXXxx: not caching into model...
 			//model.getForeignKeys().addAll(list);
-			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, list, FK.class);
+			rs = new ResultSetListAdapter<FK>(objectName, statusUniqueColumns, fkInstantCols, list, FK.class);
 			break;
 		}
 		case SYNONYM: {
@@ -261,7 +264,7 @@ public class QueryOnInstant extends BaseApiServlet {
 		}
 		}
 		
-		rs = filterStatus(rs, reqspec, currentUser, PrivilegeType.SELECT); //XXX: should be SHOW privilege?
+		rs = filterStatus(rs, Collections.singletonList(schemaName), currentUser, PrivilegeType.SELECT); //XXX: should be SHOW privilege?
 		
 		dumpResultSet(rs, reqspec, null, objectName, statusUniqueColumns, null, null, true, resp);
 		if(rs!=null) { rs.close(); }

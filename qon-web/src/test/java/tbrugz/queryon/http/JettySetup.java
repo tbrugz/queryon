@@ -35,6 +35,7 @@ public class JettySetup {
 	
 	public static String qonUrl = "http://localhost:"+port;
 	public static String baseUrl = "http://localhost:"+port+"/q";
+	public static String qonInstantBaseUrl = "http://localhost:"+port+"/qoi";
 	public static String qonSchemaInstantBaseUrl = "http://localhost:"+port+"/qos";
 	public static String qonSchemaBaseUrl = "http://localhost:"+port+"/qoschema";
 	

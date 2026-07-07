@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -206,6 +207,13 @@ public class WinstoneAndH2HttpRequestTest {
 			}
 		}
 		return nodes;
+	}
+	
+	public static void assertCsvRowCount(int expected, Iterator<CSVRecord> it) {
+		//Iterator<CSVRecord> it = parser.iterator();
+		int count = 0;
+		while(it.hasNext()) {it.next(); count++;}
+		Assert.assertEquals(expected, count);
 	}
 
 	/*
@@ -1417,6 +1425,143 @@ public class WinstoneAndH2HttpRequestTest {
 	@Test
 	public void testQosGetFkEmpdeptError() throws IOException, ParserConfigurationException, SAXException {
 		Assert.assertEquals(404, getReturnCodeQosInstant("/FK/PUBLIC.EMP_XXX_FK"));
+	}
+
+	//http://localhost:8088/app/qon-diff/qinfo/schemas?model=des
+	//@Test
+	public void testQosGetSchemas() throws IOException, ParserConfigurationException, SAXException {
+		//Assert.assertEquals(200, getReturnCodeQosInstant("/table/PUBLIC.json"));
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonSchemaInstantBaseUrl+"/table/PUBLIC");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		String cntnt = getContent(response1);
+		System.out.println("cntnt: "+cntnt);
+		int count = Integer.parseInt(cntnt.substring(0, cntnt.length()-2));
+
+		Assert.assertEquals("Should have count==5", 5, count);
+		
+		httpGet.releaseConnection();
+	}
+		
+	@Test
+	public void testQosGetTables() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonInstantBaseUrl+"/table/PUBLIC.csv");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		String cntnt = getContent(response1);
+		//System.out.println("cntnt>>\n"+cntnt);
+
+		CSVParser parser = new CSVParser(new StringReader(cntnt), CSVFormat.DEFAULT);
+		Iterator<CSVRecord> it = parser.iterator();
+		
+		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
+		CSVRecord record = it.next();
+		String value = record.get(1);
+		Assert.assertEquals("name", value);
+		//System.out.println("row0.value1: "+value);
+		//int count = 0;
+		//while(it.hasNext()) {it.next(); count++;}
+		//Assert.assertEquals(4, count);
+		assertCsvRowCount(4, it);
+
+		parser.close();
+		httpGet.releaseConnection();
+	}
+
+	@Test
+	public void testQosGetTablesIS() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonInstantBaseUrl+"/table/INFORMATION_SCHEMA.csv");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		String cntnt = getContent(response1);
+		//System.out.println("cntnt>>\n"+cntnt);
+
+		CSVParser parser = new CSVParser(new StringReader(cntnt), CSVFormat.DEFAULT);
+		Iterator<CSVRecord> it = parser.iterator();
+		
+		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
+		CSVRecord record = it.next();
+		assertCsvRowCount(10, it);
+
+		parser.close();
+		httpGet.releaseConnection();
+	}
+
+	@Test
+	public void testQosGetFKs() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonInstantBaseUrl+"/fk/PUBLIC/EMP.csv");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		String cntnt = getContent(response1);
+		//System.out.println("cntnt>>\n"+cntnt);
+
+		CSVParser parser = new CSVParser(new StringReader(cntnt), CSVFormat.DEFAULT);
+		Iterator<CSVRecord> it = parser.iterator();
+		
+		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
+		CSVRecord record = it.next();
+		assertCsvRowCount(2, it);
+
+		parser.close();
+		httpGet.releaseConnection();
+	}
+
+	@Test
+	public void testQosGetViews() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonInstantBaseUrl+"/view/PUBLIC.csv");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		String cntnt = getContent(response1);
+		//System.out.println("cntnt>>\n"+cntnt);
+
+		CSVParser parser = new CSVParser(new StringReader(cntnt), CSVFormat.DEFAULT);
+		Iterator<CSVRecord> it = parser.iterator();
+		
+		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
+		CSVRecord record = it.next();
+		Assert.assertEquals("name", record.get(1));
+		record = it.next();
+		Assert.assertEquals("PUBLIC", record.get(0));
+		Assert.assertEquals("EMP_VW", record.get(1));
+		Assert.assertFalse(it.hasNext());
+
+		parser.close();
+		httpGet.releaseConnection();
+	}
+	
+	@Test
+	public void testQosGetFunctions() throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = getHttpClient();
+		HttpGet httpGet = new HttpGet(qonInstantBaseUrl+"/function/PUBLIC.csv");
+		
+		HttpResponse response1 = httpclient.execute(httpGet);
+		Assert.assertEquals(200, response1.getStatusLine().getStatusCode());
+		String cntnt = getContent(response1);
+		//System.out.println("cntnt>>\n"+cntnt);
+
+		CSVParser parser = new CSVParser(new StringReader(cntnt), CSVFormat.DEFAULT);
+		Iterator<CSVRecord> it = parser.iterator();
+		
+		Assert.assertTrue("Must have 0ed (header) element", it.hasNext());
+		CSVRecord record = it.next();
+		Assert.assertEquals("name", record.get(1));
+		record = it.next();
+		Assert.assertEquals("PUBLIC", record.get(0));
+		Assert.assertEquals("IS_PRIME", record.get(1));
+		Assert.assertEquals("FUNCTION", record.get(2));
+		Assert.assertFalse(it.hasNext());
+
+		parser.close();
+		httpGet.releaseConnection();
 	}
 	
 	/*@Test

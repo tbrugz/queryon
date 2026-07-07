@@ -65,11 +65,11 @@ public class WebUtils {
 	}
 	
 	public static void writeException(HttpServletRequest req, HttpServletResponse resp, BadRequestException e, int status, boolean debugMode) throws IOException {
-		//e.printStackTrace();
-		//log.warn("BRE: "+e.getMessage()+
-		//		(e.internalMessage!=null?" ; internal="+e.internalMessage:""));
 		String message = e.getMessage();
 		if(message==null) { message = e.toString(); }
+		//System.out.println("WebUtils.writeException: "+message);
+		//e.printStackTrace();
+		//log.warn("BRE: "+e.getMessage()+(e.internalMessage!=null?" ; internal="+e.internalMessage:""));
 		
 		resp.reset();
 		resp.setStatus(status);

@@ -2249,15 +2249,16 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		}
 		
-		rs = filterStatus(rs, reqspec, currentUser, privilege);
+		rs = filterStatus(rs, reqspec.getParams(), currentUser, privilege);
 		
 		dumpResultSet(rs, reqspec, null, objectName, statusUniqueColumns, importedFKs, uks, true, resp);
 		if(rs!=null) { rs.close(); }
 	}
 	
-	protected ResultSet filterStatus(ResultSet rs, RequestSpec reqspec, Subject currentUser, PrivilegeType privilege) throws SQLException {
-		if(reqspec.params!=null && reqspec.params.size()>0) {
-			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), MiscUtils.toStringList(reqspec.params) );
+	protected ResultSet filterStatus(ResultSet rs, List<Object> reqspecParams, Subject currentUser, PrivilegeType privilege) throws SQLException {
+		if(reqspecParams!=null && reqspecParams.size()>0) {
+			rs = new ResultSetFilterDecorator(rs, Arrays.asList(new Integer[]{1,2}), MiscUtils.toStringList(reqspecParams) );
+			//log.info("... add ResultSetFilterDecorator, params = "+MiscUtils.toStringList(reqspecParams));
 		}
 		/*
 		log.info("doFilterStatusByPermission: "+doFilterStatusByPermission
