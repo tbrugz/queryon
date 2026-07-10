@@ -246,4 +246,15 @@ public class MiscUtils {
 		return sb.toString();
 	}
 
+	public static String limitString(String s, int n) {
+		if(s==null) { return s; }
+		if(s.length()>n) {
+			//3 dots
+			//return s.substring(0, n-3)+"...";
+			//ellipsis
+			return s.substring(0, n-1)+"\u2026";
+		}
+		return s;
+	}
+
 }
