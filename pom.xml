@@ -54,6 +54,11 @@
     <sqldump.version>0.12-SNAPSHOT</sqldump.version>
     <kmlutils.version>0.5.6</kmlutils.version>
 
+    <!--
+    https://www.eclipse.org/community/eclipse_newsletter/2020/november/1.php - Understanding Jakarta EE 9
+    Jakarta EE 9.1      (jakarta.*)
+    Java / Jakarta EE 8 (javax.*)
+    -->
     <servlet-api.version>3.1.0</servlet-api.version>
     <!-- https://jakarta.ee/specifications/servlet/5.0/ - Jakarta EE 9 -->
     <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
@@ -90,7 +95,7 @@
 
     3.5.9, 3.5.11, 3.6.8, 4.0.9, 4.1.3
     -->
-    <cxf.version>4.0.9</cxf.version>
+    <cxf.version>4.0.11</cxf.version>
     <poi-ooxml.version>5.5.1</poi-ooxml.version>
 
     <!--
