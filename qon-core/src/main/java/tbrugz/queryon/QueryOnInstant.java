@@ -59,18 +59,27 @@ public class QueryOnInstant extends BaseApiServlet {
 	static final List<TableType> viewTypesList = Arrays.asList(viewTypes);
 	static final List<TableType> materializedViewTypesList = Arrays.asList(materializedViewTypes);
 
-	static final List<String> tableInstantCols =  Arrays.asList(new String[]{"relationType", "remarks"});
+	static final List<String> validOnlyInstantCol =  Arrays.asList(new String[]{"valid"});
+
+	//static final List<String> relationInstantCols = Arrays.asList(new String[]{"relationType"});
+	static final List<String> relationInstantCols = null;
+	//static final List<String> tableInstantCols = Arrays.asList(new String[]{"relationType", "remarks"});
 	static final List<String> fkInstantCols =  Arrays.asList(new String[]{"fkTable", "pkTable"});
 	static final List<String> executableInstantCols =  Arrays.asList(new String[]{"type", "parameterCount", "deterministic", "packageName"});
+	static final List<String> packageInstantCols = Arrays.asList(new String[]{"type"});
+	static final List<String> typeInstantCols = Arrays.asList(new String[]{"type"});
+	static final List<String> triggerInstantCols = Arrays.asList(new String[]{"tableName", "valid"});
+	static final List<String> sequenceInstantCols = validOnlyInstantCol;
+	static final List<String> synonymInstantCols = Arrays.asList(new String[]{"objectOwner", "referencedObject", "valid"});
 
-	static final List<String> statusTriggerAllColumns;
+	//static final List<String> statusTriggerAllColumns;
 	//static final List<String> statusSynonymAllColumns;
 	static {
-		statusTriggerAllColumns = new ArrayList<String>(); statusTriggerAllColumns.addAll(statusUniqueColumns); statusTriggerAllColumns.addAll(Arrays.asList(new String[]{"tableName"}));
+		//statusTriggerAllColumns = new ArrayList<String>(); /*statusTriggerAllColumns.addAll(statusUniqueColumns);*/ statusTriggerAllColumns.addAll(Arrays.asList(new String[]{"tableName", "valid"}));
 		//statusSynonymAllColumns = new ArrayList<String>(); statusSynonymAllColumns.addAll(statusUniqueColumns); statusSynonymAllColumns.addAll(Arrays.asList(new String[]{"objectOwner", "referencedObject"}));
 	}
 	
-	static final boolean returnOnlyUniqueCols = true;
+	static final boolean returnOnlyUniqueCols = false;
 	
 	/*@Override
 	protected void doInit(ServletContext context) throws ServletException {
@@ -111,19 +120,19 @@ public class QueryOnInstant extends BaseApiServlet {
 		switch (statusType) {
 		case TABLE: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, tableTypesList);
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableInstantCols, rels, returnOnlyUniqueCols, Relation.class);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationInstantCols, rels, returnOnlyUniqueCols, Relation.class);
 			break;
 		}
 		case VIEW: {
 			List<Relation> rels = grabRelationNames(schemaName, dbmd, viewTypesList);
-			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, tableInstantCols, rels, returnOnlyUniqueCols, Relation.class);
+			rs = new ResultSetListAdapter<Relation>(objectName, statusUniqueColumns, relationInstantCols, rels, returnOnlyUniqueCols, Relation.class);
 			break;
 		}
 		case MATERIALIZED_VIEW: {
 			// using feat.grabDBMaterializedViews...
 			List<View> rels = new ArrayList<View>();
 			feat.grabDBMaterializedViews(rels, schemaName, null, conn);
-			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, tableInstantCols, rels, returnOnlyUniqueCols, View.class);
+			rs = new ResultSetListAdapter<View>(objectName, statusUniqueColumns, relationInstantCols, rels, returnOnlyUniqueCols, View.class);
 			
 			// using dbmd.getTables...
 			/*List<Relation> rels = grabRelationNames(schemaName, dbmd, materializedViewTypesList);
@@ -148,9 +157,15 @@ public class QueryOnInstant extends BaseApiServlet {
 			//XXXdone: filter by type 'FUNCTION', filter by packageName == null ?
 			break;
 		}
-		case JAVA_SOURCE:
 		case TYPE:
-		case TYPE_BODY:
+		case TYPE_BODY: {
+			List<ExecutableObject> proc = feat.grabExecutableNames(null, schemaName, null, null, conn);
+			removeExecsWithinPackages(proc);
+			keepExecsByType(proc, statusType);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, typeInstantCols, proc, ExecutableObject.class);
+			break;
+		}
+		case JAVA_SOURCE:
 		case PROCEDURE: {
 			//XXXxx: procedures/functions: remove elements with catalog!=null (element belogs to package - oracle)
 			//List<ExecutableObject> proc = new ArrayList<ExecutableObject>();
@@ -194,7 +209,7 @@ public class QueryOnInstant extends BaseApiServlet {
 				eo.setType(statusType);
 				pkgs.add(eo);
 			}
-			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, executableInstantCols, pkgs, ExecutableObject.class);
+			rs = new ResultSetListAdapter<ExecutableObject>(objectName, statusUniqueColumns, packageInstantCols, pkgs, ExecutableObject.class);
 			
 			break;
 		}
@@ -211,7 +226,7 @@ public class QueryOnInstant extends BaseApiServlet {
 			feat.grabDBTriggers(triggers, schemaName, null, null, conn);
 			//log.info("#triggers: "+triggers.size());
 
-			rs = new ResultSetListAdapter<Trigger>(objectName, statusTriggerAllColumns, triggers, Trigger.class);
+			rs = new ResultSetListAdapter<Trigger>(objectName, statusUniqueColumns, triggerInstantCols, triggers, Trigger.class);
 			break;
 		}
 		case EXECUTABLE: {
@@ -236,7 +251,7 @@ public class QueryOnInstant extends BaseApiServlet {
 			feat.grabDBSequences(seqs, schemaName, null, conn);
 			log.info("#sequences: "+seqs.size());
 
-			rs = new ResultSetListAdapter<Sequence>(objectName, statusUniqueColumns, seqs, Sequence.class);
+			rs = new ResultSetListAdapter<Sequence>(objectName, statusUniqueColumns, sequenceInstantCols, seqs, Sequence.class);
 			break;
 		}
 		case FK: {
@@ -255,7 +270,7 @@ public class QueryOnInstant extends BaseApiServlet {
 			feat.grabDBSynonyms(synonyms, schemaName, null, conn);
 			log.info("#synonyms: "+synonyms.size()); //+" ; synonyms: "+synonyms+" ; cols:: "+statusSynonymAllColumns);
 
-			rs = new ResultSetListAdapter<Synonym>(objectName, statusUniqueColumns, /*statusSynonymAllColumns,*/ synonyms, Synonym.class);
+			rs = new ResultSetListAdapter<Synonym>(objectName, statusUniqueColumns, synonymInstantCols, synonyms, Synonym.class);
 			break;
 		}
 		default: {

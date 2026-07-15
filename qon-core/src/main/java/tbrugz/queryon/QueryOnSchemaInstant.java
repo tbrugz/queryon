@@ -133,7 +133,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		case TYPE_BODY:
 		case EXECUTABLE:
 			feat.grabDBExecutables(ret, schemaName, objectName, conn);
-			if(type==DBObjectType.PACKAGE || type==DBObjectType.PACKAGE_BODY) {
+			if(type==DBObjectType.PACKAGE || type==DBObjectType.PACKAGE_BODY || type==DBObjectType.TYPE || type==DBObjectType.TYPE_BODY) {
 				QueryOnInstant.keepExecsByType(ret, type); //DBObjectType.PACKAGE_BODY);
 			}
 			break;
