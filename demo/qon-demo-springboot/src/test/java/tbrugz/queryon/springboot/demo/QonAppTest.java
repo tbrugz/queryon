@@ -38,7 +38,7 @@ public class QonAppTest {
 		String url = "http://localhost:" + port + "/" + "/q/relation.json";
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 		
-		Assertions.assertEquals(response.getStatusCode(), HttpStatus.OK);
+		Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 }

@@ -370,8 +370,8 @@ public class QueryOn extends AbstractHttpServlet {
 	static boolean validateFilterColumnNames = true;
 	//boolean xSetRequestUtf8 = false;
 	protected final boolean validateUpdateColumnPermissions = true; //XXX: add prop for validateUpdateColumnPermissions
-	protected Integer defaultLimit;
-	protected int maxLimit;
+	protected Integer defaultLimit = RequestSpec.DEFAULT_LIMIT;
+	protected int maxLimit = RequestSpec.DEFAULT_LIMIT;
 
 	protected boolean discoveryMode = false;
 	protected boolean debugMode = false;
@@ -1849,6 +1849,8 @@ public class QueryOn extends AbstractHttpServlet {
 			//log.info("doValidate: #params="+params+" ; types = "+paramsTypes);
 			resp.setIntHeader(ResponseSpec.HEADER_VALIDATE_PARAMCOUNT, params);
 			resp.setHeader(ResponseSpec.HEADER_VALIDATE_PARAMTYPES, Utils.join(paramsTypes, ","));
+			//log.info("doValidate: relation.getNamedParameterNames() = "+relation.getNamedParameterNames());
+			//log.info("doValidate: relation.getParameterOptionals() = "+relation.getParameterOptionals());
 			resp.setHeader(ResponseSpec.HEADER_VALIDATE_NAMED_PARAMETER_NAMES, Utils.join(relation.getNamedParameterNames(), ","));
 			if(relation.hasParameterOptionals()) {
 				resp.setHeader(ResponseSpec.HEADER_VALIDATE_OPTIONAL_PARAMS, Utils.join(relation.getParameterOptionals(), ","));
