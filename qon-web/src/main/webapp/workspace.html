@@ -328,7 +328,7 @@ function doRequest(url, btnId, options = {}, callback) {
 			var updateCount = request.getResponseHeader("X-UpdateCount");
 			var warnings = request.getResponseHeader("X-Warning");
 			if(updateCount) {
-				var message = oEvent.target.responseText;
+				var message = escapeXML(oEvent.target.responseText);
 				//var message = updateCount+" rows updated"
 				if(warnings) {
 					message += " (<em>"+warnings+"</em>)";
@@ -368,7 +368,7 @@ function doRequest(url, btnId, options = {}, callback) {
 		}
 		else {
 			console.log("Error:", oEvent);
-			showErrorMessages("messages", oEvent.target.responseText
+			showErrorMessages("messages", escapeXML(oEvent.target.responseText)
 					+(request.status==403?" (invalid session?)":"")
 					);
 			checkForSqlWarnings(request, editor);
@@ -389,7 +389,7 @@ function setParameters(numparams, paramNamesStr, paramOptionalsStr) {
 	var paramNames = [];
 	var paramOptionals = [];
 	var positionalParameters = true;
-	var optionalPartz = paramOptionalsStr.split(",");
+	var optionalPartz = paramOptionalsStr ? paramOptionalsStr.split(",") : [];
 	if(paramNamesStr) {
 		//XXX: sort array?
 		paramNames = [];

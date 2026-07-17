@@ -32,7 +32,7 @@ function loadQueries0(url, containerId, callback, modelId) {
 			//console.log("jqXHR", jqXHR, "textStatus", textStatus, "errorThrown", errorThrown);
 			var message = jqXHR.responseText;
 			if(!message) {
-				message = jqXHR.status + ": " + jqXHR.statusText;
+				message = jqXHR.status + ": " + escapeXML(jqXHR.statusText);
 			}
 			showErrorMessages(messagesId, message);
 		}

@@ -562,7 +562,7 @@
 		var paramNames = [];
 		var paramOptionals = [];
 		var positionalParameters = true;
-		var optionalPartz = paramOptionalsStr.split(",");
+		var optionalPartz = paramOptionalsStr ? paramOptionalsStr.split(",") : [];
 		if(paramNamesStr) {
 			//XXX: sort array?
 			paramNames = [];
