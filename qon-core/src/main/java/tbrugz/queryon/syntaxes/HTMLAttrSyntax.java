@@ -28,8 +28,29 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 
 	static final Log log = LogFactory.getLog(HTMLAttrSyntax.class);
 	
-	static final String[] SUFFIXES = {"_STYLE", "_CLASS", "_TITLE", "_HREF"}; //XXX: change to enum!
-	
+	public enum Suffix {
+		STYLE, CLASS, TITLE, HREF;
+		
+		static final String[] ALL_SUFFIXES;
+
+		static {
+			int len = Suffix.values().length;
+			String[] ret = new String[len*2];
+			for(int i=0;i<len;i++) {
+				ret[i] = "_"+Suffix.values()[i];
+			}
+			for(int i=0;i<len;i++) {
+				ret[len+i] = "_"+String.valueOf(Suffix.values()[i]).toLowerCase();
+			}
+			ALL_SUFFIXES = ret;
+			//log.warn("ALL_SUFFIXES = "+Arrays.asList(ALL_SUFFIXES));
+		}
+		
+		static String[] getAllSuffixes() {
+			return ALL_SUFFIXES;
+		}
+	}
+
 	//static final List<String> ATTRIB = Arrays.asList(new String[]{SUFFIXES[0].substring(1).toLowerCase(), SUFFIXES[1].substring(1).toLowerCase()});
 	static final List<String> ATTRIBS = Arrays.asList("style", "class", "title");
 
@@ -87,13 +108,13 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 			boolean isFullColumn = true;
 			String colname = lsColNames.get(i);
 			
-			for(String suf: SUFFIXES) {
+			for(String suf: Suffix.getAllSuffixes()) {
 				if(colname.endsWith(suf)) {
 					isFullColumn = false;
 				}
 			}
 			//if(isPivotResultSet()) {
-			for(String suf: SUFFIXES) {
+			for(String suf: Suffix.getAllSuffixes()) {
 				if(colname.contains(suf+colSep)) {
 					isFullColumn = false;
 				}
@@ -136,7 +157,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 
 	static void changeTypes4AsBlobCols(List<String> colNames, List<Class<?>> colTypes) {
 		for(int i=0;i<colNames.size();i++) {
-			if(colNames.get(i).endsWith(SUFFIX_ASBLOB)) {
+			if(colNames.get(i).endsWith(SUFFIX_ASBLOB) || colNames.get(i).endsWith(SUFFIX_ASBLOB.toLowerCase())) {
 				colTypes.set(i, Blob.class);
 				//log.info("col '"+colNames.get(i)+"' changed type to Blob");
 			}
@@ -295,7 +316,7 @@ public class HTMLAttrSyntax extends HTMLDataDump implements DumpSyntaxBuilder, C
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			if(!finalColNames.contains(colName)) {
-				for(String suffix: SUFFIXES) {
+				for(String suffix: Suffix.getAllSuffixes()) {
 					//if(colName.endsWith(suffix)) {
 					if(colName.endsWith(suffix) || colName.contains(suffix+colSep)) {
 						String fullCol = colName.replace(suffix, "");
