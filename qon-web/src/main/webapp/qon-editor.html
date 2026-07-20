@@ -159,7 +159,7 @@
 		
 		var reqData = {
 			schema : document.getElementById('schema').value,
-			name : document.getElementById('name').value,
+			name : document.getElementById('name').value || "_tmp_",
 			sql: sqlString,
 			utf8: utf8check,
 		};
