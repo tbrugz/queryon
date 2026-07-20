@@ -368,7 +368,7 @@
     <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
-      <version>${jaxws.version}</version> <!-- <version>2.2.10 / 2.3.1</version> -->
+      <version>${jaxws.version}</version> -->
       <scope>test</scope>
     </dependency>
 
