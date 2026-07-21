@@ -49,16 +49,19 @@ logging:
         #org.springframework.web: DEBUG
         #tbrugz.queryon.QueryOn: DEBUG
         #tbrugz.queryon.RequestSpec: TRACE
-        #tbrugz.queryon.action.QOnManage: INFO
         #tbrugz.queryon.action.QOnManage: DEBUG
         #tbrugz.queryon.api: DEBUG
         #tbrugz.queryon.diff: DEBUG
+        #tbrugz.queryon.processor: DEBUG
         #tbrugz.queryon.processor.QOnQueries: DEBUG
+        #tbrugz.queryon.processor.QOnTables: DEBUG
         tbrugz.queryon.springboot.demo: DEBUG
         #tbrugz.queryon.util: DEBUG
+        #tbrugz.queryon.util.DBObjectUtils: DEBUG
         #tbrugz.queryon.util.ReflectionUtil: DEBUG
         #tbrugz.queryon.util.ShiroUtils: DEBUG
         #tbrugz.sqldiff: DEBUG
+        #tbrugz.sqldiff.model.TableDiff: DEBUG
         #tbrugz.sqldump.cdi: DEBUG
         #tbrugz.sqldump.datadump.parquet: DEBUG
         #tbrugz.sqldump.resultset.BaseResultSetCollectionAdapter: DEBUG

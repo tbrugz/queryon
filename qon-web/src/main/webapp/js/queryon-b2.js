@@ -79,7 +79,7 @@ function updateSelectedQueryStateParameters() {
 		if(bigParts.length>=3) {
 			modelId = bigParts[2];
 		}
-		var relname = parts.splice(0, 1)[0];
+		var relname = decodeURIComponent(parts.splice(0, 1)[0]);
 		//console.log("updateSelectedQueryStateParameters: bigParts", bigParts, ", parts", parts, ", relname ", relname, ", modelId ", modelId);
 		
 		if(modelId) {

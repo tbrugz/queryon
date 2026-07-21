@@ -92,7 +92,7 @@ See [DatabaseMetaData's javadoc](https://docs.oracle.com/javase/8/docs/api/java/
 * `$columns [ [[<schema pattern>.]<table>][.<column>] ]`
 * `$exportedkeys [ <schema pattern>[.<table>] ]`
 * `$importedkeys [ <schema pattern>[.<table>] ]`
-* `$metadata <method>`
+* `$metadata <method>` (ex.: `$metadata getDatabaseProductVersion`)
 * `$schemas [ <schema pattern> ]`
 * `$tables [ <schema pattern>[.<table>] ]`
 
