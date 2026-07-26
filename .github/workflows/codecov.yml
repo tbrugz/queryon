@@ -30,7 +30,8 @@ jobs:
         cache: maven
 
     - name: Test with Maven
-      run: mvn -V -B test
+      # 'mvn -V -B test': error on qon-demo-springboot - uses javax.servlet instead of jakarta.servlet
+      run: mvn -V -B package
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v7
