@@ -1,0 +1,38 @@
+# see:
+# https://github.com/codecov/example-java-maven/blob/main/.github/workflows/ci.yml
+# https://about.codecov.io/for/open-source/
+# https://about.codecov.io/resource/what-is-code-coverage/
+# https://docs.codecov.com/docs/codecovyml-reference
+
+name: Codecov
+
+on:
+  push:
+  #  branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v7.0.1
+    - name: Setup JDK
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: maven
+
+    - name: Test with Maven
+      run: mvn -V -B test
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v7
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
