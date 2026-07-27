@@ -31,7 +31,7 @@ jobs:
 
     - name: Test with Maven
       # 'mvn -V -B test': error on qon-demo-springboot - uses javax.servlet instead of jakarta.servlet
-      run: mvn -V -B package
+      run: mvn -V -B -pl .,qon-core,qon-auth-keycloak,qon-graphql,qon-soap,qon-web test jacoco:report-aggregate
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v7
