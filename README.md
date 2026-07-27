@@ -7,6 +7,7 @@ queryon
 [![Maven Central (Snapshots)](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Forg%2Fbitbucket%2Ftbrugz%2Fqueryon%2Fmaven-metadata.xml&label=Central%20Snapshots)](https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/queryon/maven-metadata.xml)
 [![CI](https://github.com/tbrugz/queryon/actions/workflows/maven.yml/badge.svg)](https://github.com/tbrugz/queryon/actions/workflows/maven.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/tbrugz/queryon/badge)](https://scorecard.dev/viewer/?uri=github.com/tbrugz/queryon)
+[![codecov](https://codecov.io/gh/tbrugz/queryon/graph/badge.svg?token=L6ON12RI8N)](https://codecov.io/gh/tbrugz/queryon)
 
 
 A REST-like API that follows the naked objects pattern. A bit like a 'naked database objects' API.
