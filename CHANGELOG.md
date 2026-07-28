@@ -1,11 +1,33 @@
 
-queryon 0.11 [xxxx-xx-xx]
+queryon 0.11 [2026-07-25]
 -----------
 * **java 11+** required
 * pom/shiro: upgrading to version 2
 * springboot/helper: upgrading version to 3 (jdk17+)
 * demo: quarkus: upgrading to version 3 / using 'jakarta' dependencies (jdk17+)
 * pom: updated required maven version (3.2.5 -> 3.6.3)
+* filter: AccessLogFilter: added 'context_path' & 'servlet_path' [2025-09-09]
+* util: added SchemaModelUtils.getNullBinding(Named)Parameters [2026-02-06]
+* api: swagger: fixed 'required' Query parameters when using 'bind-null-on-missing-parameters'
+* queryon: setting readOnly on 'SELECT_ANY' [2026-04-22]
+* api: InfoServlet: showing less debug info ; logging changes [2026-05-04]
+* qon: NamedTypedDBObject: validating sql identifiers & refactoring
+* security: XML parsing changes
+* pom: added sonar & jacoco plugins
+* web: parquet syntax support ; demo-springboot: parquet usage [2026-05-15]
+* core: improved sql identifiers & schema name validation
+* web/auth: logout should not send redirect
+* qon: hasMoreRows fixed, added to htmlx footer, better limit/offset [2026-06-02]
+* qon: added 'parameterOptionals'
+* queryon: added props `queryon.limit.[default|max].<syntax>`
+* web: refactoring: add 'qonContextPath()'
+* processor: ModelValidator: added '.update-invalid-objects' prop suffix ; qon-plugins.xml: updated 'generated'
+* updateplugin: Grant refactoring
+* filter: CacheControlFilter: getting 'maxAge' from init parameter
+* qon.instant: add 'tableInstantCols' [2026-07-03]
+* qon.instant: fixes for TYPE objetcs ; column changes for trigger, sequence & synonyms
+* build: updating 'build.timestamp' to timestamp of last commit
+* syntax: htmlx: added Suffix enum - allow lowercase suffixes [2026-07-17]
 
 
 queryon 0.10 [xxxx-xx-xx]
