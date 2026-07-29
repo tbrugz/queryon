@@ -523,6 +523,7 @@
 		evt.preventDefault();
 		var newbigparts = [];
 		var namedParams = relationsHash[relname].namedParameterNames;
+		//var optionalParams = relationsHash[relname].parameterOptionals;
 		if(namedParams) {
 			for(var i=0;i<namedParams.length;i++) {
 				var param = getParameterByName(namedParams[i], fullh.search);

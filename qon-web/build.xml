@@ -1,16 +1,22 @@
 <project name="qon-web" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<property name="webapp.dir" value="src/main/webapp"/>
+	<property name="download.dir" value="${settings.localRepository}/.cache/queryon-qon-web"/>
+	<!--
 	<property name="download.dir" value="target/download"/>
+	${local-repo}/.cache/download-maven-plugin
+	${settings.localRepository}
+	-->
 
+	<!--
 	<target name="download-swagger2">
 		<property name="version.swagger2" value="2.2.10"/>
 		
 		<mkdir dir="${download.dir}/swagger2-ui"/>
 		
-		<!-- 
+		<!- -
 		curl -L - -create-dirs -o qon-web/target/download/swagger-ui/v2.2.10.zip https://github.com/swagger-api/swagger-ui/archive/v2.2.10.zip
-		-->
+		- ->
 		<get src="https://github.com/swagger-api/swagger-ui/archive/v${version.swagger2}.zip" dest="${download.dir}/swagger2-ui" verbose="true" skipexisting="true"/>
 		<echo message="downloaded swagger ${version.swagger2}" level="info"/>
 
@@ -21,15 +27,16 @@
 		</copy>
 		<copy tofile="${webapp.dir}/swagger2-ui/index.html" file="${webapp.dir}/swagger2-ui-index.html" overwrite="true"/>
 	</target>
+	-->
 
 	<target name="download-swagger">
 		<!--
 		<property name="version.swagger" value="3.38.0"/>
 		<property name="version.swagger" value="3.52.5"/>
 		<property name="version.swagger" value="4.19.1"/>
-		<property name="version.swagger" value="5.27.0"/>
+		<property name="version.swagger" value="5.32.11"/>
 		-->
-		<property name="version.swagger" value="5.27.0"/>
+		<property name="version.swagger" value="5.32.11"/>
 		
 		<mkdir dir="${download.dir}/swagger-ui"/>
 		
@@ -42,10 +49,15 @@
 			<fileset dir="${download.dir}/swagger-ui/unzipped/swagger-ui-${version.swagger}/dist" includes="**/*"/>
 		</copy>
 
+		<!--
+		<copy tofile="${webapp.dir}/swagger-ui/index0.html" file="${webapp.dir}/swagger-ui/index.html" overwrite="true"/>
 		<copy tofile="${webapp.dir}/swagger-ui/index.html" file="${webapp.dir}/swagger-ui-index.html" overwrite="true"/>
+		-->
+		<copy tofile="${webapp.dir}/swagger-ui/swagger-initializer0.js" file="${webapp.dir}/swagger-initializer.js" overwrite="true"/>
+		<copy tofile="${webapp.dir}/swagger-ui/swagger-initializer.js" file="${webapp.dir}/swagger-initializer.js" overwrite="true"/>
 	</target>
 
-	<target name="download-deps" depends="download-swagger2, download-swagger">
+	<target name="download-deps" depends="download-swagger">
 	</target>
 	
 </project>
