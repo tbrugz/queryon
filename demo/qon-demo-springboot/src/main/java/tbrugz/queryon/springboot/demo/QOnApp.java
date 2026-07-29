@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Import;
 
 import tbrugz.queryon.AbstractHttpServlet;
 import tbrugz.queryon.filter.AccessLogFilter;
+//import tbrugz.queryon.filter.SessionLogFilter;
 import tbrugz.queryon.springboot.QOnSpringBootApp;
 import tbrugz.queryon.springboot.SpringBootUtils;
 import tbrugz.queryon.springboot.SpringDataSourceProvider;
@@ -304,5 +305,36 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 		//log.info("accessLogFilterRegistration...");
 		return registration;
 	}
+
+	/*@Bean
+	public FilterRegistrationBean<SessionLogFilter> sessionLogFilterRegistration() {
+		FilterRegistrationBean<SessionLogFilter> registration = new FilterRegistrationBean<SessionLogFilter>();
+		registration.setFilter(new SessionLogFilter());
+		registration.addUrlPatterns("/*");
+		registration.setName("SessionLogFilter");
+		registration.setOrder(1);
+		log.info("sessionLogFilterRegistration...");
+		return registration;
+	}*/
+
+	/*@GetMapping("/check-session")
+	public String checkSession(HttpServletRequest request) {
+		HttpSession session = request.getSession(false); // Does not force create
+		if (session == null) {
+			return "No session exists.";
+		}
+		return "Session actively exists! ID: " + session.getId();
+	}*/
+
+	/*@Autowired
+	private final RequestMappingHandlerMapping handlerMapping;
+
+	public void logAllEndpoints() {
+		log.info("============== REGISTERED ENDPOINTS ==============");
+		handlerMapping.getHandlerMethods().forEach((key, value) -> 
+			log.info("Path: "+key+" ---> Method: "+value)
+		);
+		log.info("==================================================");
+	}*/
 
 }

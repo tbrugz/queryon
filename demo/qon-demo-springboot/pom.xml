@@ -249,6 +249,12 @@
 			<artifactId>jstl</artifactId>
 		</dependency>
 		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-properties-migrator</artifactId>
+			<version>${springboot.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- db -->
 		<dependency>
@@ -313,9 +319,10 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
+			<artifactId>spring-boot-starter-test-classic</artifactId>
 			<version>${springboot.version}</version>
 			<scope>test</scope>
 			<exclusions>
@@ -325,6 +332,25 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<version>${springboot.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-restclient</artifactId>
+			<version>${springboot.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-resttestclient</artifactId>
+			<version>${springboot.version}</version>
+			<scope>test</scope>
+		</dependency>-->
 
 		<!--
 		springboot 3.5 tests require this

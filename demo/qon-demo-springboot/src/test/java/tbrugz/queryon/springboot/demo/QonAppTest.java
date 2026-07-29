@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,12 @@ import org.springframework.test.context.TestPropertySource;
  * https://spring.io/guides/gs/testing-web
  * https://www.baeldung.com/rest-template
  * https://docs.spring.io/spring-framework/reference/testing/annotations/integration-spring/annotation-testpropertysource.html
+ * 
+ * TODO:
+ * https://github.com/github/awesome-copilot/blob/main/instructions/springboot-4-migration.instructions.md#testresttemplate--resttestclient-recommended
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 @TestPropertySource("/test.properties")
 public class QonAppTest {
 
