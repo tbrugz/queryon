@@ -60,7 +60,7 @@
     Jakarta EE 9.1      (jakarta.*)
     Java / Jakarta EE 8 (javax.*)
     -->
-    <servlet-api.version>3.1.0</servlet-api.version>
+    <servlet-api.version>4.0.1</servlet-api.version>
     <!-- https://jakarta.ee/specifications/servlet/5.0/ - Jakarta EE 9 -->
     <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 
