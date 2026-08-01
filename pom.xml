@@ -14,6 +14,7 @@
     Web application that creates a REST API based on database objects (tables, views, queries) from a RDBMS
   </description>
   <url>https://github.com/tbrugz/queryon</url>
+  <inceptionYear>2012</inceptionYear>
 
   <properties>
     <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
@@ -59,8 +60,16 @@
     https://www.eclipse.org/community/eclipse_newsletter/2020/november/1.php - Understanding Jakarta EE 9
     Jakarta EE 9.1      (jakarta.*)
     Java / Jakarta EE 8 (javax.*)
+    https://stackoverflow.com/questions/68707177/upgrade-servlet-4-0-1-to-servlet-5-0
+    Modern Jakarta Servlet Versions (Jakarta EE)
+      Jakarta Servlet 6.1 (2024): Released with Jakarta EE 11; improves HTTP status codes and character encoding support. Requires Java SE 17 or higher.
+      Jakarta Servlet 6.0 (2022): Released with Jakarta EE 10; removes old deprecated features.
+      Jakarta Servlet 5.0 (2020): Released with Jakarta EE 9; transitions the package namespace entirely from javax.servlet to jakarta.servlet.
+    Legacy Java Servlet Versions (Java EE / Sun)
+      Servlet 4.0 (2017): Introduced HTTP/2 support under Java EE 8.
+      Servlet 3.1 (2013): Added non-blocking I/O and WebSocket protocol upgrade support under Java EE 7.
     -->
-    <servlet-api.version>3.1.0</servlet-api.version>
+    <servlet-api.version>4.0.1</servlet-api.version>
     <!-- https://jakarta.ee/specifications/servlet/5.0/ - Jakarta EE 9 -->
     <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 
@@ -89,7 +98,7 @@
     quarkus lts: 3.33 (2026/3), 3.27 (2025/9), ...
     https://quarkus.io/releases/
     -->
-    <quarkus.version>3.33.2.1</quarkus.version>
+    <quarkus.version>3.33.3</quarkus.version>
 
     <junit.version>4.13.2</junit.version>
     <!--

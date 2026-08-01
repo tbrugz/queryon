@@ -74,16 +74,26 @@ docker push tbrugz/qon-demo-springboot:$TAG
 
 * images in Docker Hub:
 
-https://hub.docker.com/r/tbrugz/qon-demo-springboot/
+    https://hub.docker.com/r/tbrugz/qon-demo-springboot/
 
 
 * ref:
 
-https://spring.io/guides/gs/spring-boot-docker/
+    https://spring.io/guides/gs/spring-boot-docker/
 
 
 misc links
 -----
 
-* Release Notes / Migration Guide
-https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.7-Release-Notes
+* Releases/Support
+
+    https://spring.io/projects/spring-boot#support
+
+* Release Notes / Migration Guide (Spring Boot 4)
+
+    https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide  
+    https://spring.io/blog/2025/10/28/modularizing-spring-boot
+
+* Release Notes (Spring Boot 2.7)
+
+    https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.7-Release-Notes

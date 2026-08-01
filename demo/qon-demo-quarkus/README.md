@@ -64,11 +64,12 @@ ref: https://quarkus.io/guides/getting-started
 
 ## Links
 
-Dev:
+Dev:  
 https://quarkus.io/guides/maven-tooling
 
-Releases:
+Releases:  
+https://quarkus.io/releases/  
 https://github.com/quarkusio/quarkus/releases
 
-Migration Guides:
+Migration Guides:  
 https://github.com/quarkusio/quarkus/wiki/Migration-Guides
