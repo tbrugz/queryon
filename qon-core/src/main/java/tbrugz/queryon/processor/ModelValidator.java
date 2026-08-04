@@ -87,6 +87,7 @@ public class ModelValidator extends AbstractSQLProc {
 					rel.setValid(false);
 					if(removeInvalid) { it2.remove(); }
 					log.warn("Error with query '"+rel.getFinalQualifiedName()+"': "+e);
+					//log.warn("Error with query '"+rel.getFinalQualifiedName()+"': "+MiscUtils.limitString(e.toString(), 100));
 					log.debug("Error with query '"+rel.getFinalQualifiedName()+"': "+e.getMessage(), e);
 					countErr++;
 				}

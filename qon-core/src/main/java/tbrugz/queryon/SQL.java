@@ -988,14 +988,16 @@ public class SQL {
 			Object value = bindParameterValues.get(i);
 			if(value instanceof Long) {
 				st.setLong(i+1, (Long) value);
+				//log.debug("setLong [i="+i+"]: "+value);
 			}
 			else if(value instanceof Double) {
 				st.setDouble(i+1, (Double) value);
+				//log.debug("setDouble [i="+i+"]: "+value);
 			}
 			else if(value instanceof String) {
 				st.setString(i+1, (String) value);
+				//log.debug("setString [i="+i+"]: "+value);
 				/*
-				log.debug("param["+i+"] setString: "+value);
 				if(((String) value).length()>0) {
 					String s = (String) value;
 					log.debug("param["+i+"] setString[0]: "+s.getBytes("UTF-8")[0] + " / to-utf8: "+new String(s.getBytes("iso-8859-1"), QueryOn.UTF8));
@@ -1004,23 +1006,26 @@ public class SQL {
 			}
 			else if(value instanceof Date) {
 				st.setTimestamp(i+1, new Timestamp(((Date) value).getTime()));
+				//log.debug("setTimestamp [i="+i+"]: "+value);
 			}
 			else if(value instanceof InputStream) {
 				st.setBinaryStream(i+1, (InputStream) value);
+				//log.debug("setBinaryStream [i="+i+"]...");
 			}
 			else if(value instanceof Reader) {
 				st.setCharacterStream(i+1, (Reader) value);
-				//log.debug("param["+i+"] setReader...");
+				//log.debug("setCharacterStream [i="+i+"]...");
 			}
 			else if(value instanceof Part) {
 				Part p = (Part) value;
 				//XXX guess if binary or character stream... based on p.getContentType() or column type??
 				//st.setBinaryStream(i+1, p.getInputStream());
 				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream()));
-				//log.debug("param["+i+"] setPart...");
+				//log.debug("setCharacterStream/Part [i="+i+"]...");
 			}
 			else if(value==null) {
 				st.setObject(i+1, null);
+				//log.debug("setObject [i="+i+"]: "+value);
 			}
 			else {
 				log.warn("bindParameters: unknown value type: " + value.getClass().getName() );

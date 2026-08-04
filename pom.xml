@@ -53,7 +53,7 @@
     <maven-enforcer-plugin.requireMavenVersion>3.6.3</maven-enforcer-plugin.requireMavenVersion>
 
     <!-- <queryon.version>${project.version}</queryon.version> -->
-    <sqldump.version>0.12</sqldump.version>
+    <sqldump.version>0.13-SNAPSHOT</sqldump.version>
     <kmlutils.version>0.5.6</kmlutils.version>
 
     <!--

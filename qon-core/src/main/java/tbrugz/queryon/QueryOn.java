@@ -682,11 +682,16 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	void initModelsMetadata(Map<String, SchemaModel> models) throws ClassNotFoundException, SQLException, NamingException {
 		for(Entry<String, SchemaModel> e: models.entrySet()) {
-			if(! QOnModelUtils.isModelMetadataSet(e.getValue())) {
+			SchemaModel sm = e.getValue();
+			if(! QOnModelUtils.isModelMetadataSet(sm)) {
 				Connection conn = null;
 				try {
 					conn = DBUtil.initDBConn(prop, e.getKey());
-					QOnModelUtils.setModelMetadata(e.getValue(), e.getKey(), conn);
+					QOnModelUtils.setModelMetadata(sm, e.getKey(), conn);
+					// warn if dialect is null
+					if(sm.getSqlDialect()==null) {
+						log.warn("model '"+sm.getModelId()+"': sqldialect is null");
+					}
 				}
 				finally {
 					ConnectionUtil.closeConnection(conn);
@@ -904,7 +909,12 @@ public class QueryOn extends AbstractHttpServlet {
 		String dialect = prop.getProperty(PROP_SQLDIALECT);
 		if(dialect!=null) {
 			log.info("setting sql-dialect: "+dialect);
-			sm.setSqlDialect(dialect);
+			if(!DBMSResources.instance().getDbIds().contains(dialect)) {
+				log.warn("invalid sql-dialect: "+dialect);
+			}
+			else {
+				sm.setSqlDialect(dialect);
+			}
 		}
 		/*else if(sm.getSqlDialect()==null && conn!=null) {
 			dialect = DBMSResources.instance().detectDbId(conn.getMetaData(), false);
@@ -1734,7 +1744,8 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		catch(SQLException e) {
 			DBUtil.doRollback(conn);
-			log.warn("exception in 'doSelect': "+e+" ; sql:\n"+finalSql);
+			boolean valid = relation.getValid()!=null ? relation.getValid() : true;
+			log.warn("exception in 'doSelect'"+(!valid?" [invalid relation]":"")+": "+e+" ; sql:\n"+finalSql);
 			setSqlInfo(reqspec.request, sql);
 			//XXX: create new SQLException including the query string? throw BadRequestException? InternalServerException?
 			//throw new InternalServerException("Exception in 'doSelect': "+e, e);

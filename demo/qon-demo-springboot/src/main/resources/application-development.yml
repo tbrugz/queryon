@@ -1,0 +1,8 @@
+# https://stackoverflow.com/questions/31250598/prevent-stack-trace-logging-for-custom-exception-in-spring-boot-application
+# https://docs.spring.io/spring-boot/appendix/application-properties/index.html#application-properties.web.spring.web.error.include-exception
+server:
+    web:
+        error:
+            include-exception: true
+            include-message: ALWAYS
+            include-stacktrace: ALWAYS
