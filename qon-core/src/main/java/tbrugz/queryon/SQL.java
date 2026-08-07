@@ -591,6 +591,14 @@ public class SQL {
 				sql += "\noffset "+offset;
 			}
 		}
+		else if(strategy==LimitOffsetStrategy.SQL_FETCH_FIRST) {
+			if(offset>0) {
+				sql += "\noffset "+offset+" rows";
+			}
+			if(limit>0) {
+				sql += "\nfetch first "+limitToApply+" rows only";
+			}
+		}
 		else if(strategy==LimitOffsetStrategy.SQL_ROWNUM) {
 			if(limit>0 && offset>0) {
 				/*if(! allowEncapsulation) {
