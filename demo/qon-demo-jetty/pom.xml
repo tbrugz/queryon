@@ -1,0 +1,165 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.bitbucket.tbrugz</groupId>
+		<artifactId>qon-demo-parent</artifactId>
+		<version>0.12-SNAPSHOT</version>
+	</parent>
+	
+	<artifactId>qon-demo-jetty</artifactId>
+	<version>0.12-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>qon-demo-jetty</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!--<maven.deploy.skip>true</maven.deploy.skip>-->
+		<jetty.v12.version>12.1.11</jetty.v12.version>
+	</properties>
+	
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		
+		<plugins>
+			<plugin>
+				<!--
+				https://jetty.org/docs/jetty/12.1/programming-guide/maven-jetty/jetty-maven-plugin.html
+				-->
+				<groupId>org.eclipse.jetty.ee11</groupId>
+				<artifactId>jetty-ee11-maven-plugin</artifactId>
+				<version>${jetty.v12.version}</version>
+				<!--
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>${jetty.v12.version}</version>
+				-Djetty.http.port=9999
+				-->
+
+				<configuration>
+					<!-- https://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+					<!--
+					<systemProperties>
+						<org.eclipse.jetty.annotations.AnnotationParser.LEVEL>OFF</org.eclipse.jetty.annotations.AnnotationParser.LEVEL>
+					</systemProperties>
+					<systemPropertiesFile>${project.basedir}/jetty.properties</systemPropertiesFile>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					-->
+					<!-- <webApp>
+						<contextPath>/qon</contextPath>
+					</webApp> -->
+					<httpConnector>
+						<port>8080</port>
+					</httpConnector>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>${maven-war-plugin.version}</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-web</artifactId>
+			<version>${project.parent.version}</version>
+			<type>war</type>
+		</dependency>
+
+		<!-- considering a skinny qon-web war -->
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-core</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-graphql</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bitbucket.tbrugz</groupId>
+			<artifactId>qon-soap</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-web</artifactId>
+			<version>${shiro.web.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.java-diff-utils</groupId>
+			<artifactId>diffutils</artifactId>
+			<version>${diffutils.version}</version>
+		</dependency>
+		<!-- /considering... -->
+		
+		<!--<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-reload4j</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>-->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<!-- 1.6.1 -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<!--<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+			<scope>runtime</scope>
+		</dependency>-->
+		
+		<!-- db -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>
