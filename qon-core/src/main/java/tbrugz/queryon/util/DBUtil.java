@@ -167,6 +167,8 @@ public class DBUtil {
 	}
 	
 	public static boolean doRollback(Connection conn) {
+		return DBUtil.doRollback(conn, null);
+		/*
 		boolean auto = false;
 		try {
 			auto = conn.getAutoCommit();
@@ -176,6 +178,7 @@ public class DBUtil {
 			return false;
 		}
 		return true;
+		*/
 	}
 
 	public static boolean doRollback(Connection conn, Savepoint sp) {
@@ -193,6 +196,13 @@ public class DBUtil {
 			return false;
 		}
 		return true;
+	}
+
+	public static boolean doRollbackIfRequiredAfterException(Connection conn, Savepoint sp, DBMSFeatures features) {
+		if(features.sqlExceptionRequiresRollback()) {
+			return DBUtil.doRollback(conn, sp);
+		}
+		return true; // or false?
 	}
 
 	public static boolean releaseSavepoint(Connection conn, DBMSFeatures features, Savepoint sp) {

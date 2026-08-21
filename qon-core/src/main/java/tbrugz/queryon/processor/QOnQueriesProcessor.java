@@ -192,9 +192,10 @@ public class QOnQueriesProcessor extends SQLQueries implements WebProcessor {
 			ResultSetMetaData rsmd = stmt.getMetaData();
 			query.setColumns(DataDumpUtils.getColumns(rsmd));
 		} catch (SQLException e) {
-			if(features.sqlExceptionRequiresRollback()) {
+			DBUtil.doRollbackIfRequiredAfterException(conn, null, features);
+			/*if(features.sqlExceptionRequiresRollback()) {
 				DBUtil.doRollback(conn);
-			}
+			}*/
 			query.setColumns(new ArrayList<Column>());
 			if(metadataAllowQueryExec) {
 				long initTime = System.currentTimeMillis();
