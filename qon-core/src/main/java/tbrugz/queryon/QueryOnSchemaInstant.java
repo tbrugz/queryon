@@ -107,6 +107,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 		//log.info("feats: "+feat.getClass().getName()+" metadata: "+dbmd.getClass().getName());
 
 		List ret = new ArrayList();
+		final String tableName = null;
 		
 		switch(type) {
 		case TABLE:
@@ -137,9 +138,12 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 				QueryOnInstant.keepExecsByType(ret, type); //DBObjectType.PACKAGE_BODY);
 			}
 			break;
+		case INDEX:
+			feat.grabDBIndexes(ret, schemaName, tableName, objectName, conn);
+			break;
 		case TRIGGER:
 			//XXX: really grab trigger?
-			feat.grabDBTriggers(ret, schemaName, null, objectName, conn);
+			feat.grabDBTriggers(ret, schemaName, tableName, objectName, conn);
 			break;
 		case SEQUENCE:
 			feat.grabDBSequences(ret, schemaName, objectName, conn);
@@ -269,7 +273,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 			
 			//TRIGGERs
 			if(doSchemaGrabTableTriggers) {
-				feat.grabDBTriggers(model, schemaName, name, null, dbmd.getConnection());
+				feat.grabDBTriggers(model.getTriggers(), schemaName, name, null, dbmd.getConnection());
 			}
 			*/
 

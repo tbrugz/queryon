@@ -30,6 +30,7 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -110,12 +111,13 @@ public class QueryOnInstant extends BaseApiServlet {
 		final DatabaseMetaData dbmd = feat.getMetadataDecorator(conn.getMetaData());
 		final String schemaName = String.valueOf( reqspec.params.get(0) );
 		final String objectParam = reqspec.params.size()>1 ? String.valueOf( reqspec.params.get(1) ) : null;
+		final String subObjectParam = null;
 		ResultSet rs;
 		
 		//final DBObjectType type = DBObjectType.valueOf(reqspec.object.toUpperCase());
 		final DBObjectType statusType = DBObjectType.valueOf(statusTypeStr);
 		final String objectName = statusType.desc();
-		//log.info("doStatus: "+statusType+" ; "+objectName);
+		log.debug("doStatus["+statusType+"]: schemaName="+schemaName+" ; objectParam="+objectParam);
 		
 		switch (statusType) {
 		case TABLE: {
@@ -213,13 +215,14 @@ public class QueryOnInstant extends BaseApiServlet {
 			
 			break;
 		}
-		/*case INDEX: {
-			List<Index> indexes = grabIndexes(schemaName, dbmd);
-			log.info("#indexes: "+indexes.size());
+		case INDEX: {
+			List<Index> indexes = new ArrayList<>();
+			feat.grabDBIndexes(indexes, schemaName, objectParam, subObjectParam, conn);
+			//log.info("#indexes: "+indexes.size());
 
 			rs = new ResultSetListAdapter<Index>(objectName, statusUniqueColumns, indexes, Index.class);
 			break;
-		}*/
+		}
 		case TRIGGER: {
 			List<Trigger> triggers = new ArrayList<Trigger>();
 			//XXX: DBMSFeatures show have a grabDbTriggerNames ... trigger body is retrieved every time...

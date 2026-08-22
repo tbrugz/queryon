@@ -44,7 +44,7 @@ var typemap = {
 		"TABLE": "table",
 		"FK": null, //"fk", //??
 		"VIEW": "view",
-		"INDEX": null, //XXX: add indexes
+		"INDEX": "index", //null, //XXX: add indexes
 		"EXECUTABLE": null,
 		"TRIGGER": "trigger", //"executable", ??
 		"SEQUENCE": "sequence",
@@ -868,6 +868,12 @@ updateFromFilters = function() {
 		margin-top: 4px;
 		font-weight: bolder;
 		background-color: #555;
+	}
+	#schema {
+		max-width: 18em;
+	}
+	#object {
+		max-width: 30em;
 	}
 	code {
 		display: block;
