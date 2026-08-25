@@ -27,7 +27,7 @@ var typemap = {
 		"TABLE": "table",
 		"FK": null,
 		"VIEW": "view",
-		"INDEX": null, //XXX: add indexes
+		"INDEX": "index", //null, //XXX: add indexes
 		"EXECUTABLE": null,
 		"TRIGGER": "trigger",
 		"SEQUENCE": "sequence",
@@ -288,6 +288,9 @@ updateUI = function() {}
 		overflow-y: auto;
 		max-height: 100%;
 	}
+	#navbar-prop {
+		display: inline;
+	}
 	#content-container {
 		position: relative;
 		top: 26px;
@@ -298,8 +301,11 @@ updateUI = function() {}
 		font-weight: bolder;
 		background-color: #555;
 	}
-	#navbar-prop {
-		display: inline;
+	#schema {
+		max-width: 18em;
+	}
+	#object {
+		max-width: 30em;
 	}
 	pre[class*="language-"] {
 		border-radius: 0;
