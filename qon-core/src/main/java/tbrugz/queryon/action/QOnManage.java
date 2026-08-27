@@ -55,7 +55,10 @@ public class QOnManage {
 		grabProps.put(JDBCSchemaGrabber.PROP_SCHEMAGRAB_DBSPECIFIC, "true");
 		//grabProps.put(AbstractDBMSFeatures.PROP_GRAB_CONSTRAINTS_XTRA, "false"); //XXX: add xtra-constraints?
 		//grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, "public");
-		grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Utils.join(getModelSchemas(model), ", "));
+		Set<String> schemaNames = getModelSchemas(model);
+		if(schemaNames.size()>0) {
+			grabProps.put(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Utils.join(schemaNames, ", "));
+		}
 		List<String> typesList = Arrays.asList(new String[]{"SCHEMA_META", "TABLE", "FK", "CONSTRAINT"});
 		DiffManyServlet.setPropForTypes(grabProps, typesList);
 		//log.debug("grab props: "+grabProps);
@@ -93,7 +96,12 @@ public class QOnManage {
 		ColumnDiff.updateFeatures(feat);
 		log.debug("dialect: "+dialect+" ; feats: "+feat);
 		
-		differ.setTypesForDiff("SCHEMA_META,TABLE");
+		if(feat.supportsMultipleSchemas()) {
+			differ.setTypesForDiff("SCHEMA_META,TABLE");
+		}
+		else {
+			differ.setTypesForDiff("TABLE");
+		}
 		SchemaDiff diff = differ.diffSchemas(dbModel, model);
 		diff.getGrantDiffs().clear(); //do not dump Grant diffs
 
@@ -180,7 +188,10 @@ public class QOnManage {
 	static Set<String> getModelSchemas(SchemaModel model) {
 		Set<String> names = new HashSet<String>();
 		for(Table t: model.getTables()) {
-			names.add( t.getSchemaName() );
+			String schemaName = t.getSchemaName();
+			if(schemaName!=null) {
+				names.add( t.getSchemaName() );
+			}
 		}
 		return names;
 	}
