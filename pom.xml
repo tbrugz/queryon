@@ -76,6 +76,7 @@
     <shiro.version>2.2.1</shiro.version>
     <shiro.web.version>${shiro.version}</shiro.web.version>
     <log4j.version>1.2.17</log4j.version>
+    <log4j2.version>2.25.5</log4j2.version>
     <slf4j.version>2.0.18</slf4j.version>
     <logback.version>1.6.1</logback.version>
 
@@ -766,13 +767,6 @@
       <version>${slf4j.version}</version>
       <optional>true</optional>
     </dependency> -->
-    <!--<dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${log4j.version}</version>
-      <scope>runtime</scope>
-      <optional>true</optional>
-    </dependency>-->
     <!-- dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
