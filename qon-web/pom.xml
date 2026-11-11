@@ -16,6 +16,7 @@
   <name>qon-web</name>
 
   <properties>
+    <skip.frontend>false</skip.frontend>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!--<swagger.version>5.32.11</swagger.version>-->
   </properties>
@@ -94,8 +95,42 @@
                 <fileset>
                   <directory>src/main/webapp/swagger2-ui</directory>
                 </fileset>
+                <fileset>
+                  <directory>src/main/webapp/js/vendor</directory>
+                </fileset>
             </filesets>
         </configuration>
+      </plugin>
+
+      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead) into src/main/webapp/js/vendor; skip with -Dskip.frontend=true -->
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.15.1</version>
+        <configuration>
+          <workingDirectory>src/main/frontend</workingDirectory>
+          <nodeVersion>v22.12.0</nodeVersion>
+          <skip>${skip.frontend}</skip>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install-node-and-npm</id>
+            <goals><goal>install-node-and-npm</goal></goals>
+            <phase>generate-resources</phase>
+          </execution>
+          <execution>
+            <id>npm-ci</id>
+            <goals><goal>npm</goal></goals>
+            <phase>generate-resources</phase>
+            <configuration><arguments>ci</arguments></configuration>
+          </execution>
+          <execution>
+            <id>npm-build</id>
+            <goals><goal>npm</goal></goals>
+            <phase>generate-resources</phase>
+            <configuration><arguments>run build</arguments></configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- <plugin>
