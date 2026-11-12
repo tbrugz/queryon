@@ -25,16 +25,16 @@ drop table if exists PAIR;
 create table PAIR ( -- type=TABLE
 	ID1 INTEGER not null,
 	ID2 INTEGER not null,
-	REMARKS VARCHAR,
+	REMARKS VARCHAR(100),
 	constraint PAIR_PK primary key (ID1, ID2)
 );
 
 drop table if exists TASK;
 
 create table TASK (
-	ID INTEGER primary key auto_increment,
-	SUBJECT varchar not null,
-	DESCRIPTION text,
+	ID INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	SUBJECT varchar(100) not null,
+	DESCRIPTION varchar(1000),
 	ATTACH blob
 );
 
