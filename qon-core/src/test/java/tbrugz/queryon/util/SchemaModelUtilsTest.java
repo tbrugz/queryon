@@ -25,7 +25,7 @@ public class SchemaModelUtilsTest {
 		v.setParameterCount(0);
 		v.setQuery(sql);
 		boolean[] nullBindings = SchemaModelUtils.getNullBindingParameters(v);
-		System.out.println("nullBindings="+Arrays.toString(nullBindings));
+		//System.out.println("nullBindings="+Arrays.toString(nullBindings));
 		Assert.assertNotNull(nullBindings);
 		boolean[] defaultValue = new boolean[] {}; //see: SQL.processPatternBooleanArray
 		Assert.assertArrayEquals(defaultValue, nullBindings);
@@ -126,7 +126,7 @@ public class SchemaModelUtilsTest {
 		v.setQuery(sql);
 		DBObjectUtils.updateParameterOptionals(v, sql);
 		boolean[] nullBindingsNamed = getBooleanArray( SchemaModelUtils.getUniqueNamedParameterOptionals(v) );
-		System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
+		//System.out.println("nullBindings="+Arrays.toString(nullBindingsNamed));
 		Assert.assertNotNull(nullBindingsNamed);
 		Assert.assertArrayEquals(new boolean[] {false, false}, nullBindingsNamed);
 	}

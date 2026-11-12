@@ -157,7 +157,7 @@
     https://github.com/xerial/sqlite-jdbc
     3.36.0.3, 3.50.3.0
     -->
-    <sqlite.version>3.50.3.0</sqlite.version>
+    <sqlite.version>3.53.4.0</sqlite.version>
 
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
     <buildnumber-maven-plugin.version>3.3.0</buildnumber-maven-plugin.version>
@@ -345,7 +345,7 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.10.0</version>
+        <version>0.11.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
