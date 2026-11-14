@@ -33,6 +33,7 @@ import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.processors.SQLDialectTransformer;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.sqldump.xtraproc.ModelSQLIdTransformer;
 
 public class QOnManage {
 
@@ -44,7 +45,9 @@ public class QOnManage {
 	public static final String DIFF_SUBACTION_SHOW = "show";
 	public static final String DIFF_SUBACTION_APPLY = "applydiff";
 
+	static final boolean mayDiffSchema = true;
 	static final boolean transformDialectBackAndForth = false;
+	static final boolean transformSqlIds = true;
 	
 	public void diffModel(SchemaModel model, Connection conn, boolean apply, HttpServletResponse resp) throws IOException {
 		//XXX param: schemas, validate?
@@ -70,7 +73,9 @@ public class QOnManage {
 		jsg.setProperties(grabProps);
 		SchemaModel dbModel = jsg.grabSchema();
 		String dialect = dbModel.getSqlDialect();
-		
+
+		//log.debug("schema grabbed: "+dbModel);
+
 		if(transformDialectBackAndForth) {
 			log.info("diffModel: SQLDialectTransformer: todbid dialect="+dialect);
 			Processor transf = new SQLDialectTransformer();
@@ -90,13 +95,24 @@ public class QOnManage {
 				transf.process();
 			}
 		}
+		if(transformSqlIds) {
+			Properties transformProps = new Properties();
+			String decorator = "toupper";
+			transformProps.put(ModelSQLIdTransformer.PROP_SQLIDTRANSF_DECORATOR, decorator);
+			//sqldump.proc.sqlidtransformer.decorator=tolower|toupper
+			log.debug("diffModel: ModelSQLIdTransformer: decorator="+decorator);
+			Processor transf = new ModelSQLIdTransformer();
+			transf.setProperties(transformProps);
+			transf.setSchemaModel(dbModel);
+			transf.process();
+		}
 		
 		SchemaDiffer differ = new SchemaDiffer();
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
 		ColumnDiff.updateFeatures(feat);
 		log.debug("dialect: "+dialect+" ; feats: "+feat);
 		
-		if(feat.supportsMultipleSchemas()) {
+		if(mayDiffSchema && feat.supportsMultipleSchemas()) {
 			differ.setTypesForDiff("SCHEMA_META,TABLE");
 		}
 		else {
@@ -153,6 +169,11 @@ public class QOnManage {
 					it.remove();
 					removed++;
 				}
+				if(id.getChangeType().equals(ChangeType.REPLACE)) {
+					log.debug("will not generate REPLACE diff for "+id);
+					it.remove();
+					removed++;
+				}
 			}
 		}
 		log.info("diff: removed "+removed+" diffs");
@@ -164,15 +185,21 @@ public class QOnManage {
 		
 		int diffcount = diff.getDiffListSize();
 		// output diff
-		if(!apply && resp!=null) {
-			resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
-			if(diffcount==0) {
-				//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-				resp.getWriter().write("-- no diffs found");
+		if(!apply) {
+			if(resp!=null) {
+				resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
+				if(diffcount==0) {
+					//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+					resp.getWriter().write("-- no diffs found");
+				}
+				else {
+					CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
+					diff.outDiffs(cout);
+				}
 			}
 			else {
-				CategorizedOut cout = new CategorizedOut(resp.getWriter(), null);
-				diff.outDiffs(cout);
+				String diffStr = diff.getDiff();
+				log.info("diff:\n"+diffStr);
 			}
 		}
 		// apply...
@@ -190,9 +217,10 @@ public class QOnManage {
 		for(Table t: model.getTables()) {
 			String schemaName = t.getSchemaName();
 			if(schemaName!=null) {
-				names.add( t.getSchemaName() );
+				names.add( schemaName );
 			}
 		}
+		//log.info("getModelSchemas: "+names);
 		return names;
 	}
 

@@ -25,6 +25,8 @@ public class DiffUtilQon {
 
 	static final Log log = LogFactory.getLog(DiffUtilQon.class);
 	
+	static boolean forceAllDiffs = false;
+	
 	public static void applyDiffs(List<Diff> diffs, Properties prop, String modelId, boolean addComments, HttpServletResponse resp) throws IOException {
 		Connection conn = null;
 		try {
@@ -48,6 +50,7 @@ public class DiffUtilQon {
 	public static void applyDiffs(List<Diff> diffs, Connection conn, String modelId, boolean addComments, HttpServletResponse resp) throws IOException {
 		String sql = null;
 		try {
+			int diffCount = 0;
 			int executeCount = 0;
 			StringBuilder sb = new StringBuilder();
 			for(Diff d: diffs) {
@@ -57,22 +60,35 @@ public class DiffUtilQon {
 					sql = s;
 					
 					Statement st = conn.createStatement();
-					boolean retIsRs = st.execute(sql);
-					int count = st.getUpdateCount();
-					log.debug("Diff executed: "+sql);
-					if(resp!=null) {
-						sb.append(sql);
-						if(addComments) {
-							sb.append(" /* model="+modelId+" ; ret=[isRS="+retIsRs+",count="+count+"] */");
+					try {
+						boolean retIsRs = st.execute(sql);
+						int updateCount = st.getUpdateCount();
+						log.debug("Diff executed: "+sql);
+						if(resp!=null) {
+							sb.append(sql);
+							if(addComments) {
+								sb.append(" /* model="+modelId+" ; ret=[isRS="+retIsRs+",updateCount="+updateCount+"] */");
+							}
+							sb.append((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
 						}
-						sb.append((d.getObjectType().isExecutableType() && d.getChangeType().equals(ChangeType.ADD))? "\n" : ";\n");
+						executeCount++;
 					}
-					executeCount++;
+					catch(SQLException e) {
+						if(forceAllDiffs) {
+							log.warn("Error aplying diff: ["+e+"] ; sql =\n"+sql);
+						}
+						else {
+							throw e;
+						}
+					}
+					finally {
+						diffCount++;
+					}
 				}
 			}
 			//XXX: commit after postHooks have run?
 			DBUtil.doCommit(conn);
-			log.info(executeCount+" diffs applyed");
+			log.info(executeCount+" [of "+diffCount+"] diffs applyed");
 
 			if(resp!=null) {
 				resp.setContentType(QueryOnSchema.MIME_SQL);

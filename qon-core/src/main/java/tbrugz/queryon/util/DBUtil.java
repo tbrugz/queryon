@@ -30,6 +30,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.Utils;
 
 public class DBUtil {
 	static final Log log = LogFactory.getLog(DBUtil.class);
@@ -132,8 +133,8 @@ public class DBUtil {
 	}
 
 	public static Connection initDBConn(Properties prop, String modelId, Boolean readOnly) throws ClassNotFoundException, SQLException, NamingException {
-		boolean autocommit = false;
 		String prefix = getDBConnPrefix(prop, modelId);
+		boolean autocommit = Utils.getPropBool(prop, prefix+ConnectionUtil.SUFFIX_AUTOCOMMIT, false);
 		log.debug("initDBConn: modelId = "+modelId+" ; prefix = "+prefix+" ; autocommit = "+autocommit+" ; readonly = "+readOnly);
 		Connection conn = ConnectionUtil.initDBConnection(prefix, prop, autocommit, readOnly);
 		initStatics(conn);
