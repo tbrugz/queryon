@@ -168,12 +168,9 @@ public class PluginsTest {
 		Assert.assertEquals(1, hs.length);
 		Assert.assertEquals("2", hs[0].getValue()); // ID of created page
 		
-		//TODO: upgrade pegdown to flexmark-java (or commonmark-java)
-		/*
 		fullUrl = qonUrl+"/md/"+url;
 		content = WinstoneAndH2HttpRequestTest.getContentFromUrl(fullUrl);
 		Assert.assertTrue(content.contains("Hello <em>World</em>!"));
-		*/
 	}
 
 }

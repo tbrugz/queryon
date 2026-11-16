@@ -1,4 +1,9 @@
 
+queryon 0.12 [xxxx-xx-xx]
+-----------
+* qon: MarkdownServlet: replaced pegdown with flexmark-java
+
+
 queryon 0.11 [2026-07-25]
 -----------
 * **java 11+** required

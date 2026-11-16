@@ -346,30 +346,6 @@
       <version>${gson.version}</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
-      <groupId>org.pegdown</groupId>
-      <artifactId>pegdown</artifactId>
-      <version>1.6.0</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm-tree</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm-analysis</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm-util</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
     <!-- used by PatchDumper -->
     <!-- TODO: update to https://github.com/java-diff-utils/java-diff-utils (java8+) -->
     <dependency>

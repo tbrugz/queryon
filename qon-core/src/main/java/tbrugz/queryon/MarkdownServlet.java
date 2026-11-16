@@ -11,13 +11,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.pegdown.Extensions;
-import org.pegdown.PegDownProcessor;
+import com.vladsch.flexmark.ext.anchorlink.AnchorLinkExtension;
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
+import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import tbrugz.queryon.util.QOnContextUtils;
 
 /*
- * see: https://github.com/sirthias/pegdown
+ * see: https://github.com/vsch/flexmark-java
  */
 public class MarkdownServlet extends PagesServlet {
 	
@@ -32,7 +38,21 @@ public class MarkdownServlet extends PagesServlet {
 
 	public static final String DEFAULT_INDEX = "index.md";
 	
-	public static final int DEFAULT_PEGDOWN_OPTIONS = Extensions.EXTANCHORLINKS | Extensions.TABLES | Extensions.STRIKETHROUGH | Extensions.TASKLISTITEMS;
+	// Parser & HtmlRenderer are thread-safe once built
+	static final Parser PARSER;
+	static final HtmlRenderer RENDERER;
+	
+	static {
+		MutableDataSet options = new MutableDataSet();
+		options.set(Parser.EXTENSIONS, java.util.Arrays.asList(
+				TablesExtension.create(),
+				StrikethroughExtension.create(),
+				TaskListExtension.create(),
+				AnchorLinkExtension.create()
+				));
+		PARSER = Parser.builder(options).build();
+		RENDERER = HtmlRenderer.builder(options).build();
+	}
 	
 	boolean doXpend = true;
 	boolean reqXpend = doXpend;
@@ -70,9 +90,8 @@ public class MarkdownServlet extends PagesServlet {
 		//resp.setContentType(mimeType);
 		resp.setContentType(HTML_MIMETYPE);
 		//resp.setHeader(HEADER_PAGE_ID, id);
-		int pegDownOpts = DEFAULT_PEGDOWN_OPTIONS;
-		PegDownProcessor pdp = new PegDownProcessor(pegDownOpts);
-		String md = pdp.markdownToHtml(body);
+		Node document = PARSER.parse(body);
+		String md = RENDERER.render(document);
 		Writer w = resp.getWriter();
 		
 		if(reqXpend && prepend!=null) {

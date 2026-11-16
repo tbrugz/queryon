@@ -275,12 +275,31 @@
       <scope>compile</scope>
     </dependency>
     
-    <!-- TODO: change to https://github.com/vsch/flexmark-java (java8+) (see https://github.com/sirthias/pegdown) -->
+    <!-- https://github.com/vsch/flexmark-java -->
     <dependency>
-      <groupId>org.pegdown</groupId>
-      <artifactId>pegdown</artifactId>
-      <version>1.6.0</version>
-      <scope>compile</scope>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark</artifactId>
+      <version>${flexmark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-ext-tables</artifactId>
+      <version>${flexmark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-ext-gfm-strikethrough</artifactId>
+      <version>${flexmark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-ext-gfm-tasklist</artifactId>
+      <version>${flexmark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-ext-anchorlink</artifactId>
+      <version>${flexmark.version}</version>
     </dependency>
 
     <dependency>
