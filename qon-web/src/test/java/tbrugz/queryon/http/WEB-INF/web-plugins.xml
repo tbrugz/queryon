@@ -48,4 +48,24 @@
 		<url-pattern>/q/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>PagesServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.PagesServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>PagesServlet</servlet-name>
+		<url-pattern>/p/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>MarkdownServlet</servlet-name>
+		<servlet-class>tbrugz.queryon.MarkdownServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>MarkdownServlet</servlet-name>
+		<url-pattern>/md/*</url-pattern>
+	</servlet-mapping>
+
 </web-app>

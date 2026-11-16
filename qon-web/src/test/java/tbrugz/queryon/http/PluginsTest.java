@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -83,6 +84,25 @@ public class PluginsTest {
 		return ret;
 	}
 	
+	public static HttpResponse addQonPage(String path, String body, String mime) throws IOException, ParserConfigurationException, SAXException {
+		CloseableHttpClient httpclient = WinstoneAndH2HttpRequestTest.getHttpClient();
+		HttpPost httpPost = new HttpPost(baseUrl+"/QON_PAGES");
+		
+		List<NameValuePair> formParams = List.of(
+			new BasicNameValuePair("v:PATH", path),
+			new BasicNameValuePair("v:MIME", mime),
+			new BasicNameValuePair("v:BODY", body)
+			//new BasicNameValuePair("v:HAS_BODY", "t"),
+			//new BasicNameValuePair("bodyparamname", "BODY")
+		);
+		httpPost.setEntity(new UrlEncodedFormEntity(formParams, StandardCharsets.UTF_8));
+		
+		HttpResponse response1 = httpclient.execute(httpPost);
+		
+		httpPost.releaseConnection();
+		return response1;
+	}
+
 	public static boolean containRowWithProperty(JSONArray jarr, String property, String value) {
 		for(Object row: jarr) {
 			Assert.assertTrue("Should be a JSONObject", row instanceof JSONObject);
@@ -118,6 +138,42 @@ public class PluginsTest {
 		jsonStr = WinstoneAndH2HttpRequestTest.getContentFromUrl(baseUrl+"/TEST1.json");
 		obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+	}
+
+	@Test
+	public void testAddAndRetrievePage() throws IOException, ParserConfigurationException, SAXException {
+		//--- text
+		String url = "xxx.txt";
+		HttpResponse pageAddResponse = addQonPage(url, "Hello World!", "text/plain");
+		int status = pageAddResponse.getStatusLine().getStatusCode();
+		Assert.assertEquals("Must be 201/Created", 201, status);
+		Header[] hs = pageAddResponse.getHeaders("x-relation-uk-values"); //X-Relation-UK-Value
+		/*if(hs.length>0) {
+			System.out.println("header: "+hs[0].getName()+"="+hs[0].getValue());
+		}*/
+		Assert.assertEquals(1, hs.length);
+		Assert.assertEquals("1", hs[0].getValue()); // ID of created page
+
+		String fullUrl = qonUrl+"/p/"+url;
+		//System.out.println("fullUrl=="+fullUrl);
+		String content = WinstoneAndH2HttpRequestTest.getContentFromUrl(fullUrl);
+		Assert.assertEquals("Hello World!", content);
+		
+		//--- markdown
+		url = "zzz.md";
+		pageAddResponse = addQonPage(url, "Hello *World*!", "text/markdown");
+		status = pageAddResponse.getStatusLine().getStatusCode();
+		Assert.assertEquals("Must be 201/Created", 201, status);
+		hs = pageAddResponse.getHeaders("x-relation-uk-values"); //X-Relation-UK-Value
+		Assert.assertEquals(1, hs.length);
+		Assert.assertEquals("2", hs[0].getValue()); // ID of created page
+		
+		//TODO: upgrade pegdown to flexmark-java (or commonmark-java)
+		/*
+		fullUrl = qonUrl+"/md/"+url;
+		content = WinstoneAndH2HttpRequestTest.getContentFromUrl(fullUrl);
+		Assert.assertTrue(content.contains("Hello <em>World</em>!"));
+		*/
 	}
 
 }
