@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
+import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.SQL;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.model.QonQuery;
@@ -127,6 +128,10 @@ public class QOnQueries extends AbstractUpdatePlugin {
 		
 		int addcount = addQueryToModel(q);
 		boolean added = addcount==1;
+		Boolean valid = q.getValid();
+		if(valid!=null) {
+			reqspec.setAttribute(ResponseSpec.HEADER_IS_VALID, valid);
+		}
 
 		if(added) {
 			return q;

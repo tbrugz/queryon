@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -350,6 +351,8 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	public static final String UTF8 = "UTF-8"; 
 
+	static final String[] HEADERS_FROM_REQUEST_ATTRIBUTES = { ResponseSpec.HEADER_IS_VALID };
+	
 	public static final String QON_PROJECT_URL = "https://github.com/tbrugz/queryon";
 
 	static final String EMPTY_MODEL_GRABCLASS = EmptyModelGrabber.class.getSimpleName(); //"tbrugz.sqldump.EmptyModelGrabber";
@@ -477,6 +480,7 @@ public class QueryOn extends AbstractHttpServlet {
 	}
 	
 	protected void doInit(ServletContext context/*, String propertiesResource, String propertiesFile*/) throws ServletException {
+		//System.out.println("QueryOn.doInit()...");
 		String propertiesResource = null;
 		String propertiesFile = null;
 		try {
@@ -2768,7 +2772,8 @@ public class QueryOn extends AbstractHttpServlet {
 		//log.debug("insert: sqlFinal=\n" + sql.getFinalSql() );
 
 		PreparedStatement st = pkcols!=null? 
-			conn.prepareStatement(sql.getFinalSql(), pkcols):
+			//conn.prepareStatement(sql.getFinalSql(), pkcols): // use pkcols in 'conn.prepareStatement'?
+			conn.prepareStatement(sql.getFinalSql(), Statement.RETURN_GENERATED_KEYS):
 			conn.prepareStatement(sql.getFinalSql());
 		sql.bindParameters(st);
 		
@@ -2808,6 +2813,7 @@ public class QueryOn extends AbstractHttpServlet {
 		//XXX: (heterogeneous) array / map to ResultSet adapter?
 		DBUtil.doCommit(conn);
 		setResponseStatus(resp, HttpServletResponse.SC_CREATED);
+		setHeadersFromRequestAttributes(reqspec, resp);
 		writeUpdateCount(reqspec, resp, count, "inserted");
 		
 		}
@@ -2836,6 +2842,15 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	protected void setGeneratedKeys(RequestSpec reqspec, HttpServletResponse resp, List<String> generatedKey) {
 		resp.setHeader(ResponseSpec.HEADER_RELATION_UK_VALUES, Utils.join(generatedKey, ", "));
+	}
+	
+	protected void setHeadersFromRequestAttributes(RequestSpec reqspec, HttpServletResponse resp) {
+		for(String header: HEADERS_FROM_REQUEST_ATTRIBUTES) {
+			Object val = reqspec.getAttribute(header);
+			if(val!=null) {
+				resp.setHeader(header, String.valueOf(val));
+			}
+		}
 	}
 	
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {

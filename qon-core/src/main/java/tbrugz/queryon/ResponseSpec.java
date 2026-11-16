@@ -45,6 +45,8 @@ public class ResponseSpec {
 	public static final String HEADER_VALIDATE_NAMED_PARAMETER_NAMES = "X-Validate-NamedParameterNames";
 	public static final String HEADER_VALIDATE_OPTIONAL_PARAMS = "X-Validate-OptionalParameters";
 	
+	public static final String HEADER_IS_VALID = "X-IsValid";
+
 	public static final String HEADER_DIFFCOUNT = "X-DiffCount";
 
 	//---
