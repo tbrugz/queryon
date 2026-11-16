@@ -78,6 +78,10 @@ public class PluginsTestWithSqlite {
 
 		JSONArray jarr = (JSONArray) obj;
 		Assert.assertTrue("Should have Query named TEST1", PluginsTest.containRowWithProperty(jarr, "name", "TEST1"));
+
+		jsonStr = WinstoneAndH2HttpRequestTest.getContentFromUrl(baseUrl+"/TEST1.json");
+		obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
 	}
 
 }
