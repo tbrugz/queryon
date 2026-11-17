@@ -921,11 +921,11 @@
 
 <!-- see http://ace.c9.io/ -->
 <!-- style? see http://ace.c9.io/build/kitchen-sink.html -->
-<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/vendor/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
 	var editor = ace.edit("editor");
 	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
-	editor.getSession().setMode("ace/mode/sql");
+	editor.getSession().setMode("ace/mode/qon_sql");
 	editor.getSelectedText = function() {
 		//see: https://groups.google.com/forum/#!topic/ace-discuss/kxRy5g_Je2o
 		return this.getSession().getTextRange(this.getSelectionRange());

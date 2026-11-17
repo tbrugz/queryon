@@ -15,7 +15,7 @@
 	<script src="js/http-post.js"></script>
 	<script src="js/table.js"></script>
 	<script src="js/ui.js"></script>
-	<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/vendor/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 	<script src="js/editor.js"></script>
 	<script src="js/xtra.js"></script>
 <style>
@@ -157,7 +157,7 @@ function loadAce() {
 	editor = ace.edit("editor");
 	editor.$blockScrolling = true;
 	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
-	editor.getSession().setMode("ace/mode/sql"); //javascript, html, json, markdown, css, xml
+	editor.getSession().setMode("ace/mode/qon_sql"); //javascript, html, json, markdown, css, xml
 	editor.setOptions({
 		fontSize: "11pt"
 	});

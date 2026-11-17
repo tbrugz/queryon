@@ -10,6 +10,7 @@
     "vite": "^8.3.7"
   },
   "dependencies": {
+    "ace-builds": "^1.45.2",
     "d3": "^3.5.17",
     "font-awesome": "^4.7.0",
     "jquery": "^3.7.1",

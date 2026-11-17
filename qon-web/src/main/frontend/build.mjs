@@ -50,3 +50,20 @@ fs.copyFileSync(path.join(sigmaSrc, 'sigma.min.js'), path.join(sigmaOut, 'sigma.
 for (const f of ['sigma.layout.forceAtlas2.min.js', 'sigma.plugins.dragNodes.min.js']) {
   fs.copyFileSync(path.join(sigmaSrc, 'plugins', f), path.join(sigmaOut, 'plugins', f));
 }
+
+// ace editor (noconflict, minified) + QueryOn's sql mode; only the files used by the pages are copied
+const aceSrc = path.resolve(here, 'node_modules/ace-builds/src-min-noconflict');
+const aceOut = path.join(outDir, 'ace');
+fs.mkdirSync(aceOut, { recursive: true });
+const aceModes = ['css', 'diff', 'html', 'javascript', 'json', 'markdown', 'plain_text', 'sql', 'xml'];
+// modes with syntax checking start a web worker (worker-<mode>.js), loaded lazily by ace
+const aceWorkers = ['css', 'html', 'javascript', 'json', 'xml'];
+const aceFiles = ['ace.js', 'ext-searchbox.js', 'theme-twilight.js']
+  .concat(aceModes.map(m => `mode-${m}.js`))
+  .concat(aceWorkers.map(w => `worker-${w}.js`));
+for (const f of aceFiles) {
+  fs.copyFileSync(path.join(aceSrc, f), path.join(aceOut, f));
+}
+// ace only loads the requested mode file (not its dependencies), so upstream mode-sql is bundled into mode-qon_sql
+fs.writeFileSync(path.join(aceOut, 'mode-qon_sql.js'),
+  fs.readFileSync(path.join(aceSrc, 'mode-sql.js'), 'utf8') + '\n;\n' + fs.readFileSync(path.resolve(here, 'ace/mode-qon_sql.js'), 'utf8'));
