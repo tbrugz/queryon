@@ -217,12 +217,12 @@ body {
 			}
 
 			//doLoadExecs();
-			init(qonContextPath()+queryOnUrl,'objects', writeOptions, getCurrentModelId());
+			loadQueries0(qonContextPath()+queryOnUrl,'objects', writeOptions, getCurrentModelId());
 		}
 		
 		function onModelChanged() {
 			byId('objects').innerHTML = defaultNullObjectOption;
-			init(qonContextPath()+queryOnUrl,'objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
+			loadQueries0(qonContextPath()+queryOnUrl,'objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
 		}
 		
 		// ======================== sigma-related functions ========================
