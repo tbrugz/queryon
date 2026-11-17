@@ -2,10 +2,12 @@
 import { build } from 'vite';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(here, '../webapp/js/vendor');
-const entries = ['jquery', 'd3', 'nvd3'];
+const cssOutDir = path.resolve(here, '../webapp/css/vendor');
+const entries = ['jquery', 'd3', 'nvd3', 'prism'];
 
 for (const [i, name] of entries.entries()) {
   await build({
@@ -25,3 +27,7 @@ for (const [i, name] of entries.entries()) {
     },
   });
 }
+
+// prism theme
+fs.mkdirSync(cssOutDir, { recursive: true });
+fs.copyFileSync(path.resolve(here, 'node_modules/prismjs/themes/prism-twilight.css'), path.join(cssOutDir, 'prism.css'));

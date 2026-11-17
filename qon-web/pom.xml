@@ -98,6 +98,9 @@
                 <fileset>
                   <directory>src/main/webapp/js/vendor</directory>
                 </fileset>
+                <fileset>
+                  <directory>src/main/webapp/css/vendor</directory>
+                </fileset>
             </filesets>
         </configuration>
       </plugin>
