@@ -163,7 +163,9 @@ function updateSelectedQueryStateParametersCallback(relname, parts) {
 		setParametersValues(parts);
 	}
 	
-	loadModelStatusContentCallback();
+	if(typeof loadModelStatusContentCallback === 'function') {
+		loadModelStatusContentCallback();
+	}
 }
 
 function updateNavBar() {
