@@ -32,6 +32,9 @@ for (const [i, name] of entries.entries()) {
 fs.mkdirSync(cssOutDir, { recursive: true });
 fs.copyFileSync(path.resolve(here, 'node_modules/prismjs/themes/prism-twilight.css'), path.join(cssOutDir, 'prism.css'));
 
+// nvd3 css (same version as the nvd3 js bundle)
+fs.copyFileSync(path.resolve(here, 'node_modules/nvd3/build/nv.d3.min.css'), path.join(cssOutDir, 'nv.d3.min.css'));
+
 // font-awesome 4.x (css + fonts, keeping its relative css/ and fonts/ layout)
 const faSrc = path.resolve(here, 'node_modules/font-awesome');
 const faOut = path.join(cssOutDir, 'font-awesome');
