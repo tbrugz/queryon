@@ -7,7 +7,7 @@ import fs from 'node:fs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(here, '../webapp/js/vendor');
 const cssOutDir = path.resolve(here, '../webapp/css/vendor');
-const entries = ['jquery', 'd3', 'nvd3', 'prism'];
+const entries = ['jquery', 'd3', 'nvd3', 'prism', 'marked'];
 
 for (const [i, name] of entries.entries()) {
   await build({
