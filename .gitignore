@@ -6,6 +6,7 @@
 qon-web/src/main/webapp/swagger-ui/
 qon-web/src/main/webapp/swagger2-ui/
 qon-web/src/main/webapp/js/vendor/
+qon-web/src/main/webapp/css/vendor/
 qon-web/src/main/frontend/node_modules/
 qon-web/src/main/frontend/node/
 
@@ -26,3 +27,4 @@ demo/qon-demo-jetty/tmp
 **/dependency-tree.txt
 **/derby.log
 
+copilot-session-*.md

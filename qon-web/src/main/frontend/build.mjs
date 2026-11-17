@@ -31,3 +31,13 @@ for (const [i, name] of entries.entries()) {
 // prism theme
 fs.mkdirSync(cssOutDir, { recursive: true });
 fs.copyFileSync(path.resolve(here, 'node_modules/prismjs/themes/prism-twilight.css'), path.join(cssOutDir, 'prism.css'));
+
+// font-awesome 4.x (css + fonts, keeping its relative css/ and fonts/ layout)
+const faSrc = path.resolve(here, 'node_modules/font-awesome');
+const faOut = path.join(cssOutDir, 'font-awesome');
+fs.mkdirSync(path.join(faOut, 'css'), { recursive: true });
+fs.mkdirSync(path.join(faOut, 'fonts'), { recursive: true });
+fs.copyFileSync(path.join(faSrc, 'css/font-awesome.min.css'), path.join(faOut, 'css/font-awesome.min.css'));
+for (const f of ['fontawesome-webfont.woff', 'fontawesome-webfont.woff2']) {
+  fs.copyFileSync(path.join(faSrc, 'fonts', f), path.join(faOut, 'fonts', f));
+}
