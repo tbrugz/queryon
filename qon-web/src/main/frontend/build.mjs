@@ -41,3 +41,12 @@ fs.copyFileSync(path.join(faSrc, 'css/font-awesome.min.css'), path.join(faOut, '
 for (const f of ['fontawesome-webfont.woff', 'fontawesome-webfont.woff2']) {
   fs.copyFileSync(path.join(faSrc, 'fonts', f), path.join(faOut, 'fonts', f));
 }
+
+// sigma.js 1.2.1 (classic scripts, copied as is) + plugins
+const sigmaSrc = path.resolve(here, 'node_modules/sigma/build');
+const sigmaOut = path.join(outDir, 'sigma');
+fs.mkdirSync(path.join(sigmaOut, 'plugins'), { recursive: true });
+fs.copyFileSync(path.join(sigmaSrc, 'sigma.min.js'), path.join(sigmaOut, 'sigma.min.js'));
+for (const f of ['sigma.layout.forceAtlas2.min.js', 'sigma.plugins.dragNodes.min.js']) {
+  fs.copyFileSync(path.join(sigmaSrc, 'plugins', f), path.join(sigmaOut, 'plugins', f));
+}
