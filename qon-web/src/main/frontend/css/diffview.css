@@ -1,5 +1,7 @@
 /*
-This is part of jsdifflib v1.0. <http://github.com/cemerick/jsdifflib>
+Diff view styles, used with js/vendor/qon-diff.min.js (built from frontend/src/qon-diff.js).
+
+Based on jsdifflib v1.0. <http://github.com/cemerick/jsdifflib>
 
 Copyright 2007 - 2011 Chas Emerick <cemerick@snowtide.com>. All rights reserved.
 
@@ -76,8 +78,14 @@ table.diff .skip {
 table.diff .insert {
 	background-color:#9E9
 }
-table.diff th.author {
-	text-align:right;
-	border-top:1px solid #BBC;
-	background:#EFEFEF
+/* word-level changes inside replaced lines (qon-diff.js) */
+table.diff .wdiff {
+	text-decoration:none;
+	border-radius:2px
+}
+table.diff .replace del.wdiff, table.diff .delete del.wdiff {
+	background-color:#E77
+}
+table.diff .replace ins.wdiff, table.diff .insert ins.wdiff {
+	background-color:#6C6
 }

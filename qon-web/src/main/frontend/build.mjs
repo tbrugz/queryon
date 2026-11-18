@@ -7,7 +7,7 @@ import fs from 'node:fs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(here, '../webapp/js/vendor');
 const cssOutDir = path.resolve(here, '../webapp/css/vendor');
-const entries = ['jquery', 'd3', 'nvd3', 'prism', 'marked'];
+const entries = ['jquery', 'd3', 'nvd3', 'prism', 'marked', 'qon-diff'];
 
 for (const [i, name] of entries.entries()) {
   await build({
@@ -20,7 +20,7 @@ for (const [i, name] of entries.entries()) {
       minify: true,
       lib: {
         entry: path.resolve(here, 'src', `${name}.js`),
-        name: `qonVendor_${name}`,
+        name: `qonVendor_${name.replace(/\W/g, '_')}`,
         formats: ['iife'],
         fileName: () => `${name}.min.js`,
       },
@@ -34,6 +34,9 @@ fs.copyFileSync(path.resolve(here, 'node_modules/prismjs/themes/prism-twilight.c
 
 // nvd3 css (same version as the nvd3 js bundle)
 fs.copyFileSync(path.resolve(here, 'node_modules/nvd3/build/nv.d3.min.css'), path.join(cssOutDir, 'nv.d3.min.css'));
+
+// diff view css (used with qon-diff.min.js)
+fs.copyFileSync(path.resolve(here, 'css/diffview.css'), path.join(cssOutDir, 'diffview.css'));
 
 // font-awesome 4.x (css + fonts, keeping its relative css/ and fonts/ layout)
 const faSrc = path.resolve(here, 'node_modules/font-awesome');
