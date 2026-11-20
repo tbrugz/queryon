@@ -68,7 +68,7 @@ table.diff .replace {
 	background-color:#FD8
 }
 table.diff .delete {
-	background-color:#E99;
+	background-color:#F1ADAD;
 }
 table.diff .skip {
 	background-color:#EFEFEF;
@@ -76,7 +76,7 @@ table.diff .skip {
 	border-right:1px solid #BBC;
 }
 table.diff .insert {
-	background-color:#9E9
+	background-color:#F1ADAD;
 }
 /* word-level changes inside replaced lines (qon-diff.js) */
 table.diff .wdiff {
