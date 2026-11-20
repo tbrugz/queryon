@@ -7,7 +7,7 @@ import fs from 'node:fs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(here, '../webapp/js/vendor');
 const cssOutDir = path.resolve(here, '../webapp/css/vendor');
-const entries = ['jquery', 'd3', 'nvd3', 'prism', 'marked', 'qon-diff'];
+const entries = ['jquery', 'd3', 'nvd3', 'prism', 'marked', 'qon-diff', 'typeahead'];
 
 for (const [i, name] of entries.entries()) {
   await build({
@@ -34,6 +34,9 @@ fs.copyFileSync(path.resolve(here, 'node_modules/prismjs/themes/prism-twilight.c
 
 // nvd3 css (same version as the nvd3 js bundle)
 fs.copyFileSync(path.resolve(here, 'node_modules/nvd3/build/nv.d3.min.css'), path.join(cssOutDir, 'nv.d3.min.css'));
+
+// typeahead-standalone css
+//fs.copyFileSync(path.resolve(here, 'node_modules/typeahead-standalone/dist/basic.css'), path.join(cssOutDir, 'typeahead.css'));
 
 // diff view css (used with qon-diff.min.js)
 fs.copyFileSync(path.resolve(here, 'css/diffview.css'), path.join(cssOutDir, 'diffview.css'));

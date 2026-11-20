@@ -105,7 +105,7 @@
         </configuration>
       </plugin>
 
-      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead) into src/main/webapp/js/vendor; skip with -Dskip.frontend=true -->
+      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead-standalone) into src/main/webapp/js/vendor; skip with -Dskip.frontend=true -->
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>

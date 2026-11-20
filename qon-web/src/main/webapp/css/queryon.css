@@ -439,31 +439,42 @@ i[onclick] {
 	border: 0;
 }
 
-/* typeahead */
+/* typeahead (typeahead-standalone) - library css not used: it styles the input, changing its native look */
 
-.tt-dropdown-menu {
-	/*width: 422px;*/
-	/*margin-top: 12px;*/
+.typeahead-standalone {
+	display: inline-flex;
+	flex-direction: column;
+	vertical-align: middle;
+	text-align: left;
+}
+
+.typeahead-standalone .tt-list {
+	z-index: 1000;
+	box-sizing: border-box;
+	overflow: auto;
+	max-height: 70vh;
 	padding: 8px 0;
 	background-color: #fff;
 	border: 1px solid #ccc;
-	/*border: 1px solid rgba(0, 0, 0, 0.2);*/
 }
 
-.tt-suggestion {
+.typeahead-standalone .tt-list.tt-hide {
+	display: none;
+}
+
+.typeahead-standalone .tt-suggestion {
 	padding: 3px 20px;
-	/*font-size: 18px;*/
-	/*line-height: 24px;*/
+	cursor: pointer;
 }
 
-.tt-suggestion.tt-cursor {
+.typeahead-standalone .tt-suggestion:hover,
+.typeahead-standalone .tt-suggestion.tt-selected {
 	color: #fff;
-	/* background-color: #0097cf; */
 	background-color: rgb(126, 198, 116);
 }
 
-.tt-suggestion p {
-	margin: 0;
+.typeahead-standalone .tt-highlight {
+	font-weight: bold;
 }
 
 

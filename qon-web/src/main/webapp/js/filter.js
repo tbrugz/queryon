@@ -1,7 +1,7 @@
 
 /* depends on: qon-base.js */
 
-var bhvalues = null;
+var ttInstance = null;
 
 var operatorsInfo = {
 	"in":  {"name":"in", "multiple": true },
@@ -18,20 +18,6 @@ var operatorsInfo = {
 	"null": { "name":"is null", "multiple": false, "has-no-argument": true },
 	"notnull": { "name":"is not null", "multiple": false, "has-no-argument": true }
 };
-
-if(typeof Bloodhound != 'undefined') {
-	bhvalues = new Bloodhound({
-		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
-		queryTokenizer : Bloodhound.tokenizers.whitespace,
-		local: $.map([], function(str) {
-			return {
-				value : str
-			};
-		})
-	});
-	// kicks off the loading/processing of `local` and `prefetch`
-	bhvalues.initialize();
-}
 
 function addFilterDialog(selectedCol, columns) {
 	var select = document.getElementById('objects');
@@ -91,7 +77,7 @@ function filterGetColumnTypes() {
 }
 
 function refreshAutocomplete() {
-	if(bhvalues==null) { return; }
+	if(typeof typeahead == 'undefined') { return; }
 	var sel = document.getElementById('fin-column');
 	var columnName = sel.options[sel.selectedIndex].value;
 	var input = document.getElementById('fin-value');
@@ -104,47 +90,29 @@ function refreshAutocomplete() {
 	if(numericSqlTypes.indexOf(colType)>=0) { inputType = 'number'; }
 	input.setAttribute('type', inputType);
 
-	// constructs the suggestion engine
-	/*var bhvalues = new Bloodhound({
-		datumTokenizer : Bloodhound.tokenizers.obj.whitespace('value'),
-		queryTokenizer : Bloodhound.tokenizers.whitespace,
-		// `states` is an array of state names defined in "The Basics"
-		local : $.map(getValuesFromColumn('content', columnName), function(str) {
-			return {
-				value : str
-			};
-		})
-	});*/
+	destroyAutocomplete();
 
-	bhvalues.local = $.map(getValuesFromColumn('content', columnName), function(str) {
-		return {
-			value : str
-		};
-	});
+	// typeahead-standalone works on strings (null/undefined values are skipped)
+	var values = getValuesFromColumn('content', columnName).filter(function(v) { return v!=null && v!==''; })
+		.map(function(v) { return String(v); });
 
-	// kicks off the loading/processing of `local` and `prefetch`
-	bhvalues.clear();
-	bhvalues.initialize(true);
-
-	if($('#fin-value').typeahead) {
-		$('#fin-value').typeahead('destroy');
-	}
-
-	$('#fin-value').typeahead({
-		hint : true,
+	ttInstance = typeahead({
+		input : input,
+		hint : false, //XXX true?
 		highlight : true,
-		minLength : 1
-	}, {
-		name : columnName.replace(/([^a-zA-Z0-9])/g,""),
-		displayKey : 'value',
-		// `ttAdapter` wraps the suggestion engine in an adapter that
-		// is compatible with the typeahead jQuery plugin
-		source : bhvalues.ttAdapter()
+		minLength : 1,
+		limit : 10,
+		source : {
+			local : values
+		}
 	});
+}
 
-	// removing styles added by typeahead
-	$('#fin-value').css('vertical-align','');
-	$('#fin-value').css('background-color','');
+function destroyAutocomplete() {
+	if(ttInstance!=null) {
+		ttInstance.destroy();
+		ttInstance = null;
+	}
 }
 
 function addFilterIn() {
@@ -214,9 +182,7 @@ function removeAllFilters() {
 }
 
 function closeDialogs() {
-	if(bhvalues!=null) {
-		$('#fin-value').typeahead('destroy');
-	}
+	destroyAutocomplete();
 	var components = ['dialog', 'update-dialog'];
 	for(var i=0;i<components.length;i++) {
 		var elem = document.getElementById(components[i]);
