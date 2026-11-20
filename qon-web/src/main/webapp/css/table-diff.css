@@ -27,12 +27,21 @@ th.texttitle {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: #fff;
+	background-color: rgba(100,100,100,0.7);
+	z-index: 20;
 }
 
 #diffcontrols {
-	z-index: 10;
-	position: relative;
+	z-index: 30;
+	position: fixed;
+	top: 10%;
+	left: 10%;
+	right: 10%;
+	height: 30px;
+	background-color: #ccc;
+	border: 4px solid #fff;
+	border-bottom: 0;
+	box-sizing: border-box;
 }
 
 .diffoutput {
@@ -40,13 +49,16 @@ th.texttitle {
 	white-space: pre;
 	/*clear:both;*/
 	/*border: 10px solid #ddd;*/
-	width: 100%;
-	top: 30px;
+	top: calc(10% + 30px);
+	left: 10%;
+	right: 10%;
+	bottom: 10%;
 	background-color: #fff;
-	
-	overflow-y: scroll;
-	position: absolute;
-	height: 100%;	
+	border: 4px solid #fff;
+	border-top: 0;
+	box-sizing: border-box;
+	overflow: auto;
+	position: fixed;
 }
 
 .closebtn {
@@ -61,4 +73,10 @@ th.texttitle {
 
 .closebtn:hover {
 	cursor: pointer;
+}
+
+.difftitle {
+	font-weight: bold;
+	line-height: 30px;
+	padding-left: 8px;
 }

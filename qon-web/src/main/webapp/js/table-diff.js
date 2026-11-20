@@ -29,6 +29,12 @@ function addDiffBtns() {
 	}
 }
 
+function getColumnName(td) {
+	var table = td.closest('table');
+	var th = table && table.querySelectorAll('thead th, tr:first-child th')[td.cellIndex];
+	return th ? th.textContent.trim() : '';
+}
+
 function diffcell(i) {
 	var adds = getAddElements();
 	
@@ -44,17 +50,26 @@ function diffcell(i) {
 	
 	var diffed = diffUsingJS(0, remove.textContent, add.textContent, fromTitle, toTitle, 'diffoutput', false);
 	if(diffed) {
-		byId('diffcontrols').innerHTML = "<span class=\"closebtn\" onclick=\"closeDiff();\" title=\"close\">X</span>";
+		var colName = getColumnName(add.parentElement);
+		byId('diffcontrols').innerHTML = "<span class=\"closebtn\" onclick=\"closeDiff();\" title=\"close\">X</span>"+
+			"<span class=\"difftitle\"></span>";
+		byId('diffcontrols').querySelector('.difftitle').textContent = colName;
+		document.documentElement.style.overflow = 'hidden';
 	}
-	
-	var table = document.querySelectorAll('table')[0];
-	table.style.visibility='hidden'
 }
+
+document.addEventListener('keydown', function(e) {
+	if(e.key === 'Escape') {
+		var cont = byId('diffoutputcontainer');
+		if(cont && cont.style.display === 'block') {
+			closeDiff();
+		}
+	}
+});
 
 function closeDiff() {
 	byId('diffoutputcontainer').style.display='none';
-	var table = document.querySelectorAll('table')[0];
-	table.style.visibility=''
+	document.documentElement.style.overflow = '';
 }
 
 removeTrailingWhitespace = function(txt) {
