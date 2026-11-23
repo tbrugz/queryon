@@ -13,33 +13,33 @@
 	<script src="js/menu.js"></script>
 	<script src="js/xtra.js"></script>
 	<script>
-onLoad = function() {
+function onLoad() {
 	//console.log("onload");
 	loadAuthInfo();
 	loadModels();//function() { loadModelsContent(); loadMenuContentCallback("(from onLoad)"); });
 	//loadMenu();
 }
 
-loadAuthInfoCallback = function() {
+function loadAuthInfoCallback() {
 	//console.log("loadAuthInfoCallback");
 	//loadModelsContentCallback("(from makeHrefs)");
 	refreshAuthInfo();
 	drawMenu();
 }
 
-loadMenuContentCallback = function () {
+function loadMenuContentCallback() {
 	//console.log("loadMenuContentCallback");
 	//loadAuthInfo();
 	//loadModels(loadModelsContentCallback);
 	drawMenu();
 }
 
-loadModelsContentCallback = function () {
+function loadModelsContentCallback() {
 	//console.log("loadModelsContentCallback");
 	drawMenu();
 }
 
-drawMenu = function () {
+function drawMenu() {
 	//console.log("drawMenu");
 	if(typeof authInfo == "undefined" || typeof modelsInfo == "undefined" || typeof menucontent == "undefined") {
 		console.warn("something is not right.. have auth.js, models.js & menu.js been loaded?");

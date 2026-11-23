@@ -27,7 +27,7 @@
 	<script src="js/settings.js"></script>
 	<script src="js/ui.js"></script>
 	<script src="js/xtra.js"></script>
-	<script type="text/javascript">
+	<script>
 	
 	var lastQueryThatRan = null;
 	
@@ -795,12 +795,12 @@
 		var request = new XMLHttpRequest();
 		request.open("POST", finalUrl, true); // jboss needs POST ?
 		request.onload = function(oEvent) {
-			var jqXHR = oEvent.target;
+			var xhr = oEvent.target;
 			//console.log('request: ', request,' ; oEvent: ', oEvent);
 			if (request.status >= 200 && request.status < 300) {
 				//btnActionStop('go-button');
 				var completedTimeMilis = Date.now();
-				showInfoMessages(messagesId, jqXHR.responseText+" [please refresh page]");
+				showInfoMessages(messagesId, xhr.responseText+" [please refresh page]");
 				//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
 
 				var content = document.getElementById('content');
@@ -828,7 +828,7 @@
 				row.style.backgroundColor = "#ffa";
 				//XXX update dialog-filter
 				
-				//if(callback) { callback(jqXHR); }
+				//if(callback) { callback(xhr); }
 				// run QOnTables processor
 				var rel = getCurrentRelation('objects');
 				//XXXdone: using default table name, query for actual table name...
@@ -847,7 +847,7 @@
 				console.log("doExecuteUpdateAjax, rel.name:",rel.name.toUpperCase(),'qon-tables:',qonTablesTable.toUpperCase(),nv.formData.get("v:NAME"));
 			}
 			else {
-				showErrorMessages(messagesId, jqXHR.responseText);
+				showErrorMessages(messagesId, xhr.responseText);
 			}
 		}
 		//console.log("grh: ",request.getRequestHeader("Content-Type"));
@@ -872,7 +872,7 @@
 		});
 		
 		btnActionStart('btnUpdate');
-		request.done(function(data, textStatus, jqXHR) {
+		request.done(function(data, textStatus, xhr) {
 			btnActionStop('btnUpdate');
 			//console.log(data);
 			// test for count (data)==1
@@ -887,9 +887,9 @@
 				changeMessagesClass(messagesId, 'error');
 			}
 		});
-		request.fail(function(jqXHR, textStatus, errorThrown) {
+		request.fail(function(xhr, textStatus, errorThrown) {
 			btnActionStop('btnUpdate');
-			console.log("reloadTables: fail: ", jqXHR);
+			console.log("reloadTables: fail: ", xhr);
 		});
 	}
 
@@ -908,7 +908,7 @@
 		});
 		
 		btnActionStart('btnUpdate');
-		request.done(function(data, textStatus, jqXHR) {
+		request.done(function(data, textStatus, xhr) {
 			btnActionStop('btnUpdate');
 			//console.log(data);
 			// test for count (data)==1
@@ -922,11 +922,11 @@
 				changeMessagesClass(messagesId, 'error');
 			}
 		});
-		request.fail(function(jqXHR, textStatus, errorThrown) {
+		request.fail(function(xhr, textStatus, errorThrown) {
 			btnActionStop('btnUpdate');
 			appendMessages(messagesId, ' - error validating executable '+(execName?'<code>'+execName+'</code>':'')+' [status='+textStatus+']');
 			changeMessagesClass(messagesId, 'error');
-			console.log("reloadExecs: fail: xhr: ",jqXHR,"; error",errorThrown);
+			console.log("reloadExecs: fail: xhr: ",xhr,"; error",errorThrown);
 		});
 	}
 	*/

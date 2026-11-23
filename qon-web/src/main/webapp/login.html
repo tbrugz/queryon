@@ -14,7 +14,7 @@
 //var urlSettings = "../qinfo/settings";
 var urlLogin = "qauth/login";
 
-onLoad = function() {
+function onLoad() {
 	//console.log("onLoad...");
 	loadSettings(loadSettingsCallback);
 	// loadAuthInfo(); //?
@@ -23,7 +23,7 @@ onLoad = function() {
 	form.addEventListener('submit', doLogin);
 }
 
-loadSettingsCallback = function() {
+function loadSettingsCallback() {
 	//console.log("loadSettingsCallback:", settings);
 	var appname = settings["queryon.web.appname"];
 	var loginMessage = settings["queryon.web.login-message"];
@@ -42,7 +42,7 @@ loadSettingsCallback = function() {
 	}
 }
 
-doLogin = function(event) {
+function doLogin(event) {
 	// FormData is always multipart/form-data
 	// https://stackoverflow.com/questions/7542586/new-formdata-application-x-www-form-urlencoded
 	/*var formData = new FormData();

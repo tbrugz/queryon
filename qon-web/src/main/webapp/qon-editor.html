@@ -24,16 +24,16 @@
 }
 	</style>
 	<script src="js/qon-base.js"></script>
-	<script type="text/javascript" src="js/http-post.js"></script>
-	<script type="text/javascript" src="js/qon-util.js"></script>
-	<script type="text/javascript" src="js/settings.js"></script>
-	<script type="text/javascript" src="js/auth.js"></script>
-	<script type="text/javascript" src="js/models.js"></script>
-	<script type="text/javascript" src="js/table.js"></script>
+	<script src="js/http-post.js"></script>
+	<script src="js/qon-util.js"></script>
+	<script src="js/settings.js"></script>
+	<script src="js/auth.js"></script>
+	<script src="js/models.js"></script>
+	<script src="js/table.js"></script>
 	<script src="js/ui.js"></script>
-	<script type="text/javascript" src="js/editor.js"></script>
+	<script src="js/editor.js"></script>
 	<script src="js/xtra.js"></script>
-<script type="text/javascript">
+<script>
 	const DEFAULT_TABLE_NAME = "QON_QUERIES";
 	var responseType = "htmlx";
 	var queryOnUrl = 'q';
@@ -202,17 +202,17 @@
 			updateUI();
 		});
 
-		request.fail(function(jqXHR, textStatus, errorThrown) {
+		request.fail(function(xhr, textStatus, errorThrown) {
 			btnActionStop('btnRun');
-			//console.log(jqXHR);
-			errorMessage(jqXHR.responseText
-					+(jqXHR.status==403?" (invalid session?)":"")
+			//console.log(xhr);
+			errorMessage(xhr.responseText
+					+(xhr.status==403?" (invalid session?)":"")
 					);
-			checkForSqlWarnings(jqXHR, editor);
+			checkForSqlWarnings(xhr, editor);
 			closeResults();
 			closeMessages('status-container');
 			updateUI();
-			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			//alert("Request failed ["+textStatus+"]: "+xhr.responseText);
 		});
 	}
 	//type: 'POST'
@@ -244,11 +244,11 @@
 		});
 		
 		btnActionStart('btnValidate');
-		request.done(function(data, textStatus, jqXHR) {
+		request.done(function(data, textStatus, xhr) {
 			btnActionStop('btnValidate');
-			var paramNames = jqXHR.getResponseHeader('X-Validate-NamedParameterNames');
-			var paramCount = jqXHR.getResponseHeader('X-Validate-ParameterCount');
-			var paramOptionals = jqXHR.getResponseHeader('X-Validate-OptionalParameters');
+			var paramNames = xhr.getResponseHeader('X-Validate-NamedParameterNames');
+			var paramCount = xhr.getResponseHeader('X-Validate-ParameterCount');
+			var paramOptionals = xhr.getResponseHeader('X-Validate-OptionalParameters');
 			console.log('#params = ', paramCount, ' ; named-params = ', paramNames, ' ; optional-params = ', paramOptionals);
 			//XXX set named parameters
 			//var container = document.getElementById('sqlparams');
@@ -266,15 +266,15 @@
 			updateUI();
 		});
 
-		request.fail(function(jqXHR, textStatus, errorThrown) {
+		request.fail(function(xhr, textStatus, errorThrown) {
 			btnActionStop('btnValidate');
-			//console.log(jqXHR);
-			errorMessage(jqXHR.responseText
-					+(jqXHR.status==403?" (invalid session?)":"")
+			//console.log(xhr);
+			errorMessage(xhr.responseText
+					+(xhr.status==403?" (invalid session?)":"")
 					);
-			checkForSqlWarnings(jqXHR, editor);
+			checkForSqlWarnings(xhr, editor);
 			closeResults();
-			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			//alert("Request failed ["+textStatus+"]: "+xhr.responseText);
 			updateUI();
 		});
 	}
@@ -312,9 +312,9 @@
 		});
 		
 		btnActionStart('btnExplain');
-		request.done(function(data, textStatus, jqXHR) {
+		request.done(function(data, textStatus, xhr) {
 			btnActionStop('btnExplain');
-			//var paramCount = jqXHR.getResponseHeader('X-Validate-ParameterCount');
+			//var paramCount = xhr.getResponseHeader('X-Validate-ParameterCount');
 			//console.log('#params = '+paramCount);
 			//var container = document.getElementById('sqlparams');
 			//setParameters(paramCount);
@@ -331,15 +331,15 @@
 			updateUI();
 		});
 
-		request.fail(function(jqXHR, textStatus, errorThrown) {
+		request.fail(function(xhr, textStatus, errorThrown) {
 			btnActionStop('btnExplain');
-			//console.log(jqXHR);
-			errorMessage(jqXHR.responseText
-					+(jqXHR.status==403?" (invalid session?)":"")
+			//console.log(xhr);
+			errorMessage(xhr.responseText
+					+(xhr.status==403?" (invalid session?)":"")
 					);
-			checkForSqlWarnings(jqXHR, editor);
+			checkForSqlWarnings(xhr, editor);
 			closeResults();
-			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			//alert("Request failed ["+textStatus+"]: "+xhr.responseText);
 			updateUI();
 		});
 	}
@@ -416,13 +416,13 @@
 			updateUI();
 		});
 
-		request.fail(function(jqXHR, textStatus, errorThrown) {
+		request.fail(function(xhr, textStatus, errorThrown) {
 			btnActionStop('btnSave');
-			//console.log(jqXHR);
-			errorMessage('error saving query: '+jqXHR.responseText
-					+(jqXHR.status==403?" (invalid session?)":"")
+			//console.log(xhr);
+			errorMessage('error saving query: '+xhr.responseText
+					+(xhr.status==403?" (invalid session?)":"")
 					);
-			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
+			//alert("Request failed ["+textStatus+"]: "+xhr.responseText);
 			updateUI();
 		});
 	}
@@ -460,10 +460,10 @@
 			history.replaceState(null, null, "qon-editor.html" +(modelId!=null?"?model="+modelId:""));
 		});
 
-		request.fail(function(jqXHR, textStatus, errorThrown) {
-			//console.log(jqXHR);
-			errorMessage('error removing query: '+jqXHR.responseText
-					+(jqXHR.status==403?" (invalid session?)":"")
+		request.fail(function(xhr, textStatus, errorThrown) {
+			//console.log(xhr);
+			errorMessage('error removing query: '+xhr.responseText
+					+(xhr.status==403?" (invalid session?)":"")
 					);
 		});
 	}
@@ -829,7 +829,7 @@
 	window.addEventListener('resize', updateUI);
 
 </script>
-<script type="text/javascript">
+<script>
 	document.addEventListener('keydown', function(e) {
 		switch(e.key) {
 			case 'F8':
@@ -922,7 +922,7 @@
 
 <!-- see http://ace.c9.io/ -->
 <!-- style? see http://ace.c9.io/build/kitchen-sink.html -->
-<script src="js/vendor/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/vendor/ace/ace.js" charset="utf-8"></script>
 <script>
 	var editor = ace.edit("editor");
 	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?

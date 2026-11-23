@@ -41,8 +41,8 @@ function updatePageContent() {
 			document.getElementById('preview').innerHTML = md;
 			postProcess();
 		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			console.log('error reading: '+url, jqXHR, textStatus, errorThrown);
+		error: function(xhr, textStatus, errorThrown) {
+			console.log('error reading: '+url, xhr, textStatus, errorThrown);
 		}
 	});
 }

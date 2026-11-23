@@ -28,11 +28,11 @@ function loadQueries0(url, containerId, callback, modelId) {
 			}
 			callback(containerId, rels);
 		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			//console.log("jqXHR", jqXHR, "textStatus", textStatus, "errorThrown", errorThrown);
-			var message = jqXHR.responseText;
+		error: function(xhr, textStatus, errorThrown) {
+			//console.log("xhr", xhr, "textStatus", textStatus, "errorThrown", errorThrown);
+			var message = xhr.responseText;
 			if(!message) {
-				message = jqXHR.status + ": " + escapeXML(jqXHR.statusText);
+				message = xhr.status + ": " + escapeXML(xhr.statusText);
 			}
 			showErrorMessages(messagesId, message);
 		}
@@ -279,11 +279,11 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 			//var doneTimeMilis = Date.now();
 			//console.log('doRun: times: ', startTimeMilis, completedTimeMilis, doneTimeMilis);
 		},
-		error: function(jqXHR, textStatus, errorThrown) {
+		error: function(xhr, textStatus, errorThrown) {
 			btnActionStop('go-button');
 			tblActivate(document.querySelector('#content > table'));
-			showErrorMessages(messagesId, jqXHR.responseText ? jqXHR.responseText : "No response from server");
-			//if(! jqXHR.responseText) { console.warn("Error", jqXHR); }
+			showErrorMessages(messagesId, xhr.responseText ? xhr.responseText : "No response from server");
+			//if(! xhr.responseText) { console.warn("Error", xhr); }
 			if(errorCallback) { errorCallback(errorThrown); }
 		}
 	});
@@ -696,17 +696,17 @@ function doDelete(selectId, key, containerId, messagesId, callback, callbackErro
 		url: finalUrl,
 		method: 'DELETE',
 		dataType: "text",
-		success: function(data, textStatus, jqXHR) {
+		success: function(data, textStatus, xhr) {
 			btnActionStop('go-button');
 			var completedTimeMilis = Date.now();
-			showInfoMessages(messagesId, jqXHR.responseText+" [please refresh page]");
+			showInfoMessages(messagesId, xhr.responseText+" [please refresh page]");
 			//showRunStatusInfo(containerId, 'status-container', startTimeMilis, completedTimeMilis);
-			if(callback) { callback(jqXHR); }
+			if(callback) { callback(xhr); }
 		},
-		error: function(jqXHR, textStatus, errorThrown) {
+		error: function(xhr, textStatus, errorThrown) {
 			btnActionStop('go-button');
-			showErrorMessages(messagesId, jqXHR.responseText);
-			if(callbackError) { callbackError(jqXHR); }
+			showErrorMessages(messagesId, xhr.responseText);
+			if(callbackError) { callbackError(xhr); }
 		}
 	});
 }

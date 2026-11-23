@@ -29,7 +29,7 @@ function escapeXML(str) {
 }
 
 // see: http://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
-safeTags = function (str) {
+function safeTags(str) {
 	return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
 }
 
@@ -242,7 +242,7 @@ function closeDialogMessage() {
 
 // ---------- select's functions ----------
 
-loadSelect = function(data, selectId, callbackName, callbackValue, dataClasses) {
+function loadSelect(data, selectId, callbackName, callbackValue, dataClasses) {
 	if(!callbackName) { callbackName = function(obj) { return obj; } }
 	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
 	var sel = document.getElementById(selectId);
@@ -262,7 +262,7 @@ loadSelect = function(data, selectId, callbackName, callbackValue, dataClasses) 
 	}
 }
 
-updateSelectValue = function(select, value) {
+function updateSelectValue(select, value) {
 	//console.log("updateSelectValue", select, value, select.selectedIndex);
 	var prevIdx = select.selectedIndex;
 	for(var i=0;i<select.options.length;i++) {
@@ -275,7 +275,7 @@ updateSelectValue = function(select, value) {
 	return false;
 }
 
-getSelectMultiOptions = function(selectId) {
+function getSelectMultiOptions(selectId) {
 	var select = document.getElementById(selectId);
 	var schemaOptions = select.selectedOptions;
 	var schemas = [];
@@ -285,7 +285,7 @@ getSelectMultiOptions = function(selectId) {
 	return schemas;
 }
 
-setSelectMultiOptions = function(select, values) {
+function setSelectMultiOptions(select, values) {
 	for(var i=0 ; i<select.options.length ; i++) {
 		for(var j=0 ; j<values.length ; j++) {
 			if(select.options[i] && values[j] && (select.options[i].value==values[j]) ) {

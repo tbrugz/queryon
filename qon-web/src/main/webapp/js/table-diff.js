@@ -2,7 +2,7 @@ console.log("table-diff.js loaded");
 
 var doRemoveTrailingWhitespace = true;
 
-byId = function (id) { return document.getElementById(id); };
+function byId(id) { return document.getElementById(id); };
 
 function getAddElements() {
 	return document.querySelectorAll("td > span.add");
@@ -72,7 +72,7 @@ function closeDiff() {
 	document.documentElement.style.overflow = '';
 }
 
-removeTrailingWhitespace = function(txt) {
+function removeTrailingWhitespace(txt) {
 	var pattern = /\s*$/g;
 	var newtxt = [];
 	for(var i=0;i<txt.length;i++) {
@@ -81,7 +81,7 @@ removeTrailingWhitespace = function(txt) {
 	return newtxt;
 }
 
-diffHasChanges = function(opcodes) {
+function diffHasChanges(opcodes) {
 	for(var i=0;i<opcodes.length;i++) {
 		if(opcodes[i][0]!='equal') {
 			return true;
@@ -94,7 +94,7 @@ diffHasChanges = function(opcodes) {
 //		document.getElementById('modelSource').value, document.getElementById('modelTarget').value,
 //		'diffoutput', inverse);
 
-diffUsingJS = function(viewType, from, to, fromTitle, toTitle, outputId, invertSides) {
+function diffUsingJS(viewType, from, to, fromTitle, toTitle, outputId, invertSides) {
 	"use strict";
 	//console.log("viewType=",viewType);
 	//console.log("diff0: ", from, to);

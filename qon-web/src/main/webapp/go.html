@@ -19,13 +19,13 @@
 	<script>
 var queryOnUrl = 'q/';
 
-onLoad = function() {
+function onLoad() {
 	loadSettings(makeHrefs);
 	loadAuthInfo();
 	loadModels();
 }
 
-doLoadExecs = function() {
+function doLoadExecs() {
 	var queryString = (getCurrentModelId()?'?model='+getCurrentModelId():'');
 
 	var url = qonContextPath() + queryOnUrl + 'executable.json' + queryString;
@@ -35,7 +35,7 @@ doLoadExecs = function() {
 	oReq.send();
 };
 
-loadSelectContent = function(oEvent) {
+function loadSelectContent(oEvent) {
 	var txt = oEvent.target.responseText;
 	var execs = JSON.parse(txt);
 	var executables = getQonData(execs);
@@ -56,11 +56,11 @@ loadSelectContent = function(oEvent) {
 	makeHrefs();
 }
 
-onModelChanged = function() {
+function onModelChanged() {
 	doLoadExecs();
 }
 
-onExecChanged = function(doUpdateFragment) {
+function onExecChanged(doUpdateFragment) {
 	var select = document.getElementById('objects');
 	var idx = select.selectedIndex;
 	var option = select.options[idx];
@@ -87,11 +87,11 @@ onExecChanged = function(doUpdateFragment) {
 	if(doUpdateFragment) { updateURLFragment(); }
 }
 
-onParameterChange = function() {
+function onParameterChange() {
 	updateURLFragment();
 }
 
-makeHrefs = function() {
+function makeHrefs() {
 	refreshAuthInfo();
 	//console.log('auth', authInfo);
 	if(authInfo.isDev) {
@@ -112,7 +112,7 @@ function updateUI() {
 	document.getElementById('content-container').style.top = 10 + document.getElementById('nav').offsetHeight + 'px';
 }
 
-doGo = function() {
+function doGo() {
 	var select = document.getElementById('objects');
 	var idx = select.selectedIndex;
 	var option = select.options[idx];
@@ -153,7 +153,7 @@ doGo = function() {
 	closeMessages('messages');
 }
 
-doGoCallback = function(oEvent) {
+function doGoCallback(oEvent) {
 	btnActionStop('go-button');
 	var status = oEvent.target.status;
 	var txt = oEvent.target.responseText;
@@ -167,7 +167,7 @@ doGoCallback = function(oEvent) {
 	//console.log('doGoCallback: ', oEvent);
 }
 
-goSetParameters = function(parametersId, pars) {
+function goSetParameters(parametersId, pars) {
 	var paramsContainer = document.getElementById('parameters');
 	paramsContainer.innerHTML = '';
 	var content = '';
@@ -203,7 +203,7 @@ function loadModelsContentCallback() {
 	doLoadExecs();
 }
 
-updateURLFragment = function() {
+function updateURLFragment() {
 	//var model = document.getElementById('model').value;
 	var select = document.getElementById('objects');
 	var idx = select.selectedIndex;
@@ -220,7 +220,7 @@ updateURLFragment = function() {
 	history.replaceState(null, null, "#"+state);
 }
 
-updateUIFromFragmentSelect = function() {
+function updateUIFromFragmentSelect() {
 	var hash = getLocationHash();
 	if(hash.indexOf('#')==0) {
 		hash = hash.substring(1);
@@ -235,7 +235,7 @@ updateUIFromFragmentSelect = function() {
 	}
 }
 
-updateUIFromFragmentParams = function() {
+function updateUIFromFragmentParams() {
 	var hash = getLocationHash();
 	if(hash.indexOf('#')==0) {
 		hash = hash.substring(1);

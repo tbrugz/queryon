@@ -14,7 +14,7 @@
 	<script src="js/settings.js"></script>
 	<script src="js/menu.js"></script>
 	<script src="js/xtra.js"></script>
-<script type="text/javascript">
+<script>
 
 //javascript, html, json, markdown, css, xml
 var extMap = {
@@ -46,7 +46,7 @@ var qonUrl = 'q/QON_PAGES'; //XXX: ignore-case?
 var qonEditorUrl = 'pages-editor.html'
 var pages = [];
 
-onLoad = function() {
+function onLoad() {
 	//var id = getParameterByName('id', location.search);
 	updateUI();
 	loadAuthInfo();
@@ -54,7 +54,7 @@ onLoad = function() {
 	loadSettings(onLoadAfter);
 };
 
-onLoadAfter = function() {
+function onLoadAfter() {
 	//console.log("onLoadAfter", authInfo.loaded, settings['queryon.project.version'], modelsInfo);
 	if(! authInfo.loaded) return;
 	if(! settings['queryon.project.version']) return;
@@ -70,7 +70,7 @@ onLoadAfter = function() {
 loadAuthInfoCallback = onLoadAfter;
 //loadModelsContentCallback = onLoadAfter;
 
-onModelChanged = function() {
+function onModelChanged() {
 	updateQonPagesUrls();
 	updateUI();
 	updatePagesList();
@@ -98,14 +98,14 @@ function loadModelsContentCallback() {
 	onLoadAfter();
 }
 
-updateUI = function() {
+function updateUI() {
 	document.getElementById('content').style.top = document.getElementById('nav').offsetHeight + 'px';
 }
 
 
 window.onresize = updateUI;
 
-makeHrefs = function() {
+function makeHrefs() {
 	var urlNew = byId('url-editor-new');
 	var urlUpload = byId('url-upload');
 	
@@ -120,17 +120,17 @@ makeHrefs = function() {
 	}
 }
 
-clearPagesList = function() {
+function clearPagesList() {
 	var content = byId('content');
 	content.innerHTML = '';
 }
 
-updatePagesList = function() {
+function updatePagesList() {
 	clearPagesList();
 	loadPagesList();
 }
 
-loadPagesList = function() {
+function loadPagesList() {
 	closeMessages('messages');
 
 	var loadUrl = qonContextPath()+qonUrl+'.json';
@@ -183,16 +183,16 @@ loadPagesList = function() {
 	//btnActionStart('url-refresh');
 }
 
-hasBody = function(hasBodyVal) {
+function hasBody(hasBodyVal) {
 	if(!hasBodyVal) return false;
 	return hasBodyVal.substring(0,1).toUpperCase() === "T";
 }
 
-updateBlob = function(id) {
+function updateBlob(id) {
 	openUploadDialog(id);
 }
 
-prettyLink = function(str) {
+function prettyLink(str) {
 	if(str==null) return null;
 	var idx = str.indexOf("?");
 	if(idx>0) {
@@ -201,7 +201,7 @@ prettyLink = function(str) {
 	return str.replace(/\//g, " / ");
 }
 
-removePage = function(id, path) {
+function removePage(id, path) {
 	
 	if(confirm("remove page "+path+"?")) {
 		var loadUrl = qonContextPath()+qonUrl+'/'+id+'.json';
@@ -231,7 +231,7 @@ removePage = function(id, path) {
 	}
 }
 
-openUploadDialog = function(id) {
+function openUploadDialog(id) {
 	var dialogCont = document.getElementById('dialog-container');
 	dialogCont.style.display = 'block';
 
@@ -263,7 +263,7 @@ openUploadDialog = function(id) {
 	}
 }
 
-onFileChange = function() {
+function onFileChange() {
 	var filename = byId('v:BINARY_DATA').files[0].name;
 	if(! byId('v:PATH').value) {
 		byId('v:PATH').value = filename;
@@ -271,20 +271,20 @@ onFileChange = function() {
 	//console.log(, byId('v:PATH'));
 }
 
-findPage = function(id) {
+function findPage(id) {
 	for(var i=0;i<pages.length;i++) {
 		if(pages[i].ID==id || pages[i].id==id) { return pages[i]; }
 	}
 	return null;
 }
 
-closeUploadDialog = function() {
+function closeUploadDialog() {
 	var dialogCont = document.getElementById('dialog-container');
 	dialogCont.style.display = 'none';
 	closeMessages("update-dialog");
 }
 
-doConfirmUpload = function() {
+function doConfirmUpload() {
 
 	var formElement = document.querySelector("#upload-form");
 	var request = new XMLHttpRequest();

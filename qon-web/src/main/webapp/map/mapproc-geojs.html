@@ -5,13 +5,13 @@
 <link rel="stylesheet" type="text/css" href="css/mapproc.css" />
 <link rel="stylesheet" type="text/css" href="css/qonmap.css" />
 <link rel="icon" type="image/png" href="../favicon.png" />
-<script type="text/javascript" src="../js/qon-base.js"></script>
-<script type="text/javascript" src="../js/queryon-b.js"></script>
-<script type="text/javascript" src="../js/qon-util.js"></script>
-<script type="text/javascript" src="js/mapproc.js"></script>
-<script type="text/javascript" src="js/mapproc.sa.js"></script>
-<script type="text/javascript" src="js/jscolor/jscolor.js"></script>
-<script type="text/javascript">
+<script src="../js/qon-base.js"></script>
+<script src="../js/queryon-b.js"></script>
+<script src="../js/qon-util.js"></script>
+<script src="js/mapproc.js"></script>
+<script src="js/mapproc.sa.js"></script>
+<script src="js/jscolor/jscolor.js"></script>
+<script>
 /*
  * Mapproc project, see: https://github.com/tbrugz/mapproc
  */
@@ -28,7 +28,7 @@ var mapsData = {}; //loaded from maps.json
 function loadNakedMap(map_canvas_id, mapUrl) {
 	//var dataPlaces = mapUrl;
 	console.log("loadNakedMap:: mapUrl=",mapUrl);
-	var jqxhrPlaces = qonAjax({
+	qonAjax({
 		url: mapUrl,
 		dataType: 'text',
 		success: function(data) {
@@ -160,7 +160,7 @@ function loadData(dataUrl) {
 	//var dataUrl = document.getElementById('dataUrl').value;
 	console.log("loadData:: dataurl=",dataUrl);
 	btnActionStart('btn-loaddata');
-	var jqxhrSeries = qonAjax({ url: dataUrl,
+	qonAjax({ url: dataUrl,
 		dataType: 'text',
 		success: function(data) {
 			//okNumber++;
@@ -670,8 +670,8 @@ qonAjax({
 		refreshDataUrlColumns();
 		onLoadUpdateUiComponents();
 	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.log('Error: relation.json', jqXHR, textStatus, errorThrown);
+	error: function(xhr, textStatus, errorThrown) {
+		console.log('Error: relation.json', xhr, textStatus, errorThrown);
 	}
 });
 }
@@ -700,8 +700,8 @@ qonAjax({
 		}
 		ajaxCallsOnLoadRelation();
 	},
-	error: function(jqXHR, textStatus, errorThrown) {
-		console.warn('Error: maps.json', jqXHR, textStatus, errorThrown);
+	error: function(xhr, textStatus, errorThrown) {
+		console.warn('Error: maps.json', xhr, textStatus, errorThrown);
 	}
 });
 }

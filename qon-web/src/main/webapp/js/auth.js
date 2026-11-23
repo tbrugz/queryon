@@ -135,7 +135,7 @@ function authLogout() {
 	var request = new XMLHttpRequest();
 	request.open("GET", authGetLogoutUrl(), true);
 	request.onload = function(evt) {
-		//var jqXHR = evt.target;
+		//var xhr = evt.target;
 		//console.log('request: ', request,' ; oEvent: ', oEvent);
 		if (request.status >= 200 && request.status < 300) {
 			location.reload();

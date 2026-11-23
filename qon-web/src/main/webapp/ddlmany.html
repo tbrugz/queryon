@@ -10,7 +10,7 @@
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<link href="css/vendor/prism.css" rel="stylesheet" />
-	<script type="text/javascript" src="js/vendor/prism.min.js"></script>
+	<script src="js/vendor/prism.min.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
 	<script src="js/auth.js"></script>
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded',
 	}
 );
 
-makeHrefs = function() {
+function makeHrefs() {
 	refreshAuthInfo();
 }
 
@@ -92,7 +92,7 @@ qonAjax({
 });
 
 //TODOne: schemas by model?
-loadSchemas = function(model) {
+function loadSchemas(model) {
 	var url = qonContextPath()+'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
 	qonAjax({
@@ -112,7 +112,7 @@ loadSchemas = function(model) {
 	});
 }
 
-joinSchemas = function() {
+function joinSchemas() {
 	//console.log('joinSchemas, schemas',Object.keys(schemasByModel).length,document.getElementById(defaultModelId).childElementCount);
 	if(Object.keys(schemasByModel).length < document.getElementById(defaultModelId).childElementCount) { return; }
 	/*for(var i=0;i<Object.keys(schemasByModel).length;i++) {
@@ -124,7 +124,7 @@ joinSchemas = function() {
 	loadModel();
 }
 
-loadModel = function() {
+function loadModel() {
 	//TODO!!: merge models...
 	var m = document.getElementById(defaultModelId).value;
 	//console.log('loadModel, model:', m, defaultModelId, schemasByModel[m], schemasByModel);
@@ -133,37 +133,37 @@ loadModel = function() {
 	refreshSelectsState();
 }
 
-onModelChanged = function() {
+function onModelChanged() {
 	updateState();
 	loadModel();
 }
 
-onSchemaChanged = function() {
+function onSchemaChanged() {
 	updateState();
 }
 
-onObjTypeChanged = function() {
+function onObjTypeChanged() {
 	updateState();
 }
 
-onSyntaxChanged = function() {
+function onSyntaxChanged() {
 	updateState();
 }
 
-doDdlMany = function() {
+function doDdlMany() {
 	doClear();
 	getDDLdiff();
 }
 
-doClear = function() {
+function doClear() {
 	document.getElementById('content-container').style.display = 'none';
 }
 
-isMultiModel = function() {
+function isMultiModel() {
 	return Object.keys(schemasByModel).length > 1;
 }
 
-getDDLdiff = function(apply) {
+function getDDLdiff(apply) {
 	//apply = apply==='true'?'true':false;
 	// /qdiff/TABLE/<shcema>.<object>?modelSource=x&modelTarget=y
 	var schemas = getSelectMultiOptions('schema').join();
@@ -283,7 +283,7 @@ function refreshSelectsState() {
 	}
 }
 
-updateUIModelsContainer = function() {
+function updateUIModelsContainer() {
 	if(isMultiModel()) {
 		document.getElementById('models-container').style.display = 'inline-block';
 	}
@@ -292,7 +292,7 @@ updateUIModelsContainer = function() {
 	}
 }
 
-updateUI = function() {
+function updateUI() {
 	document.getElementById('content-container').style.top = document.getElementById('nav').offsetHeight + 'px';
 }
 
