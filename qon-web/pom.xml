@@ -101,7 +101,7 @@
         </configuration>
       </plugin>
 
-      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead-standalone, swagger-ui, ...) into src/main/webapp/js/vendor and swagger-ui; skip with -Dskip.frontend=true -->
+      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead-standalone, swagger-ui, graphiql, ...) into src/main/webapp/js/vendor and swagger-ui; skip with -Dskip.frontend=true -->
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>

@@ -1605,6 +1605,15 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void graphiqlHtml() throws IOException {
+		String content = getContentFromUrl(qonUrl+"/graphiql.html");
+		Assert.assertFalse("graphiql.html should not use CDNs", content.contains("//cdn."));
+		Assert.assertTrue("graphiql.html should load local graphiql", content.contains("js/vendor/graphiql/graphiql.min.js"));
+		String js = getContentFromUrl(qonUrl+"/js/vendor/graphiql/graphiql.min.js");
+		Assert.assertTrue("graphiql.min.js should be served", js.contains("GraphiQL"));
+	}
+
+	@Test
 	public void swaggerGsonParse() throws IOException, ParserConfigurationException, SAXException {
 		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
 		//System.out.println(jsonStr);

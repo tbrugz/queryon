@@ -77,6 +77,14 @@ for (const f of aceFiles) {
 fs.writeFileSync(path.join(aceOut, 'mode-qon_sql.js'),
   fs.readFileSync(path.join(aceSrc, 'mode-sql.js'), 'utf8') + '\n;\n' + fs.readFileSync(path.resolve(here, 'ace/mode-qon_sql.js'), 'utf8'));
 
+// graphiql (prebuilt UMD, needs global React & ReactDOM)
+const graphiqlOut = path.join(outDir, 'graphiql');
+fs.mkdirSync(graphiqlOut, { recursive: true });
+fs.copyFileSync(path.resolve(here, 'node_modules/graphiql/graphiql.min.js'), path.join(graphiqlOut, 'graphiql.min.js'));
+fs.copyFileSync(path.resolve(here, 'node_modules/react/umd/react.production.min.js'), path.join(graphiqlOut, 'react.production.min.js'));
+fs.copyFileSync(path.resolve(here, 'node_modules/react-dom/umd/react-dom.production.min.js'), path.join(graphiqlOut, 'react-dom.production.min.js'));
+fs.copyFileSync(path.resolve(here, 'node_modules/graphiql/graphiql.min.css'), path.join(cssOutDir, 'graphiql.min.css'));
+
 // swagger-ui (only the files used by index.html, copied from swagger-ui-dist)
 const swaggerSrc = path.resolve(here, 'node_modules/swagger-ui-dist');
 const swaggerOut = path.resolve(here, '../webapp/swagger-ui');

@@ -12,6 +12,9 @@
       margin: 0;
       overflow: hidden;
     }
+    #graphiql {
+      height: 100vh;
+    }
     #splash {
       color: #333;
       display: flex;
@@ -23,17 +26,19 @@
     }
   </style>
   <link rel="icon" href="favicon.ico">
-  <link href="//cdn.jsdelivr.net/npm/graphiql@0.11.11/graphiql.css" rel="stylesheet" />
+  <link href="css/vendor/graphiql.min.css" rel="stylesheet" />
 </head>
 <body>
-  <div id="splash">
-    Loading&hellip;
+  <div id="graphiql">
+    <div id="splash">
+      Loading&hellip;
+    </div>
   </div>
-  <script src="//cdn.jsdelivr.net/es6-promise/4.0.5/es6-promise.auto.min.js"></script>
-  <script src="//cdn.jsdelivr.net/react/15.4.2/react.min.js"></script>
-  <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/graphiql@0.11.11/graphiql.min.js"></script>
+  <script src="js/vendor/graphiql/react.production.min.js"></script>
+  <script src="js/vendor/graphiql/react-dom.production.min.js"></script>
+  <script src="js/vendor/graphiql/graphiql.min.js"></script>
   <!-- <script src="schema.js"></script> -->
+  <script src="js/qon-base.js"></script>
   <script src="js/xtra.js"></script>
   <script>
       // Parse the search string to get url parameters.
@@ -107,8 +112,8 @@
         });
       }
 
-      // Render <GraphiQL /> into the body.
-      ReactDOM.render(
+      // Render <GraphiQL /> into #graphiql.
+      ReactDOM.createRoot(document.getElementById('graphiql')).render(
         React.createElement(GraphiQL, {
           fetcher: graphQLFetcher,
           query: parameters.query,
@@ -117,8 +122,7 @@
           onEditQuery: onEditQuery,
           onEditVariables: onEditVariables,
           onEditOperationName: onEditOperationName
-        }),
-        document.body,
+        })
       );
   </script>
 </body>

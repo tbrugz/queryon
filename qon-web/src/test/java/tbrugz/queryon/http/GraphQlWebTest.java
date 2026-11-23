@@ -173,6 +173,7 @@ public class GraphQlWebTest {
 	@Test
 	public void getMetadata() throws IOException, ParserConfigurationException, SAXException {
 		String query = "{ __schema { types { name } } }";
+		//0 { __schema { types { name,  kind, description } } }
 		String jsonStr = getContent(query);
 		//System.out.println("content:\n"+jsonStr);
 
