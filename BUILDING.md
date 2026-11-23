@@ -16,7 +16,7 @@ you may build it first (and publish it to your local maven repo)
 
 Deploy (local/sonatype), see: [doc/mvn-deploy.md](doc/mvn-deploy.md)
 
-Frontend: `qon-web` bundles npm-managed libs (jquery 3, typeahead-standalone, d3, nvd3, prism, font-awesome, sigma, ace, marked, swagger-ui, graphiql/react) from `qon-web/src/main/frontend`
+Frontend: `qon-web` bundles npm-managed libs (typeahead-standalone, d3, nvd3, prism, font-awesome, sigma, ace, marked, swagger-ui, graphiql/react) from `qon-web/src/main/frontend`
 into `qon-web/src/main/webapp/js/vendor` and `qon-web/src/main/webapp/swagger-ui` (git-ignored) during `generate-resources`, using `frontend-maven-plugin`
 (node is downloaded automatically). Skip with `-Dskip.frontend=true` if `js/vendor` and `swagger-ui` are already built;
 for manual builds: `cd qon-web/src/main/frontend && npm ci && npm run build`

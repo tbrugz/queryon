@@ -85,8 +85,7 @@ function qonAjax(opts) {
 	var body = null;
 	var data = opts.data;
 	if(data!=null && typeof data !== 'string') {
-		data = Object.keys(data).filter(function(k) { return data[k]!==undefined; })
-			.map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]==null ? '' : data[k]); })
+		data = Object.keys(data).map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]==null ? '' : data[k]); })
 			.join('&');
 	}
 	if(data!=null && data!=='') {

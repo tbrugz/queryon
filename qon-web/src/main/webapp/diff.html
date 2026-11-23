@@ -12,7 +12,6 @@
 	<meta charset="utf-8">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<!-- link href="css/vendor/prism.css" rel="stylesheet" /-->
-	<script type="text/javascript" src="js/vendor/jquery.min.js"></script>
 	<!-- script type="text/javascript" src="js/vendor/prism.min.js"></script-->
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
@@ -66,7 +65,7 @@ var schemasByModel = {};
 
 var defaultModelId = 'modelTarget';
 
-$(document).ready(
+document.addEventListener('DOMContentLoaded',
 	function() {
 		var tts = [];
 		var keys = Object.keys(typemap);
@@ -94,7 +93,7 @@ updateUI = function() {
 
 loadEnv = function() {
 	//console.log('loadEnv...');
-	$.ajax({
+	qonAjax({
 		url: 'qinfo/env',
 		dataType: "text",
 		success: function(data) {
@@ -126,7 +125,7 @@ loadEnv = function() {
 loadSchemas = function(model) {
 	var url = 'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
-	$.ajax({
+	qonAjax({
 		url: url,
 		dataType: "text",
 		success: function(data) {
@@ -201,7 +200,7 @@ loadObjectList = function(callbackOk) {
 	console.log("loadObjectList: url=",url);
 	closeMessages('messages');
 	btnActionStart('object');
-	$.ajax({
+	qonAjax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "json",
@@ -240,7 +239,7 @@ getDDL = function(modelId, contentId, contentTitleId, callback) {
 	var mblock = document.getElementById(contentId+"-msg");
 	var divStatus = document.getElementById(contentId+"-status");
 	
-	$.ajax({
+	qonAjax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "text",
@@ -580,7 +579,7 @@ getDDLdiff = function(apply) {
 	msg.style.display = 'none';
 	var applyBtn = document.getElementById('applyDdlDiffBtn');
 	
-	$.ajax({
+	qonAjax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "text",
@@ -757,14 +756,14 @@ loadSelect = function(data, selectId, callbackName, callbackValue) {
 	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
 	var sel = document.getElementById(selectId);
 	var prevOptionValue = sel.value;
-	$('#'+selectId).empty();
+	sel.innerHTML = '';
 	if(data==null) { console.log('null data; selectId: ',selectId); return; }
 	for(var i=0;i<data.length;i++) {
 		var name = callbackName(data[i]);
 		if(name==null) { continue; }
 		var optionValue = callbackValue(data[i]);
 		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
+		sel.insertAdjacentHTML('beforeend', "<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
 	}
 }
 
@@ -807,9 +806,9 @@ domSwith2ElementsInternal = function(e1, e2) {
 /*mergeSelect = function(data, selectId, idCallback, descCallback) {
 	if(!idCallback) { idCallback = function(obj) { return obj; } }
 	if(!descCallback) { descCallback = function(obj) { return obj; } }
-	//$('#'+selectId).empty();
+	//byId(selectId).innerHTML = '';
 	for(var i=0;i<data.length;i++) {
-		$('#'+selectId).append("<option value='"+idCallback(data[i])+"'>"+descCallback(data[i])+"</option>");
+		byId(selectId).insertAdjacentHTML('beforeend', "<option value='"+idCallback(data[i])+"'>"+descCallback(data[i])+"</option>");
 	}
 }*/
 

@@ -6,7 +6,6 @@
 	<link href="css/qon-components.css" rel="stylesheet">
 	<link rel="stylesheet" href="css/vendor/font-awesome/css/font-awesome.min.css">
 	<link rel="icon" type="image/png" href="favicon.png" />
-	<script type="text/javascript" src="js/vendor/jquery.min.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/queryon-b.js"></script>
 	<script src="js/queryon-b2.js"></script>
@@ -149,7 +148,7 @@ body {
 			for(var i=0;i<relations.length;i++) {
 				if(validGraphRelation(relations[i])) {
 					var id = getId(relations[i]);
-					$('#'+containerId).append("<option value='"+id+"'>"+getDescription(relations[i])+"</option>");
+					byId(containerId).insertAdjacentHTML('beforeend', "<option value='"+id+"'>"+getDescription(relations[i])+"</option>");
 					relationsHash[id] = relations[i];
 				}
 			}
@@ -324,7 +323,7 @@ body {
 			btnActionStart('go-button');
 			var url = qonContextPath()+queryOnUrl+'/'+qid+paramsStr+'.json?'+queryString;
 			//console.log('url['+qid+']: '+url);
-			var jqxhr = $.getJSON(url, function(data) {
+			qonAjax({ url: url, dataType: 'json' }).done(function(data) {
 				btnActionStop('go-button');
 				data = getQonData(data);
 				s.graph.clear();
@@ -385,9 +384,9 @@ body {
 				s.refresh();
 				document.getElementById('graphbuttons').style.display = 'initial';
 			})
-			.fail(function() {
+			.fail(function(xhr) {
 				btnActionStop('go-button');
-				showErrorMessages('messages', jqxhr.responseText);
+				showErrorMessages('messages', xhr.responseText);
 			});
 		}
 		

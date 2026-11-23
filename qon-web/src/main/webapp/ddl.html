@@ -10,7 +10,6 @@
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<link href="css/vendor/prism.css" rel="stylesheet" />
-	<script type="text/javascript" src="js/vendor/jquery.min.js"></script>
 	<script type="text/javascript" src="js/vendor/prism.min.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
@@ -48,7 +47,7 @@ var typemap = {
 var schemasByModel = {};
 var typesByModel = {};
 
-$(document).ready(
+document.addEventListener('DOMContentLoaded',
 	function() {
 		loadTypesSelect();
 		loadAuthInfo();
@@ -98,7 +97,7 @@ loadModelsContentCallback = function() {
 loadSchemas = function(model) {
 	var url = qonContextPath()+'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
-	$.ajax({
+	qonAjax({
 		url: url,
 		dataType: "text",
 		success: function(data) {
@@ -211,7 +210,7 @@ loadObjectList = function(callback) {
 	console.log("loadObjectList: model=",model,"url=",url,"type=",type,"schema=",schema);
 	closeMessages('messages');
 	btnActionStart('object');
-	$.ajax({
+	qonAjax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "json",
@@ -245,7 +244,7 @@ getDDL = function() {
 	console.log("getDDL: model=", model, "url=", url);
 	closeMessages('messages');
 	btnActionStart('go-button');
-	$.ajax({
+	qonAjax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "text",

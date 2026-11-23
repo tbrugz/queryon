@@ -5,7 +5,6 @@
 <link rel="stylesheet" type="text/css" href="css/mapproc.css" />
 <link rel="stylesheet" type="text/css" href="css/qonmap.css" />
 <link rel="icon" type="image/png" href="../favicon.png" />
-<script src="../js/vendor/jquery.min.js"></script>
 <script type="text/javascript" src="../js/qon-base.js"></script>
 <script type="text/javascript" src="../js/queryon-b.js"></script>
 <script type="text/javascript" src="../js/qon-util.js"></script>
@@ -29,7 +28,7 @@ var mapsData = {}; //loaded from maps.json
 function loadNakedMap(map_canvas_id, mapUrl) {
 	//var dataPlaces = mapUrl;
 	console.log("loadNakedMap:: mapUrl=",mapUrl);
-	var jqxhrPlaces = $.ajax({
+	var jqxhrPlaces = qonAjax({
 		url: mapUrl,
 		dataType: 'text',
 		success: function(data) {
@@ -161,7 +160,7 @@ function loadData(dataUrl) {
 	//var dataUrl = document.getElementById('dataUrl').value;
 	console.log("loadData:: dataurl=",dataUrl);
 	btnActionStart('btn-loaddata');
-	var jqxhrSeries = $.ajax({ url: dataUrl,
+	var jqxhrSeries = qonAjax({ url: dataUrl,
 		dataType: 'text',
 		success: function(data) {
 			//okNumber++;
@@ -636,7 +635,7 @@ function resetMap() {
 }
 
 function ajaxCallsOnLoadRelation() {
-$.ajax({
+qonAjax({
 	url: '../q/relation.json',
 	dataType: 'text',
 	success: function(data) {
@@ -678,7 +677,7 @@ $.ajax({
 }
 
 function ajaxCallsOnLoad() {
-$.ajax({
+qonAjax({
 	url: 'maps.json',
 	dataType: 'text',
 	success: function(data) {

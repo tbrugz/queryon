@@ -24,7 +24,6 @@
 }
 	</style>
 	<script src="js/qon-base.js"></script>
-	<script type="text/javascript" src="js/vendor/jquery.min.js"></script>
 	<script type="text/javascript" src="js/http-post.js"></script>
 	<script type="text/javascript" src="js/qon-util.js"></script>
 	<script type="text/javascript" src="js/settings.js"></script>
@@ -53,7 +52,7 @@
 	}
 	
 	function onLoad() {
-		$.ajax({
+		qonAjax({
 			dataType: 'text',
 			url: 'allroles.json',
 			success: function(data) {
@@ -180,7 +179,7 @@
 		
 		var startTimeMilis = Date.now();
 		
-		var request = $.ajax({
+		var request = qonAjax({
 			url : qonContextPath()+queryOnUrl+"/QueryAny."+responseType,
 			//url : "q/QueryAny"+paramsStr+"."+responseType,
 			type : "POST",
@@ -216,7 +215,7 @@
 			//alert("Request failed ["+textStatus+"]: "+jqXHR.responseText);
 		});
 	}
-	//type: 'POST' - https://api.jquery.com/jQuery.ajax/
+	//type: 'POST'
 
 	function doValidate() {
 		removeMarker(editor);
@@ -237,7 +236,7 @@
 			reqData.model = getModelId();
 		}
 		
-		var request = $.ajax({
+		var request = qonAjax({
 			url : qonContextPath()+queryOnUrl+"/ValidateAny",
 			type : "POST",
 			data : reqData,
@@ -305,7 +304,7 @@
 			reqData[item.name] = item.value;
 		}
 		
-		var request = $.ajax({
+		var request = qonAjax({
 			url : qonContextPath()+queryOnUrl+"/ExplainAny",
 			type : "POST",
 			data : reqData,
@@ -392,7 +391,7 @@
 			reqData["v:CREATED_AT"] = encodeURIComponent(now.toISOString());
 		}
 		
-		var request = $.ajax({
+		var request = qonAjax({
 			url : qonUrl,
 			type : method,
 			data : reqData,
@@ -445,7 +444,7 @@
 		
 		//console.log("deleteUrl=", deleteUrl);
 
-		var request = $.ajax({
+		var request = qonAjax({
 			url : deleteUrl,
 			type : "DELETE",
 			//data : data,

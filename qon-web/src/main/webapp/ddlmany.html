@@ -10,7 +10,6 @@
 	<meta name="author" content="">
 	<link rel="icon" type="image/png" href="favicon.png" />
 	<link href="css/vendor/prism.css" rel="stylesheet" />
-	<script type="text/javascript" src="js/vendor/jquery.min.js"></script>
 	<script type="text/javascript" src="js/vendor/prism.min.js"></script>
 	<script src="js/qon-base.js"></script>
 	<script src="js/qon-util.js"></script>
@@ -49,7 +48,7 @@ var schemasByModel = {};
 
 var defaultModelId = 'model';
 
-$(document).ready(
+document.addEventListener('DOMContentLoaded',
 	function() {
 		var tts = [];
 		var keys = Object.keys(typemap);
@@ -67,7 +66,7 @@ makeHrefs = function() {
 	refreshAuthInfo();
 }
 
-$.ajax({
+qonAjax({
 	url: qonContextPath()+'qinfo/env',
 	dataType: "text",
 	success: function(data) {
@@ -96,7 +95,7 @@ $.ajax({
 loadSchemas = function(model) {
 	var url = qonContextPath()+'qinfo/schemas'+(model?'?model='+model:'');
 	//console.log('loadSchemas url:', url);
-	$.ajax({
+	qonAjax({
 		url: url,
 		dataType: "text",
 		success: function(data) {
@@ -196,7 +195,7 @@ getDDLdiff = function(apply) {
 	
 	closeMessages('messages');
 	//msg.style.display = 'none';
-	$.ajax({
+	qonAjax({
 		//TODO: filter by schema?
 		url: url,
 		dataType: "text",
@@ -311,14 +310,14 @@ loadSelect = function(data, selectId, keyFnc, valueFnc) {
 	if(!valueFnc) { valueFnc = function(obj) { return obj; } }
 	var sel = document.getElementById(selectId);
 	var prevOptionValue = sel.value;
-	$('#'+selectId).empty();
+	sel.innerHTML = '';
 	if(data==null) { console.log('null data; selectId: ',selectId); return; }
 	for(var i=0;i<data.length;i++) {
 		var name = valueFnc(data[i]);
 		if(name==null) { continue; }
 		var optionValue = keyFnc(data[i]);
 		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		$('#'+selectId).append("<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
+		sel.insertAdjacentHTML('beforeend', "<option value='"+optionValue+"'"+(optionValue==prevOptionValue?" selected":"")+">"+name+"</option>");
 	}
 }
 

@@ -184,7 +184,6 @@
       qon-web/src/main/webapp/js/jsdifflib/**,
       qon-web/src/main/webapp/js/sigma/**,
       qon-web/src/main/webapp/js/d3.min.js,
-      qon-web/src/main/webapp/js/jquery*.js,
       qon-web/src/main/webapp/js/markdown.js,
       qon-web/src/main/webapp/js/nv.d3.min.js,
       qon-web/src/main/webapp/js/prism.js,
