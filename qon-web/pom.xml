@@ -18,7 +18,6 @@
   <properties>
     <skip.frontend>false</skip.frontend>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!--<swagger.version>5.32.11</swagger.version>-->
   </properties>
 
   <build>
@@ -93,9 +92,6 @@
                     <directory>src/main/webapp/swagger-ui</directory>
                 </fileset>
                 <fileset>
-                  <directory>src/main/webapp/swagger2-ui</directory>
-                </fileset>
-                <fileset>
                   <directory>src/main/webapp/js/vendor</directory>
                 </fileset>
                 <fileset>
@@ -105,7 +101,7 @@
         </configuration>
       </plugin>
 
-      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead-standalone) into src/main/webapp/js/vendor; skip with -Dskip.frontend=true -->
+      <!-- builds npm-managed vendor libs (jquery, d3, nvd3, typeahead-standalone, swagger-ui, ...) into src/main/webapp/js/vendor and swagger-ui; skip with -Dskip.frontend=true -->
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
@@ -155,55 +151,6 @@
         <groupId>org.apache.tomcat.maven</groupId>
         <artifactId>tomcat7-maven-plugin</artifactId>
         <version>2.2</version>
-      </plugin>
-      -->
-
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <phase>generate-resources</phase>
-            <configuration>
-              <target>
-                <!-- <property name="maven.project.url" value="${project.url}"/> -->
-                <ant antfile="${basedir}/build.xml">
-                  <target name="download-deps"/>
-                </ant>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!--
-      https://github.com/download-maven-plugin/download-maven-plugin
-      cacheDirectory
-      The directory to use as a cache. Default is
-      ${local-repo}/.cache/download-maven-plugin
-      User property: download.cache.directory
-      -->
-      <!--
-      <plugin>
-        <groupId>io.github.download-maven-plugin</groupId>
-        <artifactId>download-maven-plugin</artifactId>
-        <version>2.1.0</version>
-        <executions>
-          <execution>
-            <id>install-swagger</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>wget</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <url>https://github.com/swagger-api/swagger-ui/archive/v${swagger.version}.zip</url>
-          <unpack>true</unpack>
-          <outputDirectory>src/main/webapp/swagger-ui</outputDirectory>
-        </configuration>
       </plugin>
       -->
 

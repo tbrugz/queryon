@@ -1598,6 +1598,13 @@ public class WinstoneAndH2HttpRequestTest {
 	}
 
 	@Test
+	public void swaggerUiIndexHtml() throws IOException {
+		String content = getContentFromUrl(qonUrl+"/swagger-ui/index.html");
+		Assert.assertTrue("swagger-ui index.html should contain swagger-ui div", content.contains("id=\"swagger-ui\""));
+		Assert.assertTrue("swagger-ui index.html should load swagger-initializer.js", content.contains("swagger-initializer.js"));
+	}
+
+	@Test
 	public void swaggerGsonParse() throws IOException, ParserConfigurationException, SAXException {
 		String jsonStr = getContentFromUrl(qonUrl+"/swagger");
 		//System.out.println(jsonStr);

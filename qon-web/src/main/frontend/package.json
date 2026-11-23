@@ -6,6 +6,9 @@
   "scripts": {
     "build": "node build.mjs"
   },
+  "scarfSettings": {
+    "enabled": false
+  },
   "devDependencies": {
     "vite": "^8.3.7"
   },
@@ -19,6 +22,7 @@
     "nvd3": "^1.8.6",
     "prismjs": "^1.30.0",
     "sigma": "1.2.1",
+    "swagger-ui-dist": "^5.36.0",
     "typeahead-standalone": "^5.4.0"
   }
 }

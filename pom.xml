@@ -190,8 +190,7 @@
       qon-web/src/main/webapp/js/prism.js,
       qon-web/src/main/webapp/js/vendor/typeahead.min.js,
       qon-web/src/main/webapp/map/js/jscolor/**,
-      qon-web/src/main/webapp/swagger-ui/**,
-      qon-web/src/main/webapp/swagger2-ui/**
+      qon-web/src/main/webapp/swagger-ui/**
     </sonar.exclusions>
   </properties>
   

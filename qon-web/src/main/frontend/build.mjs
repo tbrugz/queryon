@@ -76,3 +76,16 @@ for (const f of aceFiles) {
 // ace only loads the requested mode file (not its dependencies), so upstream mode-sql is bundled into mode-qon_sql
 fs.writeFileSync(path.join(aceOut, 'mode-qon_sql.js'),
   fs.readFileSync(path.join(aceSrc, 'mode-sql.js'), 'utf8') + '\n;\n' + fs.readFileSync(path.resolve(here, 'ace/mode-qon_sql.js'), 'utf8'));
+
+// swagger-ui (only the files used by index.html, copied from swagger-ui-dist)
+const swaggerSrc = path.resolve(here, 'node_modules/swagger-ui-dist');
+const swaggerOut = path.resolve(here, '../webapp/swagger-ui');
+fs.rmSync(swaggerOut, { recursive: true, force: true });
+fs.mkdirSync(swaggerOut, { recursive: true });
+const swaggerFiles = ['index.html', 'index.css', 'swagger-ui.css', 'swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js',
+  'favicon-16x16.png', 'favicon-32x32.png', 'oauth2-redirect.html', 'oauth2-redirect.js'];
+for (const f of swaggerFiles) {
+  fs.copyFileSync(path.join(swaggerSrc, f), path.join(swaggerOut, f));
+}
+// QueryOn's swagger-initializer.js (points to '../swagger')
+fs.copyFileSync(path.resolve(here, 'swagger/swagger-initializer.js'), path.join(swaggerOut, 'swagger-initializer.js'));
