@@ -120,6 +120,10 @@ function updateState() {
 
 function updateSelectedQueryState() {
 	var bigParts = updateSelectedQueryStateParameters();
+	if(!bigParts) {
+		//console.log("updateSelectedQueryState: no bigParts", bigParts);
+		return;
+	}
 	//console.log('chart: updateSelectedQueryState: ', bigParts);
 	document.getElementById('columns').value = bigParts[1] || '';
 	document.getElementById('order').value = bigParts[2] || '';

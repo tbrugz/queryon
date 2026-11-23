@@ -76,7 +76,7 @@ table.diff .skip {
 	border-right:1px solid #BBC;
 }
 table.diff .insert {
-	background-color:#F1ADAD;
+	background-color:#ADF1AD;
 }
 /* word-level changes inside replaced lines (qon-diff.js) */
 table.diff .wdiff {

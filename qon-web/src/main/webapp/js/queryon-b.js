@@ -471,7 +471,7 @@ function getColumnsFromRelation(relation) {
 
 	for(var i=cols.length-1;i>=0;i--) {
 		cols[i] = cols[i].replace("[","").replace("]","").trim();
-		if(cols[i]=="") { cols.pop(i); }
+		if(cols[i]=="") { cols.pop(); }
 	}
 	return cols;
 }
