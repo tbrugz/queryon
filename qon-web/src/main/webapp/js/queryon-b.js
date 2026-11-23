@@ -15,7 +15,7 @@ function loadQueries0(url, containerId, callback, modelId) {
 	byId(containerId).innerHTML = defaultNullObjectOption;
 	var url = baseUrl+'/relation.json'+(modelId?'?model='+modelId:'');
 	//console.log('url: ', url, 'baseUrl: ', baseUrl);
-	$.ajax({
+	qonAjax({
 		url: url,
 		dataType: "json",
 		success: function(data) {
@@ -57,7 +57,7 @@ function writeRelations(containerId, relations, showSchemaName) {
 	//console.log('write relations [#'+relations.length+'] to '+containerId);
 	for(var i=0;i<relations.length;i++) {
 		var id = getId(relations[i]);
-		$('#'+containerId).append("<option value='"+id+"'"+
+		byId(containerId).insertAdjacentHTML('beforeend', "<option value='"+id+"'"+
 				//" class='schema_"+relations[i].schemaName+"'"+
 				">"+getDescription(relations[i], showSchemaName)+"</option>");
 		relationsHash[id] = relations[i];
@@ -260,7 +260,7 @@ function doRun(selectId, containerId, messagesId, callback, errorCallback) {
 	else {
 	
 	//console.log("doRun(): ",finalUrl);
-	$.ajax({
+	qonAjax({
 		url: finalUrl,
 		dataType: "html",
 		success: function(data, textStatus, request) {
@@ -387,7 +387,7 @@ function setParameters(parametersId, params, parameterOptionals) {
 	/*
 	if(numparams > params.length) {
 		for(var i=params.length+1;i<=numparams;i++) {
-			$("#"+parametersId).append("<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'/></label>");
+			byId(parametersId).insertAdjacentHTML('beforeend', "<label class='parameter-label'>p"+i+": <input type='text' class='parameter' id='param"+i+"' name='p"+i+"' onchange='onParameterChange("+i+");'/></label>");
 		}
 	}
 	else if(numparams < params.length) {
@@ -692,7 +692,7 @@ function doDelete(selectId, key, containerId, messagesId, callback, callbackErro
 
 	btnActionStart('go-button');
 	var startTimeMilis = Date.now();
-	$.ajax({
+	qonAjax({
 		url: finalUrl,
 		method: 'DELETE',
 		dataType: "text",

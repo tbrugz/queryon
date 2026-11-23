@@ -72,6 +72,84 @@ function qonContextPath() {
     return "";
 }
 
+/*
+ * Minimal replacement for the subset of jQuery.ajax() used by QueryOn pages.
+ * opts: url, type|method (default GET), data (object: form-encoded; string: sent as is),
+ *       dataType ('json' parses the response; anything else returns text), success, error
+ * Callbacks: success(data, textStatus, xhr), error(xhr, textStatus, errorThrown).
+ * Returns an object with chainable done(fn)/fail(fn), which receive the same arguments.
+ */
+function qonAjax(opts) {
+	var method = (opts.type || opts.method || 'GET').toUpperCase();
+	var url = opts.url;
+	var body = null;
+	var data = opts.data;
+	if(data!=null && typeof data !== 'string') {
+		data = Object.keys(data).filter(function(k) { return data[k]!==undefined; })
+			.map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]==null ? '' : data[k]); })
+			.join('&');
+	}
+	if(data!=null && data!=='') {
+		if(method=='GET' || method=='HEAD') {
+			url += (url.indexOf('?')>=0 ? '&' : '?') + data;
+		}
+		else {
+			body = data;
+		}
+	}
+
+	var doneFns = [], failFns = [], result = null;
+	if(opts.success) { doneFns.push(opts.success); }
+	if(opts.error) { failFns.push(opts.error); }
+
+	function settle(ok, args) {
+		result = { ok: ok, args: args };
+		var fns = ok ? doneFns : failFns;
+		for(var i=0;i<fns.length;i++) { fns[i].apply(null, args); }
+	}
+
+	var xhr = new XMLHttpRequest();
+	xhr.open(method, url, true);
+	if(body!=null) {
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+	}
+	xhr.onload = function() {
+		if((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+			var resp = xhr.responseText;
+			if(opts.dataType == 'json') {
+				try {
+					resp = resp ? JSON.parse(resp) : null;
+				}
+				catch(e) {
+					settle(false, [xhr, 'parsererror', e]);
+					return;
+				}
+			}
+			settle(true, [resp, 'success', xhr]);
+		}
+		else {
+			settle(false, [xhr, 'error', xhr.statusText]);
+		}
+	};
+	xhr.onerror = function() { settle(false, [xhr, 'error', '']); };
+	xhr.onabort = function() { settle(false, [xhr, 'abort', '']); };
+	xhr.send(body);
+
+	var req = {
+		done: function(fn) {
+			if(result) { if(result.ok) { fn.apply(null, result.args); } }
+			else { doneFns.push(fn); }
+			return req;
+		},
+		fail: function(fn) {
+			if(result) { if(!result.ok) { fn.apply(null, result.args); } }
+			else { failFns.push(fn); }
+			return req;
+		}
+	};
+	return req;
+}
+
 // polyfill IE - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
 
 if (!String.prototype.startsWith) {

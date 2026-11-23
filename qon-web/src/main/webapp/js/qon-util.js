@@ -242,7 +242,7 @@ loadSelect = function(data, selectId, callbackName, callbackValue, dataClasses) 
 	if(!callbackValue) { callbackValue = function(obj) { return obj; } }
 	var sel = document.getElementById(selectId);
 	var prevOptionValue = sel.value;
-	$('#'+selectId).empty();
+	sel.innerHTML = '';
 	if(data==null) { console.log('null data; selectId: ',selectId); return; }
 	for(var i=0;i<data.length;i++) {
 		var name = callbackName(data[i]);
@@ -250,7 +250,7 @@ loadSelect = function(data, selectId, callbackName, callbackValue, dataClasses) 
 		var optionValue = callbackValue(data[i]);
 		var optionClass = dataClasses&&dataClasses[i]?dataClasses[i]:null;
 		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		$('#'+selectId).append("<option value='"+optionValue+"'"+
+		sel.insertAdjacentHTML('beforeend', "<option value='"+optionValue+"'"+
 				(optionClass?" class='"+optionClass+"'":"")+
 				(optionValue==prevOptionValue?" selected":"")+
 				">"+name+"</option>");
