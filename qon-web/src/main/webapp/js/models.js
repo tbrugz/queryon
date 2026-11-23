@@ -41,7 +41,6 @@ function updateEnvVars(json) {
 	//console.log("updateEnvVars, json:", json);
 	if(json.models) {
 		modelsInfo = json.models;
-		//loadSelect(json.models, 'model');
 	}
 	if(json.services) {
 		servicesInfo = json.services;

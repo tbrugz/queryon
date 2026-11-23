@@ -28,6 +28,11 @@ function escapeXML(str) {
 			.replace(/'/g, '&apos;');
 }
 
+// see: http://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
+safeTags = function (str) {
+	return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
+}
+
 /*function getQueryString() {
 	var href = location.search;
 	return href.indexOf("?")==-1?"":href.substr(href.indexOf("?"));
@@ -268,4 +273,25 @@ updateSelectValue = function(select, value) {
 		}
 	}
 	return false;
+}
+
+getSelectMultiOptions = function(selectId) {
+	var select = document.getElementById(selectId);
+	var schemaOptions = select.selectedOptions;
+	var schemas = [];
+	for(var i=0; i<schemaOptions.length ; i++) {
+		schemas.push(schemaOptions[i].value); 
+	}
+	return schemas;
+}
+
+setSelectMultiOptions = function(select, values) {
+	for(var i=0 ; i<select.options.length ; i++) {
+		for(var j=0 ; j<values.length ; j++) {
+			if(select.options[i] && values[j] && (select.options[i].value==values[j]) ) {
+				select.options[i].selected = true;
+				//console.log('opt match! ', i, j, select.options[i], '/', values[j]);
+			}
+		}
+	}
 }
