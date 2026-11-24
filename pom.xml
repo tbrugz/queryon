@@ -177,17 +177,8 @@
     <checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
 
     <sonar.exclusions>
-      qon-web/src/main/webapp/css/diffview.css,
-      qon-web/src/main/webapp/css/nv.d3.css,
-      qon-web/src/main/webapp/css/prism.css,
-      qon-web/src/main/webapp/js/ace/**,
-      qon-web/src/main/webapp/js/jsdifflib/**,
-      qon-web/src/main/webapp/js/sigma/**,
-      qon-web/src/main/webapp/js/d3.min.js,
-      qon-web/src/main/webapp/js/markdown.js,
-      qon-web/src/main/webapp/js/nv.d3.min.js,
-      qon-web/src/main/webapp/js/prism.js,
-      qon-web/src/main/webapp/js/vendor/typeahead.min.js,
+      qon-web/src/main/webapp/js/vendor/**,
+      qon-web/src/main/webapp/css/vendor/**,
       qon-web/src/main/webapp/map/js/jscolor/**,
       qon-web/src/main/webapp/swagger-ui/**
     </sonar.exclusions>
