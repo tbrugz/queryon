@@ -17,6 +17,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.QueryOnSchema;
 import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DBUtil;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -92,6 +93,7 @@ public class DiffUtilQon {
 
 			if(resp!=null) {
 				resp.setContentType(QueryOnSchema.MIME_SQL);
+				WebUtils.setResponseUtf8(resp);
 				if(executeCount==0) {
 					resp.getWriter().write("-- no diffs applyed");
 				}

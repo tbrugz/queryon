@@ -32,6 +32,7 @@ import tbrugz.queryon.processor.AbstractUpdatePlugin;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 
@@ -192,6 +193,7 @@ public class PagesServlet extends AbstractHttpServlet {
 				boolean wasNull = rs.wasNull();
 				if(!wasNull) {
 					//log.info("col4 was not null");
+					WebUtils.setResponseUtf8(resp);
 					Writer writer = resp.getWriter();
 					IOUtil.pipeCharacterStreams(reader, writer);
 					hasWritterOutput = true;

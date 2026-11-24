@@ -38,6 +38,7 @@ import tbrugz.queryon.api.ODataServlet;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -108,6 +109,7 @@ public class QonSoapServlet extends BaseApiServlet {
 					
 					Document doc = makeWsdl(domImpl, req);
 					resp.setContentType(ResponseSpec.MIME_TYPE_XML);
+					WebUtils.setResponseUtf8(resp);
 					ODataServlet.serialize(domImpl, doc, resp.getWriter());
 				}
 				catch(ParserConfigurationException e) {
@@ -236,6 +238,7 @@ public class QonSoapServlet extends BaseApiServlet {
 
 	public static void writeBean(String beanQuery, Object bean, HttpServletResponse resp) throws IOException, IntrospectionException {
 		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		WebUtils.setResponseUtf8(resp);
 		
 		StringBuilder sb = new StringBuilder();
 		String soapPrefix = "soapenv";
@@ -1312,6 +1315,7 @@ public class QonSoapServlet extends BaseApiServlet {
 	@Override
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		WebUtils.setResponseUtf8(resp);
 		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
 		String qonPrefix = "ns1";
 		
@@ -1363,6 +1367,7 @@ public class QonSoapServlet extends BaseApiServlet {
 		}
 		
 		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		WebUtils.setResponseUtf8(resp);
 		String envPrefix = SoapDumpSyntax.DEFAULT_SOAPENV_PREFIX;
 		String qonPrefix = "ns1";
 		

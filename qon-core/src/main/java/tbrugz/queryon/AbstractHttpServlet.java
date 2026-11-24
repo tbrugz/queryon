@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.queryon.util.WebUtils;
+
 public abstract class AbstractHttpServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -38,6 +40,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
 			log.debug("BadRequestException ["+this.getClass().getSimpleName()+"][committed? "+resp.isCommitted()+"]: "+e.getMessage(), e);
 			resp.setStatus(e.getCode());
 			resp.setContentType(MIME_TEXT);
+			WebUtils.setResponseUtf8(resp);
 			resp.getWriter().write(e.getMessage());
 		}
 		/*catch (ServletException e) {

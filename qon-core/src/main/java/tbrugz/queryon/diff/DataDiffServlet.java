@@ -91,6 +91,7 @@ public class DataDiffServlet extends AbstractHttpServlet {
 	
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		WebUtils.setResponseUtf8(resp);
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<2 || partz.size()>3) {
 			throw new BadRequestException("Malformed URL");

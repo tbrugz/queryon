@@ -3,6 +3,7 @@ package tbrugz.queryon;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -1028,7 +1029,7 @@ public class SQL {
 				Part p = (Part) value;
 				//XXX guess if binary or character stream... based on p.getContentType() or column type??
 				//st.setBinaryStream(i+1, p.getInputStream());
-				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream()));
+				st.setCharacterStream(i+1, new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
 				//log.debug("setCharacterStream/Part [i="+i+"]...");
 			}
 			else if(value==null) {

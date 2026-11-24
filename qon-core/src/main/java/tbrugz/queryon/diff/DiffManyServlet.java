@@ -28,6 +28,7 @@ import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.JDBCSchemaGrabber;
@@ -68,6 +69,7 @@ public class DiffManyServlet extends AbstractHttpServlet {
 
 	@Override
 	public void doProcess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		WebUtils.setResponseUtf8(resp);
 		
 		List<String> partz = QueryOnSchema.parseQS(req);
 		if(partz.size()<3) {

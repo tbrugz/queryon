@@ -33,6 +33,7 @@ import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -264,7 +265,7 @@ public class SwaggerServlet extends AbstractHttpServlet {
 		// type: "basic", "apiKey" or "oauth2"
 		
 		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
-		//resp.setCharacterEncoding(QueryOn.UTF8);
+		WebUtils.setResponseUtf8(resp);
 		
 		resp.getWriter().write( gson.toJson(swagger) );
 	}

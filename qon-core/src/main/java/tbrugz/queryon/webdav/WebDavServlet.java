@@ -35,6 +35,7 @@ import tbrugz.queryon.resultset.ResultSetLimitOffsetDecorator;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
@@ -571,6 +572,7 @@ public class WebDavServlet extends BaseApiServlet {
 	void writePaths(List<WebDavResource> resl, HttpServletResponse resp) throws IOException {
 		resp.setStatus(STATUS_MULTI_STATUS);
 		resp.setContentType(ResponseSpec.MIME_TYPE_XML); // "application/xml"
+		WebUtils.setResponseUtf8(resp);
 		//resp.setStatus(sc, sm);
 		Writer w = resp.getWriter();
 		w.write("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" + 

@@ -25,6 +25,7 @@ import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.RequestSpec;
 import tbrugz.queryon.api.ODataFilterParser.Filter;
 import tbrugz.queryon.syntaxes.ODataJsonSyntax;
+import tbrugz.queryon.util.WebUtils;
 
 public class ODataRequest extends RequestSpec {
 	
@@ -292,6 +293,7 @@ public class ODataRequest extends RequestSpec {
 	protected void processXtra() {
 		try {
 			Gson gson = new Gson();
+			WebUtils.setRequestUtf8IfUnset(request);
 			
 			//java 8
 			//Type type = new TypeToken<Map<String, Object>>(){}.getType();

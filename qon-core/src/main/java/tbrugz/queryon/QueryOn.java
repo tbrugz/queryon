@@ -464,10 +464,8 @@ public class QueryOn extends AbstractHttpServlet {
 	 * https://jakarta.ee/specifications/servlet/6.1/jakarta-servlet-spec-6.1.html#request-data-encoding
 	*/
 	protected void setUtf8Charset(HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
-		if(req.getCharacterEncoding()==null) {
-			req.setCharacterEncoding(QueryOn.UTF8);
-		}
-		resp.setCharacterEncoding(QueryOn.UTF8);
+		WebUtils.setRequestUtf8IfUnset(req);
+		WebUtils.setResponseUtf8(resp);
 	}
 	
 	protected void setContextPathInfo(ServletContext context, Protocol protocol) throws UnknownHostException {
@@ -2868,10 +2866,12 @@ public class QueryOn extends AbstractHttpServlet {
 	
 	protected void writeUpdateCount(RequestSpec reqspec, HttpServletResponse resp, int count, String action) throws IOException {
 		resp.setContentType(MIME_TEXT);
+		WebUtils.setResponseUtf8(resp);
 		resp.getWriter().write(count+" "+(count>1?"rows":"row")+" "+action);
 	}
 
 	protected void writeExecuteOutput(RequestSpec reqspec, ExecutableObject eo, HttpServletResponse resp, String value) throws IOException {
+		WebUtils.setResponseUtf8(resp);
 		resp.getWriter().write(value);
 	}
 
@@ -2898,7 +2898,7 @@ public class QueryOn extends AbstractHttpServlet {
 				//log.info("1.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
 			}
 			else {*/
-				sql.addParameter(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream() ));
+				sql.addParameter(new InputStreamReader( reqspec.updatePartValues.get(col).getInputStream(), UTF8 ));
 				//log.info("2.addPartParameter: xSetRequestUtf8="+xSetRequestUtf8);
 			//}
 		}
@@ -2914,6 +2914,7 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 		
 		resp.setContentType(MIME_TEXT);
+		WebUtils.setResponseUtf8(resp);
 		//log.info("doManage: params: "+reqspec.params);
 		
 		String action = String.valueOf( reqspec.params.get(0) );
@@ -3348,6 +3349,7 @@ public class QueryOn extends AbstractHttpServlet {
 			}
 		}
 		else {
+			WebUtils.setResponseUtf8(resp);
 			ds.dumpHeader(resp.getWriter());
 			hasNext = ds.isFetcherSyntax()?true:rs.next();
 			while(hasNext && count < limit) {
@@ -3452,6 +3454,7 @@ public class QueryOn extends AbstractHttpServlet {
 			try {
 				// integer/double/date: just read the object/string... derby does not like getCharacterStream() on those
 				if(Integer.class.equals( colType ) || Double.class.equals( colType ) || Date.class.equals( colType )) {
+					WebUtils.setResponseUtf8(resp);
 					Writer w = resp.getWriter();
 					String s = rs.getString(reqspec.uniValueCol);
 					if(s!=null) {
@@ -3462,6 +3465,7 @@ public class QueryOn extends AbstractHttpServlet {
 					// "scalar" types / non-binary types
 					Reader r = rs.getCharacterStream(reqspec.uniValueCol);
 					if(r!=null) {
+						WebUtils.setResponseUtf8(resp);
 						if(reqspec.isRangeDefined()) {
 							r.skip(reqspec.getRangeStart());
 							resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);

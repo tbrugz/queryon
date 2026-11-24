@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.ResponseSpec;
 import tbrugz.queryon.diff.DiffManyServlet;
 import tbrugz.queryon.diff.DiffUtilQon;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
@@ -188,6 +189,7 @@ public class QOnManage {
 		if(!apply) {
 			if(resp!=null) {
 				resp.setIntHeader(ResponseSpec.HEADER_DIFFCOUNT, diffcount);
+				WebUtils.setResponseUtf8(resp);
 				if(diffcount==0) {
 					//resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 					resp.getWriter().write("-- no diffs found");

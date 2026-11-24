@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -171,6 +172,7 @@ public class QueryOnSchemaInstant extends QueryOnSchema {
 	
 	void dump(DBIdentifiable dbid, HttpServletResponse resp) throws IOException {
 		resp.setContentType(MIME_SQL);
+		WebUtils.setResponseUtf8(resp);
 		if(dbid==null) {
 			throw new BadRequestException("null object?");
 		}

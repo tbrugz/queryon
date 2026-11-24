@@ -26,6 +26,7 @@ import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.ProcessComponent;
@@ -70,6 +71,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			log.debug(e.getClass().getSimpleName()+" ["+e.getCode()+"]: "+e.getMessage(), e);
 			resp.setStatus(e.getCode());
 			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
+			WebUtils.setResponseUtf8(resp);
 			if(resp.isCommitted()) {
 				log.warn("response already committed...");
 			}
@@ -173,6 +175,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			}
 			doProcessProcessor(proc, appprop, modelId, context, req, resp);
 			if(!proc.acceptsOutputStream() && !proc.acceptsOutputWriter() && resp!=null) {
+				WebUtils.setResponseUtf8(resp);
 				resp.getWriter().write("processor '"+procClassName+"' processed\n");
 			}
 		}
@@ -181,6 +184,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 			SchemaModelDumper dumper = (SchemaModelDumper) procComponent;
 			doProcessDumper(dumper, modelId, context, resp);
 			if(!dumper.acceptsOutputStream() && !dumper.acceptsOutputWriter() && resp!=null) {
+				WebUtils.setResponseUtf8(resp);
 				resp.getWriter().write("dumper '"+procClassName+"' processed\n");
 			}
 		}
@@ -280,6 +284,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		String mimeType = dumper.getMimeType();
 		if(resp!=null) {
 			if(dumper.acceptsOutputWriter()) {
+				WebUtils.setResponseUtf8(resp);
 				w = resp.getWriter();
 				dumper.setOutputWriter(w);
 			}
@@ -309,6 +314,7 @@ public class ProcessorServlet extends AbstractHttpServlet {
 		String mimeType = pc.getMimeType();
 		if(resp!=null) {
 			if(pc.acceptsOutputWriter()) {
+				WebUtils.setResponseUtf8(resp);
 				Writer w = resp.getWriter();
 				pc.setOutputWriter(w);
 				ret = w;

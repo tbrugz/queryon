@@ -21,6 +21,7 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import tbrugz.queryon.util.QOnContextUtils;
+import tbrugz.queryon.util.WebUtils;
 
 /*
  * see: https://github.com/vsch/flexmark-java
@@ -89,6 +90,7 @@ public class MarkdownServlet extends PagesServlet {
 		
 		//resp.setContentType(mimeType);
 		resp.setContentType(HTML_MIMETYPE);
+		WebUtils.setResponseUtf8(resp);
 		//resp.setHeader(HEADER_PAGE_ID, id);
 		Node document = PARSER.parse(body);
 		String md = RENDERER.render(document);

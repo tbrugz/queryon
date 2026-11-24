@@ -82,6 +82,7 @@ public class AuthServlet extends AbstractHttpServlet {
 			}
 			catch(Exception e) { // ShiroException | AuthenticationException
 				resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				WebUtils.setResponseUtf8(resp);
 				resp.getWriter().write(getExceptionMessage(e));
 			}
 		}
@@ -135,6 +136,7 @@ public class AuthServlet extends AbstractHttpServlet {
 		// if content-type is json, process body as json
 		if(isContentTypeJson(req.getContentType())) {
 			Gson gson = new Gson();
+			WebUtils.setRequestUtf8IfUnset(req);
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = gson.fromJson(req.getReader(), Map.class);
 			if(map!=null) {

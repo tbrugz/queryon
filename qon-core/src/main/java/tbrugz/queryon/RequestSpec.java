@@ -611,6 +611,7 @@ public class RequestSpec {
 		}
 		else if(isContentTypeJson()) {
 			Gson gson = new Gson();
+			WebUtils.setRequestUtf8IfUnset(req);
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = gson.fromJson(req.getReader(), Map.class);
 			if(map!=null) {

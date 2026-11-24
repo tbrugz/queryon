@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -1895,6 +1896,38 @@ public class WinstoneAndH2HttpRequestTest {
 	public void testGetQueryWithNamedParametersMissingParam() throws Exception {
 		String url = "/QUERY.NAMED_PARAMS_1.csv?par1=1";
 		getContentFromUrl(baseUrl+url, 400);
+	}
+	
+	static final String NON_ASCII_VALUE = "S\u00e3o Jos\u00e9 \u20ac";
+	
+	void assertUtf8Response(String url) throws IOException {
+		HttpGet httpGet = new HttpGet(url);
+		HttpResponse resp = getHttpClient().execute(httpGet);
+		String content = new String(EntityUtils.toByteArray(resp.getEntity()), StandardCharsets.UTF_8);
+		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
+		Assert.assertTrue("content should contain '"+NON_ASCII_VALUE+"': "+content, content.contains(NON_ASCII_VALUE));
+		String ctype = resp.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue().toLowerCase();
+		Assert.assertTrue("content-type should be utf-8: "+ctype, ctype.contains("charset=utf-8"));
+	}
+	
+	@Test
+	public void testGetQueryWithNonAsciiParamCsv() throws Exception {
+		assertUtf8Response(baseUrl+"/QUERY.NAMED_PARAMS_1.csv?par1="+URLEncoder.encode(NON_ASCII_VALUE, "UTF-8")+"&par2=x");
+	}
+	
+	@Test
+	public void testGetQueryWithNonAsciiParamXml() throws Exception {
+		assertUtf8Response(baseUrl+"/QUERY.NAMED_PARAMS_1.xml?par1="+URLEncoder.encode(NON_ASCII_VALUE, "UTF-8")+"&par2=x");
+	}
+	
+	@Test
+	public void testGetQueryWithNonAsciiParamJson() throws Exception {
+		assertUtf8Response(baseUrl+"/QUERY.NAMED_PARAMS_1.json?par1="+URLEncoder.encode(NON_ASCII_VALUE, "UTF-8")+"&par2=x");
+	}
+	
+	@Test
+	public void testGetQueryWithNonAsciiParamValueField() throws Exception {
+		assertUtf8Response(baseUrl+"/QUERY.NAMED_PARAMS_1?par1="+URLEncoder.encode(NON_ASCII_VALUE, "UTF-8")+"&par2=x&limit=1&valuefield=C1");
 	}
 	
 	@Test

@@ -51,6 +51,7 @@ import tbrugz.queryon.syntaxes.ODataJsonSyntax;
 import tbrugz.queryon.util.DBUtil;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -195,6 +196,7 @@ public class ODataServlet extends BaseApiServlet {
 				
 				Document doc = makeMetadata(domImpl, req);
 				resp.setContentType(ResponseSpec.MIME_TYPE_XML);
+				WebUtils.setResponseUtf8(resp);
 				serialize(domImpl, doc, resp.getWriter());
 				
 				return;
@@ -538,6 +540,7 @@ public class ODataServlet extends BaseApiServlet {
 		}
 		
 		resp.setContentType(mimeType);
+		WebUtils.setResponseUtf8(resp);
 		if(contentLocation!=null) {
 			resp.addHeader(ResponseSpec.HEADER_CONTENT_LOCATION, contentLocation);
 		}
@@ -578,6 +581,7 @@ public class ODataServlet extends BaseApiServlet {
 		resp.reset();
 		resp.setStatus(code);
 		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
+		WebUtils.setResponseUtf8(resp);
 		resp.getWriter().write(json);
 	}
 

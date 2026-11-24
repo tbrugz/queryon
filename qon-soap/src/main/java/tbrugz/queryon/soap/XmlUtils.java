@@ -17,6 +17,7 @@ import org.w3c.dom.NodeList;
 
 import tbrugz.queryon.BadRequestException;
 import tbrugz.queryon.exception.InternalServerException;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 
 public class XmlUtils {
@@ -140,6 +141,7 @@ public class XmlUtils {
 		// https://www.w3.org/TR/soap11/#_Toc478383529
 		resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		resp.setContentType(SoapDumpSyntax.SOAP_MIMETYPE);
+		WebUtils.setResponseUtf8(resp);
 		
 		StringBuilder sb = new StringBuilder();
 		String prefix = "soapenv";

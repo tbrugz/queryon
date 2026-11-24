@@ -22,6 +22,7 @@ import tbrugz.queryon.exception.NotFoundException;
 import tbrugz.queryon.util.QOnContextUtils;
 import tbrugz.queryon.util.SchemaModelUtils;
 import tbrugz.queryon.util.ShiroUtils;
+import tbrugz.queryon.util.WebUtils;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ModelUtils;
@@ -65,6 +66,7 @@ public class QueryOnSchema extends AbstractHttpServlet {
 		catch(BadRequestException e) {
 			resp.setStatus(e.getCode());
 			resp.setContentType(AbstractHttpServlet.MIME_TEXT);
+			WebUtils.setResponseUtf8(resp);
 			resp.getWriter().write(e.getMessage());
 		} catch(ServletException e) {
 			throw e;
@@ -161,6 +163,7 @@ public class QueryOnSchema extends AbstractHttpServlet {
 		}
 		
 		resp.setContentType(MIME_SQL);
+		WebUtils.setResponseUtf8(resp);
 		resp.getWriter().write(dbid.getDefinition(true));
 		writeFooter(dbid, resp.getWriter());
 		lastDialect = model.getSqlDialect();

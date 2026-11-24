@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Map;
@@ -31,6 +32,8 @@ public class WebUtils {
 	
 	public static final String MIME_TEXT = "text/plain";
 	
+	public static final String UTF8 = "UTF-8";
+	
 	public static final String PROP_WEB_APPNAME = "queryon.web.appname";
 	public static final String PROP_WEB_LOGINMESSAGE = "queryon.web.login-message";
 	
@@ -48,6 +51,34 @@ public class WebUtils {
 		return ret;
 	}
 	
+	/*
+	 * In the absence of a charset, the container uses ISO-8859-1 for getReader() & getWriter()
+	 * https://jakarta.ee/specifications/servlet/6.1/jakarta-servlet-spec-6.1.html#request-data-encoding
+	 */
+
+	/**
+	 * Sets the request charset to UTF-8 if the client didn't send one.
+	 * Must be called before getReader()/getParameter() to have any effect.
+	 */
+	public static void setRequestUtf8IfUnset(HttpServletRequest req) throws UnsupportedEncodingException {
+		if(req.getCharacterEncoding()==null) {
+			req.setCharacterEncoding(UTF8);
+		}
+	}
+
+	/**
+	 * Sets the response charset to UTF-8, unless the content type already declares a charset.
+	 * Must be called before getWriter(); should be used only for text (writer-based) responses,
+	 * otherwise binary responses would get a "charset" in its content type.
+	 */
+	public static void setResponseUtf8(HttpServletResponse resp) {
+		String ctype = resp.getContentType();
+		if(ctype!=null && ctype.toLowerCase().contains("charset=")) {
+			return;
+		}
+		resp.setCharacterEncoding(UTF8);
+	}
+
 	public static Integer getIntegerParameter(HttpServletRequest req, String param) {
 		return getIntegerParameter(req, param, null);
 	}
@@ -74,6 +105,7 @@ public class WebUtils {
 		resp.reset();
 		resp.setStatus(status);
 		resp.setContentType(MIME_TEXT);
+		setResponseUtf8(resp);
 		if(e.getCause() instanceof SQLException) {
 			Integer indexOfInitialSql = (Integer) req.getAttribute(RequestSpec.ATTR_SQL_INDEX_OF_INITIAL);
 			if(indexOfInitialSql!=null && indexOfInitialSql>=0) {
@@ -176,6 +208,7 @@ public class WebUtils {
 
 	public static void writeJsonResponse(Object bean, HttpServletResponse resp) throws IOException {
 		resp.setContentType(ResponseSpec.MIME_TYPE_JSON);
+		setResponseUtf8(resp);
 		Gson gson = new Gson();
 		resp.getWriter().write(gson.toJson(bean));
 	}
