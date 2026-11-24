@@ -3,6 +3,8 @@
 **/work/
 **/.mvn/
 
+attic/
+
 qon-web/src/main/webapp/swagger-ui/
 qon-web/src/main/webapp/js/vendor/
 qon-web/src/main/webapp/css/vendor/
@@ -25,5 +27,7 @@ demo/qon-demo-jetty/tmp
 **/.settings
 **/dependency-tree.txt
 **/derby.log
+
+*.patch
 
 copilot-session-*.md
