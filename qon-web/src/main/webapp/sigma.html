@@ -196,6 +196,7 @@ body {
 			//loadQueries();
 			loadModels();
 			loadAuthInfo();
+			refreshUiComponents();
 			updateUI();
 		}
 		
@@ -217,7 +218,7 @@ body {
 			}
 
 			//doLoadExecs();
-			loadQueries0(qonContextPath()+queryOnUrl,'objects', writeOptions, getCurrentModelId());
+			loadQueries0(qonContextPath()+queryOnUrl,'objects', function(containerId, relations) { writeOptions(containerId, relations); refreshUiComponents(); }, getCurrentModelId());
 		}
 		
 		function onModelChanged() {
@@ -307,7 +308,8 @@ body {
 		}
 	
 		function loadGraph() {
-			var qid = document.getElementById('objects').options[document.getElementById('objects').selectedIndex].value;
+			var qid = byId('objects').value;
+			if(!qid) { return; }
 
 			//parameters
 			var paramsStr = getUrlParams();
@@ -376,7 +378,7 @@ body {
 						//console.log("added edge [",eid,"]: ",edge);
 					}
 					catch (e) {
-						console.log("addEdge:", e, "; i: ",i," ; source: ",data[i].SOURCE," ; target: ",data[i].TARGET);
+						console.log("Error/addEdge:", e, "; i: ",i," ; source: ",data[i].SOURCE," ; target: ",data[i].TARGET);
 					}
 				}
 				console.log("#nodes =",s.graph.nodes().length," ; #edges =",s.graph.edges().length);

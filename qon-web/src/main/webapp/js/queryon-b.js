@@ -66,7 +66,7 @@ function writeRelations(containerId, relations, showSchemaName) {
 
 function loadRelation(selectId, parametersId, containerId) {
 	var select = document.getElementById(selectId);
-	var id = select.options[select.selectedIndex].value;
+	var id = select.value;
 	var params = relationsHash[id] ?
 			( relationsHash[id].namedParameterNames ? getScalarArrayFromValue( relationsHash[id].namedParameterNames ) : relationsHash[id].parameterCount ) :
 			null;
