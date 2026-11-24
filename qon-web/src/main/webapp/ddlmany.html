@@ -247,7 +247,7 @@ function updateState() {
 	//var select = document.getElementById('syntax');
 	//var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	
-	if(model && schema) {
+	if(model && schemas) {
 		history.replaceState(null, null, "#"+model+"/"+schemas+"/"+types); //+"/"+syntax);
 	}
 }

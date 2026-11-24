@@ -7,7 +7,7 @@ function checkForSqlWarnings(request, editor) {
 	if(position) {
 		//console.log("checkForPosition:: position = ", position);
 		if(isTextSelected(editor)) {
-			diff = getCharCountPrecedingSelection(editor);
+			let diff = getCharCountPrecedingSelection(editor);
 			//console.log("isTextSelected:: checkForPosition position = ", position, "; diff = ", diff);
 			position += diff;
 		}
@@ -17,7 +17,7 @@ function checkForSqlWarnings(request, editor) {
 	if(line) {
 		//console.log("checkForPosition:: line = ", line);
 		if(isTextSelected(editor)) {
-			diff = getRowCountPrecedingSelection(editor);
+			let diff = getRowCountPrecedingSelection(editor);
 			//console.log("isTextSelected:: checkForPosition line = ", line, "; diff = ", diff);
 			line += diff;
 		}

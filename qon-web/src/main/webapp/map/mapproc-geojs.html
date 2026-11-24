@@ -67,7 +67,7 @@ function loadNakedMapCallback(map_canvas_id) {
 	var count = 0;
 	var countError = 0;
 	var box = new google.maps.LatLngBounds();
-	for(idx in places) {
+	for(let idx in places) {
 		var thisplace = places[idx];
 		var id = idx;
 		if(thisplace.properties && thisplace.properties.id) {
@@ -82,9 +82,7 @@ function loadNakedMapCallback(map_canvas_id) {
 			//console.log("id["+id+"]", thisplace);
 		}
 		//console.log(thisplace);
-		if(thisplace.geometry.type=="Polygon") {}
-		else if(thisplace.geometry.type=="MultiPolygon") {}
-		else {
+		if(thisplace.geometry.type!="Polygon" && thisplace.geometry.type!="MultiPolygon") {
 			console.log(thisplace.geometry.type+" type not understood [id = "+id+" / "+thisplace.id+" ; name = "+thisplace.properties.name+"]");
 			countError++;
 			continue;
@@ -92,10 +90,10 @@ function loadNakedMapCallback(map_canvas_id) {
 
 		var polygon = new Array();
 		if(thisplace.geometry.type=="Polygon") {
-			for(polyid in thisplace.geometry.coordinates) {
-				var coords = new Array();
-				for(c in thisplace.geometry.coordinates[polyid]) {
-					var latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyid][c][1], thisplace.geometry.coordinates[polyid][c][0]);
+			for(let polyid in thisplace.geometry.coordinates) {
+				let coords = new Array();
+				for(let c in thisplace.geometry.coordinates[polyid]) {
+					let latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyid][c][1], thisplace.geometry.coordinates[polyid][c][0]);
 					coords.push( latlng );
 					box.extend( latlng );
 				}
@@ -104,11 +102,11 @@ function loadNakedMapCallback(map_canvas_id) {
 			//console.log(thisplace.geometry.type+" type [id = "+id+" / "+thisplace.id+" ; name = "+thisplace.properties.name+"] - ",polygon);
 		}
 		else if(thisplace.geometry.type=="MultiPolygon") {
-			for(polyarr in thisplace.geometry.coordinates) {
-				for(polyid in thisplace.geometry.coordinates[polyarr]) {
-					var coords = new Array();
-					for(c in thisplace.geometry.coordinates[polyarr][polyid]) {
-						var latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyarr][polyid][c][1], thisplace.geometry.coordinates[polyarr][polyid][c][0]);
+			for(let polyarr in thisplace.geometry.coordinates) {
+				for(let polyid in thisplace.geometry.coordinates[polyarr]) {
+					let coords = new Array();
+					for(let c in thisplace.geometry.coordinates[polyarr][polyid]) {
+						let latlng = new google.maps.LatLng(thisplace.geometry.coordinates[polyarr][polyid][c][1], thisplace.geometry.coordinates[polyarr][polyid][c][0]);
 						coords.push( latlng );
 						box.extend( latlng );
 					}
@@ -218,7 +216,7 @@ function parseCSV(csv, sep) {
 }
 
 function normalize(value) {
-	return value.replace(/[\"\']/g,"");
+	return value.replace(/["']/g,"");
 }
 
 function createCatElements() {
@@ -234,13 +232,13 @@ function createCatElements() {
 	//console.log(ncats+" ; "+divLimits);
 	var catDataIndexes = [];
 	//var counter = ncats-1;
-	for(var id in catData) {
+	for(let id in catData) {
 		catDataIndexes.push(id);
 	}
 	catDataIndexes.reverse();
-	for(var idx in catDataIndexes) {
+	for(let idx in catDataIndexes) {
 	//for(var i=0; i<ncats; i++) {
-		var id = catDataIndexes[idx];
+		let id = catDataIndexes[idx];
 		var cat = document.createElement('div');
 		cat.setAttribute('id', 'cat'+id);
 		cat.setAttribute('class', 'category');

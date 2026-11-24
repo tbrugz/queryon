@@ -46,6 +46,7 @@
 	var lastExecutedQuery = null;
 	var utf8check = "✓";
 	var utf8par = "utf8="+utf8check;
+	var editor = null;
 
 	function getModelId() {
 		return byId('model').value
@@ -540,14 +541,14 @@
 		var params = document.querySelectorAll('.parameter');
 		//console.log('setParametersValues: ', params, values);
 		if(Array.isArray(values)) {
-			for(var i=0;i<params.length;i++) {
+			for(let i=0;i<params.length;i++) {
 				if(values.length>i) {
 					params[i].value = values[i];
 				}
 			}
 		}
 		else if(isObject(values)) {
-			for(var i=0;i<params.length;i++) {
+			for(let i=0;i<params.length;i++) {
 				if(values[params[i].name]) {
 					params[i].value = values[params[i].name];
 				}
@@ -564,7 +565,7 @@
 			//XXX: sort array?
 			paramNames = [];
 			var namePartz = paramNamesStr.split(",");
-			for(var i=0;i<namePartz.length;i++) {
+			for(let i=0;i<namePartz.length;i++) {
 				if(paramNames.indexOf(namePartz[i])<0) {
 					paramNames.push(namePartz[i]);
 					paramOptionals.push(optionalPartz[i]==="true");
@@ -574,7 +575,7 @@
 			positionalParameters = false;
 		}
 		else {
-			for(var i=0;i<numparams;i++) {
+			for(let i=0;i<numparams;i++) {
 				paramNames.push("p"+(i+1));
 				paramOptionals.push(optionalPartz[i]==="true");
 			}
@@ -583,7 +584,7 @@
 		
 		var currentParamsWithValues = getParametersWithValues();
 		var paramsStr = '';
-		for(var i=0;i<numparams;i++) {
+		for(let i=0;i<numparams;i++) {
 			paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
 				" id='"+paramNames[i]+"' name='"+paramNames[i]+"'"+
 				"/>"+
@@ -745,7 +746,7 @@
 		
 		var rdc=document.getElementById('rolesListDialogContent');
 		rdc.innerHTML = '';
-		for(var i=0;i<rolesInfo.roles.length;i++) {
+		for(let i=0;i<rolesInfo.roles.length;i++) {
 			var checked = false;
 			var indexOf = rolesValues.indexOf(rolesInfo.roles[i]);
 			if(indexOf >= 0) {
@@ -756,7 +757,7 @@
 				+(checked?" checked":"")
 				+'/>'+rolesInfo.roles[i]+'</div>\n';
 		}
-		for(var i=0;i<rolesValues.length;i++) {
+		for(let i=0;i<rolesValues.length;i++) {
 			var role = rolesValues[i];
 			if(role) {
 				rdc.innerHTML += '<div class="disabled"><input name="roleName" class="rolesCheck" type="checkbox" value="'+role+'"'
@@ -924,7 +925,7 @@
 <!-- style? see http://ace.c9.io/build/kitchen-sink.html -->
 <script src="js/vendor/ace/ace.js" charset="utf-8"></script>
 <script>
-	var editor = ace.edit("editor");
+	editor = ace.edit("editor");
 	editor.setTheme("ace/theme/twilight"); //monokai,ambiance,twilight,,eclipse,github ?
 	editor.getSession().setMode("ace/mode/qon_sql");
 	editor.getSelectedText = function() {

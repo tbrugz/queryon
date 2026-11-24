@@ -8,7 +8,7 @@ function getQueryString() {
 
 //see: http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function getParameterByName(name, queryString) {
-	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	name = name.replace(/\[/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
 		results = regex.exec(queryString);
 	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
@@ -41,7 +41,7 @@ function createBlobLinks() {
 	var blobNames = [];
 	var blobIndexes = [];
 	var allColNames = [];
-	for(var i=0;i<cols.length;i++) {
+	for(let i=0;i<cols.length;i++) {
 		if(cols[i].getAttribute("type")=="Blob") {
 			blobNames.push(cols[i].getAttribute("colname"));
 			blobIndexes.push(i);
@@ -50,7 +50,7 @@ function createBlobLinks() {
 	}
 
 	var blobFileExtIndex = [];
-	for(var i=0;i<blobNames.length;i++) {
+	for(let i=0;i<blobNames.length;i++) {
 		var idx = allColNames.indexOf(blobNames[i]+"_FILEEXT");
 		blobFileExtIndex.push(idx);
 	}
@@ -77,7 +77,7 @@ function createBlobLinks() {
 		}
 		//console.log("table.js: currentOffset", currentOffset, "queryString", queryString, "urlPrepend", urlPrepend);
 		var rownum = 0;
-		for(var i=1;i<rows.length;i++) {
+		for(let i=1;i<rows.length;i++) {
 			var row = rows[i];
 			if(/*row.children[blobIndexes[ci]]!=null && */row.parentNode.parentNode === content) {
 				for(var ci=0;ci<blobIndexes.length;ci++) {
@@ -155,8 +155,7 @@ function mergeRowDimensions(content, trs) {
 				for(var z=i-1; z>=0 ; z--) {
 					//console.log("test row ",z);
 					var zhs =trs[z].querySelectorAll("th");
-					if( zhs[j].innerText && zhs[j-1] && (zhs[j].innerText===zhs[j-1].innerText) ) {}
-					else {
+					if( !(zhs[j].innerText && zhs[j-1] && (zhs[j].innerText===zhs[j-1].innerText)) ) {
 						//console.log("parent is not equal: ", zhs[j], zhs[j-1]);
 						continue loop1;
 					}
@@ -202,7 +201,7 @@ function mergeColumnDimensions(content, trs) {
 	var headerRows = (lastDimRow > 0) ? lastDimRow : 1;
 	var dimRow = trs[headerRows];
 	var dimRowCols = dimRow.querySelectorAll("th,td");
-	for(var i=0;i<dimRowCols.length;i++) {
+	for(let i=0;i<dimRowCols.length;i++) {
 		//console.log("dimRowCols[",i,"]: ",dimRowCols[i]);
 		/*if(dimRowCols[i].getAttribute("measuresrow")!=null) {
 			continue;
@@ -215,7 +214,7 @@ function mergeColumnDimensions(content, trs) {
 	//console.log("mergeColumnDimensions: lastDimCol=",lastDimCol,"rows=",trs.length,"cols=",dimRowCols.length,"headerRows=",headerRows);
 
 	var allTds = [];
-	for(var i=lastDimCol ; i>=0 ; i--) {
+	for(let i=lastDimCol ; i>=0 ; i--) {
 		//console.log("cols: i=", i);
 		allTds[i] = content.querySelectorAll("td:nth-of-type("+(i+1)+")");
 	}
@@ -223,7 +222,7 @@ function mergeColumnDimensions(content, trs) {
 	var merges = 0;
 
 	loop1:
-	for(var i=lastDimCol ; i>=0 ; i--) {
+	for(let i=lastDimCol ; i>=0 ; i--) {
 		//console.log("cols: i=", i);
 		var tds = allTds[i];
 		//var tds = content.querySelectorAll("td:nth-of-type("+(i+1)+")");

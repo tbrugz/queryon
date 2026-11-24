@@ -13,7 +13,7 @@ function loadQueries0(url, containerId, callback, modelId) {
 	baseUrl = url;
 	callback = typeof callback !== 'undefined' ? callback : writeRelations;
 	byId(containerId).innerHTML = defaultNullObjectOption;
-	var url = baseUrl+'/relation.json'+(modelId?'?model='+modelId:'');
+	url = baseUrl+'/relation.json'+(modelId?'?model='+modelId:'');
 	//console.log('url: ', url, 'baseUrl: ', baseUrl);
 	qonAjax({
 		url: url,
@@ -190,7 +190,7 @@ function getPivotURL(url) {
 
 		var measuresAggs = byId('measures').querySelectorAll('.col select');
 		var measuresAggsArr = []
-		for(var i=0;i<measuresAggs.length;i++) {
+		for(let i=0;i<measuresAggs.length;i++) {
 			measuresAggsArr.push(measuresAggs[i].value);
 		}
 		
@@ -198,7 +198,7 @@ function getPivotURL(url) {
 		
 		if(oncolsArr.length>0 || onrowsArr.length>0 || measuresArr.length>0) {
 			var measuresStr = "";
-			for(var i=0;i<measuresArr.length;i++) {
+			for(let i=0;i<measuresArr.length;i++) {
 				measuresStr += "&agg:"+measuresArr[i]+"="+measuresAggsArr[i];
 			}
 			var newUrl = url +
@@ -365,7 +365,7 @@ function setParameters(parametersId, params, parameterOptionals) {
 		positionalParameters = false;
 	}
 	else {
-		for(var i=0;i<=numparams;i++) {
+		for(let i=0;i<=numparams;i++) {
 			paramNames.push("p"+(i+1));
 		}
 	}
@@ -374,7 +374,7 @@ function setParameters(parametersId, params, parameterOptionals) {
 	//console.log('setParameters: numparams: ',numparams,' ; paramNames: ',paramNames, ' ; parameterOptionals: ', parameterOptionals);
 	
 	var paramsStr = '';
-	for(var i=0;i<numparams;i++) {
+	for(let i=0;i<numparams;i++) {
 		paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
 			" id='"+paramNames[i]+"' name='"+paramNames[i]+"' onchange='onParameterChange(\""+paramNames[i]+"\");'"+
 			"/>"+
@@ -418,14 +418,14 @@ function setParametersValues(values) {
 	var params = document.querySelectorAll('.parameter');
 	//console.log('setParametersValues: ', params, values);
 	if(Array.isArray(values)) {
-		for(var i=0;i<params.length;i++) {
+		for(let i=0;i<params.length;i++) {
 			if(values.length>i) {
 				params[i].value = values[i];
 			}
 		}
 	}
 	else if(isObject(values)) {
-		for(var i=0;i<params.length;i++) {
+		for(let i=0;i<params.length;i++) {
 			if(values[params[i].name]) {
 				params[i].value = values[params[i].name];
 			}
@@ -487,13 +487,13 @@ function disableParam(paramName) {
 function removeHtmlxSpecialCols(colsPar) {
 	var cols = colsPar.slice();
 	var suffixes = ["_STYLE", "_CLASS", "_TITLE", "_HREF"];
-	for(var i=cols.length-1;i>=0;i--) {
+	for(let i=cols.length-1;i>=0;i--) {
 		for(var j=0;j<suffixes.length;j++) {
 			if( cols[i].endsWith(suffixes[j]) ) {
 				var root = cols[i].substring(0, cols[i].length - suffixes[j].length);
 				//console.log("[",i,"]", cols[i], suffixes[j], root, ">>", cols);
 				if ( cols.indexOf(root) >=0 ) {
-					var removed = cols.splice(i, 1);
+					let removed = cols.splice(i, 1);
 					//console.log("[",i,"] removed!", removed);
 					break;
 				}
@@ -501,9 +501,9 @@ function removeHtmlxSpecialCols(colsPar) {
 		}
 	}
 	var spCols = ["ROW_STYLE", "ROW_CLASS"];
-	for(var i=cols.length-1;i>=0;i--) {
+	for(let i=cols.length-1;i>=0;i--) {
 		if ( spCols.indexOf(cols[i]) >=0 ) {
-			var removed = cols.splice(i, 1);
+			let removed = cols.splice(i, 1);
 			//console.log("[",i,"] removed!", removed);
 		}
 	}

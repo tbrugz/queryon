@@ -166,15 +166,15 @@ function getRowDimValues(table, rowN) {
 	var keysRowIndex = -1;
 	var keysValues = {};
 	var rowCount = -1;
-	for(var i=0;i<table.children.length;i++) {
-		var row = table.children[i];
+	for(let i=0;i<table.children.length;i++) {
+		let row = table.children[i];
 		if(row.getAttribute("measuresrow") && !row.getAttribute("colname")) { continue; }
-		for(var j=0;j < row.children.length; j++) {
-			var cell = row.children[j];
+		for(let j=0;j < row.children.length; j++) {
+			let cell = row.children[j];
 			var blank = cell.getAttribute("class") == "blank";
 			if(blank) { break; }
 			if(cell.tagName == 'TH') {
-				var dim = cell.innerText;
+				let dim = cell.innerText;
 				keys.push(dim);
 				keysRowIndex = i;
 			}
@@ -183,11 +183,11 @@ function getRowDimValues(table, rowN) {
 	//console.log("keys=", keys, "keysRowIndex=", keysRowIndex);
 	rowCount = keys.length;
 	
-	var row = table.children[keysRowIndex+1];
+	let firstDataRow = table.children[keysRowIndex+1];
 	var keysMaxColIndex = -1;
-	for(var j=0;j < row.children.length; j++) {
-		var cell = row.children[j];
-		var dimoncol = cell.getAttribute("dimoncol");
+	for(let j=0;j < firstDataRow.children.length; j++) {
+		let cell = firstDataRow.children[j];
+		let dimoncol = cell.getAttribute("dimoncol");
 		if(!dimoncol) {
 			keysMaxColIndex = j;
 			break;
@@ -195,17 +195,17 @@ function getRowDimValues(table, rowN) {
 	}
 	keys = keys.slice(0, keysMaxColIndex);
 	//console.log("keysMaxColIndex=", keysMaxColIndex, "keys=", keys);
-	for(var i=0;i<keys.length;i++) {
+	for(let i=0;i<keys.length;i++) {
 		//console.log("i=", i, "keys=", keys[i]);
 		keysValues[keys[i]] = [];
 	}
 
-	for(var i=keysRowIndex+1;i<table.children.length;i++) {
-		var row = table.children[i];
+	for(let i=keysRowIndex+1;i<table.children.length;i++) {
+		let row = table.children[i];
 		if(row.getAttribute("measuresrow") && !row.getAttribute("colname")) { continue; }
-		for(var j=0;j < row.children.length; j++) {
-			var cell = row.children[j];
-			var dimoncol = cell.getAttribute("dimoncol");
+		for(let j=0;j < row.children.length; j++) {
+			let cell = row.children[j];
+			let dimoncol = cell.getAttribute("dimoncol");
 			//var blank = cell.getAttribute("class") == "blank";
 			if(!dimoncol) { break; }
 			
@@ -215,7 +215,7 @@ function getRowDimValues(table, rowN) {
 				//console.log("row.children.length=", row.children.length, "row.children=", row.children);
 				dimIdx = 0;
 			}
-			var dim = keys[dimIdx];
+			let dim = keys[dimIdx];
 			//var dim = cell.innerText;
 			//var dim = cell.getAttribute("colname");
 			if(!dim) { dim = "xxx"; }
@@ -226,7 +226,7 @@ function getRowDimValues(table, rowN) {
 			else { height = parseInt(height); }
 			//console.log("i=", i, "j=", j, "dimIdx=", dimIdx, "dim=", dim, "height=", height);
 			
-			for(var z=0;z<height;z++) {
+			for(let z=0;z<height;z++) {
 				var isnull = cell.getAttribute("null");
 				if(isnull=="true") {
 					keysValues[dim].push(DIM_NULL_VALUE);
@@ -238,7 +238,7 @@ function getRowDimValues(table, rowN) {
 		}
 	}
 	
-	for(var i=0;i<keys.length;i++) {
+	for(let i=0;i<keys.length;i++) {
 		//ret[keys[i]] = keysValues[keys[i]][rowN];
 		const kk = keys[i];
 		const map = {};
@@ -279,11 +279,11 @@ function getTableDimValues(table, cell) {
 
 	//return Object.assign({}, colDimVals, rowDimVals);
 	var ret = {};
-	for(var i=0;i<colDimVals.length;i++) {
+	for(let i=0;i<colDimVals.length;i++) {
 		ret[Object.keys(colDimVals[i])[0]] = Object.values(colDimVals[i])[0];
 		//console.log("...C",i," -- ", Object.keys(colDimVals[i])[0], " -- ", Object.values(colDimVals[i])[0]);
 	}
-	for(var i=0;i<rowDimVals.length;i++) {
+	for(let i=0;i<rowDimVals.length;i++) {
 		ret[Object.keys(rowDimVals[i])[0]] = Object.values(rowDimVals[i])[0];
 		//console.log("...R",i," -- ", Object.keys(rowDimVals[i])[0], " -- ", Object.values(rowDimVals[i])[0]);
 	}

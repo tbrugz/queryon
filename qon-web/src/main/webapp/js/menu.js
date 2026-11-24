@@ -97,9 +97,8 @@ function createMenuContent(addCloseBtn) {
 		//XXXdone: index, d3chart: do not show login, logout
 		//XXX: graph: add login/out
 		//~XXX: all: do not show (linkable) self - current!
-		if( true
+		if( (!li.classList.contains("dev") || isDeveloper)
 			//&& (!li.classList.contains("sqlany") || isAdmin)
-			&& (!li.classList.contains("dev") || isDeveloper)
 			&& (!li.classList.contains("auth") || !hasLoginLink)
 			&& (!li.classList.contains("multimodel") || isMultiModel) ) {
 			

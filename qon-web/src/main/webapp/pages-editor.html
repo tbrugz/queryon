@@ -110,7 +110,7 @@ function doSave() {
 	//console.log("now:",now,now.toISOString(),'optimisticlock',optimisticlock,'version_seq',version_seq,'isInteger(optimisticlock)',isInteger(optimisticlock));
 
 	// normalizing path
-	path = path.replace(/\/+/g, '\/').replace(/^\//, '');
+	path = path.replace(/\/+/g, '/').replace(/^\//, '');
 	//console.log('doSave', byId('path').value, path);
 	byId('path').value = path;
 	
@@ -358,7 +358,7 @@ function updateEditorMode() {
 
 function registerKeybindings() {
 	document.onkeydown = function(evt) {
-		var evt = evt || window.event;
+		evt = evt || window.event;
 		var key = evt.keyCode; // evt.key
 		var keyname = "";
 		

@@ -357,7 +357,7 @@ function getKeyValsForRow(rownum) {
 		return null;
 	}
 	var idx = [];
-	for(var i=0;i<pk.length;i++) {
+	for(let i=0;i<pk.length;i++) {
 		idx.push(cols.indexOf(pk[i]));
 	}
 	var tds = row.querySelectorAll('td');
@@ -365,7 +365,7 @@ function getKeyValsForRow(rownum) {
 	var vals = [];
 	var allvals = [];
 	var filter = '';
-	for(var i=0;i<idx.length;i++) {
+	for(let i=0;i<idx.length;i++) {
 		vals.push(tds[idx[i]].innerHTML);
 		if(filter) { filter += ', '; }
 		filter += pk[i]+" = "+vals[i];
@@ -380,7 +380,7 @@ function getKeyValsForRow(rownum) {
 	}
 	*/
 	
-	for(var i=0;i<tds.length;i++) {
+	for(let i=0;i<tds.length;i++) {
 		allvals.push(tds[i].innerHTML);
 	}
 	
@@ -393,12 +393,12 @@ function getKeyValsForTr(pk, cols, tr) {
 	var tds = tr.querySelectorAll('td');
 
 	var idx = [];
-	for(var i=0;i<pk.length;i++) {
+	for(let i=0;i<pk.length;i++) {
 		idx.push(cols.indexOf(pk[i]));
 	}
 	
 	var vals = [];
-	for(var i=0;i<idx.length;i++) {
+	for(let i=0;i<idx.length;i++) {
 		vals.push(tds[idx[i]].innerHTML);
 	}
 	

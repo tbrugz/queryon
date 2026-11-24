@@ -40,14 +40,14 @@ function safeTags(str) {
 
 //see: http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function getParameterByName(name, queryString) {
-	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	name = name.replace(/\[/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
 		results = regex.exec(queryString);
 	return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g," "));
 }
 
 function getParametersByName(name, queryString) {
-	name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	name = name.replace(/\[/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&]" + name + "=([^&#]*)", "g");
 	var results = regex.exec(queryString);
 	var ret = [];
@@ -61,9 +61,9 @@ function getParametersByName(name, queryString) {
 }
 
 function getParameterNamesStartWith(startWithRegex, queryString) {
-	startWithRegex = startWithRegex.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	startWithRegex = startWithRegex.replace(/\[/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&](" + startWithRegex + ".*?)=([^&#]*)", "g");
-	//var results = regex.exec(queryString);
+	var results;
 	var ret = [];
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
 	while ((results = regex.exec(queryString)) !== null) {
@@ -76,9 +76,9 @@ function getParameterNamesStartWith(startWithRegex, queryString) {
 }
 
 function getParameterArrayStartWith(startWithRegex, queryString) {
-	startWithRegex = startWithRegex.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	startWithRegex = startWithRegex.replace(/\[/, "\\[").replace(/[\]]/, "\\]");
 	var regex = new RegExp("[\\?&](" + startWithRegex + ".*?)=([^&#]*)", "g");
-	//var results = regex.exec(queryString);
+	var results;
 	var ret = [];
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
 	while ((results = regex.exec(queryString)) !== null) {

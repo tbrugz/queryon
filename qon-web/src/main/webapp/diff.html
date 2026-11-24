@@ -328,7 +328,7 @@ function doClearDdlOutput() {
 	var block = document.getElementById('ddldiff-output');
 	block.innerHTML = '';
 	block.style.display = 'none';
-	var block = document.getElementById('ddldiff-msg');
+	block = document.getElementById('ddldiff-msg');
 	block.innerHTML = '';
 	block.style.display = 'none';
 	var applyBtn = document.getElementById('applyDdlDiffBtn');
@@ -424,7 +424,7 @@ function doDiffUsingJS(viewType, inverse) {
 	}
 	else {
 		var divs = document.querySelectorAll('th.texttitle');
-		for (i = 0; i < divs.length; ++i) {
+		for (let i = 0; i < divs.length; ++i) {
 			divs[i].style.width='48%';
 		}
 	}
@@ -648,7 +648,7 @@ function getDataDiffUrl(syntax) {
 	var cols = document.querySelectorAll('#columns-container input');
 	var ignorecols = [];
 	var objName = byId('object')[byId('object').selectedIndex].innerText;
-	for(var i=0; i<cols.length; i++) {
+	for(let i=0; i<cols.length; i++) {
 		if(!cols[i].checked) {
 			ignorecols.push("ignorecol:"+objName+"="+cols[i].id.substring(cols[i].id.indexOf(":")+1));
 		}
@@ -656,7 +656,7 @@ function getDataDiffUrl(syntax) {
 	//console.log("ignorecols",ignorecols);
 	var filters = document.querySelectorAll('.filter');
 	var filtersStr = "";
-	for (var i = 0; i < filters.length; ++i) {
+	for (let i = 0; i < filters.length; ++i) {
 		var item = filters[i];
 		//console.log(item);
 		filtersStr += '&'+item.name+"="+encodeURIComponent(item.value);

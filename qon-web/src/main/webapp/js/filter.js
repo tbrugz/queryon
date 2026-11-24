@@ -26,7 +26,7 @@ function addFilterDialog(selectedCol, columns) {
 		select = document.getElementById('object');
 	}
 	if(select == null) {
-		log.warn("element #objects/#object not found");
+		console.warn("element #objects/#object not found");
 		return;
 	}
 	var id = select.options[select.selectedIndex].value;
@@ -41,7 +41,7 @@ function addFilterDialog(selectedCol, columns) {
 	var cols = columns ? columns : getColumnNames('content');
 
 	var selectHTML = "<select name='fin-column' id='fin-column' onchange='refreshAutocomplete()'>";
-	for(var i=0;i<cols.length;i++) {
+	for(let i=0;i<cols.length;i++) {
 		var colz = cols[i];
 		selectHTML += "<option value='"+colz+"'"+
 			( colz==selectedCol ? " selected" : "")+
@@ -51,7 +51,7 @@ function addFilterDialog(selectedCol, columns) {
 
 	var operatorsHTML = "<select name='fil-operator' id='fil-operator' class='operator' onchange='onFilterOperatorChange()'>";
 	var keys = Object.keys(operatorsInfo);
-	for(var i=0; i<keys.length; i++) {
+	for(let i=0; i<keys.length; i++) {
 		operatorsHTML += "<option value='"+keys[i]+"'>"+operatorsInfo[keys[i]].name+"</option>";
 	}
 	operatorsHTML += "</select>";
@@ -208,7 +208,7 @@ function onFilterOperatorChange() {
 }
 
 document.onkeydown = function(evt) {
-	var evt = evt || window.event;
+	evt = evt || window.event;
 	var key = evt.keyCode; // evt.key
 	if (key == 27) {
 		closeDialogs();

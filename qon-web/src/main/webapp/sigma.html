@@ -201,6 +201,7 @@ body {
 		}
 		
 		function updateDownloadUrl() {
+			var objects = byId('objects');
 			var paramsStr = getUrlParams();
 			var filterStr = getUrlFilters();
 			byId('download').href = downloadUrl + '/' + objects.value + paramsStr + '?' + filterStr;
@@ -332,19 +333,19 @@ body {
 				//console.log(data);
 				//XXX: test if valid query (valid columns)
 				// node priority: SOURCE nodes
-				for(var i=0;i<data.length;i++) {
+				for(let i=0;i<data.length;i++) {
 					// maybe add source node
 					if(!contains(s.graph,data[i].SOURCE)) {
 						addNode(s.graph, "SOURCE", data[i]);
 					}
 				}
-				for(var i=0;i<data.length;i++) {
+				for(let i=0;i<data.length;i++) {
 					// maybe add target node
 					if(!contains(s.graph,data[i].TARGET)) {
 						addNode(s.graph, "TARGET", data[i]);
 					}
 				}
-				for(var i=0;i<data.length;i++) {
+				for(let i=0;i<data.length;i++) {
 					// add edge
 					try {
 						//var eid = data[i].SOURCE+"$"+data[i].TARGET;

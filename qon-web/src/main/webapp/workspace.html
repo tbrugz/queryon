@@ -222,14 +222,14 @@ function setParametersValues(values) {
 	var params = document.querySelectorAll('.parameter');
 	//console.log('setParametersValues: ', params, values);
 	if(Array.isArray(values)) {
-		for(var i=0;i<params.length;i++) {
+		for(let i=0;i<params.length;i++) {
 			if(values.length>i) {
 				params[i].value = values[i];
 			}
 		}
 	}
 	else if(isObject(values)) {
-		for(var i=0;i<params.length;i++) {
+		for(let i=0;i<params.length;i++) {
 			if(values[params[i].name]) {
 				params[i].value = values[params[i].name];
 			}
@@ -394,7 +394,7 @@ function setParameters(numparams, paramNamesStr, paramOptionalsStr) {
 		//XXX: sort array?
 		paramNames = [];
 		var namePartz = paramNamesStr.split(",");
-		for(var i=0;i<namePartz.length;i++) {
+		for(let i=0;i<namePartz.length;i++) {
 			if(paramNames.indexOf(namePartz[i])<0) {
 				paramNames.push(namePartz[i]);
 				paramOptionals.push(optionalPartz[i]==="true");
@@ -404,7 +404,7 @@ function setParameters(numparams, paramNamesStr, paramOptionalsStr) {
 		positionalParameters = false;
 	}
 	else {
-		for(var i=0;i<numparams;i++) {
+		for(let i=0;i<numparams;i++) {
 			paramNames.push("p"+(i+1));
 			paramOptionals.push(optionalPartz[i]==="true");
 		}
@@ -413,7 +413,7 @@ function setParameters(numparams, paramNamesStr, paramOptionalsStr) {
 	
 	var currentParamsWithValues = getParametersWithValues();
 	var paramsStr = '';
-	for(var i=0;i<numparams;i++) {
+	for(let i=0;i<numparams;i++) {
 		paramsStr += "<label class='parameter-label'>"+paramNames[i]+": <input type='text' class='parameter"+(positionalParameters?" positional":"")+"'"+
 			" id='"+paramNames[i]+"' name='"+paramNames[i]+"'"+
 			"/>"+
@@ -440,20 +440,15 @@ function showRunStatusInfo(containerId, messagesId, startTimeMilis, completedTim
 	var numOfCols = -1;
 	//console.log('showRunStatusInfo: numOfRows=', numOfRows);
 	
-	if(true) {
-		if(content.getElementsByTagName('tr')[0]) {
-			numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
-		}
-		if(options.download) { numOfRows = -1; numOfCols = -1; }
-		messages.innerHTML = (numOfRows>0 ? 'rows = '+numOfRows+' ;' : '')
-			+ ((numOfCols > 0) ? ' cols = ' + numOfCols + ' ;': '')
-			+' time = '+(completedTimeMilis-startTimeMilis)+'ms '
-			+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
-		messages.style.display = 'initial';
+	if(content.getElementsByTagName('tr')[0]) {
+		numOfCols = content.getElementsByTagName('tr')[0].getElementsByTagName('th').length;
 	}
-	else {
-		closeMessages(messagesId);
-	}
+	if(options.download) { numOfRows = -1; numOfCols = -1; }
+	messages.innerHTML = (numOfRows>0 ? 'rows = '+numOfRows+' ;' : '')
+		+ ((numOfCols > 0) ? ' cols = ' + numOfCols + ' ;': '')
+		+' time = '+(completedTimeMilis-startTimeMilis)+'ms '
+		+"<input type='button' class='statusbutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x' float='right'/>";
+	messages.style.display = 'initial';
 }
 
 function closeResults() {
@@ -463,7 +458,7 @@ function closeResults() {
 
 function registerKeybindings() {
 	document.onkeydown = function(evt) {
-		var evt = evt || window.event;
+		evt = evt || window.event;
 		var key = evt.keyCode; // evt.key
 		var keyname = "";
 		

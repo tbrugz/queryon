@@ -16,7 +16,7 @@ function post(path, params, callback, target) {
 	//console.log(params);
 
 	for ( var key in params) {
-		if (params.hasOwnProperty(key)) {
+		if (Object.prototype.hasOwnProperty.call(params, key)) {
 			var hiddenField = document.createElement("input");
 			hiddenField.setAttribute("type", "hidden");
 			hiddenField.setAttribute("name", key);
@@ -36,7 +36,7 @@ function post(path, params, callback, target) {
 function obj2encodedUrl(obj) {
 	var str = [];
 	for (var p in obj)
-		if (obj.hasOwnProperty(p)) {
+		if (Object.prototype.hasOwnProperty.call(obj, p)) {
 		str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
 	}
 	return str.join("&");
@@ -45,7 +45,7 @@ function obj2encodedUrl(obj) {
 // https://stackoverflow.com/questions/22724070/prompt-file-download-with-xmlhttprequest/44435573#44435573
 function saveBlob(content, fileName, contentType) {
 	var a = document.createElement('a');
-	blob = new File([content], fileName); //, { type: contentType });
+	var blob = new File([content], fileName); //, { type: contentType });
 	a.href = window.URL.createObjectURL(blob);
 	a.download = fileName;
 	a.dispatchEvent(new MouseEvent('click'));

@@ -90,7 +90,7 @@
       function getPath() {
         var pathArray = window.location.pathname.split( '/' );
         var newPathname = "";
-        for (i = 1; i < pathArray.length - 1 ; i++) {
+        for (let i = 1; i < pathArray.length - 1 ; i++) {
           newPathname += "/";
           newPathname += pathArray[i];
         }

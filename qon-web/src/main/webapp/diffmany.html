@@ -253,21 +253,21 @@ function updateState() {
 	//models
 	var select = document.getElementById('modelSource');
 	var modelSource = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
-	var select = document.getElementById('modelTarget');
+	select = document.getElementById('modelTarget');
 	var modelTarget = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 	
 	//schemas & types
 	var schemas = getSelectMultiOptions('schema').join();
 	var types = getSelectMultiOptions('type').join();
 
-	var select = document.getElementById('syntax');
+	select = document.getElementById('syntax');
 	var syntax = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 
 	//wsignore
-	var select = document.getElementById('wsignore');
+	select = document.getElementById('wsignore');
 	var wsignore = select.selectedIndex==-1 ? "" : select.options[select.selectedIndex].value;
 
-	if(modelSource && modelTarget && schema) {
+	if(modelSource && modelTarget && schemas) {
 		history.replaceState(null, null, "#"+modelSource+"/"+modelTarget+"/"+schemas+"/"+types+"/"+syntax+"/"+wsignore);
 	}
 }

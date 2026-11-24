@@ -282,14 +282,14 @@
 	function updateFilterButtonStyle() {
 		var filterbutton = document.querySelectorAll('.filterbutton');
 		if(filterbutton) {
-			for (var i = 0; i < filterbutton.length; ++i) {
+			for (let i = 0; i < filterbutton.length; ++i) {
 				filterbutton[i].classList.remove('filter-selected');
 			}
 		}
 		
 		var filters = document.querySelectorAll('.filter');
 		if(filters) {
-			for (var i = 0; i < filters.length; ++i) {
+			for (let i = 0; i < filters.length; ++i) {
 				var item = filters[i];
 				var itemname = item.getAttribute('name');
 				var colname = itemname.substring(itemname.indexOf(':')+1);
@@ -498,7 +498,7 @@
 		var obj = fullh.pathname.substring(fullh.pathname.indexOf("/q/")+3);
 		//console.log("innerHrefInterceptor: fullh.pathname=", fullh.pathname, "obj=", obj); //, "typeof fullh=", typeof fullh);
 
-		for(var i=0;i<settings["syntax.fileextensions"].length;i++) {
+		for(let i=0;i<settings["syntax.fileextensions"].length;i++) {
 			var syntaxExt = "."+settings["syntax.fileextensions"][i];
 			if(obj.endsWith(syntaxExt)) {
 				//console.log("innerHrefInterceptor: endsWith=", syntaxExt);
@@ -523,7 +523,7 @@
 		var namedParams = relationsHash[relname].namedParameterNames;
 		//var optionalParams = relationsHash[relname].parameterOptionals;
 		if(namedParams) {
-			for(var i=0;i<namedParams.length;i++) {
+			for(let i=0;i<namedParams.length;i++) {
 				var param = getParameterByName(namedParams[i], fullh.search);
 				obj += "/" + param;
 			}
@@ -768,7 +768,7 @@
 			formData.append('p'+(i+1), ret.pkvals[i]);
 		}
 		
-		nv = getUpdateNewValues(formData);
+		var nv = getUpdateNewValues(formData);
 		
 		var method = "PATCH";
 		nv.formData.append('_method', method);
@@ -809,7 +809,7 @@
 					row = content.querySelectorAll('tr')[rownum];
 					//update row values
 					var tds = row.querySelectorAll('td');
-					for(var i=0;i<nv.newVals.length;i++) {
+					for(let i=0;i<nv.newVals.length;i++) {
 						tds[i].innerHTML = nv.newVals[i];
 						if(tds[i].hasAttribute("null")) {
 							tds[i].removeAttribute("null"); 
@@ -819,7 +819,7 @@
 				else { //insert
 					var table = content.querySelector('tbody');
 					row = document.createElement("tr");
-					for(var i=0;i<cols.length;i++) {
+					for(let i=0;i<cols.length;i++) {
 						row.innerHTML += '<td>'+nv.newVals[i]+'</td>';
 					}
 					table.appendChild(row);
@@ -943,7 +943,7 @@
 		var cols = getColumnNamesFromColgroup('content');
 		
 		var formData = new FormData();
-		nv = getUpdateNewValues(formData);
+		var nv = getUpdateNewValues(formData);
 
 		//console.log("doConfirmInsert key",finalUrl,nv);
 		
@@ -1023,7 +1023,7 @@
 		//console.log('updateSelectedQueryState: filters: ',filters);
 		var filtersAdded = [];
 		removeAllFilters();
-		for(var i=0; i<filters.length; i++) {
+		for(let i=0; i<filters.length; i++) {
 			if(filtersAdded.indexOf(filters[i])>=0) { continue; }
 			var filterVals = getParametersByName(filters[i], qs);
 			var idx = filters[i].indexOf(":");
@@ -1054,17 +1054,17 @@
 		//console.log('updateSelectedQueryState: oncols: ', oncols, '; onrows: ', onrows, '; aggsMap: ', aggsMap);
 		if(oncols) {
 			var cols = oncols.split(',');
-			for(var i=0;i<cols.length;i++) {
+			for(let i=0;i<cols.length;i++) {
 				pivotSimpleAddColumn(cols[i], null, 'oncols');
 			}
 		}
 		if(onrows) {
 			var rows = onrows.split(',');
-			for(var i=0;i<rows.length;i++) {
+			for(let i=0;i<rows.length;i++) {
 				pivotSimpleAddColumn(rows[i], null, 'onrows');
 			}
 		}
-		for(var i=0;i<aggsMap.length;i++) {
+		for(let i=0;i<aggsMap.length;i++) {
 			//var key = aggs[i].substring(4);
 			//var value = getParameterByName(aggs[i], qs);
 			var key0 = Object.keys(aggsMap[i])[0];
@@ -1194,7 +1194,7 @@
 		
 		var existing = byId('pivots').querySelectorAll('.col');
 		var existingData = [];
-		for(var i=existing.length-1;i>=0;i--) {
+		for(let i=existing.length-1;i>=0;i--) {
 			//console.log(existing[i]);
 			var dv = existing[i].getAttribute('data-value');
 			if(cols.indexOf(dv)==-1) {
@@ -1206,7 +1206,7 @@
 			}
 		}
 		//console.log("updatePivotCols: existingData: ",existingData);
-		for(var i=0;i<cols.length;i++) {
+		for(let i=0;i<cols.length;i++) {
 			if(existingData.indexOf(cols[i])==-1 || pivotAllColsAreStatic) {
 				unusedcols.innerHTML += "<span class='col' draggable='true' data-value='"+cols[i]+"'>"+cols[i]+"</span>";
 			}
@@ -1305,7 +1305,7 @@
 		var colContainer = byId(origColParentId); //origCol.parentNode;
 		if(!origCol) {
 			var cols = colContainer.querySelectorAll('.col');
-			for(var i=0;i<cols.length;i++) {
+			for(let i=0;i<cols.length;i++) {
 				if(cols[i].getAttribute("data-value")==data) {
 					origCol = cols[i];
 				}
@@ -1332,7 +1332,7 @@
 		if(!pivotAllColsAreStatic || dragto.id!='unusedcols') {
 			//console.log("event", event);
 			var inserted = false;
-			for(var i=0;i<dragto.children.length;i++) {
+			for(let i=0;i<dragto.children.length;i++) {
 				var el = dragto.children[i];
 				var rect = el.getBoundingClientRect();
 				if(event && event.clientX < rect.left + (rect.width/2)) {
@@ -1357,7 +1357,7 @@
 			var select = document.createElement('select');
 			select.addEventListener('change', updateFromPivotChange);
 			var s = "";
-			for(var i=0;i<aggregateFunctions.length;i++) {
+			for(let i=0;i<aggregateFunctions.length;i++) {
 				s += "<option value='"+aggregateFunctions[i]+"'>"+aggregateFunctions[i]+"</option>";
 			}
 			select.innerHTML += s;
@@ -1392,10 +1392,10 @@
 		}
 		
 		// add columns
-		for(var i=0;i<colnodes.length;i++) {
+		for(let i=0;i<colnodes.length;i++) {
 			onrows.appendChild(colnodes[i]);
 		}
-		for(var i=0;i<rownodes.length;i++) {
+		for(let i=0;i<rownodes.length;i++) {
 			oncols.appendChild(rownodes[i]);
 		}
 
@@ -1441,14 +1441,13 @@
 		var params = bigparts[1].split("&");
 		var dimKeys = Object.keys(dimVals);
 		var newparams = [];
-		for(var i=0;i<params.length;i++) {
-			if(params[i].startsWith("onrows=") || params[i].startsWith("oncols=") || params[i].startsWith("groupbydims=") || params[i].startsWith("agg:")) {
-			}
-			else {
+		for(let i=0;i<params.length;i++) {
+			if(!(params[i].startsWith("onrows=") || params[i].startsWith("oncols=") ||
+				params[i].startsWith("groupbydims=") || params[i].startsWith("agg:"))) {
 				newparams.push(params[i]);
 			}
 		}
-		for(var i=0;i<dimKeys.length;i++) {
+		for(let i=0;i<dimKeys.length;i++) {
 			var value = dimVals[dimKeys[i]];
 			if(value==DIM_NULL_VALUE) {
 				newparams.push("fnull:" + dimKeys[i] + "=" )

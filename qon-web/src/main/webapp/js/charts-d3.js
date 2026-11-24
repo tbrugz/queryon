@@ -60,7 +60,7 @@ var d3multiseries = function(data, columns, containerId) {
 		height = container.offsetHeight - margin.top - margin.bottom;
 	
 	var seriesNames = [];
-	for(var i=0;i<columns.length;i++) {
+	for(let i=0;i<columns.length;i++) {
 		seriesNames.push(columns[i].trim());
 	}
 	
@@ -113,7 +113,7 @@ var d3multiseries = function(data, columns, containerId) {
 		//console.log("data[0]",data[0]);
 		color.domain(allCols.filter(function(key) { return seriesNames.indexOf(key)>=0; }));
 		
-		for(var i=0;i<seriesNames.length;i++) {
+		for(let i=0;i<seriesNames.length;i++) {
 			if(color.domain().indexOf(seriesNames[i])<0) {
 				//XXX show available column that are numeric...
 				//XXXdone throw?
