@@ -55,6 +55,7 @@ public class GraphQlQonServlet extends BaseApiServlet { // extends HttpServlet
 		if(Arrays.binarySearch(ACCEPTED_METHODS, req.getMethod().toUpperCase())<0) {
 			throw new BadRequestException("Method not accepted: "+req.getMethod());
 		}
+		setUtf8Charset(req, resp);
 		
 		boolean requestSchema = req.getParameter("schema")!=null;
 

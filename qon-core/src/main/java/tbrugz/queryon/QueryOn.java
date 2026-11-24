@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -456,6 +457,18 @@ public class QueryOn extends AbstractHttpServlet {
 		}
 	}
 	*/
+	
+	/*
+	 * In the absence of a char encoding qualifier (...) the default encoding of a request
+	 * the container uses to create the request reader and parse POST data must be ISO-8859-1
+	 * https://jakarta.ee/specifications/servlet/6.1/jakarta-servlet-spec-6.1.html#request-data-encoding
+	*/
+	protected void setUtf8Charset(HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
+		if(req.getCharacterEncoding()==null) {
+			req.setCharacterEncoding(QueryOn.UTF8);
+		}
+		resp.setCharacterEncoding(QueryOn.UTF8);
+	}
 	
 	protected void setContextPathInfo(ServletContext context, Protocol protocol) throws UnknownHostException {
 		String contextPath = null;

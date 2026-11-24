@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.After;
@@ -289,6 +293,27 @@ public class GraphQlWebTest {
 		String jsonStr = getContent(query, null, null);
 		//System.out.println("content:\n"+jsonStr);
 		assertGraphqlOk(jsonStr);
+	}
+
+	@Test
+	public void getQueryWithNonAsciiParam() throws IOException {
+		String value = "S\u00e3o Jos\u00e9 \u20ac";
+		String body = "{ \"query\": \"{ list_NAMED_PARAMS_1(par1: \\\"" + value + "\\\", par2: \\\"x\\\") { C1 }}\" }";
+		HttpPost httpReq = new HttpPost(graphqlUrl);
+		// UTF-8 json body without charset in Content-Type, as sent by graphiql.html
+		ByteArrayEntity entity = new ByteArrayEntity(body.getBytes(StandardCharsets.UTF_8));
+		entity.setContentType("application/json");
+		httpReq.setEntity(entity);
+		HttpResponse resp = AbstractWebTest.getHttpClient().execute(httpReq);
+		String jsonStr = EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+		httpReq.releaseConnection();
+
+		Assert.assertTrue("Content-Type should be utf-8: "+resp.getEntity().getContentType(),
+				resp.getEntity().getContentType().getValue().toLowerCase().contains("charset=utf-8"));
+		assertGraphqlOk(jsonStr);
+		JSONObject o = (JSONObject) getJsonData(jsonStr);
+		JSONArray rows = (JSONArray) o.get("list_NAMED_PARAMS_1");
+		Assert.assertEquals(value, ((JSONObject) rows.get(0)).get("C1"));
 	}
 
 	@Test
