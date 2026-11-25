@@ -251,6 +251,21 @@
 	<filter>
 		<filter-name>CacheControlFilter</filter-name>
 		<filter-class>tbrugz.queryon.cache.CacheControlFilter</filter-class>
+		<!--
+		manage & plugin actions are always sent with 'Cache-Control: private, no-cache'
+		status objects (relation.json, table.json, ...) also, when shiro is enabled
+		when shiro is enabled & data depends on user permissions, consider setting 'cache-private' to 'true'
+		-->
+		<!--
+		<init-param>
+			<param-name>cache-max-age</param-name>
+			<param-value>3600</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cache-private</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		-->
 	</filter>
 
 	<filter-mapping>

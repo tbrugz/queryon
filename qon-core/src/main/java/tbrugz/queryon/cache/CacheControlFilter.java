@@ -22,6 +22,7 @@ public class CacheControlFilter implements Filter {
 	private static final Log log = LogFactory.getLog(CacheControlFilter.class);
 	
 	public static final String CACHE_MAX_AGE = "cache-max-age";
+	public static final String CACHE_PRIVATE = "cache-private";
 	
 	boolean privateCache = false;
 	boolean addLastModifiedNow = false;
@@ -40,6 +41,11 @@ public class CacheControlFilter implements Filter {
 			else {
 				log.warn("patemeter '"+CACHE_MAX_AGE+"' not an integer: "+cacheMaxAge);
 			}
+		}
+		String cachePrivate = filterConfig.getInitParameter(CACHE_PRIVATE);
+		if(cachePrivate!=null) {
+			privateCache = Boolean.parseBoolean(cachePrivate.trim());
+			log.info(CACHE_PRIVATE+" = "+privateCache);
 		}
 	}
 

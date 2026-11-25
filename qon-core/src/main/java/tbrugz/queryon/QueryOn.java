@@ -1111,6 +1111,19 @@ public class QueryOn extends AbstractHttpServlet {
 					}
 				}
 			}
+			if(atype==ActionType.MANAGE || atype==ActionType.PLUGIN_ACTION ||
+				(atype==ActionType.STATUS && isShiroEnabled())) {
+				// depends on current user & may change at any time: don't cache
+				resp.setHeader("Cache-Control", "private, no-cache");
+			}
+			/*else if(isShiroEnabled()) {
+				// responses depend on the current user: shared caches must not store them & browser cache is per session
+				String cacheControl = resp.getHeader("Cache-Control");
+				if(cacheControl!=null && !cacheControl.contains("private")) {
+					resp.setHeader("Cache-Control", "private, "+cacheControl);
+				}
+				resp.addHeader("Vary", "Cookie");
+			}*/
 			switch (atype) {
 			case SELECT: {
 				Relation rel = (Relation) dbobj;
