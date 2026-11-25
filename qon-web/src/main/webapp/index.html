@@ -771,9 +771,8 @@
 		var nv = getUpdateNewValues(formData);
 		
 		var method = "PATCH";
-		nv.formData.append('_method', method);
 
-		var querystring = 'updatemax=1&updatemin=1';
+		var querystring = '_method=' + method + '&updatemax=1&updatemin=1';
 		var modelId = getCurrentModelId();
 		if(modelId) {
 			querystring = 'model=' + modelId + '&' + querystring;

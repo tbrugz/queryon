@@ -2,6 +2,8 @@ package tbrugz.queryon.springboot.demo;
 
 import javax.sql.DataSource;
 
+import jakarta.servlet.MultipartConfigElement;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -168,6 +170,7 @@ public class QOnApp extends QOnSpringBootApp { //SpringBootServletInitializer {
 	public ServletRegistrationBean servletQueryOnBean() {
 		AbstractHttpServlet servlet = new tbrugz.queryon.QueryOn();
 		ServletRegistrationBean bean = new ServletRegistrationBean(servlet, servlet.getDefaultUrlMapping()); //"/q/*"
+		bean.setMultipartConfig(new MultipartConfigElement(getSystemTempDir()));
 		bean.setLoadOnStartup(1);
 		return bean;
 	}

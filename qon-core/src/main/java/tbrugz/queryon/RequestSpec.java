@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.gson.Gson;
 
+import tbrugz.queryon.exception.InternalServerException;
 import tbrugz.queryon.util.DumpSyntaxUtils;
 import tbrugz.queryon.util.MiscUtils;
 import tbrugz.queryon.util.QOnContextUtils;
@@ -266,6 +267,15 @@ public class RequestSpec {
 		String defaultOutputSyntaxTmp = getDefaultOutputSyntax(prop, defaultOutputSyntax);
 		
 		contentType = req.getContentType();
+		if(isContentTypeMultiPart()) {
+			// Trigger multipart parsing before getParameter() so missing multipart-config fails fast
+			try {
+				req.getParts();
+			}
+			catch(IllegalStateException e) {
+				throw new InternalServerException("Multipart request cannot be processed (missing servlet multipart-config): " + e.getMessage(), e);
+			}
+		}
 		
 		/* 
 		 * http://stackoverflow.com/a/37125568/616413 - using-put-method-in-html-form
