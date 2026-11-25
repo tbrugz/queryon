@@ -350,7 +350,7 @@
 		var name = document.getElementById('name').value;
 		var remarks = document.getElementById('remarks').value;
 		var roles = document.getElementById('roles').value;
-		var username = byId('username').innerHTML;
+		var username = byId('username').textContent;
 		var now = new Date();
 		var optimisticlock = byId('optimisticlock').value;
 		var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
@@ -367,8 +367,8 @@
 			"v:ROLES_FILTER": roles,
 			//"queryon.qon-queries.limit.insert.exact": isQuerySaved?0:1,
 			//"queryon.qon-queries.limit.update.exact": isQuerySaved?1:0,
-			"optimisticlock": encodeURIComponent(optimisticlock),
-			"v:VERSION_SEQ": encodeURIComponent(version_seq)
+			"optimisticlock": optimisticlock,
+			"v:VERSION_SEQ": version_seq
 		}
 		if(getModelId()) {
 			reqData.model = getModelId();
@@ -382,14 +382,14 @@
 			reqData["_method"] = "PATCH";
 			reqData["v:SCHEMA_NAME"] = schema, //needed by QOnQueries
 			reqData["v:NAME"] = name, //needed by QOnQueries
-			reqData["v:UPDATED_BY"] = encodeURIComponent(username);
-			reqData["v:UPDATED_AT"] = encodeURIComponent(now.toISOString());
+			reqData["v:UPDATED_BY"] = username;
+			reqData["v:UPDATED_AT"] = now.toISOString();
 		}
 		else {
 			reqData["v:SCHEMA_NAME"] = schema,
 			reqData["v:NAME"] = name,
-			reqData["v:CREATED_BY"] = encodeURIComponent(username);
-			reqData["v:CREATED_AT"] = encodeURIComponent(now.toISOString());
+			reqData["v:CREATED_BY"] = username;
+			reqData["v:CREATED_AT"] = now.toISOString();
 		}
 		
 		var request = qonAjax({
