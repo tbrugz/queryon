@@ -622,6 +622,22 @@ function getColumnsRemarks() {
 	return ret;
 }
 
+function getColumnsGenerated(rel) {
+	if(rel==null) { rel = getCurrentRelation('objects'); }
+	var ret = {};
+	if(rel==null || rel.columnGenerated==null) { return ret; }
+	var names = getColumnsFromRelation(rel);
+	var gens = getScalarArrayFromValue(rel.columnGenerated);
+	if(!names || !gens) { return ret; }
+	for(var i=0;i<names.length && i<gens.length;i++) {
+		var v = gens[i];
+		if(v === true || (typeof v === 'string' && v.trim().toLowerCase() === 'true')) {
+			ret[names[i].toUpperCase()] = true;
+		}
+	}
+	return ret;
+}
+
 function getColumnsTypesFromHash() {
 	var rel = getCurrentRelation('objects');
 	if(rel==null) { return null; }
@@ -677,7 +693,7 @@ function getQueryUpdateUrl(selectId, key, queryString, syntax) {
 		+(syntax?'.'+syntax:'')
 		+(queryString?'?'+queryString:'');
 	
-	console.log('getQueryUpdateUrl:', returl);
+	//console.log('getQueryUpdateUrl:', returl);
 	return returl;
 }
 

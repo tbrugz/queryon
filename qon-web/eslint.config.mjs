@@ -34,7 +34,7 @@ const qonAppGlobals = Object.fromEntries(
 		'doHttpRequest', 'doRun', 'doTableOnLoad', 'escapeXML', 'formatDate',
 		'getAttributeListFromObjectList', 'getColumnNames', 'getColumnNamesFromColgroup',
 		'getColumnTypesFromColgroup', 'getColumnsFromColgroup', 'getColumnsFromRelation',
-		'getColumnsRemarks', 'getColumnsTypesFromHash', 'getCookie', 'getCurrentModelElement',
+		'getColumnsGenerated', 'getColumnsRemarks', 'getColumnsTypesFromHash', 'getCookie', 'getCurrentModelElement',
 		'getCurrentModelId', 'getCurrentRelation', 'getDescription', 'getId',
 		'getKeyValsForRow', 'getLocationHash', 'getModelSetting', 'getParameterArrayStartWith',
 		'getParameterByName', 'getParameterNamesStartWith', 'getParameters',

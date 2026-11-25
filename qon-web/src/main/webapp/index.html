@@ -608,6 +608,7 @@
 			
 		var dialogContent = "<div id='dialog-content'>";
 		var colRemarks = getColumnsRemarks();
+		var colGeneratedMap = getColumnsGenerated(rel);
 		for(var i=0;i<cols.length;i++) {
 			//XXXdone check column permission (grants)
 			//XXX column size & column remarks would be nice
@@ -622,7 +623,8 @@
 			//var colDbType = cols[i].getAttribute("dbtype");
 			//console.log(">>>", cols[i], colTypes[i], colDbTypes[i]);
 			//console.log("col["+i+"]: ",cols[i],"--",allowUpdate,"---",relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
-			var disabled = !allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]);
+			var isGenerated = !!colGeneratedMap[cols[i].toUpperCase()];
+			var disabled = isGenerated || (!allowUpdate && !relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]));
 			
 			var value = (vals?vals[i]:'');
 			//console.log('enabled ',updateType.toUpperCase(),cols[i],allowUpdate,relationHasGrantOfType(rel, updateType.toUpperCase(), cols[i]))
@@ -632,6 +634,7 @@
 					+(disabled?" disabled='true'":"")+">"
 					+value //.replace(/[<]/g, '&lt;').replace(/>/g, '&gt;')
 					+"</textarea>"
+					+(isGenerated?" <em>(generated)</em>":"")
 					+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
 					+"</label> ";
 			}
@@ -642,6 +645,7 @@
 					+">"
 					+(colTypeOrig=="Blob" ? (value?' <strong>HAS CONTENT</strong>':' <em>&lt;empty&gt;</em>') : "")
 					+(colTypeOrig!="String"?" <em>("+colTypeOrig+")</em>":"")
+					+(isGenerated?" <em>(generated)</em>":"")
 					+(colRemarks[i]!=null && colRemarks[i]!="null"?" <span class='remarks'>"+escapeXML(colRemarks[i])+"</span>":"")
 					+"</label> ";
 				dialogContent += (colTypeOrig=="Blob" ? ("<label class='setnull'><input type='checkbox' name='isnull:"+cols[i]+"' onchange='onSetNullChange(\""+cols[i]+"\");'/>set null</label>") : "")
@@ -720,7 +724,7 @@
 							//console.log("["+i+"] setting null on file field "+inputs[i].name, ' ; colname=', colname);
 						}
 						else {
-							console.log("["+i+"] no file informed on field "+inputs[i].name);
+							console.debug("["+i+"] no file informed on field "+inputs[i].name);
 						}
 					}
 					else {
@@ -740,8 +744,7 @@
 		var ret = getKeyValsForRow(rownum);
 		var cols = getColumnNamesFromColgroup('content');
 		
-		console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals"
-				,ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
+		//console.log("doConfirmUpdate key",ret.key,"filter",ret.filter,"pk",ret.pk,"pkvals",ret.pkvals,"cols",ret.cols,"allvals",ret.allvals);
 		/*
 		// get values
 		var dialog = document.getElementById('update-dialog');
