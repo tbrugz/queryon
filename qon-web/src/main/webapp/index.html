@@ -562,7 +562,7 @@
 	function doOpenUpdateDialog(rownum) {
 		var ret = getKeyValsForRow(rownum);
 		if(ret==null) {
-			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
+			showErrorMessages('messages', "relation <code>"+escapeXML(getCurrentRelation('objects').name)+"</code> has no PK", true);
 			return;
 		}
 		var cols = getColumnNamesFromColgroup('content');
@@ -957,7 +957,7 @@
 	function doRunDelete(rownum) {
 		var ret = getKeyValsForRow(rownum);
 		if(!ret) {
-			showErrorMessages('messages', "relation <code>"+getCurrentRelation('objects').name+"</code> has no PK");
+			showErrorMessages('messages', "relation <code>"+escapeXML(getCurrentRelation('objects').name)+"</code> has no PK", true);
 			//alert("relation has no PK");
 			return;
 		}

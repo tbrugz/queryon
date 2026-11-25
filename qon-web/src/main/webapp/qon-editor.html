@@ -259,10 +259,10 @@
 			byId('queryResult').innerHTML = getCloseResultBtnHtml()+data;
 			
 			if(usingSelected) {
-				infoMessage('selected text from query <b>'+document.getElementById('name').value+'</b> successfully validated');
+				infoMessage('selected text from query <b>'+escapeXML(document.getElementById('name').value)+'</b> successfully validated', true);
 			}
 			else {
-				infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully validated');
+				infoMessage('query <b>'+escapeXML(document.getElementById('name').value)+'</b> successfully validated', true);
 			}
 			updateUI();
 		});
@@ -324,10 +324,10 @@
 			byId('queryResult').innerHTML = getCloseResultBtnHtml()+"<div class='explain'>"+data+"</div>";
 			
 			if(usingSelected) {
-				infoMessage('selected text from query <b>'+document.getElementById('name').value+'</b> successfully explained');
+				infoMessage('selected text from query <b>'+escapeXML(document.getElementById('name').value)+'</b> successfully explained', true);
 			}
 			else {
-				infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully explained');
+				infoMessage('query <b>'+escapeXML(document.getElementById('name').value)+'</b> successfully explained', true);
 			}
 			updateUI();
 		});
@@ -356,7 +356,7 @@
 		var version_seq = isInteger(optimisticlock)? 1+parseInt(optimisticlock) : 1;
 
 		if(name==null || name=="") {
-			errorMessage('<strong>query name</strong> cannot be null...');
+			errorMessage('<strong>query name</strong> cannot be null...', true);
 			updateUI();
 			return;
 		}
@@ -406,7 +406,7 @@
 			//console.log(data);
 			closeMessages('messages');
 			byId('optimisticlock').value = version_seq;
-			infoMessage('query <b>'+name+'</b> successfully saved');
+			infoMessage('query <b>'+escapeXML(name)+'</b> successfully saved', true);
 			//XXX: reload query after save?
 			validateEditComponents(true);
 			var modelId = getModelId();
@@ -455,7 +455,7 @@
 		request.done(function(data) {
 			//console.log(data);
 			closeMessages('messages');
-			infoMessage('query <b>'+document.getElementById('name').value+'</b> successfully removed');
+			infoMessage('query <b>'+escapeXML(document.getElementById('name').value)+'</b> successfully removed', true);
 			validateEditComponents(false);
 			var modelId = getModelId();
 			history.replaceState(null, null, "qon-editor.html" +(modelId!=null?"?model="+modelId:""));
@@ -625,20 +625,33 @@
 		refreshRolesCount();
 	}
 	
-	function errorMessage(message) {
-		// XXX encode 'message'?
-		byId('messages').innerHTML = "<div class='error message'>" + message +
-			"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/>" +
-			"</div>";
-		//$('#messages').html("<div class='error message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+	function renderEditorMessage(clazz, message, allowHtml) {
+		var container = byId('messages');
+		container.innerHTML = '';
+		var div = document.createElement('div');
+		div.className = clazz;
+		var msg = message == null ? '' : String(message);
+		if(allowHtml) {
+			div.innerHTML = msg;
+		}
+		else {
+			div.textContent = msg;
+		}
+		var closeBtn = document.createElement('input');
+		closeBtn.type = 'button';
+		closeBtn.className = 'closebutton';
+		closeBtn.value = 'x';
+		closeBtn.addEventListener('click', function() { closeMessages('messages'); });
+		div.appendChild(closeBtn);
+		container.appendChild(div);
 	}
 
-	function infoMessage(message) {
-		// XXX encode 'message'?
-		byId('messages').innerHTML = "<div class='info message'>" + message +
-			"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/>" +
-			"</div>";
-		//$('#messages').html("<div class='info message'>"+message+"<input type='button' class='closebutton' onclick=\"javascript:closeMessages('messages')\" value='x' float='right'/></div>");
+	function errorMessage(message, allowHtml) {
+		renderEditorMessage('error message', message, allowHtml);
+	}
+
+	function infoMessage(message, allowHtml) {
+		renderEditorMessage('info message', message, allowHtml);
 	}
 	
 	function closeMessages(elemId) {

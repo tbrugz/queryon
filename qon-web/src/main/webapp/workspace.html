@@ -123,7 +123,7 @@ function onLoadAfter() {
 	if(modelsInfo!=null) {
 		if(modelsInfo.indexOf(modelId)<0 && isMultiModel()) {
 			console.warn("model not found: ",modelId," models:",modelsInfo);
-			showErrorMessages("messages", "model not found: <b>"+modelId+"</b> [models: "+modelsInfo+"]");
+			showErrorMessages("messages", "model not found: <b>"+escapeXML(modelId)+"</b> [models: "+escapeXML(modelsInfo)+"]", true);
 		}
 		if(modelsInfo.length>1) {
 			byId('modelLabel').style.display = 'inline-block';
@@ -328,14 +328,13 @@ function doRequest(url, btnId, options = {}, callback) {
 			var updateCount = request.getResponseHeader("X-UpdateCount");
 			var warnings = request.getResponseHeader("X-Warning");
 			if(updateCount) {
-				var message = escapeXML(oEvent.target.responseText);
 				//var message = updateCount+" rows updated"
 				if(warnings) {
-					message += " (<em>"+warnings+"</em>)";
-					showWarnMessages("messages", message);
+					var message = escapeXML(oEvent.target.responseText) + " (<em>"+escapeXML(warnings)+"</em>)";
+					showWarnMessages("messages", message, true);
 				}
 				else {
-					showInfoMessages("messages", message);
+					showInfoMessages("messages", oEvent.target.responseText);
 				}
 			}
 			else if(warnings) {
@@ -353,7 +352,7 @@ function doRequest(url, btnId, options = {}, callback) {
 					saveBlob(oEvent.target.response, "queryon_"+fileName, contentType);
 				}
 				else if(options.format == "md") {
-					byId('queryResult').innerHTML = "<pre>"+oEvent.target.responseText+"</pre>";
+					byId('queryResult').innerHTML = "<pre>"+escapeXML(oEvent.target.responseText)+"</pre>";
 				}
 				else {
 					byId('queryResult').innerHTML = oEvent.target.responseText;
@@ -368,7 +367,7 @@ function doRequest(url, btnId, options = {}, callback) {
 		}
 		else {
 			console.log("Error:", oEvent);
-			showErrorMessages("messages", escapeXML(oEvent.target.responseText)
+			showErrorMessages("messages", oEvent.target.responseText
 					+(request.status==403?" (invalid session?)":"")
 					);
 			checkForSqlWarnings(request, editor);

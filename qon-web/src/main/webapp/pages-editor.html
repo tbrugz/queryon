@@ -118,7 +118,7 @@ function doSave() {
 	//var roles = byId('roles').value;
 
 	if(path==null || path=="") {
-		showErrorMessages('messages', '<b>path</b> cannot be null...');
+		showErrorMessages('messages', '<b>path</b> cannot be null...', true);
 		//updateUI();
 		return;
 	}
@@ -180,7 +180,7 @@ function doSave() {
 			setTimeout(function() {
 				byId('messages').classList.remove('fade');
 				byId('messages').classList.add('fadeoutable');
-				showInfoMessages('messages', 'page <b>'+name+'</b> successfully saved');
+				showInfoMessages('messages', 'page <b>'+escapeXML(name)+'</b> successfully saved', true);
 				refreshUI();
 				setTimeout(
 						function() { byId('messages').classList.add('fade'); },

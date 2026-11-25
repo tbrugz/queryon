@@ -240,8 +240,8 @@ function getDDLdiff(apply) {
 		},
 		error: function(error) {
 			console.log("getDDLdiff error=",error);
-			var message = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
-			showErrorMessages('messages', message);
+			var message = (apply?"<b>Apply DDL Diff</b>: ":"") + escapeXML(error.responseText);
+			showErrorMessages('messages', message, true);
 			//msg.style.display = 'block';
 			//msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
 			btnActionStop('go-button');

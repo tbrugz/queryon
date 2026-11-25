@@ -73,7 +73,7 @@ function doLogin(event) {
 			}*/
 		}
 		else {
-			byId('loginStatus').innerHTML = req.responseText;
+			byId('loginStatus').textContent = req.responseText;
 			byId('loginStatus').className ='warning';
 		}
 	}

@@ -32,7 +32,7 @@ function loadQueries0(url, containerId, callback, modelId) {
 			//console.log("xhr", xhr, "textStatus", textStatus, "errorThrown", errorThrown);
 			var message = xhr.responseText;
 			if(!message) {
-				message = xhr.status + ": " + escapeXML(xhr.statusText);
+				message = xhr.status + ": " + xhr.statusText;
 			}
 			showErrorMessages(messagesId, message);
 		}
@@ -44,10 +44,10 @@ function getId(obj) {
 }
 
 function getDescription(obj, showSchemaName) {
-	return (obj.valid === false ? "&#10008; " : "")
+	return (obj.valid === false ? "\u2718 " : "")
 		+ ( (obj.schemaName!=null && obj.schemaName!="" && obj.schemaName!="null" && showSchemaName) ? obj.schemaName+"." : "")
 		+ obj.name
-		+ ( obj.relationType == "table" ? " &#9638;" : "" ) // "table" symbol
+		+ ( obj.relationType == "table" ? " \u25A6" : "" ) // "table" symbol
 		//+ ( obj.relationType == "table" ? " &#8862;" : "" )
 		+ ((obj.remarks!=null && obj.remarks!="" && obj.remarks!="null")?" - "+obj.remarks:"");
 }
@@ -55,13 +55,17 @@ function getDescription(obj, showSchemaName) {
 function writeRelations(containerId, relations, showSchemaName) {
 	if(!relations) { return; }
 	//console.log('write relations [#'+relations.length+'] to '+containerId);
+	var container = byId(containerId);
+	var frag = document.createDocumentFragment();
 	for(var i=0;i<relations.length;i++) {
 		var id = getId(relations[i]);
-		byId(containerId).insertAdjacentHTML('beforeend', "<option value='"+id+"'"+
-				//" class='schema_"+relations[i].schemaName+"'"+
-				">"+getDescription(relations[i], showSchemaName)+"</option>");
+		var opt = document.createElement('option');
+		opt.value = id == null ? '' : String(id);
+		opt.textContent = getDescription(relations[i], showSchemaName);
+		frag.appendChild(opt);
 		relationsHash[id] = relations[i];
 	}
+	container.appendChild(frag);
 }
 
 function loadRelation(selectId, parametersId, containerId) {

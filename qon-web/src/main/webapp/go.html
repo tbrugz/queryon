@@ -42,14 +42,19 @@ function loadSelectContent(oEvent) {
 	//console.log('execs:', execs, 'executables: ', executables);
 	var select = document.getElementById('objects');
 	select.innerHTML = '<option invalid="true">select executable</option>';
+	var frag = document.createDocumentFragment();
 	for(var i = 0 ; i < executables.length ; i++) {
 		//XXX: packageName...
 		var e = executables[i];
-		var option = '<option value="'+e.qualifiedName+'" params="'+e.params+'" grants="'+e.grants+'">'+
-			(e.valid === false ? "&#10008; " : "")+
-			e.qualifiedName+(e.remarks?" - "+e.remarks:"")+'</option>';
-		select.innerHTML += option;
+		var opt = document.createElement('option');
+		opt.value = e.qualifiedName == null ? '' : String(e.qualifiedName);
+		opt.setAttribute('params', e.params == null ? '' : String(e.params));
+		opt.setAttribute('grants', e.grants == null ? '' : String(e.grants));
+		opt.textContent = (e.valid === false ? "\u2718 " : "") +
+			e.qualifiedName + (e.remarks ? " - " + e.remarks : "");
+		frag.appendChild(opt);
 	}
+	select.appendChild(frag);
 	updateUIFromFragmentSelect();
 	onExecChanged();
 	updateUIFromFragmentParams();
@@ -136,7 +141,7 @@ function doGo() {
 				reqData.append(params[i].name, params[i].files[0], params[i].value);
 			}
 			else {
-				showWarnMessages("messages", "parameter <strong>"+params[i].name+"</strong> (file) must be selected");
+				showWarnMessages("messages", "parameter <strong>"+escapeXML(params[i].name)+"</strong> (file) must be selected", true);
 				return;
 			}
 		}

@@ -145,13 +145,19 @@ body {
 		function writeOptions(containerId, relations) {
 			if(!relations) { return; }
 			//console.log('write relations [#'+relations.length+'] to '+containerId);
+			var container = byId(containerId);
+			var frag = document.createDocumentFragment();
 			for(var i=0;i<relations.length;i++) {
 				if(validGraphRelation(relations[i])) {
 					var id = getId(relations[i]);
-					byId(containerId).insertAdjacentHTML('beforeend', "<option value='"+id+"'>"+getDescription(relations[i])+"</option>");
+					var opt = document.createElement('option');
+					opt.value = id == null ? '' : String(id);
+					opt.textContent = getDescription(relations[i]);
+					frag.appendChild(opt);
 					relationsHash[id] = relations[i];
 				}
 			}
+			container.appendChild(frag);
 		}
 		
 		function onParameterChange(i) {

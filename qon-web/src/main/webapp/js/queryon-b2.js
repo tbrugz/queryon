@@ -152,8 +152,8 @@ function updateSelectedQueryStateParametersCallback(relname, parts) {
 	if(!found) {
 		//var message = "Query "+relname+" not found.";
 		console.log('query "',relname,'" not found [',select.length,']... authenticated == ', authInfo.authenticated);
-		showWarnMessages('messages', 'Query <code>'+relname+'</code> not found.'+
-			(authInfo.authenticated?'':' Maybe you should login') );
+		showWarnMessages('messages', 'Query <code>'+escapeXML(relname)+'</code> not found.'+
+			(authInfo.authenticated?'':' Maybe you should login'), true);
 		//throw message;
 		/*else {
 			closeMessages('messages');

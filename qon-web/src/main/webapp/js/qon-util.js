@@ -20,7 +20,8 @@ function btnActionStop(btnId) {
 
 // http://stackoverflow.com/a/7918944/616413
 function escapeXML(str) {
-	return str
+	if (str == null) { return ''; }
+	return String(str)
 			.replace(/&/g, '&amp;')
 			.replace(/</g, '&lt;')
 			.replace(/>/g, '&gt;')
@@ -30,7 +31,8 @@ function escapeXML(str) {
 
 // see: http://stackoverflow.com/questions/5499078/fastest-method-to-escape-html-tags-as-html-entities
 function safeTags(str) {
-	return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
+	if (str == null) { return ''; }
+	return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
 }
 
 /*function getQueryString() {
@@ -161,31 +163,33 @@ function isObject(obj) {
 
 function getTextHeader(text) {
 	if(! text) { return "[null]"; }
-	var idx = text.indexOf("\n\n");
-	if(idx>0) { return text.substring(0, idx); }
-	return text;
+	var str = String(text);
+	var idx = str.indexOf("\n\n");
+	if(idx>0) { return str.substring(0, idx); }
+	return str;
 }
 
-function showInfoMessages(messagesId, text) {
+function showMessage(messagesId, text, level, allowHtml) {
 	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
-	m.classList.add('info');
-	m.classList.remove('warn');
-	m.classList.remove('error');
-	//m.setAttribute('class', 'info');
-	var display = 'block';
-	if(m.tagName=='SPAN') { display = 'inline-block'; }
-	m.style.display = display;
-	updateUI();
-}
-
-function showWarnMessages(messagesId, text) {
-	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
+	m.innerHTML = '';
+	var span = document.createElement('span');
+	var header = getTextHeader(text);
+	if(allowHtml) {
+		span.innerHTML = header;
+	}
+	else {
+		span.textContent = header;
+	}
+	var closeBtn = document.createElement('input');
+	closeBtn.type = 'button';
+	closeBtn.className = 'closebutton';
+	closeBtn.value = 'x';
+	closeBtn.addEventListener('click', function() { closeMessages(messagesId); });
+	m.appendChild(span);
+	m.appendChild(closeBtn);
 	if(m.classList) {
-		m.classList.remove('info');
-		m.classList.add('warn');
-		m.classList.remove('error');
+		m.classList.remove('info', 'warn', 'error');
+		m.classList.add(level);
 	}
 	var display = 'block';
 	if(m.tagName=='SPAN') { display = 'inline-block'; }
@@ -193,23 +197,27 @@ function showWarnMessages(messagesId, text) {
 	updateUI();
 }
 
-function showErrorMessages(messagesId, text) {
-	var m = document.getElementById(messagesId);
-	m.innerHTML = "<span>"+getTextHeader(text)+"</span><input type='button' class='closebutton' onclick=\"javascript:closeMessages('"+messagesId+"')\" value='x'/>";
-	m.classList.remove('info');
-	m.classList.remove('warn');
-	m.classList.add('error');
-	//var display = 'initial';
-	var display = 'block';
-	if(m.tagName=='SPAN') { display = 'inline-block'; }
-	m.style.display = display;
-	updateUI();
+function showInfoMessages(messagesId, text, allowHtml) {
+	showMessage(messagesId, text, 'info', allowHtml);
 }
 
-function appendMessages(messagesId, text) {
+function showWarnMessages(messagesId, text, allowHtml) {
+	showMessage(messagesId, text, 'warn', allowHtml);
+}
+
+function showErrorMessages(messagesId, text, allowHtml) {
+	showMessage(messagesId, text, 'error', allowHtml);
+}
+
+function appendMessages(messagesId, text, allowHtml) {
 	//var m = document.getElementById(messagesId);
 	var span = document.querySelector('#'+messagesId+" span");
-	span.innerHTML += text;
+	if(allowHtml) {
+		span.innerHTML += text;
+	}
+	else {
+		span.appendChild(document.createTextNode(text == null ? '' : String(text)));
+	}
 	updateUI();
 }
 
@@ -225,14 +233,29 @@ function closeMessages(messagesId) {
 	updateUI();
 }
 
-function showDialogMessage(text) {
+function showDialogMessage(text, allowHtml) {
 	var dialogCont = document.getElementById('dialog-container');
 	dialogCont.style.display = 'block';
 	var dialog = document.getElementById('dialog');
 	dialog.style.display = 'block';
-	dialog.innerHTML = "<div style='font-size: large'> " +
-		text +
-		"<input type='button' value='X' class='simplebutton' style='float: right;' onclick='closeDialogMessage();'/></div>";
+	dialog.innerHTML = '';
+	var wrapper = document.createElement('div');
+	wrapper.style.fontSize = 'large';
+	var msg = text == null ? '' : String(text);
+	if(allowHtml) {
+		wrapper.innerHTML = msg;
+	}
+	else {
+		wrapper.textContent = msg;
+	}
+	var closeBtn = document.createElement('input');
+	closeBtn.type = 'button';
+	closeBtn.value = 'X';
+	closeBtn.className = 'simplebutton';
+	closeBtn.style.cssFloat = 'right';
+	closeBtn.addEventListener('click', closeDialogMessage);
+	wrapper.appendChild(closeBtn);
+	dialog.appendChild(wrapper);
 	updateUI();
 }
 
@@ -291,17 +314,25 @@ function loadSelect(data, selectId, callbackName, callbackValue, dataClasses) {
 	var prevOptionValue = sel.value;
 	sel.innerHTML = '';
 	if(data==null) { console.log('null data; selectId: ',selectId); return; }
+	var frag = document.createDocumentFragment();
 	for(var i=0;i<data.length;i++) {
 		var name = callbackName(data[i]);
 		if(name==null) { continue; }
 		var optionValue = callbackValue(data[i]);
 		var optionClass = dataClasses&&dataClasses[i]?dataClasses[i]:null;
 		//console.log('loadSelect:: ',selectId,optionValue,prevOptionValue);
-		sel.insertAdjacentHTML('beforeend', "<option value='"+optionValue+"'"+
-				(optionClass?" class='"+optionClass+"'":"")+
-				(optionValue==prevOptionValue?" selected":"")+
-				">"+name+"</option>");
+		var opt = document.createElement('option');
+		opt.value = optionValue == null ? '' : String(optionValue);
+		opt.textContent = String(name);
+		if(optionClass) {
+			opt.className = optionClass;
+		}
+		if(optionValue==prevOptionValue) {
+			opt.selected = true;
+		}
+		frag.appendChild(opt);
 	}
+	sel.appendChild(frag);
 }
 
 function updateSelectValue(select, value) {

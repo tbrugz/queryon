@@ -271,7 +271,7 @@ function getDDL(modelId, contentId, contentTitleId, callback) {
 			//}
 			//var message = 'Object \''+document.getElementById('object').value+'\' not found on model \''+document.getElementById(modelId).value+'\'';
 			mblock.style.display = 'block';
-			mblock.innerHTML = '<b>'+document.getElementById(modelId).value+':</b> '+err.responseText;
+			mblock.innerHTML = '<b>'+escapeXML(document.getElementById(modelId).value)+':</b> '+escapeXML(err.responseText);
 			//}
 			//else {
 			//	mblock.style.display = 'none';
@@ -609,14 +609,14 @@ function getDDLdiff(apply) {
 			btnActionStop('getDdlDiffBtn');
 			if(apply) {
 				btnActionStop('applyDdlDiffBtn');
-				showDialogMessage('Diff applyed to <strong>'+document.getElementById('modelSource').value+'</strong> with success!');
+				showDialogMessage('Diff applyed to <strong>'+escapeXML(document.getElementById('modelSource').value)+'</strong> with success!', true);
 				applyBtn.style.display = 'none';
 			}
 		},
 		error: function(error) {
 			console.log("getDDLdiff: error=",error);
 			msg.style.display = 'block';
-			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + error.responseText;
+			msg.innerHTML = (apply?"<b>Apply DDL Diff</b>: ":"") + escapeXML(error.responseText);
 			btnActionStop('getDdlDiffBtn');
 			if(apply) {
 				btnActionStop('applyDdlDiffBtn');
