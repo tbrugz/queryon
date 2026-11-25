@@ -240,6 +240,48 @@ function closeDialogMessage() {
 	document.getElementById('dialog-container').style.display = 'none';
 }
 
+// ---------- cookie functions ----------
+
+// Set a cookie
+function setCookie(name, value, days, path = "/") {
+	if (!name) { return; }
+	let expires = "";
+	if (typeof days === "number" && Number.isFinite(days)) {
+		const date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+		expires = "; expires=" + date.toUTCString();
+	}
+	const secure = (typeof location !== "undefined" && location.protocol === "https:") ? "; Secure" : "";
+	const encodedValue = encodeURIComponent(value == null ? "" : value);
+	document.cookie = `${encodeURIComponent(name)}=${encodedValue}${expires}; path=${path}; SameSite=Lax${secure}`;
+	//console.log('setCookie: name=', name, '; value=', encodedValue, '; expires=', expires, '; secure=', secure);
+}
+
+// Get a cookie by name
+function getCookie(name) {
+	if (!name || !document.cookie) { return null; }
+	const nameEQ = encodeURIComponent(name) + "=";
+	const cookies = document.cookie.split(";");
+	for (let cookie of cookies) {
+		cookie = cookie.trim();
+		if (cookie.startsWith(nameEQ)) {
+			const rawValue = cookie.substring(nameEQ.length);
+			try {
+				return decodeURIComponent(rawValue);
+			} catch {
+				return rawValue;
+			}
+		}
+	}
+	return null;
+}
+
+// Delete a cookie
+function deleteCookie(name, path = "/") {
+	if (!name) { return; }
+	const secure = (typeof location !== "undefined" && location.protocol === "https:") ? "; Secure" : "";
+	document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; path=${path}; SameSite=Lax${secure}`;
+}
+
 // ---------- select's functions ----------
 
 function loadSelect(data, selectId, callbackName, callbackValue, dataClasses) {

@@ -76,8 +76,9 @@ document.addEventListener('DOMContentLoaded',
 		loadSelect(tts, 'type');
 		loadAuthInfo();
 		loadEnv();
-		//console.log('ready: cookies: ',document.cookie);
-		if(document.cookie.indexOf('modelorder=baselast') >= 0) {
+		let modelOrder = getCookie('modelorder');
+		//console.log('ready: cookies/modelOrder=',modelOrder);
+		if((modelOrder === 'baselast') || !modelOrder) {
 			diffSwitchOrder();
 		}
 	}
@@ -735,18 +736,17 @@ function diffSwitchOrder() {
 	if(panels[0].style.float=='left') {
 		panels[0].style.float='right';
 		panels[1].style.float='left';
-		document.cookie = 'modelorder=baselast';
-		//console.log('modelorder=baselast');
+		setCookie('modelorder', 'baselast', 365);
+		//console.log('diffSwitchOrder: modelorder=baselast');
 		doDiffUsingJS(btnIn.checked, 1);
 	}
 	else {
 		panels[0].style.float='left';
 		panels[1].style.float='right';
-		document.cookie = 'modelorder=base1st';
-		//console.log('modelorder=base1st');
+		setCookie('modelorder', 'base1st', 365);
+		//console.log('diffSwitchOrder: modelorder=base1st');
 		doDiffUsingJS(btnIn.checked, 0);
 	}
-	//XXX: set cookie
 }
 
 // ----- utility functions

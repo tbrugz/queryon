@@ -221,7 +221,7 @@ function mergeColumnDimensions(content, trs) {
 	
 	var merges = 0;
 
-	loop1:
+	//loop1:
 	for(let i=lastDimCol ; i>=0 ; i--) {
 		//console.log("cols: i=", i);
 		var tds = allTds[i];
