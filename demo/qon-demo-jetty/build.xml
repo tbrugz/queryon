@@ -1,0 +1,33 @@
+<project name="qon-web" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+	<!-- based on old qon-web/build.xml -->
+
+	<property name="download.dir" value="${settings.localRepository}/.cache/queryon-qon-demo-jetty"/>
+	<property name="webapp.dir" value="src/main/webapp"/>
+	<property name="target.dir" value="target"/>
+
+	<target name="download-maps">
+		<mkdir dir="${download.dir}/maps"/>
+		<get src="https://raw.githubusercontent.com/johan/world.geo.json/refs/heads/master/countries.geo.json"
+			dest="${download.dir}/maps" verbose="true" skipexisting="true"/>
+		<!--echo message="downloaded countries.geo.json" level="info"/-->
+
+		<copy todir="${webapp.dir}/geojson/vendor">
+			<fileset dir="${download.dir}/maps" includes="**/*"/>
+		</copy>
+	</target>
+
+	<target name="download-data">
+		<mkdir dir="${download.dir}/data"/>
+		<get src="https://ourworldindata.org/grapher/gdp-per-capita-maddison-project-database.csv?v=1&amp;csvType=filtered&amp;useColumnShortNames=true"
+			dest="${download.dir}/data" verbose="true" skipexisting="true"/>
+		<!--echo message="downloaded dp-per-capita-maddison-project-database.csv" level="info"/-->
+
+		<copy todir="${target.dir}/data">
+			<fileset dir="${download.dir}/data" includes="**/*"/>
+		</copy>
+	</target>
+
+	<target name="download-deps" depends="download-maps, download-data">
+	</target>
+	
+</project>
