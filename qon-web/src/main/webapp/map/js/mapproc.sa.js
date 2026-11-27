@@ -374,8 +374,10 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 		});
 		
 		if(placemark.catId==undefined || placemark.catId==null) {
-			//console.warn('undefined cat: '+id+' / '+placemark.name); //+' / '+placemark.catId);
-			placemark.fillColor = ERROR_FILL_COLOR;
+			//console.warn('undefined cat: ',id,' / ',placemark.name);
+			placemark.setOptions({
+				fillColor: ERROR_FILL_COLOR,
+			});
 			placemark.setMap(null);
 			placemark.setMap(map);
 			countUndef++;
@@ -386,11 +388,13 @@ function applySeriesDataAndStyle(gPlaceMarks, seriesData, catData, map, isNumeri
 		//set style & map
 		placemark.kmlColor = catData[placemark.catId].kmlcolor;
 		placemark.rgbColor = '#'+catData[placemark.catId].color;
-		placemark.fillColor = placemark.rgbColor;
+		placemark.setOptions({
+			fillColor: placemark.rgbColor,
+		});
 		//placemark.fillColor = placemark.kmlColor.substring(6,8) + placemark.kmlColor.substring(4,6) + placemark.kmlColor.substring(2,4);
 		//TODO: add category in description
 		
-		//console.log('placemark: '+id+' cat: '+placemark.catId+' color: '+placemark.fillColor+" map: "+map);
+		//console.log('placemark-id: ',id,' cat: ',placemark.catId,' color: ',placemark.fillColor,' placemark: ', placemark, " map: "+map);
 		
 		//atualiza placemark no mapa - 'null' retira elemento do mapa
 		placemark.setMap(null);
@@ -484,13 +488,17 @@ function selectFromCategory(selectCatId) {
 		}
 		
 		if(placemark.catId==selectCatId) {
-			placemark.fillColor = placemark.rgbColor;
+			placemark.setOptions({
+				fillColor: placemark.rgbColor,
+			});
 			placemark.setMap(null);
 			placemark.setMap(map);
 			countIn++;
 		}
 		else {
-			placemark.fillColor = DEFAULT_FILL_COLOR;
+			placemark.setOptions({
+				fillColor: DEFAULT_FILL_COLOR,
+			});
 			placemark.setMap(null);
 			placemark.setMap(map);
 			countOut++;
@@ -515,7 +523,10 @@ function selectFromAllCategories(oldSelectCatId) {
 			continue;
 		}
 		
-		placemark.fillColor = placemark.rgbColor;
+		placemark.setOptions({
+			fillColor: placemark.rgbColor,
+		});
+
 		placemark.setMap(null);
 		placemark.setMap(map);
 		countIn++;
