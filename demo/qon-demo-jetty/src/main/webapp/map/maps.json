@@ -1,0 +1,11 @@
+{
+	"maps": [
+		{ "id":"world", "name": "World Map", "url": "../geojson/vendor/countries.geo.json", "default": true }
+	],
+	"mapcenter": [-16, -48],
+	"showOptionsIfUnique": false,
+	"geomIdColumns": ["CODE"],
+	"gmapsKey": "change it",
+	"showGeomIdAsValueColumn": true,
+	"showNonNumericColumnAsValueColumn": true
+}

@@ -76,6 +76,20 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>load-data</id>
+						<configuration>
+							<target>
+								<ant antfile="${basedir}/build.xml">
+									<target name="run-load"/>
+									<reference refid="maven.runtime.classpath" torefid="sqlrun.classpath" />
+								</ant>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 

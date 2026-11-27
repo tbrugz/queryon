@@ -5,6 +5,8 @@
 	<property name="webapp.dir" value="src/main/webapp"/>
 	<property name="target.dir" value="target"/>
 
+	<property name="sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
+
 	<target name="download-maps">
 		<mkdir dir="${download.dir}/maps"/>
 		<get src="https://raw.githubusercontent.com/johan/world.geo.json/refs/heads/master/countries.geo.json"
@@ -30,4 +32,10 @@
 	<target name="download-deps" depends="download-maps, download-data">
 	</target>
 	
+	<target name="run-load">
+		<java classpathref="sqlrun.classpath" classname="${sqlrun.mainclass}" failonerror="true" fork="true">
+			<arg value="-propfile=src/main/resources/queryon.sqlrun.properties"/>
+		</java>
+	</target>
+
 </project>

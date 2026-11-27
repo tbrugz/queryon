@@ -16,6 +16,12 @@ building
 mvn package
 ```
 
+loading data
+-------
+
+```sh
+mvn antrun:run@load-data
+```
 
 running
 -------
@@ -30,21 +36,21 @@ navigate to <http://localhost:8080>
 docker - building / running
 ------
 
-## jetty 10
+### jetty 10
 
 * uses servlet 4.0 / Jakarta EE8 / javax
 
 `docker run --rm -it -p 8080:8080 -v ./target/qon-demo-jetty.war:/var/lib/jetty/webapps/root.war jetty:10`
 
 
-## jetty 11
+### jetty 11
 
 * Jakarta EE9, JakartaEE Namespace, Java11+ (**not working yet**, needs `jakarta` classifier for queryon)
 
 `docker run --rm -it -p 8080:8080 -v ./target/qon-demo-jetty.war:/var/lib/jetty/webapps/root.war jetty:11`
 
 
-## jetty 12
+### jetty 12
 
 * Jakarta EE8 thru EE10, JakartaEE Namespace, JavaEE Namespace, Java17+
 
